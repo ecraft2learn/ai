@@ -38,6 +38,8 @@
       alert("No key provided in URL query");
   }
 
+  var provider = get_url_parameter("provider", "Watson");
+
   function startup() {
     var callback = function(stream) {
           var vendorURL = window.URL || window.webkitURL;
@@ -168,11 +170,13 @@
           }
       });
 
-      // We setup our request
-      XHR.open('POST', "https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key);
-
-      if (document.getElementById("myFileField").files.length === 0) {
-          XHR.setRequestHeader('Content-Type', 'multipart/form-data');
+      switch (provider) {
+        case  "Watson":
+          XHR.open('POST', "https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key);
+          if (document.getElementById("myFileField").files.length === 0) {
+              XHR.setRequestHeader('Content-Type', 'multipart/form-data');
+          }
+          break;
       }
 
      // And finally, We send our data.
@@ -187,8 +191,12 @@
 
       XHR.addEventListener('error', error_callback)
 
-      XHR.open('POST', "https://gateway.watsonplatform.net/tone-analyzer/api/v3/tone?version=2016-05-19&api_key=" + key + "&text=" +
-                       encodeURIComponent(text));
+      switch (provider) {
+        case  "Watson":
+          XHR.open('POST', "https://gateway.watsonplatform.net/tone-analyzer/api/v3/tone?version=2016-05-19&api_key=" + key + "&text=" +
+                           encodeURIComponent(text));
+          break;
+      }
 
       XHR.send(formData);
   }
