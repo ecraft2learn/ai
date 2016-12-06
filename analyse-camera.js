@@ -1,4 +1,4 @@
-(function(add_start_button) {
+(function() {
   // The width and height of the captured photo. We will set the
   // width to the value defined here, but the height will be
   // calculated based on the aspect ratio of the input stream.
@@ -11,12 +11,8 @@
 
   var streaming = false;
 
-  // The various HTML elements we need to configure or control. These
-  // will be set by the startup() function.
-
   var video = document.createElement('video');
   var canvas = document.createElement('canvas');
-  var start_button = add_start_button && document.createElement('button');
 
   var get_url_parameter = function (name, default_value) {
       var parts = window.location.search.substr(1).split('&');
@@ -54,10 +50,6 @@
       canvas.style.display = 'none';
       document.body.appendChild(video);
       document.body.appendChild(canvas);
-      if (start_button) {
-          document.body.appendChild(start_button);
-          start_button.innerHTML = "analyse";
-      }
       if (navigator.mediaDevices) {
           navigator.mediaDevices.getUserMedia(constraints)
                    .then(callback)
@@ -86,12 +78,6 @@
           streaming = true;
         }
       }, false);
-      if (start_button) {
-          start_button.addEventListener('click', function(ev){
-              take_picture();
-              ev.preventDefault();
-          }, false);
-      }
   };
 
   // Capture a photo by fetching the current contents of the video
@@ -100,8 +86,12 @@
   // drawing that to the screen, we can change its size and/or apply
   // other changes before drawing it.
 
-  var take_picture = function take_picture() {
+// available for external use by attaching it to window
+  window.take_picture_and_analyse = function take_picture_and_analyse(callback) {
     var context = canvas.getContext('2d');
+    if (!callback) {
+        callback = console.log;
+    }
     if (width && height) {
       canvas.width = width;
       canvas.height = height;
@@ -111,16 +101,15 @@
           canvas.toBlob(function (blob) {
                             post_image(blob,
                                        function (event) {
-                                           console.log(event.currentTarget.response);
-                                           console.log(event);
+                                            callback(event.currentTarget.response)
                                         });
                         },
                         "image/png");
            break;
-         case "Google":
-          post_image(canvas.toDataURL('image/png'),
+        case "Google":
+           post_image(canvas.toDataURL('image/png'),
                      function (event) {
-                          console.log(event.currentTarget.response);
+                          callback(event.currentTarget.response);
                      });
           break;
       }
@@ -163,8 +152,11 @@
           break;
       }
   };
-
-  // Set up our event listener to run the startup process
-  // once loading is complete.
-  window.addEventListener('load', startup, false);
+  if (document.body) {
+      if (!window.take_picture_and_analyse) {
+          startup();
+      }
+  } else {
+      window.addEventListener('load', startup, false);
+  }
 })();
