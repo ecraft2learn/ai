@@ -175,12 +175,9 @@
           if (document.getElementById("myFileField").files.length > 0) {
               formData.append("images_file", document.getElementById("myFileField").files[0]);
           } else {
-              formData.append("images_file", image);
+              formData.append("images_file", image, "blob.png");
           }
           XHR.open('POST', "https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key);
-          if (document.getElementById("myFileField").files.length === 0) {
-              XHR.setRequestHeader('Content-Type', 'multipart/form-data');
-          }
           XHR.send(formData);
           break;
         case "Google":
