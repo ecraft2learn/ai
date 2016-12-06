@@ -41,31 +41,30 @@
   var provider = get_url_parameter("provider", "Watson");
 
   function startup() {
-    var callback = function(stream) {
+      var callback = function(stream) {
           var vendorURL = window.URL || window.webkitURL;
           video.src = vendorURL.createObjectURL(stream);
-        video.play();
+          video.play();
       };
       var error_callback = function(err) {
-                                            console.log("An error occured! " + err);
-                                          };
+                               console.log("An error occured! " + err);
+                           };
       var constraints = {video: true,
                          audio: false};
-    video = document.getElementById('video');
-    canvas = document.getElementById('canvas');
-    photo = document.getElementById('photo');
-    startbutton = document.getElementById('startbutton');
-     if (navigator.mediaDevices) {
-       navigator.mediaDevices.getUserMedia(constraints)
-                .then(callback)
-                .catch(error_callback);
-     } else {
-       navigator.getMedia = ( navigator.getUserMedia ||
-                              navigator.webkitGetUserMedia ||         
-                              navigator.msGetUserMedia);
-
-      navigator.mediaDevices.getUserMedia(constraints, callback,  error_callback);
-     }
+      video = document.getElementById('video');
+      canvas = document.getElementById('canvas');
+      photo = document.getElementById('photo');
+      startbutton = document.getElementById('startbutton');
+      if (navigator.mediaDevices) {
+           navigator.mediaDevices.getUserMedia(constraints)
+                    .then(callback)
+                    .catch(error_callback);
+      } else {
+         navigator.getMedia = ( navigator.getUserMedia ||
+                                navigator.webkitGetUserMedia ||
+                                navigator.msGetUserMedia);
+         navigator.mediaDevices.getUserMedia(constraints, callback,  error_callback);
+      }
     video.addEventListener('canplay', function(ev){
       if (!streaming) {
         height = video.videoHeight / (video.videoWidth/width);
@@ -90,7 +89,7 @@
       ev.preventDefault();
     }, false);
     
-    clearphoto();
+//     clearphoto();
   }
 
   // Fill the photo with an indication that none has been
@@ -133,15 +132,14 @@
       var data = canvas.toDataURL('image/png');
       switch (provider) {
         case "Watson":
-      canvas.toBlob(function (blob) {
-//       alternative_toBlob(function (blob) {
-                        post_image(blob,
-                                   function (event) {
-                                       console.log(event.currentTarget.response);
-                                       console.log(event);
-                                    });
-                    },
-                    "image/png");
+          canvas.toBlob(function (blob) {
+                            post_image(blob,
+                                       function (event) {
+                                           console.log(event.currentTarget.response);
+                                           console.log(event);
+                                        });
+                        },
+                        "image/png");
            break;
          case "Google":
           post_image(data, function (event) {
@@ -150,9 +148,11 @@
                              });
           break;
       }
-       photo.setAttribute('src', data);
+      if (photo) {
+         photo.setAttribute('src', data);
+      } 
     } else {
-      clearphoto();
+//       clearphoto();
     }
   }
 
