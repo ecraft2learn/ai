@@ -125,62 +125,79 @@
 
       callback( new Blob( [arr], {type: type || 'image/png'} ) );
     }
+
     if (width && height) {
       canvas.width = width;
       canvas.height = height;
       context.drawImage(video, 0, 0, width, height);
+      var data = canvas.toDataURL('image/png');
+      switch (provider) {
+        case "Watson":
       canvas.toBlob(function (blob) {
 //       alternative_toBlob(function (blob) {
                         post_image(blob,
                                    function (event) {
                                        console.log(event.currentTarget.response);
                                        console.log(event);
-                                   });
+                                    });
                     },
                     "image/png");
-//                     "image/jpeg", 0.95);
-//       post_image(data, function (event) {
-//                             console.log(event.currentTarget.response);
-//                             console.log(event);
-//                          });
-       var data = canvas.toDataURL('image/png');
+           break;
+         case "Google":
+          post_image(data, function (event) {
+                                console.log(event.currentTarget.response);
+                                console.log(event);
+                             });
+          break;
+      }
        photo.setAttribute('src', data);
     } else {
       clearphoto();
     }
   }
 
-  var post_image = function (image_blob, callback, error_callback) {
+  var post_image = function (image, callback, error_callback) {
       // base upon https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/Sending_forms_through_JavaScript
       var XHR = new XMLHttpRequest();
       var formData = new FormData();
-      if (document.getElementById("myFileField").files.length > 0) {
-          formData.append("images_file", document.getElementById("myFileField").files[0]);
-      } else {
-          formData.append("images_file", image_blob);
-      }
       XHR.addEventListener('load', function(event) {
           callback(event);
       });
-
-      // We define what will happen in case of error
-      XHR.addEventListener('error', function(event) {
-          if (error_callback) {
-              error_callback(event);
+      if (!error_callback) {
+          error_callback = function (event) {
+              console.error(event);
           }
-      });
+      }
+      XHR.addEventListener('error', error_callback);
 
       switch (provider) {
         case  "Watson":
+          if (document.getElementById("myFileField").files.length > 0) {
+              formData.append("images_file", document.getElementById("myFileField").files[0]);
+          } else {
+              formData.append("images_file", image);
+          }
           XHR.open('POST', "https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key);
           if (document.getElementById("myFileField").files.length === 0) {
               XHR.setRequestHeader('Content-Type', 'multipart/form-data');
           }
+          XHR.send(formData);
+          break;
+        case "Google":
+          XHR.open('POST', "https://vision.googleapis.com/v1/images:annotate?key=" + key);
+          XHR.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+          XHR.send(JSON.stringify({"requests":[{"image":{"content": image.substring("data:image/png;base64,".length)},
+                                                "features":[{"type":"LABEL_DETECTION",
+                                                             "maxResults":1},
+                                                            {"type": "TEXT_DETECTION",
+                                                             "maxResults":3},
+                                                            {"type": "FACE_DETECTION",
+                                                             "maxResults":1},
+                                                             {"type": "IMAGE_PROPERTIES",
+                                                             "maxResults":2}]}]
+                                  }));
           break;
       }
-
-     // And finally, We send our data.
-     XHR.send(formData);
   };
 
   var tone_analysis = function (text, callback, error_callback) {
