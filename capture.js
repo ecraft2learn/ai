@@ -130,13 +130,24 @@
       canvas.height = height;
       context.drawImage(video, 0, 0, width, height);
       var data = canvas.toDataURL('image/png');
+      var javascript_to_snap = function (x) {
+          if (Array.isArray(x)) {
+              return x.map(javascript_to_snap);
+          }
+          if (typeof x === 'object') {
+              return Object.keys(x).map(function (key) {
+                                            return [key, javascript_to_snap(x[key])];
+                                       });
+          }
+          return x;
+      }
       switch (provider) {
         case "Watson":
           canvas.toBlob(function (blob) {
                             post_image(blob,
                                        function (event) {
                                            console.log(event.currentTarget.response);
-                                           console.log(event);
+                                           console.log(javascript_to_snap(JSON.parse(event.currentTarget.response)));
                                         });
                         },
                         "image/png");
@@ -144,7 +155,6 @@
          case "Google":
           post_image(data, function (event) {
                                 console.log(event.currentTarget.response);
-                                console.log(event);
                              });
           break;
       }
