@@ -40,6 +40,10 @@
 
   var provider = get_url_parameter("provider", "Watson");
 
+  var user = get_url_parameter("user");
+
+  var authorization_token;
+
   function startup() {
       var callback = function(stream) {
           var vendorURL = window.URL || window.webkitURL;
@@ -208,22 +212,47 @@
   };
 
   var tone_analysis = function (text, callback, error_callback) {
-      var XHR = new XMLHttpRequest();
-      var formData = new FormData();
-
-      XHR.addEventListener('load', callback);
-
-      XHR.addEventListener('error', error_callback)
-
-      switch (provider) {
-        case  "Watson":
-          XHR.open('POST', "https://gateway.watsonplatform.net/tone-analyzer/api/v3/tone?version=2016-05-19&api_key=" + key + "&text=" +
-                           encodeURIComponent(text));
-          break;
+      var XHR;
+      if (!authorization_token) {
+          get_authorization_token(function () {
+                                      tone_analysis(text, callback, error_callback);
+                                  },
+                                  error_callback);
+          return;
       }
+      XHR = new XMLHttpRequest();
+      XHR.addEventListener('load', callback);
+      XHR.addEventListener('error', error_callback);
+//       switch (provider) {
+//         case  "Watson":
+//           XHR.open('POST', "https://gateway.watsonplatform.net/tone-analyzer/api/v3/tone?version=2016-05-19&api_key=" + key + "&text=" +
+//                            encodeURIComponent(text));
+//           break;
+//       }
+      XHR.open("POST", "https://gateway.watsonplatform.net/tone-analyzer/api/v3/tone?version=2016-05-19", true);
+      XHR.setRequestHeader("Content-type", "application/json");
+      XHR.setRequestHeader("X-Watson-Authorization-Token", authorization_token);
+      XHR.send("{\"text\": \"" + text + "\"}");
+  };
 
-      XHR.send(formData);
-  }
+  var get_authorization_token = function (callback, error_callback) {
+      var XHR = new XMLHttpRequest();
+      var data = new FormData();
+      var colon_index = user.indexOf(":");
+      if (colon_index < 0) {
+          console.error("user parameter should include a colon");
+          return;
+      }
+      XHR.addEventListener('load', function (event) {
+           console.log(event.currentTarget.response);
+      });
+      XHR.addEventListener('error', error_callback);
+      // curl -u username:password "https://gateway.watsonplatform.net/authorization/api/v1/token?url=https://gateway.watsonplatform.net/tone-analyzer/api"
+      XHR.open("POST", "https://gateway.watsonplatform.net/authorization/api/v1/token?url=https://gateway.watsonplatform.net/tone-analyzer/api");
+      data.append('user', user.substring(0, colon_index));
+      data.append('password', user.substring(colon_index+1));
+      XHR.send(data);
+  };
   
   setTimeout(function () {
     var text_input = document.getElementById("text-input");
