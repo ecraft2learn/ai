@@ -5,4 +5,7 @@ if (typeof finished_callback === 'object') {
        invoke(finished_callback, new List([message]));
    };
 }
+if (window.speech_recognition) {
+   window.speech_recognition.abort();
+}
 window.speechSynthesis.speak(utterance);
