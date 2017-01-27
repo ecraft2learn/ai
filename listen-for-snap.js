@@ -17,7 +17,7 @@ var restart = function () {
 };
 var handle_result = function (callback, event) {
     var spoken = event.results[0][0].transcript;
-    console.log("Confidence is " + event.results[0][0].confidence + " for " + spoken, spoken_callback);
+    console.log("Confidence is " + event.results[0][0].confidence + " for " + spoken);
     window.speech_recognition.stop();
     invoke(callback, new List([spoken]));
 };
