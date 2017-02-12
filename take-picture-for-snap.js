@@ -32,4 +32,8 @@ window.take_picture_and_analyse(show_photo,
      invoke(callback, new List([javascript_to_snap(JSON.parse(response).responses)]));
      return;
   }
+  if (provider === "Microsoft") {
+     invoke(callback, new List([javascript_to_snap(JSON.parse(response))]));
+     return;
+  }
 });
