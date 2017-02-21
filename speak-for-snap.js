@@ -1,4 +1,7 @@
 var utterance = new SpeechSynthesisUtterance(message);
+if (lang) {
+   utterance.lang = lang;
+}
 if (typeof finished_callback === 'object') {
    // callback provided
    utterance.onend = function (event) {
