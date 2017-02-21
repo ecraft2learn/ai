@@ -1,9 +1,9 @@
 var video = document.createElement('video');
 var canvas = document.createElement('canvas');
 
-var get_url_parameter = function (name, default_value) {
+var get_url_parameter = function (name, prompt_message) {
     var parts = window.location.search.substr(1).split('&');
-    var value = default_value;
+    var value;
     parts.some(function (part) {
         var name_and_value = part.split('=');
         if (name_and_value[0] === name) {
@@ -11,16 +11,42 @@ var get_url_parameter = function (name, default_value) {
             return true;
         }
     });
+    if (prompt_message && typeof value === 'undefined') {
+       return window.prompt(prompt_message);
+    }
     return value;
 };
 
-var key = get_url_parameter("key");
+var update_url = function () {
+    if (!get_url_parameter("key")) {
+       window.alert("The URL is about to be updated to include your key and cloud provider choice. Save this URL so you don't need to provide them each time.");
+       window.onbeforeunload = null; // don't warn about reload
+       // https is needed to access camera etc in some browsers
+       window.location.replace("https://" + window.location.host + window.location.pathname +
+                               "?provider=" + window.cloud_provider + "&key=" + key +
+                               window.location.hash);
+    }
+};
 
-if (!key) {
-    alert("No key provided in URL query");
+window.cloud_provider = get_url_parameter("provider", "Please enter either Watson, Google, or Microsoft.");
+
+if (window.cloud_provider !== "Watson" && window.cloud_provider !== "Google" && window.cloud_provider !== "Microsoft") {
+   window.alert("This program will only work if the AI cloud service provider is Watson, Google, or Microsoft. Not " + window.cloud_provider);
+   window.onbeforeunload = null; // don't warn about reload
+   window.location.reload(true);
 }
 
-var provider = get_url_parameter("provider", "Watson");
+var key = get_url_parameter("key", "Please enter your API key or cancel if you don't have one.");
+
+if (!key) {
+   if (window.confirm("No key provided. Do you want to visit https://github.com/ToonTalk/ai-cloud/wiki to learn how to get a key?")) {
+      window.onbeforeunload = null; // don't warn about reload
+      window.assign("https://github.com/ToonTalk/ai-cloud/wiki");
+   }
+   return;
+}
+
+update_url();
 
 var startup = function startup() {
     var callback = function(stream) {
@@ -62,7 +88,7 @@ console.log("test this");
 // other changes before drawing it.
 
 // available for external use by attaching it to window
-window.take_picture_and_analyse = function take_picture_and_analyse(show_photo, callback) {
+window.take_picture_and_analyse = function (show_photo, callback) {
     var context, photo;
     if (!callback) {
         callback = console.log;
@@ -90,7 +116,7 @@ window.take_picture_and_analyse = function take_picture_and_analyse(show_photo, 
                                            document.body.title = "";
                                        });
     }
-    switch (provider) {
+    switch (window.cloud_provider) {
     case "Watson":
     case "Microsoft":
         canvas.toBlob(function (blob) {
@@ -123,7 +149,7 @@ var post_image = function post_image(image, callback, error_callback) {
         }
     }
     XHR.addEventListener('error', error_callback);
-    switch (provider) {
+    switch (window.cloud_provider) {
     case  "Watson":
         formData = new FormData();
         formData.append("images_file", image, "blob.png");

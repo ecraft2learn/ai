@@ -23,16 +23,14 @@ window.take_picture_and_analyse(show_photo,
                  });
       return value;
   };
-  var provider = get_url_parameter("provider", "Watson");
-  if (provider === "Watson") {
+  switch (window.cloud_provider) {
+  case "Watson":
      invoke(callback, new List([javascript_to_snap(JSON.parse(response).images[0].classifiers[0].classes)]));
      return;
-  }
-  if (provider === "Google") {
+  case "Google":
      invoke(callback, new List([javascript_to_snap(JSON.parse(response).responses)]));
      return;
-  }
-  if (provider === "Microsoft") {
+  case "Microsoft":
      invoke(callback, new List([javascript_to_snap(JSON.parse(response))]));
      return;
   }
