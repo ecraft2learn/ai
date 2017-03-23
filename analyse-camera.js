@@ -5,10 +5,10 @@ var get_global_variable_value = function (name) {
     var ancestor = this;
     var value;
     while (ancestor && !(ancestor instanceof IDE_Morph)) {
-	ancestor = ancestor.parent;
+        ancestor = ancestor.parent;
     }
     if (ancestor) {
-	value = ancestor.globalVariables.getVar(name);
+        value = ancestor.globalVariables.getVar(name);
     } else {
         value =  world.children[0].globalVariables.getVar(name);
     }
@@ -26,11 +26,11 @@ cloud_providers.forEach(function (provider) {
     var key = get_global_variable_value(provider + " key");
     if (key) {
         keys[provider] = key;
-	return;
+        return;
     }
-    if (window.confirm("No key provided for " + provider + ". Do you want to visit https://github.com/ToonTalk/ai-cloud/wiki to learn how to get a key?")) {
-	window.onbeforeunload = null; // don't warn about reload
-	window.assign("https://github.com/ToonTalk/ai-cloud/wiki");
+    if (window.confirm("No value provided for the variable '" + provider + " key'. Do you want to visit https://github.com/ToonTalk/ai-cloud/wiki to learn how to get a key?")) {
+        window.onbeforeunload = null; // don't warn about reload
+        document.location.assign("https://github.com/ToonTalk/ai-cloud/wiki");
     }
 });
 
@@ -107,11 +107,11 @@ window.take_picture_and_analyse = function (cloud_provider, show_photo, callback
     case "Microsoft":
         canvas.toBlob(
             function (blob) {
-		post_image(blob,
+                post_image(blob,
                            cloud_provider,
-			   function (event) {
+                           function (event) {
                                callback(event.currentTarget.response);
-			   });
+                           });
             },
             "image/png");
         break;
