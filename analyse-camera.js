@@ -10,7 +10,7 @@ var get_global_variable_value = function (name) {
     if (ancestor) {
         value = ancestor.globalVariables.getVar(name);
     } else {
-        value =  world.children[0].globalVariables.getVar(name);
+        value = world.children[0].globalVariables.getVar(name);
     }
     if (typeof value ===  'string') {
        return value;
@@ -28,7 +28,8 @@ cloud_providers.forEach(function (provider) {
         keys[provider] = key;
         return;
     }
-    if (window.confirm("No value provided for the variable '" + provider + " key'. Do you want to visit https://github.com/ToonTalk/ai-cloud/wiki to learn how to get a key?")) {
+    if (window.confirm("No value provided for the variable '" + provider 
+                       " key'. Do you want to visit https://github.com/ToonTalk/ai-cloud/wiki to learn how to get a key?")) {
         window.onbeforeunload = null; // don't warn about reload
         document.location.assign("https://github.com/ToonTalk/ai-cloud/wiki");
     }
