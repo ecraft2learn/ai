@@ -7,14 +7,21 @@ if (pitch > 0) {
    utterance.pitch = pitch;
 }
 if (rate > 0) {
+   if (rate < .1) {
+      // A very slow rate breaks Chrome's speech synthesiser
+      rate = .1;
+   }
+   if (rate > 2) {
+      rate = 2; // high rate also breaks Chrome's speech synthesis
+   }
    utterance.rate = rate;
 }
 if (voice) {
    voices = window.speechSynthesis.getVoices();
-   if (voice < voices.length) {
-       utterance.voice = voices[voice];
+   if (voice >= 0 && voice < voices.length) {
+       utterance.voice = voices[Math.floor(voice)];
    } else {
-       alert("Only " + voices.length + " voices are available so you can't choose voice number " + voice);
+       alert("Only " + voices.length + " voices are available. You can't choose voice number " + voice);
    }
 }
 if (volume > 0) {
