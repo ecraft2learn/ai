@@ -18,22 +18,17 @@ var get_global_variable_value = function (name) {
     return value.contents;
 }.bind(this);
 
-var cloud_providers = get_global_variable_value('AI cloud providers');
-
-var keys = [];
-
-cloud_providers.forEach(function (provider) {
+var get_key = function (provider) {
     var key = get_global_variable_value(provider + " key");
     if (key) {
-        keys[provider] = key;
-        return;
+        return key;
     }
-    if (window.confirm("No value provided for the variable '" + provider 
+    if (window.confirm("No value provided for the variable '" + provider + 
                        " key'. Do you want to visit https://github.com/ToonTalk/ai-cloud/wiki to learn how to get a key?")) {
         window.onbeforeunload = null; // don't warn about reload
         document.location.assign("https://github.com/ToonTalk/ai-cloud/wiki");
     }
-});
+};
 
 var startup = function startup() {
     var callback = function(stream) {
@@ -111,7 +106,11 @@ window.take_picture_and_analyse = function (cloud_provider, show_photo, callback
                 post_image(blob,
                            cloud_provider,
                            function (event) {
-                               callback(event.currentTarget.response);
+                               if (typeof event === 'string') {
+                                   alert(event);
+                               } else {
+                                   callback(event.currentTarget.response);
+                               }
                            });
             },
             "image/png");
@@ -120,7 +119,11 @@ window.take_picture_and_analyse = function (cloud_provider, show_photo, callback
         post_image(canvas.toDataURL('image/png'),
                    cloud_provider,
                    function (event) {
-                       callback(event.currentTarget.response);
+                       if (typeof event === 'string') {
+                           alert(event);
+                       } else {
+                           callback(event.currentTarget.response);
+                       }
                    });
         break;
     }
@@ -128,8 +131,13 @@ window.take_picture_and_analyse = function (cloud_provider, show_photo, callback
 
 var post_image = function post_image(image, cloud_provider, callback, error_callback) {
     // based upon https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/Sending_forms_through_JavaScript
-    var XHR = new XMLHttpRequest();
-    var formData;
+    var key = get_key(cloud_provider);
+    var formData, XHR;
+    if (!key) {
+       callback("No key provided so unable to ask " + cloud_provider + " to analyse an image.");
+       return;
+    }
+    XHR = new XMLHttpRequest();
     XHR.addEventListener('load', function(event) {
         callback(event);
     });
@@ -143,11 +151,11 @@ var post_image = function post_image(image, cloud_provider, callback, error_call
     case  "Watson":
         formData = new FormData();
         formData.append("images_file", image, "blob.png");
-        XHR.open('POST', "https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + keys.Watson);
+        XHR.open('POST', "https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key);
         XHR.send(formData);
         break;
     case "Google":
-        XHR.open('POST', "https://vision.googleapis.com/v1/images:annotate?key=" + keys.Google);
+        XHR.open('POST', "https://vision.googleapis.com/v1/images:annotate?key=" + key);
         XHR.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
         XHR.send(JSON.stringify({"requests":[{"image":{"content": image.substring("data:image/png;base64,".length)},
                                               "features":[{"type":"LABEL_DETECTION",
@@ -163,12 +171,13 @@ var post_image = function post_image(image, cloud_provider, callback, error_call
         break;
     case "Microsoft":
         // see https://social.msdn.microsoft.com/Forums/en-US/807ee18d-45e5-410b-a339-c8dcb3bfa25b/testing-project-oxford-ocr-how-to-use-a-local-file-in-base64-for-example?forum=mlapi
-        XHR.open('POST', "https://westus.api.cognitive.microsoft.com/vision/v1.0/analyze?visualFeatures=Description,Tags,Faces,Color,Categories&subscription-key=" + keys.Microsoft);
+        XHR.open('POST', "https://westus.api.cognitive.microsoft.com/vision/v1.0/analyze?visualFeatures=Description,Tags,Faces,Color,Categories&subscription-key=" + key);
         XHR.setRequestHeader('Content-Type', 'application/octet-stream');
         XHR.send(image);
         break;
     }
 };
+
 if (document.body) {
     startup();
 } else {
