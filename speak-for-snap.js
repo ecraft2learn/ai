@@ -1,7 +1,7 @@
 // see https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisUtterance
 var utterance = new SpeechSynthesisUtterance(message);
-if (lang) {
-   utterance.lang = lang;
+if (language) {
+   utterance.lang = language;
 }
 if (pitch > 0) {
    utterance.pitch = pitch;
