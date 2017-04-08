@@ -11,5 +11,5 @@ var get_ide = function () {
     }
 }.bind(this);
 
-// get_ide().saveProject(name);
 get_ide().openProject(name);
+// get_ide().saveProject(name);
