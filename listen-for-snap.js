@@ -5,10 +5,10 @@ var restart = function () {
     }
     try {
         window.speech_recognition.start();
-        console.log("recognition started");
+        console.log("Speech recognition started");
     } catch (error) {
         if (error.name === 'InvalidStateError') {
-            // delay needed at least in Chrome 52
+            // delay needed, at least in Chrome 52
             setTimeout(restart, 2000);
         } else {
             console.log(error);
@@ -23,7 +23,7 @@ var handle_result = function (callback, event) {
 };
 var handle_error = function (callback, event) {
     if (event.error === 'aborted') {
-        console.log("aborted so restarting speech recognition in half a second");
+        console.log("Aborted so restarting speech recognition in half a second");
         setTimeout(restart, 500);
         return;
     }
