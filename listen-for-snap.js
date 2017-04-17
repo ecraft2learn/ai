@@ -1,4 +1,8 @@
+var stopped = false;
 var restart = function () {
+    if (stopped) {
+       return;
+    }
     if (window.speechSynthesis.speaking) { // don't listen while speaking
         setTimeout(restart, 500); // try again in half a second
         return;
@@ -23,8 +27,10 @@ var handle_result = function (callback, event) {
 };
 var handle_error = function (callback, event) {
     if (event.error === 'aborted') {
-        console.log("Aborted so restarting speech recognition in half a second");
-        setTimeout(restart, 500);
+        if (!stopped) {
+            console.log("Aborted so restarting speech recognition in half a second");
+            setTimeout(restart, 500);
+        }
         return;
     }
     if (event.error === 'no-speech') {
@@ -53,3 +59,16 @@ window.speech_recognition.onend = function (event) {
     restart(); 
 };
 restart();
+
+window.addEventListener("message",
+                        function(message) {
+                            if (message.data === 'hidden') {
+                                stopped = true;
+                                window.speech_recognition.stop();
+                                console.log("Stopped because hidden");
+                            } else if (message.data === 'shown') {
+                                stopped = false;
+                                restart();
+                                console.log("Restarted because shown");
+                            }
+                       });
