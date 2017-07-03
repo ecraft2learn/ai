@@ -52,7 +52,7 @@ window.ecraft2learn =
 			                        function (response) {
 										handle_response(spoken_callback, response);
 									};
-			this.microsoft_speech_client.error =
+			this.microsoft_speech_client.onerror =
 			                        function (error, message) {
 										console.log(error, message);
 // 										console.log(JSON.parse(message));
@@ -60,10 +60,10 @@ window.ecraft2learn =
 		}
 		this.microsoft_speech_client.startMicAndRecognition();
 		setTimeout(function () {
-			this.microsoft_speech_client.endMicAndRecognition();
-		    }.bind(this),
-		    // maximum_wait given in seconds -- if not 5 second default 
-		    maximum_wait ? maximum_wait/1000 : 5000);
+					   this.microsoft_speech_client.endMicAndRecognition();
+					   }.bind(this),
+					   // maximum_wait given in seconds -- if not 5 second default 
+					   maximum_wait ? maximum_wait/1000 : 5000);
 	}
   }} ());
 
