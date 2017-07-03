@@ -1,12 +1,14 @@
-var load_script = function (url) {
+var load_script = function (url, callback) {
     var script = document.createElement("script");
     script.type = "text/javascript";
     script.src = url;
-    script.addEventListener('load', function () {
-        start_recognition();
-    });
+    if (typeof callback === 'object') {
+        script.addEventListener('load', function () {
+            callback();
+        });
+    };
     document.head.appendChild(script);
-}
+};
 
 var get_global_variable_value = function (name) {
     var ancestor = this;
@@ -55,7 +57,7 @@ var start_recognition = function () {
 };
 
 if (typeof Microsoft === 'undefined' || typeof Microsoft.CognitiveServices.SpeechRecognition === 'undefined') {
-    load_script("https://toontalk.github.io/ai-cloud/lib/speech.1.0.0.js");
+    load_script("https://toontalk.github.io/ai-cloud/lib/speech.1.0.0.js", start_recognition);
 } else {
     start_recognition();
 }
