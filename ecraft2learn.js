@@ -43,20 +43,20 @@ window.ecraft2learn =
 			this.microsoft_speech_client.endMicAndRecognition();
 		}.bind(this);
 		if (typeof spoken_callback === 'object') {
-			this.microsoft_speech_client.addEventListener('FinalResponseReceived',
+			this.microsoft_speech_client.onFinalResponseReceived =
 			                        function (response) {
 										handle_response(spoken_callback, response);
 										this.microsoft_speech_client.endMicAndRecognition(); // needed??
-									}.bind(this));
-			this.microsoft_speech_client.addEventListener('PartialResponseReceived',
+									}.bind(this);
+			this.microsoft_speech_client.onPartialResponseReceived =
 			                        function (response) {
 										handle_response(spoken_callback, response);
-									});
-			this.microsoft_speech_client.addEventListener('error',
+									};
+			this.microsoft_speech_client.onerror = 
 			                        function (error, message) {
 										console.log(error, message);
 // 										console.log(JSON.parse(message));
-									});
+									};
 		}
 		this.microsoft_speech_client.startMicAndRecognition();
 		setTimeout(function () {
