@@ -52,12 +52,12 @@ window.ecraft2learn =
 			                        function (response) {
 										handle_response(spoken_callback, response);
 									};
-			this.microsoft_speech_client.onerror =
-			                        function (error, message) {
-										console.log(error, message);
-// 										console.log(JSON.parse(message));
-									};
 		}
+		this.microsoft_speech_client.onError =
+			function (error, message) {
+			    console.log(error, message);
+// 										console.log(JSON.parse(message));
+			};
 		this.microsoft_speech_client.startMicAndRecognition();
 		setTimeout(function () {
 					   this.microsoft_speech_client.endMicAndRecognition();
