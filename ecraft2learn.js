@@ -32,33 +32,35 @@ window.ecraft2learn =
 		    console.log("Confidence is " + confidence + " for " + spoken); // remove this eventually
 		    invoke(callback, new List([spoken]));
 		};
-		var client = Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionServiceFactory.createMicrophoneClient(
-		    Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionMode.shortPhrase,
-		    this.get_global_variable_value('language', "en-us"),
-		    this.get_global_variable_value('Microsoft speech key')
-		);
+		if (!this.microsoft_speech_client) {
+			this.microsoft_speech_client = Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionServiceFactory.createMicrophoneClient(
+				Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionMode.shortPhrase,
+				this.get_global_variable_value('language', "en-us"),
+				this.get_global_variable_value('Microsoft speech key')
+			);
+		}
 		this.stop_microsoft_speech_recognition = function () {
-			client.endMicAndRecognition();
+			this.microsoft_speech_client.endMicAndRecognition();
 		};
 		if (typeof spoken_callback === 'object') {
-			client.addEventListener('FinalResponseReceived',
+			this.microsoft_speech_client.addEventListener('FinalResponseReceived',
 			                        function (response) {
 										handle_response(spoken_callback, response);
 										client.endMicAndRecognition();
 									});
-			client.addEventListener('PartialResponseReceived',
+			this.microsoft_speech_client.addEventListener('PartialResponseReceived',
 			                        function (response) {
 										handle_response(spoken_callback, response);
 									});
-			client.addEventListener('error',
+			this.microsoft_speech_client.addEventListener('error',
 			                        function (error, message) {
 										console.log(error, message);
 // 										console.log(JSON.parse(message));
 									});
 		}
-		client.startMicAndRecognition();
+		this.microsoft_speech_client.startMicAndRecognition();
 		setTimeout(function () {
-			client.endMicAndRecognition();
+			this.microsoft_speech_client.endMicAndRecognition();
 		    },
 		    // maximum_wait given in seconds -- if not 5 second default 
 		    maximum_wait ? maximum_wait/1000 : 5000);
