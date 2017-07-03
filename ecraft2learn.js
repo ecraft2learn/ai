@@ -1,8 +1,8 @@
 window.ecraft2learn =
-    (function () {
-	"use strict";
+  (function () {
+  	"use strict";
 	return {
-	    get_global_variable_value: function (name) {
+	  get_global_variable_value: function (name) {
 		var ancestor = this;
 		var value;
 		while (ancestor && !(ancestor instanceof IDE_Morph)) {
@@ -18,7 +18,7 @@ window.ecraft2learn =
 		}
 		return value.contents;
 	    }.bind(this),
-	    start_microsoft_speech_recognition: function () {
+	  start_microsoft_speech_recognition: function () {
 		var handle_response = function (callback, response) {
 		    var spoken = response[0].transcript;
 		    var confidence = response[0].confidence;
@@ -29,23 +29,19 @@ window.ecraft2learn =
 		    Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionMode.shortPhrase,
 		    "en-us",
 		    get_global_variable_value('Microsoft speech key'));
-
 		client.onFinalResponseReceived = function (response) {
 		    handle_response(spoken_callback, response);
 		};
-
 		client.onPartialResponseReceived = function (response) {
 		    handle_response(spoken_callback, response);
 		};
-
 		client.startMicAndRecognition();
-
 		setTimeout(function () {
                     client.endMicAndRecognition();
-		},
-			   5000);
+		           },
+			       5000);
 	    }
 	};
-    } ());
+  } ());
 	
 
