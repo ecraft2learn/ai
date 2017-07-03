@@ -48,11 +48,14 @@ window.ecraft2learn =
 			client.onPartialResponseReceived = function (response) {
 				handle_response(spoken_callback, response);
 			};
+			client.onError = function (error) {
+				console.log(error);
+			};
 		}
 		client.startMicAndRecognition();
 		setTimeout(function () {
 			client.endMicAndRecognition();
-		}, 1000);
+		}, 5000);
 	}
   }} ());
 
