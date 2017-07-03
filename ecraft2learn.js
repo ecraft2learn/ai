@@ -41,13 +41,13 @@ window.ecraft2learn =
 		}
 		this.stop_microsoft_speech_recognition = function () {
 			this.microsoft_speech_client.endMicAndRecognition();
-		};
+		}.bind(this);
 		if (typeof spoken_callback === 'object') {
 			this.microsoft_speech_client.addEventListener('FinalResponseReceived',
 			                        function (response) {
 										handle_response(spoken_callback, response);
-										client.endMicAndRecognition();
-									});
+										this.microsoft_speech_client.endMicAndRecognition(); // needed??
+									}.bind(this));
 			this.microsoft_speech_client.addEventListener('PartialResponseReceived',
 			                        function (response) {
 										handle_response(spoken_callback, response);
@@ -61,7 +61,7 @@ window.ecraft2learn =
 		this.microsoft_speech_client.startMicAndRecognition();
 		setTimeout(function () {
 			this.microsoft_speech_client.endMicAndRecognition();
-		    },
+		    }.bind(this),
 		    // maximum_wait given in seconds -- if not 5 second default 
 		    maximum_wait ? maximum_wait/1000 : 5000);
 	}
