@@ -64,7 +64,7 @@ window.ecraft2learn =
 					   this.microsoft_speech_client.endMicAndRecognition();
 					   }.bind(this),
 					   // maximum_wait given in seconds -- if not 5 second default 
-					   maximum_wait ? maximum_wait/1000 : 5000);
+					   maximum_wait ? maximum_wait*1000 : 5000);
 	}
   }} ());
 
