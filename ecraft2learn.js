@@ -2,7 +2,7 @@ window.ecraft2learn =
   (function () {
   	"use strict";
 	return {
-	  get_global_variable_value: function (name) {
+	  get_global_variable_value: function (name, default_value) {
 		var ancestor = this;
 		var value;
 		while (ancestor && !(ancestor instanceof IDE_Morph)) {
@@ -13,12 +13,15 @@ window.ecraft2learn =
 		} else {
 		    value = world.children[0].globalVariables.getVar(name);
 		}
+		if (value === undefined) {
+			return default_value;
+		}
 		if (typeof value ===  'string') {
 		    return value;
 		}
 		return value.contents;
 	    }.bind(this),
-	  start_microsoft_speech_recognition: function () {
+	  start_microsoft_speech_recognition: function (spoken_callback) {
 		var handle_response = function (callback, response) {
 		    var spoken = response[0].transcript;
 		    var confidence = response[0].confidence;
@@ -27,14 +30,17 @@ window.ecraft2learn =
 		};
 		var client = Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionServiceFactory.createMicrophoneClient(
 		    Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionMode.shortPhrase,
-		    "en-us",
-		    get_global_variable_value('Microsoft speech key'));
-		client.onFinalResponseReceived = function (response) {
-		    handle_response(spoken_callback, response);
-		};
-		client.onPartialResponseReceived = function (response) {
-		    handle_response(spoken_callback, response);
-		};
+		    this.get_global_variable_value('language', "en-us"),
+		    this.get_global_variable_value('Microsoft speech key')
+		);
+		if (typeof spoken_callback === 'object') {
+			client.onFinalResponseReceived = function (response) {
+				handle_response(spoken_callback, response);
+			};
+			client.onPartialResponseReceived = function (response) {
+				handle_response(spoken_callback, response);
+			};
+		}
 		client.startMicAndRecognition();
 		setTimeout(function () {
                     client.endMicAndRecognition();
