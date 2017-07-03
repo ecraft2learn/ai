@@ -1,5 +1,5 @@
 window.ecraft2learn =
-    ((function () {
+    (function () {
 	"use strict";
 	return {
 	    get_global_variable_value: function (name) {
@@ -46,12 +46,6 @@ window.ecraft2learn =
 			   5000);
 	    }
 	};
-    }) ());
+    } ());
 	
-
-//if (typeof Microsoft === 'undefined' || typeof Microsoft.CognitiveServices.SpeechRecognition === 'undefined') {
-//    load_script("https://toontalk.github.io/ai-cloud/lib/speech.1.0.0.js", start_recognition);
-//} else {
-//    start_recognition();
-//}
 
