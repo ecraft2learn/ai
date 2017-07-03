@@ -53,11 +53,12 @@ window.ecraft2learn =
 										handle_response(spoken_callback, response);
 									};
 		}
-		this.microsoft_speech_client.onError =
-			function (error, message) {
-			    console.log(error, message);
-// 										console.log(JSON.parse(message));
-			};
+		if (typeof error_callback === 'object') {
+			this.microsoft_speech_client.onError =
+				function (error, message) {
+					invoke(error_callback, new List([]));
+				};
+		}
 		this.microsoft_speech_client.startMicAndRecognition();
 		setTimeout(function () {
 					   this.microsoft_speech_client.endMicAndRecognition();
