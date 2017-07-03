@@ -52,7 +52,7 @@ window.ecraft2learn =
 			                        function (response) {
 										handle_response(spoken_callback, response);
 									};
-			this.microsoft_speech_client.onerror = 
+			this.microsoft_speech_client.error =
 			                        function (error, message) {
 										console.log(error, message);
 // 										console.log(JSON.parse(message));
