@@ -43,13 +43,16 @@ window.ecraft2learn =
 		if (typeof spoken_callback === 'object') {
 			client.onFinalResponseReceived = function (response) {
 				handle_response(spoken_callback, response);
+				client.endMicAndRecognition();
 			};
 			client.onPartialResponseReceived = function (response) {
 				handle_response(spoken_callback, response);
 			};
 		}
 		client.startMicAndRecognition();
+		setTimeout(function () {
+			client.endMicAndRecognition();
+		}, 1000);
 	}
   }} ());
-	
 
