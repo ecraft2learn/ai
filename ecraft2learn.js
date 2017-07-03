@@ -8,12 +8,16 @@ window.ecraft2learn =
 		while (ancestor && !(ancestor instanceof IDE_Morph)) {
 		    ancestor = ancestor.parent;
 		}
-		if (ancestor) {
-		    value = ancestor.globalVariables.getVar(name);
-		} else {
-		    value = world.children[0].globalVariables.getVar(name);
+		try {
+			if (ancestor) {
+				value = ancestor.globalVariables.getVar(name);
+			} else {
+				value = world.children[0].globalVariables.getVar(name);
+			}
+		} catch (e) {
+			return default_value;
 		}
-		if (value === undefined) {
+	    if (value === undefined) {
 			return default_value;
 		}
 		if (typeof value ===  'string') {
