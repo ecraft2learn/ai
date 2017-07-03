@@ -25,7 +25,7 @@ window.ecraft2learn =
 		}
 		return value.contents;
 	    }.bind(this),
-	  start_microsoft_speech_recognition: function (spoken_callback, maximum_wait) {
+	  start_microsoft_speech_recognition: function (spoken_callback, error_callback, maximum_wait) {
 		var handle_response = function (callback, response) {
 		    var spoken = response[0].transcript;
 		    var confidence = response[0].confidence;
