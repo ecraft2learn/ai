@@ -25,7 +25,7 @@ window.ecraft2learn =
 		}
 		return value.contents;
 	    }.bind(this),
-	  start_microsoft_speech_recognition: function (spoken_callback) {
+	  start_microsoft_speech_recognition: function (spoken_callback, maximum_wait) {
 		var handle_response = function (callback, response) {
 		    var spoken = response[0].transcript;
 		    var confidence = response[0].confidence;
@@ -41,21 +41,27 @@ window.ecraft2learn =
 			client.endMicAndRecognition();
 		};
 		if (typeof spoken_callback === 'object') {
-			client.onFinalResponseReceived = function (response) {
-				handle_response(spoken_callback, response);
-				client.endMicAndRecognition();
-			};
-			client.onPartialResponseReceived = function (response) {
-				handle_response(spoken_callback, response);
-			};
-			client.onError = function (error) {
-				console.log(error);
-			};
+			client.addEventListener('FinalResponseReceived',
+			                        function (response) {
+										handle_response(spoken_callback, response);
+										client.endMicAndRecognition();
+									});
+			client.addEventListener('PartialResponseReceived',
+			                        function (response) {
+										handle_response(spoken_callback, response);
+									});
+			client.addEventListener('error',
+			                        function (error, message) {
+										console.log(error, message);
+// 										console.log(JSON.parse(message));
+									});
 		}
 		client.startMicAndRecognition();
 		setTimeout(function () {
 			client.endMicAndRecognition();
-		}, 5000);
+		    },
+		    // maximum_wait given in seconds -- if not 5 second default 
+		    maximum_wait ? maximum_wait/1000 : 5000);
 	}
   }} ());
 
