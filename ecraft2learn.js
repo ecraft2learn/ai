@@ -37,6 +37,9 @@ window.ecraft2learn =
 		    this.get_global_variable_value('language', "en-us"),
 		    this.get_global_variable_value('Microsoft speech key')
 		);
+		this.stop_microsoft_speech_recognition = function () {
+			client.endMicAndRecognition();
+		};
 		if (typeof spoken_callback === 'object') {
 			client.onFinalResponseReceived = function (response) {
 				handle_response(spoken_callback, response);
@@ -46,12 +49,7 @@ window.ecraft2learn =
 			};
 		}
 		client.startMicAndRecognition();
-		setTimeout(function () {
-                    client.endMicAndRecognition();
-		           },
-			       5000);
-	    }
-	};
-  } ());
+	}
+  }} ());
 	
 
