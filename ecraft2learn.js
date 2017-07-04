@@ -1,9 +1,15 @@
 window.ecraft2learn =
   (function () {
   	"use strict";
+  	var this_url = document.querySelector('script[src*="ecraft2learn.js"]'); // the URL where this library lives
   	var load_script = function (url, when_loaded) {
   		var script = document.createElement("script");
 		script.type = "text/javascript";
+		if (url.indexOf("://") < 0) {
+			// is relative to this_url
+			var last_slash_index = this_url.lastIndexOf('/');
+			url = this_url.substring(0, last_slash_index) + url;
+		}
 		script.src = url;
 		if (when_loaded) {
 			script.addEventListener('load', when_loaded);
