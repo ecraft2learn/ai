@@ -82,7 +82,7 @@ window.ecraft2learn =
 						   }.bind(this),
 						   // maximum_wait given in seconds -- if not 5 second default 
 						   maximum_wait ? maximum_wait*1000 : 5000);			
-		};
+		}.bind(this);
 		if (typeof Microsoft === 'undefined' || typeof Microsoft.CognitiveServices.SpeechRecognition === 'undefined') {
 			load_script("lib/speech.1.0.0.js", start_listening);
 		} else {
