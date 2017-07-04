@@ -31,7 +31,7 @@ window.ecraft2learn =
 		    var spoken = response[0].transcript;
 		    var confidence = response[0].confidence;
 		    console.log("Confidence is " + confidence + " for " + spoken); // remove this eventually
-		    invoke(callback, new List([spoken]));
+		    invoke(callback, new List([spoken, confidence]));
 		};
 		if (!this.microsoft_speech_client) {
 			this.microsoft_speech_client = Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionServiceFactory.createMicrophoneClient(
