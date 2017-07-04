@@ -14,6 +14,7 @@ window.ecraft2learn =
 		if (when_loaded) {
 			script.addEventListener('load', when_loaded);
 		}
+		document.head.appendChild(script);
   	};
 	return {
 	  get_global_variable_value: function (name, default_value) {
