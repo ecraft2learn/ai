@@ -25,7 +25,8 @@ window.ecraft2learn =
 		}
 		return value.contents;
 	    }.bind(this),
-	  start_microsoft_speech_recognition: function (spoken_callback, error_callback, maximum_wait) {
+	  start_microsoft_speech_recognition_batch: function (spoken_callback, error_callback, maximum_wait) {
+	  	// spoken_callback is called with all that is spoken in the maximum_wait seconds (unless there is an error)
 		var handle_response = function (callback, response) {
 		    var spoken = response[0].transcript;
 		    var confidence = response[0].confidence;
@@ -39,7 +40,7 @@ window.ecraft2learn =
 				this.get_global_variable_value('Microsoft speech key')
 			);
 		}
-		this.stop_microsoft_speech_recognition = function () {
+		this.stop_microsoft_speech_recognition_batch = function () {
 			this.microsoft_speech_client.endMicAndRecognition();
 		}.bind(this);
 		if (typeof spoken_callback === 'object') {
