@@ -8,7 +8,7 @@ window.ecraft2learn =
 		if (url.indexOf("://") < 0) {
 			// is relative to this_url
 			var last_slash_index = this_url.lastIndexOf('/');
-			url = this_url.substring(0, last_slash_index) + url;
+			url = this_url.substring(0, last_slash_index+1) + url;
 		}
 		script.src = url;
 		if (when_loaded) {
