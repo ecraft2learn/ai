@@ -5,7 +5,7 @@ window.ecraft2learn =
   	var load_script = function (url, when_loaded) {
   		var script = document.createElement("script");
 		script.type = "text/javascript";
-		if (url.indexOf("://") < 0) {
+		if (url.indexOf("//") < 0) {
 			// is relative to this_url
 			var last_slash_index = this_url.lastIndexOf('/');
 			url = this_url.substring(0, last_slash_index+1) + url;
@@ -87,6 +87,80 @@ window.ecraft2learn =
 			load_script("lib/speech.1.0.0.js", start_listening);
 		} else {
 	    	start_listening();
+		}
+	},
+	start_microsoft_speech_recognition: function (spoken_callback, error_callback) {
+		var start_listening = function () {
+			var setup = function(SDK, recognitionMode, language, format, subscriptionKey) {
+				var recognizerConfig = new SDK.RecognizerConfig(
+					new SDK.SpeechConfig(
+						new SDK.Context(
+							new SDK.OS(navigator.userAgent, "Browser", null),
+							new SDK.Device("SpeechSample", "SpeechSample", "1.0.00000"))),
+					recognitionMode, // SDK.RecognitionMode.Interactive  (Options - Interactive/Conversation/Dictation>)
+					language,        // Supported laguages are specific to each recognition mode. Refer to docs.
+					format);         // SDK.SpeechResultFormat.Simple (Options - Simple/Detailed)
+				// Alternatively use SDK.CognitiveTokenAuthentication(fetchCallback, fetchOnExpiryCallback) for token auth
+				var authentication = new SDK.CognitiveSubscriptionKeyAuthentication(subscriptionKey);
+				return SDK.CreateRecognizer(recognizerConfig, authentication);
+			};
+			var recognizer = setup(SDK,
+			                       SDK.RecognitionMode.Interactive,
+			                       this.get_global_variable_value('language', "en-us"),
+			                       "Simple", // as opposed to "Detailed"
+			                       this.get_global_variable_value('Microsoft speech key'));
+			this.stop_microsoft_speech_recognition = function () {
+				recognizer.AudioSource.TurnOff();
+			};
+			recognizer.Recognize(function (event) {
+                switch (event.Name) {
+                    case "RecognitionTriggeredEvent":
+                        break;
+                    case "ListeningStartedEvent":
+                        break;
+                    case "RecognitionStartedEvent":
+                        break;
+                    case "SpeechStartDetectedEvent":
+                        console.log(event.Result); // check console for other information in result
+                        break;
+                    case "SpeechHypothesisEvent":
+                        invoke(spoken_callback, new List([event.Result.Text]));
+                        console.log(event.Result); // check console for other information in result
+                        break;
+                    case "SpeechEndDetectedEvent":
+                        console.log(event.Result); // check console for other information in result
+                        break;
+                    case "SpeechSimplePhraseEvent":
+                        break;
+                    case "SpeechDetailedPhraseEvent":
+                        break;
+                    case "RecognitionEndedEvent":
+                        console.log(event); // Debug information
+                        break;
+                }
+            })
+            .On(function () {
+                // The request succeeded. Nothing to do here.
+            },
+            function (error) {
+                console.error(error);
+                invoke(error_callback, new List([]));
+            });
+		}.bind(this);
+		var SDK;
+		if (typeof require === 'undefined') {
+			load_script("//cdnjs.cloudflare.com/ajax/libs/require.js/2.3.3/require.min.js", 
+					   function () {
+						   load_script("lib/speech.browser.sdk-min.js",
+						               function () {
+						                	require(["Speech.Browser.Sdk"], function(sdk) {
+												SDK = sdk;
+												start_listening();
+											});
+					                  });
+					   });
+		} else {
+			start_listening();
 		}
 	}
   }} ());
