@@ -1,6 +1,14 @@
 window.ecraft2learn =
   (function () {
   	"use strict";
+  	var load_script = function (url, when_loaded) {
+  		var script = document.createElement("script");
+		script.type = "text/javascript";
+		script.src = url;
+		if (when_loaded) {
+			script.addEventListener('load', when_loaded);
+		}
+  	};
 	return {
 	  get_global_variable_value: function (name, default_value) {
 		var ancestor = this;
@@ -31,41 +39,44 @@ window.ecraft2learn =
 		    var spoken = response[0].transcript;
 		    var confidence = response[0].confidence;
 		    console.log("Confidence is " + confidence + " for " + spoken); // remove this eventually
-		    invoke(callback, new List([spoken, confidence]));
+		    invoke(callback, new List([spoken]));
 		};
-		if (!this.microsoft_speech_client) {
-			this.microsoft_speech_client = Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionServiceFactory.createMicrophoneClient(
-				Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionMode.shortPhrase,
-				this.get_global_variable_value('language', "en-us"),
-				this.get_global_variable_value('Microsoft speech key')
-			);
-		}
-		this.stop_microsoft_speech_recognition_batch = function () {
-			this.microsoft_speech_client.endMicAndRecognition();
-		}.bind(this);
-		if (typeof spoken_callback === 'object') {
-			this.microsoft_speech_client.onFinalResponseReceived =
-			                        function (response) {
-										handle_response(spoken_callback, response);
-										this.microsoft_speech_client.endMicAndRecognition(); // needed??
-									}.bind(this);
-			this.microsoft_speech_client.onPartialResponseReceived =
-			                        function (response) {
-										handle_response(spoken_callback, response);
-									};
-		}
-		if (typeof error_callback === 'object') {
-			this.microsoft_speech_client.onError =
-				function (error, message) {
-					invoke(error_callback, new List([]));
-				};
-		}
-		this.microsoft_speech_client.startMicAndRecognition();
-		setTimeout(function () {
-					   this.microsoft_speech_client.endMicAndRecognition();
-					   }.bind(this),
-					   // maximum_wait given in seconds -- if not 5 second default 
-					   maximum_wait ? maximum_wait*1000 : 5000);
+		var start_listening = function () {
+			if (!this.microsoft_speech_client) {
+				this.microsoft_speech_client = Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionServiceFactory.createMicrophoneClient(
+					Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionMode.shortPhrase,
+					this.get_global_variable_value('language', "en-us"),
+					this.get_global_variable_value('Microsoft speech key')
+				);
+			}
+			this.stop_microsoft_speech_recognition_batch = function () {
+				this.microsoft_speech_client.endMicAndRecognition();
+			}.bind(this);
+			if (typeof spoken_callback === 'object') {
+				this.microsoft_speech_client.onFinalResponseReceived =
+										function (response) {
+											handle_response(spoken_callback, response);
+											this.microsoft_speech_client.endMicAndRecognition(); // needed??
+										}.bind(this);
+				this.microsoft_speech_client.onPartialResponseReceived =
+										function (response) {
+											handle_response(spoken_callback, response);
+										};
+			}
+			if (typeof error_callback === 'object') {
+				this.microsoft_speech_client.onError =
+					function (error, message) {
+						invoke(error_callback, new List([]));
+					};
+			}
+			this.microsoft_speech_client.startMicAndRecognition();
+			setTimeout(function () {
+						   this.microsoft_speech_client.endMicAndRecognition();
+						   }.bind(this),
+						   // maximum_wait given in seconds -- if not 5 second default 
+						   maximum_wait ? maximum_wait*1000 : 5000);			
+		};
+	    load_script("lib/speech.1.0.0.js", start_listening);
 	}
   }} ());
 
