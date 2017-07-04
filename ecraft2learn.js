@@ -90,7 +90,7 @@ window.ecraft2learn =
 		}
 	},
 	start_microsoft_speech_recognition: function (spoken_callback, error_callback) {
-		var start_listening = function () {
+		var start_listening = function (SDK) {
 			var setup = function(SDK, recognitionMode, language, format, subscriptionKey) {
 				var recognizerConfig = new SDK.RecognizerConfig(
 					new SDK.SpeechConfig(
@@ -147,20 +147,19 @@ window.ecraft2learn =
                 invoke(error_callback, new List([]));
             });
 		}.bind(this);
-		var SDK;
 		if (typeof require === 'undefined') {
 			load_script("//cdnjs.cloudflare.com/ajax/libs/require.js/2.3.3/require.min.js", 
 					   function () {
 						   load_script("lib/speech.browser.sdk-min.js",
 						               function () {
-						                	require(["Speech.Browser.Sdk"], function(sdk) {
-												SDK = sdk;
-												start_listening();
-											});
-					                  });
-					   });
+						                	require(["Speech.Browser.Sdk"], function(SDK) {
+												this.microsoft_speech_sdk = SDK;
+												start_listening(SDK);
+											}.bind(this));
+					                   }.bind(this));
+					   }.bind(this));
 		} else {
-			start_listening();
+			start_listening(this.microsoft_speech_sdk);
 		}
 	}
   }} ());
