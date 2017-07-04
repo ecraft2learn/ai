@@ -76,7 +76,11 @@ window.ecraft2learn =
 						   // maximum_wait given in seconds -- if not 5 second default 
 						   maximum_wait ? maximum_wait*1000 : 5000);			
 		};
-	    load_script("lib/speech.1.0.0.js", start_listening);
+		if (Microsoft && Microsoft.CognitiveServices.SpeechRecognition) {
+			start_listening();
+		} else {
+	    	load_script("lib/speech.1.0.0.js", start_listening);
+		}
 	}
   }} ());
 
