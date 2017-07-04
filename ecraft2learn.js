@@ -147,7 +147,9 @@ window.ecraft2learn =
                 invoke(error_callback, new List([]));
             });
 		}.bind(this);
-		if (typeof require === 'undefined') {
+		if (this.microsoft_speech_sdk) {
+			start_listening(this.microsoft_speech_sdk);
+		} else {
 			load_script("//cdnjs.cloudflare.com/ajax/libs/require.js/2.3.3/require.min.js", 
 					   function () {
 						   load_script("lib/speech.browser.sdk-min.js",
@@ -158,8 +160,6 @@ window.ecraft2learn =
 											}.bind(this));
 					                   }.bind(this));
 					   }.bind(this));
-		} else {
-			start_listening(this.microsoft_speech_sdk);
 		}
 	}
   }} ());
