@@ -89,7 +89,7 @@ window.ecraft2learn =
 	    	start_listening();
 		}
 	},
-	start_microsoft_speech_recognition: function (spoken_callback, error_callback) {
+	start_microsoft_speech_recognition: function (as_recognized_callback, final_spoken_callback, error_callback) {
 		var start_listening = function (SDK) {
 			var setup = function(SDK, recognitionMode, language, format, subscriptionKey) {
 				var recognizerConfig = new SDK.RecognizerConfig(
@@ -121,21 +121,19 @@ window.ecraft2learn =
                     case "RecognitionStartedEvent":
                         break;
                     case "SpeechStartDetectedEvent":
-                        console.log(event.Result); // check console for other information in result
                         break;
                     case "SpeechHypothesisEvent":
-                        invoke(spoken_callback, new List([event.Result.Text]));
-                        console.log(event.Result); // check console for other information in result
+                        this.last_speech_recognized = event.Result.Text;
+                        invoke(as_recognized_callback, new List([this.last_speech_recognized]));
                         break;
                     case "SpeechEndDetectedEvent":
-                        console.log(event.Result); // check console for other information in result
+                        invoke(final_spoken_callback, new List([this.last_speech_recognized]));
                         break;
                     case "SpeechSimplePhraseEvent":
                         break;
                     case "SpeechDetailedPhraseEvent":
                         break;
                     case "RecognitionEndedEvent":
-                        console.log(event); // Debug information
                         break;
                 }
             })
