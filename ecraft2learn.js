@@ -112,6 +112,7 @@ window.ecraft2learn =
 			this.stop_microsoft_speech_recognition = function () {
 				recognizer.AudioSource.TurnOff();
 			};
+			this.last_speech_recognized = undefined;
 			recognizer.Recognize(function (event) {
                 switch (event.Name) {
                     case "RecognitionTriggeredEvent":
@@ -127,7 +128,11 @@ window.ecraft2learn =
                         invoke(as_recognized_callback, new List([this.last_speech_recognized]));
                         break;
                     case "SpeechEndDetectedEvent":
-                        invoke(final_spoken_callback, new List([this.last_speech_recognized]));
+                        if (this.last_speech_recognized) {
+                        	invoke(final_spoken_callback, new List([this.last_speech_recognized]));
+                        } else {
+                        	invoke(error_callback, new List([]));
+                        }
                         break;
                     case "SpeechSimplePhraseEvent":
                         break;
