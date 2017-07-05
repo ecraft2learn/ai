@@ -321,7 +321,7 @@ window.ecraft2learn =
                    });
         break;
     }
-  };
+  }.bind(this);
     if (document.body) {
 		startup();
 	} else {
