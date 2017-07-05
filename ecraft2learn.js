@@ -22,7 +22,7 @@ window.ecraft2learn =
 			alert("Ecraft2learn library does not have a procedure named " + procedure_name);
 			return;
 		}
-		ecraft2learn[procedure_name].apply(this, parameters);
+		ecraft2learn[procedure_name].apply(this, parameters.contents);
 	  }.bind(this),
 	  get_global_variable_value: function (name, default_value) {
 		var ancestor = this;
