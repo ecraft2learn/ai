@@ -129,11 +129,7 @@ window.ecraft2learn =
                         break;
                     case "SpeechEndDetectedEvent":
                         if (this.last_speech_recognized) {
-                        	try {
                         	invoke(final_spoken_callback, new List([this.last_speech_recognized]));
-                        	} catch (e) {
-                        		console.log(e);
-                        	}
                         } else {
                         	invoke(error_callback, new List([]));
                         }
