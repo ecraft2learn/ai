@@ -18,7 +18,7 @@ window.ecraft2learn =
   	};
 	return {
 	  run: function (procedure_name, parameters) {
-		if (!ecraft2learn[procedure_name]) {
+		if (typeof ecraft2learn[procedure_name] === 'undefined') {
 			alert("Ecraft2learn library does not have a procedure named " + procedure_name);
 			return;
 		}
@@ -362,13 +362,13 @@ window.ecraft2learn =
   speak: function (message, pitch, rate, voice, volume, finished_callback) {
   	// see https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisUtterance
 	var utterance = new SpeechSynthesisUtterance(message);
-	if (language) {
-	   utterance.lang = language;
+	if (typeof language === 'string') {
+	    utterance.lang = language;
 	}
-	if (pitch > 0) {
-	   utterance.pitch = pitch;
+	if (typeof pitch === 'number' && pitch > 0) {
+	    utterance.pitch = pitch;
 	}
-	if (rate > 0) {
+	if (typeof rate === 'number' && rate > 0) {
 	   if (rate < .1) {
 		  // A very slow rate breaks Chrome's speech synthesiser
 		  rate = .1;
@@ -378,7 +378,7 @@ window.ecraft2learn =
 	   }
 	   utterance.rate = rate;
 	}
-	if (voice) {
+	if (typeof voice === 'number') {
 	   voices = window.speechSynthesis.getVoices();
 	   if (voice >= 0 && voice < voices.length) {
 		   utterance.voice = voices[Math.floor(voice)];
@@ -386,8 +386,8 @@ window.ecraft2learn =
 		   alert("Only " + voices.length + " voices are available. You can't choose voice number " + voice);
 	   }
 	}
-	if (volume > 0) {
-	   utterance.volume = volume;
+	if (typeof volume && volume > 0) {
+	    utterance.volume = volume;
 	}
 	if (typeof finished_callback === 'object') {
 	   // callback provided
@@ -396,7 +396,8 @@ window.ecraft2learn =
 	   };
 	}
 	if (window.speech_recognition) {
-	   window.speech_recognition.abort();
+		// don't recognise synthetic speech
+	    window.speech_recognition.abort();
 	}
 	window.speechSynthesis.speak(utterance);
   },
