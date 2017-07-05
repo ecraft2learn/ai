@@ -169,7 +169,7 @@ window.ecraft2learn =
   	var video  = document.createElement('video');
     var canvas = document.createElement('canvas');
     var get_key = function (provider) {
-		var key = get_global_variable_value(provider + " key");
+		var key = this.get_global_variable_value(provider + " key");
 		if (key) {
 			return key;
 		}
@@ -178,7 +178,7 @@ window.ecraft2learn =
 			window.onbeforeunload = null; // don't warn about reload
 			document.location.assign("https://github.com/ToonTalk/ai-cloud/wiki");
 		}
-	};
+	}.bind(this);
 	var post_image = function post_image(image, cloud_provider, callback, error_callback) {
 		// based upon https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/Sending_forms_through_JavaScript
 		var key = get_key(cloud_provider);
@@ -259,7 +259,31 @@ window.ecraft2learn =
 	//      navigator.mediaDevices.getUserMedia(constraints, callback, error_callback);
 		}
 	};
-  this.take_picture_and_analyse = function (cloud_provider, show_photo, callback) {
+  this.take_picture_and_analyse = function (cloud_provider, show_photo, snap_callback) {
+  	var callback = function (response) {
+		var javascript_to_snap = function (x) {
+			if (Array.isArray(x)) {
+				return new List(x.map(javascript_to_snap));
+			}
+			if (typeof x === 'object') {
+				return new List(Object.keys(x).map(function (key) {
+                                                       return new List([key, javascript_to_snap(x[key])]);
+						                           }));
+			}
+			return x;
+		};
+		switch (cloud_provider) {
+			case "Watson":
+				invoke(snap_callback, new List([javascript_to_snap(JSON.parse(response).images[0].classifiers[0].classes)]));
+			    return;
+			case "Google":
+			     invoke(snap_callback, new List([javascript_to_snap(JSON.parse(response).responses)]));
+				return;
+			case "Microsoft":
+			     invoke(snap_callback, new List([javascript_to_snap(JSON.parse(response))]));
+				return;
+		}
+	};
     var context, photo;
     if (!callback) {
         callback = console.log;
