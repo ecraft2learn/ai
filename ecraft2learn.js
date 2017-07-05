@@ -259,6 +259,7 @@ window.ecraft2learn =
 	//      navigator.mediaDevices.getUserMedia(constraints, callback, error_callback);
 		}
 	};
+	console.log("about to define take_picture_and_analyse");
   this.take_picture_and_analyse = function (cloud_provider, show_photo, callback) {
     var context, photo;
     if (!callback) {
