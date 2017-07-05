@@ -17,6 +17,13 @@ window.ecraft2learn =
 		document.head.appendChild(script);
   	};
 	return {
+	  run: function (procedure_name, parameters) {
+		if (!ecraft2learn[procedure_name]) {
+			alert("Ecraft2learn library does not have a procedure named " + procedure_name);
+			return;
+		}
+		ecraft2learn[procedure_name].apply(this, parameters);
+	  }.bind(this),
 	  get_global_variable_value: function (name, default_value) {
 		var ancestor = this;
 		var value;
@@ -39,7 +46,7 @@ window.ecraft2learn =
 		    return value;
 		}
 		return value.contents;
-	    }.bind(this),
+	  }.bind(this),
 	  start_microsoft_speech_recognition_batch: function (spoken_callback, error_callback, maximum_wait) {
 	  	// spoken_callback is called with all that is spoken in the maximum_wait seconds (unless there is an error)
 		var handle_response = function (callback, response) {
