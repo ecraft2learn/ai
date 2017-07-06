@@ -1,3 +1,6 @@
+if (!url) {
+    url = "https://toontalk.github.io/ai-cloud/ecraft2learn.js";
+}
 if (!reload && window.ecraft2larn_scripts_loaded && window.ecraft2learn_scripts_loaded.indexOf(url) >= 0) {
     if (typeof callback === 'object') {
        invoke(callback, new List([]));
