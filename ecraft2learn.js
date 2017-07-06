@@ -409,5 +409,16 @@ window.ecraft2learn =
     return new List(window.speechSynthesis.getVoices().map(function (voice) {
     	return voice.name;
     }));
+  },
+  get_voice_name: function (voice) {
+  	voice = +voice;
+	if (typeof voice === 'number') {
+	   var voices = window.speechSynthesis.getVoices();
+	   if (voice >= 0 && voice < voices.length) {
+		   return voices[Math.floor(voice)].name;
+	   } else if (voice > 0) {
+		   alert("Only " + voices.length + " voices are available. There is no voice number " + voice);
+	   }
+	}
   }
   }} ());
