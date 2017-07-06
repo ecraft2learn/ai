@@ -19,7 +19,8 @@ window.ecraft2learn =
 	return {
 	  run: function (procedure_name, parameters) {
 		if (typeof ecraft2learn[procedure_name] === 'undefined') {
-			alert("Ecraft2learn library does not have a procedure named " + procedure_name);
+			alert("Ecraft2learn library does not have a function named " + procedure_name);
+			console.log("Ecraft2learn library does not have a function named " + procedure_name);
 			return;
 		}
 		ecraft2learn[procedure_name].apply(this, parameters.contents);
