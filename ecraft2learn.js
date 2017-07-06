@@ -22,7 +22,7 @@ window.ecraft2learn =
 			alert("Ecraft2learn library does not have a function named " + function_name);
 			return;
 		}
-		return ecraft2learn[function_name].apply(this, parameters.contents);
+		return ecraft2learn[function_name].apply(ecraft2learn, parameters.contents);
 	  }.bind(this),
 
 	  get_global_variable_value: function (name, default_value) {
