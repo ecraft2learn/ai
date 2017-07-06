@@ -362,7 +362,7 @@ window.ecraft2learn =
 		window.addEventListener('load', startup, false);
 	}
   },
-  speak: function (message, pitch, rate, voice, volume, finished_callback) {
+  speak: function (message, pitch, rate, voice, volume, language, finished_callback) {
   	// see https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisUtterance
 	var utterance = new SpeechSynthesisUtterance(message);
 	if (typeof language === 'string') {
