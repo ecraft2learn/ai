@@ -84,11 +84,12 @@ window.ecraft2learn =
 					};
 			}
 			this.microsoft_speech_client.startMicAndRecognition();
+			maximum_wait = +maximum_wait; // convert to number
 			setTimeout(function () {
 						   this.microsoft_speech_client.endMicAndRecognition();
 						   }.bind(this),
-						   // maximum_wait given in seconds -- if not 5 second default 
-						   maximum_wait ? maximum_wait*1000 : 5000);			
+						   // maximum_wait given in seconds -- if not 5 second default
+						   typeof maximum_wait === 'number' ? maximum_wait*1000 : 5000);			
 		}.bind(this);
 		if (typeof Microsoft === 'undefined' || typeof Microsoft.CognitiveServices.SpeechRecognition === 'undefined') {
 			load_script("lib/speech.1.0.0.js", start_listening);
@@ -266,6 +267,8 @@ window.ecraft2learn =
 	//      navigator.mediaDevices.getUserMedia(constraints, callback, error_callback);
 		}
 	};
+	width = +width; // convert to number
+	height = +height;
   this.take_picture_and_analyse = function (cloud_provider, show_photo, snap_callback) {
   	var callback = function (response) {
 		var javascript_to_snap = function (x) {
@@ -411,7 +414,7 @@ window.ecraft2learn =
     }));
   },
   get_voice_name: function (voice) {
-  	voice = +voice;
+  	voice = +voice; // convert to nunber if is a string
 	if (typeof voice === 'number') {
 	   var voices = window.speechSynthesis.getVoices();
 	   if (voice >= 0 && voice < voices.length) {
