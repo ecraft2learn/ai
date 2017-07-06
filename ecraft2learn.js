@@ -17,12 +17,12 @@ window.ecraft2learn =
 		document.head.appendChild(script);
   	};
 	return {
-	  run: function (procedure_name, parameters) {
-		if (typeof ecraft2learn[procedure_name] === 'undefined') {
-			alert("Ecraft2learn library does not have a function named " + procedure_name);
+	  run: function (function_name, parameters) {
+		if (typeof ecraft2learn[function_name] === 'undefined') {
+			alert("Ecraft2learn library does not have a function named " + function_name);
 			return;
 		}
-		ecraft2learn[procedure_name].apply(this, parameters.contents);
+		return ecraft2learn[function_name].apply(this, parameters.contents);
 	  }.bind(this),
 	  get_global_variable_value: function (name, default_value) {
 		var ancestor = this;
@@ -385,7 +385,7 @@ window.ecraft2learn =
 	   var voices = window.speechSynthesis.getVoices();
 	   if (voice >= 0 && voice < voices.length) {
 		   utterance.voice = voices[Math.floor(voice)];
-	   } else {
+	   } else if (voice > 0) {
 		   alert("Only " + voices.length + " voices are available. You can't choose voice number " + voice);
 	   }
 	}
