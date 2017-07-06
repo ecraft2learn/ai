@@ -17,13 +17,13 @@ window.ecraft2learn =
 		document.head.appendChild(script);
   	};
 	return {
-	  run: function (function_name, parameters) {
+	  run: function (function_name, parameters, snap_context) {
 		if (typeof ecraft2learn[function_name] === 'undefined') {
 			alert("Ecraft2learn library does not have a function named " + function_name);
 			return;
 		}
-		return ecraft2learn[function_name].apply(ecraft2learn, parameters.contents);
-	  }.bind(this),
+		return ecraft2learn[function_name].apply(snap_context, parameters.contents);
+	  },
 
 	  get_global_variable_value: function (name, default_value) {
 		var ancestor = this;
