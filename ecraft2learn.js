@@ -382,7 +382,7 @@ window.ecraft2learn =
 	}
 	voice = +voice;
 	if (typeof voice === 'number') {
-	   voices = window.speechSynthesis.getVoices();
+	   var voices = window.speechSynthesis.getVoices();
 	   if (voice >= 0 && voice < voices.length) {
 		   utterance.voice = voices[Math.floor(voice)];
 	   } else {
