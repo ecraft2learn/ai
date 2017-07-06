@@ -17,16 +17,16 @@ window.ecraft2learn =
 		document.head.appendChild(script);
   	};
 	return {
-	  run: function (function_name, parameters, snap_context) {
+	  run: function (function_name, parameters) {
 		if (typeof ecraft2learn[function_name] === 'undefined') {
 			alert("Ecraft2learn library does not have a function named " + function_name);
 			return;
 		}
-		return ecraft2learn[function_name].apply(snap_context, parameters.contents);
+		return ecraft2learn[function_name].apply(null, parameters.contents);
 	  },
 
 	  get_global_variable_value: function (name, default_value) {
-		var ancestor = this;
+		var ancestor = ecraft2learn.snap_context;
 		var value;
 		while (ancestor && !(ancestor instanceof IDE_Morph)) {
 		    ancestor = ancestor.parent;
@@ -47,7 +47,7 @@ window.ecraft2learn =
 		    return value;
 		}
 		return value.contents;
-	  }.bind(this),
+	  },
 
 	  start_microsoft_speech_recognition_batch: function (spoken_callback, error_callback, maximum_wait) {
 	  	// spoken_callback is called with all that is spoken in the maximum_wait seconds (unless there is an error)
@@ -58,47 +58,47 @@ window.ecraft2learn =
 		    invoke(callback, new List([spoken]));
 		};
 		var start_listening = function () {
-			if (typeof this.microsoft_speech_client === 'undefined') {
-				this.microsoft_speech_client = Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionServiceFactory.createMicrophoneClient(
+			if (typeof ecraft2learn.microsoft_speech_client === 'undefined') {
+				ecraft2learn.microsoft_speech_client = Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionServiceFactory.createMicrophoneClient(
 					Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionMode.shortPhrase,
-					this.get_global_variable_value('language', "en-us"),
-					this.get_global_variable_value('Microsoft speech key')
+					ecraft2learn.get_global_variable_value('language', "en-us"),
+					ecraft2learn.get_global_variable_value('Microsoft speech key')
 				);
 			}
-			this.stop_microsoft_speech_recognition_batch = function () {
-				this.microsoft_speech_client.endMicAndRecognition();
-			}.bind(this);
+			ecraft2learn.stop_microsoft_speech_recognition_batch = function () {
+				ecraft2learn.microsoft_speech_client.endMicAndRecognition();
+			};
 			if (typeof spoken_callback === 'object') {
-				this.microsoft_speech_client.onFinalResponseReceived =
+				ecraft2learn.microsoft_speech_client.onFinalResponseReceived =
 										function (response) {
 											handle_response(spoken_callback, response);
-											this.microsoft_speech_client.endMicAndRecognition(); // needed??
-										}.bind(this);
-				this.microsoft_speech_client.onPartialResponseReceived =
+											ecraft2learn.microsoft_speech_client.endMicAndRecognition(); // needed??
+										};
+				ecraft2learn.microsoft_speech_client.onPartialResponseReceived =
 										function (response) {
 											handle_response(spoken_callback, response);
 										};
 			}
 			if (typeof error_callback === 'object') {
-				this.microsoft_speech_client.onError =
+				ecraft2learn.microsoft_speech_client.onError =
 					function (error, message) {
 						invoke(error_callback, new List([]));
 					};
 			}
-			this.microsoft_speech_client.startMicAndRecognition();
+			ecraft2learn.microsoft_speech_client.startMicAndRecognition();
 			maximum_wait = +maximum_wait; // convert to number
 			setTimeout(function () {
-						   this.microsoft_speech_client.endMicAndRecognition();
-						   }.bind(this),
+						   ecraft2learn.microsoft_speech_client.endMicAndRecognition();
+						   },
 						   // maximum_wait given in seconds -- if not 5 second default
 						   typeof maximum_wait === 'number' ? maximum_wait*1000 : 5000);			
-		}.bind(this);
+		};
 		if (typeof Microsoft === 'undefined' || typeof Microsoft.CognitiveServices.SpeechRecognition === 'undefined') {
 			load_script("lib/speech.1.0.0.js", start_listening);
 		} else {
 	    	start_listening();
 		}
-	}.bind(this),
+	},
 
 	start_microsoft_speech_recognition: function (as_recognized_callback, final_spoken_callback, error_callback) {
 		var start_listening = function (SDK) {
@@ -117,13 +117,13 @@ window.ecraft2learn =
 			};
 			var recognizer = setup(SDK,
 			                       SDK.RecognitionMode.Interactive,
-			                       this.get_global_variable_value('language', "en-us"),
+			                       ecraft2learn.get_global_variable_value('language', "en-us"),
 			                       "Simple", // as opposed to "Detailed"
-			                       this.get_global_variable_value('Microsoft speech key'));
-			this.stop_microsoft_speech_recognition = function () {
+			                       ecraft2learn.get_global_variable_value('Microsoft speech key'));
+			ecraft2learn.stop_microsoft_speech_recognition = function () {
 				recognizer.AudioSource.TurnOff();
 			};
-			this.last_speech_recognized = undefined;
+			ecraft2learn.last_speech_recognized = undefined;
 			recognizer.Recognize(function (event) {
                 switch (event.Name) {
                     case "RecognitionTriggeredEvent":
@@ -135,12 +135,12 @@ window.ecraft2learn =
                     case "SpeechStartDetectedEvent":
                         break;
                     case "SpeechHypothesisEvent":
-                        this.last_speech_recognized = event.Result.Text;
-                        invoke(as_recognized_callback, new List([this.last_speech_recognized]));
+                        ecraft2learn.last_speech_recognized = event.Result.Text;
+                        invoke(as_recognized_callback, new List([ecraft2learn.last_speech_recognized]));
                         break;
                     case "SpeechEndDetectedEvent":
-                        if (this.last_speech_recognized) {
-                        	invoke(final_spoken_callback, new List([this.last_speech_recognized]));
+                        if (ecraft2learn.last_speech_recognized) {
+                        	invoke(final_spoken_callback, new List([ecraft2learn.last_speech_recognized]));
                         } else {
                         	invoke(error_callback, new List([]));
                         }
@@ -160,28 +160,28 @@ window.ecraft2learn =
                 console.error(error);
                 invoke(error_callback, new List([]));
             });
-		}.bind(this);
-		if (this.microsoft_speech_sdk) {
-			start_listening(this.microsoft_speech_sdk);
+		};
+		if (ecraft2learn.microsoft_speech_sdk) {
+			start_listening(ecraft2learn.microsoft_speech_sdk);
 		} else {
 			load_script("//cdnjs.cloudflare.com/ajax/libs/require.js/2.3.3/require.min.js", 
 					   function () {
 						   load_script("lib/speech.browser.sdk-min.js",
 						               function () {
 						                	require(["Speech.Browser.Sdk"], function(SDK) {
-												this.microsoft_speech_sdk = SDK;
+												ecraft2learn.microsoft_speech_sdk = SDK;
 												start_listening(SDK);
-											}.bind(this));
-					                   }.bind(this));
-					   }.bind(this));
+											});
+					                   });
+					   });
 		}
-	}.bind(this),
+	},
 
   setup_camera: function (width, height) {
   	var video  = document.createElement('video');
     var canvas = document.createElement('canvas');
     var get_key = function (provider) {
-		var key = this.get_global_variable_value(provider + " key");
+		var key = ecraft2learn.get_global_variable_value(provider + " key");
 		if (key) {
 			return key;
 		}
@@ -190,7 +190,7 @@ window.ecraft2learn =
 			window.onbeforeunload = null; // don't warn about reload
 			document.location.assign("https://github.com/ToonTalk/ai-cloud/wiki");
 		}
-	}.bind(this);
+	};
 	var post_image = function post_image(image, cloud_provider, callback, error_callback) {
 		// based upon https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/Sending_forms_through_JavaScript
 		var key = get_key(cloud_provider);
@@ -274,7 +274,7 @@ window.ecraft2learn =
 	width = +width; // convert to number
 	height = +height;
 	
-  this.take_picture_and_analyse = function (cloud_provider, show_photo, snap_callback) {
+  ecraft2learn.take_picture_and_analyse = function (cloud_provider, show_photo, snap_callback) {
   	var callback = function (response) {
 		var javascript_to_snap = function (x) {
 			if (Array.isArray(x)) {
@@ -360,14 +360,14 @@ window.ecraft2learn =
                    });
         break;
     }
-  }.bind(this);
+  };
 
     if (document.body) {
 		startup();
 	} else {
 		window.addEventListener('load', startup, false);
 	}
-  }.bind(this),
+  },
 
   speak: function (message, pitch, rate, voice, volume, language, finished_callback) {
   	// see https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisUtterance
