@@ -24,6 +24,7 @@ window.ecraft2learn =
 		}
 		return ecraft2learn[function_name].apply(this, parameters.contents);
 	  }.bind(this),
+
 	  get_global_variable_value: function (name, default_value) {
 		var ancestor = this;
 		var value;
@@ -47,6 +48,7 @@ window.ecraft2learn =
 		}
 		return value.contents;
 	  }.bind(this),
+
 	  start_microsoft_speech_recognition_batch: function (spoken_callback, error_callback, maximum_wait) {
 	  	// spoken_callback is called with all that is spoken in the maximum_wait seconds (unless there is an error)
 		var handle_response = function (callback, response) {
@@ -96,7 +98,8 @@ window.ecraft2learn =
 		} else {
 	    	start_listening();
 		}
-	},
+	}.bind(this),
+
 	start_microsoft_speech_recognition: function (as_recognized_callback, final_spoken_callback, error_callback) {
 		var start_listening = function (SDK) {
 			var setup = function(SDK, recognitionMode, language, format, subscriptionKey) {
@@ -172,7 +175,8 @@ window.ecraft2learn =
 					                   }.bind(this));
 					   }.bind(this));
 		}
-	},
+	}.bind(this),
+
   setup_camera: function (width, height) {
   	var video  = document.createElement('video');
     var canvas = document.createElement('canvas');
@@ -269,6 +273,7 @@ window.ecraft2learn =
 	};
 	width = +width; // convert to number
 	height = +height;
+	
   this.take_picture_and_analyse = function (cloud_provider, show_photo, snap_callback) {
   	var callback = function (response) {
 		var javascript_to_snap = function (x) {
@@ -356,12 +361,14 @@ window.ecraft2learn =
         break;
     }
   }.bind(this);
+
     if (document.body) {
 		startup();
 	} else {
 		window.addEventListener('load', startup, false);
 	}
-  },
+  }.bind(this),
+
   speak: function (message, pitch, rate, voice, volume, language, finished_callback) {
   	// see https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisUtterance
 	var utterance = new SpeechSynthesisUtterance(message);
