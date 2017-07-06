@@ -20,7 +20,6 @@ window.ecraft2learn =
 	  run: function (procedure_name, parameters) {
 		if (typeof ecraft2learn[procedure_name] === 'undefined') {
 			alert("Ecraft2learn library does not have a function named " + procedure_name);
-			console.log("Ecraft2learn library does not have a function named " + procedure_name);
 			return;
 		}
 		ecraft2learn[procedure_name].apply(this, parameters.contents);
@@ -366,9 +365,11 @@ window.ecraft2learn =
 	if (typeof language === 'string') {
 	    utterance.lang = language;
 	}
+	pitch = +pitch; // if string try convering to a number
 	if (typeof pitch === 'number' && pitch > 0) {
 	    utterance.pitch = pitch;
 	}
+	rate = +rate;
 	if (typeof rate === 'number' && rate > 0) {
 	   if (rate < .1) {
 		  // A very slow rate breaks Chrome's speech synthesiser
@@ -379,6 +380,7 @@ window.ecraft2learn =
 	   }
 	   utterance.rate = rate;
 	}
+	voice = +voice;
 	if (typeof voice === 'number') {
 	   voices = window.speechSynthesis.getVoices();
 	   if (voice >= 0 && voice < voices.length) {
@@ -387,6 +389,7 @@ window.ecraft2learn =
 		   alert("Only " + voices.length + " voices are available. You can't choose voice number " + voice);
 	   }
 	}
+	volume = +volume;
 	if (typeof volume && volume > 0) {
 	    utterance.volume = volume;
 	}
