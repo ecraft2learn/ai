@@ -56,7 +56,7 @@ window.ecraft2learn =
 		    invoke(callback, new List([spoken]));
 		};
 		var start_listening = function () {
-			if (!this.microsoft_speech_client) {
+			if (typeof this.microsoft_speech_client === 'undefined') {
 				this.microsoft_speech_client = Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionServiceFactory.createMicrophoneClient(
 					Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionMode.shortPhrase,
 					this.get_global_variable_value('language', "en-us"),
@@ -282,6 +282,9 @@ window.ecraft2learn =
 			}
 			return x;
 		};
+		if (typeof snap_callback !== 'object') { // if not provided 
+			return;
+		}
 		switch (cloud_provider) {
 			case "Watson":
 				invoke(snap_callback, new List([javascript_to_snap(JSON.parse(response).images[0].classifiers[0].classes)]));
@@ -295,9 +298,6 @@ window.ecraft2learn =
 		}
 	};
     var context, photo;
-    if (!callback) {
-        callback = console.log;
-    }
     // Capture a photo by fetching the current contents of the video
 	// and drawing it into a canvas, then converting that to a PNG
 	// format data URL. By drawing it on an offscreen canvas and then
