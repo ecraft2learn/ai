@@ -95,7 +95,6 @@ window.ecraft2learn =
 					Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionMode.shortPhrase,
 					ecraft2learn.get_global_variable_value('language', "en-us"),
 					key);
-				};
 			}
 			ecraft2learn.stop_microsoft_speech_recognition_batch = function () {
 				ecraft2learn.microsoft_speech_client.endMicAndRecognition();
