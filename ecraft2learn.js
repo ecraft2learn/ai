@@ -16,6 +16,35 @@ window.ecraft2learn =
 		}
 		document.head.appendChild(script);
   	};
+  	var run_snap_block = function (labelSpec) {
+  		// based upon https://github.com/jmoenig/Snap--Build-Your-Own-Blocks/issues/1791#issuecomment-313529328
+		var allBlocks = ide.sprites.asArray().concat([stage]).map(item => item.customBlocks).reduce((a, b) => a.concat(b)).concat(stage.globalBlocks);
+		var blockSpecs = allBlocks.map(block => block.blockSpec());
+		var index = blockSpecs.indexOf(labelSpec);
+		var blockTemplate = allBlocks[index].templateInstance();
+		console.log(invoke(blockTemplate, new List(['Hello', 12]), sprite));
+		return invoke(blockTemplate, new List(['Hello', 12]), sprite);
+  	};
+var labelSpec = "temp";
+
+  		// based upon https://github.com/jmoenig/Snap--Build-Your-Own-Blocks/issues/1791#issuecomment-313529328
+
+var ide = this;
+while (ide && !(ide instanceof IDE_Morph)) {
+
+		    ide = ide.parent;
+
+		}
+		var allBlocks = ide.sprites.asArray().concat([stage]).map(item => item.customBlocks).reduce((a, b) => a.concat(b)).concat(stage.globalBlocks);
+
+		var blockSpecs = allBlocks.map(block => block.blockSpec());
+
+		var index = blockSpecs.indexOf(labelSpec);
+
+		var blockTemplate = allBlocks[index].templateInstance();
+
+		console.log(invoke(blockTemplate, new List(['Hello', 12]), sprite));
+
 	return {
 	  run: function (function_name, parameters) {
 		if (typeof ecraft2learn[function_name] === 'undefined') {
