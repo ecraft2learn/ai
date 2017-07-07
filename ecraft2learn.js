@@ -216,7 +216,7 @@ window.ecraft2learn =
     var canvas = document.createElement('canvas');
 	var post_image = function post_image(image, cloud_provider, callback, error_callback) {
 		// based upon https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/Sending_forms_through_JavaScript
-		var key = get_key(cloud_provider + " image kay");
+		var key = get_key(cloud_provider + " image key");
 		var formData, XHR;
 		if (!key) {
 		   callback("No key provided so unable to ask " + cloud_provider + " to analyse an image.");
