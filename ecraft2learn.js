@@ -16,35 +16,42 @@ window.ecraft2learn =
 		}
 		document.head.appendChild(script);
   	};
-  	var run_snap_block = function (labelSpec) {
+  	var get_key = function (key_name) {
+// 		var key = ecraft2learn.get_global_variable_value(key_name);
+		var key = run_snap_block(key_name);
+		if (key && key !== "enter your key here") {
+			return key;
+		}
+		if (window.confirm("No value reported by the '" + key_name +
+						   " reporter. After obtaining the key edit the reporter in the 'Variables' area. Do you want to visit https://github.com/ToonTalk/ai-cloud/wiki to learn how to get a key?")) {
+			window.onbeforeunload = null; // don't warn about reload
+			document.location.assign("https://github.com/ToonTalk/ai-cloud/wiki");
+		}
+	};
+  	var run_snap_block = function (labelSpec) { // add parameters later
+  	    // labelSpec if it takes areguments will look something like 'label %txt of size %n'
+  		var ide = get_snap_ide(ecraft2learn.snap_context);
   		// based upon https://github.com/jmoenig/Snap--Build-Your-Own-Blocks/issues/1791#issuecomment-313529328
-		var allBlocks = ide.sprites.asArray().concat([stage]).map(item => item.customBlocks).reduce((a, b) => a.concat(b)).concat(stage.globalBlocks);
+		var allBlocks = ide.sprites.asArray().concat([ide.stage]).map(item => item.customBlocks).reduce((a, b) => a.concat(b)).concat(ide.stage.globalBlocks);
 		var blockSpecs = allBlocks.map(block => block.blockSpec());
 		var index = blockSpecs.indexOf(labelSpec);
+		if (index < 0) {
+			return;
+		}
 		var blockTemplate = allBlocks[index].templateInstance();
-		console.log(invoke(blockTemplate, new List(['Hello', 12]), sprite));
-		return invoke(blockTemplate, new List(['Hello', 12]), sprite);
-  	};
-var labelSpec = "temp";
-
-  		// based upon https://github.com/jmoenig/Snap--Build-Your-Own-Blocks/issues/1791#issuecomment-313529328
-
-var ide = this;
-while (ide && !(ide instanceof IDE_Morph)) {
+		return invoke(blockTemplate, new List([]));
+  	}.bind(this);
+  	var get_snap_ide = function (start) {
+  		var ide = start;
+		while (ide && !(ide instanceof IDE_Morph)) {
 		    ide = ide.parent;
 		}
 		if (!ide) {
-			ide = world.children[0];
+			// not as general but works well (for now)
+			return world.children[0];
 		}
-		var allBlocks = ide.sprites.asArray().concat([ide.stage]).map(item => item.customBlocks).reduce((a, b) => a.concat(b)).concat(stage.globalBlocks);
-
-		var blockSpecs = allBlocks.map(block => block.blockSpec());
-
-		var index = blockSpecs.indexOf(labelSpec);
-
-		var blockTemplate = allBlocks[index].templateInstance();
-
-		console.log(invoke(blockTemplate, new List(['Hello', 12]), sprite));
+		return ide;
+  	};
 
 	return {
 	  run: function (function_name, parameters) {
@@ -56,17 +63,10 @@ while (ide && !(ide instanceof IDE_Morph)) {
 	  },
 
 	  get_global_variable_value: function (name, default_value) {
-		var ancestor = ecraft2learn.snap_context;
+		var ide = get_snap_ide(ecraft2learn.snap_context);
 		var value;
-		while (ancestor && !(ancestor instanceof IDE_Morph)) {
-		    ancestor = ancestor.parent;
-		}
 		try {
-			if (ancestor) {
-				value = ancestor.globalVariables.getVar(name);
-			} else {
-				value = world.children[0].globalVariables.getVar(name);
-			}
+			value = ide.globalVariables.getVar(name);
 		} catch (e) {
 			return default_value;
 		}
@@ -88,12 +88,14 @@ while (ide && !(ide instanceof IDE_Morph)) {
 		    invoke(callback, new List([spoken]));
 		};
 		var start_listening = function () {
+			var key;
 			if (typeof ecraft2learn.microsoft_speech_client === 'undefined') {
+				key = ecraft2learn.get_key('Microsoft speech key');
 				ecraft2learn.microsoft_speech_client = Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionServiceFactory.createMicrophoneClient(
 					Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionMode.shortPhrase,
 					ecraft2learn.get_global_variable_value('language', "en-us"),
-					ecraft2learn.get_global_variable_value('Microsoft speech key')
-				);
+					key);
+				};
 			}
 			ecraft2learn.stop_microsoft_speech_recognition_batch = function () {
 				ecraft2learn.microsoft_speech_client.endMicAndRecognition();
@@ -145,11 +147,15 @@ while (ide && !(ide instanceof IDE_Morph)) {
 				var authentication = new SDK.CognitiveSubscriptionKeyAuthentication(subscriptionKey);
 				return SDK.CreateRecognizer(recognizerConfig, authentication);
 			};
+			var key = get_key('Microsoft speech key');
+			if (!key) {
+				return;
+			}
 			var recognizer = setup(SDK,
 			                       SDK.RecognitionMode.Interactive,
 			                       ecraft2learn.get_global_variable_value('language', "en-us"),
 			                       "Simple", // as opposed to "Detailed"
-			                       ecraft2learn.get_global_variable_value('Microsoft speech key'));
+			                       key);
 			ecraft2learn.stop_microsoft_speech_recognition = function () {
 				recognizer.AudioSource.TurnOff();
 			};
@@ -215,7 +221,7 @@ while (ide && !(ide instanceof IDE_Morph)) {
 		if (key) {
 			return key;
 		}
-		if (window.confirm("No value provided for the variable '" + provider + 
+		if (window.confirm("No value provided for the variable '" + provider +
 						   " key'. Do you want to visit https://github.com/ToonTalk/ai-cloud/wiki to learn how to get a key?")) {
 			window.onbeforeunload = null; // don't warn about reload
 			document.location.assign("https://github.com/ToonTalk/ai-cloud/wiki");
