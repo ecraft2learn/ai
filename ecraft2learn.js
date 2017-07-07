@@ -31,11 +31,12 @@ var labelSpec = "temp";
 
 var ide = this;
 while (ide && !(ide instanceof IDE_Morph)) {
-
 		    ide = ide.parent;
-
 		}
-		var allBlocks = ide.sprites.asArray().concat([stage]).map(item => item.customBlocks).reduce((a, b) => a.concat(b)).concat(stage.globalBlocks);
+		if (!ide) {
+			ide = world.children[0];
+		}
+		var allBlocks = ide.sprites.asArray().concat([ide.stage]).map(item => item.customBlocks).reduce((a, b) => a.concat(b)).concat(stage.globalBlocks);
 
 		var blockSpecs = allBlocks.map(block => block.blockSpec());
 
