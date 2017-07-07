@@ -90,7 +90,7 @@ window.ecraft2learn =
 		var start_listening = function () {
 			var key;
 			if (typeof ecraft2learn.microsoft_speech_client === 'undefined') {
-				key = ecraft2learn.get_key('Microsoft speech key');
+				key = get_key('Microsoft speech key');
 				ecraft2learn.microsoft_speech_client = Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionServiceFactory.createMicrophoneClient(
 					Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionMode.shortPhrase,
 					ecraft2learn.get_global_variable_value('language', "en-us"),
