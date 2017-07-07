@@ -17,7 +17,6 @@ window.ecraft2learn =
 		document.head.appendChild(script);
   	};
   	var get_key = function (key_name) {
-// 		var key = ecraft2learn.get_global_variable_value(key_name);
 		var key = run_snap_block(key_name);
 		if (key && key !== "enter your key here") {
 			return key;
@@ -215,20 +214,9 @@ window.ecraft2learn =
   setup_camera: function (width, height) {
   	var video  = document.createElement('video');
     var canvas = document.createElement('canvas');
-    var get_key = function (provider) {
-		var key = ecraft2learn.get_global_variable_value(provider + " key");
-		if (key) {
-			return key;
-		}
-		if (window.confirm("No value provided for the variable '" + provider +
-						   " key'. Do you want to visit https://github.com/ToonTalk/ai-cloud/wiki to learn how to get a key?")) {
-			window.onbeforeunload = null; // don't warn about reload
-			document.location.assign("https://github.com/ToonTalk/ai-cloud/wiki");
-		}
-	};
 	var post_image = function post_image(image, cloud_provider, callback, error_callback) {
 		// based upon https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/Sending_forms_through_JavaScript
-		var key = get_key(cloud_provider);
+		var key = get_key(cloud_provider + " image kay");
 		var formData, XHR;
 		if (!key) {
 		   callback("No key provided so unable to ask " + cloud_provider + " to analyse an image.");
