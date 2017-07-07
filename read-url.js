@@ -4,12 +4,12 @@ if (access_token) {
     xhr.setRequestHeader('Authorization', 'Bearer ' + access_token);
 }
 xhr.onload = function() {
-    if (callback) {
+    if (typeof callback === 'object') {
         invoke(callback, new List([xhr.responseText]));
     }
 };
 xhr.onerror = function(error) {
-    if (error_callback) {
+    if (typeof error_callback === 'object') {
         invoke(error_callback, new List([url + " error is " + error.message]));
     }
 };
