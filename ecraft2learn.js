@@ -55,7 +55,7 @@ window.ecraft2learn =
 	return {
 	  invoke_callback: function (callback) {
 	  	if (typeof callback === 'object') { // assume Snap! callback
-	  		return invoke(callback, new List(arguments));
+	  		return invoke(callback, new List(Array.prototype.slice.call(arguments, 1)));
 	  	}
 	  	if (typeof callback === 'function') { // assume JavaScript callback
 	  		callback.apply(this, arguments);
