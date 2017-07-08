@@ -88,6 +88,28 @@ window.ecraft2learn =
 		return value.contents;
 	  },
 
+	  read_url: function (url, callback, error_callback, access_token) {
+	  	var xhr = new XMLHttpRequest();
+		xhr.open('GET', url);
+		if (access_token) {
+			xhr.setRequestHeader('Authorization', 'Bearer ' + access_token);
+		}
+		xhr.onload = function() {
+			invoke_callback(callback, xhr.responseText);
+		};
+		xhr.onerror = function(error) {
+			invoke_callback(error_callback, url + " error is " + error.message);
+		};
+		xhr.onloadend = function() {
+			if (xhr.status >= 400) {
+				invoke_callback(error_callback, url + " replied " + xhr.statusText);
+			} else if (xhr.status === 0) {
+				invoke_callback(error_callback, url + " failed to load.");
+			}
+		};
+		xhr.send();
+	  },
+
 	  start_speech_recognition: function (spoken_callback, error_callback) {
 	  	if (typeof SpeechRecognition === 'undefined' && typeof webkitSpeechRecognition === 'undefined') {
 	  		// no support from this browser so try using the Microsoft Speech API
