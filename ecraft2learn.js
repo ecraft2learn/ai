@@ -38,7 +38,7 @@ window.ecraft2learn =
 			return;
 		}
 		var blockTemplate = allBlocks[index].templateInstance();
-		return invoke(blockTemplate, new List([]));
+		return invoke_callback(blockTemplate);
   	}.bind(this);
   	var get_snap_ide = function (start) {
   		var ide = start;
@@ -53,6 +53,7 @@ window.ecraft2learn =
   	};
 
 	return {
+	  inside_snap: typeof world === 'object' && world instanceof WorldMorph,
 	  invoke_callback: function (callback) {
 	  	if (typeof callback === 'object') { // assume Snap! callback
 	  		return invoke(callback, new List(Array.prototype.slice.call(arguments, 1)));
@@ -93,7 +94,7 @@ window.ecraft2learn =
 		    var spoken = response[0].transcript;
 		    var confidence = response[0].confidence;
 		    console.log("Confidence is " + confidence + " for " + spoken); // remove this eventually
-		    invoke(callback, new List([spoken]));
+		    invoke_callback(callback, spoken);
 		};
 		var start_listening = function () {
 			var key;
@@ -121,7 +122,7 @@ window.ecraft2learn =
 			if (typeof error_callback === 'object') {
 				ecraft2learn.microsoft_speech_client.onError =
 					function (error, message) {
-						invoke(error_callback, new List([]));
+						invoke_callback(error_callback);
 					};
 			}
 			ecraft2learn.microsoft_speech_client.startMicAndRecognition();
@@ -183,9 +184,9 @@ window.ecraft2learn =
                         break;
                     case "SpeechEndDetectedEvent":
                         if (ecraft2learn.last_speech_recognized) {
-                        	invoke(final_spoken_callback, new List([ecraft2learn.last_speech_recognized]));
+                        	invoke_callback(final_spoken_callback, ecraft2learn.last_speech_recognized);
                         } else {
-                        	invoke(error_callback, new List([]));
+                        	invoke_callback(error_callback);
                         }
                         break;
                     case "SpeechSimplePhraseEvent":
@@ -201,7 +202,7 @@ window.ecraft2learn =
             },
             function (error) {
                 console.error(error);
-                invoke(error_callback, new List([]));
+                invoke_callback(error_callback);
             });
 		};
 		if (ecraft2learn.microsoft_speech_sdk) {
@@ -305,10 +306,13 @@ window.ecraft2learn =
 	};
 	width = +width; // convert to number
 	height = +height;
-	
+
   ecraft2learn.take_picture_and_analyse = function (cloud_provider, show_photo, snap_callback) {
   	var callback = function (response) {
 		var javascript_to_snap = function (x) {
+			if (!ecraft2learn.inside_snap) {
+				return x;
+			}
 			if (Array.isArray(x)) {
 				return new List(x.map(javascript_to_snap));
 			}
@@ -319,18 +323,18 @@ window.ecraft2learn =
 			}
 			return x;
 		};
-		if (typeof snap_callback !== 'object') { // if not provided 
+		if (typeof snap_callback !== 'object' && typeof snap_callback !== 'function') { // if not provided
 			return;
 		}
 		switch (cloud_provider) {
 			case "Watson":
-				invoke(snap_callback, new List([javascript_to_snap(JSON.parse(response).images[0].classifiers[0].classes)]));
+				invoke_callback(snap_callback, javascript_to_snap(JSON.parse(response).images[0].classifiers[0].classes));
 			    return;
 			case "Google":
-			     invoke(snap_callback, new List([javascript_to_snap(JSON.parse(response).responses)]));
+			    invoke_callback(snap_callback, javascript_to_snap(JSON.parse(response).responses));
 				return;
 			case "Microsoft":
-			     invoke(snap_callback, new List([javascript_to_snap(JSON.parse(response))]));
+			    invoke_callback(snap_callback, javascript_to_snap(JSON.parse(response)));
 				return;
 		}
 	};
@@ -435,12 +439,9 @@ window.ecraft2learn =
 	if (typeof volume && volume > 0) {
 	    utterance.volume = volume;
 	}
-	if (typeof finished_callback === 'object') {
-	   // callback provided
-	   utterance.onend = function (event) {
-		   invoke(finished_callback, new List([message]));
-	   };
-	}
+    utterance.onend = function (event) {
+		invoke_callback(finished_callback, message);
+	};
 	if (window.speech_recognition) {
 		// don't recognise synthetic speech
 	    window.speech_recognition.abort();
