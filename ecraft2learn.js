@@ -304,6 +304,14 @@ window.ecraft2learn =
 	},
 
   setup_camera: function (width, height) {
+  	if (ecraft2learn.take_picture_and_analyse) {
+  		// already setup
+  		video.setAttribute('width', width);
+		video.setAttribute('height', height);
+		canvas.setAttribute('width', width);
+		canvas.setAttribute('height', height);
+		return;
+  	}
   	var video  = document.createElement('video');
     var canvas = document.createElement('canvas');
 	var post_image = function post_image(image, cloud_provider, callback, error_callback) {
