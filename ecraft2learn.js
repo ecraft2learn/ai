@@ -88,7 +88,7 @@ window.ecraft2learn =
 		return value.contents;
 	  },
 
-	  start_speech_recogntion: function (spoken_callback, error_callback) {
+	  start_speech_recognition: function (spoken_callback, error_callback) {
 	  	if (typeof SpeechRecognition === 'undefined' && typeof webkitSpeechRecognition === 'undefined') {
 	  		// no support from this browser so try using the Microsoft Speech API
 	  		ecraft2learn.start_microsoft_speech_recognition_batch(spoken_callback, error_callback);
