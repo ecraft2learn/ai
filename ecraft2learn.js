@@ -53,6 +53,15 @@ window.ecraft2learn =
   	};
 
 	return {
+	  invoke_callback: function (callback) {
+	  	if (typeof callback === 'object') { // assume Snap! callback
+	  		return invoke(callback, new List(arguments));
+	  	}
+	  	if (typeof callback === 'function') { // assume JavaScript callback
+	  		callback.apply(this, arguments);
+	  	}
+	  	// otherwise no callback provided so ignore it
+	  },
 	  run: function (function_name, parameters) {
 		if (typeof ecraft2learn[function_name] === 'undefined') {
 			alert("Ecraft2learn library does not have a function named " + function_name);
@@ -170,7 +179,7 @@ window.ecraft2learn =
                         break;
                     case "SpeechHypothesisEvent":
                         ecraft2learn.last_speech_recognized = event.Result.Text;
-                        invoke(as_recognized_callback, new List([ecraft2learn.last_speech_recognized]));
+                        invoke_callback(as_recognized_callback, ecraft2learn.last_speech_recognized);
                         break;
                     case "SpeechEndDetectedEvent":
                         if (ecraft2learn.last_speech_recognized) {
