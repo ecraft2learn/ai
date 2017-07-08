@@ -411,6 +411,7 @@ window.ecraft2learn =
   		// voices not loaded so wait for them and try again
   		window.speechSynthesis.onvoiceschanged = function () {
   			ecraft2learn.speak(message, pitch, rate, voice, volume, language, finished_callback);
+  			window.speechSynthesis.onvoiceschanged = undefined;
   		};
   		return;
   	}
