@@ -65,10 +65,10 @@ window.addEventListener("message",
                             if (message.data === 'hidden') {
                                 stopped = true;
                                 window.speech_recognition.stop();
-                                console.log("Stopped because hidden");
+                                console.log("Stopped because tab/window hidden.");
                             } else if (message.data === 'shown') {
                                 stopped = false;
                                 restart();
-                                console.log("Restarted because shown");
+                                console.log("Restarted because tab/window shown.");
                             }
                        });

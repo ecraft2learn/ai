@@ -88,6 +88,83 @@ window.ecraft2learn =
 		return value.contents;
 	  },
 
+	  start_speech_recogntion: function (spoken_callback, error_callback) {
+	  	var stopped = false;
+		var restart = function () {
+			if (stopped) {
+			   return;
+			}
+			if (window.speechSynthesis.speaking) { // don't listen while speaking
+				setTimeout(restart, 500); // try again in half a second
+				return;
+			}
+			try {
+				ecraft2learn.speech_recognition.start();
+// 				console.log("Speech recognition started");
+			} catch (error) {
+				if (error.name === 'InvalidStateError') {
+					// delay needed, at least in Chrome 52
+					setTimeout(restart, 2000);
+				} else {
+					console.log(error);
+				}
+			}
+		};
+		var handle_result = function (callback, event) {
+			var spoken = event.results[0][0].transcript;
+			console.log("Confidence is " + event.results[0][0].confidence + " for " + spoken);
+			ecraft2learn.speech_recognition.stop();
+			invoke_callback(callback, spoken);
+		};
+		var handle_error = function (callback, event) {
+			if (event.error === 'aborted') {
+				if (!stopped) {
+					console.log("Aborted so restarting speech recognition in half a second");
+					setTimeout(restart, 500);
+				}
+				return;
+			}
+			if (event.error === 'no-speech') {
+				ecraft2learn.speech_recognition.onend = null;
+				ecraft2learn.speech_recognition.onresult = null;
+				ecraft2learn.speech_recognition.stop();
+			}
+			console.log("Recognition error: " + event.error);
+			if (typeof callback === 'object') {
+				invoke_callback(callback,event.error);
+			}
+		};
+		if (!ecraft2learn.speech_recognition) {
+			ecraft2learn.speech_recognition = (typeof SpeechRecognition === 'undefined') ?
+				new webkitSpeechRecognition() :
+				new SpeechRecognition();
+		}
+		ecraft2learn.speech_recognition.onresult = function (event) {
+			handle_result(spoken_callback, event);
+		};
+		ecraft2learn.speech_recognition.onerror = function (event) {
+			handle_error(error_callback, event);
+		};
+		ecraft2learn.speech_recognition.onend = function (event) {
+// 			console.log("recognition ended");
+			restart();
+		};
+		restart();
+
+		window.addEventListener("message",
+								function(message) {
+									if (message.data === 'hidden') {
+										stopped = true;
+										ecraft2learn.speech_recognition.stop();
+										console.log("Stopped because tab/window hidden.");
+									} else if (message.data === 'shown') {
+										stopped = false;
+										restart();
+										console.log("Restarted because tab/window shown.");
+									}
+							    });
+	  },
+
 	  start_microsoft_speech_recognition_batch: function (spoken_callback, error_callback, maximum_wait) {
 	  	// spoken_callback is called with all that is spoken in the maximum_wait seconds (unless there is an error)
 		var handle_response = function (callback, response) {
@@ -450,9 +527,9 @@ window.ecraft2learn =
     utterance.onend = function (event) {
 		invoke_callback(finished_callback, message);
 	};
-	if (window.speech_recognition) {
+	if (ecraft2learn.speech_recognition) {
 		// don't recognise synthetic speech
-	    window.speech_recognition.abort();
+	    ecraft2learn.speech_recognition.abort();
 	}
 	window.speechSynthesis.speak(utterance);
   },
