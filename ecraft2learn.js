@@ -561,5 +561,11 @@ window.ecraft2learn =
 		   alert("Only " + voices.length + " voices are available. There is no voice number " + voice);
 	   }
 	}
+  },
+  open_project: function (name) {
+  	get_snap_ide().openProject(name);
+  },
+  save_project: function (name) {
+	get_snap_ide().saveProject(name);
   }
   }} ());
