@@ -409,7 +409,7 @@ window.ecraft2learn =
   	// see https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisUtterance
   	if (window.speechSynthesis.getVoices().length === 0) {
   		// voices not loaded so wait for them and try again
-  		window.speechSynthesis.onvoicechanged = function () {
+  		window.speechSynthesis.onvoiceschanged = function () {
   			ecraft2learn.speak(message, pitch, rate, voice, volume, language, finished_callback);
   		};
   		return;
