@@ -51,10 +51,7 @@ window.ecraft2learn =
 		}
 		return ide;
   	};
-
-	return {
-	  inside_snap: typeof world === 'object' && world instanceof WorldMorph,
-	  invoke_callback: function (callback) {
+  	var invoke_callback = function (callback) {
 	  	if (typeof callback === 'object') { // assume Snap! callback
 	  		return invoke(callback, new List(Array.prototype.slice.call(arguments, 1)));
 	  	}
@@ -62,7 +59,10 @@ window.ecraft2learn =
 	  		callback.apply(this, arguments);
 	  	}
 	  	// otherwise no callback provided so ignore it
-	  },
+	};
+
+	return {
+	  inside_snap: typeof world === 'object' && world instanceof WorldMorph,
 	  run: function (function_name, parameters) {
 		if (typeof ecraft2learn[function_name] === 'undefined') {
 			alert("Ecraft2learn library does not have a function named " + function_name);
