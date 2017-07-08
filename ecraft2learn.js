@@ -31,8 +31,8 @@ window.ecraft2learn =
   	    // labelSpec if it takes areguments will look something like 'label %txt of size %n'
   		var ide = get_snap_ide(ecraft2learn.snap_context);
   		// based upon https://github.com/jmoenig/Snap--Build-Your-Own-Blocks/issues/1791#issuecomment-313529328
-		var allBlocks = ide.sprites.asArray().concat([ide.stage]).map(function (item) {item.customBlocks}).reduce(function (a, b) {a.concat(b)}).concat(ide.stage.globalBlocks);
-		var blockSpecs = allBlocks.map(function (block) {block.blockSpec()});
+		var allBlocks = ide.sprites.asArray().concat([ide.stage]).map(function (item) {return item.customBlocks}).reduce(function (a, b) {return a.concat(b)}).concat(ide.stage.globalBlocks);
+		var blockSpecs = allBlocks.map(function (block) {return block.blockSpec()});
 		var index = blockSpecs.indexOf(labelSpec);
 		if (index < 0) {
 			return;
