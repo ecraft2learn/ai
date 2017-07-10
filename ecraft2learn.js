@@ -18,7 +18,7 @@ window.ecraft2learn =
   	};
   	var get_key = function (key_name) {
 		var key = run_snap_block(key_name);
-		if (key && key !== "enter your key here") {
+		if (key && key !== "Enter your key here") {
 			return key;
 		}
 		if (window.confirm("No value reported by the '" + key_name +
@@ -193,7 +193,7 @@ window.ecraft2learn =
 							    });
 	  },
 
-	  start_microsoft_speech_recognition_batch: function (spoken_callback, error_callback, maximum_wait) {
+	  start_microsoft_speech_recognition_batch: function (spoken_callback, error_callback, maximum_wait, key) {
 	  	// spoken_callback is called with all that is spoken in the maximum_wait seconds (unless there is an error)
 		var handle_response = function (callback, response) {
 		    var spoken = response[0].transcript;
@@ -204,7 +204,9 @@ window.ecraft2learn =
 		var start_listening = function () {
 			var key;
 			if (typeof ecraft2learn.microsoft_speech_client === 'undefined') {
-				key = get_key('Microsoft speech key');
+				if (!key) {
+					key = get_key('Microsoft speech key');
+				}
 				ecraft2learn.microsoft_speech_client = Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionServiceFactory.createMicrophoneClient(
 					Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionMode.shortPhrase,
 					get_global_variable_value('language', "en-us"),
@@ -245,7 +247,7 @@ window.ecraft2learn =
 		}
 	},
 
-	start_microsoft_speech_recognition: function (as_recognized_callback, final_spoken_callback, error_callback) {
+	start_microsoft_speech_recognition: function (as_recognized_callback, final_spoken_callback, error_callback, provided_key) {
 		var start_listening = function (SDK) {
 			var setup = function(SDK, recognitionMode, language, format, subscriptionKey) {
 				var recognizerConfig = new SDK.RecognizerConfig(
@@ -260,7 +262,7 @@ window.ecraft2learn =
 				var authentication = new SDK.CognitiveSubscriptionKeyAuthentication(subscriptionKey);
 				return SDK.CreateRecognizer(recognizerConfig, authentication);
 			};
-			var key = get_key('Microsoft speech key');
+			var key = provided_key || get_key('Microsoft speech key');
 			if (!key) {
 				return;
 			}
@@ -326,7 +328,7 @@ window.ecraft2learn =
 		}
 	},
 
-  setup_camera: function (width, height) {
+  setup_camera: function (width, height, provided_key) {
   	if (ecraft2learn.take_picture_and_analyse) {
   		// already setup
   		video.setAttribute('width', width);
@@ -339,7 +341,7 @@ window.ecraft2learn =
     var canvas = document.createElement('canvas');
 	var post_image = function post_image(image, cloud_provider, callback, error_callback) {
 		// based upon https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/Sending_forms_through_JavaScript
-		var key = get_key(cloud_provider + " image key");
+		var key = provided_key || get_key(cloud_provider + " image key");
 		var formData, XHR;
 		if (!key) {
 		   callback("No key provided so unable to ask " + cloud_provider + " to analyse an image.");
