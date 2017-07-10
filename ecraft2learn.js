@@ -173,6 +173,7 @@ window.ecraft2learn =
 		ecraft2learn.stop_speech_recognition = function () {
  			ecraft2learn.speech_recognition.onend    = null;
 			ecraft2learn.speech_recognition.onresult = null;
+			ecraft2learn.speech_recognition.onerror  = null;
 			ecraft2learn.speech_recognition.stop();
 		};
 		restart();
