@@ -520,6 +520,60 @@ window.ecraft2learn =
   		};
   		return;
   	}
+  	var maximum_length = 200; // not sure what a good value is but long text isn't spoken in some browsers
+    var break_into_short_segments = function (text) {
+        var segments = [];
+        var break_text = function (text) {
+            var segment, index;
+            if (text.length < maximum_length) {
+                return text.length+1;
+            }
+            segment = text.substring(0, maximum_length);
+            index = segment.lastIndexOf(". ") || segment.lastIndexOf(".\n");
+            if (index > 0) {
+                return index+2;
+            }
+            index = segment.lastIndexOf(".");
+            if (index === segment.length-1) {
+                // final period need not have space after it
+                return index+1;
+            }
+            index = segment.lastIndexOf(", ");
+            if (index > 0) {
+                return index+2;
+            }
+            index = segment.lastIndexOf(" ");
+            if (index > 0) {
+                return index+1;
+            }
+            // give up - no periods, commas, or spaces
+            return Math.min(text.length+1, maximum_length);
+        };
+        var best_break;
+        while (text.length > 0) {
+            best_break = break_text(text);
+            if (best_break > 1) {
+                segments.push(text.substring(0, best_break-1));
+            }
+            text = text.substring(best_break);
+        }
+        return segments;
+    };
+    var segments, speech_utterance_index;
+    if (text.length > maximum_length) {
+        segments = break_into_short_segments(text);
+        segments.forEach(function (segment, index) {
+            // finished_callback is only for the last segment
+            var callback = index === segments.length-1 && 
+            	           finished_callback &&
+            	           function () {
+            	               invoke_callback(finished_callback, message); // entire message not just the segments
+            	           };
+            speak(segment, pitch, rate, voice, volume, language, callback)
+        });
+        return;
+    }
+    // else is less than the maximum_length
 	var utterance = new SpeechSynthesisUtterance(message);
 	if (typeof language === 'string') {
 	    utterance.lang = language;
