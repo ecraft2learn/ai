@@ -152,15 +152,8 @@ window.ecraft2learn =
 				}
 				return;
 			}
-			if (event.error === 'no-speech') {
-				ecraft2learn.speech_recognition.onend = null;
-				ecraft2learn.speech_recognition.onresult = null;
-				ecraft2learn.speech_recognition.stop();
-			}
-			console.log("Recognition error: " + event.error);
-			if (typeof callback === 'object') {
-				invoke_callback(callback,event.error);
-			}
+// 			console.log("Recognition error: " + event.error);
+			invoke_callback(callback,event.error);
 		};
 		if (!ecraft2learn.speech_recognition) {
 			ecraft2learn.speech_recognition = (typeof SpeechRecognition === 'undefined') ?
@@ -176,6 +169,11 @@ window.ecraft2learn =
 		ecraft2learn.speech_recognition.onend = function (event) {
 // 			console.log("recognition ended");
 			restart();
+		};
+		ecraft2learn.stop_speech_recognition = function () {
+ 			ecraft2learn.speech_recognition.onend    = null;
+			ecraft2learn.speech_recognition.onresult = null;
+			ecraft2learn.speech_recognition.stop();
 		};
 		restart();
 
