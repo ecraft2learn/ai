@@ -51,6 +51,22 @@ window.ecraft2learn =
 		}
 		return ide;
   	};
+  	var get_global_variable_value = function (name, default_value) {
+		var ide = get_snap_ide(ecraft2learn.snap_context);
+		var value;
+		try {
+			value = ide.globalVariables.getVar(name);
+		} catch (e) {
+			return default_value;
+		}
+	    if (value === undefined) {
+			return default_value;
+		}
+		if (typeof value ===  'string') {
+		    return value;
+		}
+		return value.contents;
+	};
   	var invoke_callback = function (callback) {
 	  	if (typeof callback === 'object') { // assume Snap! callback
 	  		return invoke(callback, new List(Array.prototype.slice.call(arguments, 1)));
@@ -69,23 +85,6 @@ window.ecraft2learn =
 			return;
 		}
 		return ecraft2learn[function_name].apply(null, parameters.contents);
-	  },
-
-	  get_global_variable_value: function (name, default_value) {
-		var ide = get_snap_ide(ecraft2learn.snap_context);
-		var value;
-		try {
-			value = ide.globalVariables.getVar(name);
-		} catch (e) {
-			return default_value;
-		}
-	    if (value === undefined) {
-			return default_value;
-		}
-		if (typeof value ===  'string') {
-		    return value;
-		}
-		return value.contents;
 	  },
 
 	  read_url: function (url, callback, error_callback, access_token) {
@@ -206,7 +205,7 @@ window.ecraft2learn =
 				key = get_key('Microsoft speech key');
 				ecraft2learn.microsoft_speech_client = Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionServiceFactory.createMicrophoneClient(
 					Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionMode.shortPhrase,
-					ecraft2learn.get_global_variable_value('language', "en-us"),
+					get_global_variable_value('language', "en-us"),
 					key);
 			}
 			ecraft2learn.stop_microsoft_speech_recognition_batch = function () {
@@ -265,7 +264,7 @@ window.ecraft2learn =
 			}
 			var recognizer = setup(SDK,
 			                       SDK.RecognitionMode.Interactive,
-			                       ecraft2learn.get_global_variable_value('language', "en-us"),
+			                       get_global_variable_value('language', "en-us"),
 			                       "Simple", // as opposed to "Detailed"
 			                       key);
 			ecraft2learn.stop_microsoft_speech_recognition = function () {
