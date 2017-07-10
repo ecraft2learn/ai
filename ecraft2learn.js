@@ -560,7 +560,7 @@ window.ecraft2learn =
         return segments;
     };
     var segments, speech_utterance_index;
-    if (text.length > maximum_length) {
+    if (message.length > maximum_length) {
         segments = break_into_short_segments(text);
         segments.forEach(function (segment, index) {
             // finished_callback is only for the last segment
