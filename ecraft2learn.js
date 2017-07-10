@@ -569,7 +569,7 @@ window.ecraft2learn =
             	           function () {
             	               invoke_callback(finished_callback, message); // entire message not just the segments
             	           };
-            speak(segment, pitch, rate, voice, volume, language, callback)
+            ecraft2learn.speak(segment, pitch, rate, voice, volume, language, callback)
         });
         return;
     }
