@@ -88,6 +88,8 @@ window.ecraft2learn =
 	  },
 
 	  read_url: function (url, callback, error_callback, access_token) {
+	  	// ironically this is the rare function that may be useful when there is no Internet connection
+	  	// since it can be used to communicate with localhost (e.g. to read/write Raspberry Pi or Arduino pins)
 	  	var xhr = new XMLHttpRequest();
 		xhr.open('GET', url);
 		if (access_token) {
