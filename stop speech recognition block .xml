@@ -1,0 +1,1 @@
+<blocks app="Snap! 4.0, http://snap.berkeley.edu" version="1"><block-definition s="Stop speech recognition" type="command" category="sensing"><header></header><code></code><inputs></inputs><script><custom-block s="run eCraft2Learn command %txt with %mult%s"><l>stop_speech_recognition</l><list></list></custom-block></script></block-definition></blocks>
