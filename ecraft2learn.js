@@ -1,4 +1,10 @@
-"use strict";
+ /**
+ * Implements JavaScript functions that extend Snap! to access AI cloud services
+ * Authors: Ken Kahn
+ * License: New BSD
+ */
+
+ "use strict";
 window.ecraft2learn =
   (function () {
   	var this_url = document.querySelector('script[src*="ecraft2learn.js"]').src; // the URL where this library lives
@@ -17,10 +23,12 @@ window.ecraft2learn =
 		document.head.appendChild(script);
   	};
   	var get_key = function (key_name) {
+  		// API keys are provided by Snap! reporters
 		var key = run_snap_block(key_name);
 		if (key && key !== "Enter your key here") {
 			return key;
 		}
+		// key missing to explain how to obtain keys
 		if (window.confirm("No value reported by the '" + key_name +
 						   " reporter. After obtaining the key edit the reporter in the 'Variables' area. Do you want to visit https://github.com/ToonTalk/ai-cloud/wiki to learn how to get a key?")) {
 			window.onbeforeunload = null; // don't warn about reload
@@ -28,6 +36,7 @@ window.ecraft2learn =
 		}
 	};
   	var run_snap_block = function (labelSpec) { // add parameters later
+  	    // runs a Snap! block that matches labelSpec
   	    // labelSpec if it takes areguments will look something like 'label %txt of size %n'
   		var ide = get_snap_ide(ecraft2learn.snap_context);
   		// based upon https://github.com/jmoenig/Snap--Build-Your-Own-Blocks/issues/1791#issuecomment-313529328
@@ -39,8 +48,9 @@ window.ecraft2learn =
 		}
 		var blockTemplate = allBlocks[index].templateInstance();
 		return invoke_callback(blockTemplate);
-  	}.bind(this);
+  	};
   	var get_snap_ide = function (start) {
+  		// finds the Snap! IDE_Morph that is the element 'start' or one of its ancestors
   		var ide = start;
 		while (ide && !(ide instanceof IDE_Morph)) {
 		    ide = ide.parent;
@@ -52,6 +62,8 @@ window.ecraft2learn =
 		return ide;
   	};
   	var get_global_variable_value = function (name, default_value) {
+  		// returns the value of the Snap! global variable named 'name'
+  		// if none exists returns default_value
 		var ide = get_snap_ide(ecraft2learn.snap_context);
 		var value;
 		try {
@@ -68,7 +80,9 @@ window.ecraft2learn =
 		return value.contents;
 	};
   	var invoke_callback = function (callback) {
+  		// callback could either be a Snap! object or a JavaScript function
 	  	if (typeof callback === 'object') { // assume Snap! callback
+	  	    // invoke the callback with the argments (other than the callback itself)
 	  		return invoke(callback, new List(Array.prototype.slice.call(arguments, 1)));
 	  	}
 	  	if (typeof callback === 'function') { // assume JavaScript callback
@@ -77,9 +91,12 @@ window.ecraft2learn =
 	  	// otherwise no callback provided so ignore it
 	};
 
+	// the following are the ecraft2learn functions available via this library
+
 	return {
 	  inside_snap: typeof world === 'object' && world instanceof WorldMorph,
 	  run: function (function_name, parameters) {
+	  	// runs one of the functions in this library
 		if (typeof ecraft2learn[function_name] === 'undefined') {
 			alert("Ecraft2learn library does not have a function named " + function_name);
 			return;
@@ -88,6 +105,7 @@ window.ecraft2learn =
 	  },
 
 	  read_url: function (url, callback, error_callback, access_token) {
+	  	// calls callback with the contents of the 'url' unless an error occurs and then error_callback is called
 	  	// ironically this is the rare function that may be useful when there is no Internet connection
 	  	// since it can be used to communicate with localhost (e.g. to read/write Raspberry Pi or Arduino pins)
 	  	var xhr = new XMLHttpRequest();
@@ -112,12 +130,15 @@ window.ecraft2learn =
 	  },
 
 	  start_speech_recognition: function (spoken_callback, error_callback) {
+	  	// spoken_callback is called with the text recognised by the browser's speech recognition capability
+	  	// or error_callback if an error occurs
+	  	// if the browser has no support for speech recognition then the Microsoft Speech API is used (API key required)
 	  	if (typeof SpeechRecognition === 'undefined' && typeof webkitSpeechRecognition === 'undefined') {
 	  		// no support from this browser so try using the Microsoft Speech API
 	  		ecraft2learn.start_microsoft_speech_recognition(null, spoken_callback, error_callback);
 	  		return;
 	  	}
-	  	var stopped = false;
+	  	var stopped = false; // used to suspend listening when tab is hidden
 		var restart = function () {
 			if (stopped) {
 			   return;
@@ -177,7 +198,7 @@ window.ecraft2learn =
 			ecraft2learn.speech_recognition.stop();
 		};
 		restart();
-
+        // if the tab or window is minimised or hidden then speech recognition is paused until the window or tab is shown again
 		window.addEventListener("message",
 								function(message) {
 									if (message.data === 'hidden') {
@@ -193,6 +214,11 @@ window.ecraft2learn =
 	},
 
 	start_microsoft_speech_recognition: function (as_recognized_callback, final_spoken_callback, error_callback, provided_key) {
+		// As spoken words are recognised as_recognized_callback is called with the result so far
+		// When the recogniser determines that the speaking is finished then the final_spoken_callback is called with the final text
+		// error_callback is called if an error occurs
+		// provided_key is either the API key to use the Microsoft Speech API or
+		// if not specified then the key is obtained from the Snap! 'Microsoft speech key' reporter
 		var start_listening = function (SDK) {
 			var setup = function(SDK, recognitionMode, language, format, subscriptionKey) {
 				var recognizerConfig = new SDK.RecognizerConfig(
@@ -274,6 +300,9 @@ window.ecraft2learn =
 	},
 
   setup_camera: function (width, height, provided_key) {
+  	// sets up the camera for taking photos and sending them to an AI cloud service for recognition
+  	// causes take_picture_and_analyse to be defined
+  	// supported service providers are currently 'Google', 'Microsoft', and IBM 'Watson'
   	var video  = document.createElement('video');
     var canvas = document.createElement('canvas');
 	var post_image = function post_image(image, cloud_provider, callback, error_callback) {
@@ -360,6 +389,8 @@ window.ecraft2learn =
 	height = +height;
 
   ecraft2learn.take_picture_and_analyse = function (cloud_provider, show_photo, snap_callback) {
+  	// snap_callback is called with the result of the image recognition
+  	// show_photo displays the photo when it is taken
   	var callback = function (response) {
 		var javascript_to_snap = function (x) {
 			if (!ecraft2learn.inside_snap) {
@@ -458,6 +489,8 @@ window.ecraft2learn =
   },
 
   speak: function (message, pitch, rate, voice, volume, language, finished_callback) {
+  	// speaks 'message' optionally with the specified pitch, rate, voice, volume, and language
+  	// finished_callback is called with the spoken text
   	// see https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisUtterance
   	if (window.speechSynthesis.getVoices().length === 0) {
   		// voices not loaded so wait for them and try again
