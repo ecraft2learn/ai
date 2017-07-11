@@ -114,7 +114,7 @@ window.ecraft2learn =
 	  start_speech_recognition: function (spoken_callback, error_callback) {
 	  	if (typeof SpeechRecognition === 'undefined' && typeof webkitSpeechRecognition === 'undefined') {
 	  		// no support from this browser so try using the Microsoft Speech API
-	  		ecraft2learn.start_microsoft_speech_recognition_batch(spoken_callback, error_callback);
+	  		ecraft2learn.start_microsoft_speech_recognition(null, spoken_callback, error_callback);
 	  		return;
 	  	}
 	  	var stopped = false;
@@ -190,60 +190,6 @@ window.ecraft2learn =
 										console.log("Restarted because tab/window shown.");
 									}
 							    });
-	  },
-
-	  start_microsoft_speech_recognition_batch: function (spoken_callback, error_callback, maximum_wait, key) {
-	  	// spoken_callback is called with all that is spoken in the maximum_wait seconds (unless there is an error)
-		var handle_response = function (callback, response) {
-		    var spoken = response[0].transcript;
-		    var confidence = response[0].confidence;
-		    console.log("Confidence is " + confidence + " for " + spoken); // remove this eventually
-		    invoke_callback(callback, spoken);
-		};
-		var start_listening = function () {
-			var key;
-			if (typeof ecraft2learn.microsoft_speech_client === 'undefined') {
-				if (!key) {
-					key = get_key('Microsoft speech key');
-				}
-				ecraft2learn.microsoft_speech_client = Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionServiceFactory.createMicrophoneClient(
-					Microsoft.CognitiveServices.SpeechRecognition.SpeechRecognitionMode.shortPhrase,
-					get_global_variable_value('language', "en-us"),
-					key);
-			}
-			ecraft2learn.stop_microsoft_speech_recognition_batch = function () {
-				ecraft2learn.microsoft_speech_client.endMicAndRecognition();
-			};
-			if (typeof spoken_callback === 'object') {
-				ecraft2learn.microsoft_speech_client.onFinalResponseReceived =
-										function (response) {
-											handle_response(spoken_callback, response);
-											ecraft2learn.microsoft_speech_client.endMicAndRecognition(); // needed??
-										};
-				ecraft2learn.microsoft_speech_client.onPartialResponseReceived =
-										function (response) {
-											handle_response(spoken_callback, response);
-										};
-			}
-			if (typeof error_callback === 'object') {
-				ecraft2learn.microsoft_speech_client.onError =
-					function (error, message) {
-						invoke_callback(error_callback);
-					};
-			}
-			ecraft2learn.microsoft_speech_client.startMicAndRecognition();
-			maximum_wait = +maximum_wait; // convert to number
-			setTimeout(function () {
-						   ecraft2learn.microsoft_speech_client.endMicAndRecognition();
-						   },
-						   // maximum_wait given in seconds -- if not 5 second default
-						   typeof maximum_wait === 'number' ? maximum_wait*1000 : 5000);			
-		};
-		if (typeof Microsoft === 'undefined' || typeof Microsoft.CognitiveServices.SpeechRecognition === 'undefined') {
-			load_script("lib/speech.1.0.0.js", start_listening);
-		} else {
-	    	start_listening();
-		}
 	},
 
 	start_microsoft_speech_recognition: function (as_recognized_callback, final_spoken_callback, error_callback, provided_key) {
