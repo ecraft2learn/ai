@@ -90,6 +90,20 @@ window.ecraft2learn =
 	  	}
 	  	// otherwise no callback provided so ignore it
 	};
+	var javascript_to_snap = function (x) {
+		if (!ecraft2learn.inside_snap) {
+			return x;
+		}
+		if (Array.isArray(x)) {
+			return new List(x.map(javascript_to_snap));
+		}
+		if (typeof x === 'object') {
+			return new List(Object.keys(x).map(function (key) {
+                                                   return new List([key, javascript_to_snap(x[key])]);
+						                       }));
+		}
+		return x;
+	};
 
 	// the following are the ecraft2learn functions available via this library
 
@@ -392,20 +406,6 @@ window.ecraft2learn =
   	// snap_callback is called with the result of the image recognition
   	// show_photo displays the photo when it is taken
   	var callback = function (response) {
-		var javascript_to_snap = function (x) {
-			if (!ecraft2learn.inside_snap) {
-				return x;
-			}
-			if (Array.isArray(x)) {
-				return new List(x.map(javascript_to_snap));
-			}
-			if (typeof x === 'object') {
-				return new List(Object.keys(x).map(function (key) {
-                                                       return new List([key, javascript_to_snap(x[key])]);
-						                           }));
-			}
-			return x;
-		};
 		if (typeof snap_callback !== 'object' && typeof snap_callback !== 'function') { // if not provided
 			return;
 		}
@@ -616,5 +616,8 @@ window.ecraft2learn =
   },
   save_project: function (name) {
 	get_snap_ide().saveProject(name);
+  },
+  handle_server_json_reponse: function (response, callback) {
+	invoke(callback, javascript_to_snap(JSON.parse(response)));
   }
-  }} ());
+}} ());
