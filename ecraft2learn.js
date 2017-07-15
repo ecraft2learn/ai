@@ -617,7 +617,7 @@ window.ecraft2learn =
   save_project: function (name) {
 	get_snap_ide().saveProject(name);
   },
-  handle_server_json_reponse: function (response, callback) {
+  handle_server_json_response: function (response, callback) {
 	invoke(callback, javascript_to_snap(JSON.parse(response)));
   }
 }} ());
