@@ -619,5 +619,16 @@ window.ecraft2learn =
   },
   handle_server_json_response: function (response, callback) {
 	invoke_callback(callback, javascript_to_snap(JSON.parse(response)));
+  },
+  handle_server_json_response_to_pins_request: function (response_text, callback_for_pins_read, callback_for_pins_written, callback_for_errors) {
+  	try{
+  		var response = JSON.parse(response_text);
+  		var read = response.pins;
+  		var written = response.write_responses;
+		invoke_callback(callback_for_pins_read,    javascript_to_snap(pins));
+		invoke_callback(callback_for_pins_written, javascript_to_snap(written));
+  	} catch (error) {
+  		invoke_callback(callback_for_errors, error.message);
+  	}
   }
 }} ());
