@@ -316,7 +316,7 @@ window.ecraft2learn =
   setup_camera: function (width, height, provided_key) {
   	// sets up the camera for taking photos and sending them to an AI cloud service for recognition
   	// causes take_picture_and_analyse to be defined
-  	// supported service providers are currently 'Google', 'Microsoft', and IBM 'Watson'
+  	// supported service providers are currently 'Google', 'Microsoft', and IBM 'Watson' (or 'IBM Watson')
   	var video  = document.createElement('video');
     var canvas = document.createElement('canvas');
 	var post_image = function post_image(image, cloud_provider, callback, error_callback) {
@@ -339,6 +339,7 @@ window.ecraft2learn =
 		XHR.addEventListener('error', error_callback);
 		switch (cloud_provider) {
 		case  "Watson":
+		case "IBM Watson":
 			formData = new FormData();
 			formData.append("images_file", image, "blob.png");
 			XHR.open('POST', "https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key);
@@ -412,6 +413,7 @@ window.ecraft2learn =
 		}
 		switch (cloud_provider) {
 			case "Watson":
+			case "IBM Watson":
 				invoke_callback(snap_callback, javascript_to_snap(JSON.parse(response).images[0].classifiers[0].classes));
 			    return;
 			case "Google":
@@ -453,6 +455,7 @@ window.ecraft2learn =
     }
     switch (cloud_provider) {
     case "Watson":
+    case "IBM Watson":
     case "Microsoft":
         canvas.toBlob(
             function (blob) {
