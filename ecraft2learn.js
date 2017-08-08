@@ -321,6 +321,9 @@ window.ecraft2learn =
     var canvas = document.createElement('canvas');
 	var post_image = function post_image(image, cloud_provider, callback, error_callback) {
 		// based upon https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/Sending_forms_through_JavaScript
+		if (cloud_provider === 'Watson') {
+			cloud_provider = 'IBM Watson';
+		}
 		var key = provided_key || get_key(cloud_provider + " image key");
 		var formData, XHR;
 		if (!key) {
@@ -338,7 +341,6 @@ window.ecraft2learn =
 		}
 		XHR.addEventListener('error', error_callback);
 		switch (cloud_provider) {
-		case  "Watson":
 		case "IBM Watson":
 			formData = new FormData();
 			formData.append("images_file", image, "blob.png");
@@ -407,12 +409,14 @@ window.ecraft2learn =
   ecraft2learn.take_picture_and_analyse = function (cloud_provider, show_photo, snap_callback) {
   	// snap_callback is called with the result of the image recognition
   	// show_photo displays the photo when it is taken
+  	if (cloud_provider === 'Watson') {
+		cloud_provider = 'IBM Watson';
+	}
   	var callback = function (response) {
 		if (typeof snap_callback !== 'object' && typeof snap_callback !== 'function') { // if not provided
 			return;
 		}
 		switch (cloud_provider) {
-			case "Watson":
 			case "IBM Watson":
 				invoke_callback(snap_callback, javascript_to_snap(JSON.parse(response).images[0].classifiers[0].classes));
 			    return;
@@ -457,7 +461,6 @@ window.ecraft2learn =
                                        });
     }
     switch (cloud_provider) {
-    case "Watson":
     case "IBM Watson":
     case "Microsoft":
         canvas.toBlob(
