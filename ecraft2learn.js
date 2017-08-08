@@ -422,6 +422,9 @@ window.ecraft2learn =
 			case "Microsoft":
 			    invoke_callback(snap_callback, javascript_to_snap(JSON.parse(response)));
 				return;
+		    default:
+		        invoke_callback(snap_callback, "Unknown cloud provider: " + cloud_provider);
+
 		}
 	};
     var context, photo;
@@ -482,6 +485,8 @@ window.ecraft2learn =
                        }
                    });
         break;
+    default:
+        invoke_callback(snap_callback, "Unknown cloud provider: " + cloud_provider);
     }
   };
 
