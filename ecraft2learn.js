@@ -373,8 +373,9 @@ window.ecraft2learn =
 			video.src = vendorURL.createObjectURL(stream);
 			video.play();
 		};
-		var error_callback = function(err) {
-			console.log("An error occured! " + err);
+		var error_callback = function(error) {
+			console.log("An error in getting access to camera: " + error.message);
+			console.log(error);
 		};
 		var constraints = {video: true,
 						   audio: false};
