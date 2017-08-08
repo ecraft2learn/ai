@@ -104,6 +104,7 @@ window.ecraft2learn =
 		}
 		return x;
 	};
+	var image_recognitions = {}; // record of most recent results from calls to take_picture_and_analyse
 
 	// the following are the ecraft2learn functions available via this library
 
@@ -412,24 +413,28 @@ window.ecraft2learn =
   	if (cloud_provider === 'Watson') {
 		cloud_provider = 'IBM Watson';
 	}
+	image_recognitions[cloud_provider] = undefined;
   	var callback = function (response) {
+  		var response_as_javascript_object;
+		switch (cloud_provider) {
+			case "IBM Watson":
+			    response_as_javascript_object = JSON.parse(response).images[0].classifiers[0].classes;
+			    break;
+			case "Google":
+			    response_as_javascript_object = JSON.parse(response).responses;
+				break;
+			case "Microsoft":
+			    response_as_javascript_object = JSON.parse(response);
+				break;
+		    default:
+		        invoke_callback(snap_callback, "Unknown cloud provider: " + cloud_provider);
+		        return;
+		}
+		image_recognitions[cloud_provider] = {response: response_as_javascript_object};
 		if (typeof snap_callback !== 'object' && typeof snap_callback !== 'function') { // if not provided
 			return;
 		}
-		switch (cloud_provider) {
-			case "IBM Watson":
-				invoke_callback(snap_callback, javascript_to_snap(JSON.parse(response).images[0].classifiers[0].classes));
-			    return;
-			case "Google":
-			    invoke_callback(snap_callback, javascript_to_snap(JSON.parse(response).responses));
-				return;
-			case "Microsoft":
-			    invoke_callback(snap_callback, javascript_to_snap(JSON.parse(response)));
-				return;
-		    default:
-		        invoke_callback(snap_callback, "Unknown cloud provider: " + cloud_provider);
-
-		}
+		invoke_callback(snap_callback, javascript_to_snap(response_as_javascript_object));
 	};
     var context, photo;
     // Capture a photo by fetching the current contents of the video
@@ -498,6 +503,24 @@ window.ecraft2learn =
 	} else {
 		window.addEventListener('load', startup, false);
 	}
+  },
+
+  image_property: function (cloud_provider, property_name) {
+  	if (cloud_provider === 'Watson') {
+		cloud_provider = 'IBM Watson';
+	}
+  	var response = image_recognitions[cloud_provider];
+  	if (!response) {
+  		return cloud_provider + " has not (yet) recognized the image.";
+  	}
+  	switch (cloud_provider) {
+  		case "Google": 
+  		return "to be done";
+   		case "Microsoft": 
+  		return "to be done";
+  		case "IBM Watson": 
+  		return "to be done"; 		
+  	}
   },
 
   speak: function (message, pitch, rate, voice, volume, language, finished_callback) {
