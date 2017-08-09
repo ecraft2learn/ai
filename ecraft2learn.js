@@ -505,7 +505,24 @@ window.ecraft2learn =
 	}
   },
 
-  image_property: function (cloud_provider, property_name) {
+  image_property: function (cloud_provider, property_name_or_names) {
+  	var get_property = function (array_or_object, property_name_or_names) {
+  		if (Array.isArray(array_or_object)) {
+  			return new List(response.response.map(function (item) {
+  			                                             return get_property(item, property_name_or_names);
+  			}));
+  		}
+  		if (typeof property_name_or_names === 'string') {
+  			return array_or_object[property_name_or_names];
+  		}
+  		if (property_name_or_names.length < 1) {
+  			return array_or_object;
+  		}
+  		if (property_name_or_names.length < 2) {
+  			return array_or_object[property_name_or_names[0]];
+  		}
+  		return get_property(array_or_object[property_name_or_names[0]], property_name_or_names.splice(1, 1));
+  	};
   	if (cloud_provider === 'Watson') {
 		cloud_provider = 'IBM Watson';
 	}
@@ -513,16 +530,7 @@ window.ecraft2learn =
   	if (!response) {
   		return cloud_provider + " has not (yet) recognized the image.";
   	}
-  	switch (cloud_provider) {
-  		case "Google": 
-  		return "to be done";
-   		case "Microsoft": 
-  		return "to be done";
-  		case "IBM Watson": 
-  		return response.response.map(function (r) {
-  			                             return r[property_name];
-  		});	
-  	}
+	return get_property(response.response, property_name_or_names);
   },
 
   speak: function (message, pitch, rate, voice, volume, language, finished_callback) {
