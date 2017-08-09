@@ -519,7 +519,9 @@ window.ecraft2learn =
    		case "Microsoft": 
   		return "to be done";
   		case "IBM Watson": 
-  		return "to be done"; 		
+  		return response.response.map(function (r) {
+  			                             return r[property_name];
+  		});	
   	}
   },
 
