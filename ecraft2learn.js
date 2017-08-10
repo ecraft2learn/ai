@@ -511,17 +511,17 @@ window.ecraft2learn =
   image_property: function (cloud_provider, property_name_or_names) {
       var get_property = function (array_or_object, property_name_or_names) {
           if (Array.isArray(array_or_object)) {
-             return new List(array_or_object.map(function (item) {
+              return new List(array_or_object.map(function (item) {
                                                       return get_property(item, property_name_or_names);
-                                                 }));
+                                                  }));
           } else if (typeof property_name_or_names === 'string') {
-             return array_or_object[property_name_or_names];
+              return array_or_object[property_name_or_names];
           } else if (property_name_or_names.length < 1) {
-             return array_or_object;
+              return array_or_object;
           } else if (property_name_or_names.length < 2) {
-             return array_or_object[property_name_or_names[0]];
+              return array_or_object[property_name_or_names[0]];
           } else {
-             return get_property(array_or_object[property_name_or_names[0]], property_name_or_names.splice(1, 1));
+              return get_property(array_or_object[property_name_or_names[0]], property_name_or_names.splice(1));
           }
       };
       if (cloud_provider === 'Watson') {
