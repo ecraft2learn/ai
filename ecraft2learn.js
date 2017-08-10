@@ -98,7 +98,7 @@ window.ecraft2learn =
             return new List(x.map(javascript_to_snap));
         }
         if (typeof x === 'object') {
-            if (x.constructor.name === 'List') {
+            if (temp1 instanceof List) {
                 return x;
             }
             return new List(Object.keys(x).map(function (key) {
