@@ -507,21 +507,19 @@ window.ecraft2learn =
 
   image_property: function (cloud_provider, property_name_or_names) {
       var get_property = function (array_or_object, property_name_or_names) {
-          var property;
           if (Array.isArray(array_or_object)) {
-              property = new List(array_or_object.map(function (item) {
-                                                          return get_property(item, property_name_or_names);
-                                                      }));
+             return new List(array_or_object.map(function (item) {
+                                                      return get_property(item, property_name_or_names);
+                                                 }));
           } else if (typeof property_name_or_names === 'string') {
-              property = array_or_object[property_name_or_names];
+             return array_or_object[property_name_or_names];
           } else if (property_name_or_names.length < 1) {
-              property = array_or_object;
+             return array_or_object;
           } else if (property_name_or_names.length < 2) {
-              property = array_or_object[property_name_or_names[0]];
+             return array_or_object[property_name_or_names[0]];
           } else {
-              property = get_property(array_or_object[property_name_or_names[0]], property_name_or_names.splice(1, 1));
+             return get_property(array_or_object[property_name_or_names[0]], property_name_or_names.splice(1, 1));
           }
-          return javascript_to_snap(property);
       };
       if (cloud_provider === 'Watson') {
         cloud_provider = 'IBM Watson';
@@ -534,7 +532,7 @@ window.ecraft2learn =
           // convert from a Snap list to a JavaScript array
         property_name_or_names = property_name_or_names.contents;
     }
-    return get_property(response.response, property_name_or_names);
+    return javascript_to_snap(get_property(response.response, property_name_or_names));
   },
 
   speak: function (message, pitch, rate, voice, volume, language, finished_callback) {
