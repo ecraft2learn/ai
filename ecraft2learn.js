@@ -357,13 +357,13 @@ window.ecraft2learn =
             XHR.send(JSON.stringify({"requests":[{"image":{"content": image.substring("data:image/png;base64,".length)},
                                                   "features":[{"type":"LABEL_DETECTION",
                                                                "maxResults":32},
-    //                                                          {"type": "TEXT_DETECTION",
-    //                                                           "maxResults":3},
-    //                                                          {"type": "FACE_DETECTION",
-    //                                                           "maxResults":1},
-    //                                                          {"type": "IMAGE_PROPERTIES",
-    //                                                           "maxResults":2}
-    ]}]
+                                                              {"type": "TEXT_DETECTION",
+                                                               "maxResults":3},
+                                                              {"type": "FACE_DETECTION",
+                                                               "maxResults":1},
+                                                              {"type": "IMAGE_PROPERTIES",
+                                                               "maxResults":2}
+                                                             ]}]
                                     }));
             break;
         case "Microsoft":
