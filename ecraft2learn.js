@@ -530,6 +530,10 @@ window.ecraft2learn =
   	if (!response) {
   		return cloud_provider + " has not (yet) recognized the image.";
   	}
+  	if (!Array.isArray(property_name_or_names) && typeof property_name_or_names !== 'string') {
+  		// convert from a Snap list to a JavaScript array
+		property_name_or_names = property_name_or_names.contents;
+	}
 	return get_property(response.response, property_name_or_names);
   },
 
