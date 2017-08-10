@@ -508,8 +508,8 @@ window.ecraft2learn =
   image_property: function (cloud_provider, property_name_or_names) {
   	var get_property = function (array_or_object, property_name_or_names) {
   		if (Array.isArray(array_or_object)) {
-  			return new List(response.response.map(function (item) {
-  			                                             return get_property(item, property_name_or_names);
+  			return new List(array_or_object.map(function (item) {
+  			                                        return get_property(item, property_name_or_names);
   			}));
   		}
   		if (typeof property_name_or_names === 'string') {
