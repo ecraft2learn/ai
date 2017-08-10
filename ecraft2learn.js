@@ -355,7 +355,7 @@ window.ecraft2learn =
             XHR.open('POST', "https://vision.googleapis.com/v1/images:annotate?key=" + key);
             XHR.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
             XHR.send(JSON.stringify({"requests":[{"image":{"content": image.substring("data:image/png;base64,".length)},
-                                                  "features":[{"type":"LABEL_DETECTION",   "maxResults":32},
+                                                  "features":[{"type": "LABEL_DETECTION",  "maxResults":32},
                                                               {"type": "TEXT_DETECTION",   "maxResults":32},
                                                               {"type": "FACE_DETECTION",   "maxResults":32},
                                                               {"type": "IMAGE_PROPERTIES", "maxResults":32}
@@ -420,7 +420,7 @@ window.ecraft2learn =
                   response_as_javascript_object = JSON.parse(response).images[0].classifiers[0].classes;
                   break;
               case "Google":
-                  response_as_javascript_object = JSON.parse(response).responses;
+                  response_as_javascript_object = JSON.parse(response).responses[0];
                   break;
               case "Microsoft":
                   response_as_javascript_object = JSON.parse(response);
