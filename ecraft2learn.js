@@ -10,74 +10,74 @@ window.ecraft2learn =
       var this_url = document.querySelector('script[src*="ecraft2learn.js"]').src; // the URL where this library lives
       var load_script = function (url, when_loaded) {
           var script = document.createElement("script");
-        script.type = "text/javascript";
-        if (url.indexOf("//") < 0) {
-            // is relative to this_url
-            var last_slash_index = this_url.lastIndexOf('/');
-            url = this_url.substring(0, last_slash_index+1) + url;
-        }
-        script.src = url;
-        if (when_loaded) {
-            script.addEventListener('load', when_loaded);
-        }
-        document.head.appendChild(script);
+          script.type = "text/javascript";
+          if (url.indexOf("//") < 0) {
+              // is relative to this_url
+              var last_slash_index = this_url.lastIndexOf('/');
+              url = this_url.substring(0, last_slash_index+1) + url;
+          }
+          script.src = url;
+          if (when_loaded) {
+              script.addEventListener('load', when_loaded);
+          }
+          document.head.appendChild(script);
       };
       var get_key = function (key_name) {
           // API keys are provided by Snap! reporters
-        var key = run_snap_block(key_name);
-        if (key && key !== "Enter your key here") {
-            return key;
-        }
-        // key missing to explain how to obtain keys
-        if (window.confirm("No value reported by the '" + key_name +
-                           " reporter. After obtaining the key edit the reporter in the 'Variables' area. Do you want to visit https://github.com/ToonTalk/ai-cloud/wiki to learn how to get a key?")) {
-            window.onbeforeunload = null; // don't warn about reload
-            document.location.assign("https://github.com/ToonTalk/ai-cloud/wiki");
-        }
+          var key = run_snap_block(key_name);
+          if (key && key !== "Enter your key here") {
+              return key;
+          }
+          // key missing to explain how to obtain keys
+          if (window.confirm("No value reported by the '" + key_name +
+                             " reporter. After obtaining the key edit the reporter in the 'Variables' area. Do you want to visit https://github.com/ToonTalk/ai-cloud/wiki to learn how to get a key?")) {
+              window.onbeforeunload = null; // don't warn about reload
+              document.location.assign("https://github.com/ToonTalk/ai-cloud/wiki");
+          }
       };
       var run_snap_block = function (labelSpec) { // add parameters later
           // runs a Snap! block that matches labelSpec
           // labelSpec if it takes areguments will look something like 'label %txt of size %n'
           var ide = get_snap_ide(ecraft2learn.snap_context);
           // based upon https://github.com/jmoenig/Snap--Build-Your-Own-Blocks/issues/1791#issuecomment-313529328
-        var allBlocks = ide.sprites.asArray().concat([ide.stage]).map(function (item) {return item.customBlocks}).reduce(function (a, b) {return a.concat(b)}).concat(ide.stage.globalBlocks);
-        var blockSpecs = allBlocks.map(function (block) {return block.blockSpec()});
-        var index = blockSpecs.indexOf(labelSpec);
-        if (index < 0) {
-            return;
-        }
-        var blockTemplate = allBlocks[index].templateInstance();
-        return invoke_callback(blockTemplate);
+          var allBlocks = ide.sprites.asArray().concat([ide.stage]).map(function (item) {return item.customBlocks}).reduce(function (a, b) {return a.concat(b)}).concat(ide.stage.globalBlocks);
+          var blockSpecs = allBlocks.map(function (block) {return block.blockSpec()});
+          var index = blockSpecs.indexOf(labelSpec);
+          if (index < 0) {
+              return;
+          }
+          var blockTemplate = allBlocks[index].templateInstance();
+          return invoke_callback(blockTemplate);
       };
       var get_snap_ide = function (start) {
           // finds the Snap! IDE_Morph that is the element 'start' or one of its ancestors
           var ide = start;
-        while (ide && !(ide instanceof IDE_Morph)) {
-            ide = ide.parent;
-        }
-        if (!ide) {
-            // not as general but works well (for now)
-            return world.children[0];
-        }
-        return ide;
+          while (ide && !(ide instanceof IDE_Morph)) {
+              ide = ide.parent;
+          }
+          if (!ide) {
+              // not as general but works well (for now)
+              return world.children[0];
+          }
+          return ide;
       };
       var get_global_variable_value = function (name, default_value) {
           // returns the value of the Snap! global variable named 'name'
           // if none exists returns default_value
-        var ide = get_snap_ide(ecraft2learn.snap_context);
-        var value;
-        try {
-            value = ide.globalVariables.getVar(name);
-        } catch (e) {
-            return default_value;
-        }
-        if (value === undefined) {
-            return default_value;
-        }
-        if (typeof value ===  'string') {
-            return value;
-        }
-        return value.contents;
+          var ide = get_snap_ide(ecraft2learn.snap_context);
+          var value;
+          try {
+              value = ide.globalVariables.getVar(name);
+          } catch (e) {
+              return default_value;
+          }
+          if (value === undefined) {
+              return default_value;
+          }
+          if (typeof value ===  'string') {
+              return value;
+          }
+          return value.contents;
     };
     var invoke_callback = function (callback) {
         // callback could either be a Snap! object or a JavaScript function
@@ -115,11 +115,11 @@ window.ecraft2learn =
       inside_snap: typeof world === 'object' && world instanceof WorldMorph,
       run: function (function_name, parameters) {
           // runs one of the functions in this library
-        if (typeof ecraft2learn[function_name] === 'undefined') {
-            alert("Ecraft2learn library does not have a function named " + function_name);
-            return;
-        }
-        return ecraft2learn[function_name].apply(null, parameters.contents);
+          if (typeof ecraft2learn[function_name] === 'undefined') {
+              alert("Ecraft2learn library does not have a function named " + function_name);
+              return;
+          }
+          return ecraft2learn[function_name].apply(null, parameters.contents);
       },
 
       read_url: function (url, callback, error_callback, access_token) {
@@ -127,24 +127,24 @@ window.ecraft2learn =
           // ironically this is the rare function that may be useful when there is no Internet connection
           // since it can be used to communicate with localhost (e.g. to read/write Raspberry Pi or Arduino pins)
           var xhr = new XMLHttpRequest();
-        xhr.open('GET', url);
-        if (access_token) {
-            xhr.setRequestHeader('Authorization', 'Bearer ' + access_token);
-        }
-        xhr.onload = function() {
-            invoke_callback(callback, xhr.responseText);
-        };
-        xhr.onerror = function(error) {
-            invoke_callback(error_callback, url + " error is " + error.message);
-        };
-        xhr.onloadend = function() {
-            if (xhr.status >= 400) {
-                invoke_callback(error_callback, url + " replied " + xhr.statusText);
-            } else if (xhr.status === 0) {
-                invoke_callback(error_callback, url + " failed to load.");
-            }
-        };
-        xhr.send();
+          xhr.open('GET', url);
+          if (access_token) {
+              xhr.setRequestHeader('Authorization', 'Bearer ' + access_token);
+          }
+          xhr.onload = function() {
+              invoke_callback(callback, xhr.responseText);
+          };
+          xhr.onerror = function(error) {
+              invoke_callback(error_callback, url + " error is " + error.message);
+          };
+          xhr.onloadend = function() {
+              if (xhr.status >= 400) {
+                  invoke_callback(error_callback, url + " replied " + xhr.statusText);
+              } else if (xhr.status === 0) {
+                  invoke_callback(error_callback, url + " failed to load.");
+              }
+          };
+          xhr.send();
       },
 
       start_speech_recognition: function (spoken_callback, error_callback) {
@@ -157,78 +157,78 @@ window.ecraft2learn =
               return;
           }
           var stopped = false; // used to suspend listening when tab is hidden
-        var restart = function () {
-            if (stopped) {
-               return;
-            }
-            if (window.speechSynthesis.speaking) { // don't listen while speaking
-                setTimeout(restart, 500); // try again in half a second
-                return;
-            }
-            try {
-                ecraft2learn.speech_recognition.start();
-//                 console.log("Speech recognition started");
-            } catch (error) {
-                if (error.name === 'InvalidStateError') {
-                    // delay needed, at least in Chrome 52
-                    setTimeout(restart, 2000);
-                } else {
-                    console.log(error);
-                }
-            }
-        };
-        var handle_result = function (callback, event) {
-            var spoken = event.results[0][0].transcript;
-            console.log("Confidence is " + event.results[0][0].confidence + " for " + spoken);
-            ecraft2learn.speech_recognition.stop();
-            invoke_callback(callback, spoken);
-        };
-        var handle_error = function (callback, event) {
-            if (event.error === 'aborted') {
-                if (!stopped) {
-                    console.log("Aborted so restarting speech recognition in half a second");
-                    setTimeout(restart, 500);
-                }
-                return;
-            }
-//             console.log("Recognition error: " + event.error);
-            invoke_callback(callback,event.error);
-        };
-        if (!ecraft2learn.speech_recognition) {
-            ecraft2learn.speech_recognition = (typeof SpeechRecognition === 'undefined') ?
-                new webkitSpeechRecognition() :
-                new SpeechRecognition();
-        }
-        ecraft2learn.speech_recognition.onresult = function (event) {
-            handle_result(spoken_callback, event);
-        };
-        ecraft2learn.speech_recognition.onerror = function (event) {
-            handle_error(error_callback, event);
-        };
-        ecraft2learn.speech_recognition.onend = function (event) {
-//             console.log("recognition ended");
-            restart();
-        };
-        ecraft2learn.stop_speech_recognition = function () {
-             ecraft2learn.speech_recognition.onend    = null;
-            ecraft2learn.speech_recognition.onresult = null;
-            ecraft2learn.speech_recognition.onerror  = null;
-            ecraft2learn.speech_recognition.stop();
-        };
-        restart();
-        // if the tab or window is minimised or hidden then speech recognition is paused until the window or tab is shown again
-        window.addEventListener("message",
-                                function(message) {
-                                    if (message.data === 'hidden') {
-                                        stopped = true;
-                                        ecraft2learn.speech_recognition.stop();
-                                        console.log("Stopped because tab/window hidden.");
-                                    } else if (message.data === 'shown') {
-                                        stopped = false;
-                                        restart();
-                                        console.log("Restarted because tab/window shown.");
-                                    }
-                                });
+          var restart = function () {
+              if (stopped) {
+                 return;
+              }
+              if (window.speechSynthesis.speaking) { // don't listen while speaking
+                  setTimeout(restart, 500); // try again in half a second
+                  return;
+              }
+              try {
+                  ecraft2learn.speech_recognition.start();
+  //                 console.log("Speech recognition started");
+              } catch (error) {
+                  if (error.name === 'InvalidStateError') {
+                      // delay needed, at least in Chrome 52
+                      setTimeout(restart, 2000);
+                  } else {
+                      console.log(error);
+                  }
+              }
+          };
+          var handle_result = function (callback, event) {
+              var spoken = event.results[0][0].transcript;
+              console.log("Confidence is " + event.results[0][0].confidence + " for " + spoken);
+              ecraft2learn.speech_recognition.stop();
+              invoke_callback(callback, spoken);
+          };
+          var handle_error = function (callback, event) {
+              if (event.error === 'aborted') {
+                  if (!stopped) {
+                      console.log("Aborted so restarting speech recognition in half a second");
+                      setTimeout(restart, 500);
+                  }
+                  return;
+              }
+  //             console.log("Recognition error: " + event.error);
+              invoke_callback(callback,event.error);
+          };
+          if (!ecraft2learn.speech_recognition) {
+              ecraft2learn.speech_recognition = (typeof SpeechRecognition === 'undefined') ?
+                  new webkitSpeechRecognition() :
+                  new SpeechRecognition();
+          }
+          ecraft2learn.speech_recognition.onresult = function (event) {
+              handle_result(spoken_callback, event);
+          };
+          ecraft2learn.speech_recognition.onerror = function (event) {
+              handle_error(error_callback, event);
+          };
+          ecraft2learn.speech_recognition.onend = function (event) {
+  //             console.log("recognition ended");
+              restart();
+          };
+          ecraft2learn.stop_speech_recognition = function () {
+               ecraft2learn.speech_recognition.onend    = null;
+              ecraft2learn.speech_recognition.onresult = null;
+              ecraft2learn.speech_recognition.onerror  = null;
+              ecraft2learn.speech_recognition.stop();
+          };
+          restart();
+          // if the tab or window is minimised or hidden then speech recognition is paused until the window or tab is shown again
+          window.addEventListener("message",
+                                  function(message) {
+                                      if (message.data === 'hidden') {
+                                          stopped = true;
+                                          ecraft2learn.speech_recognition.stop();
+                                          console.log("Stopped because tab/window hidden.");
+                                      } else if (message.data === 'shown') {
+                                          stopped = false;
+                                          restart();
+                                          console.log("Restarted because tab/window shown.");
+                                      }
+                                  });
     },
 
     start_microsoft_speech_recognition: function (as_recognized_callback, final_spoken_callback, error_callback, provided_key) {
@@ -414,30 +414,30 @@ window.ecraft2learn =
       // snap_callback is called with the result of the image recognition
       // show_photo displays the photo when it is taken
       if (cloud_provider === 'Watson') {
-        cloud_provider = 'IBM Watson';
-    }
-    image_recognitions[cloud_provider] = undefined;
-      var callback = function (response) {
-          var response_as_javascript_object;
-        switch (cloud_provider) {
-            case "IBM Watson":
-                response_as_javascript_object = JSON.parse(response).images[0].classifiers[0].classes;
-                break;
-            case "Google":
-                response_as_javascript_object = JSON.parse(response).responses;
-                break;
-            case "Microsoft":
-                response_as_javascript_object = JSON.parse(response);
-                break;
-            default:
-                invoke_callback(snap_callback, "Unknown cloud provider: " + cloud_provider);
-                return;
-        }
-        image_recognitions[cloud_provider] = {response: response_as_javascript_object};
-        if (typeof snap_callback !== 'object' && typeof snap_callback !== 'function') { // if not provided
-            return;
-        }
-        invoke_callback(snap_callback, javascript_to_snap(response_as_javascript_object));
+          cloud_provider = 'IBM Watson';
+      }
+      image_recognitions[cloud_provider] = undefined;
+        var callback = function (response) {
+            var response_as_javascript_object;
+          switch (cloud_provider) {
+              case "IBM Watson":
+                  response_as_javascript_object = JSON.parse(response).images[0].classifiers[0].classes;
+                  break;
+              case "Google":
+                  response_as_javascript_object = JSON.parse(response).responses;
+                  break;
+              case "Microsoft":
+                  response_as_javascript_object = JSON.parse(response);
+                  break;
+              default:
+                  invoke_callback(snap_callback, "Unknown cloud provider: " + cloud_provider);
+                  return;
+          }
+          image_recognitions[cloud_provider] = {response: response_as_javascript_object};
+          if (typeof snap_callback !== 'object' && typeof snap_callback !== 'function') { // if not provided
+              return;
+          }
+          invoke_callback(snap_callback, javascript_to_snap(response_as_javascript_object));
     };
     var context, photo;
     // Capture a photo by fetching the current contents of the video
@@ -525,17 +525,17 @@ window.ecraft2learn =
           }
       };
       if (cloud_provider === 'Watson') {
-        cloud_provider = 'IBM Watson';
-    }
+          cloud_provider = 'IBM Watson';
+      }
       var response = image_recognitions[cloud_provider];
       if (!response) {
           return cloud_provider + " has not (yet) recognized the image.";
       }
       if (!Array.isArray(property_name_or_names) && typeof property_name_or_names !== 'string') {
           // convert from a Snap list to a JavaScript array
-        property_name_or_names = property_name_or_names.contents;
-    }
-    return javascript_to_snap(get_property(response.response, property_name_or_names));
+          property_name_or_names = property_name_or_names.contents;
+      }
+      return javascript_to_snap(get_property(response.response, property_name_or_names));
   },
 
   speak: function (message, pitch, rate, voice, volume, language, finished_callback) {
@@ -614,23 +614,23 @@ window.ecraft2learn =
     }
     rate = +rate;
     if (typeof rate === 'number' && rate > 0) {
-       if (rate < .1) {
-          // A very slow rate breaks Chrome's speech synthesiser
-          rate = .1;
-       }
-       if (rate > 2) {
-          rate = 2; // high rate also breaks Chrome's speech synthesis
-       }
-       utterance.rate = rate;
+        if (rate < .1) {
+           // A very slow rate breaks Chrome's speech synthesiser
+           rate = .1;
+        }
+        if (rate > 2) {
+           rate = 2; // high rate also breaks Chrome's speech synthesis
+        }
+        utterance.rate = rate;
     }
     voice = +voice;
     if (typeof voice === 'number') {
-       var voices = window.speechSynthesis.getVoices();
-       if (voice >= 0 && voice < voices.length) {
-           utterance.voice = voices[Math.floor(voice)];
-       } else if (voice > 0) {
-           alert("Only " + voices.length + " voices are available. You can't choose voice number " + voice);
-       }
+        var voices = window.speechSynthesis.getVoices();
+        if (voice >= 0 && voice < voices.length) {
+            utterance.voice = voices[Math.floor(voice)];
+        } else if (voice > 0) {
+            alert("Only " + voices.length + " voices are available. You can't choose voice number " + voice);
+        }
     }
     volume = +volume;
     if (typeof volume && volume > 0) {
@@ -665,21 +665,21 @@ window.ecraft2learn =
       get_snap_ide().openProject(name);
   },
   save_project: function (name) {
-    get_snap_ide().saveProject(name);
+      get_snap_ide().saveProject(name);
   },
   console_log: function (message) {
       console.log(message);
   },
   handle_server_json_response: function (response, callback) {
-    invoke_callback(callback, javascript_to_snap(JSON.parse(response)));
+     invoke_callback(callback, javascript_to_snap(JSON.parse(response)));
   },
   handle_server_json_response_to_pins_request: function (response_text, callback_for_pins_read, callback_for_pins_written, callback_for_errors) {
       try {
           var response = JSON.parse(response_text);
           var read = response.pins;
           var written = response.write_responses;
-        invoke_callback(callback_for_pins_read,    javascript_to_snap(read));
-        invoke_callback(callback_for_pins_written, javascript_to_snap(written));
+          invoke_callback(callback_for_pins_read,    javascript_to_snap(read));
+          invoke_callback(callback_for_pins_written, javascript_to_snap(written));
       } catch (error) {
           invoke_callback(callback_for_errors, error.message);
       }
