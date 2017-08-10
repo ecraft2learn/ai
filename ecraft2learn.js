@@ -34,7 +34,7 @@ window.ecraft2learn =
             window.onbeforeunload = null; // don't warn about reload
             document.location.assign("https://github.com/ToonTalk/ai-cloud/wiki");
         }
-    };
+      };
       var run_snap_block = function (labelSpec) { // add parameters later
           // runs a Snap! block that matches labelSpec
           // labelSpec if it takes areguments will look something like 'label %txt of size %n'
@@ -79,15 +79,15 @@ window.ecraft2learn =
         }
         return value.contents;
     };
-      var invoke_callback = function (callback) {
-          // callback could either be a Snap! object or a JavaScript function
-          if (typeof callback === 'object') { // assume Snap! callback
-              // invoke the callback with the argments (other than the callback itself)
-              return invoke(callback, new List(Array.prototype.slice.call(arguments, 1)));
-          }
-          if (typeof callback === 'function') { // assume JavaScript callback
-              callback.apply(this, arguments);
-          }
+    var invoke_callback = function (callback) {
+        // callback could either be a Snap! object or a JavaScript function
+        if (typeof callback === 'object') { // assume Snap! callback
+            // invoke the callback with the argments (other than the callback itself)
+            return invoke(callback, new List(Array.prototype.slice.call(arguments, 1)));
+        }
+        if (typeof callback === 'function') { // assume JavaScript callback
+            callback.apply(this, arguments);
+        }
           // otherwise no callback provided so ignore it
     };
     var javascript_to_snap = function (x) {
@@ -98,6 +98,9 @@ window.ecraft2learn =
             return new List(x.map(javascript_to_snap));
         }
         if (typeof x === 'object') {
+            if (x.constructor.name === 'List') {
+                return x;
+            }
             return new List(Object.keys(x).map(function (key) {
                                                    return new List([key, javascript_to_snap(x[key])]);
                                                }));
