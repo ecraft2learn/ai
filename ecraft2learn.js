@@ -107,7 +107,7 @@ window.ecraft2learn =
         }
         return x;
     };
-    var add_new_costume = function (canvas, name, ide) {
+    var add_new_costume = function (provider_name, canvas, name, ide) {
         if (!name) {
             if (typeof  ecraft2learn.photo_count === 'undefined') {
                 ecraft2learn.photo_count = 1;
@@ -119,9 +119,9 @@ window.ecraft2learn =
         if (!ide) {
             ide = get_snap_ide();
         }
-        ide.currentSprite.addCostume(costume);
-        ide.currentSprite.wearCostume(costume);
-        ide.spriteBar.tabBar.tabTo('costumes');
+        var sprite = ide.sprites.contents[provider_name];
+        sprite.addCostume(costume);
+        sprite.wearCostume(costume);
         ide.hasChangedMedia = true;
     };
     var image_recognitions = {}; // record of most recent results from calls to take_picture_and_analyse
@@ -463,7 +463,7 @@ window.ecraft2learn =
     context = canvas.getContext('2d');
     context.drawImage(video, 0, 0, width, height, 0, 0, width, height);
     if (show_photo) {
-        add_new_costume(canvas);
+        add_new_costume(cloud_provider, canvas);
     }
     switch (cloud_provider) {
     case "IBM Watson":
