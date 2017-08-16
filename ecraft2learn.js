@@ -108,6 +108,13 @@ window.ecraft2learn =
         return x;
     };
     var add_new_costume = function (canvas, name, ide) {
+        if (!name) {
+            if (typeof  ecraft2learn.photo_count === 'undefined') {
+                ecraft2learn.photo_count = 1;
+            }
+            name =  "photo " + ecraft2learn.photo_count;
+            ecraft2learn.photo_count = ecraft2learn.photo_count+1;
+        }
         var costume = new Costume(canvas, name);
         if (!ide) {
             ide = get_snap_ide();
@@ -456,7 +463,7 @@ window.ecraft2learn =
     context = canvas.getContext('2d');
     context.drawImage(video, 0, 0, width, height, 0, 0, width, height);
     if (show_photo) {
-        add_new_costume(canvas, "photo 1");
+        add_new_costume(canvas);
 //        photo = document.createElement('img');
 //        photo.src = canvas.toDataURL('image/png');
 //        photo.setAttribute('width', width);
