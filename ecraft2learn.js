@@ -464,23 +464,6 @@ window.ecraft2learn =
     context.drawImage(video, 0, 0, width, height, 0, 0, width, height);
     if (show_photo) {
         add_new_costume(canvas);
-//        photo = document.createElement('img');
-//        photo.src = canvas.toDataURL('image/png');
-//        photo.setAttribute('width', width);
-//        photo.setAttribute('height', height);
-//        document.getElementById("world").style.display = "none";
-//        document.body.appendChild(photo);
-//        document.body.title = "Click me to restore Snap!";
-//        video.style.display  = ''; // display video
-//        document.body.addEventListener('click',
-//                                       function () {
-//                                           document.getElementById("world").style.display = '';
-//                                           video.style.display  = 'none';
-//                                           if (photo.parentElement) {
-//                                               document.body.removeChild(photo);
-//                                           }
-//                                           document.body.title = "";
-//                                       });
     }
     switch (cloud_provider) {
     case "IBM Watson":
