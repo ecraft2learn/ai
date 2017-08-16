@@ -107,6 +107,16 @@ window.ecraft2learn =
         }
         return x;
     };
+    var add_new_costume = function (canvas, name, ide) {
+        var costume = new Costume(canvas, name);
+        if (!ide) {
+            ide = get_snap_ide();
+        }
+        ide.currentSprite.addCostume(costume);
+        ide.currentSprite.wearCostume(costume);
+        ide.spriteBar.tabBar.tabTo('costumes');
+        ide.hasChangedMedia = true;
+    };
     var image_recognitions = {}; // record of most recent results from calls to take_picture_and_analyse
 
     // the following are the ecraft2learn functions available via this library
@@ -322,89 +332,89 @@ window.ecraft2learn =
       // causes take_picture_and_analyse to be defined
       // supported service providers are currently 'Google', 'Microsoft', and IBM 'Watson' (or 'IBM Watson')
       var video  = document.createElement('video');
-    var canvas = document.createElement('canvas');
-    var post_image = function post_image(image, cloud_provider, callback, error_callback) {
-        // based upon https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/Sending_forms_through_JavaScript
-        if (cloud_provider === 'Watson') {
-            cloud_provider = 'IBM Watson';
-        }
-        var key = provided_key || get_key(cloud_provider + " image key");
-        var formData, XHR;
-        if (!key) {
-           callback("No key provided so unable to ask " + cloud_provider + " to analyse an image.");
-           return;
-        }
-        XHR = new XMLHttpRequest();
-        XHR.addEventListener('load', function(event) {
-            callback(event);
-        });
-        if (!error_callback) {
-            error_callback = function (event) {
-                console.error(event);
-            }
-        }
-        XHR.addEventListener('error', error_callback);
-        switch (cloud_provider) {
-        case "IBM Watson":
-            formData = new FormData();
-            formData.append("images_file", image, "blob.png");
-            XHR.open('POST', "https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key);
-            XHR.send(formData);
-            break;
-        case "Google":
-            XHR.open('POST', "https://vision.googleapis.com/v1/images:annotate?key=" + key);
-            XHR.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-            XHR.send(JSON.stringify({"requests":[{"image":{"content": image.substring("data:image/png;base64,".length)},
-                                                  "features":[{"type": "LABEL_DETECTION",  "maxResults":32},
-                                                              {"type": "TEXT_DETECTION",   "maxResults":32},
-                                                              {"type": "FACE_DETECTION",   "maxResults":32},
-                                                              {"type": "IMAGE_PROPERTIES", "maxResults":32}
-                                                             ]}]
-                                    }));
-            break;
-        case "Microsoft":
-            // see https://social.msdn.microsoft.com/Forums/en-US/807ee18d-45e5-410b-a339-c8dcb3bfa25b/testing-project-oxford-ocr-how-to-use-a-local-file-in-base64-for-example?forum=mlapi
-            XHR.open('POST', "https://westus.api.cognitive.microsoft.com/vision/v1.0/analyze?visualFeatures=Description,Tags,Faces,Color,Categories&subscription-key=" + key);
-            XHR.setRequestHeader('Content-Type', 'application/octet-stream');
-            XHR.send(image);
-            break;
-        }
-    };
-    var startup = function startup() {
-        var callback = function(stream) {
-            var vendorURL = window.URL || window.webkitURL;
-            video.src = vendorURL.createObjectURL(stream);
-            video.play();
-        };
-        var error_callback = function(error) {
-            console.log("An error in getting access to camera: " + error.message);
-            console.log(error);
-        };
-        var constraints = {video: true,
-                           audio: false};
-        video.style.display  = 'none';
-        canvas.style.display = 'none';
-        video.setAttribute('width', width);
-        video.setAttribute('height', height);
-        canvas.setAttribute('width', width);
-        canvas.setAttribute('height', height);
-        document.body.appendChild(video);
-        document.body.appendChild(canvas);
-        if (navigator.mediaDevices) {
-            navigator.mediaDevices.getUserMedia(constraints)
-                .then(callback)
-                .catch(error_callback);
-        } else {
-            console.log("test this");
-            navigator.getMedia = (navigator.getUserMedia ||
-                                  navigator.webkitGetUserMedia ||
-                                  navigator.msGetUserMedia);
-            navigator.getMedia(constraints, callback, error_callback);
-    //      navigator.mediaDevices.getUserMedia(constraints, callback, error_callback);
-        }
-    };
-    width = +width; // convert to number
-    height = +height;
+      var canvas = document.createElement('canvas');
+      var post_image = function post_image(image, cloud_provider, callback, error_callback) {
+          // based upon https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/Sending_forms_through_JavaScript
+          if (cloud_provider === 'Watson') {
+              cloud_provider = 'IBM Watson';
+          }
+          var key = provided_key || get_key(cloud_provider + " image key");
+          var formData, XHR;
+          if (!key) {
+             callback("No key provided so unable to ask " + cloud_provider + " to analyse an image.");
+             return;
+          }
+          XHR = new XMLHttpRequest();
+          XHR.addEventListener('load', function(event) {
+              callback(event);
+          });
+          if (!error_callback) {
+              error_callback = function (event) {
+                  console.error(event);
+              }
+          }
+          XHR.addEventListener('error', error_callback);
+          switch (cloud_provider) {
+          case "IBM Watson":
+              formData = new FormData();
+              formData.append("images_file", image, "blob.png");
+              XHR.open('POST', "https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key);
+              XHR.send(formData);
+              break;
+          case "Google":
+              XHR.open('POST', "https://vision.googleapis.com/v1/images:annotate?key=" + key);
+              XHR.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+              XHR.send(JSON.stringify({"requests":[{"image":{"content": image.substring("data:image/png;base64,".length)},
+                                                    "features":[{"type": "LABEL_DETECTION",  "maxResults":32},
+                                                                {"type": "TEXT_DETECTION",   "maxResults":32},
+                                                                {"type": "FACE_DETECTION",   "maxResults":32},
+                                                                {"type": "IMAGE_PROPERTIES", "maxResults":32}
+                                                               ]}]
+                                      }));
+              break;
+          case "Microsoft":
+              // see https://social.msdn.microsoft.com/Forums/en-US/807ee18d-45e5-410b-a339-c8dcb3bfa25b/testing-project-oxford-ocr-how-to-use-a-local-file-in-base64-for-example?forum=mlapi
+              XHR.open('POST', "https://westus.api.cognitive.microsoft.com/vision/v1.0/analyze?visualFeatures=Description,Tags,Faces,Color,Categories&subscription-key=" + key);
+              XHR.setRequestHeader('Content-Type', 'application/octet-stream');
+              XHR.send(image);
+              break;
+          }
+      };
+      var startup = function startup() {
+          var callback = function(stream) {
+              var vendorURL = window.URL || window.webkitURL;
+              video.src = vendorURL.createObjectURL(stream);
+              video.play();
+          };
+          var error_callback = function(error) {
+              console.log("An error in getting access to camera: " + error.message);
+              console.log(error);
+          };
+          var constraints = {video: true,
+                             audio: false};
+          video.style.display  = 'none';
+          canvas.style.display = 'none';
+          video.setAttribute('width', width);
+          video.setAttribute('height', height);
+          canvas.setAttribute('width', width);
+          canvas.setAttribute('height', height);
+          document.body.appendChild(video);
+          document.body.appendChild(canvas);
+          if (navigator.mediaDevices) {
+              navigator.mediaDevices.getUserMedia(constraints)
+                  .then(callback)
+                  .catch(error_callback);
+          } else {
+              console.log("test this");
+              navigator.getMedia = (navigator.getUserMedia ||
+                                    navigator.webkitGetUserMedia ||
+                                    navigator.msGetUserMedia);
+              navigator.getMedia(constraints, callback, error_callback);
+      //      navigator.mediaDevices.getUserMedia(constraints, callback, error_callback);
+          }
+      };
+      width = +width; // convert to number
+      height = +height;
 
   ecraft2learn.take_picture_and_analyse = function (cloud_provider, show_photo, snap_callback) {
       // snap_callback is called with the result of the image recognition
@@ -413,8 +423,8 @@ window.ecraft2learn =
           cloud_provider = 'IBM Watson';
       }
       image_recognitions[cloud_provider] = undefined;
-        var callback = function (response) {
-            var response_as_javascript_object;
+      var callback = function (response) {
+          var response_as_javascript_object;
           switch (cloud_provider) {
               case "IBM Watson":
                   response_as_javascript_object = JSON.parse(response).images[0].classifiers[0].classes;
@@ -446,23 +456,24 @@ window.ecraft2learn =
     context = canvas.getContext('2d');
     context.drawImage(video, 0, 0, width, height, 0, 0, width, height);
     if (show_photo) {
-        photo = document.createElement('img');
-        photo.src = canvas.toDataURL('image/png');
-        photo.setAttribute('width', width);
-        photo.setAttribute('height', height);
-        document.getElementById("world").style.display = "none";
-        document.body.appendChild(photo);
-        document.body.title = "Click me to restore Snap!";
-        video.style.display  = ''; // display video
-        document.body.addEventListener('click',
-                                       function () {
-                                           document.getElementById("world").style.display = '';
-                                           video.style.display  = 'none';
-                                           if (photo.parentElement) {
-                                               document.body.removeChild(photo);
-                                           }
-                                           document.body.title = "";
-                                       });
+        add_new_costume(canvas, "photo 1");
+//        photo = document.createElement('img');
+//        photo.src = canvas.toDataURL('image/png');
+//        photo.setAttribute('width', width);
+//        photo.setAttribute('height', height);
+//        document.getElementById("world").style.display = "none";
+//        document.body.appendChild(photo);
+//        document.body.title = "Click me to restore Snap!";
+//        video.style.display  = ''; // display video
+//        document.body.addEventListener('click',
+//                                       function () {
+//                                           document.getElementById("world").style.display = '';
+//                                           video.style.display  = 'none';
+//                                           if (photo.parentElement) {
+//                                               document.body.removeChild(photo);
+//                                           }
+//                                           document.body.title = "";
+//                                       });
     }
     switch (cloud_provider) {
     case "IBM Watson":
