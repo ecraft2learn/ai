@@ -108,6 +108,7 @@ window.ecraft2learn =
         return x;
     };
     var add_new_costume = function (provider_name, canvas, name, ide) {
+        var sprite;
         if (!name) {
             if (typeof  ecraft2learn.photo_count === 'undefined') {
                 ecraft2learn.photo_count = 1;
@@ -119,7 +120,12 @@ window.ecraft2learn =
         if (!ide) {
             ide = get_snap_ide();
         }
-        var sprite = ide.sprites.contents[provider_name];
+        ide.sprites.contents.some(function (a_sprite) {
+                                                   if (provider_name === a_sprite.name) {
+                                                       sprite = a_sprite;
+                                                       return true;
+                                                   }
+                                  });
         sprite.addCostume(costume);
         sprite.wearCostume(costume);
         ide.hasChangedMedia = true;
