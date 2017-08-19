@@ -121,11 +121,14 @@ window.ecraft2learn =
             ide = get_snap_ide();
         }
         ide.sprites.contents.some(function (a_sprite) {
-                                                   if (provider_name === a_sprite.name) {
-                                                       sprite = a_sprite;
-                                                       return true;
-                                                   }
+                                      if (provider_name === a_sprite.name) {
+                                          sprite = a_sprite;
+                                          return true;
+                                      }
                                   });
+        if (!sprite) {
+            sprite = ide.currentSprite;
+        }
         sprite.addCostume(costume);
         sprite.wearCostume(costume);
         ide.hasChangedMedia = true;
