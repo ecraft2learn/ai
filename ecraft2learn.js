@@ -107,8 +107,18 @@ window.ecraft2learn =
         }
         return x;
     };
-    var add_new_costume = function (provider_name, canvas, name, ide) {
-        var sprite;
+    var add_photo_to_canvas = function (canvas, width, height) {
+        // Capture a photo by fetching the current contents of the video
+        // and drawing it into a canvas, then converting that to a PNG
+        // format data URL. By drawing it on an offscreen canvas and then
+        // drawing that to the screen, we can change its size and/or apply
+        // other changes before drawing it.
+        canvas.setAttribute('width', width);
+        canvas.setAttribute('height', height);
+        var context = canvas.getContext('2d');
+        context.drawImage(video, 0, 0, width, height, 0, 0, width, height);
+    };
+    var create_costume = function (canvas, name) {
         if (!name) {
             if (typeof  ecraft2learn.photo_count === 'undefined') {
                 ecraft2learn.photo_count = 1;
@@ -116,19 +126,13 @@ window.ecraft2learn =
             name =  "photo " + ecraft2learn.photo_count;
             ecraft2learn.photo_count = ecraft2learn.photo_count+1;
         }
-        var costume = new Costume(canvas, name);
-        if (!ide) {
-            ide = get_snap_ide();
+        return new Costume(canvas, name);;
+    }
+    var add_costume = function (costume, sprite) {
+        var ide = get_snap_ide();
+        if (!sprite) {
+            sprite = ide.stage;
         }
-//         ide.sprites.contents.some(function (a_sprite) {
-//                                       if (provider_name === a_sprite.name) {
-//                                           sprite = a_sprite;
-//                                           return true;
-//                                       }
-//                                   });
-//         if (!sprite) {
-        sprite = ide.stage;
-//         }
         sprite.addCostume(costume);
         sprite.wearCostume(costume);
         ide.hasChangedMedia = true;
@@ -432,13 +436,19 @@ window.ecraft2learn =
       width = +width; // convert to number
       height = +height;
 
+  // define new functions in the scope of setup_camera
+
+  ecraft2learn.add_photo_as_costume = function () {
+      add_photo_to_canvas(canvas, width, height);
+      add_costume(create_costume(canvas), get_snap_ide().currentSprite);
+  };
+
   ecraft2learn.take_picture_and_analyse = function (cloud_provider, show_photo, snap_callback) {
       // snap_callback is called with the result of the image recognition
       // show_photo displays the photo when it is taken
       if (cloud_provider === 'Watson') {
           cloud_provider = 'IBM Watson';
       }
-      image_recognitions[cloud_provider] = undefined;
       var callback = function (response) {
           var response_as_javascript_object;
           switch (cloud_provider) {
@@ -455,24 +465,18 @@ window.ecraft2learn =
                   invoke_callback(snap_callback, "Unknown cloud provider: " + cloud_provider);
                   return;
           }
-          image_recognitions[cloud_provider] = {response: response_as_javascript_object};
+          image_recognitions[cloud_provider].response = response_as_javascript_object;
           if (typeof snap_callback !== 'object' && typeof snap_callback !== 'function') { // if not provided
               return;
           }
           invoke_callback(snap_callback, javascript_to_snap(response_as_javascript_object));
     };
-    var context, photo;
-    // Capture a photo by fetching the current contents of the video
-    // and drawing it into a canvas, then converting that to a PNG
-    // format data URL. By drawing it on an offscreen canvas and then
-    // drawing that to the screen, we can change its size and/or apply
-    // other changes before drawing it.
-    canvas.setAttribute('width', width);
-    canvas.setAttribute('height', height);
-    context = canvas.getContext('2d');
-    context.drawImage(video, 0, 0, width, height, 0, 0, width, height);
+    var costume;
+    add_photo_to_canvas(canvas, width, height);
+    costume = create_costume(canvas);
+    image_recognitions[cloud_provider] = {costume: create_costume(canvas)};
     if (show_photo) {
-        add_new_costume(cloud_provider, canvas);
+        add_costume(costume);
     }
     switch (cloud_provider) {
     case "IBM Watson":
@@ -542,15 +546,26 @@ window.ecraft2learn =
       if (cloud_provider === 'Watson') {
           cloud_provider = 'IBM Watson';
       }
-      var response = image_recognitions[cloud_provider];
-      if (!response) {
+      var recognition = image_recognitions[cloud_provider];
+      if (!recognition) {
+          return cloud_provider + " has not been asked to recognize a photo.";
+      }
+      if (!recognition.response) {
           return cloud_provider + " has not (yet) recognized the image.";
       }
       if (!Array.isArray(property_name_or_names) && typeof property_name_or_names !== 'string') {
           // convert from a Snap list to a JavaScript array
           property_name_or_names = property_name_or_names.contents;
       }
-      return javascript_to_snap(get_property(response.response, property_name_or_names));
+      return javascript_to_snap(get_property(recognition.response, property_name_or_names));
+  },
+
+  add_current_photo_as_costume: function (cloud_provider) {
+      var recognition = image_recognitions[cloud_provider];
+      if (!recognition || !recognition.costume) {
+          return "No photo has been created for " + cloud_provider + " to recognize.";
+      }
+      add_costume(recognition.costume);
   },
 
   speak: function (message, pitch, rate, voice, volume, language, finished_callback) {
