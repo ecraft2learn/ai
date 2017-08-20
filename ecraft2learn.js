@@ -107,7 +107,7 @@ window.ecraft2learn =
         }
         return x;
     };
-    var add_photo_to_canvas = function (canvas, width, height) {
+    var add_photo_to_canvas = function (canvas, video, width, height) {
         // Capture a photo by fetching the current contents of the video
         // and drawing it into a canvas, then converting that to a PNG
         // format data URL. By drawing it on an offscreen canvas and then
@@ -439,7 +439,7 @@ window.ecraft2learn =
   // define new functions in the scope of setup_camera
 
   ecraft2learn.add_photo_as_costume = function () {
-      add_photo_to_canvas(canvas, width, height);
+      add_photo_to_canvas(canvas, video, width, height);
       add_costume(create_costume(canvas), get_snap_ide().currentSprite);
   };
 
@@ -472,7 +472,7 @@ window.ecraft2learn =
           invoke_callback(snap_callback, javascript_to_snap(response_as_javascript_object));
     };
     var costume;
-    add_photo_to_canvas(canvas, width, height);
+    add_photo_to_canvas(canvas, video, width, height);
     costume = create_costume(canvas);
     image_recognitions[cloud_provider] = {costume: create_costume(canvas)};
     if (show_photo) {
