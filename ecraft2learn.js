@@ -569,18 +569,18 @@ window.ecraft2learn =
   },
 
   speak: function (message, pitch, rate, voice, volume, language, finished_callback) {
-      // speaks 'message' optionally with the specified pitch, rate, voice, volume, and language
-      // finished_callback is called with the spoken text
-      // see https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisUtterance
-      if (window.speechSynthesis.getVoices().length === 0) {
-          // voices not loaded so wait for them and try again
-          window.speechSynthesis.onvoiceschanged = function () {
-              ecraft2learn.speak(message, pitch, rate, voice, volume, language, finished_callback);
-              window.speechSynthesis.onvoiceschanged = undefined;
-          };
-          return;
-      }
-      var maximum_length = 200; // not sure what a good value is but long text isn't spoken in some browsers
+    // speaks 'message' optionally with the specified pitch, rate, voice, volume, and language
+    // finished_callback is called with the spoken text
+    // see https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisUtterance
+    if (window.speechSynthesis.getVoices().length === 0) {
+        // voices not loaded so wait for them and try again
+        window.speechSynthesis.onvoiceschanged = function () {
+            ecraft2learn.speak(message, pitch, rate, voice, volume, language, finished_callback);
+            window.speechSynthesis.onvoiceschanged = undefined;
+        };
+        return;
+    }
+    var maximum_length = 200; // not sure what a good value is but long text isn't spoken in some browsers
     var break_into_short_segments = function (text) {
         var segments = [];
         var break_text = function (text) {
@@ -635,6 +635,7 @@ window.ecraft2learn =
     }
     // else is less than the maximum_length
     var utterance = new SpeechSynthesisUtterance(message);
+    ecraft2learn.utterance = utterance; // without this utterance may be garbage collected before onend can run
     if (typeof language === 'string') {
         utterance.lang = language;
     }
@@ -681,7 +682,7 @@ window.ecraft2learn =
     }));
   },
   get_voice_name: function (voice) {
-      voice = +voice; // convert to nunber if is a string
+    voice = +voice; // convert to nunber if is a string
     if (typeof voice === 'number') {
        var voices = window.speechSynthesis.getVoices();
        if (voice >= 0 && voice < voices.length) {
@@ -697,6 +698,21 @@ window.ecraft2learn =
   save_project: function (name) {
       get_snap_ide().saveProject(name);
   },
+  // experimenting with compiling Snap4Arduino to Arduino C sketch
+//   transpile_to_arduino_sketch: function () {
+//     try {
+//         console.log(
+//                 this.world().Arduino.transpile(
+//                     this.mappedCode(),
+//                     this.parentThatIsA(ScriptsMorph).children.filter(
+//                         function (each) {
+//                             return each instanceof HatBlockMorph &&
+//                                 each.selector == 'receiveMessage';
+//                         })));
+//     } catch (error) {
+//         console.log('Error exporting to Arduino sketch!', error.message)
+//     }
+//   },
   console_log: function (message) {
       console.log(message);
   },
