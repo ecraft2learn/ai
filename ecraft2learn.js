@@ -83,7 +83,8 @@ window.ecraft2learn =
         // callback could either be a Snap! object or a JavaScript function
         if (typeof callback === 'object') { // assume Snap! callback
             // invoke the callback with the argments (other than the callback itself)
-            return invoke(callback, new List(Array.prototype.slice.call(arguments, 1))); // , callback
+            // if BlockMorph then needs a receiver -- apparently callback is good enough
+            return invoke(callback, new List(Array.prototype.slice.call(arguments, 1)), (callback instanceof BlockMorph && callback)); 
         }
         if (typeof callback === 'function') { // assume JavaScript callback
             callback.apply(this, arguments);
