@@ -118,6 +118,18 @@ window.ecraft2learn =
         var context = canvas.getContext('2d');
         context.drawImage(video, 0, 0, width, height, 0, 0, width, height);
     };
+    var get_voice = function (voice) {
+        voice = +voice; // convert to nunber if is a string
+        if (typeof voice === 'number') {
+            var voices = window.speechSynthesis.getVoices();
+            voice--; // Snap (and Scratch) use 1-indexing so convert here
+            if (voice >= 0 && voice < voices.length) {
+               return voices[Math.floor(voice)];
+            } else if (voice > 0) {
+               alert("Only voice numbers between 1 and " + voices.length + " are available. There is no voice number " + voice);
+            }
+        }
+    };
     var create_costume = function (canvas, name) {
         if (!name) {
             if (typeof  ecraft2learn.photo_count === 'undefined') {
@@ -654,16 +666,7 @@ window.ecraft2learn =
         }
         utterance.rate = rate;
     }
-    voice = +voice;
-    if (typeof voice === 'number') {
-        voice--; // Snap (and Scratch) use 1-indexing so convert here
-        var voices = window.speechSynthesis.getVoices();
-        if (voice >= 0 && voice < voices.length) {
-            utterance.voice = voices[Math.floor(voice)];
-        } else if (voice > 0) {
-            alert("Only " + voices.length + " voices are available. You can't choose voice number " + voice);
-        }
-    }
+    utterance.voice = get_voice(voice);
     volume = +volume;
     if (typeof volume && volume > 0) {
         utterance.volume = volume;
@@ -682,17 +685,12 @@ window.ecraft2learn =
         return voice.name;
     }));
   },
-  get_voice_name: function (voice) {
-    voice = +voice; // convert to nunber if is a string
-    if (typeof voice === 'number') {
-       var voices = window.speechSynthesis.getVoices();
-       voice--; // Snap (and Scratch) use 1-indexing so convert here
-       if (voice >= 0 && voice < voices.length) {
-           return voices[Math.floor(voice)].name;
-       } else if (voice > 0) {
-           alert("Only " + voices.length + " voices are available. There is no voice number " + voice);
-       }
-    }
+  get_voice_name: function (voice_number) {
+      var voice = get_voice(voice_number);
+      if (voice) {
+          return voice.name;
+      }
+      return "No voice numbered " + voice_number;
   },
   open_project: function (name) {
       get_snap_ide().openProject(name);
