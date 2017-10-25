@@ -118,15 +118,15 @@ window.ecraft2learn =
         var context = canvas.getContext('2d');
         context.drawImage(video, 0, 0, width, height, 0, 0, width, height);
     };
-    var get_voice = function (voice) {
-        voice = +voice; // convert to nunber if is a string
-        if (typeof voice === 'number') {
+    var get_voice = function (voice_number) {
+        voice_number = +voice_number; // convert to nunber if is a string
+        if (typeof voice_number === 'number') {
             var voices = window.speechSynthesis.getVoices();
-            voice--; // Snap (and Scratch) use 1-indexing so convert here
-            if (voice >= 0 && voice < voices.length) {
-               return voices[Math.floor(voice)];
-            } else if (voice > 0) {
-               alert("Only voice numbers between 1 and " + voices.length + " are available. There is no voice number " + voice);
+            voice_number--; // Snap (and Scratch) use 1-indexing so convert here
+            if (voice_number >= 0 && voice_number < voices.length) {
+               return voices[Math.floor(voice_number)];
+            } else {
+               alert("Only voice numbers between 1 and " + voices.length + " are available. There is no voice number " + (voice_number+1));
             }
         }
     };
@@ -580,14 +580,14 @@ window.ecraft2learn =
       add_costume(recognition.costume);
   },
 
-  speak: function (message, pitch, rate, voice, volume, language, finished_callback) {
+  speak: function (message, pitch, rate, voice_number, volume, language, finished_callback) {
     // speaks 'message' optionally with the specified pitch, rate, voice, volume, and language
     // finished_callback is called with the spoken text
     // see https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisUtterance
     if (window.speechSynthesis.getVoices().length === 0) {
         // voices not loaded so wait for them and try again
         window.speechSynthesis.onvoiceschanged = function () {
-            ecraft2learn.speak(message, pitch, rate, voice, volume, language, finished_callback);
+            ecraft2learn.speak(message, pitch, rate, voice_number, volume, language, finished_callback);
             window.speechSynthesis.onvoiceschanged = undefined;
         };
         return;
@@ -641,7 +641,7 @@ window.ecraft2learn =
                            function () {
                                invoke_callback(finished_callback, message); // entire message not just the segments
                            };
-            ecraft2learn.speak(segment, pitch, rate, voice, volume, language, callback)
+            ecraft2learn.speak(segment, pitch, rate, voice_number, volume, language, callback)
         });
         return;
     }
@@ -666,7 +666,7 @@ window.ecraft2learn =
         }
         utterance.rate = rate;
     }
-    utterance.voice = get_voice(voice);
+    utterance.voice = get_voice(voice_number);
     volume = +volume;
     if (typeof volume && volume > 0) {
         utterance.volume = volume;
