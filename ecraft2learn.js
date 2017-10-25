@@ -548,6 +548,8 @@ window.ecraft2learn =
               return array_or_object;
           } else if (property_name_or_names.length < 2) {
               return get_property(array_or_object, property_name_or_names[0]);
+          } else if (array_or_object.statusCode >= 400 && array_or_object.statusCode <= 404) {
+              return "Unable to connect. " + array_or_object.message;
           } else {
               property = array_or_object[property_name_or_names[0]];
               if (!property) {
