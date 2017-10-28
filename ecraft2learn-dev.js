@@ -895,7 +895,7 @@ window.ecraft2learn =
     try {
         arduino_bot.verify(
                world.Arduino.transpile(
-                 expression.mappedCode(),
+                 "void setup() {" + expression.mappedCode(),
                  expression.children.filter(
                      function (each) {
                            return each instanceof HatBlockMorph &&
