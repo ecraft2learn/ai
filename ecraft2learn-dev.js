@@ -891,7 +891,7 @@ window.ecraft2learn =
   transpile_to_arduino_sketch: function () {
 //     var block = block_context.expression;
     load_script("https://toontalk.github.io/ai-cloud/lib/mqttws.js",
-                connect)
+                arduino_bot.connect)
     try {
         arduino_bot.verify(
                 this.world().Arduino.transpile(
