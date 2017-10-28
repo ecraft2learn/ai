@@ -164,24 +164,20 @@ window.ecraft2learn =
   var sketch = 'blinky'
   var server = 'raspberrypi.local:1884'
 
-  var main = function main () {
-    setServer(server)
-  }
-
-  var onDeviceReady = function onDeviceReady () {
-    connect()
-  }
-  
   document.addEventListener("deviceready", onDeviceReady, false);
 
-  var connect = function connect () {
+  function onDeviceReady () {
+    connect()
+  }
+
+  function connect () {
     disconnectMQTT()
     connectMQTT()
     // console.log('info', '', 'Connecting to MQTT ...', true)
   }
 
   // We need a unique client id when connecting to MQTT
-  var guid = function guid () {
+  function guid () {
     function s4 () {
       return Math.floor((1 + Math.random()) * 0x10000)
         .toString(16)
@@ -190,7 +186,7 @@ window.ecraft2learn =
     return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4()
   }
 
-  var connectMQTT = function connectMQTT () {
+  function connectMQTT () {
     var clientID = guid()
     var portNumber = defaultPortNumber
     var serverAndPort = getServer().split(':')
@@ -212,7 +208,7 @@ window.ecraft2learn =
     mqttClient.connect(options)
   }
 
-  var verify = function verify (source, upload) {
+  function verify (source, upload) {
     // Select command
     var command = 'verify'
     if (upload) {
@@ -238,13 +234,13 @@ window.ecraft2learn =
     publish(command + '/' + responseId, job)
   }
 
-  var handleResponse = function handleResponse (topic, payload) {
+  function handleResponse (topic, payload) {
     var jobId = payload.id
     subscribe('result/' + jobId)
     unsubscribe(topic)
   }
 
-  var handleResult = function handleResult (topic, payload) {
+  function handleResult (topic, payload) {
     var type = payload.type
     var command = payload.command
     unsubscribe(topic)
@@ -271,56 +267,56 @@ window.ecraft2learn =
     }
   }
 
-  var onMessageArrived = function onMessageArrived (message) {
+  function onMessageArrived (message) {
     var payload = JSON.parse(message.payloadString)
     console.log('Topic: ' + message.topic + ' payload: ' + message.payloadString)
     handleMessage(message.topic, payload)
   }
 
-  var onConnectSuccess = function onConnectSuccess (context) {
+  function onConnectSuccess (context) {
     console.log('info', '', 'Connected', true)
     subscribeToSketch()
   }
 
-  var onConnectFailure = function onConnectFailure (error) {
+  function onConnectFailure (error) {
     console.log('Failed to connect: ' + JSON.stringify(error))
     console.log('danger', 'Connect failed!', 'Reconnecting ...', true)
   }
 
-  var onConnectionLost = function onConnectionLost (responseObject) {
+  function onConnectionLost (responseObject) {
     console.log('Connection lost: ' + responseObject.errorMessage)
     console.log('warning', 'Connection was lost!', 'Reconnecting ...', true)
   }
 
-  var publish = function publish (topic, payload, retained) {
+  function publish (topic, payload, retained) {
     var message = new window.Paho.MQTT.Message(JSON.stringify(payload))
     message.destinationName = topic
     message.retained = !!retained
     mqttClient.send(message)
   }
 
-  var subscribe = function subscribe (topic) {
+  function subscribe (topic) {
     mqttClient.subscribe(topic)
     console.log('Subscribed: ' + topic)
   }
 
-  var subscribeToSketch= function subscribeToSketch () {
+  function subscribeToSketch () {
     subscribe('sketch/' + sketch)
   }
 
-  var unsubscribe = function unsubscribe (topic) {
+  function unsubscribe (topic) {
     mqttClient.unsubscribe(topic)
     console.log('Unsubscribed: ' + topic)
   }
 
-  var disconnectMQTT = function disconnectMQTT () {
+  function disconnectMQTT () {
     if (mqttClient && mqttClient.isConnected()) {
       mqttClient.disconnect()
     }
     mqttClient = null
   }
 
-  var handleMessage = function handleMessage (topic, payload) {
+  function handleMessage (topic, payload) {
     try {
       if (topic.startsWith('response/')) {
         return handleResponse(topic, payload)
@@ -336,7 +332,7 @@ window.ecraft2learn =
   }
 
   // Call main function to initialise app.
-  main()
+
   // return external interface to ArduinoBot
   return {verify: verify}
 })();
