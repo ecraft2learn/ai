@@ -7,7 +7,7 @@
  "use strict";
 window.ecraft2learn =
   (function () {
-      var this_url = document.querySelector('script[src*="ecraft2learn.js"]').src; // the URL where this library lives
+      var this_url = document.querySelector('script[src*="ecraft2learn-dev.js"]').src; // the URL where this library lives
       var load_script = function (url, when_loaded) {
           var script = document.createElement("script");
           script.type = "text/javascript";
@@ -126,7 +126,7 @@ window.ecraft2learn =
             voice_number--; // Snap (and Scratch) use 1-indexing so convert here
             if (voice_number >= 0 && voice_number < voices.length) {
                return voices[Math.floor(voice_number)];
-            } else {
+            } else if (voices.length > 0) {
                alert("Only voice numbers between 1 and " + voices.length + " are available. There is no voice number " + (voice_number+1));
             }
         }
