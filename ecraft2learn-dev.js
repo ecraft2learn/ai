@@ -889,13 +889,13 @@ window.ecraft2learn =
   },
   // experimenting with compiling Snap4Arduino to Arduino C sketch
   transpile_to_arduino_sketch: function (blocks) {
-//     var block = block_context.expression;
+    var expression = blocks.expression;
     load_script("https://toontalk.github.io/ai-cloud/lib/mqttws.js",
                 arduino_bot.connect)
     try {
         arduino_bot.verify(
                 this.world().Arduino.transpile(
-                 block.mappedCode(),
+                 expression.mappedCode(),
                  this.scripts.children.filter(
                      function (each) {
                            return each instanceof HatBlockMorph &&
