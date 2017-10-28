@@ -894,7 +894,7 @@ window.ecraft2learn =
                 arduino_bot.connect)
     try {
         arduino_bot.verify(
-                this.world().Arduino.transpile(
+               world.Arduino.transpile(
                  expression.mappedCode(),
                  this.scripts.children.filter(
                      function (each) {
