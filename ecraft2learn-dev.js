@@ -322,8 +322,8 @@ window.ecraft2learn =
         return handleResponse(topic, payload)
       } else if (topic.startsWith('result/')) {
         return handleResult(topic, payload)
-//       } else if (topic.startsWith('sketch/')) {
-//         return handleSketch(topic, payload)
+      } else if (topic.startsWith('sketch/')) {
+        return // ignore
       }
       console.log('Unknown topic: ' + topic)
     } catch (error) {
@@ -888,7 +888,7 @@ window.ecraft2learn =
       get_snap_ide().saveProject(name);
   },
   // experimenting with compiling Snap4Arduino to Arduino C sketch
-  transpile_to_arduino_sketch: function () {
+  transpile_to_arduino_sketch: function (blocks) {
 //     var block = block_context.expression;
     load_script("https://toontalk.github.io/ai-cloud/lib/mqttws.js",
                 arduino_bot.connect)
