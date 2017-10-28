@@ -890,7 +890,7 @@ window.ecraft2learn =
   },
   // experimenting with compiling Snap4Arduino to Arduino C sketch
   transpile_to_arduino_sketch: function () {
-    var block = block_context.expression;
+//     var block = block_context.expression;
     try {
         arduino_bot.verify(
                 this.world().Arduino.transpile(
@@ -902,7 +902,7 @@ window.ecraft2learn =
                       })),
                  true);
     } catch (error) {
-       return("Error exporting to Arduino sketch!  " + error.message)
+       alert("Error exporting to Arduino sketch!  " + error.message)
     }
   },
   console_log: function (message) {
