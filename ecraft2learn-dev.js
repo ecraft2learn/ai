@@ -166,6 +166,10 @@ window.ecraft2learn =
 
   var onConnectSuccessListeners = [];
 
+  function addConnectSuccessListener (listener) {
+    onConnectSuccessListeners.push(listener)
+  }
+
 //   document.addEventListener("deviceready", onDeviceReady, false);
 
 //   function onDeviceReady () {
@@ -336,7 +340,8 @@ window.ecraft2learn =
 
   // return external interface to ArduinoBot
   return {connect: connect,
-          verify:  verify}
+          verify:  verify,
+          addConnectSuccessListener: addConnectSuccessListener}
 })();
 
     var image_recognitions = {}; // record of most recent results from calls to take_picture_and_analyse
@@ -894,7 +899,7 @@ window.ecraft2learn =
   transpile_to_arduino_sketch: function (blocks) {
     var expression = blocks.expression;
     // wait until connected before transpiling
-    onConnectSuccessListeners.push(function () {
+    arduino_bot.addConnectSuccessListener(function () {
       try {
         arduino_bot.verify(
                world.Arduino.transpile(
