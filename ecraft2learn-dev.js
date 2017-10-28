@@ -164,6 +164,8 @@ window.ecraft2learn =
   var sketch = 'blinky'
   var server = 'raspberrypi.local:1884'
 
+  var onConnectSuccessListeners = [];
+
 //   document.addEventListener("deviceready", onDeviceReady, false);
 
 //   function onDeviceReady () {
@@ -276,6 +278,7 @@ window.ecraft2learn =
   function onConnectSuccess (context) {
     console.log('info', '', 'Connected', true)
     subscribeToSketch()
+    onConnectSuccessListeners.forEach(function (listener) { listener()})
   }
 
   function onConnectFailure (error) {
@@ -890,9 +893,9 @@ window.ecraft2learn =
   // experimenting with compiling Snap4Arduino to Arduino C sketch
   transpile_to_arduino_sketch: function (blocks) {
     var expression = blocks.expression;
-    load_script("https://toontalk.github.io/ai-cloud/lib/mqttws.js",
-                arduino_bot.connect)
-    try {
+    // wait until connected before transpiling
+    onConnectSuccessListeners.push(function () {
+      try {
         arduino_bot.verify(
                world.Arduino.transpile(
                  "void setup() {" + expression.mappedCode(),
@@ -902,9 +905,13 @@ window.ecraft2learn =
                                 each.selector == 'receiveMessage'
                       })),
                  true);
-    } catch (error) {
+     } catch (error) {
        alert("Error exporting to Arduino sketch!  " + error.message)
-    }
+     }      
+                })
+     load_script("https://toontalk.github.io/ai-cloud/lib/mqttws.js",
+                arduino_bot.connect)
+    
   },
   console_log: function (message) {
       console.log(message);
