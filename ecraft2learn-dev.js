@@ -331,10 +331,9 @@ window.ecraft2learn =
     }
   }
 
-  // connect to ArduinoBot (should really be conditional upon needing it)
-  connect()
   // return external interface to ArduinoBot
-  return {verify: verify}
+  return {connect: connect,
+          verify:  verify}
 })();
 
     var image_recognitions = {}; // record of most recent results from calls to take_picture_and_analyse
@@ -891,6 +890,8 @@ window.ecraft2learn =
   // experimenting with compiling Snap4Arduino to Arduino C sketch
   transpile_to_arduino_sketch: function () {
 //     var block = block_context.expression;
+    load_script("https://toontalk.github.io/ai-cloud/lib/mqttws.js",
+                connect)
     try {
         arduino_bot.verify(
                 this.world().Arduino.transpile(
