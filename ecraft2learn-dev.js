@@ -189,7 +189,7 @@ window.ecraft2learn =
   function connectMQTT () {
     var clientID = guid()
     var portNumber = defaultPortNumber
-    var serverAndPort = getServer().split(':')
+    var serverAndPort = server.split(':')
     if (serverAndPort.length === 2) {
       portNumber = parseInt(serverAndPort[1])
     }
