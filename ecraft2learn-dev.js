@@ -896,7 +896,7 @@ window.ecraft2learn =
         arduino_bot.verify(
                world.Arduino.transpile(
                  expression.mappedCode(),
-                 this.scripts.children.filter(
+                 expression.children.filter(
                      function (each) {
                            return each instanceof HatBlockMorph &&
                                 each.selector == 'receiveMessage'
