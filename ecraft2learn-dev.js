@@ -164,11 +164,11 @@ window.ecraft2learn =
   var sketch = 'blinky'
   var server = 'raspberrypi.local:1884'
 
-  document.addEventListener("deviceready", onDeviceReady, false);
+//   document.addEventListener("deviceready", onDeviceReady, false);
 
-  function onDeviceReady () {
-    connect()
-  }
+//   function onDeviceReady () {
+//     connect()
+//   }
 
   function connect () {
     disconnectMQTT()
@@ -331,8 +331,8 @@ window.ecraft2learn =
     }
   }
 
-  // Call main function to initialise app.
-
+  // connect to ArduinoBot (should really be conditional upon needing it)
+  connect()
   // return external interface to ArduinoBot
   return {verify: verify}
 })();
