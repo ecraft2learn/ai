@@ -124,6 +124,9 @@ window.ecraft2learn =
         if (typeof voice_number === 'number') {
             var voices = window.speechSynthesis.getVoices();
             voice_number--; // Snap (and Scratch) use 1-indexing so convert here
+            if (voice_number === -1) {
+                voice_number = 0;
+            }
             if (voice_number >= 0 && voice_number < voices.length) {
                return voices[Math.floor(voice_number)];
             } else {
