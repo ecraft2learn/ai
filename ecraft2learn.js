@@ -322,7 +322,7 @@ window.ecraft2learn =
                         break;
                     case "SpeechHypothesisEvent":
                         ecraft2learn.last_speech_recognized = event.Result.Text;
-                        ecraft2learn.invoke_callback(as_recognized_callback, ecraft2learn.last_speech_recognized);
+                        invoke_callback(as_recognized_callback, ecraft2learn.last_speech_recognized);
                         break;
                     case "SpeechEndDetectedEvent":
                         if (ecraft2learn.last_speech_recognized) {
