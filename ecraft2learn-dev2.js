@@ -120,7 +120,7 @@ window.ecraft2learn =
         context.drawImage(video, 0, 0, width, height, 0, 0, width, height);
     };
     var get_mary_tts_voice = function (voice_number) {
-        return get_voice_from(voice_number, mary_tts_internal_voice_names);
+        return get_voice_from(voice_number, mary_tts_voices.map(function (voice) { return voice[0]; }));
     };
     var get_voice = function (voice_number) {
         return get_voice_from(voice_number, window.speechSynthesis.getVoices());
@@ -158,82 +158,30 @@ window.ecraft2learn =
         sprite.wearCostume(costume);
         ide.hasChangedMedia = true;
     };
-    var mary_tts_nice_voice_names =
-    [
-"pierre-hsmm fr male",
-"pierre fr male",
-"jessica-hsmm fr female",
-"jessica fr female",
-"marylux lb female",
-"lucia-hsmm it female",
-"dennys-hsmm fr male",
-"camille-hsmm fr female",
-"camille fr female",
-"spike-hsmm en_GB male",
-"spike en_GB male",
-"prudence-hsmm en_GB female",
-"prudence en_GB female",
-"poppy-hsmm en_GB female",
-"poppy en_GB female",
-"pavoque-styles de male",
-"pavoque-neutral-hsmm de male",
-"pavoque-neutral de male",
-"ot-hsmm tr male",
-"ot tr male",
-"obadiah-hsmm en_GB male",
-"obadiah en_GB male",
-"slt-hsmm en_US female",
-"slt en_US female",
-"rms-hsmm en_US male",
-"rms en_US male",
-"nk-hsmm te female",
-"bdl-hsmm en_US male",
-"bdl en_US male",
-"bits4 de female",
-"bits3-hsmm de male",
-"bits3 de male",
-"bits2 de male",
-"hsmm de female",
-"bits1 de female"
+    var mary_tts_voices =
+    [ // name, human readable name, and locale
+["dfki-spike-hsmm", "Spike British English male", "en-GB"],
+["prudence en_GB female", "Prudence British English female", "en-GB"],
+["poppy en_GB female", "Poppy British English female", "en-GB"],
+["dfki-obadiah-hsmm", "Obadiah British English male", "en-GB"],
+["cmu-slt-hsmm", "SLT US English female", "en-US"],
+["cmu-rms-hsmm", "RMS US English male", "en-US"],
+["cmu-bdl-hsmm", "BDL US English male", "en-US"],
+["upmc-pierre-hsmm", "Pierre French male", "fr"],
+["upmc-jessica-hsmm", "Jessica Fremch female", "fr"],
+["enst-dennys-hsmm", "Dennys French male", "fr"],
+["enst-camille-hsmm", "Camille French female", "fr"],
+["dfki-pavoque-styles", "Pavoque German male", "de"],
+["bits4", "BITS4 German female", "de"],
+["bits3-hsmm", "BITS3 German male", "de"],
+["bits2", "BITS2 German male", "de"],
+["bits1-hsmm", "BITS1 German demale", "de"]
+["dfki-ot-hsmm", "Ot Turkish male", "tr"],
+["istc-lucia-hsmm", "Lucia Italian female", "it"],
+["marylux", "Mary Luxembourgian female", "lb"],
+// ["cmu-nk-hsmm", "NK Teluga female", "te"], // Teluga doesn't work with roman letters or digits
 ];
-    var mary_tts_internal_voice_names =
-[
-"upmc-pierre-hsmm fr male hmm",
-"upmc-pierre fr male unitselection general",
-"upmc-jessica-hsmm fr female hmm",
-"upmc-jessica fr female unitselection general",
-"marylux lb female unitselection general",
-"istc-lucia-hsmm it female hmm",
-"enst-dennys-hsmm fr male hmm",
-"enst-camille-hsmm fr female hmm",
-"enst-camille fr female unitselection general",
-"dfki-spike-hsmm en_GB male hmm",
-"dfki-spike en_GB male unitselection general",
-"dfki-prudence-hsmm en_GB female hmm",
-"dfki-prudence en_GB female unitselection general",
-"dfki-poppy-hsmm en_GB female hmm",
-"dfki-poppy en_GB female unitselection general",
-"dfki-pavoque-styles de male unitselection general",
-"dfki-pavoque-neutral-hsmm de male hmm",
-"dfki-pavoque-neutral de male unitselection general",
-"dfki-ot-hsmm tr male hmm",
-"dfki-ot tr male unitselection general",
-"dfki-obadiah-hsmm en_GB male hmm",
-"dfki-obadiah en_GB male unitselection general",
-"cmu-slt-hsmm en_US female hmm",
-"cmu-slt en_US female unitselection general",
-"cmu-rms-hsmm en_US male hmm",
-"cmu-rms en_US male unitselection general",
-"cmu-nk-hsmm te female hmm",
-"cmu-bdl-hsmm en_US male hmm",
-"cmu-bdl en_US male unitselection general",
-"bits4 de female unitselection general",
-"bits3-hsmm de male hmm",
-"bits3 de male unitselection general",
-"bits2 de male unitselection general",
-"bits1-hsmm de female hmm",
-"bits1 de female unitselection general"
-];
+   
     var image_recognitions = {}; // record of most recent results from calls to take_picture_and_analyse
 
     // the following are the ecraft2learn functions available via this library
@@ -779,10 +727,11 @@ window.ecraft2learn =
       }
       return "No voice numbered " + voice_number;
   },
-  speak_using_mary_tts: function (message, volume, voice_number, locale, finished_callback) {
+  speak_using_mary_tts: function (message, volume, voice_number, finished_callback) {
      var voice = get_mary_tts_voice(voice_number);
      var voice_parameter = voice ? "&VOICE=" + voice : "";
-     var locale_parameter = typeof locale === "string" ? "&LOCALE=" + locale : "&LOCALE=en-US";
+     var voice_number_index = +voice_number > 0 ? (+voice_number)-1 : 0;
+     var locale_parameter = "&LOCALE=" + mary_tts_voices[voice_number_index][2];
      var sound = new Audio("http://mary.dfki.de:59125/process?INPUT_TEXT=" + message.replace(/\s/g, "+") + 
                            "&INPUT_TYPE=TEXT&OUTPUT_TYPE=AUDIO&AUDIO=WAVE_FILE" + voice_parameter + locale_parameter);
      if (finished_callback) {
@@ -798,7 +747,7 @@ window.ecraft2learn =
      sound.play();
   },
   get_mary_tts_voice_names: function () {
-    return new List(mary_tts_nice_voice_names);
+    return new List(mary_tts_voices.map(function (voice) { return voice[1]; }));
   },
   open_project: function (name) {
       get_snap_ide().openProject(name);
