@@ -782,7 +782,7 @@ window.ecraft2learn =
   speak_using_mary_tts: function (message, volume, voice_number, locale, finished_callback) {
      var voice = get_mary_tts_voice(voice_number);
      var voice_parameter = voice ? "&VOICE=" + voice : "";
-     var locale_parameter = typeof locale === "string" ? "&LOCALE=" + locale : "";
+     var locale_parameter = typeof locale === "string" ? "&LOCALE=" + locale : "&LOCALE=en";
      var sound = new Audio("http://mary.dfki.de:59125/process?INPUT_TEXT=" + message.replace(/\s/g, "+") + 
                            "&INPUT_TYPE=TEXT&OUTPUT_TYPE=AUDIO&AUDIO=WAVE_FILE" + voice_parameter + locale_parameter);
      if (finished_callback) {
