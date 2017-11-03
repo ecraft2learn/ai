@@ -127,7 +127,7 @@ window.ecraft2learn =
     };
     var get_voice_from = function (voice_number, voices) {
         voice_number = +voice_number; // convert to nunber if is a string
-        if (typeof voice_number === 'number') {
+        if (typeof voice_number === 'number' && !isNaN(voice_number)) {
             voice_number--; // Snap (and Scratch) use 1-indexing so convert here
             if (voice_number === -1) {
                 voice_number = 0;
