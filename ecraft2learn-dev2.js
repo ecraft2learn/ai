@@ -122,9 +122,6 @@ window.ecraft2learn =
     var get_mary_tts_voice = function (voice_number) { // offical name
         return get_voice_from(voice_number, mary_tts_voices.map(function (voice) { return voice[0]; }));
     };
-    var get_mary_tts_voice_name = function (voice_number) { // user friendly name
-        return get_voice_from(voice_number, mary_tts_voices.map(function (voice) { return voice[1]; }));
-    };
     var get_voice = function (voice_number) {
         return get_voice_from(voice_number, window.speechSynthesis.getVoices());
     };
@@ -729,6 +726,9 @@ window.ecraft2learn =
           return voice.name;
       }
       return "No voice numbered " + voice_number;
+  },
+  get_mary_tts_voice_name: function (voice_number) { // user friendly name
+      return get_voice_from(voice_number, mary_tts_voices.map(function (voice) { return voice[1]; }));
   },
   speak_using_mary_tts: function (message, volume, voice_number, finished_callback) {
      var voice = get_mary_tts_voice(voice_number);
