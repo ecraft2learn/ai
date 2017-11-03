@@ -119,7 +119,7 @@ window.ecraft2learn =
         var context = canvas.getContext('2d');
         context.drawImage(video, 0, 0, width, height, 0, 0, width, height);
     };
-    var get_mary_tts_voice = function (voice_number) {
+    var get_mary_tts_voice_name = function (voice_number) {
         return get_voice_from(voice_number, mary_tts_voices.map(function (voice) { return voice[0]; }));
     };
     var get_voice = function (voice_number) {
