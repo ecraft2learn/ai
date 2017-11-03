@@ -119,10 +119,15 @@ window.ecraft2learn =
         var context = canvas.getContext('2d');
         context.drawImage(video, 0, 0, width, height, 0, 0, width, height);
     };
+    var get_mary_tts_voice = function (voice_number) { // offical name
+        return get_voice_from(voice_number, mary_tts_voices.map(function (voice) { return voice[0]; }));
+    };
     var get_voice = function (voice_number) {
+        return get_voice_from(voice_number, window.speechSynthesis.getVoices());
+    };
+    var get_voice_from = function (voice_number, voices) {
         voice_number = +voice_number; // convert to nunber if is a string
-        if (typeof voice_number === 'number') {
-            var voices = window.speechSynthesis.getVoices();
+        if (typeof voice_number === 'number' && !isNaN(voice_number)) {
             voice_number--; // Snap (and Scratch) use 1-indexing so convert here
             if (voice_number === -1) {
                 voice_number = 0;
@@ -153,6 +158,30 @@ window.ecraft2learn =
         sprite.wearCostume(costume);
         ide.hasChangedMedia = true;
     };
+    var mary_tts_voices =
+    [ // name, human readable name, and locale
+["dfki-spike-hsmm", "Spike British English male", "en-GB"],
+["dfki-prudence", "Prudence British English female", "en-GB"],
+["dfki-poppy", "Poppy British English female", "en-GB"],
+["dfki-obadiah-hsmm", "Obadiah British English male", "en-GB"],
+["cmu-slt-hsmm", "SLT US English female", "en-US"],
+["cmu-rms-hsmm", "RMS US English male", "en-US"],
+["cmu-bdl-hsmm", "BDL US English male", "en-US"],
+["upmc-pierre-hsmm", "Pierre French male", "fr"],
+["upmc-jessica-hsmm", "Jessica Fremch female", "fr"],
+["enst-dennys-hsmm", "Dennys French male", "fr"],
+["enst-camille-hsmm", "Camille French female", "fr"],
+["dfki-pavoque-styles", "Pavoque German male", "de"],
+["bits4", "BITS4 German female", "de"],
+["bits3-hsmm", "BITS3 German male", "de"],
+["bits2", "BITS2 German male", "de"],
+["bits1-hsmm", "BITS1 German demale", "de"],
+["dfki-ot-hsmm", "Ot Turkish male", "tr"],
+["istc-lucia-hsmm", "Lucia Italian female", "it"],
+["marylux", "Mary Luxembourgian female", "lb"],
+// ["cmu-nk-hsmm", "NK Teluga female", "te"], // Teluga doesn't work with roman letters or digits
+];
+   
     var image_recognitions = {}; // record of most recent results from calls to take_picture_and_analyse
 
     // the following are the ecraft2learn functions available via this library
@@ -697,6 +726,31 @@ window.ecraft2learn =
           return voice.name;
       }
       return "No voice numbered " + voice_number;
+  },
+  get_mary_tts_voice_name: function (voice_number) { // user friendly name
+      return get_voice_from(voice_number, mary_tts_voices.map(function (voice) { return voice[1]; }));
+  },
+  speak_using_mary_tts: function (message, volume, voice_number, finished_callback) {
+     var voice = get_mary_tts_voice(voice_number);
+     var voice_parameter = voice ? "&VOICE=" + voice : "";
+     var voice_number_index = +voice_number > 0 ? (+voice_number)-1 : 0;
+     var locale_parameter = "&LOCALE=" + mary_tts_voices[voice_number_index][2];
+     var sound = new Audio("http://mary.dfki.de:59125/process?INPUT_TEXT=" + message.replace(/\s/g, "+") + 
+                           "&INPUT_TYPE=TEXT&OUTPUT_TYPE=AUDIO&AUDIO=WAVE_FILE" + voice_parameter + locale_parameter);
+     if (finished_callback) {
+         sound.addEventListener("ended", 
+                                function () {
+                                     invoke_callback(finished_callback, javascript_to_snap(message));
+                                },
+                                false);
+     }
+     if (+volume > 0) {
+         sound.volume = +volume;
+     }
+     sound.play();
+  },
+  get_mary_tts_voice_names: function () {
+    return new List(mary_tts_voices.map(function (voice) { return voice[1]; }));
   },
   open_project: function (name) {
       get_snap_ide().openProject(name);
