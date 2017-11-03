@@ -161,8 +161,8 @@ window.ecraft2learn =
     var mary_tts_voices =
     [ // name, human readable name, and locale
 ["dfki-spike-hsmm", "Spike British English male", "en-GB"],
-["prudence en_GB female", "Prudence British English female", "en-GB"],
-["poppy en_GB female", "Poppy British English female", "en-GB"],
+["dfki-prudence", "Prudence British English female", "en-GB"],
+["dfki-poppy", "Poppy British English female", "en-GB"],
 ["dfki-obadiah-hsmm", "Obadiah British English male", "en-GB"],
 ["cmu-slt-hsmm", "SLT US English female", "en-US"],
 ["cmu-rms-hsmm", "RMS US English male", "en-US"],
