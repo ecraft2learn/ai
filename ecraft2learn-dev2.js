@@ -175,7 +175,7 @@ window.ecraft2learn =
 ["bits4", "BITS4 German female", "de"],
 ["bits3-hsmm", "BITS3 German male", "de"],
 ["bits2", "BITS2 German male", "de"],
-["bits1-hsmm", "BITS1 German demale", "de"]
+["bits1-hsmm", "BITS1 German demale", "de"],
 ["dfki-ot-hsmm", "Ot Turkish male", "tr"],
 ["istc-lucia-hsmm", "Lucia Italian female", "it"],
 ["marylux", "Mary Luxembourgian female", "lb"],
