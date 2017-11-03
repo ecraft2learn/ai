@@ -158,6 +158,7 @@ window.ecraft2learn =
         sprite.wearCostume(costume);
         ide.hasChangedMedia = true;
     };
+    // see http://mary.dfki.de:59125/documentation.html for documentation of Mary TTS
     var mary_tts_voices =
     [ // name, human readable name, and locale
 ["dfki-spike-hsmm", "Spike British English male", "en-GB"],
@@ -735,7 +736,7 @@ window.ecraft2learn =
      var voice_parameter = voice ? "&VOICE=" + voice : "";
      var voice_number_index = +voice_number > 0 ? (+voice_number)-1 : 0;
      var locale_parameter = "&LOCALE=" + mary_tts_voices[voice_number_index][2];
-     var sound = new Audio("http://mary.dfki.de:59125/process?INPUT_TEXT=" + message.replace(/\s/g, "+") + 
+     var sound = new Audio("http://mary.dfki.de:59125/process?INPUT_TEXT=" + (typeof message === 'string' ? message.replace(/\s/g, "+") : message) + 
                            "&INPUT_TYPE=TEXT&OUTPUT_TYPE=AUDIO&AUDIO=WAVE_FILE" + voice_parameter + locale_parameter);
      if (finished_callback) {
          sound.addEventListener("ended", 
