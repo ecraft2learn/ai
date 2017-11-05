@@ -754,8 +754,8 @@ window.ecraft2learn =
     return new List(mary_tts_voices.map(function (voice) { return voice[1]; }));
   },
   speak_using_browser_voices_or_mary_tts: function (message, finished_callback) {
-    if (window.speechSynthesis.getVoices().length === 0 || Math.random() > .5) {
-        // either there are no voices or 50% odds of using Mary TTS
+    if (window.speechSynthesis.getVoices().length === 0) {
+        // either there are no voices 
         ecraft2learn.speak_using_mary_tts(message, 1, 1, finished_callback);
     } else {
         ecraft2learn.speak(message, 0, 0, 1, 0, 0, finished_callback);
