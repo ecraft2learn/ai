@@ -176,7 +176,10 @@ window.ecraft2learn =
 //     connect()
 //   }
 
-  function connect () {
+  function connect (alternative_server) {
+    if (alternative_server) {
+        server = alternative_server
+    }
     disconnectMQTT()
     connectMQTT()
     // console.log('info', '', 'Connecting to MQTT ...', true)
@@ -896,7 +899,8 @@ window.ecraft2learn =
       get_snap_ide().saveProject(name);
   },
   // experimenting with compiling Snap4Arduino to Arduino C sketch
-  transpile_to_arduino_sketch: function (blocks) {
+  transpile_to_arduino_sketch: function (blocks, alternative_server) {
+    // alternative_server should be provided if the default raspberrypi.local isn't working
     var expression = blocks.expression;
     // wait until connected before transpiling
     arduino_bot.addConnectSuccessListener(function () {
@@ -915,8 +919,9 @@ window.ecraft2learn =
      }      
                 })
      load_script("https://toontalk.github.io/ai-cloud/lib/mqttws.js",
-                arduino_bot.connect)
-    
+                 function () {
+                   arduino_bot.connect(alternative_server)
+                 })
   },
   console_log: function (message) {
       console.log(message);
