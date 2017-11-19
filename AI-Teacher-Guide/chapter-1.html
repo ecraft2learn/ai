@@ -9,10 +9,16 @@
 }
 .iframe-clipped {
   border: 0px none;
-  margin-left: -200px;
+  margin-left: -10px;
   height: 800px;
-  margin-top: -120px;
+  margin-top: 30px;
   width: 1200px;
+  
+  -ms-transform: scale(1.5);
+  -moz-transform: scale(1.5);
+  -o-transform: scale(1.5);
+  -webkit-transform: scale(1.5);
+  transform: scale(1.5);
 }
 </style>
 </head><body>
@@ -111,7 +117,7 @@ Try clicking this and you'll hear there is a problem:</p>
 What we want is to have the door bell sound played <i>after</i> the first utterance is finished.
 For this we need a slightly more complex block that accepts actions to do after speaking:</p>
 
-<div class="iframe-container" style="width: 580px; height: 140px;">
+<div class="iframe-container" style="width: 600px; height: 140px;">
 <iframe class="iframe-clipped"
         scrolling="no"
         src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=doorbell%20fix&noRun&noExitWarning&editMode&hideControls"
