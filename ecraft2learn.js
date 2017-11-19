@@ -89,7 +89,7 @@ window.ecraft2learn =
         if (typeof callback === 'function') { // assume JavaScript callback
             callback.apply(this, arguments);
         }
-          // otherwise no callback provided so ignore it
+        // otherwise no callback provided so ignore it
     };
     var javascript_to_snap = function (x) {
         if (!ecraft2learn.inside_snap) {
