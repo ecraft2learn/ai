@@ -68,8 +68,7 @@ Let's start with the simplest program block for speaking. Click on it to try it 
 <iframe class="iframe-clipped"
         scrolling="no"
         src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=simple%20speak%20block&noRun&noExitWarning&editMode&hideControls"> 
-</iframe> 
-</div>
+</iframe></div>
 
 <h4>How does this work?</h4>
 >p>The Web is full of explanations of how speech synthesis works. 
@@ -89,8 +88,7 @@ And they speak questions differently from sentences.
         scrolling="no"
         src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=separate%20words&noRun&noExitWarning&editMode&hideControls"
         style="width: 1300px;"> 
-</iframe> 
-</div>
+</iframe></div>
 
 <p>And for a human speaking numbers and punctuation signs can be a bit challenging.
 Is this a sign of intelligence?</p>
@@ -99,8 +97,7 @@ Is this a sign of intelligence?</p>
 <iframe class="iframe-clipped"
         scrolling="no"
         src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=numbers%20signs&noRun&noExitWarning&editMode&hideControls"> 
-</iframe> 
-</div>
+</iframe></div>
 
 <h4>Problems combining speech and sound effects</h4>
 <p>Suppose one wanted the computer to speech, be interupted by a door bell, and respond accordingly.
@@ -110,8 +107,7 @@ Try clicking this and you'll hear there is a problem:</p>
 <iframe class="iframe-clipped"
         scrolling="no"
         src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=doorbell%20problem&noRun&noExitWarning&editMode&hideControls"> 
-</iframe> 
-</div>
+</iframe></div>
 
 <p>The problem is because the way the speak block works is that it tells the browswer to begin speaking and then continues with the next action.
 What we want is to have the door bell sound played <i>after</i> the first utterance is finished.
@@ -122,8 +118,7 @@ For this we need a slightly more complex block that accepts actions to do after 
         scrolling="no"
         src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=doorbell%20fix&noRun&noExitWarning&editMode&hideControls"
         style="width: 1300px;"> 
-</iframe> 
-</div>
+</iframe></div>
 
 <h4>What is speech synthesis good for?</h4>
 <p>Speech synthesis is a good way for software to communicate with people that are blind or visually impaired.
@@ -137,8 +132,41 @@ than displays, keyboards, mice, buttons, and touch sensors.</p>
 <h4>Controlling speech output</h4>
 <p>A person can speak slow or fast, in a low or high pitch, quietly or loudly, and more.
 And different people have different voices and accents.
+To mirror these abilities a more complex block is available.
+A paramter value of 1 means the normal pitch, rate, or volume.
+Note that depending upon the voice and browser some of these parameters are ignored.</p>
 
+<div class="iframe-container" style="width: 800px; height: 100px;">
+<iframe class="iframe-clipped"
+        scrolling="no"
+        src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=rate%20pitch%20volume&noRun&noExitWarning&editMode&hideControls"
+        style="width: 1300px;"> 
+</iframe></div>
 
+<p>Regarding the 'language' option, unfortunately many browsers currently ignore it.
+The argument should be one of the <a href="https://en.wikipedia.org/wiki/IETF_language_tag" target="_blank">IETF language tag</a>.</p>
+
+<p>Fortunately in some browsers (e.g. Chrome) some voices are associated with a language.
+When a non-English voice is given English to speak it typically speaks it with an accent.
+The selection of voices available depends upon the browser and the operating system.
+Click 'get voices' to see the list of voices and use the voice number in the speak command.</p>
+
+<div class="iframe-container" style="width: 800px; height: 500px;">
+<iframe class="iframe-clipped"
+        scrolling="no"
+        src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=voices&noRun&noExitWarning&editMode&hideControls"
+        style="width: 1300px;"> 
+</iframe></div>
+
+<p>A voice is more than just a voice.
+Listen to the two ways of reading dates.</p>
+
+<div class="iframe-container" style="width: 800px; height: 200px;">
+<iframe class="iframe-clipped"
+        scrolling="no"
+        src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=dates&noRun&noExitWarning&editMode&hideControls"
+        style="width: 1300px;"> 
+</iframe></div>
 
 
 
