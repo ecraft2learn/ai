@@ -1,5 +1,10 @@
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Speech Output - AI Teacher's Guide</title>
 <style>
+body {
+    font-family: "Tahoma", "Trebuchet MS";
+    font-size: 1.1em;
+}
 .iframe-container {
   border: 1px solid rgb(201, 0, 1);
   overflow: hidden;
@@ -12,7 +17,7 @@
   margin-left: -10px;
   height: 800px;
   margin-top: 30px;
-  width: 1200px;
+  width: 1300px;
   
   -ms-transform: scale(1.5);
   -moz-transform: scale(1.5);
@@ -23,7 +28,8 @@
 </style>
 </head><body>
 <h2>A teacher's guide to helping students build AI apps and artefacts</h2>
-<p>Ken Kahn, University of Oxford</p>
+<h3>Chapter 1 - Speech Output</h3>
+<h4>Ken Kahn, University of Oxford</h4>
 <h3>Introduction</h3>
 <p>The importance of artificial Intelligence in society, the workplace, and the economy is rapidly increasing.
 It is becoming an important part of many other technologies. AI conversational agents are becoming common in phones and PCs (Siri, Cortana, OK Google).
@@ -86,8 +92,7 @@ And they speak questions differently from sentences.
 <div  class="iframe-container" style="width: 580px; height: 140px"> 
 <iframe class="iframe-clipped"
         scrolling="no"
-        src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=separate%20words&noRun&noExitWarning&editMode&hideControls"
-        style="width: 1300px;"> 
+        src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=separate%20words&noRun&noExitWarning&editMode&hideControls"> 
 </iframe></div>
 
 <p>And for a human speaking numbers and punctuation signs can be a bit challenging.
@@ -116,8 +121,7 @@ For this we need a slightly more complex block that accepts actions to do after 
 <div class="iframe-container" style="width: 600px; height: 140px;">
 <iframe class="iframe-clipped"
         scrolling="no"
-        src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=doorbell%20fix&noRun&noExitWarning&editMode&hideControls"
-        style="width: 1300px;"> 
+        src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=doorbell%20fix&noRun&noExitWarning&editMode&hideControls"> 
 </iframe></div>
 
 <h4>What is speech synthesis good for?</h4>
@@ -139,23 +143,21 @@ Note that depending upon the voice and browser some of these parameters are igno
 <div class="iframe-container" style="width: 800px; height: 100px;">
 <iframe class="iframe-clipped"
         scrolling="no"
-        src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=rate%20pitch%20volume&noRun&noExitWarning&editMode&hideControls"
-        style="width: 1300px;"> 
+        src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=rate%20pitch%20volume&noRun&noExitWarning&editMode&hideControls"> 
 </iframe></div>
 
 <p>Regarding the 'language' option, unfortunately many browsers currently ignore it.
-The argument should be one of the <a href="https://en.wikipedia.org/wiki/IETF_language_tag" target="_blank">IETF language tag</a>.</p>
+The argument should be one of the <a href="https://en.wikipedia.org/wiki/IETF_language_tag" target="_blank">IETF language tags</a>.</p>
 
 <p>Fortunately in some browsers (e.g. Chrome) some voices are associated with a language.
 When a non-English voice is given English to speak it typically speaks it with an accent.
 The selection of voices available depends upon the browser and the operating system.
 Click 'get voices' to see the list of voices and use the voice number in the speak command.</p>
 
-<div class="iframe-container" style="width: 800px; height: 500px;">
+<div class="iframe-container" style="width: 800px; height: 600px;">
 <iframe class="iframe-clipped"
         scrolling="no"
-        src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=voices&noRun&noExitWarning&editMode&hideControls"
-        style="width: 1300px;"> 
+        src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=voices&noRun&noExitWarning&editMode&hideControls"> 
 </iframe></div>
 
 <p>A voice is more than just a voice.
@@ -164,11 +166,32 @@ Listen to the two ways of reading dates.</p>
 <div class="iframe-container" style="width: 800px; height: 200px;">
 <iframe class="iframe-clipped"
         scrolling="no"
-        src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=dates&noRun&noExitWarning&editMode&hideControls"
-        style="width: 1300px;"> 
+        src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=dates&noRun&noExitWarning&editMode&hideControls"> 
 </iframe></div>
 
+<h4>If your browser has too few available voices or you want to try a different speech engine</h4>
+<p>Some browsers and some operating systems have very few (or <i>no</i>) voices.
+An alternative speech block uses a server in Germany that has its own set of voices.</p>
 
+<div class="iframe-container" style="width: 800px; height: 500px;">
+<iframe class="iframe-clipped"
+        scrolling="no"
+        src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=Mary%20voices&noRun&noExitWarning&editMode&hideControls"> 
+</iframe></div>
+
+<h3>Where to get these blocks to use in projects</h3>
+<p>All of these speech output blocks as well other AI blocks are available to use in <a href="https://snap.berkeley.edu/" target="_blank">Snap!</a> in
+this <a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=eCraft2Learn" target="_blank">Snap project</a>.
+They can also be used togehter with blocks for controlling Arduinos by downloading and then importing
+<a href="toontalk.github.io/ai-cloud/AI-Teacher-Guide\AI%20Teacher%20Guide%20projects/eCraft2Learn%20S4A.xml" target="_blank">this file</a>
+into <a href="http://snap4arduino.rocks/" target="_blank">Snap4Arduino</a>.
+
+<h3>Learn about speech input</h3>
+<a href="chapter-2">Go to the next chapter on speech recognition</a>.
 
 <h3>Acknowledgements</h3>
+This research was supported by the <a href="https://project.ecraft2learn.eu/" target="_blank">eCraft2Learn project</a>
+funded by the European Union’s Horizon 2020 Coordination & Research and Innovation Action
+under Grant Agreement No 731345. <img src="https://project.ecraft2learn.eu/wp-content/uploads/2017/01/eCraft2Learn-Final0.1.png">
+
 </body></html>
