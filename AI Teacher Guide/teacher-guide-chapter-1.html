@@ -1,0 +1,122 @@
+
+<!-- saved from url=(0051)http://localhost:8080/slide-show/teacher-guide.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><style></style></head><body><h2>A teacher's guide to helping students build AI apps and artefacts</h2>
+<p>Ken Kahn, University of Oxford</p>
+<h3>Introduction</h3>
+<p>The importance of artificial Intelligence in society, the workplace, and the economy is rapidly increasing.
+It is becoming an important part of many other technologies. AI conversational agents are becoming common in phones and PCs (Siri, Cortana, OK Google).
+Driverless vehicles are coming soon.
+Finance, medicine, and many other fields are relying more and more on AI.
+Even toys are beginning to embed AI.</p>
+
+<p>Is there something to learn about intelligence in general by studying AI?
+AI researchers attempts to give computers the abilities to perceive, to solve problems, to plan, and to reason
+shed light on intelligence beyond what studying human and animal psychology can.</p>
+
+<p>AI raises many questions:</p>
+<ul><li>What is the future of work?</li>
+<li>How dangerous is AI?</li>
+<li>How to ensure AIs make ethical choices?</li>
+<li>Would you want a robot to be your child's best friend?</li></ul>
+<h3>Ways of teaching AI</h3>
+<p>Broadly there are three approaches</p>
+<ol><li>Readings, lectures, and discussions about AI's history, ideas, and technologies</li>
+<li>Readings, lectures, and discussions about social issues impacted by AI</li>
+<li>Supporting hands-on experiences creating AI apps and artefacts</li></ol>
+
+<p>While this guide touches on 1 and 2 and its focus is on 3.While some aspects of building AI applications are best suited for those with phds in the field,
+there are many projects that even young school students can do.
+If the power of speech and image recognition or the possibilities of machine learning are given easy programming interfaces
+then even beginners can use them in their creations.</p>
+<h3>Speech output</h3>
+<p>Let's start by exploring speech synthesis.
+Is the ability to transform text into spoken speech really an example of AI?
+Humans need to spend a long time learning to read (out loud).
+But reading involves character recognition and spelling as well as comprehension.
+When a computer produces speech none of that is involved.
+Is this an aspect of intelligent behaviour or it is just like a parrot speaking?
+Perhaps a good topic for students to discuss.
+And note that <a href="https://en.wikipedia.org/wiki/Alex_(parrot)" target="_blank">Alex the parrot</a> clearly did more than "parroting" speech.</p>
+
+<p>Before discussing what is technically involved in synthesising speech let's look at how it can be used by students.
+Let's start with the simplest program block for speaking. Click on it to try it out.
+(Currently only works well in Chrome.)</p>
+
+<div style="border: 1px solid rgb(201, 0, 1); overflow: hidden; margin: 15px auto; width: 480px; height: 70px"> 
+<iframe scrolling="no"
+        src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=simple%20speak%20block&noRun&noExitWarning&editMode&hideControls"
+        style="border: 0px none; margin-left: -200px; height: 800px; margin-top: -120px; width: 1200px;"> 
+</iframe> 
+</div>
+
+<h4>How does this work?</h4>
+>p>The Web is full of explanations of how speech synthesis works. 
+Microsoft has this <a href="https://msdn.microsoft.com/en-us/library/office/hh361668%28v=office.14%29.aspx?f=255&MSPPError=-2147217396" target="_blank">short explanation</a>.
+<i>Explain that Stuff</i> has a <href="http://www.explainthatstuff.com/how-speech-synthesis-works.html" target="_blank">much longer explanation including a history of speech synthesis</a>.
+And there is always the <a href="https://en.wikipedia.org/wiki/Speech_synthesis" target="_blank">Wikipedia's entry</a>.
+</p>
+
+<h4>Sentences are more than a series of words</h4>
+</p>Speech synthesizers do more than just say each word in a sentence.
+They attempt to produce a natural prosidy.
+And they speak questions differently from sentences.
+</p>
+
+<div style="border: 1px solid rgb(201, 0, 1); overflow: hidden; margin: 15px auto; width: 580px; height: 140px"> 
+<iframe scrolling="no"
+        src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=single%20separate%20words&noRun&noExitWarning&editMode&hideControls"
+        style="border: 0px none; margin-left: -200px; height: 800px; margin-top: -120px; width: 1300px;"> 
+</iframe> 
+</div>
+
+<p>And for a human speaking numbers and punctuation signs can be a bit challenging.
+Is this a sign of intelligence?</p>
+
+<div style="border: 1px solid rgb(201, 0, 1); overflow: hidden; margin: 15px auto; width: 480px; height: 70px"> 
+<iframe scrolling="no"
+        src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=single%20numbers%20signs&noRun&noExitWarning&editMode&hideControls"
+        style="border: 0px none; margin-left: -200px; height: 800px; margin-top: -120px; width: 1200px;"> 
+</iframe> 
+</div>
+
+<h4>Problems combining speech and sound effects</h4>
+<p>Suppose one wanted the computer to speech, be interupted by a door bell, and respond accordingly.
+Try clicking this and you'll hear there is a problem:</p>
+
+<div style="border: 1px solid rgb(201, 0, 1); overflow: hidden; margin: 15px auto; width: 480px; height: 140px"> 
+<iframe scrolling="no"
+        src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=single%20doorbell%20problem&noRun&noExitWarning&editMode&hideControls"
+        style="border: 0px none; margin-left: -200px; height: 800px; margin-top: -120px; width: 1200px;"> 
+</iframe> 
+</div>
+
+<p>The problem is because the way the speak block works is that it tells the browswer to begin speaking and then continues with the next action.
+What we want is to have the door bell sound played <i>after</i> the first utterance is finished.
+For this we need a slightly more complex block that accepts actions to do after speaking:</p>
+
+<div style="border: 1px solid rgb(201, 0, 1); overflow: hidden; margin: 15px auto; width: 580px; height: 140px"> 
+<iframe scrolling="no"
+        src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=single%20doorbell%20fix&noRun&noExitWarning&editMode&hideControls"
+        style="border: 0px none; margin-left: -200px; height: 800px; margin-top: -120px; width: 1300px;"> 
+</iframe> 
+</div>
+
+<h4>What is speech synthesis good for?</h4>
+<p>Speech synthesis is a good way for software to communicate with people that are blind or visually impaired.
+And for devices such as a talking clock or a robot without a display there are few alternatives.
+Or when the user's eyes need to attend to something exclusively (e.g. a surgeon during an operation or a pilot flying a plane).
+Speech output is often the best way to communicate with children or adults who have yet to learn to read.
+And speech synthesis gives those who physically cannot speak (e.g. Stephen Hawking) a way to communicate.
+Many argue that a conversation is often a more natural, friendly, and more pleasant interface to devices
+than displays, keyboards, mice, buttons, and touch sensors.</p>
+
+<h4>Controlling speech output</h4>
+<p>A person can speak slow or fast, in a low or high pitch, quietly or loudly, and more.
+And different people have different voices and accents.
+
+
+
+
+
+<h3>Acknowledgements</h3>
+</body></html>
