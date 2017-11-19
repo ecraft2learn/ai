@@ -1,4 +1,21 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><style></style></head><body>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<style>
+.iframe-container {
+  border: 1px solid rgb(201, 0, 1);
+  overflow: hidden;
+  margin: 15px auto;
+  width: 480px;
+  height: 70px;
+}
+.iframe-clipped {
+  border: 0px none;
+  margin-left: -200px;
+  height: 800px;
+  margin-top: -120px;
+  width: 1200px;
+}
+</style>
+</head><body>
 <h2>A teacher's guide to helping students build AI apps and artefacts</h2>
 <p>Ken Kahn, University of Oxford</p>
 <h3>Introduction</h3>
@@ -41,10 +58,10 @@ And note that <a href="https://en.wikipedia.org/wiki/Alex_(parrot)" target="_bla
 Let's start with the simplest program block for speaking. Click on it to try it out.
 (Currently only works well in Chrome.)</p>
 
-<div style="border: 1px solid rgb(201, 0, 1); overflow: hidden; margin: 15px auto; width: 480px; height: 70px"> 
-<iframe scrolling="no"
-        src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=simple%20speak%20block&noRun&noExitWarning&editMode&hideControls"
-        style="border: 0px none; margin-left: -200px; height: 800px; margin-top: -120px; width: 1200px;"> 
+<div class="iframe-container"> 
+<iframe class="iframe-clipped"
+        scrolling="no"
+        src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=simple%20speak%20block&noRun&noExitWarning&editMode&hideControls"> 
 </iframe> 
 </div>
 
@@ -61,20 +78,21 @@ They attempt to produce a natural prosidy.
 And they speak questions differently from sentences.
 </p>
 
-<div style="border: 1px solid rgb(201, 0, 1); overflow: hidden; margin: 15px auto; width: 580px; height: 140px"> 
-<iframe scrolling="no"
+<div  class="iframe-container" style="width: 580px; height: 140px"> 
+<iframe class="iframe-clipped"
+        scrolling="no"
         src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=separate%20words&noRun&noExitWarning&editMode&hideControls"
-        style="border: 0px none; margin-left: -200px; height: 800px; margin-top: -120px; width: 1300px;"> 
+        style="width: 1300px;"> 
 </iframe> 
 </div>
 
 <p>And for a human speaking numbers and punctuation signs can be a bit challenging.
 Is this a sign of intelligence?</p>
 
-<div style="border: 1px solid rgb(201, 0, 1); overflow: hidden; margin: 15px auto; width: 480px; height: 70px"> 
-<iframe scrolling="no"
-        src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=numbers%20signs&noRun&noExitWarning&editMode&hideControls"
-        style="border: 0px none; margin-left: -200px; height: 800px; margin-top: -120px; width: 1200px;"> 
+<div class="iframe-container"> 
+<iframe class="iframe-clipped"
+        scrolling="no"
+        src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=numbers%20signs&noRun&noExitWarning&editMode&hideControls"> 
 </iframe> 
 </div>
 
@@ -82,10 +100,10 @@ Is this a sign of intelligence?</p>
 <p>Suppose one wanted the computer to speech, be interupted by a door bell, and respond accordingly.
 Try clicking this and you'll hear there is a problem:</p>
 
-<div style="border: 1px solid rgb(201, 0, 1); overflow: hidden; margin: 15px auto; width: 480px; height: 140px"> 
-<iframe scrolling="no"
-        src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=doorbell%20problem&noRun&noExitWarning&editMode&hideControls"
-        style="border: 0px none; margin-left: -200px; height: 800px; margin-top: -120px; width: 1200px;"> 
+<div  class="iframe-container" style="width: 480px; height: 140px"> 
+<iframe class="iframe-clipped"
+        scrolling="no"
+        src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=doorbell%20problem&noRun&noExitWarning&editMode&hideControls"> 
 </iframe> 
 </div>
 
@@ -93,10 +111,11 @@ Try clicking this and you'll hear there is a problem:</p>
 What we want is to have the door bell sound played <i>after</i> the first utterance is finished.
 For this we need a slightly more complex block that accepts actions to do after speaking:</p>
 
-<div style="border: 1px solid rgb(201, 0, 1); overflow: hidden; margin: 15px auto; width: 580px; height: 140px"> 
-<iframe scrolling="no"
+<div class="iframe-container" style="width: 580px; height: 140px;">
+<iframe class="iframe-clipped"
+        scrolling="no"
         src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=doorbell%20fix&noRun&noExitWarning&editMode&hideControls"
-        style="border: 0px none; margin-left: -200px; height: 800px; margin-top: -120px; width: 1300px;"> 
+        style="width: 1300px;"> 
 </iframe> 
 </div>
 
