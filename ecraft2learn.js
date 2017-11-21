@@ -243,7 +243,7 @@ window.ecraft2learn =
               }
               try {
                   ecraft2learn.speech_recognition.start();
-  //                 console.log("Speech recognition started");
+ //               console.log("Speech recognition started");
               } catch (error) {
                   if (error.name === 'InvalidStateError') {
                       // delay needed, at least in Chrome 52
@@ -267,8 +267,9 @@ window.ecraft2learn =
                   }
                   return;
               }
-  //             console.log("Recognition error: " + event.error);
-              invoke_callback(callback,event.error);
+              ecraft2learn.speech_recognition.stop();
+ //           console.log("Recognition error: " + event.error);
+              invoke_callback(callback, event.error);
           };
           if (!ecraft2learn.speech_recognition) {
               ecraft2learn.speech_recognition = (typeof SpeechRecognition === 'undefined') ?
@@ -282,11 +283,11 @@ window.ecraft2learn =
               handle_error(error_callback, event);
           };
           ecraft2learn.speech_recognition.onend = function (event) {
-  //             console.log("recognition ended");
+ //           console.log("recognition ended");
               restart();
           };
           ecraft2learn.stop_speech_recognition = function () {
-               ecraft2learn.speech_recognition.onend    = null;
+              ecraft2learn.speech_recognition.onend    = null;
               ecraft2learn.speech_recognition.onresult = null;
               ecraft2learn.speech_recognition.onerror  = null;
               ecraft2learn.speech_recognition.stop();
