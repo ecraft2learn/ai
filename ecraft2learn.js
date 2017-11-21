@@ -287,10 +287,12 @@ window.ecraft2learn =
               restart();
           };
           ecraft2learn.stop_speech_recognition = function () {
+              stopped = true;
               ecraft2learn.speech_recognition.onend    = null;
               ecraft2learn.speech_recognition.onresult = null;
               ecraft2learn.speech_recognition.onerror  = null;
               ecraft2learn.speech_recognition.stop();
+              ecraft2learn.speech_recognition = null; // force a fresh start
           };
           restart();
           // if the tab or window is minimised or hidden then speech recognition is paused until the window or tab is shown again
