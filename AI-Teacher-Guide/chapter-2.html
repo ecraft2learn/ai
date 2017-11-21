@@ -1,36 +1,48 @@
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 <title>Speech Input - AI Teacher's Guide</title>
-<style>
-body {
-    font-family: "Tahoma", "Trebuchet MS";
-    font-size: 1.1em;
-}
-.iframe-container {
-  border: 1px solid rgb(201, 0, 1);
-  overflow: hidden;
-  margin: 15px auto;
-  width: 480px;
-  height: 70px;
-}
-.iframe-clipped {
-  border: 0px none;
-  margin-left: -10px;
-  height: 800px;
-  margin-top: 30px;
-  width: 1300px;
-  
-  -ms-transform: scale(1.5);
-  -moz-transform: scale(1.5);
-  -o-transform: scale(1.5);
-  -webkit-transform: scale(1.5);
-  transform: scale(1.5);
-}
-</style>
+<link href="ai-teacher-guide.css" rel="stylesheet">
 </head>
 <body>
 <h2>A teacher's guide to helping students build AI apps and artefacts</h2>
 <h3>Chapter 2 - Speech Input</h3>
 <h4>Ken Kahn, University of Oxford</h4>
+<h3>Introduction</h3>
+<p>It is much easier to get a computer to start with text and end up with speech
+than to start with speech and end up with the corresponding text.
+Speech causes vibrations in the air that cause vibrations in the computer's microphone.
+These vibrations are converted to numbers.
+Speech recognition begins with these numbers and attempts to determine what was said.
+As you'll see the process is not perfect, mistakes occur.</p>
+<h4>A simple speech recognition block</h4>
+<p>Click on the following block, say something, then click on the 'last thing heard' variable.
+If all is working well you should see what you just said.</p>
+
+<div class="iframe-container" style="width: 800px; height: 140px;">
+<iframe class="iframe-clipped"
+        scrolling="no"
+        src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=simple%20listen%20block&noRun&noExitWarning&editMode&hideControls"> 
+</iframe></div>
+
+<h4>Speech recognition errors</h4>
+<p>Speech recognition can encounter errors such as the inability to access the microphone.
+The most common "error" is when after several seconds nothing is heard.
+The 'listen' block keeps listening until there is an error.
+(Try saying something, look at the result, say something else, and look again.)
+When the nothing said error occurs the error block is given the text "no-speech".
+(Note that if you say "no speech" then there is no hypen.)
+Try the following and then be quiet for a while.</p>
+
+<div class="iframe-container" style="width: 800px; height: 200px;">
+<iframe class="iframe-clipped"
+        scrolling="no"
+        src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=listen%20error&noRun&noExitWarning&editMode&hideControls"> 
+</iframe></div>
+
+
+
+
+
+
 
 
 <h3>Where to get these blocks to use in projects</h3>
