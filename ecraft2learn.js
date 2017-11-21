@@ -260,15 +260,15 @@ window.ecraft2learn =
               invoke_callback(callback, spoken);
           };
           var handle_error = function (callback, event) {
-              if (event.error === 'aborted') {
-                  if (!stopped) {
-                      console.log("Aborted so restarting speech recognition in half a second");
-                      setTimeout(restart, 500);
-                  }
-                  return;
-              }
+//               if (event.error === 'aborted') {
+//                   if (!stopped) {
+//                       console.log("Aborted so restarting speech recognition in half a second");
+//                       setTimeout(restart, 500);
+//                   }
+//                   return;
+//               }
               ecraft2learn.speech_recognition.stop();
- //           console.log("Recognition error: " + event.error);
+//            console.log("Recognition error: " + event.error);
               invoke_callback(callback, event.error);
           };
           if (!ecraft2learn.speech_recognition) {
