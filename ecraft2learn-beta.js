@@ -91,6 +91,9 @@ window.ecraft2learn =
         }
         // otherwise no callback provided so ignore it
     };
+    var is_callback = function (x) {
+        typeof x === 'object' || typeof x === 'function';
+    };
     var javascript_to_snap = function (x) {
         if (!ecraft2learn.inside_snap) {
             return x;
@@ -223,7 +226,7 @@ window.ecraft2learn =
           xhr.send();
       },
 
-      start_speech_recognition: function (final_spoken_callback, error_callback, interim_spoken_callback) {
+      start_speech_recognition: function (final_spoken_callback, error_callback, interim_spoken_callback, language, all_results_callback, all_confidence_values_callback) {
           // final_spoken_callback and interim_spoken_callback are called with the text recognised by the browser's speech recognition capability
           // interim_spoken_callback is optional 
           // or error_callback if an error occurs
@@ -261,6 +264,24 @@ window.ecraft2learn =
                   ecraft2learn.speech_recognition.stop();
               }
               invoke_callback(event.results[0].isFinal ? final_spoken_callback : interim_spoken_callback, spoken);
+              if (is_callback(all_results_callback)) {
+                  handle_all_results(event);
+              }
+              if (is_callback(all_confidence_values_callback)) {
+                  handle_all_confidence_values(event);
+              }
+          };
+          var handle_all_results = function (event) {
+              var results = events.results.map(function (result) {
+                                                   return result[0].transcript;
+                                               });
+              invoke_callback(all_results_callback, new List([results]));
+          };
+          var handle_all_confidence_values = function (event) {
+              var results = events.results.map(function (result) {
+                                                   return result[0].confidence;
+                                               });
+              invoke_callback(all_confidence_values_callback, new List([results]));
           };
           var handle_error = function (event) {
 //               if (event.error === 'aborted') {
@@ -277,7 +298,10 @@ window.ecraft2learn =
           ecraft2learn.speech_recognition = (typeof SpeechRecognition === 'undefined') ?
                                             new webkitSpeechRecognition() :
                                             new SpeechRecognition();
-          ecraft2learn.speech_recognition.interimResults = typeof interim_spoken_callback === 'object';
+          ecraft2learn.speech_recognition.interimResults = typeof is_callback(interim_spoken_callback);
+          if (typeof language === 'string') {
+              ecraft2learn.speech_recognition.lang = language;
+          }
           ecraft2learn.speech_recognition.onresult = handle_result;
           ecraft2learn.speech_recognition.onerror = handle_error;
           ecraft2learn.speech_recognition.onend = function (event) {
