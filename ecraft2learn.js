@@ -268,7 +268,7 @@ window.ecraft2learn =
 //                   return;
 //               }
 //               ecraft2learn.speech_recognition.stop();
-              stop_speech_recognition();
+              ecraft2learn.stop_speech_recognition();
 //            console.log("Recognition error: " + event.error);
               invoke_callback(callback, event.error);
           };
