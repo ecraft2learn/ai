@@ -226,10 +226,13 @@ window.ecraft2learn =
           xhr.send();
       },
 
-      start_speech_recognition: function (final_spoken_callback, error_callback, interim_spoken_callback, language, all_results_callback, all_confidence_values_callback) {
+      start_speech_recognition: function (final_spoken_callback, error_callback, interim_spoken_callback, language, 
+                                          max_alternatives , all_results_callback, all_confidence_values_callback) {
           // final_spoken_callback and interim_spoken_callback are called with the text recognised by the browser's speech recognition capability
           // interim_spoken_callback is optional 
           // or error_callback if an error occurs
+          // language is of the form en-US and is optional
+          // maxAlternatives 
           // if the browser has no support for speech recognition then the Microsoft Speech API is used (API key required)
           if (typeof SpeechRecognition === 'undefined' && typeof webkitSpeechRecognition === 'undefined') {
               // no support from this browser so try using the Microsoft Speech API
@@ -273,15 +276,17 @@ window.ecraft2learn =
           };
           var handle_all_results = function (event) {
               var results = [];
-              for (var i = 0; i < event.results.length; i++) {
-                  results.append(event.results[i][0].transcript);
+              var result = event.results[event.resultIndex];
+              for (var i = 0; i < result.length; i++) {
+                  results.concat(result[i].transcript);
               }
               invoke_callback(all_results_callback, new List([results]));
           };
           var handle_all_confidence_values = function (event) {
               var confidences = [];
-              for (var i = 0; i < event.results.length; i++) {
-                  confidences.append(event.results[i][0].confidence);
+              var result = event.results[event.resultIndex];
+              for (var i = 0; i < result.length; i++) {
+                  confidences.concat(result[i].confidence);
               }
               invoke_callback(all_confidence_values_callback, new List([confidences]));
           };
@@ -303,6 +308,9 @@ window.ecraft2learn =
           ecraft2learn.speech_recognition.interimResults = typeof is_callback(interim_spoken_callback);
           if (typeof language === 'string') {
               ecraft2learn.speech_recognition.lang = language;
+          }
+          if (max_alternatives > 1) {
+              ecraft2learn.speech_recognition.maxAlternatives = max_alternatives;
           }
           ecraft2learn.speech_recognition.onresult = handle_result;
           ecraft2learn.speech_recognition.onerror = handle_error;
