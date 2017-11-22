@@ -280,7 +280,7 @@ window.ecraft2learn =
               for (var i = 0; i < result.length; i++) {
                   results.push(result[i].transcript);
               }
-              invoke_callback(all_results_callback, new List(results));
+              invoke_callback(all_results_callback, javascript_to_snap(results));
           };
           var handle_all_confidence_values = function (event) {
               var confidences = [];
@@ -288,7 +288,7 @@ window.ecraft2learn =
               for (var i = 0; i < result.length; i++) {
                   confidences.push(result[i].confidence);
               }
-              invoke_callback(all_confidence_values_callback, new List(confidences));
+              invoke_callback(all_confidence_values_callback, javascript_to_snap(confidences));
           };
           var handle_error = function (event) {
 //               if (event.error === 'aborted') {
