@@ -278,7 +278,7 @@ window.ecraft2learn =
               var results = [];
               var result = event.results[event.resultIndex];
               for (var i = 0; i < result.length; i++) {
-                  results.concat(result[i].transcript);
+                  results.push(result[i].transcript);
               }
               invoke_callback(all_results_callback, new List([results]));
           };
@@ -286,7 +286,7 @@ window.ecraft2learn =
               var confidences = [];
               var result = event.results[event.resultIndex];
               for (var i = 0; i < result.length; i++) {
-                  confidences.concat(result[i].confidence);
+                  confidences.push(result[i].confidence);
               }
               invoke_callback(all_confidence_values_callback, new List([confidences]));
           };
