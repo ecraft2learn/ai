@@ -92,7 +92,7 @@ window.ecraft2learn =
         // otherwise no callback provided so ignore it
     };
     var is_callback = function (x) {
-        typeof x === 'object' || typeof x === 'function';
+        return typeof x === 'object' || typeof x === 'function';
     };
     var javascript_to_snap = function (x) {
         if (!ecraft2learn.inside_snap) {
