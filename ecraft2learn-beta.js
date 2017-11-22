@@ -258,7 +258,7 @@ window.ecraft2learn =
               var spoken = event.results[0][0].transcript;
               console.log("Confidence is " + event.results[0][0].confidence + " for " + spoken);
               ecraft2learn.speech_recognition.stop();
-              invoke_callback(event.results[0][0].isFinal ? final_spoken_callback : interim_spoken_callback, spoken);
+              invoke_callback(event.results[0].isFinal ? final_spoken_callback : interim_spoken_callback, spoken);
           };
           var handle_error = function (event) {
 //               if (event.error === 'aborted') {
