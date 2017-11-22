@@ -262,8 +262,9 @@ window.ecraft2learn =
           };
           var handle_result = function (event) {
               var spoken = event.results[0][0].transcript;
-              console.log("Confidence is " + event.results[0][0].confidence + " for " + spoken);
+//               console.log("Confidence is " + event.results[0][0].confidence + " for " + spoken);
               if (event.results[0].isFinal) {
+                  // not clear if this is still needed
                   ecraft2learn.speech_recognition.stop();
               }
               invoke_callback(event.results[0].isFinal ? final_spoken_callback : interim_spoken_callback, spoken);
@@ -312,6 +313,7 @@ window.ecraft2learn =
           if (max_alternatives > 1) {
               ecraft2learn.speech_recognition.maxAlternatives = max_alternatives;
           }
+          ecraft2learn.speech_recognition.profanityFilter = true; // so more appropriate use in schools, e.g. f*** will result
           ecraft2learn.speech_recognition.onresult = handle_result;
           ecraft2learn.speech_recognition.onerror = handle_error;
           ecraft2learn.speech_recognition.onend = function (event) {
