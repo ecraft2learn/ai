@@ -272,16 +272,18 @@ window.ecraft2learn =
               }
           };
           var handle_all_results = function (event) {
-              var results = events.results.map(function (result) {
-                                                   return result[0].transcript;
-                                               });
+              var results = [];
+              for (var i = 0; i < event.results.length; i++) {
+                  results.append(event.results[i][0].transcript);
+              }
               invoke_callback(all_results_callback, new List([results]));
           };
           var handle_all_confidence_values = function (event) {
-              var results = events.results.map(function (result) {
-                                                   return result[0].confidence;
-                                               });
-              invoke_callback(all_confidence_values_callback, new List([results]));
+              var confidences = [];
+              for (var i = 0; i < event.results.length; i++) {
+                  confidences.append(event.results[i][0].confidence);
+              }
+              invoke_callback(all_confidence_values_callback, new List([confidences]));
           };
           var handle_error = function (event) {
 //               if (event.error === 'aborted') {
