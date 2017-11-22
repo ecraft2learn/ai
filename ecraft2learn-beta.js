@@ -223,13 +223,14 @@ window.ecraft2learn =
           xhr.send();
       },
 
-      start_speech_recognition: function (spoken_callback, error_callback, interimResults) {
-          // spoken_callback is called with the text recognised by the browser's speech recognition capability
+      start_speech_recognition: function (final_spoken_callback, error_callback, interim_spoken_callback) {
+          // final_spoken_callback and interim_spoken_callback are called with the text recognised by the browser's speech recognition capability
+          // interim_spoken_callback is optional 
           // or error_callback if an error occurs
           // if the browser has no support for speech recognition then the Microsoft Speech API is used (API key required)
           if (typeof SpeechRecognition === 'undefined' && typeof webkitSpeechRecognition === 'undefined') {
               // no support from this browser so try using the Microsoft Speech API
-              ecraft2learn.start_microsoft_speech_recognition(null, spoken_callback, error_callback);
+              ecraft2learn.start_microsoft_speech_recognition(interim_spoken_callback, spoken_callback, error_callback);
               return;
           }
           var stopped = false; // used to suspend listening when tab is hidden
@@ -257,9 +258,9 @@ window.ecraft2learn =
               var spoken = event.results[0][0].transcript;
               console.log("Confidence is " + event.results[0][0].confidence + " for " + spoken);
               ecraft2learn.speech_recognition.stop();
-              invoke_callback(callback, spoken);
+              invoke_callback(event.results[0][0].isFinal ? final_spoken_callback : interim_spoken_callback, spoken);
           };
-          var handle_error = function (callback, event) {
+          var handle_error = function (event) {
 //               if (event.error === 'aborted') {
 //                   if (!stopped) {
 //                       console.log("Aborted so restarting speech recognition in half a second");
@@ -269,18 +270,14 @@ window.ecraft2learn =
 //               }
               ecraft2learn.stop_speech_recognition();
 //               console.log("Recognition error: " + event.error);
-              invoke_callback(callback, event.error);
+              invoke_callback(error_callback, event.error);
           };
           ecraft2learn.speech_recognition = (typeof SpeechRecognition === 'undefined') ?
                                             new webkitSpeechRecognition() :
                                             new SpeechRecognition();
-          ecraft2learn.speech_recognition.interimResults = interimResults;
-          ecraft2learn.speech_recognition.onresult = function (event) {
-              handle_result(spoken_callback, event);
-          };
-          ecraft2learn.speech_recognition.onerror = function (event) {
-              handle_error(error_callback, event);
-          };
+          ecraft2learn.speech_recognition.interimResults = typeof interim_spoken_callback === 'object';
+          ecraft2learn.speech_recognition.onresult = handle_result;
+          ecraft2learn.speech_recognition.onerror = handle_error;
           ecraft2learn.speech_recognition.onend = function (event) {
  //           console.log("recognition ended");
 //               restart();
