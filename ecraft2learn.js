@@ -231,7 +231,7 @@ window.ecraft2learn =
       },
 
       start_speech_recognition: function (final_spoken_callback, error_callback, interim_spoken_callback, language, 
-                                          max_alternatives , all_results_callback, all_confidence_values_callback) {
+                                          max_alternatives, all_results_callback, all_confidence_values_callback) {
           // final_spoken_callback and interim_spoken_callback are called with the text recognised by the browser's speech recognition capability
           // interim_spoken_callback is optional 
           // or error_callback if an error occurs
@@ -250,7 +250,7 @@ window.ecraft2learn =
               // don't listen while speaking or while listening is still in progress
               setTimeout(function () {
                              ecraft2learn.start_speech_recognition(final_spoken_callback, error_callback, interim_spoken_callback, language, 
-                                                                   max_alternatives , all_results_callback, all_confidence_values_callback); 
+                                                                   max_alternatives, all_results_callback, all_confidence_values_callback); 
                          },
                          500); // try again in half a second
               return;
@@ -271,8 +271,7 @@ window.ecraft2learn =
               }
           };
           var handle_result = function (event) {
-              var spoken = event.results[0][0].transcript;
-//               console.log("Confidence is " + event.results[0][0].confidence + " for " + spoken);
+              var spoken = event.results[0][0].transcript;             
 //               if (event.results[0].isFinal) {
 //                   // not clear if this is still needed
 //                   ecraft2learn.speech_recognition.stop();
@@ -283,6 +282,8 @@ window.ecraft2learn =
               }
               if (is_callback(all_confidence_values_callback)) {
                   handle_all_confidence_values(event);
+              } else {
+                  console.log("Confidence is " + event.results[0][0].confidence + " for " + spoken);
               }
           };
           var handle_all_results = function (event) {
