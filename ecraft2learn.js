@@ -316,25 +316,21 @@ window.ecraft2learn =
           ecraft2learn.speech_recognition.profanityFilter = true; // so more appropriate use in schools, e.g. f*** will result
           ecraft2learn.speech_recognition.onresult = handle_result;
           ecraft2learn.speech_recognition.onerror = handle_error;
-          ecraft2learn.speech_recognition.onend = function (event) {
- //           console.log("recognition ended");
-//               restart();
-          };
           ecraft2learn.stop_speech_recognition = function () {
               stopped = true;
-              ecraft2learn.speech_recognition.onend    = null;
-              ecraft2learn.speech_recognition.onresult = null;
-              ecraft2learn.speech_recognition.onerror  = null;
-              ecraft2learn.speech_recognition.stop();
-              ecraft2learn.speech_recognition = null; // force a fresh start
+              if (ecraft2learn.speech_recognition) {
+                  ecraft2learn.speech_recognition.onend    = null; // not used anymore
+                  ecraft2learn.speech_recognition.onresult = null;
+                  ecraft2learn.speech_recognition.onerror  = null;
+                  ecraft2learn.speech_recognition.stop();
+              }
           };
           restart();
           // if the tab or window is minimised or hidden then speech recognition is paused until the window or tab is shown again
           window.addEventListener("message",
                                   function(message) {
                                       if (message.data === 'hidden') {
-                                          stopped = true;
-                                          ecraft2learn.speech_recognition.stop();
+                                          ecraft2learn.stop_speech_recognition();
                                           console.log("Stopped because tab/window hidden.");
                                       } else if (message.data === 'shown') {
                                           stopped = false;
