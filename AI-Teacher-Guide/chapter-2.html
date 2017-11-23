@@ -1,7 +1,7 @@
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 <title>Speech Input - AI Teacher's Guide</title>
 <link href="ai-teacher-guide.css" rel="stylesheet">
-<link rel="icon" type="image/png" href="../images/eCraft2Learn-Favicon.png" />
+<link rel="icon" type="image/png" href="images/eCraft2Learn-Favicon.png" />
 </head>
 <body>
 <h2>A teacher's guide to helping students build AI apps and artefacts</h2>
@@ -41,9 +41,51 @@ Try the following and then be quiet for a while.</p>
         src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=listen%20error&noRun&noExitWarning&editMode&hideControls"> 
 </iframe></div>
 
+<h4>A sample program using speech recognition (and synthesis)</h4>
+<p>The following program uses the 'listen' block to control a sprite.
+You can tell it to go forward or to the turn right.
+It will then ask you how much and then execute the command.
+A similar program could be written to control a physical device such as a robot or a set of lights.</p>
+
+<a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=command" target="_blank">
+<figure>
+<img src="images/command.png" class="center">
+<figurecaption>Click to try the voice command example</figurecaption></figure></a>
+
+<h4>How the speech command programs works</h4>
+<p>If you right click on 'speak turtle commands' and select 'edit' you'll see the program.
+The 'spoken' variable contains what was just recognised.
+The nested 'if-then-else' commands test for exiting commands, then forward commands, and then turning commands.
+If none match then a 'not understood' response is created.
+Both the turning and moving commands cause the program to ask for amount.
+When a number is spoken the turtle then turns or moves appropriately.</p>
+
+<h4>An alternative way to do the same thing</h4>
+<p>The command program relies upon what computer scientists call 'continuations'.
+These are blocks of code that are executed when something happens, in this case when the speech is recognised.
+An alternative that is popular among Scratch programmers is to rely instead upon broadcasting messages.
+The following implements voice commands by using a helper command called 'listen'.
+'listen' broadcasts the message 'heard something'.
+The program fragments that listen for 'heard something' broadcasts need to know what was heard.
+The variable 'last thing heard' is used for this.
+This style of programming is perhaps easier for young children but it does have its limitations.
+For example, it is very difficult to implement a response when no other parts of the program undersand what was said.
+The first version responds by saying it didn't understand what was said, repeats what it thinks it heard, and says to try again.
+The following version cannot do so.</p>
+
+<h4>A full-featured 'listen' block</h4>
+<p>The speech recognition engines typically can do more than the above blocks.
+One can specify which language is expected.
+The engine can report interim results and alternative results.
+It can provide 'confidence' values indicating how certain it is that it recognised the speech correctly.
+All of these functionalities are provided by this block:</p>
 
 
 
+<a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=command%20broadcast%202" target="_blank">
+<figure>
+<img src="images/command.png" class="center">
+<figurecaption>Click to see how to use broadcasting to implement voice commands</figurecaption></figure></a>
 
 
 
@@ -60,7 +102,7 @@ into <a href="http://snap4arduino.rocks/" target="_blank">Snap4Arduino</a>.
 
 <h3>Acknowledgements</h3>
 This research was supported by the <a href="https://project.ecraft2learn.eu/" target="_blank">eCraft2Learn project</a>
-funded by the European Union’s Horizon 2020 Coordination & Research and Innovation Action
+funded by the European Union's Horizon 2020 Coordination & Research and Innovation Action
 under Grant Agreement No 731345. <img src="https://project.ecraft2learn.eu/wp-content/uploads/2017/01/eCraft2Learn-Final0.1.png">
 
 </body></html>
