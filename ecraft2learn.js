@@ -242,17 +242,14 @@ window.ecraft2learn =
           if (stopped) {
               return;
           }
-          if (window.speechSynthesis.speaking) { // don't listen while speaking
+          if (window.speechSynthesis.speaking || listening) { 
+              // don't listen while speaking or while listening is still in progress
               setTimeout(function () {
                              start_speech_recognition(final_spoken_callback, error_callback, interim_spoken_callback, language, 
                                                       max_alternatives , all_results_callback, all_confidence_values_callback); 
                          },
                          500); // try again in half a second
               return;
-          }
-          if (listening) { // don't start listening again before previous listen is finished 
-             setTimeout(restart, 500); // try again in half a second
-             return;
           }
           var stopped = false; // used to suspend listening when tab is hidden
           var listening = false;
