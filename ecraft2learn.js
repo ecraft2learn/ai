@@ -240,6 +240,7 @@ window.ecraft2learn =
               return;
           }
           var stopped = false; // used to suspend listening when tab is hidden
+          var listening = false;
           var restart = function () {
               if (stopped) {
                  return;
@@ -248,10 +249,16 @@ window.ecraft2learn =
                   setTimeout(restart, 500); // try again in half a second
                   return;
               }
+              if (listening) { // don't start listening again before previous listen is finished 
+                  setTimeout(restart, 500); // try again in half a second
+                  return;
+              }
               try {
+                  listening = true;
                   ecraft2learn.speech_recognition.start();
  //               console.log("Speech recognition started");
               } catch (error) {
+                  listening = false;
                   if (error.name === 'InvalidStateError') {
                       // delay needed, at least in Chrome 52
                       setTimeout(restart, 2000);
@@ -316,10 +323,14 @@ window.ecraft2learn =
           ecraft2learn.speech_recognition.profanityFilter = true; // so more appropriate use in schools, e.g. f*** will result
           ecraft2learn.speech_recognition.onresult = handle_result;
           ecraft2learn.speech_recognition.onerror = handle_error;
+          ecraft2learn.speech_recognition.onend = function (event) {
+              listening = false;
+          };
           ecraft2learn.stop_speech_recognition = function () {
               stopped = true;
+              listening = false;
               if (ecraft2learn.speech_recognition) {
-                  ecraft2learn.speech_recognition.onend    = null; // not used anymore
+                  ecraft2learn.speech_recognition.onend    = null;
                   ecraft2learn.speech_recognition.onresult = null;
                   ecraft2learn.speech_recognition.onerror  = null;
                   ecraft2learn.speech_recognition.stop();
