@@ -190,6 +190,8 @@ window.ecraft2learn =
     
     var speech_recognition_in_progress = false; // used to prevent overlapping calls to start_speech_recognition
 
+    var debugging = true;
+
     // the following are the ecraft2learn functions available via this library
 
     return {
@@ -252,6 +254,9 @@ window.ecraft2learn =
           }
           var restart = function () {
               if (speech_recognition_stopped) {
+                  if (debugging) {
+                      console.log("restart exited becuase speech_recognition_stopped");
+                  }
                   return;
               }
               try {
@@ -261,6 +266,9 @@ window.ecraft2learn =
               } catch (error) {
                   speech_recognition_in_progress = false;
                   if (error.name === 'InvalidStateError') {
+                      if (debugging) {
+                          console.log("restart delayed becuase InvalidStateError");
+                      }
                       // delay needed, at least in Chrome 52
                       setTimeout(restart, 2000);
                   } else {
@@ -309,7 +317,9 @@ window.ecraft2learn =
 //                   return;
 //               }
               ecraft2learn.stop_speech_recognition();
-//               console.log("Recognition error: " + event.error);
+              if (debugging) {
+                   console.log("Recognition error: " + event.error);
+              }
               invoke_callback(error_callback, event.error);
           };
           var speech_recognition_stopped = false; // used to suspend listening when tab is hidde
