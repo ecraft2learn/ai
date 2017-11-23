@@ -338,7 +338,7 @@ window.ecraft2learn =
           ecraft2learn.speech_recognition = (typeof SpeechRecognition === 'undefined') ?
                                             new webkitSpeechRecognition() :
                                             new SpeechRecognition();
-          ecraft2learn.speech_recognition.interimResults = typeof is_callback(interim_spoken_callback);
+          ecraft2learn.speech_recognition.interimResults = is_callback(interim_spoken_callback);
           if (typeof language === 'string') {
               ecraft2learn.speech_recognition.lang = language;
           }
