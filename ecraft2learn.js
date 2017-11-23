@@ -190,7 +190,7 @@ window.ecraft2learn =
 
     var speech_recognition_stopped = false; // used to suspend listening when tab is hidden or explicitly stop it
     
-    var listening = false; // used to prevent overlapping calls to start_speech_recognition
+    var speech_recognition_in_progress = false; // used to prevent overlapping calls to start_speech_recognition
 
     // the following are the ecraft2learn functions available via this library
 
