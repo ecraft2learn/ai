@@ -249,8 +249,8 @@ window.ecraft2learn =
           if (window.speechSynthesis.speaking || speech_recognition_in_progress) { 
               // don't listen while speaking or while listening is still in progress
               setTimeout(function () {
-                             start_speech_recognition(final_spoken_callback, error_callback, interim_spoken_callback, language, 
-                                                      max_alternatives , all_results_callback, all_confidence_values_callback); 
+                             ecraft2learn.start_speech_recognition(final_spoken_callback, error_callback, interim_spoken_callback, language, 
+                                                                   max_alternatives , all_results_callback, all_confidence_values_callback); 
                          },
                          500); // try again in half a second
               return;
