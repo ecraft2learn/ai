@@ -263,10 +263,10 @@ window.ecraft2learn =
           var handle_result = function (event) {
               var spoken = event.results[0][0].transcript;
 //               console.log("Confidence is " + event.results[0][0].confidence + " for " + spoken);
-              if (event.results[0].isFinal) {
-                  // not clear if this is still needed
-                  ecraft2learn.speech_recognition.stop();
-              }
+//               if (event.results[0].isFinal) {
+//                   // not clear if this is still needed
+//                   ecraft2learn.speech_recognition.stop();
+//               }
               invoke_callback(event.results[0].isFinal ? final_spoken_callback : interim_spoken_callback, spoken);
               if (is_callback(all_results_callback)) {
                   handle_all_results(event);
