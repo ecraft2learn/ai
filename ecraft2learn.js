@@ -270,7 +270,7 @@ window.ecraft2learn =
                   if (debugging) {
                       console.log("Recognition started");
                   }
-                  SpeechRecognition.start();
+                  speech_recognition.start();
  //               console.log("Speech recognition started");
               } catch (error) {
                   speech_recognition_in_progress = false;
