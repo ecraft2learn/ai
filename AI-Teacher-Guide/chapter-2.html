@@ -73,6 +73,11 @@ For example, it is very difficult to implement a response when no other parts of
 The first version responds by saying it didn't understand what was said, repeats what it thinks it heard, and says to try again.
 The following version cannot do so.</p>
 
+<a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=command%20broadcast%202" target="_blank">
+<figure>
+<img src="images/command.png" class="center">
+<figurecaption>Click to see how to use broadcasting to implement voice commands</figurecaption></figure></a>
+
 <h4>A full-featured 'listen' block</h4>
 <p>The speech recognition engines typically can do more than the above blocks.
 One can specify which language is expected.
@@ -80,20 +85,28 @@ The engine can report interim results and alternative results.
 It can provide 'confidence' values indicating how certain it is that it recognised the speech correctly.
 All of these functionalities are provided by this block:</p>
 
+<div class="iframe-container" style="width: 800px; height: 400px;">
+<iframe class="iframe-clipped"
+        scrolling="no"
+        src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=complex%20listen%20block&noRun&noExitWarning&editMode&hideControls"> 
+</iframe></div>
 
-
-<a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=command%20broadcast%202" target="_blank">
-<figure>
-<img src="images/command.png" class="center">
-<figurecaption>Click to see how to use broadcasting to implement voice commands</figurecaption></figure></a>
-
-
+<p>The arguments to this block are:
+<ol>
+<li>The first argument are blocks that receive interim results as they are produced. Can be left blank.</li>
+<li>The next argument are blocks that receive the final result.</li>
+<li>The next argument receives errors if there are any. Can be left blank.</li>
+<li>Text in the format language-dialect. E.g. en-GB. It should be one of the <a href="https://en.wikipedia.org/wiki/IETF_language_tag" target="_blank">IETF language tags</a>. Can be left blank.</li>
+<li>The maximum number of alternative recognition results. If not provided it is 1. Note the recognition engine may return fewer results.</li>
+<li>Blocks that receive a list of alternative results. Can be left blank.</li>
+<li>Blocks that receive a list of confidence numbers corresponding to the alternative results. 0 means no confidence while 1 is the highest. Can be left blank.</li>
+</ol></p>
 
 
 <h3>Where to get these blocks to use in projects</h3>
 <p>All of these speech output blocks as well other AI blocks are available to use in <a href="https://snap.berkeley.edu/" target="_blank">Snap!</a> in
 this <a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=eCraft2Learn" target="_blank">Snap project</a>.
-They can also be used togehter with blocks for controlling Arduinos by downloading and then importing
+They can also be used together with blocks for controlling Arduinos by downloading and then importing
 <a href="https://toontalk.github.io/ai-cloud/AI-Teacher-Guide\AI%20Teacher%20Guide%20projects/eCraft2Learn%20S4A.xml" download>this file</a>
 into <a href="http://snap4arduino.rocks/" target="_blank">Snap4Arduino</a>.
 
