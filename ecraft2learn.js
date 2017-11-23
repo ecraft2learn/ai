@@ -289,7 +289,7 @@ window.ecraft2learn =
               var spoken = event.results[event.resultIndex][0].transcript; // first result            
 //               if (event.results[0].isFinal) {
 //                   // not clear if this is still needed
-//                   SpeechRecognition.stop();
+//                   speech_recognition.stop();
 //               }
               invoke_callback(event.results[event.resultIndex].isFinal ? final_spoken_callback : interim_spoken_callback, spoken);
               if (debugging) {
@@ -356,11 +356,11 @@ window.ecraft2learn =
                   console.log("Stopped.");
               }
               speech_recognition_in_progress = false;
-              if (SpeechRecognition) {
-                  SpeechRecognition.onend    = null;
-                  SpeechRecognition.onresult = null;
-                  SpeechRecognition.onerror  = null;
-                  SpeechRecognition.stop();
+              if (speech_recognition) {
+                  speech_recognition.onend    = null;
+                  speech_recognition.onresult = null;
+                  speech_recognition.onerror  = null;
+                  speech_recognition.stop();
               }
           };
           restart();
@@ -785,7 +785,7 @@ window.ecraft2learn =
     utterance.onend = function (event) {
         invoke_callback(finished_callback, message);
     };
-//     if (SpeechRecognition) {
+//     if (speech_recognition) {
 //         // don't recognise synthetic speech
 //         ecraft2learn.speech_recognition.abort();
 //     }
