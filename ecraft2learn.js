@@ -286,14 +286,14 @@ window.ecraft2learn =
               }
           };
           var handle_result = function (event) {
-              var spoken = event.results[0][0].transcript;             
+              var spoken = event.results[event.resultIndex][0].transcript; // first result            
 //               if (event.results[0].isFinal) {
 //                   // not clear if this is still needed
 //                   ecraft2learn.speech_recognition.stop();
 //               }
-              invoke_callback(event.results[0].isFinal ? final_spoken_callback : interim_spoken_callback, spoken);
+              invoke_callback(event.results[event.resultIndex].isFinal ? final_spoken_callback : interim_spoken_callback, spoken);
               if (debugging) {
-                  console.log("Just invoked callback for " + spoken + ". isFinal is " + event.results[0].isFinal);
+                  console.log("Just invoked callback for " + spoken + ". isFinal is " + event.results[event.resultIndex].isFinal);
               }
               if (is_callback(all_results_callback)) {
                   handle_all_results(event);
@@ -301,7 +301,7 @@ window.ecraft2learn =
               if (is_callback(all_confidence_values_callback)) {
                   handle_all_confidence_values(event);
               } else {
-                  console.log("Confidence is " + event.results[0][0].confidence + " for " + spoken);
+                  console.log("Confidence is " + event.results[event.resultIndex][0].confidence + " for " + spoken);
               }
           };
           var handle_all_results = function (event) {
