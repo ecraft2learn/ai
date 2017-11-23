@@ -335,9 +335,11 @@ window.ecraft2learn =
               invoke_callback(error_callback, event.error);
           };
           var speech_recognition_stopped = false; // used to suspend listening when tab is hidde
-          ecraft2learn.speech_recognition = (typeof SpeechRecognition === 'undefined') ?
-                                            new webkitSpeechRecognition() :
-                                            new SpeechRecognition();
+          if (!ecraft2learn.speech_recognition) {
+              ecraft2learn.speech_recognition = (typeof SpeechRecognition === 'undefined') ?
+                                                new webkitSpeechRecognition() :
+                                                new SpeechRecognition();
+          }
           ecraft2learn.speech_recognition.interimResults = is_callback(interim_spoken_callback);
           if (typeof language === 'string') {
               ecraft2learn.speech_recognition.lang = language;
@@ -369,11 +371,15 @@ window.ecraft2learn =
                                   function(message) {
                                       if (message.data === 'hidden') {
                                           speech_recognition_stopped = true;
-                                          console.log("Stopped because tab/window hidden.");
+                                          if (debugging) {
+                                              console.log("Stopped because tab/window hidden.");
+                                          }     
                                       } else if (message.data === 'shown') {
                                           speech_recognition_stopped = false;
                                           restart();
-                                          console.log("Restarted because tab/window shown.");
+                                          if (debugging) {
+                                              console.log("Restarted because tab/window shown.");
+                                          }
                                       }
                                   });
     },
