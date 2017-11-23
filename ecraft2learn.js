@@ -255,6 +255,9 @@ window.ecraft2learn =
                          100); // try again in a tenth of a second
               return;
           }
+          if (debugging) {
+              console.log("start_speech_recognition called.");
+          }
           var restart = function () {
               if (speech_recognition_stopped) {
                   if (debugging) {
@@ -349,6 +352,9 @@ window.ecraft2learn =
               speech_recognition_in_progress = false;
           };
           ecraft2learn.stop_speech_recognition = function () {
+              if (debugging) {
+                  console.log("Stopped.");
+              }
               speech_recognition_in_progress = false;
               if (ecraft2learn.speech_recognition) {
                   ecraft2learn.speech_recognition.onend    = null;
