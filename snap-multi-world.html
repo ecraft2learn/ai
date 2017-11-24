@@ -48,8 +48,6 @@
 														console.error("Error fetching " + project_path + ": " + error.message);
 													 });
 											 	 }
-											 	 // with multiple worlds absolute posiioning doesn't work
-												 world_canvas.style.position = 'relative';
 											 });
                 loop();
 			};
@@ -60,13 +58,44 @@
                 });
 			}
 		</script>
-	</head>
+<style>
+.snap-world-container {
+  border: 1px solid rgb(201, 0, 1);
+  overflow: hidden;
+  margin: 15px auto;
+  width: 700px; 
+  height: 170px;
+}
+.snap-world-clipped {
+  border: 0px none;
+  margin-left: -450px;
+  margin-top: -240px;
+/*   width: 1300px;
+  height: 800px; */
+  width: 1600px;
+  height: 1200px;
+  
+/*   -ms-transform: scale(.75);
+  -moz-transform: scale(.75);
+  -o-transform: scale(.75);
+  -webkit-transform: scale(.75);
+  transform: scale(.75); */
+}
+.snap_world {
+	width: 3072px;
+	height: 756px;
+}
+</style>
 </head>
 <body>
 <p>Some text</p>
-<canvas id="world_1" class="snap-world" project_path="projects/single-speak-block.xml"></canvas>
+<div class="snap-world-container">
+<div class="snap-world-clipped">
+<canvas id="world_1" class="snap-world" project_path="projects/single-speak-block.xml" width=3072 height=756></canvas></div></div>
 <p>And some more.</p>
-<canvas id="world_2" class="snap-world" project_path="projects/single doorbell fix.xml"></canvas>
+<div class="snap-world-container">
+<div class="snap-world-clipped">
+<canvas id="world_2" class="snap-world" project_path="projects/single doorbell fix.xml" width=3072 height=756></canvas></div></div>
 <p>Final text</p>
 </body>
 </html>
