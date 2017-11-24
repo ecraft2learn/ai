@@ -11345,8 +11345,8 @@ WorldMorph.prototype.fillPage = function () {
     var clientHeight = window.innerHeight,
         clientWidth = window.innerWidth,
         myself = this;
-
-    this.worldCanvas.style.position = "absolute";
+    // when there are multiple worlds they should remain 'relative'
+//     this.worldCanvas.style.position = "absolute";
     this.worldCanvas.style.left = "0px";
     this.worldCanvas.style.right = "0px";
     this.worldCanvas.style.width = "100%";
