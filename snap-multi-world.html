@@ -39,13 +39,16 @@
                 Array.prototype.forEach.call(world_canvases,
 											 function (world_canvas, index) {
 											 	 var project_path = world_canvas.getAttribute('project_path');
-											 	 fetch(project_path).then(function (response) {
-											 	 	response.text().then(function (project_text) {
-											 	 		ide_morphs[index].rawOpenProjectString(project_text);
-											 	 	});
-											 	 }).catch(function (error) {
-											 	 	console.error("Error fetching " + project_path + ": " + error.message);
-											 	 });
+											 	 if (project_path) {
+											 	 	fetch(project_path).then(function (response) {
+														response.text().then(function (project_text) {
+															ide_morphs[index].rawOpenProjectString(project_text);
+														});
+													 }).catch(function (error) {
+														console.error("Error fetching " + project_path + ": " + error.message);
+													 });
+											 	 }
+											 	 // with multiple worlds absolute posiioning doesn't work
 												 world_canvas.style.position = 'relative';
 											 });
                 loop();
