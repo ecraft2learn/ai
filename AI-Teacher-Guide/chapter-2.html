@@ -85,7 +85,7 @@ The engine can report interim results and alternative results.
 It can provide 'confidence' values indicating how certain it is that it recognised the speech correctly.
 All of these functionalities are provided by this block:</p>
 
-<div class="iframe-container" style="width: 800px; height: 400px;">
+<div class="iframe-container" style="width: 800px; height: 200px;">
 <iframe class="iframe-clipped"
         scrolling="no"
         src="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=complex%20listen%20block&noRun&noExitWarning&editMode&hideControls"> 
@@ -102,6 +102,19 @@ All of these functionalities are provided by this block:</p>
 <li>Blocks that receive a list of confidence numbers corresponding to the alternative results. 0 means no confidence while 1 is the highest. Can be left blank.</li>
 </ol>
 Note that for Google's speech recognition engine currently only the first alternative has a non-zero confidence.</p>
+
+<p>Watching the interim results can provide some insight into the process of recognition.
+You can test this using the above block where you put the say block with an empty text field in the first argument.
+(Snap! interprets an empty field in this context as the input to the blocks (in this case the current interim result).)
+Or by using <a href="https://www.google.com/intl/en/chrome/demos/speech.html" target="_blank">this Google demo</a>.
+For example, if you say "red" you'll see "red" but if you follow it with "a book" you'll see "red" become "read a book".</p>
+
+<p>There is much one can explore with the 'language' option.
+For example, if one selects 'fr-FR' (French as spoken in France) and then says "une deux trois quatre five six" the result is "1 2 3 4 5 6".
+Notice that it recognises both Frendh and English.
+(English is probably used because it the operating system language setting on my computer --
+if your computer is configured with another language it probably will be the default.)
+Strangely if with English you say "one two three four five six" you get those words, not the digits one sees with the French setting.</p>
 
 <h3>Where to get these blocks to use in projects</h3>
 <p>All of these speech output blocks as well other AI blocks are available to use in <a href="https://snap.berkeley.edu/" target="_blank">Snap!</a> in
