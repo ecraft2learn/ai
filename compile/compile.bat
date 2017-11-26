@@ -1,0 +1,21 @@
+java -jar c:\bin\closure\closure-compiler-v20170626.jar ^
+ --language_in ECMASCRIPT5_STRICT ^
+ --js "../snap/../snap/morphic.js" ^
+ --js "../snap/widgets.js" ^
+ --js "../snap/blocks.js" ^
+ --js "../snap/threads.js" ^
+ --js "../snap/objects.js" ^
+ --js "../snap/gui.js" ^
+ --js "../snap/paint.js" ^
+ --js "../snap/lists.js" ^
+ --js "../snap/byob.js" ^
+ --js "../snap/tables.js" ^
+ --js "../snap/symbols.js" ^
+ --js "../snap/xml.js" ^
+ --js "../snap/store.js" ^
+ --js "../snap/locale.js" ^
+ --js "../snap/cloud.js" ^
+ --js "../snap/sha512.js" ^
+ --js "../snap/FileSaver.min.js"  --compilation_level=SIMPLE_OPTIMIZATIONS --externs externs.js ^
+ --js_output_file=../snap/compiled_snap.js
+
