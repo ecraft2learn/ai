@@ -87,7 +87,7 @@ window.ecraft2learn =
 //             return invoke(callback, new List(Array.prototype.slice.call(arguments, 1)), (callback instanceof BlockMorph && callback));
 // something different needed if callback instanceof BlockMorph
 var proc = new Process();
-proc.initializeFor(callback, contextArgs || new List());
+proc.initializeFor(callback, new List(Array.prototype.slice.call(arguments, 1)));
 return proc.pushContext();
         }
         if (typeof callback === 'function') { // assume JavaScript callback
