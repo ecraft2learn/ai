@@ -206,7 +206,9 @@ window.ecraft2learn =
               return;
           }
           // add proc to args passed to function
-          var args = new Array(proc).concat(parameters.contents);
+          var proc_copy = {};
+          Object.assign(proc_copy, proc);
+          var args = new Array(proc_copy).concat(parameters.contents);
           return ecraft2learn[function_name].apply(null, args);
       },
 
