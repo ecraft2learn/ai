@@ -5,7 +5,7 @@ java -jar c:\bin\closure\closure-compiler-v20170626.jar ^
  --js "../snap/blocks.js" ^
  --js "../snap/threads.js" ^
  --js "../snap/objects.js" ^
- --js "../snap/gui.js" ^
+ --js "../snap/gui-without-snap-logo-sm.js" ^
  --js "../snap/paint.js" ^
  --js "../snap/lists.js" ^
  --js "../snap/byob.js" ^
