@@ -84,11 +84,12 @@ window.ecraft2learn =
         if (typeof callback === 'object') { // assume Snap! callback
             // invoke the callback with the argments (other than the callback itself)
             // if BlockMorph then needs a receiver -- apparently callback is good enough
-            return invoke(callback, new List(Array.prototype.slice.call(arguments, 1)), (callback instanceof BlockMorph && callback));
-// something different needed if callback instanceof BlockMorph
-// var proc = new Process();
-// proc.initializeFor(callback, new List(Array.prototype.slice.call(arguments, 1)));
-// return proc.pushContext();
+//             return invoke(callback, new List(Array.prototype.slice.call(arguments, 1)), (callback instanceof BlockMorph && callback));
+            // something different needed if callback instanceof BlockMorph??
+            // based upon https://github.com/jmoenig/Snap--Build-Your-Own-Blocks/issues/1938#issuecomment-347012850
+            var proc = new Process();
+            proc.evaluate(callback, new List(Array.prototype.slice.call(arguments, 1)), true);
+            return;
         }
         if (typeof callback === 'function') { // assume JavaScript callback
             callback.apply(this, arguments);
