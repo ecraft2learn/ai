@@ -79,7 +79,7 @@ window.ecraft2learn =
           }
           return value.contents;
     };
-    var invoke_callback = function (callback) {
+    var invoke_callback = function (callback, proc) {
         // callback could either be a Snap! object or a JavaScript function
         if (typeof callback === 'object') { // assume Snap! callback
             // invoke the callback with the argments (other than the callback itself)
@@ -87,8 +87,7 @@ window.ecraft2learn =
 //             return invoke(callback, new List(Array.prototype.slice.call(arguments, 1)), (callback instanceof BlockMorph && callback));
             // something different needed if callback instanceof BlockMorph??
             // based upon https://github.com/jmoenig/Snap--Build-Your-Own-Blocks/issues/1938#issuecomment-347012850
-            var proc = new Process();
-            proc.evaluate(callback, new List(Array.prototype.slice.call(arguments, 1)), true);
+            proc.evaluate(callback, new List(Array.prototype.slice.call(arguments, 2)), true);
             return;
         }
         if (typeof callback === 'function') { // assume JavaScript callback
@@ -206,7 +205,7 @@ window.ecraft2learn =
           return ecraft2learn[function_name].apply(null, parameters.contents);
       },
 
-      read_url: function (url, callback, error_callback, access_token) {
+      read_url: function (url, callback, error_callback, access_token), proc {
           // calls callback with the contents of the 'url' unless an error occurs and then error_callback is called
           // ironically this is the rare function that may be useful when there is no Internet connection
           // since it can be used to communicate with localhost (e.g. to read/write Raspberry Pi or Arduino pins)
@@ -216,23 +215,23 @@ window.ecraft2learn =
               xhr.setRequestHeader('Authorization', 'Bearer ' + access_token);
           }
           xhr.onload = function() {
-              invoke_callback(callback, xhr.responseText);
+              invoke_callback(callback, proc, xhr.responseText);
           };
           xhr.onerror = function(error) {
-              invoke_callback(error_callback, url + " error is " + error.message);
+              invoke_callback(error_callback, proc, url + " error is " + error.message);
           };
           xhr.onloadend = function() {
               if (xhr.status >= 400) {
-                  invoke_callback(error_callback, url + " replied " + xhr.statusText);
+                  invoke_callback(error_callback, proc, url + " replied " + xhr.statusText);
               } else if (xhr.status === 0) {
-                  invoke_callback(error_callback, url + " failed to load.");
+                  invoke_callback(error_callback, proc, url + " failed to load.");
               }
           };
           xhr.send();
       },
 
       start_speech_recognition: function (final_spoken_callback, error_callback, interim_spoken_callback, language, 
-                                          max_alternatives , all_results_callback, all_confidence_values_callback) {
+                                          max_alternatives , all_results_callback, all_confidence_values_callback, proc) {
           // final_spoken_callback and interim_spoken_callback are called with the text recognised by the browser's speech recognition capability
           // interim_spoken_callback is optional 
           // or error_callback if an error occurs
@@ -272,7 +271,7 @@ window.ecraft2learn =
                   // not clear if this is still needed
                   ecraft2learn.speech_recognition.stop();
               }
-              invoke_callback(event.results[0].isFinal ? final_spoken_callback : interim_spoken_callback, spoken);
+              invoke_callback(event.results[0].isFinal ? final_spoken_callback : interim_spoken_callback, proc, spoken);
               if (is_callback(all_results_callback)) {
                   handle_all_results(event);
               }
@@ -286,7 +285,7 @@ window.ecraft2learn =
               for (var i = 0; i < result.length; i++) {
                   results.push(result[i].transcript);
               }
-              invoke_callback(all_results_callback, javascript_to_snap(results));
+              invoke_callback(all_results_callback, proc, javascript_to_snap(results));
           };
           var handle_all_confidence_values = function (event) {
               var confidences = [];
@@ -294,7 +293,7 @@ window.ecraft2learn =
               for (var i = 0; i < result.length; i++) {
                   confidences.push(result[i].confidence);
               }
-              invoke_callback(all_confidence_values_callback, javascript_to_snap(confidences));
+              invoke_callback(all_confidence_values_callback, proc, javascript_to_snap(confidences));
           };
           var handle_error = function (event) {
 //               if (event.error === 'aborted') {
@@ -306,7 +305,7 @@ window.ecraft2learn =
 //               }
               ecraft2learn.stop_speech_recognition();
 //               console.log("Recognition error: " + event.error);
-              invoke_callback(error_callback, event.error);
+              invoke_callback(error_callback, proc, event.error);
           };
           ecraft2learn.speech_recognition = (typeof SpeechRecognition === 'undefined') ?
                                             new webkitSpeechRecognition() :
@@ -349,7 +348,7 @@ window.ecraft2learn =
                                   });
     },
 
-    start_microsoft_speech_recognition: function (as_recognized_callback, final_spoken_callback, error_callback, provided_key) {
+    start_microsoft_speech_recognition: function (as_recognized_callback, final_spoken_callback, error_callback, provided_key, proc) {
         // As spoken words are recognised as_recognized_callback is called with the result so far
         // When the recogniser determines that the speaking is finished then the final_spoken_callback is called with the final text
         // error_callback is called if an error occurs
@@ -394,13 +393,13 @@ window.ecraft2learn =
                         break;
                     case "SpeechHypothesisEvent":
                         ecraft2learn.last_speech_recognized = event.Result.Text;
-                        invoke_callback(as_recognized_callback, ecraft2learn.last_speech_recognized);
+                        invoke_callback(as_recognized_callback, proc, ecraft2learn.last_speech_recognized);
                         break;
                     case "SpeechEndDetectedEvent":
                         if (ecraft2learn.last_speech_recognized) {
-                            invoke_callback(final_spoken_callback, ecraft2learn.last_speech_recognized);
+                            invoke_callback(final_spoken_callback, proc, ecraft2learn.last_speech_recognized);
                         } else {
-                            invoke_callback(error_callback);
+                            invoke_callback(error_callback, proc);
                         }
                         break;
                     case "SpeechSimplePhraseEvent":
@@ -416,7 +415,7 @@ window.ecraft2learn =
             },
             function (error) {
                 console.error(error);
-                invoke_callback(error_callback);
+                invoke_callback(error_callback, proc);
             });
         };
         if (ecraft2learn.microsoft_speech_sdk) {
@@ -531,7 +530,7 @@ window.ecraft2learn =
       add_costume(create_costume(canvas), get_snap_ide().currentSprite);
   };
 
-  ecraft2learn.take_picture_and_analyse = function (cloud_provider, show_photo, snap_callback) {
+  ecraft2learn.take_picture_and_analyse = function (cloud_provider, show_photo, snap_callback, proc) {
       // snap_callback is called with the result of the image recognition
       // show_photo displays the photo when it is taken
       if (cloud_provider === 'Watson') {
@@ -550,14 +549,14 @@ window.ecraft2learn =
                   response_as_javascript_object = JSON.parse(response);
                   break;
               default:
-                  invoke_callback(snap_callback, "Unknown cloud provider: " + cloud_provider);
+                  invoke_callback(snap_callback, proc, "Unknown cloud provider: " + cloud_provider);
                   return;
           }
           image_recognitions[cloud_provider].response = response_as_javascript_object;
           if (typeof snap_callback !== 'object' && typeof snap_callback !== 'function') { // if not provided
               return;
           }
-          invoke_callback(snap_callback, javascript_to_snap(response_as_javascript_object));
+          invoke_callback(snap_callback, proc, javascript_to_snap(response_as_javascript_object));
     };
     var costume;
     add_photo_to_canvas(canvas, video, width, height);
@@ -595,7 +594,7 @@ window.ecraft2learn =
                    });
         break;
     default:
-        invoke_callback(snap_callback, "Unknown cloud provider: " + cloud_provider);
+        invoke_callback(snap_callback, proc, "Unknown cloud provider: " + cloud_provider);
     }
   };
 
@@ -658,7 +657,7 @@ window.ecraft2learn =
       add_costume(recognition.costume);
   },
 
-  speak: function (message, pitch, rate, voice_number, volume, language, finished_callback) {
+  speak: function (message, pitch, rate, voice_number, volume, language, finished_callback, proc) {
     // speaks 'message' optionally with the specified pitch, rate, voice, volume, and language
     // finished_callback is called with the spoken text
     // see https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisUtterance
@@ -717,7 +716,7 @@ window.ecraft2learn =
             var callback = index === segments.length-1 && 
                            finished_callback &&
                            function () {
-                               invoke_callback(finished_callback, message); // entire message not just the segments
+                               invoke_callback(finished_callback, proc, message); // entire message not just the segments
                            };
             ecraft2learn.speak(segment, pitch, rate, voice_number, volume, language, callback)
         });
@@ -750,7 +749,7 @@ window.ecraft2learn =
         utterance.volume = volume;
     }
     utterance.onend = function (event) {
-        invoke_callback(finished_callback, message);
+        invoke_callback(finished_callback, proc, message);
     };
     if (ecraft2learn.speech_recognition) {
         // don't recognise synthetic speech
@@ -773,7 +772,7 @@ window.ecraft2learn =
   get_mary_tts_voice_name: function (voice_number) { // user friendly name
       return get_voice_from(voice_number, mary_tts_voices.map(function (voice) { return voice[1]; }));
   },
-  speak_using_mary_tts: function (message, volume, voice_number, finished_callback) {
+  speak_using_mary_tts: function (message, volume, voice_number, finished_callback, proc) {
      var voice = get_mary_tts_voice(voice_number);
      var voice_parameter = voice ? "&VOICE=" + voice : "";
      var voice_number_index = +voice_number > 0 ? (+voice_number)-1 : 0;
@@ -783,7 +782,7 @@ window.ecraft2learn =
      if (finished_callback) {
          sound.addEventListener("ended", 
                                 function () {
-                                     invoke_callback(finished_callback, javascript_to_snap(message));
+                                     invoke_callback(finished_callback, proc, javascript_to_snap(message));
                                 },
                                 false);
      }
@@ -827,18 +826,18 @@ window.ecraft2learn =
   console_log: function (message) {
       console.log(message);
   },
-  handle_server_json_response: function (response, callback) {
-     invoke_callback(callback, javascript_to_snap(JSON.parse(response)));
+  handle_server_json_response: function (response, callback, proc) {
+     invoke_callback(callback, proc, javascript_to_snap(JSON.parse(response)));
   },
-  handle_server_json_response_to_pins_request: function (response_text, callback_for_pins_read, callback_for_pins_written, callback_for_errors) {
+  handle_server_json_response_to_pins_request: function (response_text, callback_for_pins_read, callback_for_pins_written, callback_for_errors, proc) {
       try {
           var response = JSON.parse(response_text);
           var read = response.pins;
           var written = response.write_responses;
-          invoke_callback(callback_for_pins_read,    javascript_to_snap(read));
-          invoke_callback(callback_for_pins_written, javascript_to_snap(written));
+          invoke_callback(callback_for_pins_read, proc,    javascript_to_snap(read));
+          invoke_callback(callback_for_pins_written, proc, javascript_to_snap(written));
       } catch (error) {
-          invoke_callback(callback_for_errors, error.message);
+          invoke_callback(callback_for_errors, proc, error.message);
       }
   }
 }} ());
