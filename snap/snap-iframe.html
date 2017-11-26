@@ -6,15 +6,15 @@
 		
 		<script type="text/javascript">
 			var world;
-// 			document.addEventListener("DOMContentLoaded",
-// 			 function () {
+			document.addEventListener("DOMContentLoaded",
+			 function () {
 				world = new parent.WorldMorph(document.getElementById('world'));
                 world.worldCanvas.focus();
 				new parent.IDE_Morph().openIn(world);
-        loop();
-// 			});
+        		loop();
+			});
 			function loop() {
-        requestAnimationFrame(loop);
+       			requestAnimationFrame(loop);
 				world.doOneCycle();
 			}
 		</script>
