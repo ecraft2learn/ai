@@ -198,13 +198,16 @@ window.ecraft2learn =
 
     return {
       inside_snap: typeof world === 'object' && world instanceof WorldMorph,
-      run: function (function_name, parameters) {
+
+      run: function (function_name, proc, parameters) {
           // runs one of the functions in this library
           if (typeof ecraft2learn[function_name] === 'undefined') {
               alert("Ecraft2learn library does not have a function named " + function_name);
               return;
           }
-          return ecraft2learn[function_name].apply(null, parameters.contents);
+          // add proc to args passed to function
+          var args = new Array(proc).concat(parameters.contents);
+          return ecraft2learn[function_name].apply(null, args);
       },
 
       read_url: function (proc, url, callback, error_callback, access_token) {
