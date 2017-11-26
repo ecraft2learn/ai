@@ -3,7 +3,7 @@ var world;
 				var world_canvas = document.getElementById('world');
 				var ide_morph = new IDE_Morph();
 				world = new WorldMorph(world_canvas);
-                world.worldCanvas.focus();
+//                 world.worldCanvas.focus();
 				ide_morph.openIn(world);
 				var project_path = window.frameElement.getAttribute("project_path");
 				if (project_path) {
