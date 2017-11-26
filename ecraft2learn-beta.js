@@ -205,7 +205,7 @@ window.ecraft2learn =
           return ecraft2learn[function_name].apply(null, parameters.contents);
       },
 
-      read_url: function (url, callback, error_callback, access_token), proc {
+      read_url: function (url, callback, error_callback, access_token, proc) {
           // calls callback with the contents of the 'url' unless an error occurs and then error_callback is called
           // ironically this is the rare function that may be useful when there is no Internet connection
           // since it can be used to communicate with localhost (e.g. to read/write Raspberry Pi or Arduino pins)
