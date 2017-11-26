@@ -35,7 +35,7 @@ window.ecraft2learn =
               document.location.assign("https://github.com/ToonTalk/ai-cloud/wiki");
           }
       };
-      var run_snap_block = function (labelSpec) { // add parameters later
+      var run_snap_block = function (proc, labelSpec) { // add parameters later
           // runs a Snap! block that matches labelSpec
           // labelSpec if it takes areguments will look something like 'label %txt of size %n'
           var ide = get_snap_ide(ecraft2learn.snap_context);
@@ -47,7 +47,7 @@ window.ecraft2learn =
               return;
           }
           var blockTemplate = allBlocks[index].templateInstance();
-          return invoke_callback(blockTemplate);
+          return invoke_callback(blockTemplate, proc);
       };
       var get_snap_ide = function (start) {
           // finds the Snap! IDE_Morph that is the element 'start' or one of its ancestors
@@ -85,10 +85,8 @@ window.ecraft2learn =
             // invoke the callback with the argments (other than the callback itself)
             // if BlockMorph then needs a receiver -- apparently callback is good enough
 //             return invoke(callback, new List(Array.prototype.slice.call(arguments, 1)), (callback instanceof BlockMorph && callback));
-            // something different needed if callback instanceof BlockMorph??
-            // based upon https://github.com/jmoenig/Snap--Build-Your-Own-Blocks/issues/1938#issuecomment-347012850
             proc.evaluate(callback, new List(Array.prototype.slice.call(arguments, 2)), true);
-            return;
+            return; 
         }
         if (typeof callback === 'function') { // assume JavaScript callback
             callback.apply(this, arguments);
@@ -191,22 +189,25 @@ window.ecraft2learn =
 ];
    
     var image_recognitions = {}; // record of most recent results from calls to take_picture_and_analyse
+    
+    var speech_recognition_in_progress = false; // used to prevent overlapping calls to start_speech_recognition
+
+    var debugging = true;
 
     // the following are the ecraft2learn functions available via this library
 
     return {
       inside_snap: typeof world === 'object' && world instanceof WorldMorph,
-      run: function (function_name, proc, parameters) {
+      run: function (function_name, parameters) {
           // runs one of the functions in this library
           if (typeof ecraft2learn[function_name] === 'undefined') {
               alert("Ecraft2learn library does not have a function named " + function_name);
               return;
           }
-          var args = new Array(proc).concat(parameters.contents);
-          return ecraft2learn[function_name].apply(null, args);
+          return ecraft2learn[function_name].apply(null, parameters.contents);
       },
 
-      read_url: function (url, callback, error_callback, access_token, proc) {
+      read_url: function (proc, url, callback, error_callback, access_token) {
           // calls callback with the contents of the 'url' unless an error occurs and then error_callback is called
           // ironically this is the rare function that may be useful when there is no Internet connection
           // since it can be used to communicate with localhost (e.g. to read/write Raspberry Pi or Arduino pins)
@@ -231,8 +232,8 @@ window.ecraft2learn =
           xhr.send();
       },
 
-      start_speech_recognition: function (final_spoken_callback, error_callback, interim_spoken_callback, language, 
-                                          max_alternatives , all_results_callback, all_confidence_values_callback, proc) {
+      start_speech_recognition: function (proc, final_spoken_callback, error_callback, interim_spoken_callback, language, 
+                                          max_alternatives, all_results_callback, all_confidence_values_callback) {
           // final_spoken_callback and interim_spoken_callback are called with the text recognised by the browser's speech recognition capability
           // interim_spoken_callback is optional 
           // or error_callback if an error occurs
@@ -241,23 +242,44 @@ window.ecraft2learn =
           // if the browser has no support for speech recognition then the Microsoft Speech API is used (API key required)
           if (typeof SpeechRecognition === 'undefined' && typeof webkitSpeechRecognition === 'undefined') {
               // no support from this browser so try using the Microsoft Speech API
-              ecraft2learn.start_microsoft_speech_recognition(interim_spoken_callback, spoken_callback, error_callback);
+              ecraft2learn.start_microsoft_speech_recognition(proc, interim_spoken_callback, spoken_callback, error_callback);
               return;
           }
-          var stopped = false; // used to suspend listening when tab is hidden
-          var restart = function () {
-              if (stopped) {
-                 return;
+          if (window.speechSynthesis.speaking || speech_recognition_in_progress) { 
+              // don't listen while speaking or while listening is still in progress
+              if (debugging) {
+                  console.log("Delaying start due to " + (window.speechSynthesis.speaking ? "speaking" : "listen in progress"));
               }
-              if (window.speechSynthesis.speaking) { // don't listen while speaking
-                  setTimeout(restart, 500); // try again in half a second
+              setTimeout(function () {
+                             ecraft2learn.start_speech_recognition(proc, final_spoken_callback, error_callback, interim_spoken_callback, language, 
+                                                                   max_alternatives, all_results_callback, all_confidence_values_callback); 
+                         },
+                         100); // try again in a tenth of a second
+              return;
+          }
+          if (debugging) {
+              console.log("start_speech_recognition called.");
+          }
+          var restart = function () {
+              if (speech_recognition_stopped) {
+                  if (debugging) {
+                      console.log("restart exited becuase speech_recognition_stopped");
+                  }
                   return;
               }
               try {
-                  ecraft2learn.speech_recognition.start();
+                  speech_recognition_in_progress = true;
+                  if (debugging) {
+                      console.log("Recognition started");
+                  }
+                  speech_recognition.start();
  //               console.log("Speech recognition started");
               } catch (error) {
+                  speech_recognition_in_progress = false;
                   if (error.name === 'InvalidStateError') {
+                      if (debugging) {
+                          console.log("restart delayed becuase InvalidStateError");
+                      }
                       // delay needed, at least in Chrome 52
                       setTimeout(restart, 2000);
                   } else {
@@ -266,18 +288,22 @@ window.ecraft2learn =
               }
           };
           var handle_result = function (event) {
-              var spoken = event.results[0][0].transcript;
-//               console.log("Confidence is " + event.results[0][0].confidence + " for " + spoken);
-              if (event.results[0].isFinal) {
-                  // not clear if this is still needed
-                  ecraft2learn.speech_recognition.stop();
+              var spoken = event.results[event.resultIndex][0].transcript; // first result            
+//               if (event.results[0].isFinal) {
+//                   // not clear if this is still needed
+//                   speech_recognition.stop();
+//               }
+              invoke_callback(event.results[event.resultIndex].isFinal ? final_spoken_callback : interim_spoken_callback, proc, spoken);
+              if (debugging) {
+                  console.log("Just invoked callback for " + spoken + ". isFinal is " + event.results[event.resultIndex].isFinal);
               }
-              invoke_callback(event.results[0].isFinal ? final_spoken_callback : interim_spoken_callback, proc, spoken);
               if (is_callback(all_results_callback)) {
                   handle_all_results(event);
               }
               if (is_callback(all_confidence_values_callback)) {
                   handle_all_confidence_values(event);
+              } else {
+                  console.log("Confidence is " + event.results[event.resultIndex][0].confidence + " for " + spoken);
               }
           };
           var handle_all_results = function (event) {
@@ -298,58 +324,67 @@ window.ecraft2learn =
           };
           var handle_error = function (event) {
 //               if (event.error === 'aborted') {
-//                   if (!stopped) {
+//                   if (!speech_recognition_stopped) {
 //                       console.log("Aborted so restarting speech recognition in half a second");
 //                       setTimeout(restart, 500);
 //                   }
 //                   return;
 //               }
               ecraft2learn.stop_speech_recognition();
-//               console.log("Recognition error: " + event.error);
+              if (debugging) {
+                   console.log("Recognition error: " + event.error);
+              }
               invoke_callback(error_callback, proc, event.error);
           };
-          ecraft2learn.speech_recognition = (typeof SpeechRecognition === 'undefined') ?
-                                            new webkitSpeechRecognition() :
-                                            new SpeechRecognition();
-          ecraft2learn.speech_recognition.interimResults = typeof is_callback(interim_spoken_callback);
+          var speech_recognition_stopped = false; // used to suspend listening when tab is hidden
+          var speech_recognition = (typeof SpeechRecognition === 'undefined') ?
+                                   new webkitSpeechRecognition() :
+                                   new SpeechRecognition();
+          speech_recognition.interimResults = is_callback(interim_spoken_callback);
           if (typeof language === 'string') {
-              ecraft2learn.speech_recognition.lang = language;
+              speech_recognition.lang = language;
           }
           if (max_alternatives > 1) {
-              ecraft2learn.speech_recognition.maxAlternatives = max_alternatives;
+              speech_recognition.maxAlternatives = max_alternatives;
           }
-          ecraft2learn.speech_recognition.profanityFilter = true; // so more appropriate use in schools, e.g. f*** will result
-          ecraft2learn.speech_recognition.onresult = handle_result;
-          ecraft2learn.speech_recognition.onerror = handle_error;
-          ecraft2learn.speech_recognition.onend = function (event) {
- //           console.log("recognition ended");
-//               restart();
+          speech_recognition.profanityFilter = true; // so more appropriate use in schools, e.g. f*** will result
+          speech_recognition.onresult = handle_result;
+          speech_recognition.onerror = handle_error;
+          speech_recognition.onend = function (event) {
+              speech_recognition_in_progress = false;
           };
           ecraft2learn.stop_speech_recognition = function () {
-              stopped = true;
-              ecraft2learn.speech_recognition.onend    = null;
-              ecraft2learn.speech_recognition.onresult = null;
-              ecraft2learn.speech_recognition.onerror  = null;
-              ecraft2learn.speech_recognition.stop();
-              ecraft2learn.speech_recognition = null; // force a fresh start
+              if (debugging) {
+                  console.log("Stopped.");
+              }
+              speech_recognition_in_progress = false;
+              if (speech_recognition) {
+                  speech_recognition.onend    = null;
+                  speech_recognition.onresult = null;
+                  speech_recognition.onerror  = null;
+                  speech_recognition.stop();
+              }
           };
           restart();
           // if the tab or window is minimised or hidden then speech recognition is paused until the window or tab is shown again
           window.addEventListener("message",
                                   function(message) {
                                       if (message.data === 'hidden') {
-                                          stopped = true;
-                                          ecraft2learn.speech_recognition.stop();
-                                          console.log("Stopped because tab/window hidden.");
+                                          speech_recognition_stopped = true;
+                                          if (debugging) {
+                                              console.log("Stopped because tab/window hidden.");
+                                          }     
                                       } else if (message.data === 'shown') {
-                                          stopped = false;
+                                          speech_recognition_stopped = false;
                                           restart();
-                                          console.log("Restarted because tab/window shown.");
+                                          if (debugging) {
+                                              console.log("Restarted because tab/window shown.");
+                                          }
                                       }
                                   });
     },
 
-    start_microsoft_speech_recognition: function (as_recognized_callback, final_spoken_callback, error_callback, provided_key, proc) {
+    start_microsoft_speech_recognition: function (proc, as_recognized_callback, final_spoken_callback, error_callback, provided_key) {
         // As spoken words are recognised as_recognized_callback is called with the result so far
         // When the recogniser determines that the speaking is finished then the final_spoken_callback is called with the final text
         // error_callback is called if an error occurs
@@ -531,7 +566,7 @@ window.ecraft2learn =
       add_costume(create_costume(canvas), get_snap_ide().currentSprite);
   };
 
-  ecraft2learn.take_picture_and_analyse = function (cloud_provider, show_photo, snap_callback, proc) {
+  ecraft2learn.take_picture_and_analyse = function (proc, cloud_provider, show_photo, snap_callback) {
       // snap_callback is called with the result of the image recognition
       // show_photo displays the photo when it is taken
       if (cloud_provider === 'Watson') {
@@ -658,7 +693,7 @@ window.ecraft2learn =
       add_costume(recognition.costume);
   },
 
-  speak: function (message, pitch, rate, voice_number, volume, language, finished_callback, proc) {
+  speak: function (proc, message, pitch, rate, voice_number, volume, language, finished_callback) {
     // speaks 'message' optionally with the specified pitch, rate, voice, volume, and language
     // finished_callback is called with the spoken text
     // see https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisUtterance
@@ -719,7 +754,7 @@ window.ecraft2learn =
                            function () {
                                invoke_callback(finished_callback, proc, message); // entire message not just the segments
                            };
-            ecraft2learn.speak(segment, pitch, rate, voice_number, volume, language, callback)
+            ecraft2learn.speak(proc, segment, pitch, rate, voice_number, volume, language, callback)
         });
         return;
     }
@@ -752,10 +787,10 @@ window.ecraft2learn =
     utterance.onend = function (event) {
         invoke_callback(finished_callback, proc, message);
     };
-    if (ecraft2learn.speech_recognition) {
-        // don't recognise synthetic speech
-        ecraft2learn.speech_recognition.abort();
-    }
+//     if (speech_recognition) {
+//         // don't recognise synthetic speech
+//         ecraft2learn.speech_recognition.abort();
+//     }
     window.speechSynthesis.speak(utterance);
   },
   get_voice_names: function () {
@@ -773,7 +808,7 @@ window.ecraft2learn =
   get_mary_tts_voice_name: function (voice_number) { // user friendly name
       return get_voice_from(voice_number, mary_tts_voices.map(function (voice) { return voice[1]; }));
   },
-  speak_using_mary_tts: function (message, volume, voice_number, finished_callback, proc) {
+  speak_using_mary_tts: function (message, volume, voice_number, finished_callback) {
      var voice = get_mary_tts_voice(voice_number);
      var voice_parameter = voice ? "&VOICE=" + voice : "";
      var voice_number_index = +voice_number > 0 ? (+voice_number)-1 : 0;
@@ -793,14 +828,14 @@ window.ecraft2learn =
      sound.play();
   },
   get_mary_tts_voice_names: function () {
-     return new List(mary_tts_voices.map(function (voice) { return voice[1]; }));
+    return new List(mary_tts_voices.map(function (voice) { return voice[1]; }));
   },
-  speak_using_browser_voices_or_mary_tts: function (message, finished_callback, proc) {
+  speak_using_browser_voices_or_mary_tts: function (message, finished_callback) {
     if (window.speechSynthesis.getVoices().length === 0) {
         // either there are no voices 
-        ecraft2learn.speak_using_mary_tts(message, 1, 1, finished_callback, proc);
+        ecraft2learn.speak_using_mary_tts(message, 1, 1, finished_callback);
     } else {
-        ecraft2learn.speak(message, 0, 0, 1, 0, 0, finished_callback, proc);
+        ecraft2learn.speak(message, 0, 0, 1, 0, 0, finished_callback);
     }
   },
   open_project: function (name) {
@@ -827,10 +862,10 @@ window.ecraft2learn =
   console_log: function (message) {
       console.log(message);
   },
-  handle_server_json_response: function (response, callback, proc) {
+  handle_server_json_response: function (proc, response, callback) {
      invoke_callback(callback, proc, javascript_to_snap(JSON.parse(response)));
   },
-  handle_server_json_response_to_pins_request: function (response_text, callback_for_pins_read, callback_for_pins_written, callback_for_errors, proc) {
+  handle_server_json_response_to_pins_request: function (proc, response_text, callback_for_pins_read, callback_for_pins_written, callback_for_errors) {
       try {
           var response = JSON.parse(response_text);
           var read = response.pins;
