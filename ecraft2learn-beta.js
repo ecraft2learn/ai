@@ -792,14 +792,14 @@ window.ecraft2learn =
      sound.play();
   },
   get_mary_tts_voice_names: function () {
-    return new List(mary_tts_voices.map(function (voice) { return voice[1]; }));
+     return new List(mary_tts_voices.map(function (voice) { return voice[1]; }));
   },
-  speak_using_browser_voices_or_mary_tts: function (message, finished_callback) {
+  speak_using_browser_voices_or_mary_tts: function (message, finished_callback, proc) {
     if (window.speechSynthesis.getVoices().length === 0) {
         // either there are no voices 
-        ecraft2learn.speak_using_mary_tts(message, 1, 1, finished_callback);
+        ecraft2learn.speak_using_mary_tts(message, 1, 1, finished_callback, proc);
     } else {
-        ecraft2learn.speak(message, 0, 0, 1, 0, 0, finished_callback);
+        ecraft2learn.speak(message, 0, 0, 1, 0, 0, finished_callback, proc);
     }
   },
   open_project: function (name) {
