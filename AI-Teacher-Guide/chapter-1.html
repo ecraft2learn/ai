@@ -7,7 +7,7 @@
 <h3>Chapter 1 - Speech Output</h3>
 <h4>Ken Kahn, University of Oxford</h4>
 <h3>Introduction</h3>
-<p>The importance of artificial Intelligence in society, the workplace, and the economy is rapidly increasing.
+<p>The importance of artificial Intelligence in society, the work place, and the economy is rapidly increasing.
 It is becoming an important part of many other technologies. AI conversational agents are becoming common in phones and PCs (Siri, Cortana, OK Google).
 Driverless vehicles are coming soon.
 Finance, medicine, and many other fields are relying more and more on AI.
@@ -61,7 +61,7 @@ Numbers, abbreviations, dates, and special characters are turned into words.
 For example, "42" becomes "forty two" (assuming the language is set to English).
 Next words are turned into <a href="https://en.wikipedia.org/wiki/Phoneme" target="_blank">phonemes</a>.
 A phoneme is the unit of sound that words are made of.
-A phoneme is described phonetically so later stages can pronouce the words.
+A phoneme is described phonetically so later stages can pronounce the words.
 For example, 
 <span
 style='font-variant-ligatures: normal;font-variant-caps: normal;orphans: 2;
@@ -71,10 +71,10 @@ style='font-variant-ligatures: normal;font-variant-caps: normal;orphans: 2;
 widows: 2;-webkit-text-stroke-width: 0px;text-decoration-style: initial;
 text-decoration-color: initial;float:none;word-spacing:0px'>/</span></span>
 is how the word "phoneme" is pronounced.
-This can be done by a dictionary look up or by using pronounciation rules.
-Finally sounds are generated as a squence of pitch and volume changes (typically many thousands per second).
+This can be done by a dictionary look up or by using pronunciation rules.
+Finally sounds are generated as a sequence of pitch and volume changes (typically many thousands per second).
 There are three approaches to doing this last step:
-<i>concatative</i> where recorded bits of speech are "glued" together,
+<i>concatenative</i> where recorded bits of speech are "glued" together,
 <i>formant</i> where each phoneme is synthesized,
 and <i>articulatory</i> where human tongues and vocal chords are simulated.</p>
 
@@ -82,7 +82,7 @@ and <i>articulatory</i> where human tongues and vocal chords are simulated.</p>
 
 <h4>Sentences are more than a series of words</h4>
 </p>Speech synthesizers do more than just say each word in a sentence.
-They attempt to produce a natural prosidy.
+They attempt to produce a natural prosody.
 And they speak questions differently from sentences.
 </p>
 
@@ -104,7 +104,7 @@ Is this a sign of intelligence?</p>
 </iframe></div>
 
 <h4>Problems combining speech and sound effects</h4>
-<p>Suppose one wanted the computer to speech, be interupted by a door bell, and respond accordingly.
+<p>Suppose one wanted the computer to speech, be interrupted by a door bell, and respond accordingly.
 Try clicking this and you'll hear there is a problem:</p>
 
 <div  class="iframe-container" style="width: 480px; height: 140px"> 
@@ -114,7 +114,7 @@ Try clicking this and you'll hear there is a problem:</p>
         project_path="../AI-teacher-guide-projects/doorbell problem.xml">
 </iframe></div>
 
-<p>The problem is because the way the speak block works is that it tells the browswer to begin speaking and then continues with the next action.
+<p>The problem is because the way the speak block works is that it tells the browser to begin speaking and then continues with the next action.
 What we want is to have the door bell sound played <i>after</i> the first utterance is finished.
 For this we need a slightly more complex block that accepts actions to do after speaking:</p>
 
@@ -138,7 +138,7 @@ than displays, keyboards, mice, buttons, and touch sensors.</p>
 <p>A person can speak slow or fast, in a low or high pitch, quietly or loudly, and more.
 And different people have different voices and accents.
 To mirror these abilities a more complex block is available.
-A paramter value of 1 means the normal pitch, rate, or volume.
+A parameter value of 1 means the normal pitch, rate, or volume.
 Note that depending upon the voice and browser some of these parameters are ignored.</p>
 
 <div class="iframe-container" style="width: 800px; height: 100px;">
