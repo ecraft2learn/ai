@@ -56,11 +56,29 @@ The first time one is used it fetches voices over the network and that may take 
 </iframe></div>
 
 <h4>How does this work?</h4>
->p>The Web is full of explanations of how speech synthesis works. 
-Microsoft has this <a href="https://msdn.microsoft.com/en-us/library/office/hh361668%28v=office.14%29.aspx?f=255&MSPPError=-2147217396" target="_blank">short explanation</a>.
-<i>Explain that Stuff</i> has a <href="http://www.explainthatstuff.com/how-speech-synthesis-works.html" target="_blank">much longer explanation including a history of speech synthesis</a>.
-And there is always the <a href="https://en.wikipedia.org/wiki/Speech_synthesis" target="_blank">Wikipedia's entry</a>.
-</p>
+<p>Modern speech synthesizers (also called "text-to-speech engines" or "TTS engines") start by preprocessing the text.
+Numbers, abbreviations, dates, and special characters are turned into words.
+For example, "42" becomes "forty two" (assuming the language is set to English).
+Next words are turned into <a href="https://en.wikipedia.org/wiki/Phoneme" target="_blank">phonemes</a>.
+A phoneme is the unit of sound that words are made of.
+A phoneme is described phonetically so later stages can pronouce the words.
+For example, 
+<span
+style='font-variant-ligatures: normal;font-variant-caps: normal;orphans: 2;
+widows: 2;-webkit-text-stroke-width: 0px;text-decoration-style: initial;
+text-decoration-color: initial;float:none;word-spacing:0px'>/</span>&#712;f&#601;&#650;ni&#720;m</span><span
+style='font-variant-ligatures: normal;font-variant-caps: normal;orphans: 2;
+widows: 2;-webkit-text-stroke-width: 0px;text-decoration-style: initial;
+text-decoration-color: initial;float:none;word-spacing:0px'>/</span></span>
+is how the word "phoneme" is pronounced.
+This can be done by a dictionary look up or by using pronounciation rules.
+Finally sounds are generated as a squence of pitch and volume changes (typically many thousands per second).
+There are three approaches to doing this last step:
+<i>concatative</i> where recorded bits of speech are "glued" together,
+<i>formant</i> where each phoneme is synthesized,
+and <i>articulatory</i> where human tongues and vocal chords are simulated.</p>
+
+<p>More details about how speech synthesis works can be found in the <b>Additional resources</b> section at the bottom of this page.</p>
 
 <h4>Sentences are more than a series of words</h4>
 </p>Speech synthesizers do more than just say each word in a sentence.
@@ -167,8 +185,8 @@ An alternative speech block uses <a href="http://mary.dfki.de/" target="_blank">
 </iframe></div>
 
 <h4>Heteronyms cause problems</h4>
-<p>Heteronyms are words that mean and sound different but are spelled the same.
-"Read" sounds different in past tense.
+<p><a href="https://en.wikipedia.org/wiki/Heteronym_(linguistics)" target="_blank">Heteronyms</a> are words that mean and sound different but are spelled the same.
+"Read" can sound like "reed" or "red" depending upon the tense.
 "Lead" the verb sounds different from "lead" the metal.
 Some voices are better than others at using the correct pronounciation.
 Explore how different voices deal with "read" in the following.
@@ -215,12 +233,24 @@ They can also be used together with blocks for controlling Arduinos by downloadi
 <a href="https://toontalk.github.io/ai-cloud/AI-Teacher-Guide/eCraft2Learn%20S4A.xml" download>this file</a>
 into <a href="http://snap4arduino.rocks/" target="_blank">Snap4Arduino</a>.
 
+<h3>Additional resouces</h3>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition" target="_blank">A complete description of the speech synthesis API</a>
+that web browsers support.</p>
+
+<p><a href="http://research.spa.aalto.fi/publications/theses/lemmetty_mst/chap2.html" target="_blank">A history of speech synthesis</a>.</p>
+
+<p><i>Explain that Stuff</i> has <a href="http://www.explainthatstuff.com/how-speech-synthesis-works.html" target="_blank">
+a long explanation including a history of speech synthesis</a>.</p>
+
+<p>The <a href="https://en.wikipedia.org/wiki/Speech_synthesis" target="_blank">Wikipedia's entry</a> is good.</p>
+
 <h3>Learn about speech input</h3>
 <a href="chapter-2.html">Go to the next chapter on speech recognition</a>.
 
 <h3>Acknowledgements</h3>
-This research was supported by the <a href="https://project.ecraft2learn.eu/" target="_blank">eCraft2Learn project</a>
+<p>This research was supported by the <a href="https://project.ecraft2learn.eu/" target="_blank">eCraft2Learn project</a>
 funded by the European Union's Horizon 2020 Coordination & Research and Innovation Action
-under Grant Agreement No 731345. <img src="https://project.ecraft2learn.eu/wp-content/uploads/2017/01/eCraft2Learn-Final0.1.png">
+under Grant Agreement No 731345.</p>
+<img src="https://project.ecraft2learn.eu/wp-content/uploads/2017/01/eCraft2Learn-Final0.1.png">
 
 </body></html>
