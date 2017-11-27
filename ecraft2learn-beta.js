@@ -47,7 +47,7 @@ window.ecraft2learn =
               return;
           }
           var blockTemplate = allBlocks[index].templateInstance();
-          return invoke_callback(blockTemplate);
+          return invoke_block_morph(blockTemplate);
       };
       var get_snap_ide = function (start) {
           // finds the Snap! IDE_Morph that is the element 'start' or one of its ancestors
@@ -96,11 +96,17 @@ window.ecraft2learn =
                                                      false,
                                                      false);
             process.initializeFor(callback, new List(Array.prototype.slice.call(arguments, 1)));
-        }
-        if (typeof callback === 'function') { // assume JavaScript callback
+        } else if (typeof callback === 'function') { // assume JavaScript callback
             callback.apply(this, arguments);
         }
         // otherwise no callback provided so ignore it
+    };
+    var invoke_block_morph = function (block_morph) {
+        if (!(block_morph instanceof BlockMorph)) {
+            console.error("Invoke_block_morph called on non-BlockMorph");
+            return;
+        }
+        return invoke(callback, new List(Array.prototype.slice.call(arguments, 1)), callback);
     };
     var is_callback = function (x) {
         return typeof x === 'object' || typeof x === 'function';
