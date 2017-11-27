@@ -85,7 +85,7 @@ window.ecraft2learn =
             // invoke the callback with the argments (other than the callback itself)
             // if BlockMorph then needs a receiver -- apparently callback is good enough
 //             return invoke(callback, new List(Array.prototype.slice.call(arguments, 1)), (callback instanceof BlockMorph && callback)); 
-            var stage = this.parentThatIsA(StageMorph);
+            var stage = world.children[0].stage; // this.parentThatIsA(StageMorph);
             var action = arguments[1];
             stage.threads.startProcess(action.expression,
                                        action.receiver,
