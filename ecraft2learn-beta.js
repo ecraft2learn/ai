@@ -216,6 +216,10 @@ window.ecraft2learn =
       run: function (function_name, parameters) {
           // runs one of the functions in this library
           if (typeof ecraft2learn[function_name] === 'undefined') {
+              if (function_name === "take_picture_and_analyse") {
+                  alert("You need to run setup camera before you can use the camera.");
+                  return;
+              }
               alert("Ecraft2learn library does not have a function named " + function_name);
               return;
           }
