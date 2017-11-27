@@ -106,7 +106,7 @@ window.ecraft2learn =
             console.error("Invoke_block_morph called on non-BlockMorph");
             return;
         }
-        return invoke(callback, new List(Array.prototype.slice.call(arguments, 1)), callback);
+        return invoke(block_morph, new List(Array.prototype.slice.call(arguments, 1)), block_morph);
     };
     var is_callback = function (x) {
         return typeof x === 'object' || typeof x === 'function';
