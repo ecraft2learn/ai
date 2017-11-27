@@ -86,15 +86,16 @@ window.ecraft2learn =
             // if BlockMorph then needs a receiver -- apparently callback is good enough
 //             return invoke(callback, new List(Array.prototype.slice.call(arguments, 1)), (callback instanceof BlockMorph && callback)); 
             var stage = world.children[0].stage; // this.parentThatIsA(StageMorph);
-            stage.threads.startProcess(callback.expression,
-                                       callback.receiver,
-                                       stage.isThreadSafe,
-                                       true,
-                                       function (result) {
-                                         console.log(result);
-                                       },
-                                       false,
-                                       true); // trying right away
+            var process = stage.threads.startProcess(callback.expression,
+                                                     callback.receiver,
+                                                     stage.isThreadSafe,
+                                                     true,
+                                                     function (result) {
+                                                       console.log(result);
+                                                     },
+                                                     false,
+                                                     false);
+            process.initializeFor(callback, new List(Array.prototype.slice.call(arguments, 1)));
         }
         if (typeof callback === 'function') { // assume JavaScript callback
             callback.apply(this, arguments);
