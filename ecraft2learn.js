@@ -47,7 +47,7 @@ window.ecraft2learn =
               return;
           }
           var blockTemplate = allBlocks[index].templateInstance();
-          return invoke_callback(blockTemplate);
+          return invoke_block_morph(blockTemplate);
       };
       var get_snap_ide = function (start) {
           // finds the Snap! IDE_Morph that is the element 'start' or one of its ancestors
@@ -81,18 +81,37 @@ window.ecraft2learn =
     };
     var invoke_callback = function (callback) {
         // callback could either be a Snap! object or a JavaScript function
-        if (typeof callback === 'object') { // assume Snap! callback
+        if (callback instanceof Context) { // assume Snap! callback
             // invoke the callback with the argments (other than the callback itself)
             // if BlockMorph then needs a receiver -- apparently callback is good enough
-            return invoke(callback, new List(Array.prototype.slice.call(arguments, 1)), (callback instanceof BlockMorph && callback)); 
-        }
-        if (typeof callback === 'function') { // assume JavaScript callback
+//             return invoke(callback, new List(Array.prototype.slice.call(arguments, 1)), (callback instanceof BlockMorph && callback)); 
+            var stage = world.children[0].stage; // this.parentThatIsA(StageMorph);
+//             var process = stage.threads.startProcess(callback.expression,
+//                                                      callback.receiver,
+//                                                      stage.isThreadSafe,
+//                                                      true,
+//                                                      function (result) {
+//                                                        console.log(result);
+//                                                      },
+//                                                      false,
+//                                                      false);
+            var process = new Process(null, callback.receiver, null, true);
+            process.initializeFor(callback, new List(Array.prototype.slice.call(arguments, 1)));
+            stage.threads.processes.push(process);
+        } else if (typeof callback === 'function') { // assume JavaScript callback
             callback.apply(this, arguments);
         }
         // otherwise no callback provided so ignore it
     };
+    var invoke_block_morph = function (block_morph) {
+        if (!(block_morph instanceof BlockMorph)) {
+            console.error("Invoke_block_morph called on non-BlockMorph");
+            return;
+        }
+        return invoke(block_morph, new List(Array.prototype.slice.call(arguments, 1)), block_morph);
+    };
     var is_callback = function (x) {
-        return typeof x === 'object' || typeof x === 'function';
+        return callback instanceof Context || typeof x === 'function';
     };
     var javascript_to_snap = function (x) {
         if (!ecraft2learn.inside_snap) {
@@ -190,7 +209,7 @@ window.ecraft2learn =
     
     var speech_recognition_in_progress = false; // used to prevent overlapping calls to start_speech_recognition
 
-    var debugging = true;
+    var debugging = false; // if true console will fill with information
 
     // the following are the ecraft2learn functions available via this library
 
@@ -199,6 +218,10 @@ window.ecraft2learn =
       run: function (function_name, parameters) {
           // runs one of the functions in this library
           if (typeof ecraft2learn[function_name] === 'undefined') {
+              if (function_name === "take_picture_and_analyse") {
+                  alert("You need to run setup camera before you can use the camera.");
+                  return;
+              }
               alert("Ecraft2learn library does not have a function named " + function_name);
               return;
           }
