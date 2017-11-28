@@ -111,7 +111,7 @@ window.ecraft2learn =
         return invoke(block_morph, new List(Array.prototype.slice.call(arguments, 1)), block_morph);
     };
     var is_callback = function (x) {
-        return callback instanceof Context || typeof x === 'function';
+        return x instanceof Context || typeof x === 'function';
     };
     var javascript_to_snap = function (x) {
         if (!ecraft2learn.inside_snap) {
