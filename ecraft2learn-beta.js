@@ -81,21 +81,23 @@ window.ecraft2learn =
     };
     var invoke_callback = function (callback) {
         // callback could either be a Snap! object or a JavaScript function
-        if (typeof callback === 'object') { // assume Snap! callback
+        if (callback instanceof Context) { // assume Snap! callback
             // invoke the callback with the argments (other than the callback itself)
             // if BlockMorph then needs a receiver -- apparently callback is good enough
 //             return invoke(callback, new List(Array.prototype.slice.call(arguments, 1)), (callback instanceof BlockMorph && callback)); 
             var stage = world.children[0].stage; // this.parentThatIsA(StageMorph);
-            var process = stage.threads.startProcess(callback.expression,
-                                                     callback.receiver,
-                                                     stage.isThreadSafe,
-                                                     true,
-                                                     function (result) {
-                                                       console.log(result);
-                                                     },
-                                                     false,
-                                                     false);
+//             var process = stage.threads.startProcess(callback.expression,
+//                                                      callback.receiver,
+//                                                      stage.isThreadSafe,
+//                                                      true,
+//                                                      function (result) {
+//                                                        console.log(result);
+//                                                      },
+//                                                      false,
+//                                                      false);
+            var process = new Process(null, callback.receiver, null, true);
             process.initializeFor(callback, new List(Array.prototype.slice.call(arguments, 1)));
+            Stage.threads.processes.push(process);
         } else if (typeof callback === 'function') { // assume JavaScript callback
             callback.apply(this, arguments);
         }
