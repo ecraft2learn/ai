@@ -97,7 +97,7 @@ window.ecraft2learn =
 //                                                      false);
             var process = new Process(null, callback.receiver, null, true);
             process.initializeFor(callback, new List(Array.prototype.slice.call(arguments, 1)));
-            Stage.threads.processes.push(process);
+            stage.threads.processes.push(process);
         } else if (typeof callback === 'function') { // assume JavaScript callback
             callback.apply(this, arguments);
         }
