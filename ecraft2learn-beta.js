@@ -209,7 +209,7 @@ window.ecraft2learn =
     
     var speech_recognition_in_progress = false; // used to prevent overlapping calls to start_speech_recognition
 
-    var debugging = true;
+    var debugging = false; // if true console will fill with information
 
     // the following are the ecraft2learn functions available via this library
 
