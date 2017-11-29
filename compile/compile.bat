@@ -17,6 +17,6 @@ java -jar c:\bin\closure\closure-compiler-v20170626.jar ^
  --js "../snap/cloud.js" ^
  --js "../snap/sha512.js" ^
  --js "../snap/FileSaver.min.js" ^
- --js "../snap/onload.js" --compilation_level=SIMPLE_OPTIMIZATIONS --externs externs.js ^
+ --js "../snap/onload.js" --compilation_level=SIMPLE_OPTIMIZATIONS ^
  --js_output_file=../snap/compiled_snap.js
 
