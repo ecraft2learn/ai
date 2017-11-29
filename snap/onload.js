@@ -20,6 +20,9 @@ window.onload = function () {
 										 console.error("Error fetching " + project_path + ": " + error.message);
 									 });
 		}
+		ide_morph.controlBar.hide(); // no need for the control bar
+        window.onbeforeunload = function () {}; // don't bother the user about reloading
+        ide_morph.toggleAppMode(false); // launch in edit mode
 	}
     loop();
 };
