@@ -865,19 +865,24 @@ window.ecraft2learn =
             ecraft2learn.speak_using_mary_tts(message, 1, 1, finished_callback);
         } else {
             // voices not loaded so wait for them and try again
+            var onvoiceschanged_ran = false; // so both onvoiceschanged_ran and timeout don't both run
             window.speechSynthesis.onvoiceschanged = function () {
+                onvoiceschanged_ran = true;
                 ecraft2learn.waited_for_voices = true;
                 ecraft2learn.speak_using_browser_voices_or_mary_tts(message, finished_callback);
                 window.speechSynthesis.onvoiceschanged = undefined;
             };
             // but don't wait forever because there might not be any
             setTimeout(function () {
-                           ecraft2learn.waited_for_voices = true;
-                           ecraft2learn.speak_using_browser_voices_or_mary_tts(message, finished_callback);
-                           window.speechSynthesis.onvoiceschanged = undefined;
+                           if (!onvoiceschanged_ran) {
+                               // only if onvoiceschanged didn't run
+                               ecraft2learn.waited_for_voices = true;
+                               ecraft2learn.speak_using_browser_voices_or_mary_tts(message, finished_callback);
+                               window.speechSynthesis.onvoiceschanged = undefined;
+                           }
                        },
                        10000);
-            return;     
+            return;         
         }       
     } else {
         ecraft2learn.speak(message, 0, 0, 1, 0, 0, finished_callback);
