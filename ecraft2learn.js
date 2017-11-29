@@ -851,8 +851,8 @@ window.ecraft2learn =
                                 sound.play();
                             });
      sound.addEventListener('error',
-                            function (event) {
-                                invoke_callback(finished_callback, javascript_to_snap(event.message));
+                            function () {
+                                invoke_callback(finished_callback, javascript_to_snap(sound.error.message));
                             });
   },
   get_mary_tts_voice_names: function () {
