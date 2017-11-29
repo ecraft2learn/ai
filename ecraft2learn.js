@@ -852,7 +852,7 @@ window.ecraft2learn =
                             });
      sound.addEventListener('error',
                             function (event) {
-                                invoke_callback(finished_callback, javascript_to_snap(error.message));
+                                invoke_callback(finished_callback, javascript_to_snap(event.message));
                             });
   },
   get_mary_tts_voice_names: function () {
