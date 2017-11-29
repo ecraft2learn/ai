@@ -883,7 +883,7 @@ window.ecraft2learn =
                        },
                        10000);
             return;         
-        }       
+        }
     } else {
         ecraft2learn.speak(message, 0, 0, 1, 0, 0, finished_callback);
     }

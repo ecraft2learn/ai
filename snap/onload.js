@@ -23,6 +23,7 @@ window.onload = function () {
 		ide_morph.controlBar.hide(); // no need for the control bar
         window.onbeforeunload = function () {}; // don't bother the user about reloading
         ide_morph.toggleAppMode(false); // launch in edit mode
+        ecraft2learn.get_voice_names(); // so need to wait for them to load
 	}
     loop();
 };
