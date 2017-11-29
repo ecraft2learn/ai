@@ -846,7 +846,14 @@ window.ecraft2learn =
      if (+volume > 0) {
          sound.volume = +volume;
      }
-     sound.play();
+     sound.addEventListener('canplay',
+                            function () {
+                                sound.play();
+                            });
+     sound.addEventListener('error',
+                            function (event) {
+                                invoke_callback(finished_callback, javascript_to_snap(error.message));
+                            });
   },
   get_mary_tts_voice_names: function () {
     return new List(mary_tts_voices.map(function (voice) { return voice[1]; }));
