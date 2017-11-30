@@ -270,7 +270,7 @@ window.ecraft2learn =
               // don't listen while speaking or while listening is still in progress
               if (debugging) {
                   console.log(window.speechSynthesis.speaking, "window.speechSynthesis.speaking");
-                  console.log(speech_recognition_in_progress, "speech_recognition_in_progress")
+                  console.log(speech_recognition_in_progress, "speech_recognition_in_progress");
                   console.log("Delaying start due to " + (window.speechSynthesis.speaking ? "speaking" : "listen in progress"));
               }
               setTimeout(function () {
@@ -317,6 +317,7 @@ window.ecraft2learn =
 //                   speech_recognition.stop();
 //               }
               speech_recognition_in_progress = false;
+              console.log(speech_recognition_in_progress, "speech_recognition_in_progress");
               invoke_callback(event.results[event.resultIndex].isFinal ? final_spoken_callback : interim_spoken_callback, spoken);
               if (debugging) {
                   console.log("Just invoked callback for " + spoken + ". isFinal is " + event.results[event.resultIndex].isFinal);
@@ -378,6 +379,9 @@ window.ecraft2learn =
           speech_recognition.onerror = handle_error;
           speech_recognition.onend = function (event) {
               speech_recognition_in_progress = false;
+              if (debugging) {
+                  console.log("On end triggered.");
+              }
           };
           ecraft2learn.stop_speech_recognition = function () {
               if (debugging) {
