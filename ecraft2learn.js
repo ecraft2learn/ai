@@ -365,40 +365,45 @@ window.ecraft2learn =
               invoke_callback(error_callback, event.error);
           };
           var speech_recognition_stopped = false; // used to suspend listening when tab is hidden
-          var speech_recognition = (typeof SpeechRecognition === 'undefined') ?
+          var speech_recognition;
+          var create_speech_recognition_object = function () {
+              speech_recognition = (typeof SpeechRecognition === 'undefined') ?
                                    new webkitSpeechRecognition() :
                                    new SpeechRecognition();
-          // following prevents speech_recognition from being garbage collected before its listeners run
-          ecraft2learn.speech_recognition = speech_recognition;
-          speech_recognition.interimResults = is_callback(interim_spoken_callback);
-          if (typeof language === 'string') {
-              speech_recognition.lang = language;
-          }
-          if (max_alternatives > 1) {
-              speech_recognition.maxAlternatives = max_alternatives;
-          }
-          speech_recognition.profanityFilter = true; // so more appropriate use in schools, e.g. f*** will result
-          speech_recognition.onresult = handle_result;
-          speech_recognition.onerror = handle_error;
-          speech_recognition.onend = function (event) {
-            // the following was an attempt to deal with nothing from onresult or onerror
-//               if (speech_recognition_in_progress) {
-//                   console.log("Restarting since recognition ended but no result or error was triggered");
-//                   speech_recognition_in_progress = false;
-//                   restart();
-//               }
-//               speech_recognition_in_progress = false;
-              if (debugging) {
-                  console.log("On end triggered.");
+              // following prevents speech_recognition from being garbage collected before its listeners run
+              ecraft2learn.speech_recognition = speech_recognition;
+              speech_recognition.interimResults = is_callback(interim_spoken_callback);
+              if (typeof language === 'string') {
+                  speech_recognition.lang = language;
               }
-              if (ecraft2learn.speech_recognition) {
+              if (max_alternatives > 1) {
+                  speech_recognition.maxAlternatives = max_alternatives;
+              }
+              speech_recognition.profanityFilter = true; // so more appropriate use in schools, e.g. f*** will result
+              speech_recognition.onresult = handle_result;
+              speech_recognition.onerror = handle_error;
+              speech_recognition.onend = function (event) {
+                // the following was an attempt to deal with nothing from onresult or onerror
+    //               if (speech_recognition_in_progress) {
+    //                   console.log("Restarting since recognition ended but no result or error was triggered");
+    //                   speech_recognition_in_progress = false;
+    //                   restart();
+    //               }
+    //               speech_recognition_in_progress = false;
                   if (debugging) {
-                      console.log("On end but no result or error so stopping then restarting.");
+                      console.log("On end triggered.");
                   }
-                  ecraft2learn.stop_speech_recognition();
-                  restart();
-              }                
+                  if (ecraft2learn.speech_recognition) {
+                      if (debugging) {
+                          console.log("On end but no result or error so stopping then restarting.");
+                      }
+                      ecraft2learn.stop_speech_recognition();
+                      create_speech_recognition_object();
+                      restart();
+                  }                
+              };
           };
+          create_speech_recognition_object();
           ecraft2learn.stop_speech_recognition = function () {
               if (debugging) {
                   console.log("Stopped.");
