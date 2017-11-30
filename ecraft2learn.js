@@ -316,6 +316,7 @@ window.ecraft2learn =
 //                   // not clear if this is still needed
 //                   speech_recognition.stop();
 //               }
+              speech_recognition_in_progress = false;
               invoke_callback(event.results[event.resultIndex].isFinal ? final_spoken_callback : interim_spoken_callback, spoken);
               if (debugging) {
                   console.log("Just invoked callback for " + spoken + ". isFinal is " + event.results[event.resultIndex].isFinal);
@@ -354,6 +355,7 @@ window.ecraft2learn =
 //                   }
 //                   return;
 //               }
+              speech_recognition_in_progress = false;
               ecraft2learn.stop_speech_recognition();
               if (debugging) {
                   console.log("Recognition error: " + event.error);
