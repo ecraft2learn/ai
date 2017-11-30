@@ -206,8 +206,6 @@ window.ecraft2learn =
 ];
    
     var image_recognitions = {}; // record of most recent results from calls to take_picture_and_analyse
-    
-    var speech_recognition_in_progress = false; // used to prevent overlapping calls to start_speech_recognition
 
     var debugging = true; // if true console will fill with information
 
@@ -266,11 +264,9 @@ window.ecraft2learn =
               ecraft2learn.start_microsoft_speech_recognition(interim_spoken_callback, spoken_callback, error_callback);
               return;
           }
-          if (window.speechSynthesis.speaking || ecraft2learn.speech_recognition) { // speech_recognition_in_progress) { 
+          if (window.speechSynthesis.speaking || ecraft2learn.speech_recognition) { 
               // don't listen while speaking or while listening is still in progress
               if (debugging) {
-                  console.log(window.speechSynthesis.speaking, "window.speechSynthesis.speaking");
-                  console.log(speech_recognition_in_progress, "speech_recognition_in_progress");
                   console.log("Delaying start due to " + (window.speechSynthesis.speaking ? "speaking" : "listen in progress"));
               }
               setTimeout(function () {
@@ -291,14 +287,12 @@ window.ecraft2learn =
                   return;
               }
               try {
-//                   speech_recognition_in_progress = true;
                   if (debugging) {
                       console.log("Recognition started");
                   }
                   speech_recognition.start();
  //               console.log("Speech recognition started");
               } catch (error) {
-                  speech_recognition_in_progress = false;
                   if (error.name === 'InvalidStateError') {
                       if (debugging) {
                           console.log("restart delayed becuase InvalidStateError");
@@ -312,12 +306,6 @@ window.ecraft2learn =
           };
           var handle_result = function (event) {
               var spoken = event.results[event.resultIndex][0].transcript; // first result            
-//               if (event.results[0].isFinal) {
-//                   // not clear if this is still needed
-//                   speech_recognition.stop();
-//               }
-              speech_recognition_in_progress = false;
-              console.log(speech_recognition_in_progress, "speech_recognition_in_progress");
               invoke_callback(event.results[event.resultIndex].isFinal ? final_spoken_callback : interim_spoken_callback, spoken);
               if (debugging) {
                   console.log("Just invoked callback for " + spoken + ". isFinal is " + event.results[event.resultIndex].isFinal);
@@ -357,7 +345,6 @@ window.ecraft2learn =
 //                   }
 //                   return;
 //               }
-              speech_recognition_in_progress = false;
               ecraft2learn.stop_speech_recognition();
               if (debugging) {
                   console.log("Recognition error: " + event.error);
@@ -383,13 +370,6 @@ window.ecraft2learn =
               speech_recognition.onresult = handle_result;
               speech_recognition.onerror = handle_error;
               speech_recognition.onend = function (event) {
-                // the following was an attempt to deal with nothing from onresult or onerror
-    //               if (speech_recognition_in_progress) {
-    //                   console.log("Restarting since recognition ended but no result or error was triggered");
-    //                   speech_recognition_in_progress = false;
-    //                   restart();
-    //               }
-    //               speech_recognition_in_progress = false;
                   if (debugging) {
                       console.log("On end triggered.");
                   }
@@ -408,14 +388,13 @@ window.ecraft2learn =
               if (debugging) {
                   console.log("Stopped.");
               }
-              speech_recognition_in_progress = false;
+              ecraft2learn.speech_recognition = null;
               if (speech_recognition) {
                   speech_recognition.onend    = null;
                   speech_recognition.onresult = null;
                   speech_recognition.onerror  = null;
                   speech_recognition.stop();
               }
-              ecraft2learn.speech_recognition = null;
           };
           restart();
           // if the tab or window is minimised or hidden then speech recognition is paused until the window or tab is shown again
