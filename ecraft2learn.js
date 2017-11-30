@@ -380,12 +380,13 @@ window.ecraft2learn =
           speech_recognition.onresult = handle_result;
           speech_recognition.onerror = handle_error;
           speech_recognition.onend = function (event) {
-              if (speech_recognition_in_progress) {
-                  console.log("Restarting since recognition ended but no result or error was triggered");
-                  speech_recognition_in_progress = false;
-                  restart();
-              }
-              speech_recognition_in_progress = false;
+            // the following was an attempt to deal with nothing from onresult or onerror
+//               if (speech_recognition_in_progress) {
+//                   console.log("Restarting since recognition ended but no result or error was triggered");
+//                   speech_recognition_in_progress = false;
+//                   restart();
+//               }
+//               speech_recognition_in_progress = false;
               if (debugging) {
                   console.log("On end triggered.");
               }
