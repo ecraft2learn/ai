@@ -79,18 +79,79 @@ The following version cannot do so.</p>
 <img src="images/command.png" class="center">
 <figurecaption>Click to see how to use broadcasting to implement voice commands</figurecaption></figure></a>
 
+<h4>An example project involving generating sentences using parts of speech concepts</h4>
+<p>This <a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=part%20of%20speech%20broadcast" target="_blank">
+sentence generating program</a> starts with a random sentence "template".
+The program considers any word start with "?" to be a variable that is replaced by asking the user for something of that sort.
+For example, <code>The silly ?PLURAL-NOUN like ?ADJECTIVE bananas.</code>
+will cause the program to first ask the user for a "plural noun" and then ask for an "adjective".
+If the user answers "potatoes" and "gigantic" then the program says <code>The silly potatoes like gigantic bananas.</code></p>
+
+<p>Let's look at the code to see how it works.</p>
+<figure>
+<img src="images/part-of-speech-code.png">
+<figurecaption>The core of the program that asks for substitutions for words beginning with "?"</figurecaption></figure>
+<p>This part of the program goes through the sentence word by word pausing when a word or phrase starts with a "?".
+It pauses after asking for a substitution and then calls the "listen" command.
+The following code responds when something has been heard and interpreted:</p>
+<figure>
+<img src="images/part-of-speech-when-something-heard.png">
+<figurecaption>The part of the program that responds to recognised words or phrases</figurecaption></figure>
+<p>It repeats what was heard and substitutes it into the list of words replacing the word starting with "?".</p>
+
+<p>This example illustrates how the use of speech input and output to produce an application that is purely verbal.
+It also interesting as an example of a program that crosses disciplines.
+To generate grammatically correct (though often nonsense or silly) sentences one needs to reply upon grammatical concepts
+such as nouns, noun phrases, verbs, adjectives, and adverbs.
+Issues about number agreement and tenses arise naturally.
+A student may for the first time see the <i>utility</i> of these concepts since without them the generated sentences are no good.</p>
+
+<h4>A more sophisticated sentence (or story) generator</h4>
+<p>This <a href="" target="_blank">story generator</a> extends the sentence generator by adding a new feature.
+If it encounters a word beginning with "=" it replaces it with the last response to the request for an example of that word/phrase.
+For example, consider this very short story:
+<blockquote>
+This is a story about ?GIRLS-NAME.
+=GIRLS-NAME is ?ADJECTIVE and very ?ADJECTIVE.
+She travelled to ?PLACE-NAME. There she met ?BOYS-NAME who was a ?OCCUPATION in =PLACE-NAME.
+=GIRLS-NAME and =BOYS-NAME lived ?ADVERB ever after.
+</blockquote>
+If the responses were "Juliet", "warm", "beautiful", "Verona", "Romeo", "amateur poet", and "barely" then the generated story is:
+<blockquote>
+This is a story about Juliet.
+Juliet is warm and very beautiful.
+She travelled to Verona. There she met Romeo who was a amateur poet in Verona.
+Juliet and Romeo lived barely ever after.
+</blockquote>
+A student may want to enhance the program to turn "a amateur" into "an amateur".</p>
+
 <h4>What is speech recognition good for?</h4>
 <p>Speech recognition can be used to transcribe spoken speech.
 Those unable to type or unable to write can use it to communicate textually and to write notes and reports.
 There are many specialised contexts where it can be very useful.
 For example, <a href="https://research.googleblog.com/2017/11/understanding-medical-conversations.html" target="_blank">
-doctors can produce transscripts of their conversations with patients</a>, thereby improving the patient's records.
+doctors can produce transcripts of their conversations with patients</a>, thereby improving the patient's records.
 Combined with translation speech recognition can provide input to translation service and its output can be converted to speech in another language.</p>
 
 <p>Another use of speech input is as an interface to computers or digital artefacts.
 A robot can be constructed that takes verbal commands.
 Assistants like Siri or Alexa can provide responses to spoken queries.
 Verbal input and output can be the safest way to communicate in some circumstances such as driving or piloting.</p>
+
+<h4>Ideas for projects using speech input and output</h4>
+<p>Here are some ideas for projects using speech input (and sometimes speech output as described in <a href="chapter-1.html">Chapter 1</a>).
+<ul>
+<li>A chatbot that can (pretend to) talk about a particular subject.
+Chatbots have a <a href="https://en.wikipedia.org/wiki/ELIZA" target="_blank">history going back over fifty years</a>
+but it is only recently that speech can replace the chatbot's typing and written text.</ul>
+<li>Another example of a textual program that can be reconceived as a verbal program
+are <a href="https://en.wikipedia.org/wiki/Adventure_game#Text_adventures_and_Interactive_Fiction" target="_blank">adventure games</a>.
+A virtual world is simulated where one can navigate by saying things like "walk north" or "open door" and hearing responses such as 
+"you now see a castle in the distance" and "the door is locked".</li>
+
+
+
+</ul></p>
 
 <h4>A full-featured 'listen' block</h4>
 <p>The speech recognition engines typically can do more than the above blocks.
