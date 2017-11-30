@@ -391,6 +391,13 @@ window.ecraft2learn =
               if (debugging) {
                   console.log("On end triggered.");
               }
+              if (ecraft2learn.speech_recognition) {
+                  if (debugging) {
+                      console.log("On end but no result or error so stopping then restarting.");
+                  }
+                  ecraft2learn.stop_speech_recognition();
+                  restart();
+              }                
           };
           ecraft2learn.stop_speech_recognition = function () {
               if (debugging) {
