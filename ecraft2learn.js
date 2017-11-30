@@ -209,7 +209,7 @@ window.ecraft2learn =
     
     var speech_recognition_in_progress = false; // used to prevent overlapping calls to start_speech_recognition
 
-    var debugging = false; // if true console will fill with information
+    var debugging = true; // if true console will fill with information
 
     // the following are the ecraft2learn functions available via this library
 
@@ -324,6 +324,7 @@ window.ecraft2learn =
               if (is_callback(all_confidence_values_callback)) {
                   handle_all_confidence_values(event);
               } else {
+                  // if callback for confidence values isn't used then log the top confidence value
                   console.log("Confidence is " + event.results[event.resultIndex][0].confidence + " for " + spoken);
               }
           };
@@ -353,7 +354,7 @@ window.ecraft2learn =
 //               }
               ecraft2learn.stop_speech_recognition();
               if (debugging) {
-                   console.log("Recognition error: " + event.error);
+                  console.log("Recognition error: " + event.error);
               }
               invoke_callback(error_callback, event.error);
           };
