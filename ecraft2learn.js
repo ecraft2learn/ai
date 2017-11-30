@@ -382,6 +382,10 @@ window.ecraft2learn =
               if (debugging) {
                   console.log("On end triggered.");
               }
+              if (speech_recognition_in_progress) {
+                  console.log("restarting");
+                  restart();
+              }
           };
           ecraft2learn.stop_speech_recognition = function () {
               if (debugging) {
