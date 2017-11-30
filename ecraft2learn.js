@@ -269,6 +269,8 @@ window.ecraft2learn =
           if (window.speechSynthesis.speaking || speech_recognition_in_progress) { 
               // don't listen while speaking or while listening is still in progress
               if (debugging) {
+                  console.log(window.speechSynthesis.speaking, "window.speechSynthesis.speaking");
+                  console.log(speech_recognition_in_progress, "speech_recognition_in_progress")
                   console.log("Delaying start due to " + (window.speechSynthesis.speaking ? "speaking" : "listen in progress"));
               }
               setTimeout(function () {
