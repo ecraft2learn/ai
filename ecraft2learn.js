@@ -338,13 +338,6 @@ window.ecraft2learn =
               invoke_callback(all_confidence_values_callback, javascript_to_snap(confidences));
           };
           var handle_error = function (event) {
-//               if (event.error === 'aborted') {
-//                   if (!speech_recognition_stopped) {
-//                       console.log("Aborted so restarting speech recognition in half a second");
-//                       setTimeout(restart, 500);
-//                   }
-//                   return;
-//               }
               ecraft2learn.stop_speech_recognition();
               if (debugging) {
                   console.log("Recognition error: " + event.error);
@@ -358,6 +351,7 @@ window.ecraft2learn =
                                    new webkitSpeechRecognition() :
                                    new SpeechRecognition();
               // following prevents speech_recognition from being garbage collected before its listeners run
+              // it is also used to prevent multiple speech recognitions to occur simultaneously
               ecraft2learn.speech_recognition = speech_recognition;
               speech_recognition.interimResults = is_callback(interim_spoken_callback);
               if (typeof language === 'string') {
