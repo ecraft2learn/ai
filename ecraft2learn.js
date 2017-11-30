@@ -364,11 +364,14 @@ window.ecraft2learn =
               invoke_callback(error_callback, event.error);
           };
           var speech_recognition_stopped = false; // used to suspend listening when tab is hidden
-          var speech_recognition = (typeof SpeechRecognition === 'undefined') ?
+          var speech_recognition;
+          // following prevents speech_recognition from being garbage collected before its listeners run
+          if (!ecraft2learn.speech_recognition) {
+             speech_recognition = (typeof SpeechRecognition === 'undefined') ?
                                    new webkitSpeechRecognition() :
                                    new SpeechRecognition();
-          // following prevents speech_recognition from being garbage collected before its listeners run
-          ecraft2learn.speech_recognition = speech_recognition;
+             ecraft2learn.speech_recognition = speech_recognition;
+          }
           speech_recognition.interimResults = is_callback(interim_spoken_callback);
           if (typeof language === 'string') {
               speech_recognition.lang = language;
