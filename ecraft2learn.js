@@ -291,7 +291,7 @@ window.ecraft2learn =
                   return;
               }
               try {
-                  speech_recognition_in_progress = true;
+//                   speech_recognition_in_progress = true;
                   if (debugging) {
                       console.log("Recognition started");
                   }
