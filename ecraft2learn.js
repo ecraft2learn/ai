@@ -266,7 +266,7 @@ window.ecraft2learn =
               ecraft2learn.start_microsoft_speech_recognition(interim_spoken_callback, spoken_callback, error_callback);
               return;
           }
-          if (window.speechSynthesis.speaking || speech_recognition_in_progress) { 
+          if (window.speechSynthesis.speaking || ecraft2learn.speech_recognition) { // speech_recognition_in_progress) { 
               // don't listen while speaking or while listening is still in progress
               if (debugging) {
                   console.log(window.speechSynthesis.speaking, "window.speechSynthesis.speaking");
@@ -331,6 +331,7 @@ window.ecraft2learn =
                   // if callback for confidence values isn't used then log the top confidence value
                   console.log("Confidence is " + event.results[event.resultIndex][0].confidence + " for " + spoken);
               }
+              ecraft2learn.stop_speech_recognition();
           };
           var handle_all_results = function (event) {
               var results = [];
@@ -368,11 +369,7 @@ window.ecraft2learn =
                                    new webkitSpeechRecognition() :
                                    new SpeechRecognition();
           // following prevents speech_recognition from being garbage collected before its listeners run
-          if (ecraft2learn.speech_recognition) {
-             ecraft2learn.speech_recognition.push(speech_recognition);
-          } else {
-            ecraft2learn.speech_recognition = [speech_recognition];
-          }
+          ecraft2learn.speech_recognition = speech_recognition;
           speech_recognition.interimResults = is_callback(interim_spoken_callback);
           if (typeof language === 'string') {
               speech_recognition.lang = language;
@@ -406,6 +403,7 @@ window.ecraft2learn =
                   speech_recognition.onerror  = null;
                   speech_recognition.stop();
               }
+              ecraft2learn.speech_recognition = null;
           };
           restart();
           // if the tab or window is minimised or hidden then speech recognition is paused until the window or tab is shown again
