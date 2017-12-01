@@ -10,7 +10,9 @@
 <h3>Introduction</h3>
 <p>It is much easier to get a computer to start with text and end up with speech
 than to start with speech and end up with the corresponding text.
-Speech causes vibrations in the air that cause vibrations in the computer's microphone.
+Often it is easier to get a computer to generate something than to recognise it.</p>
+
+<p>Speech (and other sounds) cause vibrations in the air that cause vibrations in the computer's microphone.
 These vibrations are converted to numbers.
 Speech recognition begins with these numbers and attempts to determine what was said.
 As you'll see the process is not perfect, mistakes occur.</p>
@@ -28,10 +30,9 @@ If all is working well you should see what you just said.</p>
 <h4>Speech recognition errors</h4>
 <p>Speech recognition can encounter errors such as the inability to access the microphone.
 The most common "error" is when after several seconds nothing is heard.
-The 'listen' block keeps listening until there is an error.
+The 'listen then ...' block keeps listening until there is an error.
 (Try saying something, look at the result, say something else, and look again.)
-When the nothing said error occurs the error block is given the text "no-speech".
-(Note that if you say "no speech" then there is no hyphen.)
+When the speech recogniser notices that nothing has been said then the error block is given the text "no-speech".
 Other errors are 'audio-capture' when the browser can't find a microphone and 
 'not-allowed' when permission to use the microphone hasn't been granted.
 Try the following and then be quiet for a while.</p>
@@ -43,17 +44,21 @@ Try the following and then be quiet for a while.</p>
         project_path="../AI-teacher-guide-projects/listen error.xml">
 </iframe></div>
 <h4>A sample program using speech recognition (and synthesis)</h4>
-<p>The following program uses the 'listen' block to control a sprite.
+<p>The following program uses the 'listen then ...' block to control a sprite.
 You can tell it to go forward or to the turn right.
 It will then ask you how much and then execute the command.
-A similar program could be written to control a physical device such as a robot or a set of lights.</p>
+Say "goodbye" to quit the program.
+Sometimes you need to repeat what you said.
+Occassionally it will mishear you.</p>
+
+<p>A similar program could be written to control a physical device such as a robot or a set of lights.</p>
 
 <a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=command" target="_blank">
 <figure>
 <img src="images/command.png" class="center">
 <figurecaption>Click to try the voice command example</figurecaption></figure></a>
 
-<h4>How the speech command programs works</h4>
+<h4>How the speech command program works</h4>
 <p>If you right click on 'speak turtle commands' and select 'edit' you'll see the program.
 The 'spoken' variable contains what was just recognised.
 The nested 'if-then-else' commands test for exiting commands, then forward commands, and then turning commands.
