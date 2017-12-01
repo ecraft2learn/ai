@@ -8,19 +8,21 @@
 <h4>Ken Kahn, University of Oxford</h4>
 <h3>Introduction</h3>
 <p>The importance of artificial Intelligence in society, the work place, and the economy is rapidly increasing.
-It is becoming an important part of many other technologies. AI conversational agents are becoming common in phones and PCs (Siri, Cortana, OK Google).
+It is becoming an important part of many other technologies.
+AI conversational agents are becoming common in phones and PCs (Siri, Cortana, OK Google).
 Driverless vehicles are coming soon.
 Finance, medicine, and many other fields are relying more and more on AI.
 Even toys are beginning to embed AI.</p>
 
 <p>Is there something to learn about intelligence in general by studying AI?
-AI researchers attempts to give computers the abilities to perceive, to solve problems, to plan, and to reason
-shed light on intelligence beyond what studying human and animal psychology can.</p>
+AI researchers are attempting to give computers the abilities to perceive, to solve problems, to plan, and to reason.
+Perhaps this will shed  some light on intelligence beyond what studying human and animal psychology can.</p>
 
 <p>AI raises many questions:</p>
 <ul><li>What is the future of work?</li>
 <li>How dangerous is AI?</li>
 <li>How to ensure AIs make ethical choices?</li>
+<li>How might AI help people in medicine, enviromental problems, crime prevention, better agriculture, and more?</li>
 <li>Would you want a robot to be your child's best friend?</li></ul>
 <h3>Ways of teaching AI</h3>
 <p>Broadly there are three approaches</p>
@@ -28,7 +30,7 @@ shed light on intelligence beyond what studying human and animal psychology can.
 <li>Readings, lectures, and discussions about social issues impacted by AI</li>
 <li>Supporting hands-on experiences creating AI apps and artefacts</li></ol>
 
-<p>While this guide touches on 1 and 2 and its focus is on 3.
+<p>While this guide touches on 1 and 2; its focus is on 3.
 While some aspects of building AI applications are best suited for those with phds in the field,
 there are many projects that even young school students can do.
 If the power of speech and image recognition or the possibilities of machine learning are given easy programming interfaces
@@ -37,11 +39,11 @@ then even beginners can use them in their creations.</p>
 <p>Let's start by exploring speech synthesis.
 Is the ability to transform text into spoken speech really an example of AI?
 Humans need to spend a long time learning to read (out loud).
-But reading involves character recognition and spelling as well as comprehension.
+But reading involves character recognition and comprehension.
 When a computer produces speech none of that is involved.
-Is this an aspect of intelligent behaviour or it is just like a parrot speaking?
-Perhaps a good topic for students to discuss.
-And note that <a href="https://en.wikipedia.org/wiki/Alex_(parrot)" target="_blank">Alex the parrot</a> clearly did more than "parroting" speech.</p>
+Is generating speech an aspect of intelligent behaviour or it is just like a parrot speaking?
+Note that <a href="https://en.wikipedia.org/wiki/Alex_(parrot)" target="_blank">Alex the parrot</a> clearly did more than "parroting" speech.
+Perhaps a good topic for students to discuss.</p>
 
 <p>Before discussing what is technically involved in synthesising speech let's look at how it can be used by students.
 Let's start with the simplest program block for speaking. Click on it to try it out.
@@ -54,6 +56,82 @@ The first time one is used it fetches voices over the network and that may take 
         src="../snap/snap.html"
         project_path="../AI-teacher-guide-projects/simple speak block.xml">
 </iframe></div>
+
+<h4>Sentences are more than a series of words</h4>
+</p>Speech synthesizers do more than just say each word in a sentence.
+They attempt to produce a natural prosody.
+They speak questions differently from declarative sentences.</p>
+
+<div  class="iframe-container" style="width: 580px; height: 140px"> 
+<iframe class="iframe-clipped"
+        scrolling="no"
+        src="../snap/snap.html"
+        project_path="../AI-teacher-guide-projects/separate words.xml"> 
+</iframe></div>
+
+<p>And for a human speaking numbers and punctuation signs can be a bit challenging.
+Is this a sign of intelligence?</p>
+
+<div class="iframe-container"> 
+<iframe class="iframe-clipped"
+        scrolling="no"
+        src="../snap/snap.html"
+        project_path="../AI-teacher-guide-projects/numbers signs.xml"> 
+</iframe></div>
+
+<h4>Problems combining speech and sound effects</h4>
+<p>Suppose one wanted the computer to speak, be interrupted by a door bell, and then respond accordingly.
+Try clicking this and you'll hear there is a problem:</p>
+
+<div  class="iframe-container" style="width: 480px; height: 140px"> 
+<iframe class="iframe-clipped"
+        scrolling="no"
+        src="../snap/snap.html"
+        project_path="../AI-teacher-guide-projects/doorbell problem.xml">
+</iframe></div>
+
+<p>The problem is that the sound effect begins the same times as the first sentence.
+This because the 'speak' block tells the browser to begin speaking and then continues with the next action.
+What we want is to have the door bell sound played <i>after</i> the first utterance is finished.
+For this we need a slightly more complex block that accepts actions to do after speaking:</p>
+
+<div class="iframe-container" style="width: 600px; height: 140px;">
+<iframe class="iframe-clipped"
+        scrolling="no"
+        src="../snap/snap.html"
+        project_path="../AI-teacher-guide-projects/doorbell fix.xml">
+</iframe></div>
+
+<p>Being able to express what should happen when speaking completes is a generally useful ability.
+The program may give some explanation and then do something on the screen.
+In many of the examples in the next chapter the programs listen for speech only after the system finishes speaking.</p>
+
+<p>Code blocks that should run when some computation finishes are an instance of an advanced computer science concept called
+<a href="https://en.wikipedia.org/wiki/Continuation" target="_blank">continations</a>.
+These are used to support asynchronous computations.
+The complexity introduced by continations need not make things hard for students.
+They can easly place blocks in the 'speak' block without understanding the underlying computer science.</p>
+
+<h4>What is speech synthesis good for?</h4>
+<p>Speech synthesis is a good way for software to communicate with people that are blind or visually impaired.
+And for devices such as a talking clock or a robot without a display there are few alternatives.
+Or when the user's eyes need to attend to something exclusively (e.g. a surgeon during an operation or a pilot flying a plane).
+Speech output is often the best way to communicate with children or adults who have yet to learn to read.
+And speech synthesis gives those who physically cannot speak (e.g. Stephen Hawking) a way to communicate.
+Many argue that a conversation is often a more natural, friendly, and more pleasant interface to devices
+than displays, keyboards, mice, buttons, and touch sensors.</p>
+
+<figure>
+<img src="images/hawking.jpg" class="center">
+<figurecaption>Stephen Hawking can communicate thanks to speech synthesis</figurecaption></figure>
+
+<h4>Can speech synthesis be misused?</h4>
+<p>It is hard to imagine dangers with today's speech synthesis technology.
+As it gets better it may enable the automation of tasks that voice actors perform today.
+A more serious worry is that the next generation of speech synthesis may be able to
+<a href="http://www.radiolab.org/story/breaking-news/" target="_blank">
+fool people into thinking that someone said something they didn't</a>.
+This is especially worrisome in combination with technology that can alter videos to change emotional expressions and lip synch.</p>
 
 <h4>How does this work?</h4>
 <p>Modern speech synthesizers (also called "text-to-speech engines" or "TTS engines") start by preprocessing the text.
@@ -80,65 +158,13 @@ and <i>articulatory</i> where human tongues and vocal chords are simulated.</p>
 
 <p>More details about how speech synthesis works can be found in the <b>Additional resources</b> section at the bottom of this page.</p>
 
-<h4>Sentences are more than a series of words</h4>
-</p>Speech synthesizers do more than just say each word in a sentence.
-They attempt to produce a natural prosody.
-And they speak questions differently from sentences.
-</p>
-
-<div  class="iframe-container" style="width: 580px; height: 140px"> 
-<iframe class="iframe-clipped"
-        scrolling="no"
-        src="../snap/snap.html"
-        project_path="../AI-teacher-guide-projects/separate words.xml"> 
-</iframe></div>
-
-<p>And for a human speaking numbers and punctuation signs can be a bit challenging.
-Is this a sign of intelligence?</p>
-
-<div class="iframe-container"> 
-<iframe class="iframe-clipped"
-        scrolling="no"
-        src="../snap/snap.html"
-        project_path="../AI-teacher-guide-projects/numbers signs.xml"> 
-</iframe></div>
-
-<h4>Problems combining speech and sound effects</h4>
-<p>Suppose one wanted the computer to speech, be interrupted by a door bell, and respond accordingly.
-Try clicking this and you'll hear there is a problem:</p>
-
-<div  class="iframe-container" style="width: 480px; height: 140px"> 
-<iframe class="iframe-clipped"
-        scrolling="no"
-        src="../snap/snap.html"
-        project_path="../AI-teacher-guide-projects/doorbell problem.xml">
-</iframe></div>
-
-<p>The problem is because the way the speak block works is that it tells the browser to begin speaking and then continues with the next action.
-What we want is to have the door bell sound played <i>after</i> the first utterance is finished.
-For this we need a slightly more complex block that accepts actions to do after speaking:</p>
-
-<div class="iframe-container" style="width: 600px; height: 140px;">
-<iframe class="iframe-clipped"
-        scrolling="no"
-        src="../snap/snap.html"
-        project_path="../AI-teacher-guide-projects/doorbell fix.xml">
-</iframe></div>
-
-<h4>What is speech synthesis good for?</h4>
-<p>Speech synthesis is a good way for software to communicate with people that are blind or visually impaired.
-And for devices such as a talking clock or a robot without a display there are few alternatives.
-Or when the user's eyes need to attend to something exclusively (e.g. a surgeon during an operation or a pilot flying a plane).
-Speech output is often the best way to communicate with children or adults who have yet to learn to read.
-And speech synthesis gives those who physically cannot speak (e.g. Stephen Hawking) a way to communicate.
-Many argue that a conversation is often a more natural, friendly, and more pleasant interface to devices
-than displays, keyboards, mice, buttons, and touch sensors.</p>
-
 <h4>Controlling speech output</h4>
 <p>A person can speak slow or fast, in a low or high pitch, quietly or loudly, and more.
 And different people have different voices and accents.
 To mirror these abilities a more complex block is available.
-A parameter value of 1 means the normal pitch, rate, or volume.
+In the following block a parameter value of 1 means the normal pitch, rate, or volume.
+Fractional values correspond to low pitch, slow rate, or low volume.
+How high the values can be for the opposite effect depends upon the browser and the voice used.
 Note that depending upon the voice and browser some of these parameters are ignored.</p>
 
 <div class="iframe-container" style="width: 800px; height: 100px;">
@@ -149,7 +175,8 @@ Note that depending upon the voice and browser some of these parameters are igno
 </iframe></div>
 
 <p>Regarding the 'language' option, unfortunately many browsers currently ignore it.
-The argument should be one of the <a href="https://en.wikipedia.org/wiki/IETF_language_tag" target="_blank">IETF language tags</a>.</p>
+The argument should be one of the <a href="https://en.wikipedia.org/wiki/IETF_language_tag" target="_blank">IETF language tags</a>.
+It describes the language and dialect, e.g. en-GB.</p>
 
 <p>Fortunately in some browsers (e.g. Chrome) some voices are associated with a language.
 When a non-English voice is given English to speak it typically speaks it with an accent.
@@ -190,7 +217,7 @@ An alternative speech block uses <a href="http://mary.dfki.de/" target="_blank">
 "Lead" the verb sounds different from "lead" the metal.
 Some voices are better than others at using the correct pronounciation.
 Explore how different voices deal with "read" in the following.
-And edit the sentences to see how they deal with "lead" and other words.</p>
+Try editing the sentences to see how they deal with "lead" and other words.</p>
 
 <div class="iframe-container" style="width: 800px; height: 400px;">
 <iframe class="iframe-clipped"
@@ -208,7 +235,8 @@ The parrot repeats what it hears (see <a href="chapter-2.html">the next chapter<
 Hearing your utterances repeated in a strange voice with a random pitch and rate can be entertaining.
 As can hearing your speech repeated in a foreign accent.
 As with all sample programs the blocks implementing it can be easily found.
-Here the sprites 'Parrot' and 'Numbers' contain the sample programs.</p>
+Click on <img src="images/show-blocks.png"> to see the blocks behind a program.
+If you click on the 'Parrot' or 'Numbers' sprite in the lower right you will see these sample programs.</p>
 
 <h4>Possible project ideas using speech output</h4>
 <p>Here are some ideas for projects using only speech output, see <a href="chapter-2.html">the next chapter</a>
@@ -217,7 +245,7 @@ for ideas combining speech input and output.
 <li>Have sprites put on a play where each sprite speaks with a different voice.</li>
 <li>Have a robot talk out loud as it moves around. E.g. "whoops" when it collides with something, or "time to turn" before it turns.</li>
 <li>Make a page reader that speaks the contents of a file on the web.</li>
-<li>Program explanation or debugging by having the program speak as it executes.</li>
+<li>Enhance a program to speak as it runs to produce explanations or help in debugging.</li>
 <li>Make a talking clock or calculator.</li>
 <li>There are thousands more ways students could use speech output in their projects.</li>
 </ul></p>
@@ -238,13 +266,6 @@ However, it has yet to be implemented in the voices one commonly finds available
 experiment by Google researchers.
 It combines computer vision and controlled speech to rap about what is in front of a web cam.</p>
 
-<h3>Where to get these blocks to use in projects</h3>
-<p>All of these speech output blocks as well other AI blocks are available to use in <a href="https://snap.berkeley.edu/" target="_blank">Snap!</a> in
-this <a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=eCraft2Learn" target="_blank">Snap project</a>.
-They can also be used together with blocks for controlling Arduinos by downloading and then importing
-<a href="https://toontalk.github.io/ai-cloud/AI-Teacher-Guide/eCraft2Learn%20S4A.xml" download>this file</a>
-into <a href="http://snap4arduino.rocks/" target="_blank">Snap4Arduino</a>.
-
 <h3>Additional resouces</h3>
 <p><a href="https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition" target="_blank">A complete description of the speech synthesis API</a>
 that web browsers support.</p>
@@ -254,7 +275,14 @@ that web browsers support.</p>
 <p><i>Explain that Stuff</i> has <a href="http://www.explainthatstuff.com/how-speech-synthesis-works.html" target="_blank">
 a long explanation including a history of speech synthesis</a>.</p>
 
-<p>The <a href="https://en.wikipedia.org/wiki/Speech_synthesis" target="_blank">Wikipedia's entry</a> is good.</p>
+<p>The <a href="https://en.wikipedia.org/wiki/Speech_synthesis" target="_blank">Wikipedia entry</a> is good.</p>
+
+<h3>Where to get these blocks to use in projects</h3>
+<p>All of these speech output blocks as well other AI blocks are available to use in <a href="https://snap.berkeley.edu/" target="_blank">Snap!</a> in
+this <a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=eCraft2Learn" target="_blank">Snap project</a>.
+They can also be used together with blocks for controlling Arduinos by downloading and then importing
+<a href="https://toontalk.github.io/ai-cloud/AI-Teacher-Guide/eCraft2Learn%20S4A.xml" download>this file</a>
+into <a href="http://snap4arduino.rocks/" target="_blank">Snap4Arduino</a>.
 
 <h3>Learn about speech input</h3>
 <a href="chapter-2.html">Go to the next chapter on speech recognition</a>.
