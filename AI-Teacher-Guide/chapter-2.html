@@ -59,11 +59,17 @@ Occassionally it will mishear you.</p>
 <figurecaption>Click to try the voice command example</figurecaption></figure></a>
 
 <h4>How the speech command program works</h4>
-<p>If you right click on 'speak turtle commands' and select 'edit' you'll see the program.
+<p>If you cick on <img src="images/show-blocks.png"> you'll see the blocks behind the program.
+If you then right click on 'speak turtle commands' and select 'edit' you'll see its program.
+
+<figure>
+<img src="images/command-program.png" class="center">
+<figurecaption>The blocks that implement the speech command program</figurecaption></figure>
+
 The 'spoken' variable contains what was just recognised.
-The nested 'if-then-else' commands test for exiting commands, then forward commands, and then turning commands.
+The nested 'if-then-else' commands test first for speech for exiting the program, then for forward movement, and then turning commands.
 If none match then a 'not understood' response is created.
-Both the turning and moving commands cause the program to ask for amount.
+Both the turning and moving commands cause the program to ask for an amount to turn or move.
 When a number is spoken the turtle then turns or moves appropriately.</p>
 
 <h4>An alternative way to do the same thing</h4>
@@ -87,25 +93,29 @@ The following version cannot do so.</p>
 <h4>An example project involving generating sentences using parts of speech concepts</h4>
 <p>This <a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=part%20of%20speech%20broadcast" target="_blank">
 sentence generating program</a> starts with a random sentence "template".
-The program considers any word start with "?" to be a variable that is replaced by asking the user for something of that sort.
-For example, <code>The silly ?PLURAL-NOUN like ?ADJECTIVE bananas.</code>
+The program considers any word starting with "?" to be a variable that is replaced by asking the user for something of that sort.
+For example,
+<blockquote>The silly ?PLURAL-NOUN like ?ADJECTIVE bananas.
+</blockquote>
 will cause the program to first ask the user for a "plural noun" and then ask for an "adjective".
-If the user answers "potatoes" and "gigantic" then the program says <code>The silly potatoes like gigantic bananas.</code></p>
+If the user answers "potatoes" and "gigantic" then the program says 
+<blockquote>The silly potatoes like gigantic bananas.
+</blockquote></p>
 
 <p>Let's look at the code to see how it works.</p>
 <figure>
 <img src="images/part-of-speech-code.png">
 <figurecaption>The core of the program that asks for substitutions for words beginning with "?"</figurecaption></figure>
 <p>This part of the program goes through the sentence word by word pausing when a word or phrase starts with a "?".
-It pauses after asking for a substitution and then calls the "listen" command.
+It pauses after asking for a substitution and then calls the 'listen' command.
 The following code responds when something has been heard and interpreted:</p>
 <figure>
 <img src="images/part-of-speech-when-something-heard.png">
 <figurecaption>The part of the program that responds to recognised words or phrases</figurecaption></figure>
 <p>It repeats what was heard and substitutes it into the list of words replacing the word starting with "?".</p>
 
-<p>This example illustrates how the use of speech input and output to produce an application that is purely verbal.
-It also interesting as an example of a program that crosses disciplines.
+<p>This example illustrates how to use speech input and output to produce an application that is purely verbal.
+It is also an example of a program that crosses discipline boundaries.
 To generate grammatically correct (though often nonsense or silly) sentences one needs to reply upon grammatical concepts
 such as nouns, noun phrases, verbs, adjectives, and adverbs.
 Issues about number agreement and tenses arise naturally.
@@ -132,23 +142,26 @@ A student may want to enhance the program to turn "a amateur" into "an amateur".
 
 <h4>What is speech recognition good for?</h4>
 <p>Speech recognition can be used to transcribe spoken speech.
-Those unable to type or unable to write can use it to communicate textually and to write notes and reports.
+Those unable to type or write can use it to communicate textually and to generate notes and reports.
 There are many specialised contexts where it can be very useful.
 For example, <a href="https://research.googleblog.com/2017/11/understanding-medical-conversations.html" target="_blank">
 doctors can produce transcripts of their conversations with patients</a>, thereby improving the patient's records.
-Combined with translation speech recognition can provide input to translation service and its output can be converted to speech in another language.</p>
+Automatic transscription can enable textual searches within videos.
+It can be used to generate captions for videos.
+Combined with translation, speech recognition can provide input to a translation services
+and its output can be converted to speech in another language.</p>
 
 <p>Another use of speech input is as an interface to computers or digital artefacts.
-A robot can be constructed that takes verbal commands.
-This is particularly empowering for people with disabilities that can't themselves perform the tasks.
+An application or a robot can be constructed that takes verbal commands.
+This is particularly empowering for people with disabilities who can't themselves perform those tasks.
 Assistants like Siri or Alexa can provide helpful responses to spoken queries.
 Verbal input and output can be the safest way to communicate in some circumstances such as when driving or piloting.</p>
 
 <h4>What are the dangers of speech recognition?</h4>
 <p>Like many technologies speech recognition can be misued.
 It could be used for widespread spying on a population.
-It could be part of the basis for replacing human interactions with telephone-based help services with computers
-without the kind of understanding and empathy that people can provide.
+It could be part of the basis for replacing human interactions with call-center help services with computers
+that lack the kind of understanding and empathy that people can provide.
 This is also an issue with <a href="https://www.wired.com/story/companion-robots-are-here/" target="_blank">companion robots</a>.
 It can be used to automate annoying telemarketing calls.
 It could be part of <a href="https://www.theguardian.com/technology/2017/sep/10/should-robot-be-your-childs-best-friend" target="_blank">
@@ -156,12 +169,34 @@ toys that children become too emotionally attached to</a>.</p>
 
 <p>The benefits and dangers of speech technology could be good topic for student dicussions.</p>
 
+<h4>How does speech recognition work?</h4>
+<p>It begins with the microphone that converts vibrations in the air (i.e. sounds) to numbers
+(using something called an analog-to-digital converter).
+The digitised sound is broken into short segments (hundreths or thousandths of a second long) and fed into a recognition engine.
+Today the best ones rely upon <a href="https://en.wikipedia.org/wiki/Artificial_neural_network" target="_blank">neural nets</a>.
+Complex statistical programs are also often used.</p>
+
+<p>There are many challenges including the wide range of voices, dialects, and eccents that a speech recognition engine may encounter.
+There is often background noise that needs to be removed from the signal.</p>
+
+<p>Other challenges come from the complexity of human languages.
+There are many words that are <a href="https://en.wikipedia.org/wiki/Homonym" target="_blank">hononyms</a>, different words that sound the same.
+Separating speech into separate words is difficult.
+A classic example is how "recognise speech" sounds a lot like "wreck a nice beach".</p>
+
+<p>As one uses the blocks and sample programs of this chapter one will often encounter errors.
+These are sometimes amusing, especially when it leads the program to do something silly.
+For applications where computer mistakes can cause serious problems one can build the interface so it asks confirmation before proceeding.
+It is interesting to compare speech recognition errors to the kind and frequency of the errors that humans make when listening to speech.</p>
+
+
+
 <h4>Ideas for projects using speech input and output</h4>
 <p>Here are some ideas for projects using speech input (and sometimes speech output as described in <a href="chapter-1.html">Chapter 1</a>).
 <ul>
 <li>A chatbot that can (pretend to) talk about a particular subject.
 Chatbots have a <a href="https://en.wikipedia.org/wiki/ELIZA" target="_blank">history going back over fifty years</a>
-but it is only recently that speech can replace the chatbot's typing and written text.</li>
+but it is only recently that speech can replace typing as the way to communicate with a chatbot.</li>
 <li>Another example of a textual program that can be reconceived as a verbal program
 are <a href="https://en.wikipedia.org/wiki/Adventure_game#Text_adventures_and_Interactive_Fiction" target="_blank">adventure games</a>.
 A virtual world is simulated where one can navigate by saying things like "walk north" or "open door" and hearing responses such as 
@@ -171,18 +206,18 @@ This can result in a computer game that blind people can play (or drivers can pl
 The computer can either pick a number and respond to guesses with "warmer" or "colder".
 Or the computer can guess numbers and listen for the words "warmer" or "colder" to decide what to guess next.</li>
 <li>Telling or responding to knock knock jokes.</li>
-<li>An interactive artwork that responds to whether what it hears is positive or negative. 
+<li>An interactive artwork that responds differently depending upon if it hears is something positive or negative. 
 It could do so by searching for key words and phrases in what it hears or
 it could connect to a <a href="https://en.wikipedia.org/wiki/Sentiment_analysis" target="_blank">sentiment analysis</a> service.</li>
 <li>Putting together two speech apps so they interact.
-For example, the part of speech sample program described earlier could be paired with a program that searches for keywords such as
+For example, the part-of-speech sample program described earlier could be paired with a program that searches for keywords such as
 "noun", "verb", etc. and then responds with a random entry in the corresponding list.
 This could be even more exciting if the two apps were placed into some physical devices that "converse".</li>
 <li>And thousands of other things.</li>
 </ul></p>
 
 <h4>A full-featured 'listen' block</h4>
-<p>The speech recognition engines typically can do more than the above blocks.
+<p>The speech recognition engines typically can do more than the basic 'listen then ...' block described above.
 One can specify which language is expected.
 The engine can report interim results and alternative results.
 It can provide 'confidence' values indicating how certain it is that it recognised the speech correctly.
@@ -195,23 +230,24 @@ All of these functionalities are provided by this block:</p>
         project_path="../AI-teacher-guide-projects/complex listen block.xml">
 </iframe></div>
 
-<p>The arguments to this block are:
+<p>The arguments to this block are (any of them can be left blank):
 <ol>
-<li>The first argument are blocks that receive interim results as they are produced. Can be left blank.</li>
+<li>The first argument are blocks that receive interim results as they are produced.</li>
 <li>The next argument are blocks that receive the final result.</li>
-<li>The next argument receives errors if there are any. Can be left blank.</li>
-<li>Text in the format language-dialect. E.g. en-GB. It should be one of the <a href="https://en.wikipedia.org/wiki/IETF_language_tag" target="_blank">IETF language tags</a>. Can be left blank.</li>
+<li>The next argument receives errors if there are any.</li>
+<li>Text in the format language-dialect. E.g. en-GB. It should be one of the <a href="https://en.wikipedia.org/wiki/IETF_language_tag" target="_blank">IETF language tags</a>.</li>
 <li>The maximum number of alternative recognition results. If not provided it is 1. Note the recognition engine may return fewer results.</li>
-<li>Blocks that receive a list of alternative results. Can be left blank.</li>
-<li>Blocks that receive a list of confidence numbers corresponding to the alternative results. 0 means no confidence while 1 is the highest. Can be left blank.</li>
+<li>Blocks that receive a list of alternative results.</li>
+<li>Blocks that receive a list of confidence numbers corresponding to the alternative results.
+0 means no confidence while 1 is the highest confidence.</li>
 </ol>
 Note that for Google's speech recognition engine currently only the first alternative has a non-zero confidence.</p>
 
 <p>Watching the interim results can provide some insight into the process of recognition.
-You can test this using the above block where you put the say block with an empty text field in the first argument.
+You can test this using the above block where you put the 'say' block with an empty text field in the first argument.
 (Snap! interprets an empty field in this context as the input to the blocks (in this case the current interim result).)
-Or by using <a href="https://www.google.com/intl/en/chrome/demos/speech.html" target="_blank">this Google demo</a>.
-For example, if you say "red" you'll see "red" but if you follow it with "a book" you'll see "red" become "read a book".</p>
+For example, if you say "red" you'll see "red" but if you soon afterwards say "a book" you'll see "red" become "read a book".
+You can see the same phenomenon at <a href="https://www.google.com/intl/en/chrome/demos/speech.html" target="_blank">this Google demo</a>.</p>
 
 <p>There is much one can explore with the 'language' option.
 For example, if one selects 'fr-FR' (French as spoken in France) and then says "une deux trois quatre five six" the result is "1 2 3 4 5 6".
@@ -222,10 +258,11 @@ Strangely if with English you say "one two three four five six" you get those wo
 
 <h3>Additional resources</h3>
 <p><a href="https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition" target="_blank">The documentation of speech recognition</a>
-that browsers support. (Chrome currently is the only one but other browser developers are working on it.)</p>
+is a very complete description of speech recognition features browsers should support.
+(Chrome currently is the only one but other browser developers are working on it.)</p>
 
 <p><a href="https://electronics.howstuffworks.com/gadgets/high-tech-gadgets/speech-recognition.htm" target="_blank">How stuff works</a>
-has a nice explanation of how different kinds of speech recognition system work.</p>
+has a clear explanation of how speech recognition systems work and what the challenges are. (Though it is a bit dated.)</p>
 
 <p><a href="https://en.wikipedia.org/wiki/Speech_recognition" target="_blank">Wikipedia, as usual, covers the topic well.</p>
 
@@ -233,7 +270,7 @@ has a nice explanation of how different kinds of speech recognition system work.
 
 <h3>Where to get these blocks to use in projects</h3>
 <p>All of these speech output blocks as well other AI blocks are available to use in <a href="https://snap.berkeley.edu/" target="_blank">Snap!</a> in
-this <a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=eCraft2Learn" target="_blank">Snap project</a>.
+this <a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=eCraft2Learn" target="_blank">Snap! project</a>.
 They can also be used together with blocks for controlling Arduinos by downloading and then importing
 <a href="https://toontalk.github.io/ai-cloud/AI-Teacher-Guide/eCraft2Learn%20S4A.xml" download>this file</a>
 into <a href="http://snap4arduino.rocks/" target="_blank">Snap4Arduino</a>.
