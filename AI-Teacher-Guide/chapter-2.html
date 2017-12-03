@@ -146,7 +146,7 @@ Those unable to type or write can use it to communicate textually and to generat
 There are many specialised contexts where it can be very useful.
 For example, <a href="https://research.googleblog.com/2017/11/understanding-medical-conversations.html" target="_blank">
 doctors can produce transcripts of their conversations with patients</a>, thereby improving the patient's records.
-Automatic transscription can enable textual searches within videos.
+Automatic transcription can enable textual searches within videos.
 It can be used to generate captions for videos.
 Combined with translation, speech recognition can provide input to a translation services
 and its output can be converted to speech in another language.</p>
@@ -158,9 +158,9 @@ Assistants like Siri or Alexa can provide helpful responses to spoken queries.
 Verbal input and output can be the safest way to communicate in some circumstances such as when driving or piloting.</p>
 
 <h4>What are the dangers of speech recognition?</h4>
-<p>Like many technologies speech recognition can be misued.
+<p>Like many technologies speech recognition can be misused.
 It could be used for widespread spying on a population.
-It could be part of the basis for replacing human interactions with call-center help services with computers
+It could be part of the basis for replacing human interactions with call-centre help services with computers
 that lack the kind of understanding and empathy that people can provide.
 This is also an issue with <a href="https://www.wired.com/story/companion-robots-are-here/" target="_blank">companion robots</a>.
 It can be used to automate annoying telemarketing calls.
@@ -172,11 +172,11 @@ toys that children become too emotionally attached to</a>.</p>
 <h4>How does speech recognition work?</h4>
 <p>It begins with the microphone that converts vibrations in the air (i.e. sounds) to numbers
 (using something called an analog-to-digital converter).
-The digitised sound is broken into short segments (hundreths or thousandths of a second long) and fed into a recognition engine.
+The digitised sound is broken into short segments (hundredths or thousandths of a second long) and fed into a recognition engine.
 Today the best ones rely upon <a href="https://en.wikipedia.org/wiki/Artificial_neural_network" target="_blank">neural nets</a>.
 Complex statistical programs are also often used.</p>
 
-<p>There are many challenges including the wide range of voices, dialects, and eccents that a speech recognition engine may encounter.
+<p>There are many challenges including the wide range of voices, dialects, and accents that a speech recognition engine may encounter.
 There is often background noise that needs to be removed from the signal.</p>
 
 <p>Other challenges come from the complexity of human languages.
@@ -188,8 +188,6 @@ A classic example is how "recognise speech" sounds a lot like "wreck a nice beac
 These are sometimes amusing, especially when it leads the program to do something silly.
 For applications where computer mistakes can cause serious problems one can build the interface so it asks confirmation before proceeding.
 It is interesting to compare speech recognition errors to the kind and frequency of the errors that humans make when listening to speech.</p>
-
-
 
 <h4>Ideas for projects using speech input and output</h4>
 <p>Here are some ideas for projects using speech input (and sometimes speech output as described in <a href="chapter-1.html">Chapter 1</a>).
@@ -235,7 +233,8 @@ All of these functionalities are provided by this block:</p>
 <li>The first argument are blocks that receive interim results as they are produced.</li>
 <li>The next argument are blocks that receive the final result.</li>
 <li>The next argument receives errors if there are any.</li>
-<li>Text in the format language-dialect. E.g. en-GB. It should be one of the <a href="https://en.wikipedia.org/wiki/IETF_language_tag" target="_blank">IETF language tags</a>.</li>
+<li>Text in the format language-dialect.
+E.g. en-GB. It should be one of the <a href="https://en.wikipedia.org/wiki/IETF_language_tag" target="_blank">IETF language tags</a>.</li>
 <li>The maximum number of alternative recognition results. If not provided it is 1. Note the recognition engine may return fewer results.</li>
 <li>Blocks that receive a list of alternative results.</li>
 <li>Blocks that receive a list of confidence numbers corresponding to the alternative results.
