@@ -261,7 +261,9 @@ window.ecraft2learn =
           // if the browser has no support for speech recognition then the Microsoft Speech API is used (API key required)
           if (typeof SpeechRecognition === 'undefined' && typeof webkitSpeechRecognition === 'undefined') {
               // no support from this browser so try using the Microsoft Speech API
-              ecraft2learn.start_microsoft_speech_recognition(interim_spoken_callback, final_spoken_callback, error_callback);
+              if (window.confirm("This browser does not support speech recognition. You could use Chrome or you can use Microsoft's speech recognition service. Go ahead and use the Microsoft service?")) {
+                  ecraft2learn.start_microsoft_speech_recognition(interim_spoken_callback, final_spoken_callback, error_callback);
+              }
               return;
           }
           if (window.speechSynthesis.speaking || ecraft2learn.speech_recognition) { 
