@@ -161,6 +161,134 @@ window.ecraft2learn =
             }
         }
     };
+    var check_for_voices = function (no_voices_callback, voices_callback) {
+        if (window.speechSynthesis.getVoices().length === 0) {
+            // either there are no voices or they haven't loaded yet
+            if (ecraft2learn.waited_for_voices) {
+                ecraft2learn.speak_using_mary_tts(message, 1, 1, finished_callback);
+            } else {
+                // voices not loaded so wait for them and try again
+                var onvoiceschanged_ran = false; // so both onvoiceschanged_ran and timeout don't both run
+                window.speechSynthesis.onvoiceschanged = function () {
+                    onvoiceschanged_ran = true;
+                    ecraft2learn.waited_for_voices = true;
+                    no_voices_callback();
+                    window.speechSynthesis.onvoiceschanged = undefined;
+                };
+                // but don't wait forever because there might not be any
+                setTimeout(function () {
+                               if (!onvoiceschanged_ran) {
+                                   // only if onvoiceschanged didn't run
+                                   ecraft2learn.waited_for_voices = true;
+                                   no_voices_callback();
+                                   window.speechSynthesis.onvoiceschanged = undefined;
+                               }
+                           },
+                           10000);
+                return;         
+            }
+        } else {
+            voices_callback();
+        }
+    };
+    var speak = function (message, pitch, rate, voice_number, volume, language, finished_callback) {
+        // speaks 'message' optionally with the specified pitch, rate, voice, volume, and language
+        // finished_callback is called with the spoken text
+        // see https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisUtterance
+        var maximum_length = 200; // not sure what a good value is but long text isn't spoken in some browsers
+        var break_into_short_segments = function (text) {
+            var segments = [];
+            var break_text = function (text) {
+                var segment, index;
+                if (text.length < maximum_length) {
+                    return text.length+1;
+                }
+                segment = text.substring(0, maximum_length);
+                index = segment.lastIndexOf(". ") || segment.lastIndexOf(".\n");
+                if (index > 0) {
+                    return index+2;
+                }
+                index = segment.lastIndexOf(".");
+                if (index === segment.length-1) {
+                    // final period need not have space after it
+                    return index+1;
+                }
+                index = segment.lastIndexOf(", ");
+                if (index > 0) {
+                    return index+2;
+                }
+                index = segment.lastIndexOf(" ");
+                if (index > 0) {
+                    return index+1;
+                }
+                // give up - no periods, commas, or spaces
+                return Math.min(text.length+1, maximum_length);
+            };
+            var best_break;
+            while (text.length > 0) {
+                best_break = break_text(text);
+                if (best_break > 1) {
+                    segments.push(text.substring(0, best_break-1));
+                }
+                text = text.substring(best_break);
+            }
+            return segments;
+        };
+        var segments, speech_utterance_index;
+        if (message.length > maximum_length) {
+            segments = break_into_short_segments(message);
+            segments.forEach(function (segment, index) {
+                // finished_callback is only for the last segment
+                var callback = index === segments.length-1 && 
+                               finished_callback &&
+                               function () {
+                                   invoke_callback(finished_callback, message); // entire message not just the segments
+                               };
+                ecraft2learn.speak(segment, pitch, rate, voice_number, volume, language, callback)
+            });
+            return;
+        }
+        // else is less than the maximum_length
+        var utterance = new SpeechSynthesisUtterance(message);
+        ecraft2learn.utterance = utterance; // without this utterance may be garbage collected before onend can run
+        if (typeof language === 'string') {
+            utterance.lang = language;
+        }
+        pitch = +pitch; // if string try convering to a number
+        if (typeof pitch === 'number' && pitch > 0) {
+            utterance.pitch = pitch;
+        }
+        rate = +rate;
+        if (typeof rate === 'number' && rate > 0) {
+            if (rate < .1) {
+               // A very slow rate breaks Chrome's speech synthesiser
+               rate = .1;
+            }
+            if (rate > 2) {
+               rate = 2; // high rate also breaks Chrome's speech synthesis
+            }
+            utterance.rate = rate;
+        }
+        utterance.voice = get_voice(voice_number);
+        volume = +volume;
+        if (typeof volume && volume > 0) {
+            utterance.volume = volume;
+        }
+        utterance.onend = function (event) {
+            invoke_callback(finished_callback, message);
+        };
+    //     if (speech_recognition) {
+    //         // don't recognise synthetic speech
+    //         ecraft2learn.speech_recognition.abort();
+    //     }
+        window.speechSynthesis.speak(utterance);
+    };
+    var no_voices_alert = function () {
+        if (!ecraft2learn.no_voices_alert_given) {
+            ecraft2learn.no_voices_alert_given = true;
+            window.alert("This browser has no voices available. Either try a different browser or try using the MARY TTS instead.");
+        }
+    };
     var create_costume = function (canvas, name) {
         if (!name) {
             if (typeof  ecraft2learn.photo_count === 'undefined') {
@@ -724,109 +852,17 @@ window.ecraft2learn =
   },
 
   speak: function (message, pitch, rate, voice_number, volume, language, finished_callback) {
-    // speaks 'message' optionally with the specified pitch, rate, voice, volume, and language
-    // finished_callback is called with the spoken text
-    // see https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisUtterance
-    if (window.speechSynthesis.getVoices().length === 0) {
-        // voices not loaded so wait for them and try again
-        window.speechSynthesis.onvoiceschanged = function () {
-            ecraft2learn.speak(message, pitch, rate, voice_number, volume, language, finished_callback);
-            window.speechSynthesis.onvoiceschanged = undefined;
-        };
-        return;
-    }
-    var maximum_length = 200; // not sure what a good value is but long text isn't spoken in some browsers
-    var break_into_short_segments = function (text) {
-        var segments = [];
-        var break_text = function (text) {
-            var segment, index;
-            if (text.length < maximum_length) {
-                return text.length+1;
-            }
-            segment = text.substring(0, maximum_length);
-            index = segment.lastIndexOf(". ") || segment.lastIndexOf(".\n");
-            if (index > 0) {
-                return index+2;
-            }
-            index = segment.lastIndexOf(".");
-            if (index === segment.length-1) {
-                // final period need not have space after it
-                return index+1;
-            }
-            index = segment.lastIndexOf(", ");
-            if (index > 0) {
-                return index+2;
-            }
-            index = segment.lastIndexOf(" ");
-            if (index > 0) {
-                return index+1;
-            }
-            // give up - no periods, commas, or spaces
-            return Math.min(text.length+1, maximum_length);
-        };
-        var best_break;
-        while (text.length > 0) {
-            best_break = break_text(text);
-            if (best_break > 1) {
-                segments.push(text.substring(0, best_break-1));
-            }
-            text = text.substring(best_break);
-        }
-        return segments;
-    };
-    var segments, speech_utterance_index;
-    if (message.length > maximum_length) {
-        segments = break_into_short_segments(message);
-        segments.forEach(function (segment, index) {
-            // finished_callback is only for the last segment
-            var callback = index === segments.length-1 && 
-                           finished_callback &&
-                           function () {
-                               invoke_callback(finished_callback, message); // entire message not just the segments
-                           };
-            ecraft2learn.speak(segment, pitch, rate, voice_number, volume, language, callback)
-        });
-        return;
-    }
-    // else is less than the maximum_length
-    var utterance = new SpeechSynthesisUtterance(message);
-    ecraft2learn.utterance = utterance; // without this utterance may be garbage collected before onend can run
-    if (typeof language === 'string') {
-        utterance.lang = language;
-    }
-    pitch = +pitch; // if string try convering to a number
-    if (typeof pitch === 'number' && pitch > 0) {
-        utterance.pitch = pitch;
-    }
-    rate = +rate;
-    if (typeof rate === 'number' && rate > 0) {
-        if (rate < .1) {
-           // A very slow rate breaks Chrome's speech synthesiser
-           rate = .1;
-        }
-        if (rate > 2) {
-           rate = 2; // high rate also breaks Chrome's speech synthesis
-        }
-        utterance.rate = rate;
-    }
-    utterance.voice = get_voice(voice_number);
-    volume = +volume;
-    if (typeof volume && volume > 0) {
-        utterance.volume = volume;
-    }
-    utterance.onend = function (event) {
-        invoke_callback(finished_callback, message);
-    };
-//     if (speech_recognition) {
-//         // don't recognise synthetic speech
-//         ecraft2learn.speech_recognition.abort();
-//     }
-    window.speechSynthesis.speak(utterance);
+      check_for_voices(function () {
+                          no_voices_alert();
+                       },
+                       function () {
+                           speak(message, pitch, rate, voice_number, volume, language, finished_callback)
+                       });
   },
   get_voice_names: function () {
-    return new List(window.speechSynthesis.getVoices().map(function (voice) {
-        return voice.name;
-    }));
+      return new List(window.speechSynthesis.getVoices().map(function (voice) {
+          return voice.name;
+      }));
   },
   get_voice_name: function (voice_number) {
       var voice = get_voice(voice_number);
@@ -868,34 +904,13 @@ window.ecraft2learn =
     return new List(mary_tts_voices.map(function (voice) { return voice[1]; }));
   },
   speak_using_browser_voices_or_mary_tts: function (message, finished_callback) {
-    if (window.speechSynthesis.getVoices().length === 0) {
-        // either there are no voices or they haven't loaded yet
-        if (ecraft2learn.waited_for_voices) {
-            ecraft2learn.speak_using_mary_tts(message, 1, 1, finished_callback);
-        } else {
-            // voices not loaded so wait for them and try again
-            var onvoiceschanged_ran = false; // so both onvoiceschanged_ran and timeout don't both run
-            window.speechSynthesis.onvoiceschanged = function () {
-                onvoiceschanged_ran = true;
-                ecraft2learn.waited_for_voices = true;
-                ecraft2learn.speak_using_browser_voices_or_mary_tts(message, finished_callback);
-                window.speechSynthesis.onvoiceschanged = undefined;
-            };
-            // but don't wait forever because there might not be any
-            setTimeout(function () {
-                           if (!onvoiceschanged_ran) {
-                               // only if onvoiceschanged didn't run
-                               ecraft2learn.waited_for_voices = true;
-                               ecraft2learn.speak_using_browser_voices_or_mary_tts(message, finished_callback);
-                               window.speechSynthesis.onvoiceschanged = undefined;
-                           }
-                       },
-                       10000);
-            return;         
-        }
-    } else {
-        ecraft2learn.speak(message, 0, 0, 1, 0, 0, finished_callback);
-    }
+    check_for_voices(function () {
+                         // no voices in browser to use Mary TTS
+                         ecraft2learn.speak_using_browser_voices_or_mary_tts(message, finished_callback);
+                     },
+                     function () {
+                         ecraft2learn.speak(message, 0, 0, 1, 0, 0, finished_callback);
+                     });
   },
   open_project: function (name) {
       get_snap_ide().openProject(name);
