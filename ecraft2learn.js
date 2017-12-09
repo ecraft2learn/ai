@@ -165,7 +165,7 @@ window.ecraft2learn =
         if (window.speechSynthesis.getVoices().length === 0) {
             // either there are no voices or they haven't loaded yet
             if (ecraft2learn.waited_for_voices) {
-                ecraft2learn.speak_using_mary_tts(message, 1, 1, finished_callback);
+                no_voices_callback();
             } else {
                 // voices not loaded so wait for them and try again
                 var onvoiceschanged_ran = false; // so both onvoiceschanged_ran and timeout don't both run
