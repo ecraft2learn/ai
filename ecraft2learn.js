@@ -346,11 +346,17 @@ window.ecraft2learn =
           if (typeof ecraft2learn[function_name] === 'undefined') {
               if (function_name === "take_picture_and_analyse") {
                   // define it now with default image dimensions
-                  ecraft2learn.setup_camera(640, 480);
-              } else {
-                  alert("Ecraft2learn library does not have a function named " + function_name);
+                  // when setup finishes then run take_picture_and_analyse
+                  ecraft2learn.setup_camera(640, 
+                                            480, 
+                                            undefined, // no key
+                                            function () {
+                                                ecraft2learn[function_name].apply(null, parameters.contents);
+                                            });
                   return;
               }
+              alert("Ecraft2learn library does not have a function named " + function_name);
+              return;
           }
           return ecraft2learn[function_name].apply(null, parameters.contents);
       },
@@ -629,10 +635,11 @@ window.ecraft2learn =
         }
     },
 
-  setup_camera: function (width, height, provided_key) {
+  setup_camera: function (width, height, provided_key, after_setup_callback) {
       // sets up the camera for taking photos and sending them to an AI cloud service for recognition
       // causes take_picture_and_analyse to be defined
       // supported service providers are currently 'Google', 'Microsoft', and IBM 'Watson' (or 'IBM Watson')
+      // after_setup_callback is optional and called once setup completes
       var video  = document.createElement('video');
       var canvas = document.createElement('canvas');
       var post_image = function post_image(image, cloud_provider, callback, error_callback) {
@@ -687,6 +694,9 @@ window.ecraft2learn =
               var vendorURL = window.URL || window.webkitURL;
               video.src = vendorURL.createObjectURL(stream);
               video.play();
+              if (after_setup_callback) {
+                  after_setup_callback();
+              }
           };
           var error_callback = function(error) {
               console.log("An error in getting access to camera: " + error.message);
