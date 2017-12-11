@@ -690,7 +690,8 @@ window.ecraft2learn =
           case "IBM Watson":
               formData = new FormData();
               formData.append("images_file", image, "blob.png");
-              XHR.open('POST', "https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key);
+              var proxy_url = "https://toontalk.appspot.com/p/" + encodeURIComponent("https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key)
+              XHR.open('POST', proxy_url);
               XHR.send(formData);
               break;
           case "Google":
