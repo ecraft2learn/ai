@@ -345,11 +345,12 @@ window.ecraft2learn =
           // runs one of the functions in this library
           if (typeof ecraft2learn[function_name] === 'undefined') {
               if (function_name === "take_picture_and_analyse") {
-                  alert("You need to run setup camera before you can use the camera.");
+                  // define it now with default image dimensions
+                  ecraft2learn.setup_camera(640, 480);
+              } else {
+                  alert("Ecraft2learn library does not have a function named " + function_name);
                   return;
               }
-              alert("Ecraft2learn library does not have a function named " + function_name);
-              return;
           }
           return ecraft2learn[function_name].apply(null, parameters.contents);
       },
