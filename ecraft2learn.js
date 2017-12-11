@@ -695,7 +695,7 @@ window.ecraft2learn =
               video.src = vendorURL.createObjectURL(stream);
               video.play();
               if (after_setup_callback) {
-                  after_setup_callback();
+                  setTimeout(after_setup_callback);
               }
           };
           var error_callback = function(error) {
