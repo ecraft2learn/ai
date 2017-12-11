@@ -40,12 +40,20 @@ window.ecraft2learn =
           if (key && key !== "Enter your key here") {
               return key;
           }
-          if (top.window.location.hash) {
-              // top.window in case this is running in an iframe
-              key = get_hash_parameter(key_name, top.window.location.hash.substring(1));
-              if (key) {
-                  return key;
+          try {
+              if (top.window.location.hash) {
+                  // top.window in case this is running in an iframe
+                  key = get_hash_parameter(key_name, top.window.location.hash.substring(1));
+                  if (key) {
+                      return key;
+                  }
               }
+              var element = top.document.getElementById(key_name);
+              if (element) {
+                  return element.value;
+              }
+          } catch (ignore) {
+              // top.window may signal an error if iframe and container are different domains
           }
           // key missing to explain how to obtain keys
           if (window.confirm("No value reported by the '" + key_name +
