@@ -25,8 +25,27 @@ window.ecraft2learn =
       var get_key = function (key_name) {
           // API keys are provided by Snap! reporters
           var key = run_snap_block(key_name);
+          var get_hash_parameter = function (name, parameters, default_value) {
+              var parts = parameters.split('&');
+              var value = default_value;
+              parts.some(function (part) {
+                             var name_and_value = part.split('=');
+                             if (name_and_value[0] === name) {
+                                 value = name_and_value[1];
+                                 return true;
+                             }
+              });
+              return value;
+          };
           if (key && key !== "Enter your key here") {
               return key;
+          }
+          if (top.window.location.hash) {
+              // top.window in case this is running in an iframe
+              key = get_hash_parameter(key_name, top.window.location.hash.substring(1));
+              if (key) {
+                  return key;
+              }
           }
           // key missing to explain how to obtain keys
           if (window.confirm("No value reported by the '" + key_name +
