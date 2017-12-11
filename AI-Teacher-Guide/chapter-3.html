@@ -27,10 +27,26 @@ A further challenge is how to provide simple interfaces for simple tasks while s
 High performance systems for identifying objects, recognising faces, interpreting sketches, and using medical images to aid diagnosis.
 Driverless cars rely heavily upon computer vision.</p>
 
-<h4>A simple image recogntion block</h4>
-<p>blah blah</p>
+<h4>API keys are needed</h4>
+<p>Chrome has builtin support for speech input and output.
+No browser, however, currently supports image recogntion.
+To access vision recogntion services from companies such as Google, Microsoft, or IBM
+one needs to <a href="https://github.com/ToonTalk/ai-cloud/wiki" target="_blank">open an account</a>.
+Accounts are free and provide some degree of free usage.
+IBM premits 250 free vision queries per day, Microsoft 5000 per month, and Google 1000 per month.
+To try the vision blocks described here you need at least one account.
+Comparing and constrasting the results from different services is an interesting way to gain some insight into how these services work.</p>
 
-<div class="iframe-container" style="width: 800px; height: 210px;">
+<p>In projects there is a different way of providing keys to Snap! but in this chapter you can paste your keys below
+and they'll be passed to the services as you use example blocks.
+<br><label>Copy and paste your Google key here:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input id="Google image key" type="text"></label>
+<br><label>Copy and paste your Microsoft key here:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input id="Microsoft image key" type="text"></label>
+<br><label>Copy and paste your IBM Watson key here: <input id="IBM Watson image key" type="text"></label></p>
+
+<h4>A simple image recogntion block</h4>
+<p>create a generic version that takes provider as argument</p>
+
+<div class="iframe-container" style="width: 800px; height: 350px;">
 <iframe class="iframe-clipped"
         scrolling="no"
         src="../snap/snap.html"
