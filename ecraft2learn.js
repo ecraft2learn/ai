@@ -835,9 +835,9 @@ window.ecraft2learn =
                    });
         break;
     default:
-        invoke_callback(snap_callback, javascript_to_snap(cloud_provider === "" ? 
-                                                          "No cloud service given" :
-                                                          "Unknown cloud provider: " + cloud_provider));
+        invoke_callback(snap_callback, cloud_provider === "" ? 
+                                       "No cloud service given" :
+                                       "Unknown cloud provider: " + cloud_provider);
     }
   };
 
@@ -895,9 +895,14 @@ window.ecraft2learn =
   add_current_photo_as_costume: function (cloud_provider) {
       var recognition = image_recognitions[cloud_provider];
       if (!recognition || !recognition.costume) {
-          return "No photo has been created for " + cloud_provider + " to recognize.";
+          if (cloud_provider === "") {
+              window.alert("No vision recognition service provided given.");
+          } else {
+              window.alert("No photo has been created for " + cloud_provider + " to recognize.");
+          }
+      } else {
+          add_costume(recognition.costume);
       }
-      add_costume(recognition.costume);
   },
 
   speak: function (message, pitch, rate, voice_number, volume, language, finished_callback) {
