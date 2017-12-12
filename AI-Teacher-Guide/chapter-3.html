@@ -55,6 +55,106 @@ The list is ordered by how confident the vision provider is that the label match
         project_path="../AI-teacher-guide-projects/image labels reporter.xml"> 
 </iframe></div>
 
+<h4>Displaying the image that was sent for recogntion</h4>
+<p>The 'show current photo' block will display the most recent image sent to the specified AI vision services
+as the background of the Snap! stage.
+To try it first obtain some labels from a vision service.
+The 'use camera to create costume' block takes a new picture and adds it as a costume to the current sprite.</p>
+
+<div class="iframe-container" style="width: 1000px; height: 400px;">
+<iframe class="iframe-clipped"
+        style="margin-left: -500px; margin-top: 200px;"
+        scrolling="no"
+        src="../snap/snap.html"
+        project_path="../AI-teacher-guide-projects/image labels reporter and show photo.xml"> 
+</iframe></div>
+
+<h4>Advanced image recogntion blocks</h4>
+<p>Image recoognisers can do more than label images.
+Some can detect and locate faces.
+Some of those will estimate the age of the person and their gender.
+Some recognise landmarks and logos.
+Many can recognise characters in text.
+A problem creating Snap! blocks that provide this functionality is that
+different services have different capabilities and different structures to capture their responses.
+Compare the documentation for the vision services from
+<a href="https://cloud.google.com/vision/" target="_blank">Google</a>,
+<a href="https://azure.microsoft.com/en-gb/services/cognitive-services/computer-vision/" target="_blank">Microsoft</a>,
+and
+<a href="https://www.ibm.com/watson/services/visual-recognition/" target="_blank">IBM Watson</a>.</p>
+
+<p>The 'Recognize new photo' block addresses this problem by reporting a data structure capturing the entire response from
+the vision service.
+It is a Snap! list that contains lists that contains more data that might be text for labels,
+numbers for confidence scores, and even more lists for complex data.
+You can double click on the <img src="images/sub-list-icon.png"> icons to drill down the structure.
+The 'Current image property' block takes an argument that describes what piece of the response structure should be reported.
+For example, Microsoft offers possible captions that can be found by following the path "description captions text".
+Common useful blocks are defined that use the 'Current image property' block internally
+to get the labels and the confidence scores of the labels for each of the supported vision service providers.
+Note that after a response is received from any of the AI services it is stored so that calls to 'Current image property'
+use the most recent response rather than ask for a new one.
+This is because one's project may rely on multiple pieces of the response.
+</p>
+
+<div class="iframe-container" style="width: 800px; height: 350px;">
+<iframe class="iframe-clipped"
+        scrolling="no"
+        src="../snap/snap.html"
+        project_path="../AI-teacher-guide-projects/recognize new photo.xml"> 
+</iframe></div>
+reporter 
+<p>The 'Recognize new photo' block is implemented using the 'Ask <provider> to say what it sees' block.
+This block does not wait for a response, instead it runs the user's blocks when a response is received.
+It isn't as convenient 'Recognize new photo' but it can support more complex usage.
+</p>
+
+<div class="iframe-container" style="width: 800px; height: 350px;">
+<iframe class="iframe-clipped"
+        scrolling="no"
+        src="../snap/snap.html"
+        project_path="../AI-teacher-guide-projects/recognize asynchronous.xml"> 
+</iframe></div>
+
+<h4>How to provide API keys</h4>
+<p>This chapter uses the API keys provided in the text areas above.
+When constructing a project there are two ways to provide keys:
+<ol>
+<li>Add extra information to the page's URL.
+Appending "&IBM Watson image key=...&Google image key=...&Microsoft image key=..." to the project URL will
+provide all three keys (after "..." is replaced by the real keys). 
+If some service providers aren't being used then there is no need to include their keys in the URL.</li>
+<li>Edit any of the following special reporters:</li>
+</ol>
+
+<div class="iframe-container" style="width: 800px; height: 280px;">
+<iframe class="iframe-clipped"
+        scrolling="no"
+        src="../snap/snap.html"
+        project_path="../AI-teacher-guide-projects/blank keys.xml"> 
+</iframe></div>
+
+<p>Because all the AI cloud services are commericial services heavy use can be costly.
+Consequently it is best if each student has their own account and minimises the sharing of their keys.
+This conflicts with one of the great things about tools like Scratch and Snap! --
+that it is so easy to share one's projects with a wider community.
+Adding the keys to the URL solves this problem if one is careful to keep the URL with keys private
+and share the version with the keys.
+It is more awkward to maintain private and public versions when using reporters for keys.</p>
+
+<h4>What about video recogntion services?</h4>
+<p>Some AI cloud providers such as <a href="https://cloud.google.com/video-intelligence/" target="_blank">Google</a>
+can accept a video stream and produces labels.
+It can also detect scene changes.
+This service can be expensive, though Google analyses 1000 minutes per month at no cost.
+There currently are no blocks for supporting video input.</p>
+
+<h3>Additional resources</h3>
+<a href="https://cloud.google.com/vision/" target="_blank">Google</a>,
+<a href="https://azure.microsoft.com/en-gb/services/cognitive-services/computer-vision/" target="_blank">Microsoft</a>,
+and
+<a href="https://www.ibm.com/watson/services/visual-recognition/" target="_blank">IBM Watson</a>
+https://www.upwork.com/hiring/data/comparing-image-recognition-apis/
 
 
 <h3>Where to get these blocks to use in projects</h3>
