@@ -44,13 +44,15 @@ and they'll be passed to the services as you use example blocks.
 <br><label>Copy and paste your IBM Watson key here: <input id="IBM Watson image key" type="text"></label></p>
 
 <h4>A simple image recogntion block</h4>
-<p>create a generic version that takes provider as argument</p>
+<p>This block takes a picture, sends it to the AI vision cloud server provider, waits for a response, and then
+reports a list of labels of the photo.
+The list is ordered by how confident the vision provider is that the label matches the image.</p>
 
 <div class="iframe-container" style="width: 800px; height: 350px;">
 <iframe class="iframe-clipped"
         scrolling="no"
         src="../snap/snap.html"
-        project_path="../AI-teacher-guide-projects/simple image block IBM.xml"> 
+        project_path="../AI-teacher-guide-projects/image labels reporter.xml"> 
 </iframe></div>
 
 
