@@ -789,7 +789,8 @@ window.ecraft2learn =
                   response_as_javascript_object = JSON.parse(response);
                   break;
               default:
-                  invoke_callback(snap_callback, "Unknown cloud provider: " + cloud_provider);
+                  // already checked cloud_provider so shouldn't happen here
+                  console.error("Unknown cloud provider: " + cloud_provider);
                   return;
           }
           image_recognitions[cloud_provider].response = response_as_javascript_object;
@@ -834,7 +835,9 @@ window.ecraft2learn =
                    });
         break;
     default:
-        invoke_callback(snap_callback, "Unknown cloud provider: " + cloud_provider);
+        invoke_callback(snap_callback, javascript_to_snap(cloud_provider === "" ? 
+                                                          "No cloud service given" :
+                                                          "Unknown cloud provider: " + cloud_provider));
     }
   };
 
