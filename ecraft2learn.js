@@ -374,8 +374,8 @@ window.ecraft2learn =
               if (function_name === "take_picture_and_analyse") {
                   // define it now with default image dimensions
                   // when setup finishes then run take_picture_and_analyse
-                  ecraft2learn.setup_camera(640, 
-                                            480, 
+                  ecraft2learn.setup_camera(480, 
+                                            640, 
                                             undefined, // no key
                                             function () {
                                                 // delay a second so camera is on when first image is captured
