@@ -53,57 +53,72 @@ Let's start with the simplest program block for speaking. Click on it to try it 
 (Currently these blocks only work well in Chrome.
 The first time one is used it fetches voices over the network and that may take several seconds.)</p>
 
+<figure>
 <div class="iframe-container"> 
 <iframe class="iframe-clipped"
         scrolling="no"
         src="../snap/snap.html"
         project_path="../AI-teacher-guide-projects/simple speak block.xml">
 </iframe></div>
+<figcaption>A simple block for speaking text</figcaption>
+</figure>
 
 <h4>Sentences are more than a series of words</h4>
 </p>Speech synthesizers do more than just say each word in a sentence.
 They attempt to produce a natural prosody.
 They speak questions differently from declarative sentences.</p>
 
+<figure>
 <div  class="iframe-container" style="width: 580px; height: 140px"> 
 <iframe class="iframe-clipped"
         scrolling="no"
         src="../snap/snap.html"
         project_path="../AI-teacher-guide-projects/separate words.xml"> 
 </iframe></div>
+<figcaption>An illustration of the difference between speaking one word at a time and whole sentences</figcaption>
+</figure>
 
 <p>And for a human speaking numbers and punctuation signs can be a bit challenging.
 Is this a sign of intelligence?</p>
 
+<figure>
 <div class="iframe-container"> 
 <iframe class="iframe-clipped"
         scrolling="no"
         src="../snap/snap.html"
         project_path="../AI-teacher-guide-projects/numbers signs.xml"> 
 </iframe></div>
+<figcaption>An illustrations of some issues speaking text containing numbers and signs</figcaption>
+</figure>
 
 <h4>Problems combining speech and sound effects</h4>
 <p>Suppose one wanted the computer to speak, be interrupted by a door bell, and then respond accordingly.
 Try clicking this and you'll hear there is a problem:</p>
 
+<figure>
 <div  class="iframe-container" style="width: 480px; height: 140px"> 
 <iframe class="iframe-clipped"
         scrolling="no"
         src="../snap/snap.html"
         project_path="../AI-teacher-guide-projects/doorbell problem.xml">
 </iframe></div>
+<figcaption>An illustration of the problem of making a sequence of utterances and sound effects</figcaption>
+</figure>
 
 <p>The problem is that the sound effect begins the same times as the first sentence.
 This because the 'speak' block tells the browser to begin speaking and then continues with the next action.
 What we want is to have the door bell sound played <i>after</i> the first utterance is finished.
 For this we need a slightly more complex block that accepts actions to do after speaking:</p>
 
+<figure>
 <div class="iframe-container" style="width: 600px; height: 140px;">
 <iframe class="iframe-clipped"
         scrolling="no"
         src="../snap/snap.html"
         project_path="../AI-teacher-guide-projects/doorbell fix.xml">
 </iframe></div>
+<figcaption>A way to control the timing of utterances and sound effects</figcaption>
+</figure>
 
 <p>Being able to express what should happen when speaking completes is a generally useful ability.
 The program may give some explanation and then do something on the screen.
@@ -126,7 +141,7 @@ than displays, keyboards, mice, buttons, and touch sensors.</p>
 
 <figure>
 <img src="images/hawking.jpg" class="center">
-<figurecaption>Stephen Hawking can communicate thanks to speech synthesis</figurecaption></figure>
+<figcaption>Stephen Hawking can communicate thanks to speech synthesis</figcaption></figure>
 
 <h4>Can speech synthesis be misused?</h4>
 <p>It is hard to imagine dangers with today's speech synthesis technology.
@@ -170,12 +185,15 @@ Fractional values correspond to low pitch, slow rate, or low volume.
 How high the values can be for the opposite effect depends upon the browser and the voice used.
 Note that depending upon the voice and browser some of these parameters are ignored.</p>
 
+<figure>
 <div class="iframe-container" style="width: 800px; height: 100px;">
 <iframe class="iframe-clipped"
         scrolling="no"
         src="../snap/snap.html"
         project_path="../AI-teacher-guide-projects/rate pitch volume.xml">
 </iframe></div>
+<figcaption>A powerful block for speaking text with many customisation options</figcaption>
+</figure>
 
 <p>Regarding the 'language' option, unfortunately many browsers currently ignore it.
 The argument should be one of the <a href="https://en.wikipedia.org/wiki/IETF_language_tag" target="_blank">IETF language tags</a>.
@@ -186,33 +204,42 @@ When a non-English voice is given English to speak it typically speaks it with a
 The selection of voices available depends upon the browser and the operating system.
 Click 'get voices' to see the list of voices and use the voice number in the speak command.</p>
 
+<figure>
 <div class="iframe-container" style="width: 800px; height: 600px;">
 <iframe class="iframe-clipped"
         scrolling="no"
         src="../snap/snap.html"
         project_path="../AI-teacher-guide-projects/voices.xml"> 
 </iframe></div>
+<figcaption>An demonstration of different speaking voices (and languges)</figcaption>
+</figure>
 
 <p>A voice is more than just a voice.
 Listen to the two ways of reading dates.</p>
 
+<figure>
 <div class="iframe-container" style="width: 800px; height: 200px;">
 <iframe class="iframe-clipped"
         scrolling="no"
         src="../snap/snap.html"
         project_path="../AI-teacher-guide-projects/dates.xml"> 
 </iframe></div>
+<figcaption>Different voices speak dates differently depending upon whether they are speaking US or UK English</figcaption>
+</figure>
 
 <h4>If your browser has too few available voices or you want to try a different speech engine</h4>
 <p>Some browsers and some operating systems have very few (or <i>no</i>) voices.
 An alternative speech block uses <a href="http://mary.dfki.de/" target="_blank">a server in Germany</a> that has its own set of voices.</p>
 
+<figure>
 <div class="iframe-container" style="width: 800px; height: 500px;">
 <iframe class="iframe-clipped"
         scrolling="no"
         src="../snap/snap.html"
         project_path="../AI-teacher-guide-projects/Mary voices.xml"> 
 </iframe></div>
+<figcaption>An alternative text-to-speech engine</figcaption>
+</figure>
 
 <h4>Heteronyms cause problems</h4>
 <p><a href="https://en.wikipedia.org/wiki/Heteronym_(linguistics)" target="_blank">Heteronyms</a> are words that mean and sound different but are spelled the same.
@@ -222,12 +249,15 @@ Some voices are better than others at using the correct pronunciation.
 Explore how different voices deal with "read" in the following.
 Try editing the sentences to see how they deal with "lead" and other words.</p>
 
+<figure>
 <div class="iframe-container" style="width: 800px; height: 400px;">
 <iframe class="iframe-clipped"
         scrolling="no"
         src="../snap/snap.html"
         project_path="../AI-teacher-guide-projects/read problem.xml"> 
 </iframe></div>
+<figcaption>An example of the problem of speaking words such as 'read'</figcaption>
+</figure>
 
 <h4>Two sample programs using speech synthesis</h4>
 <p>This <a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=speak%20randomly" target="_blank">

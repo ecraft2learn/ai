@@ -5,15 +5,14 @@ body {
 figure {
   display: inline-block;
   text-align: center;
-/*   border: 1px dotted gray; */
-  margin: 20px; /* adjust as needed */
+/*   margin: 20px; adjust as needed */
 }
 figure img {
   display:      block;
   margin-left:  auto;
   margin-right: auto;
 }
-figurecaption {
+figcaption {
   font-style: italic; 
 }
 .iframe-container {
