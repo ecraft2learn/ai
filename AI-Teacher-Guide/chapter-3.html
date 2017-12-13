@@ -48,12 +48,16 @@ and they'll be passed to the services as you use example blocks.
 reports a list of labels of the photo.
 The list is ordered by how confident the vision provider is that the label matches the image.</p>
 
-<div class="iframe-container" style="width: 800px; height: 350px;">
+<figure>
+<div class="iframe-container"
+     style="width: 800px; height: 350px;">
 <iframe class="iframe-clipped"
         scrolling="no"
         src="../snap/snap.html"
         project_path="../AI-teacher-guide-projects/image labels reporter.xml"> 
 </iframe></div>
+<figcaption>A block for reporting the labels describing what the camera is showing</figcaption>
+</figure>
 
 <h4>Displaying the image that was sent for recogntion</h4>
 <p>The 'show current photo' block will display the most recent image sent to the specified AI vision services
@@ -61,6 +65,7 @@ as the background of the Snap! stage.
 To try it first obtain some labels from a vision service.
 The 'use camera to create costume' block takes a new picture and adds it as a costume to the current sprite.</p>
 
+<figure>
 <div class="iframe-container" style="width: 1000px; height: 400px;">
 <iframe class="iframe-clipped"
         style="margin-left: -500px; margin-top: 200px;"
@@ -68,6 +73,8 @@ The 'use camera to create costume' block takes a new picture and adds it as a co
         src="../snap/snap.html"
         project_path="../AI-teacher-guide-projects/image labels reporter and show photo.xml"> 
 </iframe></div>
+<figcaption>After sending a photo for analysis you can use a block to display the image</figcaption>
+</figure>
 
 <h4>Advanced image recogntion blocks</h4>
 <p>Image recoognisers can do more than label images.
@@ -87,7 +94,7 @@ and
 the vision service.
 It is a Snap! list that contains lists that contains more data that might be text for labels,
 numbers for confidence scores, and even more lists for complex data.
-You can double click on the <img src="images/sub-list-icon.png"> icons to drill down the structure.
+You can double click on the <img src="images/sub-list-icon.png" alt="icon for opening lists in lists"> icons to drill down the structure.
 The 'Current image property' block takes an argument that describes what piece of the response structure should be reported.
 For example, Microsoft offers possible captions that can be found by following the path "description captions text".
 Common useful blocks are defined that use the 'Current image property' block internally
@@ -97,24 +104,30 @@ use the most recent response rather than ask for a new one.
 This is because one's project may rely on multiple pieces of the response.
 </p>
 
+<figure>
 <div class="iframe-container" style="width: 800px; height: 350px;">
 <iframe class="iframe-clipped"
         scrolling="no"
         src="../snap/snap.html"
         project_path="../AI-teacher-guide-projects/recognize new photo.xml"> 
 </iframe></div>
-reporter 
-<p>The 'Recognize new photo' block is implemented using the 'Ask <provider> to say what it sees' block.
+<figcaption>A block for reporting the entire analysis response</figcaption>
+</figure>
+
+<p>The 'Recognize new photo' reporter block is implemented using the 'Ask <provider> to say what it sees' block.
 This block does not wait for a response, instead it runs the user's blocks when a response is received.
 It isn't as convenient 'Recognize new photo' but it can support more complex usage.
 </p>
 
+<figure>
 <div class="iframe-container" style="width: 800px; height: 350px;">
 <iframe class="iframe-clipped"
         scrolling="no"
         src="../snap/snap.html"
         project_path="../AI-teacher-guide-projects/recognize asynchronous.xml"> 
 </iframe></div>
+<figcaption>A block for obtaining the entire analysis response as a callback</figcaption>
+</figure>
 
 <h4>How to provide API keys</h4>
 <p>This chapter uses the API keys provided in the text areas above.
@@ -127,12 +140,15 @@ If some service providers aren't being used then there is no need to include the
 <li>Edit any of the following special reporters:</li>
 </ol>
 
+<figure>
 <div class="iframe-container" style="width: 800px; height: 280px;">
 <iframe class="iframe-clipped"
         scrolling="no"
         src="../snap/snap.html"
         project_path="../AI-teacher-guide-projects/blank keys.xml"> 
 </iframe></div>
+<figcaption>Reporters for API keys that users edit to provide service keys</figcaption>
+</figure>
 
 <p>Because all the AI cloud services are commericial services heavy use can be costly.
 Consequently it is best if each student has their own account and minimises the sharing of their keys.
@@ -168,8 +184,9 @@ into <a href="http://snap4arduino.rocks/" target="_blank">Snap4Arduino</a>.
 <p>The next chapter is planned to be about machine learning.</p>
 
 <h3>Acknowledgements</h3>
-This research was supported by the <a href="https://project.ecraft2learn.eu/" target="_blank">eCraft2Learn project</a>
+<p>This research was supported by the <a href="https://project.ecraft2learn.eu/" target="_blank">eCraft2Learn project</a>
 funded by the European Union's Horizon 2020 Coordination & Research and Innovation Action
-under Grant Agreement No 731345. <img src="https://project.ecraft2learn.eu/wp-content/uploads/2017/01/eCraft2Learn-Final0.1.png">
-
+under Grant Agreement No 731345.
+<img src="https://project.ecraft2learn.eu/wp-content/uploads/2017/01/eCraft2Learn-Final0.1.png" alt="eCraft2Learn icon">
+</p>
 </body></html>
