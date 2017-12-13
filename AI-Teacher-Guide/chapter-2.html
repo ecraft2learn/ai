@@ -9,7 +9,10 @@
 <h4>Ken Kahn, University of Oxford</h4>
 <h3>Browser compatibility</h3>
 <p>This guide includes many interactive elements that currently only run well in the Chrome browser.
-This chapter relies upon there being a microphone connected to your computer.</p>
+This chapter relies upon there being a microphone connected to your computer.
+(Note that when running Linux (e.g. on a Raspberry Pi)
+one may need to configure the system or the browser to know how to access the microphone.)
+</p>
 <h3>Introduction</h3>
 <p>It is much easier to get a computer to start with text and end up with speech
 than to start with speech and end up with the corresponding text.
@@ -23,12 +26,15 @@ As you'll see the process is not perfect, mistakes occur.</p>
 <p>Click on the following block, say something, then click on the 'last thing heard' variable.
 If all is working well you should see what you just said.</p>
 
+<figure>
 <div class="iframe-container" style="width: 800px; height: 140px;">
 <iframe class="iframe-clipped"
         scrolling="no"
         src="../snap/snap.html"
         project_path="../AI-teacher-guide-projects/simple listen block.xml"> 
 </iframe></div>
+<figcaption>A simple block for turning speech into text. TRY IT</figcaption>
+</figure>
 
 <h4>Speech recognition errors</h4>
 <p>Speech recognition can encounter errors such as the inability to access the microphone.
@@ -40,12 +46,16 @@ Other errors are 'audio-capture' when the browser can't find a microphone and
 'not-allowed' when permission to use the microphone hasn't been granted.
 Try the following and then be quiet for a while.</p>
 
+<figure>
 <div class="iframe-container" style="width: 800px; height: 200px;">
 <iframe class="iframe-clipped"
         scrolling="no"
         src="../snap/snap.html"
         project_path="../AI-teacher-guide-projects/listen error.xml">
 </iframe></div>
+<figcaption>A demonstration of listening errors (including nothing being spoken). TRY IT</figcaption>
+</figure>
+
 <h4>A sample program using speech recognition (and synthesis)</h4>
 <p>The following program uses the 'listen then ...' block to control a sprite.
 You can tell it to go forward or to the turn right.
@@ -63,13 +73,13 @@ Occassionally it will mishear you.</p>
 
 <h4>How the speech command program works</h4>
 <p>If you cick on <img src="images/show-blocks.png"> you'll see the blocks behind the program.
-If you then right click on 'speak turtle commands' and select 'edit' you'll see its program.
+If you then right click on 'speak turtle commands' and select 'edit' you'll see its program.</p>
 
 <figure>
 <img src="images/command-program.png" class="center">
 <figcaption>The blocks that implement the speech command program</figcaption></figure>
 
-The 'spoken' variable contains what was just recognised.
+<p>The 'spoken' variable contains what was just recognised.
 The nested 'if-then-else' commands test first for speech for exiting the program, then for forward movement, and then turning commands.
 If none match then a 'not understood' response is created.
 Both the turning and moving commands cause the program to ask for an amount to turn or move.
@@ -224,12 +234,15 @@ The engine can report interim results and alternative results.
 It can provide 'confidence' values indicating how certain it is that it recognised the speech correctly.
 All of these functionalities are provided by this block:</p>
 
+<figure>
 <div class="iframe-container" style="width: 800px; height: 200px;">
 <iframe class="iframe-clipped"
         scrolling="no"
         src="../snap/snap.html"
         project_path="../AI-teacher-guide-projects/complex listen block.xml">
 </iframe></div>
+<figcaption>A full-featured block for turning speech into text. TRY IT</figcaption>
+</figure>
 
 <p>The arguments to this block are (any of them can be left blank):
 <ol>
