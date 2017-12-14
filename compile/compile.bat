@@ -1,6 +1,6 @@
 java -jar c:\bin\closure\closure-compiler-v20170626.jar ^
  --language_in ECMASCRIPT5_STRICT ^
- --js "../snap/../snap/morphic.js" ^
+ --js "../snap/morphic.js" ^
  --js "../snap/widgets.js" ^
  --js "../snap/blocks.js" ^
  --js "../snap/threads.js" ^
