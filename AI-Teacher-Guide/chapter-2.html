@@ -89,10 +89,11 @@ When a number is spoken the turtle then turns or moves appropriately.</p>
 <p>The command program relies upon what computer scientists call 'continuations'.
 These are blocks of code that are executed when something happens, in this case when the speech is recognised.
 An alternative that is popular among Scratch programmers is to rely instead upon broadcasting messages.
-The following implements voice commands by using a helper command called 'listen'.
-'listen' broadcasts the message 'heard something'.
+The following implements voice commands by using a helper command called 'Broadcast speech recognition results and ...'.
+It broadcasts the message 'heard something'.
 The program fragments that listen for 'heard something' broadcasts need to know what was heard.
 The variable 'last thing heard' is used for this.
+(It also broadcasts speech recognition errors and sets the 'speech recognition error' if they occur.)
 This style of programming is perhaps easier for young children but it does have its limitations.
 For example, it is very difficult to implement a response when no other parts of the program understand what was said.
 The first version responds by saying it didn't understand what was said, repeats what it thinks it heard, and says to try again.
@@ -118,13 +119,13 @@ If the user answers "potatoes" and "gigantic" then the program says
 <p>Let's look at the code to see how it works.</p>
 <figure>
 <img src="images/part-of-speech-code.png">
-<figcaption>The core of the program that asks for substitutions for words beginning with "?"</figcaption></figure>
+<figcaption>Screenshot of the core of the program that asks for substitutions for words beginning with "?"</figcaption></figure>
 <p>This part of the program goes through the sentence word by word pausing when a word or phrase starts with a "?".
-It pauses after asking for a substitution and then calls the 'listen' command.
+It pauses after asking for a substitution and then calls the 'Broadcast speech recognition results ...' command.
 The following code responds when something has been heard and interpreted:</p>
 <figure>
 <img src="images/part-of-speech-when-something-heard.png">
-<figcaption>The part of the program that responds to recognised words or phrases</figcaption></figure>
+<figcaption>Screenshot of the part of the program that responds to recognised words or phrases</figcaption></figure>
 <p>It repeats what was heard and substitutes it into the list of words replacing the word starting with "?".</p>
 
 <p>This example illustrates how to use speech input and output to produce an application that is purely verbal.
@@ -135,7 +136,7 @@ Issues about number agreement and tenses arise naturally.
 A student may for the first time see the <i>utility</i> of these concepts since without them the generated sentences are no good.</p>
 
 <h4>A more sophisticated sentence (or story) generator</h4>
-<p>This <a href="" target="_blank">story generator</a> extends the sentence generator by adding a new feature.
+<p>This <a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=story%20generator" target="_blank">story generator</a> extends the sentence generator by adding a new feature.
 If it encounters a word beginning with "=" it replaces it with the last response to the request for an example of that word/phrase.
 For example, consider this very short story:
 <blockquote>
@@ -227,7 +228,7 @@ This could be even more exciting if the two apps were placed into some physical 
 <li>And thousands of other things.</li>
 </ul></p>
 
-<h4>A full-featured 'listen' block</h4>
+<h4>A full-featured speech recognition block</h4>
 <p>The speech recognition engines typically can do more than the basic 'listen then ...' block described above.
 One can specify which language is expected.
 The engine can report interim results and alternative results.
