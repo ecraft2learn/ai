@@ -90,13 +90,13 @@ The 'use camera to create costume' block takes a new picture and adds it as a co
 <figcaption>Click on the AI cloud provider logos and see what happens</figcaption>
 </figure>
 
-<h4>A sample program combing image and speech recognition and speech output</h4>
+<h4>A sample program combining image and speech recognition and speech output</h4>
 <p>This program is similar to the previous one except it is listening for the words "Google", "Microsoft", or "Watson".
 When it hears one of these words it contacts the service.
 When the response is received it turns it into speech.
 As a demo it is impressive if you say things like "Tell me Google what do you see?" and "What do you see Microsoft?".
-It is a nice illustration of appearing more intelligent than it is.
-Though a discussion with the students on how and where this program is intelligent and where it isn't could be good.
+It is a nice illustration of how software can appear more intelligent than it is.
+Though this could be a good topic for a student discussion on how and where this program is intelligent and where it isn't.
 </p>
 
 <figure>
@@ -134,7 +134,7 @@ Common useful blocks are defined that use the 'Current image property' block int
 to get the labels and the confidence scores of the labels for each of the supported vision service providers.
 Note that after a response is received from any of the AI services it is stored so that calls to 'Current image property'
 use the most recent response rather than ask for a new one.
-This is because one's project may rely on multiple pieces of the response.
+This is because a project may need to access multiple pieces of a response.
 </p>
 
 <figure>
@@ -147,7 +147,7 @@ This is because one's project may rely on multiple pieces of the response.
 <figcaption>A block for reporting the entire analysis response. TRY IT</figcaption>
 </figure>
 
-<p>The 'Recognize new photo' reporter block is implemented using the 'Ask <provider> to say what it sees' block.
+<p>The 'Recognize new photo' reporter block is implemented using the 'Ask &lt;provider&gt; to say what it sees' block.
 This block does not wait for a response, instead it runs the user's blocks when a response is received.
 It isn't as convenient 'Recognize new photo' but it can support more complex usage.
 </p>
@@ -167,20 +167,21 @@ It isn't as convenient 'Recognize new photo' but it can support more complex usa
 When constructing a project there are two ways to provide keys:
 <ol>
 <li>Add extra information to the page's URL.
-Appending "&IBM Watson image key=...&Google image key=...&Microsoft image key=..." to the project URL will
-provide all three keys (after "..." is replaced by the real keys). 
+Appending "&IBM Watson image key=...&Google image key=...&Microsoft image key=..." to a shared project URL will
+provide all three keys (after "..." is replaced by the real keys).
+Refresh the page after adding the keys.
 If some service providers aren't being used then there is no need to include their keys in the URL.</li>
-<li>Edit any of the following special reporters:</li>
+<li>Edit any of the following special reporters (found in the <a href="#library">eCraft2Learn block library</a>):</li>
 </ol>
 
 <figure>
-<div class="iframe-container" style="width: 800px; height: 210px;">
+<div class="iframe-container" style="width: 800px; height: 170px;">
 <iframe class="iframe-clipped"
         scrolling="no"
         src="../snap/snap.html"
         project_path="../AI-teacher-guide-projects/blank keys.xml"> 
 </iframe></div>
-<figcaption>Reporters for API keys that users edit to provide service keys. TRY IT</figcaption>
+<figcaption>Reporters for API keys that users edit to provide service keys.</figcaption>
 </figure>
 
 <p>Because all the AI cloud services are commercial services heavy use can be costly.
@@ -188,8 +189,8 @@ Consequently it is best if each student has their own account and minimises the 
 This conflicts with one of the great things about tools like Scratch and Snap! --
 that it is so easy to share one's projects with a wider community.
 Adding the keys to the URL solves this problem if one is careful to keep the URL with keys private
-and share the version with the keys.
-It is more awkward to maintain private and public versions when using reporters for keys.</p>
+and share the version without the keys.
+It is possible but more awkward to maintain private and public versions when using reporters for keys.</p>
 
 <h4>What is image recognition good for?</h4>
 <p>This is like asking what is vision good for.
@@ -214,12 +215,13 @@ There are two main approaches to processing images:
 <li>A machine learning system</li>
 </ol>
 
-Most of the recent progress has been with machine learning systems that are for many tasks near human level.
+Most of the recent progress has been with machine learning systems that for many tasks are near human level.
 For some tasks such as
 <a href="https://www.extremetech.com/extreme/233746-ai-beats-doctors-at-visual-diagnosis-observes-many-times-more-lung-cancer-signals" target="_blank">
 detecting lung cancer from x-rays</a> machine learning has exceeded the ability of experts.</p>
 
-<p>A neural net inspired by what little is known about how neurons in animal brains work is used to train the system to identify images.
+<p>A neural net is a program that is inspired by what little is known about how neurons in animal and human brains work.
+It can be trained to identify images.
 In the most common case it is trained on thousands or millions of images that have already been labelled.
 When given a new image and it computes the most likely labels.</p>
 
@@ -248,8 +250,8 @@ Researchers have built
 <p>Some AI cloud providers such as <a href="https://cloud.google.com/video-intelligence/" target="_blank">Google</a>
 can accept a video stream and produce labels.
 It can also detect scene changes.
-This service can be expensive, though Google analyses 1000 minutes of video per month at no cost.
-There currently are no snap! blocks for supporting video input.</p>
+This service can be expensive, though Google will analyse 1000 minutes of video per month at no cost.
+There currently are no Snap! blocks for supporting video input.</p>
 
 <h3>Additional resources</h3>
 <a href="https://cloud.google.com/vision/" target="_blank">Google</a>,
@@ -259,7 +261,10 @@ and
 document their AI vision services.
 There are many more vision services, see for example this
 <a href="https://www.upwork.com/hiring/data/comparing-image-recognition-apis/" target="_blank">image recognition services comparison page</a>.
-The <a href="https://en.wikipedia.org/wiki/Computer_vision" target="_blank">Wikipedia page</a> on computer vision is very thorough.</p>
+The <a href="https://en.wikipedia.org/wiki/Computer_vision" target="_blank">Wikipedia page</a> on computer vision is very thorough.
+There are many MOOCS on computer vision and machine learning for image recognition.
+<a href="https://distill.pub/" target="_blank">Distill</a> is a scientific journal that strives to explain clearly complex machine learning topics.
+</p>
 
 <script src="where-to-get-library.js"></script>
 

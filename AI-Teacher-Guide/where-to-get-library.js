@@ -1,6 +1,6 @@
 document.write(
-'<h3>Where to get these blocks to use in projects</h3> ' +
-'<p>All of these speech output blocks as well other AI blocks are available to use in ' +
+'<h3 id="library">Where to get these blocks to use in projects</h3> ' +
+'<p>All of the blocks described in these three chapters are available to use in ' +
 '<a href="https://snap.berkeley.edu/" target="_blank">Snap!</a> in ' +
 'this <a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=eCraft2Learn" target="_blank">Snap project</a>. ' +
 'They can also be used together with blocks for controlling Arduinos by downloading and then importing ' +
