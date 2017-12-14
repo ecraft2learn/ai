@@ -12,16 +12,16 @@
 This chapter relies upon there being a camera that the browser can access.</p>
 <h3>Introduction</h3>
 <p>A camera connected to a computer can report the colour of each pixel in an image and not much else.
-A description of what is in front of the camera is returned when those pixels are sent to an image recogntion service.
+A description of what is in front of the camera is returned when those pixels are sent to an image recognition service.
 There are many kinds of things an image description may contain.
-With speech recogntion the description is what was spoken, how confident the system is, and possible alternatives.
-With image recogntion there are many possible descriptions: descriptive tags, possible captions, dominant colours,
+With speech recognition the description is what was spoken, how confident the system is, and possible alternatives.
+With image recognition there are many possible descriptions: descriptive tags, possible captions, dominant colours,
 location of faces and parts of the face if there are any, and the presence of landmarks, celebrities, well-known entities, and logos.
 Text can also be recognised.</p>
 
-<p>A challenge in providing student-friendly programming blocks for image recogntion is that
+<p>A challenge in providing student-friendly programming blocks for image recognition is that
 different AI cloud services report different descriptions in different ways.
-We currently provide interfaces to image recogntion services provided by Google, Microsoft, and IBM.
+We currently provide interfaces to image recognition services provided by Google, Microsoft, and IBM.
 A further challenge is how to provide simple interfaces for simple tasks while still supporting more sophisticated uses and projects.</p>
 
 <p>In the last few years there has been tremendous progress in computer vision.
@@ -30,13 +30,13 @@ Driverless cars rely heavily upon computer vision.</p>
 
 <h4>API keys are needed</h4>
 <p>Chrome has builtin support for speech input and output.
-No browser, however, currently supports image recogntion.
-To access vision recogntion services from companies such as Google, Microsoft, or IBM
+No browser, however, currently supports image recognition.
+To access vision recognition services from companies such as Google, Microsoft, or IBM
 one needs to <a href="https://github.com/ToonTalk/ai-cloud/wiki" target="_blank">open an account</a>.
 Accounts are free and provide some degree of free usage.
-IBM premits 250 free vision queries per day, Microsoft 5000 per month, and Google 1000 per month.
+IBM permits 250 free vision queries per day, Microsoft 5000 per month, and Google 1000 per month.
 To try the vision blocks described here you need at least one account.
-Comparing and constrasting the results from different services is an interesting way to gain some insight into how these services work.</p>
+Comparing and contrasting the results from different services is an interesting way to gain some insight into how these services work.</p>
 
 <p>In projects there is a different way of providing keys to Snap! but in this chapter you can paste your keys below
 and they'll be passed to the services as you use example blocks.
@@ -44,7 +44,7 @@ and they'll be passed to the services as you use example blocks.
 <br><label>Copy and paste your Microsoft key here:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input id="Microsoft image key" type="text"></label>
 <br><label>Copy and paste your IBM Watson key here: <input id="IBM Watson image key" type="text"></label></p>
 
-<h4>A simple image recogntion block</h4>
+<h4>A simple image recognition block</h4>
 <p>This block takes a picture, sends it to the AI vision cloud server provider, waits for a response, and then
 reports a list of labels of the photo.
 The list is ordered by how confident the vision provider is that the label matches the image.</p>
@@ -60,7 +60,7 @@ The list is ordered by how confident the vision provider is that the label match
 <figcaption>A block for reporting the labels describing what the camera is showing. TRY IT</figcaption>
 </figure>
 
-<h4>Displaying the image that was sent for recogntion</h4>
+<h4>Displaying the image that was sent for recognition</h4>
 <p>The 'show current photo' block will display the most recent image sent to the specified AI vision services
 as the background of the Snap! stage.
 To try it first obtain some labels from a vision service.
@@ -77,7 +77,7 @@ The 'use camera to create costume' block takes a new picture and adds it as a co
 <figcaption>After sending a photo for analysis you can use a block to display the image. TRY IT</figcaption>
 </figure>
 
-<h4>A sample program using image recogntion</h4>
+<h4>A sample program using image recognition</h4>
 <p>Here is a program that can contact any of Google, Microsoft, or IBM and displays the tags returned.</p>
 
 <figure>
@@ -90,7 +90,7 @@ The 'use camera to create costume' block takes a new picture and adds it as a co
 <figcaption>Click on the AI cloud provider logos and see what happens</figcaption>
 </figure>
 
-<h4>A sample program combing image and speech recogntion and speech output</h4>
+<h4>A sample program combing image and speech recognition and speech output</h4>
 <p>This program is similar to the previous one except it is listening for the words "Google", "Microsoft", or "Watson".
 When it hears one of these words it contacts the service.
 When the response is received it turns it into speech.
@@ -109,8 +109,8 @@ Though a discussion with the students on how and where this program is intellige
 <figcaption>Click the green flag and then say a sentence containing "Google", "Microsoft", or "Watson"</figcaption>
 </figure>
 
-<h4>Advanced image recogntion blocks</h4>
-<p>Image recoognisers can do more than label images.
+<h4>Advanced image recognition blocks</h4>
+<p>Image recognisers can do more than label images.
 Some can detect and locate faces.
 Some of those will estimate the age of the person and their gender.
 Some recognise landmarks and logos.
@@ -183,7 +183,7 @@ If some service providers aren't being used then there is no need to include the
 <figcaption>Reporters for API keys that users edit to provide service keys. TRY IT</figcaption>
 </figure>
 
-<p>Because all the AI cloud services are commericial services heavy use can be costly.
+<p>Because all the AI cloud services are commercial services heavy use can be costly.
 Consequently it is best if each student has their own account and minimises the sharing of their keys.
 This conflicts with one of the great things about tools like Scratch and Snap! --
 that it is so easy to share one's projects with a wider community.
@@ -191,11 +191,65 @@ Adding the keys to the URL solves this problem if one is careful to keep the URL
 and share the version with the keys.
 It is more awkward to maintain private and public versions when using reporters for keys.</p>
 
-<h4>What about video recogntion services?</h4>
+<h4>What is image recognition good for?</h4>
+<p>This is like asking what is vision good for.
+According to <a href="https://en.wikipedia.org/wiki/Evolution_of_the_eye" target="_blank">Wikipedia</a>
+eyes have independently evolved between 50 and 100 times since animals first appeared.
+Computer vision enables robots to see, self-driving cars (which really are just a kind of robot),
+new kinds of user interfaces, support for doctors, police, sports coaches, farmers, the military, and more.
+It can help blind people to navigate their surroundings and to use devices.
+</p>
+
+<h4>What are the dangers of image recognition?</h4>
+<p>Like much of AI technology it may take away many jobs.
+It may reduce our privacy since it makes it much easier to track people's movements and activities.
+It can enable autonomous weapons that may kill many.</p>
+
+<h4>How does computer vision work?</h4>
+<p>Image recognition begins with pixels.
+Each pixel is a number or three numbers (for red, green, and blue components) that corresponds to a tiny piece of an image.
+There are two main approaches to processing images:
+<ol>
+<li>A sequence of programmed processing steps to find edges, determine textures, identify objects, etc.</li>
+<li>A machine learning system</li>
+</ol>
+
+Most of the recent progress has been with machine learning systems that are for many tasks near human level.
+For some tasks such as
+<a href="https://www.extremetech.com/extreme/233746-ai-beats-doctors-at-visual-diagnosis-observes-many-times-more-lung-cancer-signals" target="_blank">
+detecting lung cancer from x-rays</a> machine learning has exceeded the ability of experts.</p>
+
+<p>A neural net inspired by what little is known about how neurons in animal brains work is used to train the system to identify images.
+In the most common case it is trained on thousands or millions of images that have already been labelled.
+When given a new image and it computes the most likely labels.</p>
+
+<p>Different levels or stages of the processing by the neural net recognise different elements of an image.
+Researchers have built
+<a href="https://distill.pub/2017/feature-visualization/" target="_blank">software that figures out what images produce the greatest response from the different layers</a>.
+</p>
+
+<figure>
+<img src="images/edges layer.png" class="center">
+<figcaption>Ideal images for a neural net layer that looks for edges</figcaption></figure>
+<figure>
+<img src="images/textures layer.png" class="center">
+<figcaption>Ideal images for a neural net layer that looks for textures</figcaption></figure>
+<figure>
+<img src="images/patterns layer.png" class="center">
+<figcaption>Ideal images for a neural net layer that looks for patterns</figcaption></figure>
+<figure>
+<img src="images/parts layer.png" class="center">
+<figcaption>Ideal images for a neural net layer that looks for parts</figcaption></figure>
+<figure>
+<img src="images/objects layer.png" class="center">
+<figcaption>Ideal images for a neural net layer that looks for objects</figcaption></figure>
+<figure>
+
+<h4>What about video recognition services?</h4>
 <p>Some AI cloud providers such as <a href="https://cloud.google.com/video-intelligence/" target="_blank">Google</a>
-can accept a video stream and produces labels.
+can accept a video stream and produce labels.
 It can also detect scene changes.
-This service can be expensive, though Google analyses 1000 minutes per month at no cost.
+This service can be expensive, though Google analyses 1000 minutes of video per month at no cost.
 There currently are no blocks for supporting video input.</p>
 
 <h3>Additional resources</h3>
@@ -203,8 +257,10 @@ There currently are no blocks for supporting video input.</p>
 <a href="https://azure.microsoft.com/en-gb/services/cognitive-services/computer-vision/" target="_blank">Microsoft</a>,
 and
 <a href="https://www.ibm.com/watson/services/visual-recognition/" target="_blank">IBM Watson</a>
-https://www.upwork.com/hiring/data/comparing-image-recognition-apis/
-
+document their AI vision services.
+There are many more vision services, see for example this
+<a href="https://www.upwork.com/hiring/data/comparing-image-recognition-apis/" target="_blank">image recognition services comparison page</a>.
+The <a href="https://en.wikipedia.org/wiki/Computer_vision" target="_blank">Wikipedia page</a> on computer vision is very thorough.</p>
 
 <h3>Where to get these blocks to use in projects</h3>
 <p>All of these speech output blocks as well other AI blocks are available to use in <a href="https://snap.berkeley.edu/" target="_blank">Snap!</a> in
