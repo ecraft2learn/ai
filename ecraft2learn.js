@@ -836,7 +836,7 @@ window.ecraft2learn =
         break;
     default:
         invoke_callback(snap_callback, cloud_provider === "" ? 
-                                       "No cloud service given" :
+                                       "A vision recognition service provider needs to be chosen." :
                                        "Unknown cloud provider: " + cloud_provider);
     }
   };
@@ -896,7 +896,7 @@ window.ecraft2learn =
       var recognition = image_recognitions[cloud_provider];
       if (!recognition || !recognition.costume) {
           if (cloud_provider === "") {
-              window.alert("No vision recognition service provided given.");
+              window.alert("A vision recognition service provider needs to be chosen.");
           } else {
               window.alert("No photo has been created for " + cloud_provider + " to recognize.");
           }
