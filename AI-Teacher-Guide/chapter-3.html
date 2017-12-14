@@ -8,14 +8,15 @@
 <h3>Chapter 3 - Camera Input</h3>
 <h4>Ken Kahn, University of Oxford</h4>
 <h3>Browser compatibility</h3>
-<p>This guide includes many interactive elements that currently only run well in the Chrome browser.</p>
+<p>This guide includes many interactive elements that currently only run well in the Chrome browser.
+This chapter relies upon there being a camera that the browser can access.</p>
 <h3>Introduction</h3>
 <p>A camera connected to a computer can report the colour of each pixel in an image and not much else.
 A description of what is in front of the camera is returned when those pixels are sent to an image recogntion service.
 There are many kinds of things an image description may contain.
 With speech recogntion the description is what was spoken, how confident the system is, and possible alternatives.
 With image recogntion there are many possible descriptions: descriptive tags, possible captions, dominant colours,
-location of faces and parts of the face if there are any, and the presence of landmarks, well-known entities, and logos.
+location of faces and parts of the face if there are any, and the presence of landmarks, celebrities, well-known entities, and logos.
 Text can also be recognised.</p>
 
 <p>A challenge in providing student-friendly programming blocks for image recogntion is that
@@ -74,6 +75,38 @@ The 'use camera to create costume' block takes a new picture and adds it as a co
         project_path="../AI-teacher-guide-projects/image labels reporter and show photo.xml"> 
 </iframe></div>
 <figcaption>After sending a photo for analysis you can use a block to display the image. TRY IT</figcaption>
+</figure>
+
+<h4>A sample program using image recogntion</h4>
+<p>Here is a program that can contact any of Google, Microsoft, or IBM and displays the tags returned.</p>
+
+<figure>
+<iframe style="width: 800px; height: 600px"
+        scrolling="no"
+        src="../snap/snap.html"
+        project_path="../AI-teacher-guide-projects/camera and say.xml"
+        run_full_screen="true"> 
+</iframe></div>
+<figcaption>Click on the AI cloud provider logos and see what happens</figcaption>
+</figure>
+
+<h4>A sample program combing image and speech recogntion and speech output</h4>
+<p>This program is similar to the previous one except it is listening for the words "Google", "Microsoft", or "Watson".
+When it hears one of these words it contacts the service.
+When the response is received it turns it into speech.
+As a demo it is impressive if you say things like "Tell me Google what do you see?" and "What do you see Microsoft?".
+It is a nice illustration of appearing more intelligent than it is.
+Though a discussion with the students on how and where this program is intelligent and where it isn't could be good.
+</p>
+
+<figure>
+<iframe style="width: 800px; height: 600px"
+        scrolling="no"
+        src="../snap/snap.html"
+        project_path="../AI-teacher-guide-projects/camera, listen, and speak.xml"
+        full_screen="true"> 
+</iframe></div>
+<figcaption>Click the green flag and then say a sentence containing "Google", "Microsoft", or "Watson"</figcaption>
 </figure>
 
 <h4>Advanced image recogntion blocks</h4>
