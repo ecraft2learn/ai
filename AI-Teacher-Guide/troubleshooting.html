@@ -1,0 +1,40 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Troubleshooting - AI Teacher's Guide</title>
+<link href="ai-teacher-guide.css" rel="stylesheet">
+<link rel="icon" type="image/png" href="images/eCraft2Learn-Favicon.png" />
+</head>
+<body>
+<p>As with any technology things can go wrong.
+Here we discuss problems we are aware of.
+Please send email to <a href="mailto:toontalk@gmail.com">Ken Kahn &lt;toontalk@gmail.com&gt;</a> if you encounter any problems or have questions.</p>
+
+<h3>General advice</h3>
+<p>The guide has been well-tested on Chrome.
+Some problems have been observed with FireFox and Edge so best to avoid them.
+Some chapters need to load many Snap! projects as interactive illustrations.
+Unfortunately this can take several seconds causing scrolling and interactive illustrations to not work well while the page is loading.
+To address this there is a good deal of text to read at the top of each chapter while the rest is loading.</p>
+
+<h3>Granting permission for the guide to use the microphone and camera</h3>
+<p>The first time the guide is loaded into Chrome it should ask for permission to use the microphone or camera.
+If you need to change the permission then
+<a href="https://support.google.com/chrome/answer/114662?hl=en&visit_id=1-636489202927020473-1104243073&rd=1" target="_blank">read this help page by Google</a>.
+</p>
+
+<h3>Raspberry Pi problems</h3>
+<h4>No audio</h4>
+<p>The Raspberry Pi may think there are multiple audio devices.
+Right clicking on the speaker volume icon should display alternative devices.</p>
+<h4>No microphone</h4>
+<p>Depending upon the kind of microphone connected (internal or USB) the browser may not know how to access the microphone.
+You may need to launch Chromium with an argument describing the <a href="https://raspberrypi.stackexchange.com/questions/39928/unable-to-set-default-input-and-output-audio-device-on-raspberry-jessie" target="_blank">alsa-input-device</a>:
+<code>
+chromium-browser --alsa-input-device=...
+</code>
+</p>
+<h4>Text-to-speech voices missing</h4>
+<p>The Raspberry Pi cannot run Chrome but can run Chromium instead.
+One of the few ways in which Chromium differs from Chrome is that it has no builtin voices.
+The easiet workaround is to rely upon the MARY TTS speech blocks instead.</p>
+</body>
+</html>
