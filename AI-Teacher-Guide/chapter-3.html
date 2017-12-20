@@ -256,7 +256,26 @@ This service can be expensive, though Google will analyse 1000 minutes of video 
 There currently are no Snap! blocks for supporting video input.</p>
 
 <h4 id="project-ideas">Possible project ideas using image recognition</h4>
-<p>TO DO</p>
+<p>Adding image recognition to a robotics project can make the robot behave much more intelligently.
+It can head towards goals and avoid specified objects.
+A simple example would be a robot told to move to X (where X can be "the red ball", "the toy truck", "a person", or whatever).
+It then sends an image for recognition.
+If the description returned matches X then go forward a few steps (assuming the camera is mounted pointing forward).
+If not then turn a little and try again.
+Repeat until X is reached.
+</p>
+<p>For projects that use a camera that can't move there are many possibilities:
+<ol>
+<li>Engages in a simple conversation about what it thinks it is seeing.</li>
+<li>Responds to what it sees.
+E.g. says "How cute" when the description includes words such as "kitten" or "puppy" but says "How scary!" when the description is a toy lion or wolf.</li>
+<li>Enhance the <a href="chapter-2.html#story-generator" target="_blank">story generator example</a>
+so that in addition to tokens that ask for phrases or names a new kind of token is introduced that causes the current image to be recognised and
+then substitutes the resulting description into that location of the story.</li>
+<li>When a face is recognised its location and the location of parts of the face are included in the response. 
+The app can then add know where to places glassses, mustaches, etc. to the image.</li>
+<li>And thousands more possibilities.</li>
+</ol>
 
 <h3>Additional resources</h3>
 <a href="https://cloud.google.com/vision/" target="_blank">Google</a>,
