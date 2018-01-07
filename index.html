@@ -1,27 +1,55 @@
 <!doctype html>
 <html>
-<!-- Based on https://github.com/mdn/samples-server/tree/master/s/webrtc-capturestill -->
 <head>
-	<title>WebRTC: Still photo capture demo</title>
+	<title>AI extensions for the eCraft2Learn project</title>
 	<meta charset='utf-8'>
 	<link rel="stylesheet" href="main.css" type="text/css" media="all">
-	<script src="capture.js">
-	</script>
+<style>
+body {
+  font-family: "Tahoma", "Trebuchet MS";
+  font-size: 1.1em;
+}
+</style>
 </head>
 <body>
-<input type="text" id="text-input">Enter some text here</input>
-<br>
-<input type="file" id="myFileField" name="myFile" />
-<div class="contentarea">
-  <div class="camera">
-    <video id="video">Video stream not available.</video>
-    <button id="startbutton">Take photo</button> 
-  </div>
-  <canvas id="canvas">
-  </canvas>
-  <div class="output">
-    <img id="photo" alt="The screen capture will appear in this box."> 
-  </div>
-</div>
+<h2>Enabling children to build AI programs</h2>
+<p>
+The <a href="https://project.ecraft2learn.eu/">eCraft2Learn project</a> is developing a set of extensions to
+<a href="https://snap.berkeley.edu">the Snap! programming language</a> to enable children
+(and non-expert programmers) to build AI programs.
+</p>
+<p>
+A teacher’s guide that describes the extensions, projects, and the larger context currently consists of
+<a href="AI-Teacher-Guide/chapter-1.html">a chapter on speech output</a>,
+<a href="AI-Teacher-Guide/chapter-2.html">a chapter on speech recognition</a>,
+and
+<a href="AI-Teacher-Guide/chapter-3.html">a chapter on image recognition</a>.
+An early version of the extension is described in the paper
+<a href="https://ora.ox.ac.uk/objects/uuid:12124254-acce-4c11-a540-19e74530798d">Child-friendly Programming Interfaces to AI Cloud Services</a>
+by Ken Kahn and Niall Winters.
+</p>
+<p>
+The following demonstration programs use the AI Snap! blocks.
+They run best in the Chrome browser.
+All require a speaker or headphones.
+Examples 2, 3, and 4 also require a microphone.
+Examples 5 and 6 also require a camera.
+<ol>
+<li><a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=speak%20randomly">Random speaking</a></li>
+<li><a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=command%20broadcast%202">Spoken commands</a></li>
+<li><a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=part%20of%20speech%20broadcast">Funny templated sentences</a></li>
+<li><a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=story%20generator">Story generator (new)</a></li>
+<li><a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=camera%20and%20say%20no%20keys">Says what it sees</a></li>
+<li><a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=camera%2C%20listen%2C%20and%20speak%20no%20keys">Says what it sees when asked to</a></li>
+</ol>
+</p>
+<p>
+The library of AI cloud service blocks is available
+<a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=eCraft2Learn">here</a>.
+</p>
+<p>
+Send email to <a href="mailto:toontalk@gmail.com">Ken Kahn</a> if you encounter problems or have questions.
+</p>
+<script src="AI-Teacher-Guide/acknowledgements.js"></script>
 </body>
 </html>
