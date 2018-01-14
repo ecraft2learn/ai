@@ -57,9 +57,9 @@ window.ecraft2learn =
           }
           // key missing to explain how to obtain keys
           if (window.confirm("No value reported by the '" + key_name +
-                             " reporter. After obtaining the key edit the reporter in the 'Variables' area. Do you want to visit https://github.com/ToonTalk/ai-cloud/wiki to learn how to get a key?")) {
+                             " reporter. After obtaining the key edit the reporter in the 'Variables' area. Do you want to visit https://github.com/ecraft2learn/ai/wiki to learn how to get a key?")) {
               window.onbeforeunload = null; // don't warn about reload
-              document.location.assign("https://github.com/ToonTalk/ai-cloud/wiki");
+              document.location.assign("https://github.com/ecraft2learn/ai/wiki");
           }
       };
       var run_snap_block = function (labelSpec) { // add parameters later
