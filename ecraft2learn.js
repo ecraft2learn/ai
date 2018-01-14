@@ -960,7 +960,7 @@ window.ecraft2learn =
   speak_using_browser_voices_or_mary_tts: function (message, finished_callback) {
     check_for_voices(function () {
                          // no voices in browser to use Mary TTS
-                         ecraft2learn.speak_using_browser_voices_or_mary_tts(message, finished_callback);
+                         ecraft2learn.speak_using_mary_tts(message, 1, 0, finished_callback);
                      },
                      function () {
                          ecraft2learn.speak(message, 0, 0, 1, 0, 0, finished_callback);
