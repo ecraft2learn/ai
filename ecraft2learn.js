@@ -992,7 +992,7 @@ window.ecraft2learn =
   },
   open_help_page: function () {
     // might end up a new window instead of a tab
-    window.open("https://github.com/ecraft2learn/ai/wiki", "_blank");
+    document.location.assign("https://github.com/ecraft2learn/ai/wiki", "_blank");
   },
   handle_server_json_response: function (response, callback) {
      invoke_callback(callback, javascript_to_snap(JSON.parse(response)));
