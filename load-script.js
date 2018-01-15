@@ -1,23 +1,23 @@
 if (!url) {
-    url = "https://toontalk.github.io/ai-cloud/ecraft2learn.js";
+    url = "https://ecraft2learn.github.io/ai/ecraft2learn.js";
 }
 if (!reload && window.ecraft2larn_scripts_loaded && window.ecraft2learn_scripts_loaded.indexOf(url) >= 0) {
     if (typeof callback === 'object') {
        invoke(callback, new List([]));
     };
-    return;
+} else {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = url;
+    script.addEventListener('load', function () {
+        if (typeof callback === 'object') {
+           invoke(callback, new List([]));
+        };
+        if (window.ecraft2learn_scripts_loaded && window.ecraft2learn_scripts_loaded.indexOf(url) < 0) {
+            window.ecraft2learn_scripts_loaded.push(url);
+        } else {
+            window.ecraft2learn_scripts_loaded = [url];
+        }
+    });
+    document.head.appendChild(script);
 }
-var script = document.createElement("script");
-script.type = "text/javascript";
-script.src = url;
-script.addEventListener('load', function () {
-    if (typeof callback === 'object') {
-       invoke(callback, new List([]));
-    };
-    if (window.ecraft2learn_scripts_loaded && window.ecraft2learn_scripts_loaded.indexOf(url) < 0) {
-        window.ecraft2learn_scripts_loaded.push(url);
-    } else {
-        window.ecraft2learn_scripts_loaded = [url];
-    }
-});
-document.head.appendChild(script);

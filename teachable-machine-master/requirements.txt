@@ -1,3 +1,0 @@
-requests==2.18.4
-poster==0.8.1
-requests-toolbelt
