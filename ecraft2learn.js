@@ -734,7 +734,7 @@ window.ecraft2learn =
               }
           };
           var error_callback = function(error) {
-              alert("An error occured while getting access to the camera: " + error.message || error.name);
+              alert("An error occured while getting access to the camera: " + (error.name || error.message));
               console.log(error);
           };
           var constraints = {video: true,
