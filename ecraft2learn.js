@@ -371,9 +371,9 @@ window.ecraft2learn =
       run: function (function_name, parameters) {
           // runs one of the functions in this library
           if (typeof ecraft2learn[function_name] === 'undefined') {
-              if (function_name === "take_picture_and_analyse" || function_name === "add_photo_as_costume") {
+              if (function_name === "take_picture_and_analyse") {
                   // define it now with default image dimensions
-                  // when setup finishes then run function_name
+                  // when setup finishes then run take_picture_and_analyse
                   ecraft2learn.setup_camera(480, 
                                             640, 
                                             undefined, // no key
@@ -734,7 +734,7 @@ window.ecraft2learn =
               }
           };
           var error_callback = function(error) {
-              alert("An error occured while getting access to the camera: " + (error.name || error.message));
+              console.log("An error in getting access to camera: " + error.message);
               console.log(error);
           };
           var constraints = {video: true,
@@ -1012,3 +1012,4 @@ window.ecraft2learn =
 ecraft2learn.get_voice_names(); // to ensure voices are loaded
 ecraft2learn.inside_snap = true;
 
+                                                          
