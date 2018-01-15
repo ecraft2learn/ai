@@ -1011,5 +1011,3 @@ window.ecraft2learn =
 }} ());
 ecraft2learn.get_voice_names(); // to ensure voices are loaded
 ecraft2learn.inside_snap = true;
-
-                                                          
