@@ -371,7 +371,7 @@ window.ecraft2learn =
       run: function (function_name, parameters) {
           // runs one of the functions in this library
           if (typeof ecraft2learn[function_name] === 'undefined') {
-              if (function_name === "take_picture_and_analyse") {
+              if (function_name === "take_picture_and_analyse" || function_name === "add_photo_as_costume") {
                   // define it now with default image dimensions
                   // when setup finishes then run take_picture_and_analyse
                   ecraft2learn.setup_camera(480, 
@@ -734,7 +734,7 @@ window.ecraft2learn =
               }
           };
           var error_callback = function(error) {
-              console.log("An error in getting access to camera: " + error.message);
+              alert("An error occured while getting access to the camera: " + error.message || error.name);
               console.log(error);
           };
           var constraints = {video: true,
