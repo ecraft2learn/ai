@@ -402,7 +402,7 @@ window.ecraft2learn =
               xhr.setRequestHeader('Authorization', 'Bearer ' + access_token);
           }
           xhr.onload = function() {
-              invoke_callback(callback, json_format ? javascript_to_snap(xhr.responseText) : xhr.responseText);
+              invoke_callback(callback, json_format ? javascript_to_snap(JSON.parsexhr.responseText)) : xhr.responseText);
           };
           xhr.onerror = function(error) {
               invoke_callback(error_callback, url + " error is " + error.message);
