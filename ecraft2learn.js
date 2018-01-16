@@ -392,7 +392,7 @@ window.ecraft2learn =
           return ecraft2learn[function_name].apply(null, parameters.contents);
       },
 
-      read_url: function (url, callback, error_callback, access_token) {
+      read_url: function (url, callback, error_callback, access_token, json_format) {
           // calls callback with the contents of the 'url' unless an error occurs and then error_callback is called
           // ironically this is the rare function that may be useful when there is no Internet connection
           // since it can be used to communicate with localhost (e.g. to read/write Raspberry Pi or Arduino pins)
@@ -402,7 +402,7 @@ window.ecraft2learn =
               xhr.setRequestHeader('Authorization', 'Bearer ' + access_token);
           }
           xhr.onload = function() {
-              invoke_callback(callback, xhr.responseText);
+              invoke_callback(callback, json_format ? javascript_to_snap(xhr.responseText) : xhr.responseText);
           };
           xhr.onerror = function(error) {
               invoke_callback(error_callback, url + " error is " + error.message);
