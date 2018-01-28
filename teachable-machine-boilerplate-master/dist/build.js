@@ -182,9 +182,6 @@ var Main = function () {
   return Main;
 }();
 
-ecraft2learn.create_training_interface = function () {
-  new Main();
-};
 
 window.addEventListener('load', function () {
   return new Main();
