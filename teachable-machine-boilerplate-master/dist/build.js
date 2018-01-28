@@ -23,10 +23,6 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-// // will be defined before calling this once all is working
-// typeof window.ecraft2learn === 'undefined' ? window.ecraft2learn = {image_learning_buckets: ["thinking", "sleeping"]} :
-//                                              window.ecraft2learn.image_learning_buckets = ["thinking", "sleeping"];
-
 // Number of classes to classify
 var NUM_CLASSES = ecraft2learn.image_learning_buckets.length;
 // Webcam Image size. Must be 227. 
@@ -181,11 +177,13 @@ var Main = function () {
     }
   }]);
 
+  ecraft2learn.run_when_training_system_ready();
+
   return Main;
 }();
 
 ecraft2learn.create_training_interface = function () {
-  return new Main();
+  new Main();
 };
 
 window.addEventListener('load', function () {

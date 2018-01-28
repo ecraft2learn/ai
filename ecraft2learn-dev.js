@@ -1020,10 +1020,12 @@ window.ecraft2learn =
       if (!ecraft2learn.image_learning_buckets) {
           // first time 
           ecraft2learn.image_learning_buckets = buckets;
-          load_script("teachable-machine-boilerplate-master/dist/build.js",
-                      function () {
-                          ecraft2learn.train_using_camera(buckets_as_snap_list, true);
-                      });                   
+          ecraft2learn.run_when_training_system_ready = 
+              function () {
+                  ecraft2learn.train_using_camera(buckets_as_snap_list, true);
+          };
+          load_script("teachable-machine-boilerplate-master/dist/build.js");
+          return;                 
       }
       if (!add_to_previous_training || !buckets_equal(buckets, ecraft2learn.image_learning_buckets)) {
           // to do
