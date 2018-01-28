@@ -1028,6 +1028,7 @@ window.ecraft2learn =
       if (!add_to_previous_training || !buckets_equal(buckets, ecraft2learn.image_learning_buckets)) {
           // to do
       }
+      ecraft2learn.create_training_interface();
       var snap_canvas = document.getElementById('world');
       snap_canvas.style.display = 'none';
   },
