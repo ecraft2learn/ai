@@ -7,7 +7,7 @@
  "use strict";
 window.ecraft2learn =
   (function () {
-      var this_url = document.querySelector('script[src*="ecraft2learn.js"]').src; // the URL where this library lives
+      var this_url = document.querySelector('script[src*="ecraft2learn-dev.js"]').src; // the URL where this library lives
       var load_script = function (url, when_loaded) {
           var script = document.createElement("script");
           script.type = "text/javascript";
@@ -1008,7 +1008,7 @@ window.ecraft2learn =
           invoke_callback(callback_for_errors, error.message);
       }
   },
-  train_using_camera: function (buckets, start_over) {
+  train_using_camera: function (buckets, add_to_previous_training) {
       var buckets_equal = function (buckets1, buckets2) {
           return buckets1 === buckets2 ||
                  (buckets1.length === buckets2.length &&
@@ -1021,10 +1021,10 @@ window.ecraft2learn =
           ecraft2learn.image_learning_buckets = buckets;
           load_script("teachable-machine-boilerplate-master/dist/build.js",
                       function () {
-                          ecraft2learn.train_using_camera(buckets, false);
+                          ecraft2learn.train_using_camera(buckets, true);
                       });                   
       }
-      if (start_over || !buckets_equal(buckets, ecraft2learn.image_learning_buckets)) {
+      if (!add_to_previous_training || !buckets_equal(buckets, ecraft2learn.image_learning_buckets)) {
           // to do
       }
       var snap_canvas = document.getElementById('world');
