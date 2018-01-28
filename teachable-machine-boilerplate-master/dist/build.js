@@ -177,11 +177,12 @@ var Main = function () {
     }
   }]);
 
-  ecraft2learn.run_when_training_system_ready();
-
   return Main;
 }();
 
+ecraft2learn.create_training_interface = function () {
+  new Main();
+};
 
 window.addEventListener('load', function () {
   return new Main();
