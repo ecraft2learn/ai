@@ -23,8 +23,13 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+// will be defined before calling this once all is working
+typeof window.ecraft2learn === 'undefined' ? window.ecraft2learn = {learning_buckets: ["thinking", "sleeping"]} :
+                                             window.ecraft2learn.learning_buckets = ["thinking", "sleeping"];
+
+
 // Number of classes to classify
-var NUM_CLASSES = 3;
+var NUM_CLASSES = ecraft2learn.learning_buckets.length;
 // Webcam Image size. Must be 227. 
 var IMAGE_SIZE = 227;
 // K value for KNN
@@ -44,6 +49,12 @@ var Main = function () {
     // Initiate deeplearn.js math and knn classifier objects
     this.knn = new _deeplearnKnnImageClassifier.KNNImageClassifier(NUM_CLASSES, TOPK, _deeplearn.ENV.math);
 
+    ecraft2learn.knn_predict = function (process_prediction) {
+        this.stop(); // done training (will have interface)
+        var image = _deeplearn.Array3D.fromPixels(this.video);
+        this.knn.predictClass(image).then(process_prediction);
+    }.bind(this);
+
     // Create video element that will contain the webcam image
     this.video = document.createElement('video');
     this.video.setAttribute('autoplay', '');
@@ -61,7 +72,7 @@ var Main = function () {
 
       // Create training button
       var button = document.createElement('button');
-      button.innerText = "Train " + i;
+      button.innerText = "Train " + ecraft2learn.learning_buckets[i];
       div.appendChild(button);
 
       // Listen for mouse events when clicking the button
