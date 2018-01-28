@@ -1022,7 +1022,7 @@ window.ecraft2learn =
           ecraft2learn.image_learning_buckets = buckets;
           load_script("teachable-machine-boilerplate-master/dist/build.js",
                       function () {
-                          ecraft2learn.train_using_camera(buckets, true);
+                          ecraft2learn.train_using_camera(buckets_as_snap_list, true);
                       });                   
       }
       if (!add_to_previous_training || !buckets_equal(buckets, ecraft2learn.image_learning_buckets)) {
