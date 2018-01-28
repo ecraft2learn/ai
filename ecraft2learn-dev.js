@@ -1008,7 +1008,8 @@ window.ecraft2learn =
           invoke_callback(callback_for_errors, error.message);
       }
   },
-  train_using_camera: function (buckets, add_to_previous_training) {
+  train_using_camera: function (buckets_as_snap_list, add_to_previous_training) {
+      var buckets = buckets_as_snap_list.contents;
       var buckets_equal = function (buckets1, buckets2) {
           return buckets1 === buckets2 ||
                  (buckets1.length === buckets2.length &&
