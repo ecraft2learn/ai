@@ -1021,7 +1021,6 @@ window.ecraft2learn =
           ecraft2learn.image_learning_buckets = buckets;
           var machine_learning_window = window.open("https://ecraft2learn.github.io/ai/teachable-machine-boilerplate-master/index.html",
                                                     "Machine learning");
-          document.body.appendChild(machine_learning_window);
           machine_learning_window.addEventListener(
               'load',
               function (event) {
@@ -1038,7 +1037,7 @@ window.ecraft2learn =
                                                              function () {
                                                                   var snap_canvas = document.getElementById('world');
                                                                   snap_canvas.style.display = '';
-                                                                  machine_learning_window.style.display = 'none';
+//                                                                machine_learning_window.style.display = 'none';
                                                                   ecraft2learn.snap_paused = false;
                                                              });
                       document.body.appendChild(return_to_snap_button);
