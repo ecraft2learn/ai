@@ -1018,6 +1018,7 @@ window.ecraft2learn =
                   }));
       };
       if (!ecraft2learn.machine_learning_iframe) {
+          ecraft2learn.image_learning_buckets = buckets;
           var machine_learning_iframe = document.createElement('iframe');
           machine_learning_iframe.src = "https://ecraft2learn.github.io/ai/teachable-machine-boilerplate-master/index.html";
           machine_learning_iframe.width  = 600;
