@@ -31,6 +31,7 @@ var IMAGE_SIZE = 227;
 var TOPK = 10;
 
 var Main = function () {
+  var prediction_function;
   function Main(training_class_names) {
     var _this = this;
 
@@ -48,7 +49,7 @@ var Main = function () {
     // Initiate deeplearn.js math and knn classifier objects
     this.knn = new _deeplearnKnnImageClassifier.KNNImageClassifier(NUM_CLASSES, TOPK, _deeplearn.ENV.math);
 
-    ecraft2learn.knn_predict = function (process_prediction) {
+    prediction_function = function (process_prediction) {
         this.stop(); // done training (will have interface)
         var image = _deeplearn.Array3D.fromPixels(this.video);
         this.knn.predictClass(image).then(process_prediction);
@@ -174,11 +175,7 @@ var Main = function () {
   }]);
 
     // instead of returning Main we return a prediction function
-    return function (process_prediction) {
-             this.stop(); // done training (will have interface)
-             var image = _deeplearn.Array3D.fromPixels(this.video);
-             this.knn.predictClass(image).then(process_prediction);
-         }.bind(this);
+    return prediction_function;
 }();
 
 // need to export this or listen to a custom event since the 'load' listener below is useless
