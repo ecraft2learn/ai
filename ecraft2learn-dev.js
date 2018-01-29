@@ -1029,7 +1029,6 @@ window.ecraft2learn =
               function (event) {
                   if (event.data === "Ready") {
                       var return_to_snap_button = document.createElement('button');
-                      var main = ecraft2learn.create_training_interface(buckets);
                       return_to_snap_button.innerText = "Return to Snap!";
                       return_to_snap_button.addEventListener('click',
                                                              function () {

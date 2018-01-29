@@ -184,11 +184,6 @@ var Main = function () {
     return Main;
 }();
 
-// need to export this or listen to a custom event since the 'load' listener below is useless
-ecraft2learn.create_training_interface = function (training_class_names) {
-  return new Main(training_class_names);
-};
-
 window.addEventListener("message",
                         function (event) {
                             if (typeof event.data.training_class_names !== 'undefined') {
