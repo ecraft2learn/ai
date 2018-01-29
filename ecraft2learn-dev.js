@@ -1065,7 +1065,7 @@ window.ecraft2learn =
           invoke_callback(javascript_to_snap(event.data));
           window.removeEventListener("message", receive_confidences);
       };
-      ecraft2learn.machine_learning_window.postMessage("Predict");
+      ecraft2learn.machine_learning_window.postMessage("Predict", "*");
       window.addEventListener("message", receive_confidences);
   }
 }} ());
