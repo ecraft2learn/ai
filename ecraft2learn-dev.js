@@ -1024,7 +1024,12 @@ window.ecraft2learn =
           machine_learning_iframe.width  = 600;
           machine_learning_iframe.height = 600;
           document.body.appendChild(machine_learning_iframe);
-          machine_learning_iframe.contentWindow.postMessage({training_class_names: buckets}, "*");
+          machine_learning_iframe.contentWindow.addEventListener(
+              'load',
+              function (event) {
+                  machine_learning_iframe.contentWindow.postMessage({training_class_names: buckets}, "*");
+              }
+          );
           ecraft2learn.machine_learning_iframe = machine_learning_iframe;
           var receive_ready = 
               function (event) {
