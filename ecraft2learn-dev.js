@@ -1017,20 +1017,18 @@ window.ecraft2learn =
                       return bucket_name === buckets2[index];
                   }));
       };
-      if (!ecraft2learn.machine_learning_iframe) {
+      if (!ecraft2learn.machine_learning_window) {
           ecraft2learn.image_learning_buckets = buckets;
-          var machine_learning_iframe = document.createElement('iframe');
-          machine_learning_iframe.src = "https://ecraft2learn.github.io/ai/teachable-machine-boilerplate-master/index.html";
-          machine_learning_iframe.width  = 600;
-          machine_learning_iframe.height = 600;
-          document.body.appendChild(machine_learning_iframe);
-          machine_learning_iframe.contentWindow.addEventListener(
+          var machine_learning_window = window.open("https://ecraft2learn.github.io/ai/teachable-machine-boilerplate-master/index.html",
+                                                    "Machine learning");
+          document.body.appendChild(machine_learning_window);
+          machine_learning_window.addEventListener(
               'load',
               function (event) {
-                  machine_learning_iframe.contentWindow.postMessage({training_class_names: buckets}, "*");
+                  machine_learning_window.postMessage({training_class_names: buckets}, "*");
               }
           );
-          ecraft2learn.machine_learning_iframe = machine_learning_iframe;
+          ecraft2learn.machine_learning_window = machine_learning_window;
           var receive_ready = 
               function (event) {
                   if (event.data === "Ready") {
@@ -1040,7 +1038,7 @@ window.ecraft2learn =
                                                              function () {
                                                                   var snap_canvas = document.getElementById('world');
                                                                   snap_canvas.style.display = '';
-                                                                  machine_learning_iframe.style.display = 'none';
+                                                                  machine_learning_window.style.display = 'none';
                                                                   ecraft2learn.snap_paused = false;
                                                              });
                       document.body.appendChild(return_to_snap_button);
