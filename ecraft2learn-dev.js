@@ -1017,12 +1017,22 @@ window.ecraft2learn =
                       return bucket_name === buckets2[index];
                   }));
       };
+      
       if (!ecraft2learn.image_learning_buckets) {
           // first time 
-          ecraft2learn.image_learning_buckets = buckets;
           load_script("teachable-machine-boilerplate-master/dist/build.js",
                       function () {
-                          ecraft2learn.create_training_interface();
+                          var return_to_snap_button = document.createElement('button');
+                          ecraft2learn.create_training_interface(buckets);
+                          return_to_snap_button.innerText = "Return to Snap!";
+                          return_to_snap_button.addEventListener('click',
+                                           function () {
+                                                var snap_canvas = document.getElementById('world');
+                                                snap_canvas.style.display = '';
+                                                ecraft2learn.snap_paused = false;
+                                           });
+                          document.body.appendChild(return_to_snap_button);
+                          ecraft2learn.snap_paused = true;
                           var snap_canvas = document.getElementById('world');
                           snap_canvas.style.display = 'none';
                       });

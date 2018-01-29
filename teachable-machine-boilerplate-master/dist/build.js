@@ -24,17 +24,21 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 // Number of classes to classify
-var NUM_CLASSES = ecraft2learn.image_learning_buckets.length;
+var NUM_CLASSES = 3;
 // Webcam Image size. Must be 227. 
 var IMAGE_SIZE = 227;
 // K value for KNN
 var TOPK = 10;
 
 var Main = function () {
-  function Main() {
+  function Main(training_class_names) {
     var _this = this;
 
     _classCallCheck(this, Main);
+
+    if (training_class_names) {
+        NUM_CLASSES = training_class_names.length;
+    }
 
     // Initiate variables
     this.infoTexts = [];
@@ -67,7 +71,7 @@ var Main = function () {
 
       // Create training button
       var button = document.createElement('button');
-      button.innerText = "Train " + ecraft2learn.image_learning_buckets[i];
+      button.innerText = "Train " + training_class_names[i];
       div.appendChild(button);
 
       // Listen for mouse events when clicking the button
@@ -88,15 +92,6 @@ var Main = function () {
     for (var i = 0; i < NUM_CLASSES; i++) {
       _loop(i);
     }
-
-    var return_to_snap_button = document.createElement('button');
-    return_to_snap_button.innerText = "Return to Snap!";
-    return_to_snap_button.addEventListener('click',
-                                           function () {
-                                                var snap_canvas = document.getElementById('world');
-                                                snap_canvas.style.display = '';
-                                           });
-    document.body.appendChild(return_to_snap_button);
 
     // Setup webcam
     navigator.mediaDevices.getUserMedia({ video: true, audio: false }).then(function (stream) {
@@ -178,16 +173,22 @@ var Main = function () {
     }
   }]);
 
-  return Main;
+    // instead of returning Main we return a prediction function
+    return function (process_prediction) {
+             this.stop(); // done training (will have interface)
+             var image = _deeplearn.Array3D.fromPixels(this.video);
+             this.knn.predictClass(image).then(process_prediction);
+         }.bind(this);
 }();
 
-ecraft2learn.create_training_interface = function () {
-  new Main();
+// need to export this or listen to a custom event since the 'load' listener below is useless
+ecraft2learn.create_training_interface = function (training_class_names) {
+  new Main(training_class_names);
 };
 
-window.addEventListener('load', function () {
-  return new Main();
-});
+// window.addEventListener('load', function () {
+//   return new Main();
+// });
 
 },{"deeplearn":51,"deeplearn-knn-image-classifier":3}],2:[function(require,module,exports){
 
@@ -284,7 +285,7 @@ var KNNImageClassifier = (function () {
         if (classIndex >= this.numClasses) {
             console.warn('Cannot add to invalid class ${classIndex}');
         }
-        console.log("Training " + ecraft2learn.image_learning_buckets[classIndex]);
+        console.log("Training " + training_class_names[classIndex]);
         this.clearTrainLogitsMatrix();
         this.math.scope(function (keep, track) {
             var logits = _this.squeezeNet.predict(image);
