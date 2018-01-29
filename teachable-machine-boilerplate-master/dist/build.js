@@ -280,7 +280,6 @@ var KNNImageClassifier = (function () {
         if (classIndex >= this.numClasses) {
             console.warn('Cannot add to invalid class ${classIndex}');
         }
-        console.log("Training " + training_class_names[classIndex]);
         this.clearTrainLogitsMatrix();
         this.math.scope(function (keep, track) {
             var logits = _this.squeezeNet.predict(image);
