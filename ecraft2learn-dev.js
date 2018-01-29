@@ -1021,12 +1021,12 @@ window.ecraft2learn =
           ecraft2learn.image_learning_buckets = buckets;
           var machine_learning_window = window.open("https://ecraft2learn.github.io/ai/teachable-machine-boilerplate-master/index.html",
                                                     "Machine learning");
-          machine_learning_window.addEventListener(
-              'load',
+          var when_popup_loaded =
               function (event) {
                   machine_learning_window.postMessage({training_class_names: buckets}, "*");
-              }
-          );
+          };  
+          machine_learning_window.addEventListener('load', when_popup_loaded);
+          setTimeout(when_popup_loaded, 5000); // somehow the load event isn't being triggered
           ecraft2learn.machine_learning_window = machine_learning_window;
           var receive_ready = 
               function (event) {
@@ -1035,15 +1035,15 @@ window.ecraft2learn =
                       return_to_snap_button.innerText = "Return to Snap!";
                       return_to_snap_button.addEventListener('click',
                                                              function () {
-                                                                  var snap_canvas = document.getElementById('world');
-                                                                  snap_canvas.style.display = '';
+//                                                                   var snap_canvas = document.getElementById('world');
+//                                                                   snap_canvas.style.display = '';
 //                                                                machine_learning_window.style.display = 'none';
                                                                   ecraft2learn.snap_paused = false;
                                                              });
-                      document.body.appendChild(return_to_snap_button);
+                      machine_learning_window.body.appendChild(return_to_snap_button);
                       ecraft2learn.snap_paused = true;
-                      var snap_canvas = document.getElementById('world');
-                      snap_canvas.style.display = 'none';
+//                       var snap_canvas = document.getElementById('world');
+//                       snap_canvas.style.display = 'none';
                   }
           };      
           window.addEventListener("message", receive_ready, false);                     
