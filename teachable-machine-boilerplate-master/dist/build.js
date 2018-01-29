@@ -50,6 +50,7 @@ var Main = function () {
 
     var send_confidences = function (results) {
         Window.parent.postMessage(results.confidences, "*");
+        this.video.play();
     };
 
     window.addEventListener("message",
@@ -57,7 +58,9 @@ var Main = function () {
                                 if (typeof event.data.predict !== 'undefined') {
 //                                     this.stop(); // done training
                                     var image = event.data.predict;
-                                    var image_as_Array3D = _deeplearn.Array3D.fromPixels(image);
+                                    canvas.drawImage(image);
+                                    this.video.pause();
+                                    var image_as_Array3D = _deeplearn.Array3D.fromPixels(this.video);
                                     this.knn.predictClass(image_as_Array3D).then(send_confidences);
                                 }
                             }.bind(this),
