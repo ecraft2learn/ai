@@ -1057,12 +1057,16 @@ window.ecraft2learn =
       }
   },
   image_confidences: function (callback) {
-      if (!ecraft2learn.knn_predict) {
-          window.alert("You need to train the system before using it. Run 'Train using camera' before this.")
+      if (!ecraft2learn.machine_learning_window) {
+          window.alert("You need to train the system before using it. Run 'Train using camera' before this.");
+          return;
       }
-      ecraft2learn.knn_predict(function (results) {
-                                   invoke_callback(javascript_to_snap(results.confidences));
-      });
+      var receive_confidences = function (event) {
+          invoke_callback(javascript_to_snap(event.data));
+          window.removeEventListener("message", receive_confidences);
+      };
+      ecraft2learn.machine_learning_window.postMessage("Predict");
+      window.addEventListener("message", receive_confidences);
   }
 }} ());
 ecraft2learn.get_voice_names(); // to ensure voices are loaded

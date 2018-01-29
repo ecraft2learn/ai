@@ -56,7 +56,7 @@ var Main = function () {
                             function (event) {
                                 if (typeof event.data.predict !== 'undefined') {
                                     this.stop(); // done training
-                                    var image = _deeplearn.Array3D.fromPixels(event.data.video);
+                                    var image = _deeplearn.Array3D.fromPixels(this.video);
                                     this.knn.predictClass(image).then(send_confidences);
                                 }
                             }.bind(this),
