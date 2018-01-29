@@ -1023,7 +1023,7 @@ window.ecraft2learn =
           load_script("teachable-machine-boilerplate-master/dist/build.js",
                       function () {
                           var return_to_snap_button = document.createElement('button');
-                          ecraft2learn.create_training_interface(buckets);
+                          var main = ecraft2learn.create_training_interface(buckets);
                           return_to_snap_button.innerText = "Return to Snap!";
                           return_to_snap_button.addEventListener('click',
                                            function () {
