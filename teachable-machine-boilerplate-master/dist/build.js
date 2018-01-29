@@ -195,7 +195,7 @@ window.addEventListener("message",
 
 window.addEventListener('load', 
                         function (event) {
-                            event.source.postMessage("Loaded", "*");
+                            window.opener.postMessage("Loaded", "*");
                         },
                         false);
 
