@@ -85,6 +85,10 @@ var Main = function () {
       _this.infoTexts.push(infoText);
     };
 
+    for (var i = 0; i < NUM_CLASSES; i++) {
+      _loop(i);
+    }
+
     var return_to_snap_button = document.createElement('button');
     return_to_snap_button.innerText = "Return to Snap!";
     return_to_snap_button.addEventListener('click',
@@ -93,9 +97,6 @@ var Main = function () {
                                                 snap_canvas.style.display = '';
                                            });
     document.body.appendChild(return_to_snap_button);
-    for (var i = 0; i < NUM_CLASSES; i++) {
-      _loop(i);
-    }
 
     // Setup webcam
     navigator.mediaDevices.getUserMedia({ video: true, audio: false }).then(function (stream) {
@@ -283,6 +284,7 @@ var KNNImageClassifier = (function () {
         if (classIndex >= this.numClasses) {
             console.warn('Cannot add to invalid class ${classIndex}');
         }
+        console.log("Training " + ecraft2learn.image_learning_buckets[classIndex]);
         this.clearTrainLogitsMatrix();
         this.math.scope(function (keep, track) {
             var logits = _this.squeezeNet.predict(image);
