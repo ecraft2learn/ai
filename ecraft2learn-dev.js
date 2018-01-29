@@ -1017,27 +1017,37 @@ window.ecraft2learn =
                       return bucket_name === buckets2[index];
                   }));
       };
-      
-      if (!ecraft2learn.image_learning_buckets) {
-          // first time 
-          load_script("teachable-machine-boilerplate-master/dist/build.js",
-                      function () {
-                          var return_to_snap_button = document.createElement('button');
-                          var main = ecraft2learn.create_training_interface(buckets);
-                          return_to_snap_button.innerText = "Return to Snap!";
-                          return_to_snap_button.addEventListener('click',
-                                           function () {
-                                                var snap_canvas = document.getElementById('world');
-                                                snap_canvas.style.display = '';
-                                                ecraft2learn.snap_paused = false;
-                                           });
-                          document.body.appendChild(return_to_snap_button);
-                          ecraft2learn.snap_paused = true;
-                          var snap_canvas = document.getElementById('world');
-                          snap_canvas.style.display = 'none';
-                      });
-          return;   
+      if (!ecraft2learn.machine_learning_iframe) {
+          var machine_learning_iframe = document.createElement('iframe');
+          machine_learning_iframe.src = "https://ecraft2learn.github.io/ai/teachable-machine-boilerplate-master/index.html";
+          machine_learning_iframe.width  = 600;
+          machine_learning_iframe.height = 600;
+          machine_learning_iframe.postMessage({training_class_names: buckets}, "*");
+          ecraft2learn.machine_learning_iframe = machine_learning_iframe;
+          var receive_ready = 
+              function (event) {
+                  if (event.data === "Ready") {
+                      document.body.appendChild(machine_learning_iframe);
+                      var return_to_snap_button = document.createElement('button');
+                      var main = ecraft2learn.create_training_interface(buckets);
+                      return_to_snap_button.innerText = "Return to Snap!";
+                      return_to_snap_button.addEventListener('click',
+                                                             function () {
+                                                                  var snap_canvas = document.getElementById('world');
+                                                                  snap_canvas.style.display = '';
+                                                                  machine_learning_iframe.style.display = 'none';
+                                                                  ecraft2learn.snap_paused = false;
+                                                             });
+                      document.body.appendChild(return_to_snap_button);
+                      ecraft2learn.snap_paused = true;
+                      var snap_canvas = document.getElementById('world');
+                      snap_canvas.style.display = 'none';
+                  }
+          };      
+          window.addEventListener("message", receive_ready, false);                     
+          return;
       }
+      
       if (!add_to_previous_training || !buckets_equal(buckets, ecraft2learn.image_learning_buckets)) {
           // to do
       }

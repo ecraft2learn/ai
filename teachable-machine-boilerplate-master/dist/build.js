@@ -48,11 +48,19 @@ var Main = function () {
     // Initiate deeplearn.js math and knn classifier objects
     this.knn = new _deeplearnKnnImageClassifier.KNNImageClassifier(NUM_CLASSES, TOPK, _deeplearn.ENV.math);
 
-    this.prediction_function = function (process_prediction) {
-        this.stop(); // done training (will have interface)
-        var image = _deeplearn.Array3D.fromPixels(this.video);
-        this.knn.predictClass(image).then(process_prediction);
-    }.bind(this);
+    var send_confidences = function (results) {
+        Window.parent.postMessage(results.confidences, "*");
+    };
+
+    window.addEventListener("message",
+                            function (event) {
+                                if (typeof event.data.predict !== 'undefined') {
+                                    this.stop(); // done training
+                                    var image = _deeplearn.Array3D.fromPixels(event.data.video);
+                                    this.knn.predictClass(image).then(send_confidences);
+                                }
+                            }.bind(this),
+                            false);
 
     // Create video element that will contain the webcam image
     this.video = document.createElement('video');
@@ -181,6 +189,16 @@ ecraft2learn.create_training_interface = function (training_class_names) {
   return new Main(training_class_names);
 };
 
+window.addEventListener("message",
+                        function (event) {
+                            if (typeof event.data.training_class_names !== 'undefined') {
+                                new Main(event.data.training_class_names);
+                                event.source.postMessage("Ready", "*");
+                            }
+                        },
+                        false);
+
+// now we wait for a message from the window that launched this iframe
 // window.addEventListener('load', function () {
 //   return new Main();
 // });
