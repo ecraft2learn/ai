@@ -193,10 +193,9 @@ window.addEventListener("message",
                         },
                         false);
 
-// now we wait for a message from the window that launched this iframe
-// window.addEventListener('load', function () {
-//   return new Main();
-// });
+window.addEventListener('load', function () {
+    event.source.postMessage("Loaded", "*");
+});
 
 },{"deeplearn":51,"deeplearn-knn-image-classifier":3}],2:[function(require,module,exports){
 
