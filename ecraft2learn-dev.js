@@ -730,7 +730,7 @@ window.ecraft2learn =
               video.src = vendorURL.createObjectURL(stream);
               video.play();
               if (after_setup_callback) {
-                  after_setup_callback();
+                  after_setup_callback(canvas);
               }
           };
           var error_callback = function(error) {
@@ -1065,8 +1065,17 @@ window.ecraft2learn =
           invoke_callback(javascript_to_snap(event.data));
           window.removeEventListener("message", receive_confidences);
       };
-      ecraft2learn.machine_learning_window.postMessage("Predict", "*");
-      window.addEventListener("message", receive_confidences);
+      var post_image = function (canvas) {
+          var image = canvas.toDataURL('image/png');
+          ecraft2learn.machine_learning_window.postMessage({predict: image}, "*");
+          window.addEventListener("message", receive_confidences);
+      }
+      if (ecraft2learn.canvas) {
+          post_image(ecraft2learn.canvas);
+      } else {
+          ecraft2learn.canvas = ecraft2learn.setup_camera(227, 227, undefined, post_image);
+      }
+      
   }
 }} ());
 ecraft2learn.get_voice_names(); // to ensure voices are loaded

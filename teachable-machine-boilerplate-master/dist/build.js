@@ -55,9 +55,10 @@ var Main = function () {
     window.addEventListener("message",
                             function (event) {
                                 if (typeof event.data.predict !== 'undefined') {
-                                    this.stop(); // done training
-                                    var image = _deeplearn.Array3D.fromPixels(this.video);
-                                    this.knn.predictClass(image).then(send_confidences);
+//                                     this.stop(); // done training
+                                    var image = event.data.predict;
+                                    var image_as_Array3D = _deeplearn.Array3D.fromPixels(image);
+                                    this.knn.predictClass(image_as_Array3D).then(send_confidences);
                                 }
                             }.bind(this),
                             false);
