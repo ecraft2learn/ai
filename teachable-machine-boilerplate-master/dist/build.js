@@ -58,9 +58,12 @@ var Main = function () {
                                 if (typeof event.data.predict !== 'undefined') {
 //                                     this.stop(); // done training
                                     var image = event.data.predict;
+                                    var canvas = document.createElement('canvas');
+                                    canvas.width = 227;
+                                    canvas.height = 227;
                                     canvas.getContext('2d').drawImage(image, 0, 0);
                                     this.video.pause();
-                                    var image_as_Array3D = _deeplearn.Array3D.fromPixels(this.video);
+                                    var image_as_Array3D = _deeplearn.Array3D.fromPixels(canvas);
                                     this.knn.predictClass(image_as_Array3D).then(send_confidences);
                                 }
                             }.bind(this),
