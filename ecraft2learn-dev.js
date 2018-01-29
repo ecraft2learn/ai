@@ -1022,7 +1022,7 @@ window.ecraft2learn =
           machine_learning_iframe.src = "https://ecraft2learn.github.io/ai/teachable-machine-boilerplate-master/index.html";
           machine_learning_iframe.width  = 600;
           machine_learning_iframe.height = 600;
-          machine_learning_iframe.postMessage({training_class_names: buckets}, "*");
+          machine_learning_iframe.contentWindow.postMessage({training_class_names: buckets}, "*");
           ecraft2learn.machine_learning_iframe = machine_learning_iframe;
           var receive_ready = 
               function (event) {
