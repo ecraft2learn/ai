@@ -193,9 +193,11 @@ window.addEventListener("message",
                         },
                         false);
 
-window.addEventListener('load', function () {
-    event.source.postMessage("Loaded", "*");
-});
+window.addEventListener('load', 
+                        function (event) {
+                            event.source.postMessage("Loaded", "*");
+                        },
+                        false);
 
 },{"deeplearn":51,"deeplearn-knn-image-classifier":3}],2:[function(require,module,exports){
 
