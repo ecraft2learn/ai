@@ -51,7 +51,7 @@ var Main = function () {
     var send_confidences = function (results) {
         window.parent.postMessage(results.confidences, "*");
         this.video.play();
-    };
+    }.bind(this);
 
     window.addEventListener("message",
                             function (event) {
