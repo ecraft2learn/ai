@@ -49,7 +49,7 @@ var Main = function () {
     this.knn = new _deeplearnKnnImageClassifier.KNNImageClassifier(NUM_CLASSES, TOPK, _deeplearn.ENV.math);
 
     var send_confidences = function (results) {
-        Window.parent.postMessage(results.confidences, "*");
+        window.parent.postMessage(results.confidences, "*");
         this.video.play();
     };
 
