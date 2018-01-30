@@ -1021,7 +1021,7 @@ window.ecraft2learn =
           return window.open("https://ecraft2learn.github.io/ai/teachable-machine-boilerplate-master/index.html",
                              "Machine learning");
       };
-      if (!ecraft2learn.machine_learning_window) {
+      if (!ecraft2learn.machine_learning_window || ecraft2learn.machine_learning_window.closed) {
           ecraft2learn.image_learning_buckets = buckets;
           var machine_learning_window = open_machine_learning_window();
 //           var when_popup_loaded =
