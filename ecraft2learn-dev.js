@@ -1057,9 +1057,7 @@ window.ecraft2learn =
       if (add_to_previous_training && buckets_equal(buckets, ecraft2learn.image_learning_buckets)) {
           // would like to go to that window:  ecraft2learn.machine_learning_window.focus();
           // but browsers don't allow it unless clear the user initiated it
-          if (window.confirm("Go to the training window?")) {
-              ecraft2learn.machine_learning_window.focus()
-          }
+          window.alert("Go to the training window whenever you want to add to the training.");
       } else {
           ecraft2learn.machine_learning_window.close();
           // start over
