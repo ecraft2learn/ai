@@ -48,11 +48,6 @@ var Main = function () {
     // Initiate deeplearn.js math and knn classifier objects
     this.knn = new _deeplearnKnnImageClassifier.KNNImageClassifier(NUM_CLASSES, TOPK, _deeplearn.ENV.math);
 
-    var send_confidences = function (results) {
-        window.parent.postMessage(results.confidences, "*");
-        this.video.play();
-    }.bind(this);
-
     window.addEventListener("message",
                             function (event) {
                                 if (typeof event.data.predict !== 'undefined') {
@@ -66,7 +61,12 @@ var Main = function () {
                                     canvas.getContext('2d').drawImage(image, 0, 0);
                                     this.video.pause();
                                     var image_as_Array3D = _deeplearn.Array3D.fromPixels(canvas);
-                                    this.knn.predictClass(image_as_Array3D).then(send_confidences);
+                                    this.knn.predictClass(image_as_Array3D).then(
+                                        function (results) {
+                                            event.source.postMessage(results.confidences, "*");
+                                            console.log(results.confidences, "confidences posted");
+                                            this.video.play();
+                                        });
                                 }
                             }.bind(this),
                             false);
