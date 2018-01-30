@@ -1017,10 +1017,13 @@ window.ecraft2learn =
                       return bucket_name === buckets2[index];
                   }));
       };
+      var open_machine_learning_window = function () {
+          return window.open("https://ecraft2learn.github.io/ai/teachable-machine-boilerplate-master/index.html",
+                             "Machine learning");
+      };
       if (!ecraft2learn.machine_learning_window) {
           ecraft2learn.image_learning_buckets = buckets;
-          var machine_learning_window = window.open("https://ecraft2learn.github.io/ai/teachable-machine-boilerplate-master/index.html",
-                                                    "Machine learning");
+          var machine_learning_window = open_machine_learning_window();
 //           var when_popup_loaded =
 //               function (event) {
 //                   machine_learning_window.postMessage({training_class_names: buckets}, "*");
@@ -1050,10 +1053,12 @@ window.ecraft2learn =
           };      
           window.addEventListener("message", receive_ready, false);                     
           return;
-      }
-      
-      if (!add_to_previous_training || !buckets_equal(buckets, ecraft2learn.image_learning_buckets)) {
-          // to do
+      }     
+      if (add_to_previous_training && buckets_equal(buckets, ecraft2learn.image_learning_buckets)) {
+          // just go to that window
+          open_machine_learning_window();
+      } else {
+          ecraft2learn.machine_learning_window.location.reload();
       }
   },
   image_confidences: function (callback) {
