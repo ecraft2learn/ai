@@ -1055,12 +1055,15 @@ window.ecraft2learn =
           return;
       }     
       if (add_to_previous_training && buckets_equal(buckets, ecraft2learn.image_learning_buckets)) {
-          // just go to that window
-          ecraft2learn.machine_learning_window.focus();
+          // would like to go to that window:  ecraft2learn.machine_learning_window.focus();
+          // but browsers don't allow it unless clear the user initiated it
+          if (window.confirm("Go to the training window?")) {
+              ecraft2learn.machine_learning_window.focus()
+          }
       } else {
           ecraft2learn.machine_learning_window.close();
           // start over
-          train_using_camera(buckets_as_snap_list, add_to_previous_training);
+          ecraft2learn.train_using_camera(buckets_as_snap_list, add_to_previous_training);
       }
   },
   image_confidences: function (callback) {
