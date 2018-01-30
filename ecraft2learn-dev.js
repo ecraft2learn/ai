@@ -106,7 +106,7 @@ window.ecraft2learn =
           }
           return value.contents;
     };
-    var invoke_callback = function (callback) {
+    var invoke_callback = function (callback) { // any number of additional arguments
         // callback could either be a Snap! object or a JavaScript function
         if (callback instanceof Context) { // assume Snap! callback
             // invoke the callback with the argments (other than the callback itself)
@@ -1062,7 +1062,7 @@ window.ecraft2learn =
           return;
       }
       var receive_confidences = function (event) {
-          invoke_callback(javascript_to_snap(event.data));
+          invoke_callback(callback, javascript_to_snap(event.data));
           window.removeEventListener("message", receive_confidences);
       };
       var post_image = function (canvas) {
