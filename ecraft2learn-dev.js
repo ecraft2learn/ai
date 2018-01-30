@@ -1056,9 +1056,11 @@ window.ecraft2learn =
       }     
       if (add_to_previous_training && buckets_equal(buckets, ecraft2learn.image_learning_buckets)) {
           // just go to that window
-          open_machine_learning_window();
+          ecraft2learn.machine_learning_window.focus();
       } else {
-          ecraft2learn.machine_learning_window.location.reload();
+          ecraft2learn.machine_learning_window.close();
+          // start over
+          train_using_camera(buckets_as_snap_list, add_to_previous_training);
       }
   },
   image_confidences: function (callback) {
