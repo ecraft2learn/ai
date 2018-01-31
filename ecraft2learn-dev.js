@@ -760,7 +760,9 @@ window.ecraft2learn =
       //      navigator.mediaDevices.getUserMedia(constraints, callback, error_callback);
           }
       };
-      width = +width; // convert to number
+      video.setAttribute('autoplay', '');
+      video.setAttribute('playsinline', '');
+      width  = +width; // convert to number
       height = +height;
 
   // define new functions in the scope of setup_camera
