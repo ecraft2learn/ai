@@ -1018,7 +1018,7 @@ window.ecraft2learn =
                   }));
       };
       var open_machine_learning_window = function () {
-          return window.open("https://ecraft2learn.github.io/ai/teachable-machine-boilerplate-master/index.html",
+          return window.open("https://ecraft2learn.github.io/ai/camera-train/index.html",
                              "Machine learning");
       };
       if (!ecraft2learn.machine_learning_window || ecraft2learn.machine_learning_window.closed) {

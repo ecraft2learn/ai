@@ -16,7 +16,7 @@
 // import {NDArrayMathGPU, Array3D, ENV}from 'deeplearn';
 
 // Number of classes to classify
-const NUM_CLASSES = 3;
+var NUM_CLASSES = 3; // default
 // Webcam Image size. Must be 227. 
 const IMAGE_SIZE = 227;
 // K value for KNN
@@ -24,11 +24,17 @@ const TOPK = 10;
 
 
 class Main {
-  constructor(){
+  constructor(training_class_names){
+    if (training_class_names) {
+        NUM_CLASSES = training_class_names.length;
+    } else {
+        training_class_names = ["1", "2", "3"];
+    }
     // Initiate variables
     this.infoTexts = [];
     this.training = -1; // -1 when no class is being trained
     this.videoPlaying = false;
+    this.training_class_names = training_class_names;
     
     // Initiate deeplearn.js math and knn classifier objects
     this.knn = new knn_image_classifier.KNNImageClassifier(NUM_CLASSES, TOPK, ENV.math);
@@ -37,6 +43,30 @@ class Main {
     this.video = document.createElement('video');
     this.video.setAttribute('autoplay', '');
     this.video.setAttribute('playsinline', '');
+
+    // listen for requests for predictions
+    window.addEventListener("message",
+                            function (event) {
+                                if (typeof event.data.predict !== 'undefined') {
+//                                  this.stop(); // done training
+                                    var image_url = event.data.predict;
+                                    var image = new Image();
+                                    var canvas = document.createElement('canvas');
+                                    canvas.width = 227;
+                                    canvas.height = 227;
+                                    image.src = image_url;
+                                    canvas.getContext('2d').drawImage(image, 0, 0);
+                                    this.video.pause();
+                                    var image_as_Array3D = _deeplearn.Array3D.fromPixels(canvas);
+                                    this.knn.predictClass(image_as_Array3D).then(
+                                        function (results) {
+                                            event.source.postMessage(results.confidences, "*");
+                                            console.log(results.confidences, "confidences posted");
+                                            this.video.play();
+                                        });
+                                }
+                            }.bind(this),
+                            false);
     
     // Add video element to DOM
     document.body.appendChild(this.video);   
@@ -70,7 +100,7 @@ class Main {
 
       // Create training button
       const button = document.createElement('button')
-      button.innerText = "Train "+i;
+      button.innerText = "Train " + this.training_class_names[i];
       div.appendChild(button);
 
       // Listen for mouse events when clicking the button
@@ -134,4 +164,19 @@ class Main {
   }
 }
 
-window.addEventListener('load', () => new Main());
+// receive class names
+window.addEventListener("message",
+                        function (event) {
+                            if (typeof event.data.training_class_names !== 'undefined') {
+                                new Main(event.data.training_class_names);
+                                event.source.postMessage("Ready", "*");
+                            }
+                        },
+                        false);
+
+// tell Snap! this is loaded
+window.addEventListener('load', 
+                        function (event) {
+                            window.opener.postMessage("Loaded", "*");
+                        },
+                        false);
