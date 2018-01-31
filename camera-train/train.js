@@ -58,10 +58,8 @@ class Main {
                                     image.width = IMAGE_SIZE;
                                     image.height = IMAGE_SIZE;
                                     canvas.getContext('2d').drawImage(image, 0, 0);
-                                    image.dispose();
                                     this.video.pause();
                                     var image_as_Array3D = dl.Array3D.fromPixels(canvas);
-                                    canvas.dispose();
                                     this.knn.predictClass(image_as_Array3D).then(
                                         function (results) {
                                             event.source.postMessage(results.confidences, "*");
