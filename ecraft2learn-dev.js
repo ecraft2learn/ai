@@ -730,7 +730,7 @@ window.ecraft2learn =
               video.src = vendorURL.createObjectURL(stream);
               video.play();
               if (after_setup_callback) {
-                  after_setup_callback(canvas);
+                  after_setup_callback(canvas, video);
               }
           };
           var error_callback = function(error) {
@@ -1065,6 +1065,8 @@ window.ecraft2learn =
       }
   },
   image_confidences: function (callback) {
+      var training_image_width  = 227;
+      var training_image_height = 227;
       if (!ecraft2learn.machine_learning_window) {
           window.alert("You need to train the system before using it. Run 'Train using camera' before this.");
           return;
@@ -1073,7 +1075,8 @@ window.ecraft2learn =
           invoke_callback(callback, javascript_to_snap(event.data));
           window.removeEventListener("message", receive_confidences);
       };
-      var post_image = function (canvas) {
+      var post_image = function (canvas, video, width, height) {
+          add_photo_to_canvas(canvas, video, training_image_width, training_image_height);
           var image = canvas.toDataURL('image/png');
           ecraft2learn.machine_learning_window.postMessage({predict: image}, "*");
           window.addEventListener("message", receive_confidences);
@@ -1081,7 +1084,7 @@ window.ecraft2learn =
       if (ecraft2learn.canvas) {
           post_image(ecraft2learn.canvas);
       } else {
-          ecraft2learn.canvas = ecraft2learn.setup_camera(227, 227, undefined, post_image);
+          ecraft2learn.canvas = ecraft2learn.setup_camera(training_image_width, training_image_height, undefined, post_image);
       }
       
   }
