@@ -1075,14 +1075,16 @@ window.ecraft2learn =
           invoke_callback(callback, javascript_to_snap(event.data));
           window.removeEventListener("message", receive_confidences);
       };
-      var post_image = function (canvas, video, width, height) {
+      var post_image = function (canvas, video) {
+          ecraft2learn.canvas = canvas;
+          ecraft2learn.video = video;
           add_photo_to_canvas(canvas, video, training_image_width, training_image_height);
           var image = canvas.toDataURL('image/png');
           ecraft2learn.machine_learning_window.postMessage({predict: image}, "*");
           window.addEventListener("message", receive_confidences);
       }
       if (ecraft2learn.canvas) {
-          post_image(ecraft2learn.canvas);
+          post_image(ecraft2learn.canvas, ecraft2learn.video);
       } else {
           ecraft2learn.canvas = ecraft2learn.setup_camera(training_image_width, training_image_height, undefined, post_image);
       }
