@@ -744,8 +744,8 @@ window.ecraft2learn =
                              audio: false};
           video.style.display  = 'none';
           canvas.style.display = 'none';
-          video.setAttribute('width', width);
-          video.setAttribute('height', height);
+//           video.setAttribute('width', width);
+//           video.setAttribute('height', height);
           canvas.setAttribute('width', width);
           canvas.setAttribute('height', height);
           document.body.appendChild(video);
