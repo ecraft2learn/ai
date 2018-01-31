@@ -57,7 +57,7 @@ class Main {
                                     image.src = image_url;
                                     canvas.getContext('2d').drawImage(image, 0, 0);
                                     this.video.pause();
-                                    var image_as_Array3D = _deeplearn.Array3D.fromPixels(canvas);
+                                    var image_as_Array3D = dl.Array3D.fromPixels(canvas);
                                     this.knn.predictClass(image_as_Array3D).then(
                                         function (results) {
                                             event.source.postMessage(results.confidences, "*");
