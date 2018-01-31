@@ -727,7 +727,7 @@ window.ecraft2learn =
       var startup = function startup() {
           var callback = function(stream) {
               var vendorURL = window.URL || window.webkitURL;
-              video.src = vendorURL.createObjectURL(stream);
+              video.src = stream; // vendorURL.createObjectURL(stream);
               video.play();
               if (after_setup_callback) {
                   after_setup_callback(canvas, video);
