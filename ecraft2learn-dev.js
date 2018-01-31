@@ -1036,19 +1036,7 @@ window.ecraft2learn =
                   if (event.data === "Loaded") {
                       machine_learning_window.postMessage({training_class_names: buckets}, "*");
                   } else if (event.data === "Ready") {
-//                       var return_to_snap_button = document.createElement('button');
-//                       return_to_snap_button.innerText = "Return to Snap!";
-//                       return_to_snap_button.addEventListener('click',
-//                                                              function () {
-//                                                                   var snap_canvas = document.getElementById('world');
-//                                                                   snap_canvas.style.display = '';
-//                                                                machine_learning_window.style.display = 'none';
-//                                                                   ecraft2learn.snap_paused = false;
-//                                                              });
-//                       machine_learning_window.body.appendChild(return_to_snap_button);
-//                       ecraft2learn.snap_paused = true;
-//                       var snap_canvas = document.getElementById('world');
-//                       snap_canvas.style.display = 'none';
+                      // could let the user know...
                   }
           };      
           window.addEventListener("message", receive_ready, false);                     
