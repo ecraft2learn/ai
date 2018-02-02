@@ -3,7 +3,7 @@ body {
   font-size: 1.1em;
 }
 figure {
-  display: inline-block;
+  display: block;
   text-align: center;
   left-margin: 20px;
 }
