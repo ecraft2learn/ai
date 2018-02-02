@@ -60,7 +60,7 @@ class Main {
                                     canvas.getContext('2d').drawImage(image, 0, 0);
                                     this.video.pause();
                                     var image_as_Array3D = dl.Array3D.fromPixels(canvas);
-                                    console.log(image_as_Array3D, "predict");
+                                    console.log(image_as_Array3D.dataSync(), "predict");
                                     this.knn.predictClass(image_as_Array3D).then(
                                         function (results) {
                                             event.source.postMessage(results.confidences, "*");
@@ -136,7 +136,7 @@ class Main {
       if(this.training != -1){
         // Add current image to classifier
         this.knn.addImage(image, this.training);
-        console.log(image, "train");
+        console.log(image.dataSync(), "train");
       }
       
       // If any examples have been added, run predict
