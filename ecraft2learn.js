@@ -106,7 +106,7 @@ window.ecraft2learn =
           }
           return value.contents;
     };
-    var invoke_callback = function (callback) {
+    var invoke_callback = function (callback) { // any number of additional arguments
         // callback could either be a Snap! object or a JavaScript function
         if (callback instanceof Context) { // assume Snap! callback
             // invoke the callback with the argments (other than the callback itself)
@@ -166,7 +166,7 @@ window.ecraft2learn =
         canvas.setAttribute('width', width);
         canvas.setAttribute('height', height);
         var context = canvas.getContext('2d');
-        context.drawImage(video, 0, 0, width, height, 0, 0, width, height);
+        context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 0, 0, width, height);
     };
     var get_mary_tts_voice = function (voice_number) { // offical name
         return get_voice_from(voice_number, mary_tts_voices.map(function (voice) { return voice[0]; }));
@@ -374,8 +374,8 @@ window.ecraft2learn =
               if (function_name === "take_picture_and_analyse") {
                   // define it now with default image dimensions
                   // when setup finishes then run take_picture_and_analyse
-                  ecraft2learn.setup_camera(480, 
-                                            640, 
+                  ecraft2learn.setup_camera(640, 
+                                            480, 
                                             undefined, // no key
                                             function () {
                                                 // delay a second so camera is on when first image is captured
@@ -726,11 +726,14 @@ window.ecraft2learn =
       };
       var startup = function startup() {
           var callback = function(stream) {
-              var vendorURL = window.URL || window.webkitURL;
-              video.src = vendorURL.createObjectURL(stream);
+//               var vendorURL = window.URL || window.webkitURL;
+//               video.src = vendorURL.createObjectURL(stream);
+              video.srcObject = stream;
+              video.width  = width;
+              video.height = height;
               video.play();
               if (after_setup_callback) {
-                  after_setup_callback();
+                  after_setup_callback(canvas, video);
               }
           };
           var error_callback = function(error) {
@@ -741,8 +744,6 @@ window.ecraft2learn =
                              audio: false};
           video.style.display  = 'none';
           canvas.style.display = 'none';
-          video.setAttribute('width', width);
-          video.setAttribute('height', height);
           canvas.setAttribute('width', width);
           canvas.setAttribute('height', height);
           document.body.appendChild(video);
@@ -760,7 +761,9 @@ window.ecraft2learn =
       //      navigator.mediaDevices.getUserMedia(constraints, callback, error_callback);
           }
       };
-      width = +width; // convert to number
+      video.setAttribute('autoplay', '');
+      video.setAttribute('playsinline', '');
+      width  = +width; // convert to number
       height = +height;
 
   // define new functions in the scope of setup_camera
@@ -1007,6 +1010,76 @@ window.ecraft2learn =
       } catch (error) {
           invoke_callback(callback_for_errors, error.message);
       }
+  },
+  train_using_camera: function (buckets_as_snap_list, add_to_previous_training) {
+      var buckets = buckets_as_snap_list.contents;
+      var buckets_equal = function (buckets1, buckets2) {
+          return buckets1 === buckets2 ||
+                 (buckets1.length === buckets2.length &&
+                  buckets1.every(function (bucket_name, index) {
+                      return bucket_name === buckets2[index];
+                  }));
+      };
+      var open_machine_learning_window = function () {
+          return window.open("https://ecraft2learn.github.io/ai/camera-train/index.html",
+                             "Machine learning");
+      };
+      if (!ecraft2learn.machine_learning_window || ecraft2learn.machine_learning_window.closed) {
+          ecraft2learn.image_learning_buckets = buckets;
+          var machine_learning_window = open_machine_learning_window();
+//           var when_popup_loaded =
+//               function (event) {
+//                   machine_learning_window.postMessage({training_class_names: buckets}, "*");
+//           };  
+//           machine_learning_window.addEventListener('load', when_popup_loaded);
+//           setTimeout(when_popup_loaded, 5000); // somehow the load event isn't being triggered
+          ecraft2learn.machine_learning_window = machine_learning_window;
+          var receive_ready = 
+              function (event) {
+                  if (event.data === "Loaded") {
+                      machine_learning_window.postMessage({training_class_names: buckets}, "*");
+                  } else if (event.data === "Ready") {
+                      // could let the user know...
+                  }
+          };      
+          window.addEventListener("message", receive_ready, false);                     
+          return;
+      }     
+      if (add_to_previous_training && buckets_equal(buckets, ecraft2learn.image_learning_buckets)) {
+          // would like to go to that window:  ecraft2learn.machine_learning_window.focus();
+          // but browsers don't allow it unless clear the user initiated it
+          window.alert("Go to the training window whenever you want to add to the training.");
+      } else {
+          ecraft2learn.machine_learning_window.close();
+          // start over
+          ecraft2learn.train_using_camera(buckets_as_snap_list, add_to_previous_training);
+      }
+  },
+  image_confidences: function (callback) {
+      var training_image_width  = 227;
+      var training_image_height = 227;
+      if (!ecraft2learn.machine_learning_window) {
+          window.alert("You need to train the system before using it. Run 'Train using camera' before this.");
+          return;
+      }
+      var receive_confidences = function (event) {
+          invoke_callback(callback, javascript_to_snap(event.data));
+          window.removeEventListener("message", receive_confidences);
+      };
+      var post_image = function (canvas, video) {
+          ecraft2learn.canvas = canvas;
+          ecraft2learn.video = video;
+          add_photo_to_canvas(canvas, video, training_image_width, training_image_height);
+          var image = canvas.toDataURL('image/png');
+          ecraft2learn.machine_learning_window.postMessage({predict: image}, "*");
+          window.addEventListener("message", receive_confidences);
+      }
+      if (ecraft2learn.canvas) {
+          post_image(ecraft2learn.canvas, ecraft2learn.video);
+      } else {
+          ecraft2learn.canvas = ecraft2learn.setup_camera(training_image_width, training_image_height, undefined, post_image);
+      }
+      
   }
 }} ());
 ecraft2learn.get_voice_names(); // to ensure voices are loaded
