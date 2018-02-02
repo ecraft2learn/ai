@@ -57,15 +57,17 @@ class Main {
                                     image.src = image_url;
                                     image.width = IMAGE_SIZE;
                                     image.height = IMAGE_SIZE;
-                                    canvas.getContext('2d').drawImage(image, 0, 0, IMAGE_SIZE, IMAGE_SIZE);
-                                    this.video.pause();
-                                    var image_as_Array3D = dl.Array3D.fromPixels(canvas);
-                                    this.knn.predictClass(image_as_Array3D).then(
-                                        function (results) {
-                                            event.source.postMessage(results.confidences, "*");
-                                            console.log(results.confidences, "confidences posted");
-                                            this.video.play();
-                                        }.bind(this));
+                                    image.onload = function () {
+                                      canvas.getContext('2d').drawImage(image, 0, 0, IMAGE_SIZE, IMAGE_SIZE);
+                                      this.video.pause();
+                                      var image_as_Array3D = dl.Array3D.fromPixels(canvas);
+                                      this.knn.predictClass(image_as_Array3D).then(
+                                          function (results) {
+                                              event.source.postMessage(results.confidences, "*");
+                                              console.log(results.confidences, "confidences posted");
+                                              this.video.play();
+                                          }.bind(this));                                      
+                                    };
                                 }
                             }.bind(this),
                             false);
