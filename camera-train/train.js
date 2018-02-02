@@ -67,7 +67,7 @@ class Main {
                                               console.log(results.confidences, "confidences posted");
                                               this.video.play();
                                           }.bind(this));                                      
-                                    };
+                                    }.bind(this);
                                 }
                             }.bind(this),
                             false);
