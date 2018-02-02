@@ -50,7 +50,7 @@ class Main {
                                 if (typeof event.data.predict !== 'undefined') {
 //                                  this.stop(); // done training
                                     var image_url = event.data.predict;
-                                    var image = new Image();
+                                    var image = document.createElement('img');
                                     var canvas = document.createElement('canvas');
                                     canvas.width = IMAGE_SIZE;
                                     canvas.height = IMAGE_SIZE;
