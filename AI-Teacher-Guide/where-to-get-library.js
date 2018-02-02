@@ -6,4 +6,4 @@ document.write(
 'They can also be used together with blocks for controlling Arduinos by downloading and then importing ' +
 '<a href="https://toontalk.github.io/ai-cloud/AI-Teacher-Guide/eCraft2Learn%20S4A.xml" download>this file</a> ' +
 'into <a href="http://snap4arduino.rocks/" target="_blank">Snap4Arduino</a>.');
-document.close(
+document.close();
