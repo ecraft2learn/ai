@@ -66,7 +66,8 @@ class Main {
                                               event.source.postMessage(results.confidences, "*");
                                               console.log(results.confidences, "confidences posted");
                                               this.video.play();
-                                          }.bind(this));                                      
+                                              image_as_Array3D.dispose();
+                                          }.bind(this));          
                                     }.bind(this);
                                 }
                             }.bind(this),
