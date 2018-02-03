@@ -74,6 +74,7 @@ When you are ready to test the trained system return to the Snap! tab
 and click on the "Confidences of buckets" block.
 Then click on the "confidences" variable to see its value.
 Change what is in front of the camera and try again.
+Note that when you return to the training tab it starts running and you can add more training samples.
 </p>
 <h4>A sample program training and using image labels</h4>
 <p>Here is a program that launches a training tab to learning
@@ -113,7 +114,7 @@ We discussed <a href="chapter-3.html#how-does-computer-vision-work">how image re
 in the previous chapter.
 The fact that training of a deep learning system is feasible inside of browser is due to the work on
 <a href="https://deeplearnjs.org" target="_blank">deeplearn.js</a>.
-This Javascript library speeds up learning and prediction by using the 
+This JavaScript library speeds up learning and prediction by using the 
 <a href="http://www.nvidia.com/object/what-is-gpu-computing.html" target="_blank">GPU</a>
 that is part of nearly all computers.
 The GPU can be more than one hundred times faster at the computations that deep learning needs than using
@@ -125,6 +126,33 @@ target="_blank">teachable machine boilerplate</a>.
 <p>
 Most of the <a href="chapter-3.html#project-ideas">project ideas listed for using image recognition services</a>
 can be based upon the blocks described in this chapter.
+There is much that training by students enables that cloud services can't do.
+Students can train the system to recognise themselves, their fellow students, gestures, and the things that
+their robots may encounter in its particular environment.
+Here are some project ideas that exploit the ability of students to train the system:
+<ul>
+<li>
+Rock, paper, and scissors. The computer can be trained to tell when someone's hand
+is showing "rock", "paper", or "scissors".
+A game can be created where one plays the game by using your hand just as one does when playing with humans.
+(Note that one should probably not program the computer to cheat and make its choice after seeing what the player has done.)
+This example was inspired by the great set of machine learning project examples at
+<a href="https://machinelearningforkids.co.uk/#!/worksheets" target="_blank">machine learning for kids</a>.
+</li>
+<li>
+A scientific classification app. It could be trained to tell the name of a plant when shown one of its leaves,
+or identify insects, rocks, etc.
+</li>
+<li>
+A robot that recognises gestures such as "stop" when it sees an outstretched palm.
+</li>
+<li>
+A program that greets fellow students by name when they sit in front of the camera.
+</li>
+</ul>
+The <a href="https://machinelearningforkids.co.uk/#!/worksheets" target="_blank">machine learning for kids site</a>
+also has sample projects.
+</p>
 <h4>Future directions for this chapter</h4>
 <p>
 Several enhancements to this chapter are planned.
@@ -133,5 +161,7 @@ a block for adding new training data,
 blocks for saving and restoring a trained model,
 and more.
 </p>
+
+<a href="chapter-3.html">Return to the previous chapter on using image recognition services</a>.
 </body>
 </html>
