@@ -12,25 +12,38 @@
 This chapter relies upon there being a camera that the browser can access.
 Note that the blocks described here create a second browser tab for "training" the system.
 The first time the "Train using camera ..." block is run you may see it blocked as a "popup".
-</p>
-<figure>
-<img src="images/popup-blocked.png" class="center">
-<figcaption>The first time a training window is created it will be treated as a blocked 'popup'</figcaption></figure>
-<figure>
+See the <a href="troubleshooting.html" target="_blank">troubleshooting guide</a>
+for how to handle this or if other problems are encountered.</p>
+<h3>Introduction</h3>
 <p>
-To fix the problem click the tiny icon that shows a page with a red box containing a white 'x' and
-select 'Always allow popups from ...'.
+In the previous chapters the new Snap! blocks used services that had been trained to
+recognise speech and images.
+In this chapter the students train the system.
+This training is done by a <a href="https://en.wikipedia.org/wiki/Deep_learning">deep learning</a> system.
+Deep learning is a very successful set of machine learning techniques.
+Here is a very nice 5 minute video that introduces the big ideas behind machine learning:
 </p>
-<img src="images/popup-dialog.png" class="center">
-<figcaption>How to allow popups needed for training</figcaption></figure>
-<p>After allowing popups you may need to refresh the page.
+<iframe width="560" height="315" 
+        src="https://www.youtube.com/embed/_rdINNHLYaQ"
+        frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+<p>
+In this chapter we focus upon "supervised learning" which means that during training labels
+for the input are provided.
+The machine learns to then choose among training labels when presented with a new image (or other kind of input).
+Rarely is the system completely confident that its choice of label is correct so instead it computes
+"confidence scores".
+The scores are between 0 (sure it is not this label) to 1 (sure).
+The sum of the scores of all the labels always adds up to 1.
+Students may prefer to display confidence scores as percentages.
+For example, a .8 score for label X can be thought of as saying the system is
+"80% sure the new input should have label X".
 </p>
 <p>
-There is a <a href="troubleshooting.html" target="_blank">troubleshooting guide</a>
-that should be consulted if problems are encountered.</p>
-
-<p>This chapter will be written soon. It will include this nice video.</p>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/_rdINNHLYaQ" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-
+Unlike the previous chapters that rely upon pre-trained models here students can experiment with machine learning.
+They can learn what kinds of inputs the system can easily tell apart and which ones confuse it.
+Students can experiment to answer questions such as
+how many examples of each label are needed to recognise them reliably and
+how does recognition degrade as more labels are introduced.
+</p>
 </body>
 </html>

@@ -20,7 +20,28 @@ To address this there is a good deal of text to read at the top of each chapter 
 If you need to change the permission then
 <a href="https://support.google.com/chrome/answer/114662?hl=en&visit_id=1-636489202927020473-1104243073&rd=1" target="_blank">read this help page by Google</a>.
 </p>
-
+<h3>Nothing happens when using the "Train using camera ..." block</h3>
+The first time the "Train using camera ..." block is run you may see it blocked as a "popup".
+</p>
+<figure>
+<img src="images/popup-blocked.png" class="center">
+<figcaption>The first time a training window is created it will be treated as a blocked 'popup'</figcaption></figure>
+<figure>
+<p>
+To fix the problem click the tiny icon that shows a page with a red box containing a white 'x' and
+select 'Always allow popups from ...'.
+</p>
+<img src="images/popup-dialog.png" class="center">
+<figcaption>How to allow popups needed for training</figcaption></figure>
+<p>After allowing popups you may need to refresh the page.
+</p>
+<p>
+Training a computer to recognise images runs quickly on modern PCs because it is able to use the
+<a href="http://www.nvidia.com/object/what-is-gpu-computing.html" target="_blank">GPU</a> that is part of nearly all computers.
+There is a GPU on a Raspberry Pi but you may find it runs very slowly.
+Developers are working on a means to save a model after training.
+When this is ready one can train on a PC and the load the trained model on a Raspberry Pi.
+</p>
 <h3>Raspberry Pi problems</h3>
 <h4>No audio</h4>
 <p>The Raspberry Pi may think there are multiple audio devices.
@@ -36,20 +57,5 @@ chromium-browser --alsa-input-device=...
 <p>The Raspberry Pi cannot run Chrome but can run Chromium instead.
 One of the few ways in which Chromium differs from Chrome is that it has no builtin voices.
 The easiet workaround is to rely upon the MARY TTS speech blocks instead.</p>
-<h4>Nothing happens when using the "Train using camera ..." block</h4>
-The first time the "Train using camera ..." block is run you may see it blocked as a "popup".
-</p>
-<figure>
-<img src="images/popup-blocked.png" class="center">
-<figcaption>The first time a training window is created it will be treated as a blocked 'popup'</figcaption></figure>
-<figure>
-<p>
-To fix the problem click the tiny icon that shows a page with a red box containing a white 'x' and
-select 'Always allow popups from ...'.
-</p>
-<img src="images/popup-dialog.png" class="center">
-<figcaption>How to allow popups needed for training</figcaption></figure>
-<p>After allowing popups you may need to refresh the page.
-</p>
 </body>
 </html>
