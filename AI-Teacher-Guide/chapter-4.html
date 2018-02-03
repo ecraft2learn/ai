@@ -32,7 +32,7 @@ for the input are provided.
 The machine learns to then choose among training labels when presented with a new image (or other kind of input).
 Rarely is the system completely confident that its choice of label is correct so instead it computes
 "confidence scores".
-The scores are between 0 (sure it is not this label) to 1 (sure).
+The scores are between 0 (certain it is not this label) to 1 (certain it is).
 The sum of the scores of all the labels always adds up to 1.
 Students may prefer to display confidence scores as percentages.
 For example, a .8 score for label X can be thought of as saying the system is
@@ -47,10 +47,11 @@ how does recognition degrade as more labels are introduced.
 </p>
 <h4>A block to start training to recognise images from a camera</h4>
 <p>
-The following block opens a tab where you can train the system to label what is in front of the camera.
+The "train using camera" block opens a tab where you can train the system to label what is in front of the camera.
 (If the tab is blocked by your browser read
 the <a href="troubleshooting.html#train-camera" target="_blank">troubleshooting guide</a>.)
 The first argument is the list of labels.
+A "bucket" is the collection of all the images with the same label.
 Here there are only two: "leaning left" and "leaning right".
 You can edit the list to instead recognise different facial expressions, different people's faces,
 objects held in front of the camera, and much more.
@@ -82,7 +83,7 @@ whether your finger is pointing at the camera or to the right.
 While training move your hand around so it is trained to ignore where the hand is
 and just pay attention to which way the finger is pointing.
 When you return to Snap! the program will repeatedly check which way your finger is pointing.
-If at the camera the turtle goes forward.
+If it sees a finger pointing at the camera then the turtle goes forward.
 If not then it turns.
 There are many ways of enhancing this program.
 For example, add the label of pointing left and turn left or right depending on which way the finger is pointing.
@@ -101,8 +102,8 @@ For example, add the label of pointing left and turn left or right depending on 
 </figure>
 <h4>Benefits and risks</h4>
 <p>
-Most of the <a href="chapter-3.html#image-recognition-good-for">things image recognition is good for</a>
-and <a href="chapter-3.html#image-recognition-dangers">its dangers</a> were discussed in chapter 3.
+Most of the <a href="chapter-3.html#image-recognition-good-for" target="_blank">things image recognition is good for</a>
+and <a href="chapter-3.html#image-recognition-dangers" target="_blank">its dangers</a> were discussed in chapter 3.
 Students may want to discuss whether there are benefits and risks when they do the training
 instead of professionals in large corporations?
 Will the biases be different?
@@ -110,7 +111,7 @@ Does the smaller training set make the system less reliable?
 </p>
 <h4>How does this work?</h4>
 <p>
-We discussed <a href="chapter-3.html#how-does-computer-vision-work">how image recognition works in general</a>
+We discussed <a href="chapter-3.html#how-does-computer-vision-work" target="_blank">how image recognition works in general</a>
 in the previous chapter.
 The fact that training of a deep learning system is feasible inside of browser is due to the work on
 <a href="https://deeplearnjs.org" target="_blank">deeplearn.js</a>.
@@ -124,7 +125,7 @@ target="_blank">teachable machine boilerplate</a>.
 </p>
 <h4 id="project-ideas">Possible project ideas using image recognition</h4>
 <p>
-Most of the <a href="chapter-3.html#project-ideas">project ideas listed for using image recognition services</a>
+Most of the <a href="chapter-3.html#project-ideas" target="_blank">project ideas listed for using image recognition services</a>
 can be based upon the blocks described in this chapter.
 There is much that training by students enables that cloud services can't do.
 Students can train the system to recognise themselves, their fellow students, gestures, and the things that
@@ -159,6 +160,7 @@ Several enhancements to this chapter are planned.
 These include support for other kinds of input such as audio or text,
 a block for adding new training data,
 blocks for saving and restoring a trained model,
+an option when training to use image files instead of the camera,
 and more.
 </p>
 
