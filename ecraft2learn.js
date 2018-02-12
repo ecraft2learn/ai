@@ -175,6 +175,10 @@ window.ecraft2learn =
         return get_voice_from(voice_number, window.speechSynthesis.getVoices());
     };
     var get_voice_from = function (voice_number, voices) {
+        if (voices.length === 0) {
+            window.alert("This browser has no voices available. Either try a different browser or try using the MARY TTS instead.");
+            return;
+        }
         voice_number = +voice_number; // convert to nunber if is a string
         if (typeof voice_number === 'number' && !isNaN(voice_number)) {
             voice_number--; // Snap (and Scratch) use 1-indexing so convert here
