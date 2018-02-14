@@ -1,0 +1,19 @@
+
+body{
+	background-color: white;
+	padding-left:30px;
+	padding-top:20px;
+	padding-bottom:20px;
+	
+	font-family: "Segoe UI Light", "Segoe UI", "Segoe WP", "Helvetica Neue", sans-serif;
+	font-size: 14px;
+	line-height: 1.428571429;
+	color: #333333;
+}
+
+td{
+	padding-right: 30px;
+}
+tr{
+	padding-bottom: 20px;
+}
