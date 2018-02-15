@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// This file was copied and modified by Ken Kahn <toontalk@gmail.com> as part of the eCraft2Learn project
+
 // import {KNNImageClassifier} from 'deeplearn-knn-image-classifier';
 // import {NDArrayMathGPU, Array3D, ENV}from 'deeplearn';
 
@@ -21,7 +23,6 @@ var NUM_CLASSES = 3; // default
 const IMAGE_SIZE = 227;
 // K value for KNN
 const TOPK = 10;
-
 
 class Main {
   constructor(training_class_names){
@@ -96,7 +97,7 @@ class Main {
     if (this.timer) {
       this.stop();
     }
-    this.video.play();
+//     this.video.play(); // this caused an error on Android because it wasn't directly caused by a user action
         // Create training buttons and info texts    
     for(let i=0;i<NUM_CLASSES; i++){
       const div = document.createElement('div');
