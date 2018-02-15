@@ -108,6 +108,7 @@ class Main {
       // Create training button
       const button = document.createElement('button')
       button.innerText = "Train " + this.training_class_names[i];
+      button.className = "training-button";
       div.appendChild(button);
 
       // Listen for mouse events when clicking the button
