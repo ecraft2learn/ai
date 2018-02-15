@@ -36,5 +36,19 @@ figcaption {
   transform: scale(1.5);
 }
 .training-button {
-/*    copied from jquery-ui */padding: .8em 1em;display: inline-block;position: relative;line-height: normal;margin-right: .1em;cursor: pointer;vertical-align: middle;text-align: center;font-size: 1.25em;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;}
+/*    copied from jquery-ui and padding and font-size edited */
+  padding: .8em 1em;
+  display: inline-block;
+  position: relative;
+  line-height: normal;
+  margin-right: .1em;
+  cursor: pointer;
+  vertical-align: middle;
+  text-align: center;
+  font-size: 1.1em;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
 
