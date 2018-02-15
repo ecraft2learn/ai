@@ -60,13 +60,13 @@ class Main {
                                     image.height = IMAGE_SIZE;
                                     image.onload = function () {
                                       canvas.getContext('2d').drawImage(image, 0, 0, IMAGE_SIZE, IMAGE_SIZE);
-                                      this.video.pause();
+//                                       this.video.pause();
                                       var image_as_Array3D = dl.Array3D.fromPixels(canvas);
                                       this.knn.predictClass(image_as_Array3D).then(
                                           function (results) {
                                               event.source.postMessage(results.confidences, "*");
                                               console.log(results.confidences, "confidences posted");
-                                              this.video.play();
+//                                               this.video.play();
                                               image_as_Array3D.dispose();
                                           }.bind(this));          
                                     }.bind(this);
