@@ -49,7 +49,8 @@ class Main {
     window.addEventListener("message",
                             function (event) {
                                 if (typeof event.data.predict !== 'undefined') {
-//                                  this.stop(); // done training
+//                                  this.stop(); // done training -- might do more training later
+//                                  no need to stop this since only runs when not hidden
                                     var image_url = event.data.predict;
                                     var image = document.createElement('img');
                                     var canvas = document.createElement('canvas');
