@@ -389,6 +389,8 @@ window.ecraft2learn =
                                                           1000);
                                             });
                   return;
+              } else if (function_name === "stop_speech_recognition") {
+                  return; // ignore if called before speech_recognition started
               }
               alert("Ecraft2learn library does not have a function named " + function_name);
               return;
