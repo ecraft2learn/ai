@@ -164,7 +164,7 @@ class Main {
 
             // Update info text
             if(exampleCount[i] > 0){
-              this.infoTexts[i].innerText = ` ${exampleCount[i]} examples - ${res.confidences[i]*100}%`
+              this.infoTexts[i].innerText = ` ${exampleCount[i]} examples - ${Math.round(res.confidences[i]*100)}%`
             }
           }
         })
