@@ -111,8 +111,12 @@ class Main {
       div.appendChild(button);
 
       // Listen for mouse events when clicking the button
-      button.addEventListener('mousedown', () => this.training = i);
-      button.addEventListener('mouseup', () => this.training = -1);
+      var train_on  = () => this.training = i;
+      var train_off = () => this.training = -1;
+      button.addEventListener('mousedown', train_on);
+      button.addEventListener('touchstart', train_on);
+      button.addEventListener('mouseup', train_off);
+      button.addEventListener('touchend', train_off);
       
       // Create info text
       const infoText = document.createElement('span')
