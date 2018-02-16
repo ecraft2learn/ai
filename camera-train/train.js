@@ -44,6 +44,7 @@ class Main {
     this.video = document.createElement('video');
     this.video.setAttribute('autoplay', '');
     this.video.setAttribute('playsinline', '');
+    this.log_timings = window.location.hash.includes("log-timings");
 
     // listen for requests for predictions
     window.addEventListener("message",
@@ -63,8 +64,14 @@ class Main {
                                       canvas.getContext('2d').drawImage(image, 0, 0, IMAGE_SIZE, IMAGE_SIZE);
 //                                       this.video.pause();
                                       var image_as_Array3D = dl.Array3D.fromPixels(canvas);
+                                      if (this.log_timings) {
+                                        console.time("Prediction - requested by message");
+                                      }
                                       this.knn.predictClass(image_as_Array3D).then(
                                           function (results) {
+                                              if (this.log_timings) {
+                                                console.timeEnd("Prediction - requested by message");
+                                              }
                                               event.source.postMessage(results.confidences, "*");
                                               console.log(results.confidences, "confidences posted");
 //                                               this.video.play();
@@ -146,14 +153,26 @@ class Main {
       // Train class if one of the buttons is held down
       if(this.training != -1){
         // Add current image to classifier
+        if (this.log_timings) {
+          console.time("Training " + this.training);
+        }
         this.knn.addImage(image, this.training);
+        if (this.log_timings) {
+          console.timeEnd("Training " + this.training);
+        }
       }
       
       // If any examples have been added, run predict
       const exampleCount = this.knn.getClassExampleCount();
       if(Math.max(...exampleCount) > 0){
+        if (this.log_timings) {
+          console.time("Prediction");
+        }
         this.knn.predictClass(image)
         .then((res)=>{
+          if (this.log_timings) {
+            console.timeEnd("Prediction");
+          }
           for(let i=0;i<NUM_CLASSES; i++){
             // Make the predicted class bold
             if(res.classIndex == i){
@@ -161,7 +180,6 @@ class Main {
             } else {
               this.infoTexts[i].style.fontWeight = 'normal';
             }
-
             // Update info text
             if(exampleCount[i] > 0){
               this.infoTexts[i].innerText = ` ${exampleCount[i]} examples - ${Math.round(res.confidences[i]*100)}%`
