@@ -1,0 +1,64 @@
+Training 0: 7184.02294921875ms
+train.js:161 Training 0: 1402.494873046875ms
+train.js:161 Training 0: 1362.969970703125ms
+train.js:161 Training 0: 761.14990234375ms
+train.js:161 Training 0: 662.073974609375ms
+train.js:161 Training 0: 1841.744873046875ms
+train.js:161 Training 0: 1475.32275390625ms
+train.js:161 Training 0: 1393.387939453125ms
+train.js:161 Training 0: 1338.983154296875ms
+train.js:161 Training 0: 1397.507080078125ms
+train.js:161 Training 0: 717.221923828125ms
+train.js:161 Training 0: 1268.641845703125ms
+train.js:161 Training 0: 1389.81494140625ms
+train.js:161 Training 0: 699.3798828125ms
+train.js:161 Training 0: 1423.726806640625ms
+train.js:161 Training 0: 1370.364013671875ms
+train.js:161 Training 0: 633.97705078125ms
+train.js:161 Training 1: 80.085205078125ms
+train.js:161 Training 1: 171.489013671875ms
+train.js:161 Training 1: 95.933349609375ms
+train.js:161 Training 1: 85.3720703125ms
+train.js:161 Training 1: 90.951904296875ms
+train.js:161 Training 1: 135.85693359375ms
+train.js:161 Training 1: 88.087158203125ms
+train.js:161 Training 1: 82.11376953125ms
+train.js:161 Training 1: 99.968017578125ms
+train.js:161 Training 1: 61.0107421875ms
+train.js:176 Prediction: 2888.9990234375ms
+train.js:176 Prediction: 1251.510986328125ms
+train.js:176 Prediction: 1243.634033203125ms
+train.js:176 Prediction: 1236.908203125ms
+train.js:176 Prediction: 1228.7890625ms
+train.js:176 Prediction: 1223.114990234375ms
+train.js:176 Prediction: 1217.201904296875ms
+train.js:176 Prediction: 1255.363037109375ms
+train.js:176 Prediction: 1236.9580078125ms
+train.js:176 Prediction: 1242.722900390625ms
+train.js:176 Prediction: 1273.769775390625ms
+train.js:176 Prediction: 1240.533935546875ms
+train.js:176 Prediction: 1238.49609375ms
+train.js:176 Prediction: 1249.456787109375ms
+train.js:176 Prediction: 1341.1123046875ms
+train.js:176 Prediction: 1239.96728515625ms
+train.js:176 Prediction: 1215.9189453125ms
+train.js:176 Prediction: 1205.630126953125ms
+train.js:176 Prediction: 1220.497802734375ms
+train.js:176 Prediction: 1237.81884765625ms
+train.js:176 Prediction: 1202.10302734375ms
+train.js:176 Prediction: 1231.791015625ms
+train.js:176 Prediction: 1180.14501953125ms
+train.js:73 Prediction - requested by message: 1180.962158203125ms
+train.js:76 (2) [0.2, 0.8] "confidences posted"
+train.js:73 Prediction - requested by message: 1304.765869140625ms
+train.js:76 (2) [1, 0] "confidences posted"
+train.js:73 Prediction - requested by message: 1169.600830078125ms
+train.js:76 (2) [0.2, 0.8] "confidences posted"
+train.js:73 Prediction - requested by message: 1189.451171875ms
+train.js:76 (2) [0.2, 0.8] "confidences posted"
+train.js:73 Prediction - requested by message: 1184.617919921875ms
+train.js:76 (2) [1, 0] "confidences posted"
+train.js:73 Prediction - requested by message: 1182.968017578125ms
+train.js:76 (2) [1, 0] "confidences posted"
+train.js:73 Prediction - requested by message: 1161.935791015625ms
+train.js:76 (2) [1, 0] "confidences posted"
