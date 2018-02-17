@@ -1,0 +1,35 @@
+?
+train.js:176 Prediction: 2368830.283ms
+train.js:176 Prediction: 2374408.940ms
+train.js:176 Prediction: 2378972.989ms
+train.js:176 Prediction: 2386816.434ms
+train.js:176 Prediction: 2392987.983ms
+train.js:176 Prediction: 2408772.995ms
+train.js:176 Prediction: 2412535.664ms
+train.js:176 Prediction: 2416268.427ms
+train.js:176 Prediction: 2421762.044ms
+train.js:176 Prediction: 2426165.222ms
+train.js:176 Prediction: 2427045.109ms
+train.js:176 Prediction: 2427051.582ms
+train.js:176 Prediction: 2427056.002ms
+train.js:176 Prediction: 85127.742ms
+train.js:176 Prediction: 92625.432ms
+train.js:176 Prediction: 98033.543ms
+train.js:176 Prediction: 103978.665ms
+train.js:176 Prediction: 114452.530ms
+train.js:176 Prediction: 122397.894ms
+train.js:176 Prediction: 128875.472ms
+train.js:176 Prediction: 135533.294ms
+train.js:176 Prediction: 140294.976ms
+train.js:176 Prediction: 146292.251ms
+train.js:176 Prediction: 156190.661ms
+train.js:176 Prediction: 176726.129ms
+train.js:176 Prediction: 183311.040ms
+train.js:176 Prediction: 187265.288ms
+train.js:176 Prediction: 194061.643ms
+
+Prediction 95s to 2500s
+Training 84s to 250s
+?
+ 
+?
