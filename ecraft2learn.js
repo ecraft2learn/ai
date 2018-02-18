@@ -203,7 +203,7 @@ window.ecraft2learn =
                 window.speechSynthesis.onvoiceschanged = function () {
                     onvoiceschanged_ran = true;
                     ecraft2learn.waited_for_voices = true;
-                    no_voices_callback();
+                    check_for_voices(no_voices_callback, voices_callback);
                     window.speechSynthesis.onvoiceschanged = undefined;
                 };
                 // but don't wait forever because there might not be any
