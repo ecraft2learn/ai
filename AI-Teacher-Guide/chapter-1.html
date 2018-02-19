@@ -1,9 +1,11 @@
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<title>Speech Output - AI Teacher's Guide</title>
 <link href="ai-teacher-guide.css" rel="stylesheet">
 <link rel="icon" type="image/png" href="images/eCraft2Learn-Favicon.png" />
-</head><body>
-<h2>A teacher's guide to helping students build AI apps and artefacts</h2>
+</head>
+<script src="ai-guide.js"></script>
+<body>
+<h2 class="student-guide">A student guide to building AI apps and artefacts</h2>
+<h2 class="teacher-guide">A teacher's guide to building AI apps and artefacts</h2>
 <h3>Chapter 1 - Speech Output</h3>
 <h4>Ken Kahn, University of Oxford</h4>
 <h3>Browser compatibility</h3>
@@ -29,17 +31,22 @@ Perhaps this will shed some light on intelligence beyond what studying human and
 <li>How to ensure AIs make ethical choices?</li>
 <li>How might AI help people in medicine, environmental problems, crime prevention, improving agriculture, removing poverty, and more?</li>
 <li>Would you want a robot to be your child's best friend?</li></ul>
-<h3>Ways of teaching AI</h3>
-<p>Broadly there are three approaches</p>
-<ol><li>Readings, lectures, and discussions about AI's history, ideas, and technologies</li>
-<li>Readings, lectures, and discussions about social issues impacted by AI</li>
-<li>Supporting hands-on experiences creating AI apps and artefacts</li></ol>
 
+<h3 class="student-guide">Ways of learning AI</h3>
+<h3 class="teacher-guide">Ways of teaching AI</h3>
+<p>Broadly there are three approaches</p>
+<ol>
+<li>Readings, lectures, and discussions about AI's history, ideas, and technologies</li>
+<li>Readings, lectures, and discussions about social issues impacted by AI</li>
+<li>Supporting hands-on experiences creating AI apps and artefacts</li>
+</ol>
 <p>While this guide touches on 1 and 2; its focus is on 3.
 While some aspects of building AI applications are best suited for those with phds in the field,
 there are many projects that even young school students can do.
-If the power of speech and image recognition or the possibilities of machine learning are given easy programming interfaces
+If the power of speech and image recognition or
+the possibilities of machine learning are given easy programming interfaces
 then even beginners can use them in their creations.</p>
+
 <h3>Speech output</h3>
 <p>Let's start by exploring speech synthesis.
 Is the ability to transform text into spoken speech really an example of AI?
@@ -48,10 +55,17 @@ But reading involves character recognition and comprehension.
 When a computer produces speech none of that is involved.
 Is generating speech an aspect of intelligent behaviour or it is just like a parrot speaking?
 Note that <a href="https://en.wikipedia.org/wiki/Alex_(parrot)" target="_blank">Alex the parrot</a> clearly did more than "parroting" speech.
-Perhaps a good topic for students to discuss.</p>
+Maybe speech synthesis is AI if the program uses AI techniques to generate the output.
+The article <a href="https://www.scientificamerican.com/article/new-ai-tech-can-mimic-any-voice/" target="_blank">
+<i>New AI Tech Can Mimic Any Voice</i></a> assumes this is AI.
+<span class="student-guide">What do you think?</span>
+<span class="teacher-guide">Perhaps a good topic for students to discuss.</span>
+</p>
 
-<p>Before discussing what is technically involved in synthesising speech let's look at how it can be used by students.
-Let's start with the simplest program block for speaking. Click on it to try it out.
+<p>Before discussing what is technically involved in synthesising speech
+let's look at how it can be used.
+Let's start with the simplest program block for speaking.
+Click on it to try it out.
 (Currently these blocks only work well in Chrome.
 Note that the Raspberry Pi has the open source version of Chrome called Chromium and it lacks builtin voices.
 The Mary TTS blocks below work in any browser.)</p>
@@ -127,10 +141,11 @@ For this we need a slightly more complex block that accepts actions to do after 
 </figure>
 
 <p>Being able to express what should happen when speaking finishes is a generally useful ability.
-The program may give some explanation and then do something on the screen.
+For example, the program may speak some explanation and then do something on the screen.
 In many of the examples in the next chapter the programs listen for speech only after the system finishes speaking.</p>
 
-<p>Code blocks that should run when some computation finishes are an instance of an advanced computer science concept called
+<p><b class="student-guide">Advanced info</b>
+Code blocks that should run when some computation finishes are an instance of an advanced computer science concept called
 <a href="https://en.wikipedia.org/wiki/Continuation" target="_blank">continuations</a>.
 These are used to support asynchronous computations.
 The complexity introduced by continuations need not make things hard for students.
