@@ -1,10 +1,12 @@
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<title>Speech Input - AI Teacher's Guide</title>
+<title>Speech Input - AI Guide</title>
 <link href="ai-teacher-guide.css" rel="stylesheet">
-<link rel="icon" type="image/png" href="images/eCraft2Learn-Favicon.png" />
+<link rel="icon" type="image/png" href="/ai/eCraft2Learn-Favicon.png" />
+<script src="ai-guide.js"></script>
 </head>
 <body>
-<h2>A teacher's guide to helping students build AI apps and artefacts</h2>
+<h2 class="teacher-guide">A teacher's guide to helping students build AI apps and artefacts</h2>
+<h2 class="student-guide">A student's guide to building AI apps and artefacts</h2>
 <h3>Chapter 2 - Speech Input</h3>
 <h4>Ken Kahn, University of Oxford</h4>
 <h3>Browser compatibility</h3>
@@ -18,7 +20,7 @@ that should be consulted if problems are encountered.
 <h3>Introduction</h3>
 <p>It is much easier to get a computer to start with text and end up with speech
 than to start with speech and end up with the corresponding text.
-Often it is easier to get a computer to generate something than to recognise it.</p>
+Typically it is easier to get a computer to generate something than to recognise it.</p>
 
 <p>Speech (and other sounds) cause vibrations in the air that cause vibrations in the computer's microphone.
 These vibrations are converted to numbers.
@@ -38,11 +40,14 @@ If all is working well you should see what you just said.</p>
 <figcaption>A simple block for turning speech into text. TRY IT</figcaption>
 </figure>
 
+<p>
+Try saying something, look at the result, click on the block again, say something else, and look again.
+</p>
+
 <h4>Speech recognition errors</h4>
 <p>Speech recognition can encounter errors such as the inability to access the microphone.
 The most common "error" is when after several seconds nothing is heard.
 The 'listen then ...' block keeps listening until there is an error.
-(Try saying something, look at the result, say something else, and look again.)
 When the speech recogniser notices that nothing has been said then the error block is given the text "no-speech".
 Other errors are 'audio-capture' when the browser can't find a microphone and 
 'not-allowed' when permission to use the microphone hasn't been granted.
@@ -64,7 +69,7 @@ You can tell it to go forward or to the turn right.
 It will then ask you how much and then execute the command.
 Say "goodbye" to quit the program.
 Sometimes you need to repeat what you said.
-Occassionally it will mishear you.</p>
+Occasionally it will mishear you.</p>
 
 <p>A similar program could be written to control a physical device such as a robot or a set of lights.</p>
 
@@ -73,22 +78,32 @@ Occassionally it will mishear you.</p>
 <img src="images/command.png" class="center">
 <figcaption>Click to try the voice command example</figcaption></figure></a>
 
+<p>
+<b>Exercise.</b> 
+See if you can add a "turn left" command to the program.
+What else might be fun to try?
+Hint: how about changing size, looks, colour, or more?
+How about doing animations in response to spoken commands?
+</p>
+
 <h4>How the speech command program works</h4>
-<p>If you cick on <img src="images/show-blocks.png"> you'll see the blocks behind the program.
+<p>If you click on <img src="images/show-blocks.png"> you'll see the blocks behind the program.
 If you then right click on 'speak turtle commands' and select 'edit' you'll see its program.</p>
 
 <figure>
 <img src="images/command-program.png" class="center">
 <figcaption>The blocks that implement the speech command program</figcaption></figure>
 
-<p>The 'spoken' variable contains what was just recognised.
+<p><b class="student-guide">Advanced Topic.</b>
+The 'spoken' variable contains what was just recognised.
 The nested 'if-then-else' commands test first for speech for exiting the program, then for forward movement, and then turning commands.
 If none match then a 'not understood' response is created.
 Both the turning and moving commands cause the program to ask for an amount to turn or move.
 When a number is spoken the turtle then turns or moves appropriately.</p>
 
 <h4>An alternative way to do the same thing</h4>
-<p>The command program relies upon what computer scientists call 'continuations'.
+<p><b class="student-guide">Advanced Topic.</b>
+The command program relies upon what computer scientists call 'continuations'.
 These are blocks of code that are executed when something happens, in this case when the speech is recognised.
 An alternative that is popular among Scratch programmers is to rely instead upon broadcasting messages.
 The following implements voice commands by using a helper command called 'Broadcast speech recognition results and ...'.
@@ -97,8 +112,10 @@ The program fragments that listen for 'heard something' broadcasts need to know 
 The variable 'last thing heard' is used for this.
 (It also broadcasts speech recognition errors and sets the 'speech recognition error' if they occur.)
 This style of programming is perhaps easier for young children but it does have its limitations.
-For example, it is very difficult to implement a response when no other parts of the program understand what was said.
-The first version responds by saying it didn't understand what was said, repeats what it thinks it heard, and says to try again.
+For example, it is very difficult to implement a response when
+no other parts of the program understand what was said.
+The first version responds by saying it didn't understand what was said, repeats what it thinks it heard,
+and says to try again.
 The following version cannot do so.</p>
 
 <a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=command%20broadcast%202" target="_blank">
@@ -135,10 +152,17 @@ It is also an example of a program that crosses discipline boundaries.
 To generate grammatically correct (though often nonsense or silly) sentences one needs to reply upon grammatical concepts
 such as nouns, noun phrases, verbs, adjectives, and adverbs.
 Issues about number agreement and tenses arise naturally.
-A student may for the first time see the <i>utility</i> of these concepts since without them the generated sentences are no good.</p>
+<span class="teacher-guide">
+A student may for the first time see the <i>utility</i> of these concepts since without them the generated sentences are no good.
+</span>
+<span class="student-guide">
+Could a program like this work without grammatical ideas like nouns, verbs, adjectives, etc.?
+</span>
+</p>
 
 <h4 id="story-generator">A more sophisticated sentence (or story) generator</h4>
-<p>This <a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=story%20generator" target="_blank">story generator</a> extends the sentence generator by adding a new feature.
+<p>This <a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=story%20generator" target="_blank">story generator</a>
+extends the sentence generator by adding a new feature.
 If it encounters a word beginning with "=" it replaces it with the last response to the request for an example of that word/phrase.
 For example, consider this very short story:
 <blockquote>
@@ -154,12 +178,14 @@ Juliet is warm and very beautiful.
 She travelled to Verona. There she met Romeo who was a amateur poet in Verona.
 Juliet and Romeo lived barely ever after.
 </blockquote>
-A student may want to enhance the program to turn "a amateur" into "an amateur".</p>
+<span class="teacher-guide">A student may want to enhance the program to turn "a amateur" into "an amateur".</span>
+<span class="student-guide">You may want to enhance the program to turn "a amateur" into "an amateur".</span>
+</p>
 
 <h4>A question answering demo</h4>
 <p>The following demo is a bit like Alexa, Cortana, and "OK Google".
 It asks the user to say something and then sends those words off to Wikipedia.
-Typically there are many matches so it picks on at random and says it.</p>
+Typically there are many matches so it picks one at random and says it.</p>
 
 <figure>
 <iframe style="width: 800px; height: 600px"
@@ -183,7 +209,7 @@ For example, <a href="https://research.googleblog.com/2017/11/understanding-medi
 doctors can produce transcripts of their conversations with patients</a>, thereby improving the patient's records.
 Automatic transcription can enable textual searches within videos.
 It can be used to generate captions for videos.
-Combined with translation, speech recognition can provide input to a translation services
+Combined with translation, speech recognition can provide input to translation services
 and its output can be converted to speech in another language.</p>
 
 <p>Another use of speech input is as an interface to computers or digital artefacts.
@@ -202,20 +228,26 @@ It can be used to automate annoying telemarketing calls.
 It could be part of <a href="https://www.theguardian.com/technology/2017/sep/10/should-robot-be-your-childs-best-friend" target="_blank">
 toys that children become too emotionally attached to</a>.</p>
 
-<p>The benefits and dangers of speech technology could be good topic for student dicussions.</p>
+<p class="teacher-guide">The benefits and dangers of speech technology could be good topic for student discussions.</p>
+<p class="student-guide">Do you think the benefits outweigh the dangers?
+Is there a way the dangers can be avoided?</p>
 
 <h4>How does speech recognition work?</h4>
 <p>It begins with the microphone that converts vibrations in the air (i.e. sounds) to numbers
 (using something called an analog-to-digital converter).
-The digitised sound is broken into short segments (hundredths or thousandths of a second long) and fed into a recognition engine.
-Today the best ones rely upon <a href="https://en.wikipedia.org/wiki/Artificial_neural_network" target="_blank">neural nets</a>.
+The digitised sound is broken into short segments (hundredths or thousandths of a second long)
+and fed into a recognition engine.
+Today the best ones rely upon
+<a href="https://en.wikipedia.org/wiki/Artificial_neural_network" target="_blank">neural nets</a>.
 Complex statistical programs are also often used.</p>
 
-<p>There are many challenges including the wide range of voices, dialects, and accents that a speech recognition engine may encounter.
+<p>There are many challenges including the wide range of voices, dialects, and accents
+that a speech recognition engine may encounter.
 There is often background noise that needs to be removed from the signal.</p>
 
 <p>Other challenges come from the complexity of human languages.
-There are many words that are <a href="https://en.wikipedia.org/wiki/Homonym" target="_blank">hononyms</a>, different words that sound the same.
+There are many words that are <a href="https://en.wikipedia.org/wiki/Homonym" target="_blank">hononyms</a>,
+different words that sound the same.
 Separating speech into separate words is difficult.
 A classic example is how "recognise speech" sounds a lot like "wreck a nice beach".</p>
 
@@ -223,9 +255,22 @@ A classic example is how "recognise speech" sounds a lot like "wreck a nice beac
 These are sometimes amusing, especially when it leads the program to do something silly.
 For applications where computer mistakes can cause serious problems one can build the interface so it asks confirmation before proceeding.
 It is interesting to compare speech recognition errors to the kind and frequency of the errors that humans make when listening to speech.</p>
+</p>
+<p>
+<b>Exercise.</b>
+Find a list of things that people mishear or use the examples in 
+<a href="https://www.huffingtonpost.com/shawn-amos/excuse-me-while-i-kiss-th_b_167446.html" target="_blank">
+this article about lyrics that people misunderstand</a>.
+See how well the listen block does when saying these examples.
+Does the system make the same kinds of mistakes people do?
+What can one say about a speech recogniser if it makes the same mistakes as people?
+What if its mistakes are different?
+</p>
 
 <h4 id="project-ideas">Ideas for projects using speech input and output</h4>
-<p>Here are some ideas for projects using speech input (and sometimes speech output as described in <a href="chapter-1.html">Chapter 1</a>).
+<p>Here are some ideas for projects using speech input
+(and sometimes also use speech output as described in 
+<a class="teacher-guide" href="chapter-1.html#teacher">Chapter 1</a><a class="student-guide" href="chapter-1.html#student">Chapter 1</a>).
 <ul>
 <li>A robot that responds to commands such as "forward", "left", "right", and "stop".</li>
 <li>A chatbot that can (pretend to) talk about a particular subject.
@@ -233,9 +278,11 @@ Chatbots have a <a href="https://en.wikipedia.org/wiki/ELIZA" target="_blank">hi
 but it is only recently that speech can replace typing as the way to communicate with a chatbot.</li>
 <li>Another example of a textual program that can be reconceived as a verbal program
 are <a href="https://en.wikipedia.org/wiki/Adventure_game#Text_adventures_and_Interactive_Fiction" target="_blank">adventure games</a>.
-A virtual world is simulated where one can navigate by saying things like "walk north" or "open door" and hearing responses such as 
+A virtual world is simulated where one can navigate by saying things like "walk north" or "open door"
+and hearing responses such as 
 "you now see a castle in the distance" and "the door is locked".
-This can result in a computer game that blind people can play (or drivers can play without taking their eyes off the road).</li>
+This can result in a computer game that blind people can play
+(or drivers can play without taking their eyes off the road).</li>
 <li>Guessing games such as "guess what number I'm thinking of".
 The computer can either pick a number and respond to guesses with "warmer" or "colder".
 Or the computer can guess numbers and listen for the words "warmer" or "colder" to decide what to guess next.</li>
@@ -272,11 +319,13 @@ All of these functionalities are provided by this block:</p>
 <li>The first argument are blocks that receive interim results as they are produced.</li>
 <li>The next argument are blocks that receive the final result.</li>
 <li>The next argument receives errors if there are any.</li>
-<li>Text in the format language-dialect.
-E.g. en-GB. It should be one of the <a href="https://en.wikipedia.org/wiki/IETF_language_tag" target="_blank">IETF language tags</a>.
+<li>Text that indicates the language followed by the dialect.
+E.g. en-GB for English as spoken in Great Britain.
+It should be one of the <a href="https://en.wikipedia.org/wiki/IETF_language_tag" target="_blank">IETF language tags</a>.
 Google's Chrome browser supports over <a href="https://cloud.google.com/speech/docs/languages" target="_blank">100 languages</a>.
 </li>
-<li>The maximum number of alternative recognition results. If not provided it is 1. Note the recognition engine may return fewer results.</li>
+<li>The maximum number of alternative recognition results.
+If not provided it is 1. Note the recognition engine may return fewer results.</li>
 <li>Blocks that receive a list of alternative results.</li>
 <li>Blocks that receive a list of confidence numbers corresponding to the alternative results.
 0 means no confidence while 1 is the highest confidence.</li>
@@ -286,34 +335,53 @@ Note that for Google's speech recognition engine currently only the first altern
 <p>Watching the interim results can provide some insight into the process of recognition.
 You can test this using the above block where you put the 'say' block with an empty text field in the first argument.
 (Snap! interprets an empty field in this context as the input to the blocks (in this case the current interim result).)
-For example, if you say "red" you'll see "red" but if you soon afterwards say "a book" you'll see "red" become "read a book".
+For example, if you say "red" you'll see "red" but if you soon afterwards say "a book"
+you'll see "red" become "read a book".
 You can see the same phenomenon at <a href="https://www.google.com/intl/en/chrome/demos/speech.html" target="_blank">this Google demo</a>.</p>
 
 <p>There is much one can explore with the 'language' option.
-For example, if one selects 'fr-FR' (French as spoken in France) and then says "une deux trois quatre five six" the result is "1 2 3 4 5 6".
+For example, if one selects 'fr-FR' (French as spoken in France) and then says "une deux trois quatre five six"
+the result is "1 2 3 4 5 6".
 Notice that it recognises both French and English.
 (English is probably used because it the operating system language setting on my computer --
 if your computer is configured with another language it probably will be the default.)
-Strangely if with English you say "one two three four five six" you get those words, not the digits one sees with the French setting.</p>
+Strangely if with English you say "one two three four five six" you get those words,
+not the digits one sees with the French setting.</p>
+
+<p>
+<b>Exercise.</b>
+Explore how well the system recognises numbers in different languages.
+You can use <a href="translate.google.com" target="_blank">Google Translate</a> to learn how to say 
+numbers in languages you don't know.
+Try fractions and negative numbers.
+Try very big numbers.
+</p>
 
 <h3>Additional resources</h3>
-<p><a href="https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition" target="_blank">The documentation of speech recognition</a>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition" target="_blank">
+This documentation of speech recognition</a>
 is a very complete description of speech recognition features browsers should support.
 (Chrome currently is the only one but other browser developers are working on it.)</p>
 
 <p><a href="https://electronics.howstuffworks.com/gadgets/high-tech-gadgets/speech-recognition.htm" target="_blank">How stuff works</a>
-has a clear explanation of how speech recognition systems work and what the challenges are. (Though it is a bit dated.)</p>
+has a clear explanation of how speech recognition systems work and what the challenges are.
+(Though it is a bit dated.)</p>
 
-<p><a href="https://en.wikipedia.org/wiki/Speech_recognition" target="_blank">Wikipedia, as usual, covers the topic well.</p>
+<p><a href="https://en.wikipedia.org/wiki/Speech_recognition" target="_blank">
+Wikipedia</a>, as usual, covers the topic well.</p>
 
-<p>We wrote a paper entitled <a href="https://ora.ox.ac.uk/objects/uuid:12124254-acce-4c11-a540-19e74530798d" target="_blank">Child-friendly programming interfaces to AI cloud services</a>.</p>
+<p>We wrote a paper entitled
+<a href="https://ora.ox.ac.uk/objects/uuid:12124254-acce-4c11-a540-19e74530798d" target="_blank">
+Child-friendly programming interfaces to AI cloud services</a>
+that discusses these Snap! speech input and output blocks.</p>
 
 <script src="where-to-get-library.js"></script>
 
 <h3>Learn about image input</h3>
-<a href="chapter-3.html">Go to the next chapter on image recognition</a>.
+Go to 
+<a class="teacher-guide" href="chapter-3.html#teacher">the next chapter on image recognition</a><a class="student-guide" href="chapter-3.html#student">the next chapter on image recognition</a>.
 
-<a href="chapter-1.html">Return to the previous chapter on speech output</a>.
+Return to <a class="teacher-guide" href="chapter-1.html#teacher">the previous chapter on speech output</a><a class="student-guide" href="chapter-1.html#student">the previous chapter on speech output</a>.
 
 <script src="acknowledgements.js"></script>
 
