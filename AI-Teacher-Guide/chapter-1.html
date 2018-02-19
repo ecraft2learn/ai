@@ -1,8 +1,9 @@
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Speech Output - AI Guide</title>
 <link href="ai-teacher-guide.css" rel="stylesheet">
-<link rel="icon" type="image/png" href="images/eCraft2Learn-Favicon.png" />
-</head>
+<link rel="icon" type="image/png" href="/ai/eCraft2Learn-Favicon.png" />
 <script src="ai-guide.js"></script>
+</head>
 <body>
 <h2 class="student-guide">A student guide to building AI apps and artefacts</h2>
 <h2 class="teacher-guide">A teacher's guide to building AI apps and artefacts</h2>
@@ -111,6 +112,10 @@ Is this a sign of intelligence?</p>
 <figcaption>An illustrations of some issues speaking text containing numbers and signs. TRY IT</figcaption>
 </figure>
 
+<p class="student-guide">
+Try editing it to see how different numbers are spoken and how it handles special signs.
+</p>
+
 <h4>Problems combining speech and sound effects</h4>
 <p>Suppose one wanted the computer to speak, be interrupted by a door bell, and then respond accordingly.
 Try clicking this and you'll hear there is a problem:</p>
@@ -144,7 +149,7 @@ For this we need a slightly more complex block that accepts actions to do after 
 For example, the program may speak some explanation and then do something on the screen.
 In many of the examples in the next chapter the programs listen for speech only after the system finishes speaking.</p>
 
-<p><b class="student-guide">Advanced info</b>
+<p><b class="student-guide">Advanced Topic.</b>
 Code blocks that should run when some computation finishes are an instance of an advanced computer science concept called
 <a href="https://en.wikipedia.org/wiki/Continuation" target="_blank">continuations</a>.
 These are used to support asynchronous computations.
@@ -173,10 +178,14 @@ As it gets better it may enable the automation of tasks that voice actors perfor
 A more serious worry is that the next generation of speech synthesis may be able to
 <a href="http://www.radiolab.org/story/breaking-news/" target="_blank">
 fool people into thinking that someone said something they didn't</a>.
-This is especially worrisome in combination with technology that can alter videos to change emotional expressions and lip synch.</p>
+This is especially worrisome in combination with technology that can alter videos
+to change emotional expressions and lip synch.</p>
 
 <h4>How does this work?</h4>
-<p>Modern speech synthesizers (also called "text-to-speech engines" or "TTS engines") start by preprocessing the text.
+<p>
+<b class="student-guide">Advanced Topic.</b>
+Modern speech synthesizers (also called "text-to-speech engines" or "TTS engines")
+start by preprocessing the text.
 Numbers, abbreviations, dates, and special characters are turned into words.
 For example, "42" becomes "forty two" (assuming the language is set to English).
 Next words are turned into <a href="https://en.wikipedia.org/wiki/Phoneme" target="_blank">phonemes</a>.
@@ -198,7 +207,8 @@ There are three approaches to doing this last step:
 <i>formant</i> where each phoneme is synthesized,
 and <i>articulatory</i> where human tongues and vocal chords are simulated.</p>
 
-<p>More details about how speech synthesis works can be found in the <b>Additional resources</b> section at the bottom of this page.</p>
+<p>More details about how speech synthesis works can be found in
+the <a href="#additional-resources">Additional resources</a> section at the bottom of this page.</p>
 
 <h4>Controlling speech output</h4>
 <p>A person can speak slow or fast, in a low or high pitch, quietly or loudly, and more.
@@ -219,11 +229,20 @@ Note that depending upon the voice and browser some of these parameters are igno
 <figcaption>A powerful block for speaking text with many customisation options. TRY IT</figcaption>
 </figure>
 
+<p class="student-guide">
+A good strategy for trying things out is to vary one thing at a time.
+Try changing the rate to a number less than 1 and then greater than 1.
+Do the same for the pitch.
+Try different voices.
+Some of them are intended to speak other langauges.
+</p>
+
 <p>Regarding the 'language' option, unfortunately many browsers currently ignore it.
-The argument should be one of the <a href="https://en.wikipedia.org/wiki/IETF_language_tag" target="_blank">IETF language tags</a>.
+The argument should be one of the
+<a href="https://en.wikipedia.org/wiki/IETF_language_tag" target="_blank">IETF language tags</a>.
 It describes the language and dialect, e.g. en-GB.</p>
 
-<p>Fortunately in some browsers (e.g. Chrome) some voices are associated with a language.
+<p>Fortunately in some browsers (e.g., Chrome) some voices are associated with a language.
 When a non-English voice is given English to speak it typically speaks it with an accent.
 The selection of voices available depends upon the browser and the operating system.
 Click 'get voices' to see the list of voices and use the voice number in the speak command.</p>
@@ -235,7 +254,7 @@ Click 'get voices' to see the list of voices and use the voice number in the spe
         src="../snap/snap.html"
         project_path="../AI-teacher-guide-projects/voices.xml"> 
 </iframe></div>
-<figcaption>An demonstration of different speaking voices (and languges). TRY IT</figcaption>
+<figcaption>A demonstration of different speaking voices (and languges). TRY IT</figcaption>
 </figure>
 
 <p>A voice is more than just a voice.
@@ -283,12 +302,20 @@ Try editing the sentences to see how they deal with "lead" and other words.</p>
 <figcaption>An example of the problem of speaking words such as 'read'. TRY IT</figcaption>
 </figure>
 
+<p class="student-guide">
+Can you think of any other words that are pronounced in more than one way?
+See if the voices can figure out the right one from the surrounding words.
+</p>
+
 <h4>Two sample programs using speech synthesis</h4>
 <p>This <a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=speak%20randomly" target="_blank">
 sample speech output program</a> uses random settings for rate, pitch, and voice.
-When one clicks on the numbers a random number is spoken with a random voice (and hence a random language) as well as a random pitch and rate.
+When one clicks on the picture of some numbers a random number is spoken with a random voices
+(and hence a random language) as well as a random pitch and rate.
 Numbers are well-suited for this since numbers are spoken in the language of the voice.
-The parrot repeats what it hears (see <a href="chapter-2.html">the next chapter</a>).
+The parrot repeats what it hears (see 
+<!-- To avoid a space before the closing paren the following needs to be on the same line -->
+<a class="student-guide" href="chapter-2.html#student">the next chapter</a><a class="teacher-guide" href="chapter-2.html#teacher">the next chapter</a>).
 Hearing your utterances repeated in a strange voice with a random pitch and rate can be entertaining.
 As can hearing your speech repeated in a foreign accent.
 As with all sample programs the blocks implementing it can be easily found.
@@ -296,7 +323,8 @@ Click on <img src="images/show-blocks.png"> to see the blocks behind a program.
 If you click on the 'Parrot' or 'Numbers' sprite in the lower right you will see these sample programs.</p>
 
 <h4 id="project-ideas">Possible project ideas using speech output</h4>
-<p>Here are some ideas for projects using only speech output, see <a href="chapter-2.html#project-ideas">the next chapter</a>
+<p>Here are some ideas for projects using only speech output, see
+<a class="student-guide" href="chapter-2.html#student">the next chapter</a><a class="teacher-guide" href="chapter-2.html#teacher">the next chapter</a>
 for ideas combining speech input and output.
 <ul>
 <li>Have sprites put on a play where each sprite speaks with a different voice.</li>
@@ -305,7 +333,8 @@ for ideas combining speech input and output.
 <li>Enhance a program to speak as it runs to produce explanations or help in debugging.</li>
 <li>Make a talking clock or calculator.</li>
 <li>Make a spelling game where words to be spelled are spoken.</li>
-<li>There are thousands more ways students could use speech output in their projects.</li>
+<li class="teacher-guide">There are thousands more ways students could use speech output in their projects.</li>
+<li class="student-guide">Be creative. Think of something and try to build it.</li>
 </ul></p>
 
 <h4>Is there even more to speech synthesis?</h4>
@@ -315,30 +344,36 @@ You can experiment with these kinds of speech effects at <a href="http://mary.df
 by clicking on the 'Show Audio Effects' button.</p>
 
 <p>Speech can be emotional; the speaker can sound angry, happy, sad, and so on.
-One way to experiment with this is to change the input type from 'TEXT' to 'EMOTIONML' at  <a href="http://mary.dfki.de:59125/" target="_blank">the MARY TTS site</a>.
-There is a standard called <a href="https://www.w3.org/TR/speech-synthesis/" target="_blank">Speech Synthesis Markup Language</a>
+One way to experiment with this is to change the input type from 'TEXT' to 'EMOTIONML'
+at <a href="http://mary.dfki.de:59125/" target="_blank">the MARY TTS site</a>.
+There is a standard called
+<a href="https://www.w3.org/TR/speech-synthesis/" target="_blank">Speech Synthesis Markup Language</a>
 that provides great control over how the speech is generated.
 However, it has yet to be implemented in the voices one commonly finds available in browsers.</p>
 
-<p>Listen to these samples of <a href="https://google.github.io/tacotron/publications/tacotron2/index.html" target="_blank">generated speech from the latest research from Google</a>.</p>
+<p>Listen to these samples of
+<a href="https://google.github.io/tacotron/publications/tacotron2/index.html" target="_blank">generated speech from the latest research from Google</a>.</p>
 
 <p>A very impressive use of controlled speech is the <a href="https://experiments.withgoogle.com/ai/giorgio-cam" target="_blank">Giorgio Cam</a>
 experiment by Google researchers.
 It combines computer vision and controlled speech to rap about what is in front of a web cam.</p>
 
-<h3>Additional resources</h3>
-<p><a href="https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition" target="_blank">A complete description of the speech synthesis API</a>
+<h3 id="additional-resources">Additional resources</h3>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition" target="_blank">
+A complete description of the speech synthesis API</a>
 that web browsers support.</p>
 
-<p><a href="http://research.spa.aalto.fi/publications/theses/lemmetty_mst/chap2.html" target="_blank">A history of speech synthesis</a>.</p>
+<p><a href="http://research.spa.aalto.fi/publications/theses/lemmetty_mst/chap2.html" target="_blank">
+A history of speech synthesis</a>.</p>
 
-<p><i>Explain that Stuff</i> has <a href="http://www.explainthatstuff.com/how-speech-synthesis-works.html" target="_blank">
-a long explanation including a history of speech synthesis</a>.</p>
+<p><a href="http://www.explainthatstuff.com/how-speech-synthesis-works.html" target="_blank">
+A long explanation of how speech synthesis is done</a> by <i>Explain that Stuff</i>.</p>
 
 <p>The <a href="https://en.wikipedia.org/wiki/Speech_synthesis" target="_blank">Wikipedia entry</a> is good.</p>
 
 <h4>Suggestions for using this guide</h4>
-<p>An excellent way to learn about new programming constructs such as the blocks in this guide is to <i>tinker</i> with them.
+<p>An excellent way to learn about new programming constructs such as the blocks in this guide is to
+<i>tinker</i> with them.
 Explore what each block can and can't do.
 See what effects the parameters have.
 Then try them out in your own projects perhaps starting with the simple blocks.
@@ -347,7 +382,8 @@ Then try them out in your own projects perhaps starting with the simple blocks.
 <script src="where-to-get-library.js"></script>
 
 <h3>Learn about speech input</h3>
-<a href="chapter-2.html">Go to the next chapter on speech recognition</a>.
+Go to
+<a class="student-guide" href="chapter-2.html#student">the next chapter on speech recognition</a><a class="teacher-guide" href="chapter-2.html#teacher">the next chapter on speech recognition</a>.
 
 <script src="acknowledgements.js"></script>
 

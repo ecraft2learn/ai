@@ -7,10 +7,8 @@ window.addEventListener(
         style.rel="stylesheet";
         if (window.location.hash.indexOf("teacher") >= 0) {
            style.href = "teacher.css";
-           document.title = "Speech Output - AI Teacher's Guide";
         } else {
-           style.href = "student.css";
-           document.title = "Speech Output - AI Student's Guide";    
+           style.href = "student.css"; 
         }
         document.head.appendChild(style);
 });
