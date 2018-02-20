@@ -6,9 +6,9 @@ window.addEventListener(
         var style = document.createElement('link');
         style.rel="stylesheet";
         if (window.location.hash.indexOf("teacher") >= 0) {
-           style.href = "teacher.css";
+           style.href = "/ai/css/teacher.css";
         } else {
-           style.href = "student.css"; 
+           style.href = "/ai/css/student.css"; 
         }
         document.head.appendChild(style);
 });

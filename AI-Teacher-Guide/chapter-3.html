@@ -1,10 +1,12 @@
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<title>Camera Input - AI Teacher's Guide</title>
-<link href="ai-teacher-guide.css" rel="stylesheet">
-<link rel="icon" type="image/png" href="images/eCraft2Learn-Favicon.png" />
+<title>Camera Input - AI Guide</title>
+<link href="/ai/css/ai-teacher-guide.css" rel="stylesheet">
+<link href="/ai/css/oer-style.css" rel="stylesheet">
+<link rel="icon" type="image/png" href="/ai/images/eCraft2Learn-Favicon.png" />
+<script src="/ai/js/ai-guide.js"></script>
 </head>
 <body>
-<h2>A teacher's guide to helping students build AI apps and artefacts</h2>
+<script src="/ai/js/top-of-page.js"></script>
 <h3>Chapter 3 - Camera Input</h3>
 <h4>Ken Kahn, University of Oxford</h4>
 <h3>Browser compatibility</h3>
@@ -12,22 +14,27 @@
 This chapter relies upon there being a camera that the browser can access.
 There is a <a href="troubleshooting.html" target="_blank">troubleshooting guide</a>
 that should be consulted if problems are encountered.</p>
+
 <h3>Introduction</h3>
 <p>A camera connected to a computer can report the colour of each pixel in an image and not much else.
-A description of what is in front of the camera is returned when those pixels are sent to an image recognition service.
+A description of what is in front of the camera is returned when those pixels
+are sent to an image recognition service.
 There are many kinds of things an image description may contain.
 With speech recognition the description is what was spoken, how confident the system is, and possible alternatives.
 With image recognition there are many possible descriptions: descriptive tags, possible captions, dominant colours,
-location of faces and parts of the face if there are any, and the presence of landmarks, celebrities, well-known entities, and logos.
-Text can also be recognised.</p>
+location of faces and parts of the face if there are any,
+and the presence of landmarks, celebrities, well-known entities, and logos.
+Hand-written and scanned text can also be recognised.</p>
 
 <p>A challenge in providing student-friendly programming blocks for image recognition is that
 different AI cloud services report different descriptions in different ways.
 We currently provide interfaces to image recognition services provided by Google, Microsoft, and IBM.
-A further challenge is how to provide simple interfaces for simple tasks while still supporting more sophisticated uses and projects.</p>
+A further challenge is how to provide simple interfaces for simple tasks
+while still supporting more sophisticated uses and projects.</p>
 
 <p>In the last few years there has been tremendous progress in computer vision.
-High performance systems for identifying objects, recognising faces, interpreting sketches, and using medical images to aid diagnosis.
+There are high performance systems for identifying objects, recognising faces, interpreting sketches,
+and using medical images to aid diagnosis.
 Driverless cars rely heavily upon computer vision.</p>
 
 <h4>API keys are needed</h4>
@@ -38,11 +45,13 @@ one needs to <a href="https://github.com/ToonTalk/ai-cloud/wiki" target="_blank"
 Accounts are free and provide some degree of free usage.
 IBM permits 250 free vision queries per day, Microsoft 5000 per month, and Google 1000 per month.
 To try the vision blocks described here you need at least one account.
-Comparing and contrasting the results from different services is an interesting way to gain some insight into how these services work.</p>
+Comparing and contrasting the results from different services is an interesting ways
+to gain some insight into how these services work.</p>
 
-<p>In projects there is a different way of providing keys to Snap! (as described <a href="#api-keys">here</a>) but in this chapter you can paste your keys below
+<p>In projects there is a different way of providing keys to Snap!
+(as described <a href="#api-keys">here</a>) but in this chapter you can paste your keys below
 and they'll be passed to the services as you use example blocks.
-<br><label>Copy and paste your Google key here:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input id="Google image key" type="text"></label>
+<br><label>Copy and paste your Google key here:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input id="Google image key" type="text"></label>
 <br><label>Copy and paste your Microsoft key here:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input id="Microsoft image key" type="text"></label>
 <br><label>Copy and paste your IBM Watson key here: <input id="IBM Watson image key" type="text"></label></p>
 
@@ -69,9 +78,9 @@ To try it first obtain some labels from a vision service.
 The 'use camera to create costume' block takes a new picture and adds it as a costume to the current sprite.</p>
 
 <figure>
-<div class="iframe-container" style="width: 1000px; height: 400px;">
+<div class="iframe-container" style="width: 1000px; height: 350px;">
 <iframe class="iframe-clipped"
-        style="margin-left: -500px; margin-top: 200px;"
+        style="margin-left: -800px; margin-top: 150px;"
         scrolling="no"
         src="../snap/snap.html"
         project_path="../AI-teacher-guide-projects/image labels reporter and show photo.xml"> 
@@ -98,7 +107,9 @@ When it hears one of these words it contacts the service.
 When the response is received it turns it into speech.
 As a demo it is impressive if you say things like "Tell me Google what do you see?" and "What do you see Microsoft?".
 It is a nice illustration of how software can appear more intelligent than it is.
-Though this could be a good topic for a student discussion on how and where this program is intelligent and where it isn't.
+<span class="teacher-guide">This could be a good topic for a student discussion on how and
+where this program is intelligent and where it isn't.</span>
+<span class="student-guide">Do you think this program <i>seems</i> intelligent? If so, why? Is it intelligent?</span>
 </p>
 
 <figure>
@@ -116,29 +127,77 @@ Though this could be a good topic for a student discussion on how and where this
 Some can detect and locate faces.
 Some of those will estimate the age of the person and their gender.
 Some recognise landmarks and logos.
-Many can recognise characters in text.
+Many can recognise characters in hand-written or scanned text.
 A problem creating Snap! blocks that provide this functionality is that
 different services have different capabilities and different structures to capture their responses.
+</p>
+
+<h4 id="current-image-properies">Getting properties of an image</h4>
+<p><b class="student-guide">Advanced Topic.</b>
+The 'Recognize new photo' block addresses this problem by reporting a data structure capturing the entire response from
+the vision service.
+It is a Snap! list that contains lists that contains more data that might be text for labels,
+numbers for confidence scores, and even more lists for complex data.
+You can double click on the <img src="images/sub-list-icon.png" alt="icon for opening lists in lists">
+icons to drill down the structure.
+</p>
+<p>
+The 'Current image property' block takes an argument that describes what piece of the response structure
+should be reported.
+For example, Microsoft offers possible captions that can be found by following the path
+"description captions text".
+Common useful blocks are defined that use the 'Current image property' block internally
+to get the labels and the confidence scores of the labels for each of the supported vision service providers.
+Note that after a response is received from any of the AI services it is stored so that calls to
+'Current image property' use the most recent response rather than ask for a new one.
+This is because a project may need to access multiple pieces of a response.
+</p>
+<p>
+After having run 'Recognize new photo' block you should select the same AI cloud provider
+(currently Google, Microsoft, or IBM Watson)
+when you run the 'Current image property' block.
+The second argument can be a string or a list of strings specifying what information
+is desired from the image recognition.
+Each AI cloud provider supports different image properties:
+<ul>
+<li>
+<b>IBM Watson.</b> Currently the only properties supported are 'class' and 'score'.
+More details
+<a href="https://www.ibm.com/watson/developercloud/visual-recognition/api/v3/#classify_an_image" target="_blank">here</a>.
+</li>
+<li>
+<b>Google.</b> It supports properties that are lists of the form [labelAnnotations description],
+[labelAnnotations score] and [imagePropertiesAnnotation dominantColors colors].
+More details
+<a href="https://cloud.google.com/vision/docs/reference/rest/v1/images/annotate#AnnotateImageResponse" target="_blank">here</a>.
+</li>
+<li>
+<b>Microsoft.</b> It supports properties that are lists of the form [Categories name], [Categories score],
+[Description captions text], [Description tags], Faces, [Tags name], and [Tags confidence].
+More details
+<a href="https://westcentralus.dev.cognitive.microsoft.com/docs/services/56f91f2d778daf23d8ec6739/operations/56f91f2e778daf14a499e1fa" target="_blank">here</a>.
+</li>
+</ul>
+</p>
+<p>
+Common calls to the get property reporter are pre-defined.
+They are 'IBM Watson classes', 'IBM Watson scores', 'Microsoft labels',
+'Microsoft first caption', 'Google labels', and 'Google label scores'.
+</p>
+
+<p class="student-guide">
+<b>Exercise.</b>
+Recognise a picture and then use the "Current image property" block to see what kinds of descriptions
+the service provides.
+How might each one be useful?
+</p>
+
+<p><b class="student-guide">Advanced Exercise.</b>
 Compare the documentation for the vision services from
 <a href="https://cloud.google.com/vision/" target="_blank">Google</a>,
 <a href="https://azure.microsoft.com/en-gb/services/cognitive-services/computer-vision/" target="_blank">Microsoft</a>,
 and
 <a href="https://www.ibm.com/watson/services/visual-recognition/" target="_blank">IBM Watson</a>.</p>
-
-<p>The 'Recognize new photo' block addresses this problem by reporting a data structure capturing the entire response from
-the vision service.
-It is a Snap! list that contains lists that contains more data that might be text for labels,
-numbers for confidence scores, and even more lists for complex data.
-You can double click on the <img src="images/sub-list-icon.png" alt="icon for opening lists in lists"> icons to drill down the structure.
-The 'Current image property' block takes an argument that describes what piece of the response structure should be reported.
-For example, Microsoft offers possible captions that can be found by following the path "description captions text".
-Common useful blocks are defined that use the 'Current image property' block internally
-to get the labels and the confidence scores of the labels for each of the supported vision service providers.
-Note that after a response is received from any of the AI services it is stored so that calls to 'Current image property'
-use the most recent response rather than ask for a new one.
-This is because a project may need to access multiple pieces of a response.
-</p>
-
 <figure>
 <div class="iframe-container" style="width: 800px; height: 350px;">
 <iframe class="iframe-clipped"
@@ -208,7 +267,7 @@ It can help blind people to navigate their surroundings and to use devices.
 It may reduce our privacy since it makes it much easier to track people's movements and activities.
 It can enable autonomous weapons that may kill many.</p>
 
-<p>Another danger is that either intentionally or unintentially the data
+<p>Another danger is that either intentionally or unintentionally the data
 the machine learning system is trained on contains biases.
 Here is a nice short video on bias and machine learning published by Google.</p>
 <iframe width="560" height="315"
@@ -280,7 +339,7 @@ E.g. says "How cute" when the description includes words such as "kitten" or "pu
 so that in addition to tokens that ask for phrases or names a new kind of token is introduced that causes the current image to be recognised and
 then substitutes the resulting description into that location of the story.</li>
 <li>When a face is recognised its location and the location of parts of the face are included in the response. 
-The app can then add know where to places glassses, mustaches, etc. to the image.</li>
+The app can then add know where to places glasses, mustaches, etc. to the image.</li>
 <li>And thousands more possibilities.</li>
 </ol>
 
@@ -297,13 +356,15 @@ There are many MOOCS on computer vision and machine learning for image recogniti
 <a href="https://distill.pub/" target="_blank">Distill</a> is a scientific journal that strives to explain clearly complex machine learning topics.
 </p>
 
-<script src="where-to-get-library.js"></script>
+<script src="/ai/js/where-to-get-library.js"></script>
 
 <h3>Learn about machine learning</h3>
-<p>The <a href="chapter-4.html">next chapter</a> is about machine learning.</p>
+<p>The
+<a class="teacher-guide" href="chapter-4.html#teacher">next chapter</a><a class="student-guide" href="chapter-4.html#student">next chapter</a>
+is about machine learning.</p>
 
-<a href="chapter-2.html">Return to the previous chapter on speech input</a>.
+<a class="teacher-guide" href="chapter-2.html#teacher">Return to the previous chapter on speech input</a><a class="student-guide" href="chapter-2.html#student">Return to the previous chapter on speech input</a>.
 
-<script src="acknowledgements.js"></script>
+<script src="/ai/js/bottom-of-page.js"></script>
 
 </body></html>
