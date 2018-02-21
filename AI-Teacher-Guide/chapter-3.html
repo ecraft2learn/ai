@@ -198,6 +198,7 @@ Compare the documentation for the vision services from
 <a href="https://azure.microsoft.com/en-gb/services/cognitive-services/computer-vision/" target="_blank">Microsoft</a>,
 and
 <a href="https://www.ibm.com/watson/services/visual-recognition/" target="_blank">IBM Watson</a>.</p>
+
 <figure>
 <div class="iframe-container" style="width: 800px; height: 350px;">
 <iframe class="iframe-clipped"
@@ -208,9 +209,12 @@ and
 <figcaption>A block for reporting the entire analysis response. TRY IT</figcaption>
 </figure>
 
-<p>The 'Recognize new photo' reporter block is implemented using the 'Ask &lt;provider&gt; to say what it sees' block.
+<p>
+<b class="student-guide">Advanced Topic.</b>
+The 'Recognize new photo' reporter block is implemented using the 'Ask &lt;provider&gt;
+to say what it sees' block.
 This block does not wait for a response, instead it runs the user's blocks when a response is received.
-It isn't as convenient 'Recognize new photo' but it can support more complex usage.
+It isn't as convenient as 'Recognize new photo' but it can support more complex usage.
 </p>
 
 <figure>
@@ -230,8 +234,9 @@ When constructing a project there are two ways to provide keys:
 <li>Add extra information to the page's URL.
 Appending "&IBM Watson image key=...&Google image key=...&Microsoft image key=..." to a shared project URL will
 provide all three keys (after "..." is replaced by the real keys).
+You can provide only one key if you aren't interested in comparing the responses from different AI service providers.
 Refresh the page after adding the keys.
-If some service providers aren't being used then there is no need to include their keys in the URL.</li>
+</li>
 <li>Edit any of the following special reporters (found in the <a href="#library">eCraft2Learn block library</a>):</li>
 </ol>
 
@@ -245,7 +250,7 @@ If some service providers aren't being used then there is no need to include the
 <figcaption>Reporters for API keys that users edit to provide service keys.</figcaption>
 </figure>
 
-<p>Because all the AI cloud services are commercial services heavy use can be costly.
+<p class="teacher-guide">Because all the AI cloud services are commercial services heavy use can be costly.
 Consequently it is best if each student has their own account and minimises the sharing of their keys.
 This conflicts with one of the great things about tools like Scratch and Snap! --
 that it is so easy to share one's projects with a wider community.
@@ -268,7 +273,7 @@ It may reduce our privacy since it makes it much easier to track people's moveme
 It can enable autonomous weapons that may kill many.</p>
 
 <p>Another danger is that either intentionally or unintentionally the data
-the machine learning system is trained on contains biases.
+the machine learning system is trained on may contain biases.
 Here is a nice short video on bias and machine learning published by Google.</p>
 <iframe width="560" height="315"
         src="https://www.youtube.com/embed/59bMh59JQDo"
@@ -276,7 +281,8 @@ Here is a nice short video on bias and machine learning published by Google.</p>
 
 <h4 id="how-does-computer-vision-work">How does computer vision work?</h4>
 <p>Image recognition begins with pixels.
-Each pixel is a number or three numbers (for red, green, and blue components) that corresponds to a tiny piece of an image.
+Each pixel is a number or three numbers (for red, green, and blue components)
+that corresponds to a tiny piece of an image.
 There are two main approaches to processing images:
 <ol>
 <li>A sequence of programmed processing steps to find edges, determine textures, identify objects, etc.</li>
@@ -288,14 +294,20 @@ For some tasks such as
 <a href="https://www.extremetech.com/extreme/233746-ai-beats-doctors-at-visual-diagnosis-observes-many-times-more-lung-cancer-signals" target="_blank">
 detecting lung cancer from x-rays</a> machine learning has exceeded the ability of experts.</p>
 
-<p>A neural net is a program that is inspired by what little is known about how neurons in animal and human brains work.
+<p>A neural net is a program that is inspired by what little is known
+about how neurons in animal and human brains work.
 It can be trained to identify images.
 In the most common case it is trained on thousands or millions of images that have already been labelled.
-When given a new image and it computes the most likely labels.</p>
+When given a new image and it computes the most likely labels.
+Some easy visual discrimination tasks can be handled by training only a hundred or less images.
+You can train a neural net to do this kind of vision recognition in the
+<a class="teacher-guide" href="chapter-4.html#teacher">next chapter</a><a class="student-guide" href="chapter-4.html#student">next chapter</a>
+</p>
 
 <p>Different levels or stages of the processing by the neural net recognise different elements of an image.
 Researchers have built
-<a href="https://distill.pub/2017/feature-visualization/" target="_blank">software that figures out what images produce the greatest response from the different layers</a>.
+<a href="https://distill.pub/2017/feature-visualization/" target="_blank">
+software that figures out what images produce the greatest response from the different layers</a>.
 </p>
 
 <figure>
@@ -314,8 +326,9 @@ Researchers have built
 <img src="images/objects layer.png" class="center">
 <figcaption>Ideal images for a neural net layer that looks for objects</figcaption></figure>
 
-<h4>What about video recognition services?</h4>
-<p>Some AI cloud providers such as <a href="https://cloud.google.com/video-intelligence/" target="_blank">Google</a>
+<h4>What about <i>video</i> recognition services?</h4>
+<p>Some AI cloud providers such as
+<a href="https://cloud.google.com/video-intelligence/" target="_blank">Google</a>
 can accept a video stream and produce labels.
 It can also detect scene changes.
 This service can be expensive, though Google will analyse 1000 minutes of video per month at no cost.
@@ -324,9 +337,11 @@ There currently are no Snap! blocks for supporting video input.</p>
 <h4 id="project-ideas">Possible project ideas using image recognition</h4>
 <p>Adding image recognition to a robotics project can make the robot behave much more intelligently.
 It can head towards goals and avoid specified objects.
-A simple example would be a robot told to move to X (where X can be "the red ball", "the toy truck", "a person", or whatever).
-It then sends an image for recognition.
-If the description returned matches X then go forward a few steps (assuming the camera is mounted pointing forward).
+A simple example would be a robot told to move to X
+(where X can be "the red ball", "the toy truck", "a person", or whatever).
+It begins by sending the current camera image for recognition.
+If the description returned matches X then go forward a few steps
+(assuming the camera is mounted pointing forward).
 If not then turn a little and try again.
 Repeat until X is reached.
 </p>
@@ -334,16 +349,19 @@ Repeat until X is reached.
 <ol>
 <li>Engages in a simple conversation about what it thinks it is seeing.</li>
 <li>Responds to what it sees.
-E.g. says "How cute" when the description includes words such as "kitten" or "puppy" but says "How scary!" when the description is a toy lion or wolf.</li>
+E.g. says "How cute" when the description includes words such as "kitten" or "puppy"
+but says "How scary!" when the description is a toy lion or wolf.</li>
 <li>Enhance the <a href="chapter-2.html#story-generator" target="_blank">story generator example</a>
-so that in addition to tokens that ask for phrases or names a new kind of token is introduced that causes the current image to be recognised and
+so that in addition to tokens that ask for phrases or names, a new kind of token
+is introduced that causes the current image to be recognised and
 then substitutes the resulting description into that location of the story.</li>
 <li>When a face is recognised its location and the location of parts of the face are included in the response. 
-The app can then add know where to places glasses, mustaches, etc. to the image.</li>
+The app can then add know where to place glasses, mustaches, etc. to the image.</li>
 <li>And thousands more possibilities.</li>
 </ol>
 
 <h3 id="additional-resources">Additional resources</h3>
+<b class="student-guide">Advanced Topic.</b>
 <a href="https://cloud.google.com/vision/" target="_blank">Google</a>,
 <a href="https://azure.microsoft.com/en-gb/services/cognitive-services/computer-vision/" target="_blank">Microsoft</a>,
 and
@@ -363,7 +381,8 @@ There are many MOOCS on computer vision and machine learning for image recogniti
 <a class="teacher-guide" href="chapter-4.html#teacher">next chapter</a><a class="student-guide" href="chapter-4.html#student">next chapter</a>
 is about machine learning.</p>
 
-<a class="teacher-guide" href="chapter-2.html#teacher">Return to the previous chapter on speech input</a><a class="student-guide" href="chapter-2.html#student">Return to the previous chapter on speech input</a>.
+Return to
+<a class="teacher-guide" href="chapter-2.html#teacher">the previous chapter on speech input</a><a class="student-guide" href="chapter-2.html#student">the previous chapter on speech input</a>.
 
 <script src="/ai/js/bottom-of-page.js"></script>
 
