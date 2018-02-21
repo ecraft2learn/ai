@@ -20,9 +20,13 @@ for how to handle this or if other problems are encountered.</p>
 <p>
 In the previous chapters the new Snap! blocks used services that had been trained to
 recognise speech and images.
-In this chapter the students train the system.
+<span class="teacher-guide">In this chapter the students train the system.</span>
+<span class="student-guide">In this chapter you train the system.</span>
 This training is done by a <a href="https://en.wikipedia.org/wiki/Deep_learning">deep learning</a> system.
 Deep learning is a very successful set of machine learning techniques.
+It called "deep" because there are many layers of neurons that do the processing.
+Typically the lowest layers pay attention to tiny details
+but higher layers can use the output of lower layers that capture some aspect of the image such as texture or edges.
 Here is a very nice 5 minute video that introduces the big ideas behind machine learning:
 </p>
 <iframe width="560" height="315" 
@@ -36,14 +40,22 @@ Rarely is the system completely confident that its choice of label is correct so
 "confidence scores".
 The scores are between 0 (certain it is not this label) to 1 (certain it is).
 The sum of the scores of all the labels always adds up to 1.
-Students may prefer to display confidence scores as percentages.
+<span class="teacher-guide">Students may prefer to display confidence scores as percentages.</span>
+<span class="student-guide">You may prefer to display confidence scores as percentages by multiplying the scores by 100.</span>
 For example, a .8 score for label X can be thought of as saying the system is
 "80% sure the new input should have label X".
 </p>
-<p>
+<p class="teacher-guide">
 Unlike the previous chapters that rely upon pre-trained models here students can experiment with machine learning.
 They can learn what kinds of inputs the system can easily tell apart and which ones confuse it.
 Students can experiment to answer questions such as
+how many examples of each label are needed to recognise them reliably and
+how does recognition degrade as more labels are introduced.
+</p>
+<p class="student-guide">
+Unlike the previous chapters that rely upon pre-trained models here you can experiment with machine learning.
+You can learn what kinds of inputs the system can easily tell apart and which ones confuse it.
+You can experiment to answer questions such as
 how many examples of each label are needed to recognise them reliably and
 how does recognition degrade as more labels are introduced.
 </p>
@@ -54,7 +66,14 @@ The "train using camera" block opens a tab where you can train the system to lab
 the <a href="troubleshooting.html#train-camera" target="_blank">troubleshooting guide</a>.)
 The first argument is the list of labels.
 A "bucket" is the collection of all the images with the same label.
-Here there are only two: "leaning left" and "leaning right".
+The system will attempt to determine the confidence that an image matches the images in each bucket.
+If you are training it to distinguish between two things (e.g. cats and dogs) then it is a good idea
+to add a third bucket for "everything else".
+During training then produce images of lots of different things that aren't cats or dogs while pressing the
+button to train for the "everything else" bucket.
+</p>
+<p>
+Here there are only two labels: "leaning left" and "leaning right".
 You can edit the list to instead recognise different facial expressions, different people's faces,
 objects held in front of the camera, and much more.
 When the training tab launches you'll see two buttons:
@@ -62,6 +81,7 @@ When the training tab launches you'll see two buttons:
 <figure>
 <img src="images/training-buttons.png" class="center">
 <figcaption>Hold down each of these buttons as you present examples of leaning left or right</figcaption></figure>
+
 <figure>
 <div class="iframe-container"
      style="width: 800px; height: 350px;">
@@ -72,30 +92,49 @@ When the training tab launches you'll see two buttons:
 </iframe></div>
 <figcaption>A block for training the system to recognise what the camera is showing. TRY IT</figcaption>
 </figure>
+
+<p>
+When training the system try to provide a variety of images that match the label.
+If you are training "leaning left" then lean different amounts and at different distances to the camera.
+Then when training "leaning right" don't allow the system to learn some difference that shouldn't matter.
+For example, don't change the lighting or background between training different labels.
+When you aren't pressing any training buttons the page keeps trying to recognise what is in front of the camera.
+You can determine if your training is good by leaning one way and then the other
+and see if the confidence scores changes as they should.
+</p>
 <p>
 When you are ready to test the trained system return to the Snap! tab
 and click on the "Confidences of buckets" block.
 Then click on the "confidences" variable to see its value.
 Change what is in front of the camera and try again.
 Note that when you return to the training tab it starts running and you can add more training samples.
+When you are finished with this close the training tab.
 </p>
 <h4>A sample program training and using image labels</h4>
-<p>Here is a program that launches a training tab to learning
+<p>Here is a program that launches a training tab to determine
 whether your finger is pointing at the camera or to the right.
 While training move your hand around so it is trained to ignore where the hand is
 and just pay attention to which way the finger is pointing.
 When you return to Snap! the program will repeatedly check which way your finger is pointing.
 If it sees a finger pointing at the camera then the turtle goes forward.
 If not then it turns.
+It always displays the latest confidence scores.
+</p>
+<p>
+<b>Exercise.</b>
 There are many ways of enhancing this program.
-For example, add the label of pointing left and turn left or right depending on which way the finger is pointing.
+Add a third or fourth label and use that label to control the turtle.
+For example, add the label of pointing left and change the program to turn left or right depending on which way the finger is pointing.
+Or add a gesture to stop moving.
+</p>
+<p>
 A full screen version of this program can be
 <a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=follow%20finger" href="_blank">found here</a>.
 There is a similar <a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=follow%20lean" href="_blank">
 program where the sprite moves left or right depending upon which way you are leaning</a>.
 </p>
 
-<div>
+
 <div class="iframe-container" style="width: 1000px; height: 400px;">
 <figure>
 <iframe class="iframe-clipped"
@@ -103,20 +142,32 @@ program where the sprite moves left or right depending upon which way you are le
         scrolling="no"
         src="../snap/snap.html"
         project_path="../AI-teacher-guide-projects/follow finger.xml"> 
-</iframe></div>
+</iframe>
 <figcaption>Train it to learn which way your finger is pointing and the watch the turtle follow your finger</figcaption>
-</figure>
+</figure></div>
+
+<p>
+<b>Exercise.</b> Explore how to make the training more accurate.
+How does the performance change as more examples are presented?
+Does it help to simplify the images (e.g. arrange so only your pointing hand is being captured by the camera)?
+If you train with one person and then replace with another does the system get confused?
+Does it help to train with both people?
+</p>
+
 <h4>Benefits and risks</h4>
 <p>
 Most of the <a href="chapter-3.html#image-recognition-good-for" target="_blank">things image recognition is good for</a>
 and <a href="chapter-3.html#image-recognition-dangers" target="_blank">its dangers</a> were discussed in chapter 3.
-Students may want to discuss whether there are benefits and risks when they do the training
-instead of professionals in large corporations?
+<span class="teacher-guide">Students may want to discuss whether there are benefits and risks when they do the training
+instead of professionals in large corporations?</span>
+<span class="student-guide">But maybe the situation is different
+if users do the training instead of professionals in large corporations.</span>
 Will the biases be different?
 Does the smaller training set make the system less reliable?
 </p>
 <h4>How does this work?</h4>
 <p>
+<b class="student-guide">Advanced Topic.</b>
 We discussed <a href="chapter-3.html#how-does-computer-vision-work" target="_blank">how image recognition works in general</a>
 in the previous chapter.
 The fact that training of a deep learning system is feasible inside of browser is due to the work on
@@ -128,15 +179,18 @@ The GPU can be more than one hundred times faster at the computations that deep 
 the CPU of the computer.
 The training window is based upon the <a href="https://github.com/googlecreativelab/teachable-machine-boilerplate"
 target="_blank">teachable machine boilerplate</a>.
+The deep learning model used is called <a href="https://arxiv.org/abs/1602.07360" target="_blank">SqueezeNet</a>
+because it is designed to be smaller and faster than more accurate architectures.
 </p>
 <h4 id="project-ideas">Possible project ideas using image recognition</h4>
 <p>
 Most of the <a href="chapter-3.html#project-ideas" target="_blank">project ideas listed for using image recognition services</a>
 can be based upon the blocks described in this chapter.
-There is much that training by students enables that cloud services can't do.
-Students can train the system to recognise themselves, their fellow students, gestures, and the things that
-their robots may encounter in its particular environment.
-Here are some project ideas that exploit the ability of students to train the system:
+There is much that training by users enables that cloud services can't do.
+You can train the system to recognise yourself, distinguish between your friends,
+gestures, and the things that
+your robots may encounter in its particular environment.
+Here are some project ideas that exploit the ability of users to train the system:
 <ul>
 <li>
 Rock, paper, and scissors. The computer can be trained to tell when someone's hand
@@ -147,7 +201,16 @@ This example was inspired by the great set of machine learning project examples 
 <a href="https://machinelearningforkids.co.uk/#!/worksheets" target="_blank">machine learning for kids</a>.
 </li>
 <li>
-A scientific classification app. It could be trained to tell the name of a plant when shown one of its leaves,
+A different rock, paper, scissors app would be one that is trained watching two human players.
+It can then keep score as people play the game.
+</li>
+<li>
+Yet another different rock, paper, scissors app could learn patterns in how a human
+player plays and predict what they will do next with better than 1/3 accuracy.
+</li>
+<li>
+A scientific classification app.
+It could be trained to tell the name of a plant when shown one of its leaves,
 or identify insects, rocks, etc.
 </li>
 <li>
@@ -157,15 +220,16 @@ A robot that recognises gestures such as "stop" when it sees an outstretched pal
 Control a game element with four hand positions for left, right, up, and down.
 Maybe left and right could be pointing left or right, up could be thumbs up, and down thumbs down.
 Create your own game, modify one already in Snap!, or <a href="https://djdolphin.github.io/Snapin8r2/" target+"_blank">import a Scratch game</a>.
-This idea was inspired by this <a href="https://medium.com/@mariannelinharesm/playing-a-game-using-just-your-camera-with-deeplearnjs-ca156008f537" target="_blank">
-article about using hand gestures to play tetris, snake, and asteroids</a>.
+This idea was inspired by this
+<a href="https://medium.com/@mariannelinharesm/playing-a-game-using-just-your-camera-with-deeplearnjs-ca156008f537" target="_blank">
+article about using hand gestures to play Tetris, Snake, and Asteroids</a>.
 </li>
 <li>
 A program that greets fellow students by name when they sit in front of the camera.
 </li>
 <li>
 A safety app that can tell if someone is lying on the floor or not.
-If so for <i>x</i> minutes it contacts help.
+If someone is down for <i>x</i> minutes it contacts help.
 Or an app that can tell if a bed is empty or not and takes some action if the bed is occupied well after
 the time the occupant usually gets up.
 </li>
@@ -196,8 +260,10 @@ there is the <a href="https://teachablemachine.withgoogle.com/" target="_blank">
 Technical details on the deep learning model used here are <a href="https://github.com/googlecreativelab/teachable-machine-boilerplate"
 target="_blank">documented here</a>.
 </p>
-<a href="chapter-3.html">Return to the previous chapter on using image recognition services</a>.
-
+<p>
+Return to 
+<a class="teacher-guide" href="chapter-3.html#teacher">the previous chapter on using image recognition services</a><a class="student-guide" href="chapter-3.html#student">the previous chapter on using image recognition services</a>.
+</p>
 <script src="/ai/js/bottom-of-page.js"></script>
 </body>
 </html>
