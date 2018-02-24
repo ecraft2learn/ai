@@ -47,7 +47,7 @@ Try saying something, look at the result, click on the block again, say somethin
 <h4>Speech recognition errors</h4>
 <p>Speech recognition can encounter errors such as the inability to access the microphone.
 The most common "error" is when after several seconds nothing is heard.
-The 'listen then ...' block keeps listening until there is an error.
+The <span class="command-name">listen then ...</span> block keeps listening until there is an error.
 When the speech recogniser notices that nothing has been said then the error block is given the text "no-speech".
 Other errors are 'audio-capture' when the browser can't find a microphone and 
 'not-allowed' when permission to use the microphone hasn't been granted.
@@ -64,7 +64,7 @@ Try the following and then be quiet for a while.</p>
 </figure>
 
 <h4>A sample program using speech recognition (and synthesis)</h4>
-<p>The following program uses the 'listen then ...' block to control a sprite.
+<p>The following program uses the <span class="command-name">listen then ...</span> block to control a sprite.
 You can tell it to go forward or to the turn right.
 It will then ask you how much and then execute the command.
 Say "goodbye" to quit the program.
@@ -88,7 +88,8 @@ How about doing animations in response to spoken commands?
 
 <h4>How the speech command program works</h4>
 <p>If you click on <img src="images/show-blocks.png"> you'll see the blocks behind the program.
-If you then right click on 'speak turtle commands' and select 'edit' you'll see its program.</p>
+If you then right click on <span class="command-name">speak turtle commands</span>
+and select 'edit' you'll see its program.</p>
 
 <figure>
 <img src="images/command-program.png" class="center">
@@ -96,7 +97,8 @@ If you then right click on 'speak turtle commands' and select 'edit' you'll see 
 
 <p><b class="student-guide">Advanced Topic.</b>
 The 'spoken' variable contains what was just recognised.
-The nested 'if-then-else' commands test first for speech for exiting the program, then for forward movement, and then turning commands.
+The nested <span class="command-name">if-then-else</span> commands test first for speech for exiting the program,
+then for forward movement, and then turning commands.
 If none match then a 'not understood' response is created.
 Both the turning and moving commands cause the program to ask for an amount to turn or move.
 When a number is spoken the turtle then turns or moves appropriately.</p>
@@ -140,7 +142,8 @@ If the user answers "potatoes" and "gigantic" then the program says
 <img src="images/part-of-speech-code.png">
 <figcaption>Screenshot of the core of the program that asks for substitutions for words beginning with "?"</figcaption></figure>
 <p>This part of the program goes through the sentence word by word pausing when a word or phrase starts with a "?".
-It pauses after asking for a substitution and then calls the 'Broadcast speech recognition results ...' command.
+It pauses after asking for a substitution and
+then calls the <span class="command-name">Broadcast speech recognition results ...</span> command.
 The following code responds when something has been heard and interpreted:</p>
 <figure>
 <img src="images/part-of-speech-when-something-heard.png">
@@ -261,7 +264,7 @@ It is interesting to compare speech recognition errors to the kind and frequency
 Find a list of things that people mishear or use the examples in 
 <a href="https://www.huffingtonpost.com/shawn-amos/excuse-me-while-i-kiss-th_b_167446.html" target="_blank">
 this article about lyrics that people misunderstand</a>.
-See how well the listen block does when saying these examples.
+See how well the <span class="command-name">listen</span> block does when saying these examples.
 Does the system make the same kinds of mistakes people do?
 What can one say about a speech recogniser if it makes the same mistakes as people?
 What if its mistakes are different?
@@ -298,7 +301,8 @@ This could be even more exciting if the two apps were placed into some physical 
 </ul></p>
 
 <h4>A full-featured speech recognition block</h4>
-<p>The speech recognition engines typically can do more than the basic 'listen then ...' block described above.
+<p>The speech recognition engines typically can do more than
+the basic <span class="command-name">listen then ...</span> block described above.
 One can specify which language is expected.
 The engine can report interim results and alternative results.
 It can provide 'confidence' values indicating how certain it is that it recognised the speech correctly.
@@ -333,7 +337,8 @@ If not provided it is 1. Note the recognition engine may return fewer results.</
 Note that for Google's speech recognition engine currently only the first alternative has a non-zero confidence.</p>
 
 <p>Watching the interim results can provide some insight into the process of recognition.
-You can test this using the above block where you put the 'say' block with an empty text field in the first argument.
+You can test this using the above block where you put the <span class="command-name">say</span>
+block with an empty text field in the first argument.
 (Snap! interprets an empty field in this context as the input to the blocks (in this case the current interim result).)
 For example, if you say "red" you'll see "red" but if you soon afterwards say "a book"
 you'll see "red" become "read a book".

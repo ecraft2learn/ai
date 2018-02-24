@@ -15,6 +15,15 @@ figure img {
 figcaption {
   font-style: italic; 
 }
+.command-name {
+/*   based on Mozilla Developer Network CSS for code */
+    background-color: rgba(220,220,220,.5);
+    border-radius: 2px;
+    box-decoration-break: clone;
+    font-family: consolas,"Liberation Mono",courier,monospace;
+    padding: 0 2px;
+    word-wrap: break-word;
+}
 .iframe-container {
   border: 1px solid rgb(201, 0, 1);
   overflow: hidden;
@@ -51,4 +60,5 @@ figcaption {
   -ms-user-select: none;
   user-select: none;
 }
+
 
