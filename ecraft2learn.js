@@ -328,7 +328,7 @@ window.ecraft2learn =
             name =  "photo " + ecraft2learn.photo_count;
             ecraft2learn.photo_count = ecraft2learn.photo_count+1;
         }
-        return new Costume(canvas, name);;
+        return new Costume(canvas, name);
     }
     var add_costume = function (costume, sprite) {
         var ide = get_snap_ide();
@@ -338,6 +338,27 @@ window.ecraft2learn =
         sprite.addCostume(costume);
         sprite.wearCostume(costume);
         ide.hasChangedMedia = true;
+    };
+    var training_window_request = function (block_name, message_maker, response_listener, image) {
+        var training_image_width  = 227;
+        var training_image_height = 227;
+        if (!ecraft2learn.machine_learning_window) {
+            window.alert("You need to train the system before using '" + block_name + "'. Run 'Train using camera' before this.");
+            return;
+        }
+        var post_image = function (canvas, video) {
+            ecraft2learn.canvas = canvas;
+            ecraft2learn.video  = image || video;
+            add_photo_to_canvas(canvas, video, training_image_width, training_image_height);
+            var image_URL = canvas.toDataURL('image/png');
+            ecraft2learn.machine_learning_window.postMessage(message_maker(image_URL), "*");
+            window.addEventListener("message", response_listener);
+        }
+        if (ecraft2learn.canvas) {
+            post_image(ecraft2learn.canvas, ecraft2learn.video);
+        } else {
+            ecraft2learn.canvas = ecraft2learn.setup_camera(training_image_width, training_image_height, undefined, post_image);
+        }
     };
     // see http://mary.dfki.de:59125/documentation.html for documentation of Mary TTS
     var mary_tts_voices =
@@ -1028,18 +1049,12 @@ window.ecraft2learn =
                   }));
       };
       var open_machine_learning_window = function () {
-          return window.open("https://ecraft2learn.github.io/ai/camera-train/index.html",
-                             "Machine learning");
+          return window.open("https://ecraft2learn.github.io/ai/camera-train/index-beta.html",
+                             "Training " + buckets);
       };
       if (!ecraft2learn.machine_learning_window || ecraft2learn.machine_learning_window.closed) {
           ecraft2learn.image_learning_buckets = buckets;
           var machine_learning_window = open_machine_learning_window();
-//           var when_popup_loaded =
-//               function (event) {
-//                   machine_learning_window.postMessage({training_class_names: buckets}, "*");
-//           };  
-//           machine_learning_window.addEventListener('load', when_popup_loaded);
-//           setTimeout(when_popup_loaded, 5000); // somehow the load event isn't being triggered
           ecraft2learn.machine_learning_window = machine_learning_window;
           var receive_ready = 
               function (event) {
@@ -1063,30 +1078,40 @@ window.ecraft2learn =
       }
   },
   image_confidences: function (callback) {
-      var training_image_width  = 227;
-      var training_image_height = 227;
-      if (!ecraft2learn.machine_learning_window) {
-          window.alert("You need to train the system before using it. Run 'Train using camera' before this.");
-          return;
-      }
       var receive_confidences = function (event) {
-          invoke_callback(callback, javascript_to_snap(event.data));
-          window.removeEventListener("message", receive_confidences);
-      };
-      var post_image = function (canvas, video) {
-          ecraft2learn.canvas = canvas;
-          ecraft2learn.video = video;
-          add_photo_to_canvas(canvas, video, training_image_width, training_image_height);
-          var image = canvas.toDataURL('image/png');
-          ecraft2learn.machine_learning_window.postMessage({predict: image}, "*");
-          window.addEventListener("message", receive_confidences);
-      }
-      if (ecraft2learn.canvas) {
-          post_image(ecraft2learn.canvas, ecraft2learn.video);
-      } else {
-          ecraft2learn.canvas = ecraft2learn.setup_camera(training_image_width, training_image_height, undefined, post_image);
-      }
-      
+                                    if (typeof event.data.confidences !== 'undefined') {
+                                        invoke_callback(callback, javascript_to_snap(event.data.confidences));
+                                        window.removeEventListener("message", receive_confidences);
+                                    };
+                                };
+      training_window_request('Current image label confidences', 
+                              function (image) {
+                                  return {predict: image};
+                              }, 
+                              receive_confidences);
+    },
+    add_image_to_training: function (costume_number, label, callback) {
+        var ide = get_snap_ide(ecraft2learn.snap_context);
+        var current_sprite = ide.currentSprite;
+        var costumes = current_sprite.costumes.contents;
+        var costume = costumes[costume_number-1]; // 1-indexing to zero-indexing
+        var canvas = costume.contents;
+        var image_url = canvas.toDataURL('image/png');
+        var image = document.createElement('img');
+        image.src = image_url;
+        var receive_comfirmation = function (event) {
+                                       if (typeof event.data.confirmation !== 'undefined') {
+                                           invoke_callback(callback, event.data.confirmation);
+                                           window.removeEventListener("message", receive_comfirmation);
+                                       };
+                                   };
+        training_window_request('Add image to training', 
+                                function (image_URL) {
+                                    return {train: image_URL,
+                                            label: label};
+                                },
+                                receive_comfirmation,
+                                image);
   }
 }} ());
 ecraft2learn.get_voice_names(); // to ensure voices are loaded

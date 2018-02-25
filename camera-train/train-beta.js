@@ -92,7 +92,7 @@ class Main {
                                     } else {
                                         load_image(image_url,
                                                    function (image) {
-                                                     var image_as_Array3D = dl.Array3D.fromPixels(image);
+                                                       var image_as_Array3D = dl.Array3D.fromPixels(image);
                                                        this.knn.addImage(image_as_Array3D, label_index);
                                                        response = this.knn.getClassExampleCount()[label_index];
                                                        event.source.postMessage({confirmation: response}, "*");
