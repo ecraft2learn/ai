@@ -98,6 +98,7 @@ class Main {
                                                        this.knn.addImage(image_as_Array3D, label_index);
                                                        response = this.knn.getClassExampleCount()[label_index];
                                                        event.source.postMessage({confirmation: response}, "*");
+                                                       image_as_Array3D.dispose();
                                                    }.bind(this));
                                     }
                                     
