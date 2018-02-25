@@ -1090,9 +1090,13 @@ window.ecraft2learn =
                               }, 
                               receive_confidences);
     },
-    add_image_to_training: function (costume, label, callback) {
+    add_image_to_training: function (costume_number, label, callback) {
+        var ide = get_snap_ide(ecraft2learn.snap_context);
+        var current_sprite = ide.currentSprite;
+        var costumes = current_sprite.costumes.contents;
+        var costum = costumes[costume_number];
         var canvas = costume.contents;
-        var image_url = canvas.toDataURL();
+        var image_url = canvas.toDataURL('image/png');
         var image = document.createElement('img');
         image.src = image_url;
         var receive_comfirmation = function (event) {
