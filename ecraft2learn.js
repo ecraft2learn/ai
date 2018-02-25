@@ -1094,6 +1094,12 @@ window.ecraft2learn =
         var ide = get_snap_ide(ecraft2learn.snap_context);
         var current_sprite = ide.currentSprite;
         var costumes = current_sprite.costumes.contents;
+        if (costume_number < 0 || costume_number > costumes.length) {
+            alert("Cannot add costume number " + costume_number +
+                  " to " + label + " training bucket. Only numbers between 1 and " + 
+                  costumes.length + " are permitted.");
+            return;
+        }
         var costume = costumes[costume_number-1]; // 1-indexing to zero-indexing
         var canvas = costume.contents;
         var image_url = canvas.toDataURL('image/png');
