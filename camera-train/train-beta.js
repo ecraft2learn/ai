@@ -54,7 +54,9 @@ class Main {
                                     image.src = image_url;
                                     image.width  = IMAGE_SIZE;
                                     image.height = IMAGE_SIZE;
-                                    image.onload = callback(image);
+                                    image.onload = function () {
+                                                       callback(image);
+                                    };
                                 };
                                 if (typeof event.data.predict !== 'undefined') {
 //                                  this.stop(); // done training -- might do more training later

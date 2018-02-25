@@ -360,6 +360,30 @@ window.ecraft2learn =
             ecraft2learn.canvas = ecraft2learn.setup_camera(training_image_width, training_image_height, undefined, post_image);
         }
     };
+    var costume_of_current_sprite = function (costume_number) {
+        var ide = get_snap_ide(ecraft2learn.snap_context);
+        var current_sprite = ide.currentSprite;
+        var costumes = current_sprite.costumes.contents;
+        if (costume_number < 0 || costume_number > costumes.length) {
+            alert("Cannot add costume number " + costume_number +
+                  " to " + label + " training bucket. Only numbers between 1 and " + 
+                  costumes.length + " are permitted.");
+            return;
+        }
+        return costumes[costume_number-1]; // 1-indexing to zero-indexing
+    };
+    var image_url_of_costume = function (costume) {
+        var canvas = costume.contents;
+        return canvas.toDataURL('image/png');        
+    };
+    var costume_to_image = function (costume, when_loaded) {
+        var image_url = image_url_of_costume(costume);
+        var image = document.createElement('img');
+        image.src = image_url;
+        image.onload = function () {
+                           when_loaded(image);
+                       };
+    }
     // see http://mary.dfki.de:59125/documentation.html for documentation of Mary TTS
     var mary_tts_voices =
     [ // name, human readable name, and locale
@@ -1078,6 +1102,7 @@ window.ecraft2learn =
       }
   },
   image_confidences: function (callback) {
+      // if no costume_number provided then camera is used
       var receive_confidences = function (event) {
                                     if (typeof event.data.confidences !== 'undefined') {
                                         invoke_callback(callback, javascript_to_snap(event.data.confidences));
@@ -1089,30 +1114,46 @@ window.ecraft2learn =
                                   return {predict: image};
                               }, 
                               receive_confidences);
-    },
-    add_image_to_training: function (costume_number, label, callback) {
-        var ide = get_snap_ide(ecraft2learn.snap_context);
-        var current_sprite = ide.currentSprite;
-        var costumes = current_sprite.costumes.contents;
-        var costume = costumes[costume_number-1]; // 1-indexing to zero-indexing
-        var canvas = costume.contents;
-        var image_url = canvas.toDataURL('image/png');
-        var image = document.createElement('img');
-        image.src = image_url;
-        var receive_comfirmation = function (event) {
-                                       if (typeof event.data.confirmation !== 'undefined') {
-                                           invoke_callback(callback, event.data.confirmation);
-                                           window.removeEventListener("message", receive_comfirmation);
-                                       };
-                                   };
-        training_window_request('Add image to training', 
-                                function (image_URL) {
-                                    return {train: image_URL,
-                                            label: label};
-                                },
-                                receive_comfirmation,
-                                image);
-  }
+  },
+  costume_confidences: function (costume_number, callback) {
+        var costume = costume_of_current_sprite(costume_number);
+        var receive_confidences = function (event) {
+                                    if (typeof event.data.confidences !== 'undefined') {
+                                        invoke_callback(callback, javascript_to_snap(event.data.confidences));
+                                        window.removeEventListener("message", receive_confidences);
+                                    };
+                                };
+        costume_to_image(costume,
+                         function (image) {
+                            training_window_request('Image label confidences', 
+                                                    function (image_URL) {
+                                                                 return {predict: image_URL};
+                                                    },
+                                                    receive_confidences,
+                                                    image);
+                         });                            
+  },
+  add_image_to_training: function (costume_number, label, callback) {
+      var receive_comfirmation = 
+          function (event) {
+              if (typeof event.data.confirmation !== 'undefined') {
+                  invoke_callback(callback, event.data.confirmation);
+                  window.removeEventListener("message", receive_comfirmation);
+              };
+      };
+      var costume = costume_of_current_sprite(costume_number);
+      costume_to_image(costume,
+                       function (image) {
+                          training_window_request('Add image to training', 
+                                                  function (image_URL) {
+                                                      return {train: image_URL,
+                                                              label: label};
+                                                  },
+                                                  receive_comfirmation,
+                                                  image);
+                       });
+  },
+        
 }} ());
 ecraft2learn.get_voice_names(); // to ensure voices are loaded
 ecraft2learn.inside_snap = true;
