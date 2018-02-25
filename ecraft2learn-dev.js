@@ -166,7 +166,7 @@ window.ecraft2learn =
         canvas.setAttribute('width', width);
         canvas.setAttribute('height', height);
         var context = canvas.getContext('2d');
-        context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 0, 0, width, height);
+        context.drawImage(video, 0, 0, width, height);
     };
     var get_mary_tts_voice = function (voice_number) { // offical name
         return get_voice_from(voice_number, mary_tts_voices.map(function (voice) { return voice[0]; }));
