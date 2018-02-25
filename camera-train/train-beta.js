@@ -91,10 +91,12 @@ class Main {
                                         event.source.postMessage({confirmation: response}, "*");
                                     } else {
                                         load_image(image_url,
-                                                   function (image) {this.knn.addImage(image, label_index);
+                                                   function (image) {
+                                                     var image_as_Array3D = dl.Array3D.fromPixels(image);
+                                                       this.knn.addImage(image_as_Array3D, label_index);
                                                        response = this.knn.getClassExampleCount()[label_index];
                                                        event.source.postMessage({confirmation: response}, "*");
-                                                   });
+                                                   }.bind(this));
                                     }
                                     
                                 }
