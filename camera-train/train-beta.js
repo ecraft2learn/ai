@@ -49,35 +49,54 @@ class Main {
     // listen for requests for predictions
     window.addEventListener("message",
                             function (event) {
+                                var load_image = function (image_url, callback) {
+                                    var image = document.createElement('img');
+                                    image.src = image_url;
+                                    image.width  = IMAGE_SIZE;
+                                    image.height = IMAGE_SIZE;
+                                    image.onload = callback(image);
+                                };
                                 if (typeof event.data.predict !== 'undefined') {
 //                                  this.stop(); // done training -- might do more training later
 //                                  no need to stop this since only runs when not hidden
                                     var image_url = event.data.predict;
-                                    var image = document.createElement('img');
-                                    var canvas = document.createElement('canvas');
-                                    canvas.width = IMAGE_SIZE;
-                                    canvas.height = IMAGE_SIZE;
-                                    image.src = image_url;
-                                    image.width = IMAGE_SIZE;
-                                    image.height = IMAGE_SIZE;
-                                    image.onload = function () {
-                                      canvas.getContext('2d').drawImage(image, 0, 0, IMAGE_SIZE, IMAGE_SIZE);
-                                      var image_as_Array3D = dl.Array3D.fromPixels(canvas);
-                                      if (this.log_timings) {
-                                          console.time("Prediction - requested by message");
-                                      }
-                                      this.knn.predictClass(image_as_Array3D).then(
-                                          function (results) {
-                                              if (this.log_timings) {
-                                                  console.timeEnd("Prediction - requested by message");
-                                              }
-                                              event.source.postMessage({confidences: results.confidences}, "*");
-                                              if (this.log_timings) {
-                                                  console.log(results.confidences, "confidences posted");
-                                              }
-                                              image_as_Array3D.dispose();
-                                          }.bind(this));          
-                                    }.bind(this);
+                                    load_image(image_url,
+                                               function (image) {
+                                                  var canvas = document.createElement('canvas');
+                                                  canvas.width  = IMAGE_SIZE;
+                                                  canvas.height = IMAGE_SIZE;
+                                                  canvas.getContext('2d').drawImage(image, 0, 0, IMAGE_SIZE, IMAGE_SIZE);
+                                                  var image_as_Array3D = dl.Array3D.fromPixels(canvas);
+                                                  if (this.log_timings) {
+                                                      console.time("Prediction - requested by message");
+                                                  }
+                                                  this.knn.predictClass(image_as_Array3D).then(
+                                                      function (results) {
+                                                          if (this.log_timings) {
+                                                              console.timeEnd("Prediction - requested by message");
+                                                          }
+                                                          event.source.postMessage({confidences: results.confidences}, "*");
+                                                          if (this.log_timings) {
+                                                              console.log(results.confidences, "confidences posted");
+                                                          }
+                                                          image_as_Array3D.dispose();
+                                                      }.bind(this));          
+                                                }.bind(this));
+                                } else if (typeof event.data.train !== 'undefined') {
+                                    var image_url = event.data.train;
+                                    var label_index = this.training_class_names.indexOf(event.data.label);
+                                    var response;
+                                    if (label_index < 0) {
+                                        response = "Error: " + event.data.label + " is not one of " + this.training_class_names;
+                                        event.source.postMessage({confirmation: response}, "*");
+                                    } else {
+                                        load_image(image_url,
+                                                   function (image) {this.knn.addImage(image, label_index);
+                                                       response = this.knn.getClassExampleCount()[label_index];
+                                                       event.source.postMessage({confirmation: response}, "*");
+                                                   });
+                                    }
+                                    
                                 }
                             }.bind(this),
                             false);

@@ -328,7 +328,7 @@ window.ecraft2learn =
             name =  "photo " + ecraft2learn.photo_count;
             ecraft2learn.photo_count = ecraft2learn.photo_count+1;
         }
-        return new Costume(canvas, name);;
+        return new Costume(canvas, name);
     }
     var add_costume = function (costume, sprite) {
         var ide = get_snap_ide();
@@ -1090,7 +1090,11 @@ window.ecraft2learn =
                               }, 
                               receive_confidences);
     },
-    add_image_to_training: function (image, label, callback) {
+    add_image_to_training: function (costume, label, callback) {
+        var canvas = costume.contents;
+        var image_url = canvas.toDataURL();
+        var image = document.createElement('img');
+        image.src = image_url;
         var receive_comfirmation = function (event) {
                                        if (typeof event.data.confirmation !== 'undefined') {
                                            invoke_callback(callback, event.data.confirmation);
@@ -1098,11 +1102,12 @@ window.ecraft2learn =
                                        };
                                    };
         training_window_request('Add image to training', 
-                                function (image) {
+                                function (image_URL) {
                                     return {train: image_URL,
                                             label: label};
                                 },
-                                receive_comfirmation);
+                                receive_comfirmation,
+                                image);
   }
 }} ());
 ecraft2learn.get_voice_names(); // to ensure voices are loaded
