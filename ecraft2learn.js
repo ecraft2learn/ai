@@ -339,11 +339,11 @@ window.ecraft2learn =
         sprite.wearCostume(costume);
         ide.hasChangedMedia = true;
     };
-    var training_window_request = function (block_name, message_maker, response_listener, image) {
+    var training_window_request = function (alert_message, message_maker, response_listener, image) {
         var training_image_width  = 227;
         var training_image_height = 227;
         if (!ecraft2learn.machine_learning_window) {
-            window.alert("You need to train the system before using '" + block_name + "'. Run 'Train using camera' before this.");
+            window.alert(alert_message);
             return;
         }
         var post_image = function (canvas, video) {
@@ -1109,7 +1109,8 @@ window.ecraft2learn =
                                         window.removeEventListener("message", receive_confidences);
                                     };
                                 };
-      training_window_request('Current image label confidences', 
+      training_window_request("You need to train the system before using 'Current image label confidences'. " +
+                              "Run 'Train using camera ...' before this.", 
                               function (image) {
                                   return {predict: image};
                               }, 
@@ -1125,7 +1126,8 @@ window.ecraft2learn =
                                 };
         costume_to_image(costume,
                          function (image) {
-                            training_window_request('Image label confidences', 
+                            training_window_request("You need to train the system before using 'Image label confidences'. " +
+                                                    "Run 'Train using camera ...' before this.", 
                                                     function (image_URL) {
                                                                  return {predict: image_URL};
                                                     },
@@ -1144,7 +1146,8 @@ window.ecraft2learn =
       var costume = costume_of_current_sprite(costume_number);
       costume_to_image(costume,
                        function (image) {
-                          training_window_request('Add image to training', 
+                          training_window_request("You need to train the system before using 'Add image to training'. " +
+                                                  "Run 'Train using camera ...' before this so the system knows the list of possible labels.", 
                                                   function (image_URL) {
                                                       return {train: image_URL,
                                                               label: label};
