@@ -353,7 +353,8 @@ window.ecraft2learn =
         if (ecraft2learn.canvas) {
             post_image(ecraft2learn.canvas, ecraft2learn.video);
         } else {
-            ecraft2learn.canvas = ecraft2learn.setup_camera(training_image_width, training_image_height, undefined, post_image);
+            // better to use 6540x480 and then scale it down before sending it off to the training tab
+            ecraft2learn.canvas = ecraft2learn.setup_camera(640, 480, undefined, post_image);
         }
     };
     var get_costumes = function () {
