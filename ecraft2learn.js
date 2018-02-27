@@ -322,7 +322,7 @@ window.ecraft2learn =
     };
     var create_costume = function (canvas, name) {
         if (!name) {
-            name =  "photo " + get_costumes().length+1;
+            name =  "photo " + Date.now(); // needs to be unique
         }
         return new Costume(canvas, name);
     }
