@@ -1155,6 +1155,9 @@ window.ecraft2learn =
                                                   image);
                        });
   },
+  costume_count: function () {
+      return get_costumes().length;
+  },
         
 }} ());
 ecraft2learn.get_voice_names(); // to ensure voices are loaded
