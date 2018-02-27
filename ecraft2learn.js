@@ -322,11 +322,7 @@ window.ecraft2learn =
     };
     var create_costume = function (canvas, name) {
         if (!name) {
-            if (typeof  ecraft2learn.photo_count === 'undefined') {
-                ecraft2learn.photo_count = 1;
-            }
-            name =  "photo " + ecraft2learn.photo_count;
-            ecraft2learn.photo_count = ecraft2learn.photo_count+1;
+            name =  "photo " + get_costumes().length+1;
         }
         return new Costume(canvas, name);
     }
@@ -360,13 +356,16 @@ window.ecraft2learn =
             ecraft2learn.canvas = ecraft2learn.setup_camera(training_image_width, training_image_height, undefined, post_image);
         }
     };
-    var costume_of_current_sprite = function (costume_number) {
+    var get_costumes = function () {
         var ide = get_snap_ide(ecraft2learn.snap_context);
         var current_sprite = ide.currentSprite;
-        var costumes = current_sprite.costumes.contents;
+        return current_sprite.costumes.contents;  
+    }
+    var costume_of_current_sprite = function (costume_number) {
+        var costumes = get_costumes();
         if (costume_number < 0 || costume_number > costumes.length) {
-            alert("There is no costume number " + costume_number +
-                  ". Only numbers between 1 and " + 
+            alert("Cannot add costume number " + costume_number +
+                  " to " + label + " training bucket. Only numbers between 1 and " + 
                   costumes.length + " are permitted.");
             return;
         }
