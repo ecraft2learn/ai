@@ -365,8 +365,8 @@ window.ecraft2learn =
         var current_sprite = ide.currentSprite;
         var costumes = current_sprite.costumes.contents;
         if (costume_number < 0 || costume_number > costumes.length) {
-            alert("Cannot add costume number " + costume_number +
-                  " to " + label + " training bucket. Only numbers between 1 and " + 
+            alert("There is no costume number " + costume_number +
+                  ". Only numbers between 1 and " + 
                   costumes.length + " are permitted.");
             return;
         }
