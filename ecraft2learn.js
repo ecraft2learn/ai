@@ -1063,7 +1063,7 @@ window.ecraft2learn =
           invoke_callback(callback_for_errors, error.message);
       }
   },
-  train_using_camera: function (buckets_as_snap_list, add_to_previous_training) {
+  train_using_camera: function (buckets_as_snap_list, add_to_previous_training, callback) {
       var buckets = buckets_as_snap_list.contents;
       var buckets_equal = function (buckets1, buckets2) {
           return buckets1 === buckets2 ||
@@ -1085,7 +1085,7 @@ window.ecraft2learn =
                   if (event.data === "Loaded") {
                       machine_learning_window.postMessage({training_class_names: buckets}, "*");
                   } else if (event.data === "Ready") {
-                      // could let the user know...
+                      invoke_callback(callback, "Ready");
                   }
           };      
           window.addEventListener("message", receive_ready, false);                     
