@@ -828,6 +828,13 @@ window.ecraft2learn =
       add_costume(create_costume(canvas), get_snap_ide().currentSprite);
   };
 
+  ecraft2learn.update_costume_from_video = function (costume_number, sprite) {
+      var costume = costume_of_sprite(costume_number, sprite);
+      var canvas = costume.contents;
+      var context = canvas.getContext('2d');
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+  };
+
   ecraft2learn.take_picture_and_analyse = function (cloud_provider, show_photo, snap_callback) {
       // snap_callback is called with the result of the image recognition
       // show_photo displays the photo when it is taken
@@ -1165,12 +1172,6 @@ window.ecraft2learn =
   },
   costume_count: function (sprite) {
       return get_costumes(sprite).length;
-  },
-  update_costume_from_video: function (costume_number, sprite) {
-      var costume = costume_of_sprite(costume_number, sprite);
-      var canvas = costume.contents;
-      var context = canvas.getContext('2d');
-      context.drawImage(ecraft2learn.video, 0, 0, canvas.width, canvas.height);
   },
   training_window_ready: function () {
       return ecraft2learn.machine_learning_window && 
