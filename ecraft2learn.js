@@ -423,7 +423,7 @@ window.ecraft2learn =
           // runs one of the functions in this library
           if (typeof ecraft2learn[function_name] === 'undefined') {
               if (function_name === "take_picture_and_analyse" ||
-                  function_name === "add_photo_as_costume",
+                  function_name === "add_photo_as_costume" ||
                   function_name === "update_costume_from_video") {
                   // define it now with default image dimensions
                   // when setup finishes then run take_picture_and_analyse
