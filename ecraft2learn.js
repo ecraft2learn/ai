@@ -831,8 +831,8 @@ window.ecraft2learn =
   ecraft2learn.update_costume_from_video = function (costume_number, sprite) {
       var costume = costume_of_sprite(costume_number, sprite);
       var canvas = costume.contents;
-      canvas.setAttribute('width', width);
-      canvas.setAttribute('height', height);
+//       canvas.setAttribute('width', width);
+//       canvas.setAttribute('height', height);
       var context = canvas.getContext('2d');
       context.drawImage(video, 0, 0, width, height);
       sprite.drawNew();
