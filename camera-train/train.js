@@ -228,6 +228,8 @@ window.addEventListener("message",
                             if (typeof event.data.training_class_names !== 'undefined') {
                                 new Main(event.data.training_class_names);
                                 event.source.postMessage("Ready", "*");
+                            } else if (typeof event.data.new_introduction !== 'undefined') {
+                                document.getElementById("please-wait").innerText = event.data.new_introduction;
                             }
                         },
                         false);
