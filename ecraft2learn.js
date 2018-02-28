@@ -1065,7 +1065,7 @@ window.ecraft2learn =
           invoke_callback(callback_for_errors, error.message);
       }
   },
-  train_using_camera: function (buckets_as_snap_list, add_to_previous_training, callback) {
+  train_using_images: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback) {
       var buckets = buckets_as_snap_list.contents;
       var buckets_equal = function (buckets1, buckets2) {
           return buckets1 === buckets2 ||
@@ -1088,6 +1088,9 @@ window.ecraft2learn =
                       machine_learning_window.postMessage({training_class_names: buckets}, "*");
                   } else if (event.data === "Ready") {
                       ecraft2learn.machine_learning_window_ready = true;
+                      if (page_introduction) {
+                          machine_learning_window.postMessage({new_introduction: page_introduction}, "*");
+                      }
                       invoke_callback(callback, "Ready");
                   }
           };      
@@ -1101,7 +1104,7 @@ window.ecraft2learn =
       } else {
           ecraft2learn.machine_learning_window.close();
           // start over
-          ecraft2learn.train_using_camera(buckets_as_snap_list, add_to_previous_training);
+          ecraft2learn.train_using_images(buckets_as_snap_list, add_to_previous_training, callback);
       }
   },
   image_confidences: function (callback) {
