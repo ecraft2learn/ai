@@ -353,7 +353,7 @@ window.ecraft2learn =
         if (ecraft2learn.canvas) {
             post_image(ecraft2learn.canvas, ecraft2learn.video);
         } else {
-            // better to use 6540x480 and then scale it down before sending it off to the training tab
+            // better to use 640x480 and then scale it down before sending it off to the training tab
             ecraft2learn.canvas = ecraft2learn.setup_camera(640, 480, undefined, post_image);
         }
     };
@@ -1075,7 +1075,7 @@ window.ecraft2learn =
                   }));
       };
       var open_machine_learning_window = function () {
-          return window.open("https://ecraft2learn.github.io/ai/camera-train/index-beta.html",
+          return window.open("https://ecraft2learn.github.io/ai/camera-train/index.html",
                              "Training " + buckets);
       };
       if (!ecraft2learn.machine_learning_window || ecraft2learn.machine_learning_window.closed) {
