@@ -1118,8 +1118,8 @@ window.ecraft2learn =
                               }, 
                               receive_confidences);
   },
-  costume_confidences: function (costume_number, callback) {
-        var costume = costume_of_current_sprite(costume_number);
+  costume_confidences: function (costume_number, callback, sprite) {
+        var costume = costume_of_sprite(costume_number, sprite);
         var receive_confidences = function (event) {
                                     if (typeof event.data.confidences !== 'undefined') {
                                         invoke_callback(callback, javascript_to_snap(event.data.confidences));
@@ -1137,7 +1137,7 @@ window.ecraft2learn =
                                                     image);
                          });                            
   },
-  add_image_to_training: function (costume_number, label, callback) {
+  add_image_to_training: function (costume_number, label, callback, sprite) {
       var receive_comfirmation = 
           function (event) {
               if (typeof event.data.confirmation !== 'undefined') {
@@ -1145,7 +1145,7 @@ window.ecraft2learn =
                   window.removeEventListener("message", receive_comfirmation);
               };
       };
-      var costume = costume_of_current_sprite(costume_number);
+      var costume = costume_of_sprite(costume_number, sprite);
       costume_to_image(costume,
                        function (image) {
                           training_window_request("You need to train the system before using 'Add image to training'. " +
