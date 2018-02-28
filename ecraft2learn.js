@@ -1168,8 +1168,9 @@ window.ecraft2learn =
   },
   update_costume_from_video: function (costume_number, sprite) {
       var costume = costume_of_sprite(costume_number, sprite);
-      var context = costume.contents.getContext('2d');
-      context.drawImage(ecraft2learn.video, 0, 0, width, height);
+      var canvas = costume.contents;
+      var context = canvas.getContext('2d');
+      context.drawImage(ecraft2learn.video, 0, 0, canvas.width, canvas.height);
   },
   training_window_ready: function () {
       return ecraft2learn.machine_learning_window && 
