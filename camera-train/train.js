@@ -157,9 +157,11 @@ class Main {
       this.infoTexts.push(infoText);
     }
     var please_wait = document.getElementById("please-wait");
-    please_wait.innerText = "Ready to start training. Just hold down one of the buttons when the desired image is front of the camera. " +
-                            "Do this until the system is sufficiently confident of the correct label when a new image is presented. " +
-                            "Then return to the Snap! tab.";
+    if (please_wait.innerText === "Please wait") {
+        please_wait.innerText = "Ready to start training. Just hold down one of the buttons when the desired image is front of the camera. " +
+                                "Do this until the system is sufficiently confident of the correct label when a new image is presented. " +
+                                "Then return to the Snap! tab.";
+    }
 
     this.timer = requestAnimationFrame(this.animate.bind(this));
   }
