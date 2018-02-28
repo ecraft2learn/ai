@@ -1104,7 +1104,7 @@ window.ecraft2learn =
       } else {
           ecraft2learn.machine_learning_window.close();
           // start over
-          ecraft2learn.train_using_images(buckets_as_snap_list, add_to_previous_training, callback);
+          ecraft2learn.train_using_images(buckets_as_snap_list, add_to_previous_training, page_introduction, callback);
       }
   },
   image_confidences: function (callback) {
