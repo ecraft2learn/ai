@@ -833,6 +833,7 @@ window.ecraft2learn =
       var canvas = costume.contents;
       var context = canvas.getContext('2d');
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      sprite.drawNew();
   };
 
   ecraft2learn.take_picture_and_analyse = function (cloud_provider, show_photo, snap_callback) {
