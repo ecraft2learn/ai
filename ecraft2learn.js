@@ -357,13 +357,15 @@ window.ecraft2learn =
             ecraft2learn.canvas = ecraft2learn.setup_camera(640, 480, undefined, post_image);
         }
     };
-    var get_costumes = function () {
-        var ide = get_snap_ide(ecraft2learn.snap_context);
-        var current_sprite = ide.currentSprite;
-        return current_sprite.costumes.contents;  
-    }
-    var costume_of_current_sprite = function (costume_number) {
-        var costumes = get_costumes();
+    var get_costumes = function (sprite) {
+        if (!sprite) {
+            alsert("get_costumes called without specifying which sprite");
+            return;
+        }
+        return sprite.costumes.contents;  
+    };
+    var costume_of_sprite = function (costume_number, sprite) {
+        var costumes = get_costumes(sprite);
         if (costume_number < 0 || costume_number > costumes.length) {
             alert("Cannot add costume number " + costume_number +
                   " to " + label + " training bucket. Only numbers between 1 and " + 
@@ -1156,8 +1158,8 @@ window.ecraft2learn =
                                                   image);
                        });
   },
-  costume_count: function () {
-      return get_costumes().length;
+  costume_count: function (sprite) {
+      return get_costumes(sprite).length;
   },
         
 }} ());
