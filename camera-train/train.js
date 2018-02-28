@@ -233,7 +233,7 @@ window.addEventListener("message",
                         false);
 
 // tell Snap! this is loaded
-window.addEventListener('load', 
+window.addEventListener('DOMContentLoaded', 
                         function (event) {
                             window.opener.postMessage("Loaded", "*");
                         },
