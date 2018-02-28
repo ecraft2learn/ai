@@ -231,7 +231,7 @@ window.addEventListener("message",
                                 new Main(event.data.training_class_names);
                                 event.source.postMessage("Ready", "*");
                             } else if (typeof event.data.new_introduction !== 'undefined') {
-                                document.getElementById("please-wait").innerText = event.data.new_introduction;
+                                document.getElementById("please-wait").innerHTML = event.data.new_introduction;
                             }
                         },
                         false);
