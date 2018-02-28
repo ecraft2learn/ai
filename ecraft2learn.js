@@ -344,8 +344,8 @@ window.ecraft2learn =
         }
         var post_image = function (canvas, video) {
             ecraft2learn.canvas = canvas;
-            ecraft2learn.video  = image || video;
-            add_photo_to_canvas(canvas, ecraft2learn.video, training_image_width, training_image_height);
+            ecraft2learn.video  = video;
+            add_photo_to_canvas(canvas, image || video, training_image_width, training_image_height);
             var image_URL = canvas.toDataURL('image/png');
             ecraft2learn.machine_learning_window.postMessage(message_maker(image_URL), "*");
             window.addEventListener("message", response_listener);
