@@ -423,7 +423,8 @@ window.ecraft2learn =
           // runs one of the functions in this library
           if (typeof ecraft2learn[function_name] === 'undefined') {
               if (function_name === "take_picture_and_analyse" ||
-                  function_name === "add_photo_as_costume") {
+                  function_name === "add_photo_as_costume",
+                  function_name === "update_costume_from_video") {
                   // define it now with default image dimensions
                   // when setup finishes then run take_picture_and_analyse
                   ecraft2learn.setup_camera(640, 
@@ -1164,6 +1165,11 @@ window.ecraft2learn =
   },
   costume_count: function (sprite) {
       return get_costumes(sprite).length;
+  },
+  update_costume_from_video: function (costume_number, sprite) {
+      var costume = costume_of_sprite(costume_number, sprite);
+      var context = costume.contents.getContext('2d');
+      context.drawImage(ecraft2learn.video, 0, 0, width, height);
   },
   training_window_ready: function () {
       return ecraft2learn.machine_learning_window && 
