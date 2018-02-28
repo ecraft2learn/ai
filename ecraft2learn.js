@@ -1087,6 +1087,7 @@ window.ecraft2learn =
                   if (event.data === "Loaded") {
                       machine_learning_window.postMessage({training_class_names: buckets}, "*");
                   } else if (event.data === "Ready") {
+                      ecraft2learn.machine_learning_window_ready = true;
                       invoke_callback(callback, "Ready");
                   }
           };      
@@ -1160,6 +1161,11 @@ window.ecraft2learn =
   },
   costume_count: function (sprite) {
       return get_costumes(sprite).length;
+  },
+  training_window_ready: function () {
+      return ecraft2learn.machine_learning_window && 
+      !ecraft2learn.machine_learning_window.closed &&
+      ecraft2learn.machine_learning_window_ready;
   },
         
 }} ());
