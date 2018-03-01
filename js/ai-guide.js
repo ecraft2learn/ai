@@ -5,7 +5,7 @@ window.addEventListener(
      function () {
         var style = document.createElement('link');
         style.rel="stylesheet";
-        if (window.location.hash.indexOf("teacher") >= 0) {
+        if (window.location.search.indexOf("teacher") >= 0) {
            style.href = "/ai/css/teacher.css";
         } else {
            style.href = "/ai/css/student.css"; 
@@ -24,7 +24,10 @@ window.addEventListener(
              var href = element.getAttribute('href');
              var search_start = href.indexOf("?");
              var hash_start   = href.indexOf("#");
-             var new_search = search_start >= 0 && href.substring(search_start, hash_start);
+             var new_search = search_start >= 0 &&
+                              (hash_start >= 0 ?
+                                  href.substring(search_start, hash_start) :
+                                  href.substring(search_start));
              var new_hash   = hash_start >= 0 && href.substring(hash_start);
              var url = href;
              if (search_start >= 0) {
@@ -35,19 +38,19 @@ window.addEventListener(
              }
              if (new_search) {
                 if (search) {
-                    new_search += search.substring(1);
+                    new_search += "&" + search.substring(1);
                 }
              } else {
                 new_search = search;
              }
              if (new_hash) {
                 if (hash) {
-                    new_hash += hash.substring(1);
+                    new_hash += "&" + hash.substring(1);
                 }
              } else {
                 new_hash = hash;
              }
-             element.setAttribute('href', url + search + hash);
+             element.setAttribute('href', url + new_search + new_hash);
          };
          Array.prototype.forEach.call(elements, add_search_and_hash);
 });
