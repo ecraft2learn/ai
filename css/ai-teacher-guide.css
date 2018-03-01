@@ -60,5 +60,8 @@ figcaption {
   -ms-user-select: none;
   user-select: none;
 }
+.advanced-topic {
+  cursor: pointer;
+}
 
 

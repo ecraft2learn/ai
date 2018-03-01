@@ -151,12 +151,15 @@ For this we need a slightly more complex block that accepts actions to do after 
 For example, the program may speak some explanation and then do something on the screen.
 In many of the examples in the next chapter the programs listen for speech only after the system finishes speaking.</p>
 
-<p><b class="student-guide">Advanced Topic.</b>
+<p>
+<b class="student-guide advanced-topic">Click to read an advanced topic</b>
+<span>
 Code blocks that should run when some computation finishes are an instance of an advanced computer science concept called
 <a href="https://en.wikipedia.org/wiki/Continuation" target="_blank">continuations</a>.
 These are used to support asynchronous computations.
 The complexity introduced by continuations need not make things hard for students.
-They can easily place blocks in the <span class="command-name">Speak</span> block without understanding the underlying computer science.</p>
+They can easily place blocks in the <span class="command-name">Speak</span> block without understanding the underlying computer science.
+</span></p>
 
 <h4>What is speech synthesis good for?</h4>
 <p>Speech synthesis is a good way for software to communicate with people that are blind or visually impaired.
@@ -183,9 +186,10 @@ fool people into thinking that someone said something they didn't</a>.
 This is especially worrisome in combination with technology that can alter videos
 to change emotional expressions and lip synch.</p>
 
+<b class="student-guide advanced-topic">Click to read an advanced topic</b>
+<span>
 <h4>How does this work?</h4>
 <p>
-<b class="student-guide">Advanced Topic.</b>
 Modern speech synthesizers (also called "text-to-speech engines" or "TTS engines")
 start by preprocessing the text.
 Numbers, abbreviations, dates, and special characters are turned into words.
@@ -207,10 +211,12 @@ Finally sounds are generated as a sequence of pitch and volume changes (typicall
 There are three approaches to doing this last step:
 <i>concatenative</i> where recorded bits of speech are "glued" together,
 <i>formant</i> where each phoneme is synthesized,
-and <i>articulatory</i> where human tongues and vocal chords are simulated.</p>
+and <i>articulatory</i> where human tongues and vocal chords are simulated.
+</p>
 
 <p>More details about how speech synthesis works can be found in
 the <a href="#additional-resources">Additional resources</a> section at the bottom of this page.</p>
+</span>
 
 <h4>Controlling speech output</h4>
 <p>A person can speak slow or fast, in a low or high pitch, quietly or loudly, and more.

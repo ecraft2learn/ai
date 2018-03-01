@@ -55,3 +55,25 @@ window.addEventListener(
          Array.prototype.forEach.call(elements, add_search_and_hash);
 });
 
+// hide the next sibling of advanced-topic elements until clicked
+window.addEventListener(
+     'DOMContentLoaded',
+     function () {
+         var elements = document.getElementsByClassName('advanced-topic');
+         var hide_next_sibling_until_click = function (element) {
+             element.nextElementSibling.style.display = 'none';
+             element.addEventListener('click',
+                                      function () {
+                                           if (element.nextElementSibling.style.display === 'none') {
+                                               element.nextElementSibling.style.display = 'block';    
+                                           } else {
+                                               element.nextElementSibling.style.display = 'none';
+                                           }
+                                              
+                                      }); 
+         };
+         Array.prototype.forEach.call(elements, hide_next_sibling_until_click);
+     });
+
+ 
+
