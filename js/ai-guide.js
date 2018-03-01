@@ -12,3 +12,43 @@ window.addEventListener(
         }
         document.head.appendChild(style);
 });
+
+// copy over search query and hash from ULR to appropriate links
+window.addEventListener(
+     'DOMContentLoaded',
+     function () {
+         var elements = document.getElementsByClassName('guide-link');
+         var hash   = window.location.hash;
+         var search = window.location.search;
+         var add_search_and_hash = function (element) {
+             var href = element.getAttribute('href');
+             var search_start = href.indexOf("?");
+             var hash_start   = href.indexOf("#");
+             var new_search = search_start >= 0 && href.substring(search_start, hash_start);
+             var new_hash   = hash_start >= 0 && href.substring(hash_start);
+             var url = href;
+             if (search_start >= 0) {
+                url = href.substring(0, search_start);
+             }
+             if (hash_start >= 0) {
+                url = url.substring(0, hash_start);
+             }
+             if (new_search) {
+                if (search) {
+                    new_search += search.substring(1);
+                }
+             } else {
+                new_search = search;
+             }
+             if (new_hash) {
+                if (hash) {
+                    new_hash += hash.substring(1);
+                }
+             } else {
+                new_hash = hash;
+             }
+             element.setAttribute('href', url + search + hash);
+         };
+         Array.prototype.forEach.call(elements, add_search_and_hash);
+});
+
