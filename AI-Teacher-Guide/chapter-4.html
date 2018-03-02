@@ -14,7 +14,7 @@
 <p>This chapter of the guide includes many interactive elements that currently only run well in the Chrome browser.
 This chapter relies upon there being a camera that the browser can access.
 Note that the blocks described here create a second browser tab for "training" the system.
-The first time the <span class="command-name">Train using camera ...</span> block
+The first time the <span class="command-name">Train with image buckets ...</span> block
 is run you may see it blocked as a "popup".
 See the <a href="troubleshooting.html" target="_blank">troubleshooting guide</a>
 for how to handle this or if other problems are encountered.</p>
@@ -63,7 +63,7 @@ how does recognition degrade as more labels are introduced.
 </p>
 <h4>A block to start training to recognise images from a camera</h4>
 <p>
-The <span class="command-name">train using camera</span> block
+The <span class="command-name">Train with image buckets ...</span> block
 opens a tab where you can train the system to label what is in front of the camera.
 (If the tab is blocked by your browser read
 the <a href="troubleshooting.html#train-camera" target="_blank">troubleshooting guide</a>.)
@@ -96,14 +96,35 @@ When the training tab launches you'll see two buttons:
 <figcaption>A block for training the system to recognise what the camera is showing. TRY IT</figcaption>
 </figure>
 
+<b class="student-guide advanced-topic">Click to read an advanced topic</b>
+<span>
+<p>
+The <span class="command-name">Train with image buckets ...</span> block only needs the first argument telling it the bucket labels.
+It has three additional optional arguments:
+<ol>
+<li>
+Whether to start fresh or continue with the current training if this block is run more than once in a session.
+</li>
+<li>
+Text that will appear on the training page. Can be in HTML format.
+</li>
+<li>
+Blocks to run after returning from the training tab.
+</li>
+</ol>
+</p>
+</span>
+
 <p>
 When training the system try to provide a variety of images that match the label.
 If you are training "leaning left" then lean different amounts and at different distances to the camera.
 Then when training "leaning right" don't allow the system to learn some difference that shouldn't matter.
 For example, don't change the lighting or background between training different labels.
-When you aren't pressing any training buttons the page keeps trying to recognise what is in front of the camera.
+When you aren't pressing any training buttons the training page keeps
+trying to recognise what is in front of the camera.
 You can determine if your training is good by leaning one way and then the other
 and see if the confidence scores changes as they should.
+If not try adding more images.
 </p>
 <p>
 When you are ready to test the trained system return to the Snap! tab
