@@ -57,7 +57,7 @@ window.addEventListener(
 
 // hide the next sibling of advanced-topic elements until clicked
 window.addEventListener(
-     'DOMContentLoaded',
+     'load', // using load instead of DOMContentLoaded since hidden iframes when made visible are empty
      function () {
          var elements = document.getElementsByClassName('advanced-topic');
          var hide_next_sibling_until_click = function (element) {
