@@ -79,5 +79,18 @@ window.addEventListener(
          Array.prototype.forEach.call(elements, hide_next_sibling_until_click);
      });
 
+// stop translation of block name elments
+window.addEventListener(
+     'load', // using load instead of DOMContentLoaded since hidden iframes when made visible are empty
+     function () {
+         var elements = document.getElementsByClassName('block-name');
+         var notranslate = function (element) {
+             element.classList.add("notranslate");
+             element.setAttribute("translate", "no");
+         };
+         Array.prototype.forEach.call(elements, notranslate);
+     });
+
+
  
 

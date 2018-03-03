@@ -63,5 +63,12 @@ figcaption {
 .advanced-topic {
   cursor: pointer;
 }
+.english {
+  font-style: italic;
+}
+.notranslate {
+  padding-left:  .2em;
+  padding-right: .2em;
+}
 
 
