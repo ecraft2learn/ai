@@ -223,8 +223,8 @@ window.ecraft2learn =
         }
     };
     var get_matching_voice = function (builtin_voices, name_parts) { 
-      voices = builtin_voices ? window.speechSynthesis.getVoices().map(function (voice) { return voice.name.toLowerCase(); }) :
-                                mary_tts_voices.map(function (voice) { return voice[1].toLowerCase(); });
+      var voices = builtin_voices ? window.speechSynthesis.getVoices().map(function (voice) { return voice.name.toLowerCase(); }) :
+                                    mary_tts_voices.map(function (voice) { return voice[1].toLowerCase(); });
       var voice_number = 0;
       if (!Array.isArray(name_parts) && typeof name_parts !== 'string') {
           // convert from a Snap list to a JavaScript array
