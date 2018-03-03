@@ -61,6 +61,10 @@ window.addEventListener(
      function () {
          var elements = document.getElementsByClassName('advanced-topic');
          var hide_next_sibling_until_click = function (element) {
+             if (window.location.search.indexOf("student") < 0)  {
+                 // for teacher's always show the advanced material
+                 return;
+             }
              element.nextElementSibling.style.display = 'none';
              element.addEventListener('click',
                                       function () {
