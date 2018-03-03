@@ -81,7 +81,7 @@ window.addEventListener(
 
 // stop translation of block name elments
 window.addEventListener(
-     'load', // using load instead of DOMContentLoaded since hidden iframes when made visible are empty
+     'DOMContentLoaded', 
      function () {
          var elements = document.getElementsByClassName('block-name');
          var notranslate = function (element) {

@@ -28,7 +28,8 @@ These vibrations are converted to numbers.
 Speech recognition begins with these numbers and attempts to determine what was said.
 As you'll see the process is not perfect, mistakes occur.</p>
 <h4>A simple speech recognition block</h4>
-<p>Click on the following block, say something, then click on the 'last thing heard' variable.
+<p>Click on the following block, say something,
+then click on the <span class="block-name" translate=no>last thing heard</span> variable.
 If all is working well you should see what you just said.</p>
 
 <figure>
@@ -48,10 +49,11 @@ Try saying something, look at the result, click on the block again, say somethin
 <h4>Speech recognition errors</h4>
 <p>Speech recognition can encounter errors such as the inability to access the microphone.
 The most common "error" is when after several seconds nothing is heard.
-The <span class="command-name">listen then ...</span> block keeps listening until there is an error.
-When the speech recogniser notices that nothing has been said then the error block is given the text "no-speech".
-Other errors are 'audio-capture' when the browser can't find a microphone and 
-'not-allowed' when permission to use the microphone hasn't been granted.
+The <span class="block-name">listen then ...</span> block keeps listening until there is an error.
+When the speech recogniser notices that nothing has been said then
+the error block is given the text <span class="block-name">no-speech</span>.
+Other errors are <span class="block-name">audio-capture</span> when the browser can't find a microphone and 
+<span class="block-name">not-allowed</span> when permission to use the microphone hasn't been granted.
 Try the following and then be quiet for a while.</p>
 
 <figure>
@@ -65,10 +67,10 @@ Try the following and then be quiet for a while.</p>
 </figure>
 
 <h4>A sample program using speech recognition (and synthesis)</h4>
-<p>The following program uses the <span class="command-name">listen then ...</span> block to control a sprite.
+<p>The following program uses the <span class="block-name">listen then ...</span> block to control a sprite.
 You can tell it to go forward or to the turn right.
 It will then ask you how much and then execute the command.
-Say "goodbye" to quit the program.
+Say <span class="notranslate english" translate=no>"goodbye"</n> to quit the program.
 Sometimes you need to repeat what you said.
 Occasionally it will mishear you.</p>
 
@@ -81,7 +83,7 @@ Occasionally it will mishear you.</p>
 
 <p>
 <b>Exercise.</b> 
-See if you can add a "turn left" command to the program.
+See if you can add a <span class="notranslate english">"turn left"</span> command to the program.
 What else might be fun to try?
 Hint: how about changing size, looks, colour, or more?
 How about doing animations in response to spoken commands?
@@ -89,7 +91,7 @@ How about doing animations in response to spoken commands?
 
 <h4>How the speech command program works</h4>
 <p>If you click on <img src="images/show-blocks.png"> you'll see the blocks behind the program.
-If you then right click on <span class="command-name">speak turtle commands</span>
+If you then right click on <span class="block-name">speak turtle commands</span>
 and select 'edit' you'll see its program.</p>
 
 <figure>
@@ -99,8 +101,8 @@ and select 'edit' you'll see its program.</p>
 <p>
 <b class="student-guide advanced-topic">Click to read an advanced topic</b>
 <span>
-The 'spoken' variable contains what was just recognised.
-The nested <span class="command-name">if-then-else</span> commands test first for speech for exiting the program,
+The <span class="block-name">spoken</span> variable contains what was just recognised.
+The nested <span class="block-name">if-then-else</span> commands test first for speech for exiting the program,
 then for forward movement, and then turning commands.
 If none match then a 'not understood' response is created.
 Both the turning and moving commands cause the program to ask for an amount to turn or move.
@@ -111,14 +113,17 @@ When a number is spoken the turtle then turns or moves appropriately.
 <span>
 <h4>An alternative way to do the same thing</h4>
 <p>
-The command program relies upon what computer scientists call 'continuations'.
+The command program relies upon what computer scientists call
+<span class="notranslate english" translate=no>'continuations'</span>.
 These are blocks of code that are executed when something happens, in this case when the speech is recognised.
 An alternative that is popular among Scratch programmers is to rely instead upon broadcasting messages.
-The following implements voice commands by using a helper command called 'Broadcast speech recognition results and ...'.
-It broadcasts the message 'heard something'.
-The program fragments that listen for 'heard something' broadcasts need to know what was heard.
-The variable 'last thing heard' is used for this.
-(It also broadcasts speech recognition errors and sets the 'speech recognition error' if they occur.)
+The following implements voice commands by using a helper command called 
+<span class="block-name">Broadcast speech recognition results and ...</span>.
+It broadcasts the message <span class="block-name">heard something</span>.
+The program fragments that listen for <span class="block-name">heard something</span> broadcasts need to know what was heard.
+The variable <span class="block-name">last thing heard</span> is used for this.
+(It also broadcasts speech recognition errors and sets the
+<span class="block-name">speech recognition error</span> if they occur.)
 This style of programming is perhaps easier for young children but it does have its limitations.
 For example, it is very difficult to implement a response when
 no other parts of the program understand what was said.
@@ -137,11 +142,14 @@ The following version cannot do so.</p>
 sentence generating program</a> starts with a random sentence "template".
 The program considers any word starting with "?" to be a variable that is replaced by asking the user for something of that sort.
 For example,
-<blockquote>The silly ?PLURAL-NOUN like ?ADJECTIVE bananas.
+<blockquote class="notranslate english" translate=no>The silly ?PLURAL-NOUN like ?ADJECTIVE bananas.
 </blockquote>
-will cause the program to first ask the user for a "plural noun" and then ask for an "adjective".
-If the user answers "potatoes" and "gigantic" then the program says 
-<blockquote>The silly potatoes like gigantic bananas.
+will cause the program to first ask the user for a
+<span class="notranslate english" translate=no>"plural noun"</span>
+and then ask for an <span class="notranslate english" translate=no>"adjective"</span>.
+If the user answers <span class="notranslate english" translate=no>"potatoes"</span>
+and <span class="notranslate english" translate=no>"gigantic"</span> then the program says 
+<blockquote class="notranslate english" translate=no>The silly potatoes like gigantic bananas.
 </blockquote></p>
 
 <p>Let's look at the code to see how it works.</p>
@@ -150,7 +158,7 @@ If the user answers "potatoes" and "gigantic" then the program says
 <figcaption>Screenshot of the core of the program that asks for substitutions for words beginning with "?"</figcaption></figure>
 <p>This part of the program goes through the sentence word by word pausing when a word or phrase starts with a "?".
 It pauses after asking for a substitution and
-then calls the <span class="command-name">Broadcast speech recognition results ...</span> command.
+then calls the <span class="block-name">Broadcast speech recognition results ...</span> command.
 The following code responds when something has been heard and interpreted:</p>
 <figure>
 <img src="images/part-of-speech-when-something-heard.png">
@@ -175,21 +183,33 @@ Could a program like this work without grammatical ideas like nouns, verbs, adje
 extends the sentence generator by adding a new feature.
 If it encounters a word beginning with "=" it replaces it with the last response to the request for an example of that word/phrase.
 For example, consider this very short story:
-<blockquote>
+<blockquote class="notranslate english" translate=no>
 This is a story about ?GIRLS-NAME.
 =GIRLS-NAME is ?ADJECTIVE and very ?ADJECTIVE.
 She travelled to ?PLACE-NAME. There she met ?BOYS-NAME who was a ?OCCUPATION in =PLACE-NAME.
 =GIRLS-NAME and =BOYS-NAME lived ?ADVERB ever after.
 </blockquote>
-If the responses were "Juliet", "warm", "beautiful", "Verona", "Romeo", "amateur poet", and "barely" then the generated story is:
-<blockquote>
+If the responses were
+<span class="notranslate english" translate=no>"Juliet"</span>,
+<span class="notranslate english" translate=no>"warm"</span>,
+<span class="notranslate english" translate=no>"beautiful"</span>,
+<span class="notranslate english" translate=no>"Verona"</span>,
+<span class="notranslate english" translate=no>"Romeo"</span>,
+<span class="notranslate english" translate=no>"amateur poet"</span>, and
+<span class="notranslate english" translate=no>"barely"</span>
+then the generated story is:
+<blockquote class="notranslate english" translate=no>
 This is a story about Juliet.
 Juliet is warm and very beautiful.
 She travelled to Verona. There she met Romeo who was a amateur poet in Verona.
 Juliet and Romeo lived barely ever after.
 </blockquote>
-<span class="teacher-guide">A student may want to enhance the program to turn "a amateur" into "an amateur".</span>
-<span class="student-guide">You may want to enhance the program to turn "a amateur" into "an amateur".</span>
+<span class="teacher-guide">A student may want to enhance the program to turn
+        <span class="notranslate english" translate=no>"a amateur"</span> into
+        <span class="notranslate english" translate=no>"an amateur"</span>.</span>
+<span class="student-guide">You may want to enhance the program to turn
+        <span class="notranslate english" translate=no>"a amateur"</span>
+         into <span class="notranslate english" translate=no>"an amateur"</span>.</span>
 </p>
 
 <h4>A question answering demo</h4>
@@ -259,7 +279,9 @@ There is often background noise that needs to be removed from the signal.</p>
 There are many words that are <a href="https://en.wikipedia.org/wiki/Homonym" target="_blank">hononyms</a>,
 different words that sound the same.
 Separating speech into separate words is difficult.
-A classic example is how "recognise speech" sounds a lot like "wreck a nice beach".</p>
+A classic example is how <span class="notranslate english" translate=no>"recognise speech"</span>
+sounds a lot like
+<span class="notranslate english" translate=no>"wreck a nice beach"</span>.</p>
 
 <p>As one uses the blocks and sample programs of this chapter one will often encounter errors.
 These are sometimes amusing, especially when it leads the program to do something silly.
@@ -271,7 +293,7 @@ It is interesting to compare speech recognition errors to the kind and frequency
 Find a list of things that people mishear or use the examples in 
 <a href="https://www.huffingtonpost.com/shawn-amos/excuse-me-while-i-kiss-th_b_167446.html" target="_blank">
 this article about lyrics that people misunderstand</a>.
-See how well the <span class="command-name">listen</span> block does when saying these examples.
+See how well the <span class="block-name">listen</span> block does when saying these examples.
 Does the system make the same kinds of mistakes people do?
 What can one say about a speech recogniser if it makes the same mistakes as people?
 What if its mistakes are different?
@@ -309,7 +331,7 @@ This could be even more exciting if the two apps were placed into some physical 
 
 <h4>A full-featured speech recognition block</h4>
 <p>The speech recognition engines typically can do more than
-the basic <span class="command-name">listen then ...</span> block described above.
+the basic <span class="block-name">listen then ...</span> block described above.
 One can specify which language is expected.
 The engine can report interim results and alternative results.
 It can provide 'confidence' values indicating how certain it is that it recognised the speech correctly.
@@ -344,20 +366,25 @@ If not provided it is 1. Note the recognition engine may return fewer results.</
 Note that for Google's speech recognition engine currently only the first alternative has a non-zero confidence.</p>
 
 <p>Watching the interim results can provide some insight into the process of recognition.
-You can test this using the above block where you put the <span class="command-name">say</span>
+You can test this using the above block where you put the <span class="block-name">say</span>
 block with an empty text field in the first argument.
 (Snap! interprets an empty field in this context as the input to the blocks (in this case the current interim result).)
-For example, if you say "red" you'll see "red" but if you soon afterwards say "a book"
-you'll see "red" become "read a book".
+For example, if you say <span class="notranslate english" translate=no>"red"</span>
+you'll see <span class="notranslate english" translate=no>"red"</span>
+but if you soon afterwards say <span class="notranslate english" translate=no>"a book"</span>
+you'll see <span class="notranslate english" translate=no>"red"</span> become
+<span class="notranslate english" translate=no>"read a book"</span>.
 You can see the same phenomenon at <a href="https://www.google.com/intl/en/chrome/demos/speech.html" target="_blank">this Google demo</a>.</p>
 
 <p>There is much one can explore with the 'language' option.
-For example, if one selects 'fr-FR' (French as spoken in France) and then says "une deux trois quatre five six"
+For example, if one selects 'fr-FR' (French as spoken in France) and then says
+<span class="notranslate english" translate=no>"une deux trois quatre five six"</span>
 the result is "1 2 3 4 5 6".
 Notice that it recognises both French and English.
 (English is probably used because it the operating system language setting on my computer --
 if your computer is configured with another language it probably will be the default.)
-Strangely if with English you say "one two three four five six" you get those words,
+Strangely if with English you say <span class="notranslate english" translate=no>"one two three four five six"</span>
+you get those words,
 not the digits one sees with the French setting.</p>
 
 <p>
@@ -375,7 +402,7 @@ This documentation of speech recognition</a>
 is a very complete description of speech recognition features browsers should support.
 (Chrome currently is the only one but other browser developers are working on it.)</p>
 
-<p><a href="https://electronics.howstuffworks.com/gadgets/high-tech-gadgets/speech-recognition.htm" target="_blank">How stuff works</a>
+<p><a class="notranslate english" translate=no href="https://electronics.howstuffworks.com/gadgets/high-tech-gadgets/speech-recognition.htm" target="_blank">How stuff works</a>
 has a clear explanation of how speech recognition systems work and what the challenges are.
 (Though it is a bit dated.)</p>
 

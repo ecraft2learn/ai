@@ -73,11 +73,11 @@ The list is ordered by how confident the vision provider is that the label match
 </figure>
 
 <h4>Displaying the image that was sent for recognition</h4>
-<p>The <span class="command-name">show current photo</span> block will display
+<p>The <span class="block-name">show current photo</span> block will display
 the most recent image sent to the specified AI vision services
 as the background of the Snap! stage.
 To try it first obtain some labels from a vision service.
-The <span class="command-name">use camera to create costume</span> block
+The <span class="block-name">use camera to create costume</span> block
 takes a new picture and adds it as a costume to the current sprite.</p>
 
 <figure>
@@ -139,7 +139,7 @@ different services have different capabilities and different structures to captu
 <span>
 <h4 id="current-image-properies">Getting properties of an image</h4>
 <p>
-The <span class="command-name">Recognize new photo</span> block addresses this problem
+The <span class="block-name">Recognize new photo</span> block addresses this problem
 by reporting a data structure capturing the entire response from
 the vision service.
 It is a Snap! list that contains lists that contains more data that might be text for labels,
@@ -148,23 +148,23 @@ You can double click on the <img src="images/sub-list-icon.png" alt="icon for op
 icons to drill down the structure.
 </p>
 <p>
-The <span class="command-name">Current image property</span> block
+The <span class="block-name">Current image property</span> block
 takes an argument that describes what piece of the response structure
 should be reported.
 For example, Microsoft offers possible captions that can be found by following the path
 "description captions text".
 Common useful blocks are defined that use
-the <span class="command-name">Current image property</span> block internally
+the <span class="block-name">Current image property</span> block internally
 to get the labels and the confidence scores of the labels for each of the supported vision service providers.
 Note that after a response is received from any of the AI services it is stored so that calls to
 'Current image property' use the most recent response rather than ask for a new one.
 This is because a project may need to access multiple pieces of a response.
 </p>
 <p>
-After having run <span class="command-name">Recognize new photo</span> block
+After having run <span class="block-name">Recognize new photo</span> block
 you should select the same AI cloud provider
 (currently Google, Microsoft, or IBM Watson)
-when you run the <span class="command-name">Current image property</span> block.
+when you run the <span class="block-name">Current image property</span> block.
 The second argument can be a string or a list of strings specifying what information
 is desired from the image recognition.
 Each AI cloud provider supports different image properties:
@@ -198,7 +198,7 @@ They are 'IBM Watson classes', 'IBM Watson scores', 'Microsoft labels',
 <p class="student-guide">
 <b>Exercise.</b>
 Recognise a picture and then use
-the <span class="command-name">Current image property</span> block to see
+the <span class="block-name">Current image property</span> block to see
 what kinds of descriptions the service provides.
 How might each one be useful?
 </p>
@@ -223,8 +223,8 @@ and
 <b class="student-guide advanced-topic">Click to read an advanced topic</b>
 <span>
 <p>
-The <span class="command-name">Recognize new photo</span> reporter block is implemented
-using the <span class="command-name">Ask &lt;provider&gt; to say what it sees</span> block.
+The <span class="block-name">Recognize new photo</span> reporter block is implemented
+using the <span class="block-name">Ask &lt;provider&gt; to say what it sees</span> block.
 This block does not wait for a response, instead it runs the user's blocks when a response is received.
 It isn't as convenient as 'Recognize new photo' but it can support more complex usage.
 </p>

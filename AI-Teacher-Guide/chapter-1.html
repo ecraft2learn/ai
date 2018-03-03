@@ -56,7 +56,8 @@ Humans need to spend a long time learning to read (out loud).
 But reading involves character recognition and comprehension.
 When a computer produces speech none of that is involved.
 Is generating speech an aspect of intelligent behaviour or it is just like a parrot speaking?
-Note that <a href="https://en.wikipedia.org/wiki/Alex_(parrot)" target="_blank">Alex the parrot</a> clearly did more than "parroting" speech.
+Note that <a href="https://en.wikipedia.org/wiki/Alex_(parrot)" target="_blank">Alex the parrot</a>
+clearly did more than "parroting" speech.
 Maybe speech synthesis is AI if the program uses AI techniques to generate the output.
 The article <a href="https://www.scientificamerican.com/article/new-ai-tech-can-mimic-any-voice/" target="_blank">
 <i>New AI Tech Can Mimic Any Voice</i></a> assumes this is AI.
@@ -133,7 +134,7 @@ Try clicking this and you'll hear there is a problem:</p>
 </figure>
 
 <p>The problem is that the sound effect begins the same times as the first sentence.
-This because the <span class="command-name">Speak</span> block tells the browser to begin speaking and then continues with the next action.
+This because the <span class="block-name">Speak</span> block tells the browser to begin speaking and then continues with the next action.
 What we want is to have the door bell sound played <i>after</i> the first utterance is finished.
 For this we need a slightly more complex block that accepts actions to do after speaking:</p>
 
@@ -155,10 +156,10 @@ In many of the examples in the next chapter the programs listen for speech only 
 <b class="student-guide advanced-topic">Click to read an advanced topic</b>
 <span>
 Code blocks that should run when some computation finishes are an instance of an advanced computer science concept called
-<a href="https://en.wikipedia.org/wiki/Continuation" target="_blank">continuations</a>.
+<a class="notranslate english" translate=no href="https://en.wikipedia.org/wiki/Continuation" target="_blank">continuations</a>.
 These are used to support asynchronous computations.
 The complexity introduced by continuations need not make things hard for students.
-They can easily place blocks in the <span class="command-name">Speak</span> block without understanding the underlying computer science.
+They can easily place blocks in the <span class="block-name">Speak</span> block without understanding the underlying computer science.
 </span></p>
 
 <h4>What is speech synthesis good for?</h4>
@@ -193,7 +194,8 @@ to change emotional expressions and lip synch.</p>
 Modern speech synthesizers (also called "text-to-speech engines" or "TTS engines")
 start by preprocessing the text.
 Numbers, abbreviations, dates, and special characters are turned into words.
-For example, "42" becomes "forty two" (assuming the language is set to English).
+For example, "42" becomes <span class="notranslate english" translate=no>"forty two"</span>
+(assuming the language is set to English).
 Next words are turned into <a href="https://en.wikipedia.org/wiki/Phoneme" target="_blank">phonemes</a>.
 A phoneme is the unit of sound that words are made of.
 A phoneme is described phonetically so later stages can pronounce the words.
@@ -205,7 +207,7 @@ text-decoration-color: initial;float:none;word-spacing:0px'>/</span>&#712;f&#601
 style='font-variant-ligatures: normal;font-variant-caps: normal;orphans: 2;
 widows: 2;-webkit-text-stroke-width: 0px;text-decoration-style: initial;
 text-decoration-color: initial;float:none;word-spacing:0px'>/</span></span>
-is how the word "phoneme" is pronounced.
+is how the word <span class="notranslate english" translate=no>"phoneme"</span> is pronounced.
 This can be done by a dictionary look up or by using pronunciation rules.
 Finally sounds are generated as a sequence of pitch and volume changes (typically many thousands per second).
 There are three approaches to doing this last step:
@@ -243,6 +245,7 @@ A good strategy for trying things out is to vary one thing at a time.
 Try changing the rate to a number less than 1 and then greater than 1.
 Do the same for the pitch.
 Try different voices.
+You can see the list of voices available in your browser using the <span class="block-name">Get voice names</span> block.
 Some of them are intended to speak other langauges.
 </p>
 
@@ -254,8 +257,11 @@ It describes the language and dialect, e.g. en-GB.</p>
 <p>Fortunately in some browsers (e.g., Chrome) some voices are associated with a language.
 When a non-English voice is given English to speak it typically speaks it with an accent.
 The selection of voices available depends upon the browser and the operating system.
-Click <span class="command-name">get voices</span> to see the list of voices and
-use the voice number in the <span class="command-name">Speak</span> command.</p>
+Click <span class="block-name">get voice names</span> to see the list of voices and
+use the voice number in the <span class="block-name">Speak</span> command.
+You can also the <span class="block-name">voice that matches</span> to find a voice 
+that matches the search terms.
+</p>
 
 <figure>
 <div class="iframe-container" style="width: 800px; height: 600px;">
