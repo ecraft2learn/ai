@@ -993,6 +993,26 @@ window.ecraft2learn =
       }
       return "No voice numbered " + voice_number;
   },
+  get_voice_number_matching: function (name_parts) {
+      var voices = window.speechSynthesis.getVoices();
+      var voice_number;
+      if (!Array.isArray(property_name_or_names) && typeof property_name_or_names !== 'string') {
+          // convert from a Snap list to a JavaScript array
+          property_name_or_names = property_name_or_names.contents;
+      }
+      var name_matches = function (name) {
+          return name_parts.every(function (part) {
+                                      return name.indexOf(part) >= 0;
+                                  });
+      };
+      voices.some(function (voice, index) {
+                      if (name_matches(voice.name)) {
+                          voice_number = index;
+                          return true;
+                      }
+                  });
+       return voice_number;          
+  },
   get_mary_tts_voice_name: function (voice_number) { // user friendly name
       return get_voice_from(voice_number, mary_tts_voices.map(function (voice) { return voice[1]; }));
   },
