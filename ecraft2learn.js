@@ -995,19 +995,22 @@ window.ecraft2learn =
   },
   get_voice_number_matching: function (name_parts) {
       var voices = window.speechSynthesis.getVoices();
-      var voice_number;
-      if (!Array.isArray(property_name_or_names) && typeof property_name_or_names !== 'string') {
+      var voice_number = 0;
+      if (!Array.isArray(name_parts) && typeof name_parts !== 'string') {
           // convert from a Snap list to a JavaScript array
-          property_name_or_names = property_name_or_names.contents;
+          name_parts = name_parts.contents;
       }
+      name_parts = name_parts.map(function (part) {
+                                      return part.toLowerCase();
+                                  });
       var name_matches = function (name) {
           return name_parts.every(function (part) {
-                                      return name.indexOf(part) >= 0;
+                                      return name.toLowerCase().indexOf(part) >= 0;
                                   });
       };
       voices.some(function (voice, index) {
                       if (name_matches(voice.name)) {
-                          voice_number = index;
+                          voice_number = index+1; // using 1-indexing
                           return true;
                       }
                   });
