@@ -993,8 +993,9 @@ window.ecraft2learn =
       }
       return "No voice numbered " + voice_number;
   },
-  get_voice_number_matching: function (name_parts) {
-      var voices = window.speechSynthesis.getVoices();
+  get_voice_number_matching: function (name_parts, builtin_voices) {
+      var voices = builtin_voices ? window.speechSynthesis.getVoices().map(function (voice) { return voice.name.toLowerCase(); }) :
+                                    mary_tts_voices.map(function (voice) { return voice[1].toLowerCase(); });
       var voice_number = 0;
       if (!Array.isArray(name_parts) && typeof name_parts !== 'string') {
           // convert from a Snap list to a JavaScript array
@@ -1005,11 +1006,11 @@ window.ecraft2learn =
                                   });
       var name_matches = function (name) {
           return name_parts.every(function (part) {
-                                      return name.toLowerCase().indexOf(part) >= 0;
+                                      return name.indexOf(part) >= 0;
                                   });
       };
-      voices.some(function (voice, index) {
-                      if (name_matches(voice.name)) {
+      voices.some(function (voice_name, index) {
+                      if (name_matches(voice_name)) {
                           voice_number = index+1; // using 1-indexing
                           return true;
                       }
