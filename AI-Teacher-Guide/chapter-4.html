@@ -158,17 +158,16 @@ There is a similar <a href="https://snap.berkeley.edu/snapsource/snap.html#prese
 program where the sprite moves left or right depending upon which way you are leaning</a>.
 </p>
 
-
-<div class="iframe-container" style="width: 1000px; height: 400px;">
 <figure>
+<div class="iframe-container" style="width: 1000px; height: 400px;">
 <iframe class="iframe-clipped"
         style="margin-left: -1000px; margin-top: 200px;"
         scrolling="no"
         src="../snap/snap.html"
         project_path="../AI-teacher-guide-projects/follow finger.xml"> 
-</iframe>
-<figcaption>Train it to learn which way your finger is pointing and the watch the turtle follow your finger</figcaption>
-</figure></div>
+</iframe></div>
+<figcaption>Train it to learn which way your finger is pointing and the watch the turtle follow your finger. TRY IT!</figcaption>
+</figure>
 
 <p>
 <b>Exercise.</b> Explore how to make the training more accurate.
@@ -177,6 +176,38 @@ Does it help to simplify the images (e.g. arrange so only your pointing hand is 
 If you train with one person and then replace with another does the system get confused?
 Does it help to train with both people?
 </p>
+
+<h4>Using sprite costumes instead of the camera in training</h4>
+<p>
+In Snap! each sprite can have any number of "costumes".
+Costumes can be drawings, photos, or imported images.
+</p>
+<figure>
+<img src="images/snap-costume.png" class="center">
+<figcaption>Snap! interface for creating costumes</figcaption></figure>
+
+<p>
+Using the <span class="command-name">Train with all my costumes</span> you can send all of a
+sprite's costumes to the training tab.
+This block is defined using the <span class="block-name">Add costume &lt;i&gt; to training ...</span> block.
+You can also ask the training tab about label confidences of a costume using 
+<span class="block-name">Label confidences of costume number ...</span>.
+You can experiment with these costume-based training blocks in the following.
+There is a
+<a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=aiteacherguide&ProjectName=black%20and%20white"
+target="_blank">full window version</a> if you want to explore the details of how this example works.
+</p>
+
+<figure>
+<div class="iframe-container" style="width: 1000px; height: 550px;">
+<iframe class="iframe-clipped"
+        style="margin-left: 0px; margin-top: 0px;"
+        scrolling="no"
+        src="../snap/snap.html"
+        project_path="../AI-teacher-guide-projects/black and white.xml"> 
+</iframe></div>
+<figcaption>Blocks for using sprite costumes for training and classification. TRY IT!</figcaption>
+</figure>
 
 <h4>Benefits and risks</h4>
 <p>
