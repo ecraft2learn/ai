@@ -222,6 +222,30 @@ window.ecraft2learn =
             voices_callback();
         }
     };
+    var get_matching_voice = function (builtin_voices, name_parts) { 
+      voices = builtin_voices ? window.speechSynthesis.getVoices().map(function (voice) { return voice.name.toLowerCase(); }) :
+                                mary_tts_voices.map(function (voice) { return voice[1].toLowerCase(); });
+      var voice_number = 0;
+      if (!Array.isArray(name_parts) && typeof name_parts !== 'string') {
+          // convert from a Snap list to a JavaScript array
+          name_parts = name_parts.contents;
+      }
+      name_parts = name_parts.map(function (part) {
+                                      return part.toLowerCase();
+                                  });
+      var name_matches = function (name) {
+          return name_parts.every(function (part) {
+                                      return name.indexOf(part) >= 0;
+                                  });
+      };
+      voices.some(function (voice_name, index) {
+                      if (name_matches(voice_name)) {
+                          voice_number = index+1; // using 1-indexing
+                          return true;
+                      }
+                  });
+       return voice_number;
+    };
     var speak = function (message, pitch, rate, voice_number, volume, language, finished_callback) {
         // speaks 'message' optionally with the specified pitch, rate, voice, volume, and language
         // finished_callback is called with the spoken text
@@ -993,29 +1017,11 @@ window.ecraft2learn =
       }
       return "No voice numbered " + voice_number;
   },
-  get_voice_number_matching: function (name_parts, builtin_voices) {
-      var voices = builtin_voices ? window.speechSynthesis.getVoices().map(function (voice) { return voice.name.toLowerCase(); }) :
-                                    mary_tts_voices.map(function (voice) { return voice[1].toLowerCase(); });
-      var voice_number = 0;
-      if (!Array.isArray(name_parts) && typeof name_parts !== 'string') {
-          // convert from a Snap list to a JavaScript array
-          name_parts = name_parts.contents;
-      }
-      name_parts = name_parts.map(function (part) {
-                                      return part.toLowerCase();
-                                  });
-      var name_matches = function (name) {
-          return name_parts.every(function (part) {
-                                      return name.indexOf(part) >= 0;
-                                  });
-      };
-      voices.some(function (voice_name, index) {
-                      if (name_matches(voice_name)) {
-                          voice_number = index+1; // using 1-indexing
-                          return true;
-                      }
-                  });
-       return voice_number;          
+  get_voice_number_matching: function (name_parts) {
+      return get_matching_voice(true, name_parts);
+  },
+  get_mary_tts_voice_number_matching: function (name_parts) {
+      return get_matching_voice(false, name_parts);
   },
   get_mary_tts_voice_name: function (voice_number) { // user friendly name
       return get_voice_from(voice_number, mary_tts_voices.map(function (voice) { return voice[1]; }));
