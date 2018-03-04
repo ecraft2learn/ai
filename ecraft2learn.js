@@ -1080,7 +1080,7 @@ window.ecraft2learn =
                          ecraft2learn.speak_using_mary_tts(message, 1, 0, finished_callback);
                      },
                      function () {
-                         ecraft2learn.speak(message, 0, 0, 1, 0, 0, finished_callback);
+                         ecraft2learn.speak(message, 0, 0, 0, 0, 0, finished_callback);
                      });
   },
   open_project: function (name) {
