@@ -5,10 +5,10 @@ window.addEventListener(
      function () {
         var style = document.createElement('link');
         style.rel="stylesheet";
-        if (window.location.search.indexOf("teacher") >= 0) {
-           style.href = "/ai/css/teacher.css";
-        } else {
+        if (window.location.search.indexOf("student") >= 0) {
            style.href = "/ai/css/student.css"; 
+        } else {
+           style.href = "/ai/css/teacher.css";
         }
         document.head.appendChild(style);
 });
