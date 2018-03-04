@@ -308,6 +308,8 @@ window.ecraft2learn =
         ecraft2learn.utterance = utterance; // without this utterance may be garbage collected before onend can run
         if (typeof language === 'string') {
             utterance.lang = language;
+        } else if (ecraft2learn.default_language) {
+            utterance.lang = ecraft2learn.default_language;
         }
         pitch = +pitch; // if string try convering to a number
         if (typeof pitch === 'number' && pitch > 0) {
@@ -659,6 +661,13 @@ window.ecraft2learn =
                                   });
     },
 
+    set_default_language: function (language) {
+        if (language.length === 2) {
+            language = language + language.toUpperCase();
+        }
+        ecraft2learn.default_language = language;
+    },
+
     start_microsoft_speech_recognition: function (as_recognized_callback, final_spoken_callback, error_callback, provided_key) {
         // As spoken words are recognised as_recognized_callback is called with the result so far
         // When the recogniser determines that the speaking is finished then the final_spoken_callback is called with the final text
@@ -998,6 +1007,9 @@ window.ecraft2learn =
   },
 
   speak: function (message, pitch, rate, voice_number, volume, language, finished_callback) {
+      if (ecraft2learn.default_language && typeof language !== 'string') {
+          language = ecraft2learn.default_language;
+      }
       check_for_voices(function () {
                           no_voices_alert();
                        },
