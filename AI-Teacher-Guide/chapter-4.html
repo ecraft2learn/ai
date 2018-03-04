@@ -26,7 +26,7 @@ recognise speech and images.
 <span class="student-guide">In this chapter you train the system.</span>
 This training is done by a <a href="https://en.wikipedia.org/wiki/Deep_learning">deep learning</a> system.
 Deep learning is a very successful set of machine learning techniques.
-It called "deep" because there are many layers of neurons that do the processing.
+It called "deep" because there are many layers of simulated neurons that do the processing.
 Typically the lowest layers pay attention to tiny details
 but higher layers can use the output of lower layers that capture some aspect of the image such as texture or edges.
 Here is a very nice 5 minute video that introduces the big ideas behind machine learning:
@@ -68,7 +68,7 @@ opens a tab where you can train the system to label what is in front of the came
 (If the tab is blocked by your browser read
 the <a href="troubleshooting.html#train-camera" target="_blank">troubleshooting guide</a>.)
 The first argument is the list of labels.
-A "bucket" is the collection of all the images with the same label.
+A <span class="notranslate" translate=no>"bucket"</span> is the collection of all the images with the same label.
 The system will attempt to determine the confidence that an image matches the images in each bucket.
 If you are training it to distinguish between two things (e.g. cats and dogs) then it is a good idea
 to add a third bucket for "everything else".
@@ -128,7 +128,7 @@ If not try adding more images.
 </p>
 <p>
 When you are ready to test the trained system return to the Snap! tab
-and click on the <span class="block-name">Confidences of buckets</span> block.
+and click on the <span class="block-name">Current image label confidences</span> block.
 Then click on the <span class="block-name">confidences</span> variable to see its value.
 Change what is in front of the camera and try again.
 Note that when you return to the training tab it starts running and you can add more training samples.
