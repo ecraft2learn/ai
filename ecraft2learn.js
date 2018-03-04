@@ -673,7 +673,7 @@ window.ecraft2learn =
 
     set_default_language: function (language) {
         if (language.length === 2) {
-            language = language.toLowerCase() + language.toUpperCase();
+            language = language.toLowerCase() + "-" + language.toUpperCase();
         }
         ecraft2learn.default_language = language;
     },
