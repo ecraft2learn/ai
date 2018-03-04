@@ -184,6 +184,22 @@ window.ecraft2learn =
             voice_number--; // Snap (and Scratch) use 1-indexing so convert here
             if (voice_number === -1) {
                 voice_number = 0;
+                if (ecraft2learn.default_language) {
+                    mary_tts_voices.some(function (voice, index) {
+                        if (voice[2].indexOf("-") >= 0) {
+                            // language and dialect specified
+                            if (voice[2] === ecraft2learn.default_language) {
+                                voice_number = index;
+                                return true;
+                            }
+                        } else {
+                            if (voice[2] === ecraft2learn.default_language.substring(0, 2)) {
+                                voice_number = index;
+                                return true;
+                            }
+                        }
+                    });
+                }
             }
             if (voice_number >= 0 && voice_number < voices.length) {
                return voices[Math.floor(voice_number)];
