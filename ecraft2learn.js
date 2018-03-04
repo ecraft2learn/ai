@@ -326,6 +326,14 @@ window.ecraft2learn =
             }
             utterance.rate = rate;
         }
+        if (voice_number === 0 && ecraft2learn.default_language) {
+            var voices = window.speechSynthesis.getVoices();
+            voices.some(function (voice, index) {
+                if (voice.lang === ecraft2learn.default_language) {
+                    voice_number = index+1; // 1-indexing
+                }
+            })
+        }
         utterance.voice = get_voice(voice_number);
         volume = +volume;
         if (typeof volume && volume > 0) {
@@ -608,6 +616,8 @@ window.ecraft2learn =
               speech_recognition.interimResults = is_callback(interim_spoken_callback);
               if (typeof language === 'string') {
                   speech_recognition.lang = language;
+              } else if (ecraft2learn.default_language) {
+                  speech_recognition.lang = ecraft2learn.default_language;
               }
               if (max_alternatives > 1) {
                   speech_recognition.maxAlternatives = max_alternatives;
@@ -663,7 +673,7 @@ window.ecraft2learn =
 
     set_default_language: function (language) {
         if (language.length === 2) {
-            language = language + language.toUpperCase();
+            language = language.toLowerCase() + language.toUpperCase();
         }
         ecraft2learn.default_language = language;
     },
@@ -1007,9 +1017,6 @@ window.ecraft2learn =
   },
 
   speak: function (message, pitch, rate, voice_number, volume, language, finished_callback) {
-      if (ecraft2learn.default_language && typeof language !== 'string') {
-          language = ecraft2learn.default_language;
-      }
       check_for_voices(function () {
                           no_voices_alert();
                        },
