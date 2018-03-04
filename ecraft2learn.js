@@ -1111,6 +1111,12 @@ window.ecraft2learn =
       // prefer window.open but then is blocked as a popup
       document.location.assign("https://github.com/ecraft2learn/ai/wiki", "_blank");
   },
+  wikipedia_domain: function () {
+      if (ecraft2learn.default_language) {
+          return "https://" + ecraft2learn.default_language.substring(0, 2) + ".wikipedia.org";
+      }
+      return "https://en.wikipedia.org";
+  },
   handle_server_json_response: function (response, callback) {
      invoke_callback(callback, javascript_to_snap(JSON.parse(response)));
   },
