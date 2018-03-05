@@ -38,7 +38,7 @@ class Main {
     this.training_class_names = training_class_names;
     
     // Initiate deeplearn.js math and knn classifier objects
-    this.knn = new knn_image_classifier.KNNImageClassifier(NUM_CLASSES, TOPK, ENV.math);
+    this.knn = new knn_image_classifier.KNNImageClassifier(NUM_CLASSES, TOPK);
     
     // Create video element that will contain the webcam image
     this.video = document.createElement('video');
@@ -68,7 +68,7 @@ class Main {
                                                   canvas.width  = IMAGE_SIZE;
                                                   canvas.height = IMAGE_SIZE;
                                                   canvas.getContext('2d').drawImage(image, 0, 0, IMAGE_SIZE, IMAGE_SIZE);
-                                                  var image_as_Array3D = dl.Array3D.fromPixels(canvas);
+                                                  var image_as_Array3D = dl.fromPixels(canvas);
                                                   if (this.log_timings) {
                                                       console.time("Prediction - requested by message");
                                                   }
@@ -94,7 +94,7 @@ class Main {
                                     } else {
                                         load_image(image_url,
                                                    function (image) {
-                                                       var image_as_Array3D = dl.Array3D.fromPixels(image);
+                                                       var image_as_Array3D = dl.fromPixels(image);
                                                        this.knn.addImage(image_as_Array3D, label_index);
                                                        response = this.knn.getClassExampleCount()[label_index];
                                                        event.source.postMessage({confirmation: response}, "*");
@@ -174,7 +174,7 @@ class Main {
   animate(){
     if(this.videoPlaying){
       // Get image data from video element
-      const image = dl.Array3D.fromPixels(this.video);
+      const image = dl.fromPixels(this.video);
       
       // Train class if one of the buttons is held down
       if(this.training != -1){
