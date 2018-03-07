@@ -138,7 +138,7 @@ class Main {
 
       // Create training button
       const button = document.createElement('button')
-      button.innerText = "Train " + this.training_class_names[i];
+      button.innerText = "Click to train " + this.training_class_names[i];
       button.className = "training-button";
       div.appendChild(button);
 
