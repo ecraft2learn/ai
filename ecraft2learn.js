@@ -249,17 +249,32 @@ window.ecraft2learn =
       name_parts = name_parts.map(function (part) {
                                       return part.toLowerCase();
                                   });
-      var name_matches = function (name) {
-          return name_parts.every(function (part) {
+      var name_parts_double_white_space = name_parts.map(function (part) {
+                                                            return " " + part + " ";
+      });
+      var name_parts_left_white_space   = name_parts.map(function (part) {
+                                                            return " " + part;
+      });
+      var name_parts_right_white_space = name_parts.map(function (part) {
+                                                            return part + " ";
+      });
+      var name_matches = function (name, parts) {
+          return parts.every(function (part) {
                                       return name.indexOf(part) >= 0;
                                   });
       };
-      voices.some(function (voice_name, index) {
-                      if (name_matches(voice_name)) {
-                          voice_number = index+1; // using 1-indexing
-                          return true;
-                      }
-                  });
+      [name_parts_double_white_space, name_parts_left_white_space, name_parts_right_white_space, name_parts].some(
+           // prefer matches with white space
+           // so that "male" doesn't match "female" unless no other choice
+            function (parts) {
+                  voices.some(function (voice_name, index) {
+                                  if (name_matches(voice_name, parts)) {
+                                      voice_number = index+1; // using 1-indexing
+                                      return true;
+                                  }
+                              });
+                  return voice_number > 0;               
+            });
        return voice_number;
     };
     var speak = function (message, pitch, rate, voice_number, volume, language, finished_callback) {
