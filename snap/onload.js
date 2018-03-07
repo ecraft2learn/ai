@@ -1,5 +1,5 @@
 var world;
-window.onload = function () {
+window.addEventListener('DOMContentLoaded', function () {
 	var world_canvas = document.getElementById('world');
 	var ide_morph = new IDE_Morph();
 	var loop = function loop() {
@@ -16,13 +16,18 @@ window.onload = function () {
 		if (project_path) {
 			fetch(project_path).then(function (response) {
 										 response.text().then(function (project_text) {
-											 ide_morph.rawOpenProjectString(project_text);
-											 if (full_screen) {
-												ide_morph.toggleAppMode(true);
-											 } 
-											 if (run_full_screen) {
-												ide_morph.runScripts();
-											 }
+										 	// timeout wasn't needed before Snap 4.1
+										 	// without it iframes show only Snap! background texture
+											 setTimeout(function () {
+															ide_morph.rawOpenProjectString(project_text);
+														    if (full_screen) {
+																ide_morph.toggleAppMode(true);
+															} 
+															if (run_full_screen) {
+																ide_morph.runScripts();
+															}
+														},
+														1000);
 										 });
 									 }).catch(function (error) {
 										 console.error("Error fetching " + project_path + ": " + error.message);
@@ -36,5 +41,5 @@ window.onload = function () {
 		ecraft2learn.get_voice_names();         // no need to wait for them to load
 	}
     loop();
-};
+});
 
