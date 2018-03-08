@@ -6683,7 +6683,9 @@ StageMorph.prototype.step = function () {
     // handle keyboard events
     if (world.keyboardReceiver === null) {
         world.keyboardReceiver = this;
-        world.worldCanvas.focus(); // addresses a Safari 11 bug
+        // Ken Kahn commented out the following since it causes the loading pages with Snap! iframes
+        // to jump around
+//         world.worldCanvas.focus(); // addresses a Safari 11 bug
     }
     if (world.currentKey === null) {
         this.keyPressed = null;
