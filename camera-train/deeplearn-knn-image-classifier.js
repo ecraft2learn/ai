@@ -43,23 +43,22 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var deeplearn_1 = (typeof window !== "undefined" ? window['dl'] : typeof global !== "undefined" ? global['dl'] : null);
+var dl = (typeof window !== "undefined" ? window['dl'] : typeof global !== "undefined" ? global['dl'] : null);
 var deeplearn_squeezenet_1 = require("deeplearn-squeezenet");
 var model_util = require("../util");
 var KNNImageClassifier = (function () {
-    function KNNImageClassifier(numClasses, k, math) {
+    function KNNImageClassifier(numClasses, k) {
         this.numClasses = numClasses;
         this.k = k;
-        this.math = math;
         this.classLogitsMatrices = [];
         this.classExampleCount = [];
         this.varsLoaded = false;
-        this.squashLogitsDenominator = deeplearn_1.Scalar.new(300);
+        this.squashLogitsDenominator = dl.scalar(300);
         for (var i = 0; i < this.numClasses; i++) {
             this.classLogitsMatrices.push(null);
             this.classExampleCount.push(0);
         }
-        this.squeezeNet = new deeplearn_squeezenet_1.SqueezeNet(this.math);
+        this.squeezeNet = new deeplearn_squeezenet_1.SqueezeNet();
     }
     KNNImageClassifier.prototype.load = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -93,7 +92,7 @@ var KNNImageClassifier = (function () {
             console.warn('Cannot add to invalid class ${classIndex}');
         }
         this.clearTrainLogitsMatrix();
-        this.math.scope(function (keep, track) {
+        dl.tidy(function () {
             var logits = _this.squeezeNet.predict(image);
             var imageLogits = _this.normalizeVector(logits);
             var logitsSize = imageLogits.shape[0];
@@ -101,11 +100,13 @@ var KNNImageClassifier = (function () {
                 _this.classLogitsMatrices[classIndex] = imageLogits.as2D(1, logitsSize);
             }
             else {
-                var newTrainLogitsMatrix = _this.math.concat2D(_this.classLogitsMatrices[classIndex].as2D(_this.classExampleCount[classIndex], logitsSize), imageLogits.as2D(1, logitsSize), 0);
+                var newTrainLogitsMatrix = _this.classLogitsMatrices[classIndex]
+                    .as2D(_this.classExampleCount[classIndex], logitsSize)
+                    .concat(imageLogits.as2D(1, logitsSize), 0);
                 _this.classLogitsMatrices[classIndex].dispose();
                 _this.classLogitsMatrices[classIndex] = newTrainLogitsMatrix;
             }
-            keep(_this.classLogitsMatrices[classIndex]);
+            dl.keep(_this.classLogitsMatrices[classIndex]);
             _this.classExampleCount[classIndex]++;
         });
     };
@@ -114,7 +115,7 @@ var KNNImageClassifier = (function () {
         if (!this.varsLoaded) {
             throw new Error('Cannot predict until vars have been loaded.');
         }
-        return this.math.scope(function (keep) {
+        return dl.tidy(function () {
             var logits = _this.squeezeNet.predict(image);
             var imageLogits = _this.normalizeVector(logits);
             var logitsSize = imageLogits.shape[0];
@@ -129,10 +130,10 @@ var KNNImageClassifier = (function () {
                 console.warn('Cannot predict without providing training images.');
                 return null;
             }
-            keep(_this.trainLogitsMatrix);
+            dl.keep(_this.trainLogitsMatrix);
             var numExamples = _this.getNumExamples();
-            return _this.math
-                .matMul(_this.trainLogitsMatrix.as2D(numExamples, logitsSize), imageLogits.as2D(logitsSize, 1))
+            return _this.trainLogitsMatrix.as2D(numExamples, logitsSize)
+                .matMul(imageLogits.as2D(logitsSize, 1))
                 .as1D();
         });
     };
@@ -194,6 +195,14 @@ var KNNImageClassifier = (function () {
     KNNImageClassifier.prototype.getClassExampleCount = function () {
         return this.classExampleCount;
     };
+    KNNImageClassifier.prototype.getClassLogitsMatrices = function () {
+        return this.classLogitsMatrices;
+    };
+    KNNImageClassifier.prototype.setClassLogitsMatrices = function (classLogitsMatrices) {
+        this.classLogitsMatrices = classLogitsMatrices;
+        this.classExampleCount = classLogitsMatrices.map(function (tensor) { return tensor != null ? tensor.shape[0] : 0; });
+        this.clearTrainLogitsMatrix();
+    };
     KNNImageClassifier.prototype.clearTrainLogitsMatrix = function () {
         if (this.trainLogitsMatrix != null) {
             this.trainLogitsMatrix.dispose();
@@ -205,19 +214,17 @@ var KNNImageClassifier = (function () {
             return null;
         }
         if (ndarray1 == null) {
-            return this.math.clone(ndarray2);
+            return ndarray2.clone();
         }
         else if (ndarray2 === null) {
-            return this.math.clone(ndarray1);
+            return ndarray1.clone();
         }
-        return this.math.concat2D(ndarray1, ndarray2, 0);
+        return ndarray1.concat(ndarray2, 0);
     };
     KNNImageClassifier.prototype.normalizeVector = function (vec) {
-        var squashedVec = this.math.divide(vec, this.squashLogitsDenominator);
-        var squared = this.math.multiplyStrict(squashedVec, squashedVec);
-        var sum = this.math.sum(squared);
-        var sqrtSum = this.math.sqrt(sum);
-        return this.math.divide(squashedVec, sqrtSum);
+        var squashedVec = dl.div(vec, this.squashLogitsDenominator);
+        var sqrtSum = squashedVec.square().sum().sqrt();
+        return dl.div(squashedVec, sqrtSum);
     };
     KNNImageClassifier.prototype.getNumExamples = function () {
         var total = 0;
@@ -1309,14 +1316,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var deeplearn_1 = (typeof window !== "undefined" ? window['dl'] : typeof global !== "undefined" ? global['dl'] : null);
+var dl = (typeof window !== "undefined" ? window['dl'] : typeof global !== "undefined" ? global['dl'] : null);
 var model_util = require("../util");
 var imagenet_classes_1 = require("./imagenet_classes");
 var GOOGLE_CLOUD_STORAGE_DIR = 'https://storage.googleapis.com/learnjs-data/checkpoint_zoo/';
 var SqueezeNet = (function () {
-    function SqueezeNet(math) {
-        this.math = math;
-        this.preprocessOffset = deeplearn_1.Array1D.new([103.939, 116.779, 123.68]);
+    function SqueezeNet() {
+        this.preprocessOffset = dl.tensor1d([103.939, 116.779, 123.68]);
     }
     SqueezeNet.prototype.load = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -1324,7 +1330,7 @@ var SqueezeNet = (function () {
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        checkpointLoader = new deeplearn_1.CheckpointLoader(GOOGLE_CLOUD_STORAGE_DIR + 'squeezenet1_1/');
+                        checkpointLoader = new dl.CheckpointLoader(GOOGLE_CLOUD_STORAGE_DIR + 'squeezenet1_1/');
                         _a = this;
                         return [4, checkpointLoader.getAllVariables()];
                     case 1:
@@ -1339,15 +1345,17 @@ var SqueezeNet = (function () {
     };
     SqueezeNet.prototype.predictWithActivation = function (input, activationName) {
         var _this = this;
-        var _a = this.math.scope(function () {
+        return dl.tidy(function () {
             var activation;
-            var preprocessedInput = _this.math.subtract(input.asType('float32'), _this.preprocessOffset);
-            var conv1 = _this.math.conv2d(preprocessedInput, _this.variables['conv1_W:0'], _this.variables['conv1_b:0'], 2, 0);
-            var conv1relu = _this.math.relu(conv1);
+            var preprocessedInput = dl.sub(input.asType('float32'), _this.preprocessOffset);
+            var conv1relu = preprocessedInput
+                .conv2d(_this.variables['conv1_W:0'], 2, 0)
+                .add(_this.variables['conv1_b:0'])
+                .relu();
             if (activationName === 'conv_1') {
                 activation = conv1relu;
             }
-            var pool1 = _this.math.maxPool(conv1relu, 3, 2, 0);
+            var pool1 = conv1relu.maxPool(3, 2, 0);
             if (activationName === 'maxpool_1') {
                 activation = pool1;
             }
@@ -1359,7 +1367,7 @@ var SqueezeNet = (function () {
             if (activationName === 'fire3') {
                 activation = fire3;
             }
-            var pool2 = _this.math.maxPool(fire3, 3, 2, 'valid');
+            var pool2 = fire3.maxPool(3, 2, 'valid');
             if (activationName === 'maxpool_2') {
                 activation = pool2;
             }
@@ -1371,7 +1379,7 @@ var SqueezeNet = (function () {
             if (activationName === 'fire5') {
                 activation = fire5;
             }
-            var pool3 = _this.math.maxPool(fire5, 3, 2, 0);
+            var pool3 = fire5.maxPool(3, 2, 0);
             if (activationName === 'maxpool_3') {
                 activation = pool3;
             }
@@ -1391,34 +1399,37 @@ var SqueezeNet = (function () {
             if (activationName === 'fire9') {
                 activation = fire9;
             }
-            var conv10 = _this.math.conv2d(fire9, _this.variables['conv10_W:0'], _this.variables['conv10_b:0'], 1, 0);
+            var conv10 = fire9.conv2d(_this.variables['conv10_W:0'], 1, 0)
+                .add(_this.variables['conv10_b:0']);
             if (activationName === 'conv10') {
                 activation = conv10;
             }
-            return [
-                _this.math.avgPool(conv10, conv10.shape[0], 1, 0).as1D(), activation
-            ];
-        }), logits = _a[0], activation = _a[1];
-        return { activation: activation, logits: logits };
+            return {
+                logits: dl.avgPool(conv10, conv10.shape[0], 1, 0).as1D(),
+                activation: activation
+            };
+        });
     };
     SqueezeNet.prototype.fireModule = function (input, fireId) {
-        var y1 = this.math.conv2d(input, this.variables["fire" + fireId + "/squeeze1x1_W:0"], this.variables["fire" + fireId + "/squeeze1x1_b:0"], 1, 0);
-        var y2 = this.math.relu(y1);
-        var left1 = this.math.conv2d(y2, this.variables["fire" + fireId + "/expand1x1_W:0"], this.variables["fire" + fireId + "/expand1x1_b:0"], 1, 0);
-        var left2 = this.math.relu(left1);
-        var right1 = this.math.conv2d(y2, this.variables["fire" + fireId + "/expand3x3_W:0"], this.variables["fire" + fireId + "/expand3x3_b:0"], 1, 1);
-        var right2 = this.math.relu(right1);
-        return this.math.concat3D(left2, right2, 2);
+        var y = dl.conv2d(input, this.variables["fire" + fireId + "/squeeze1x1_W:0"], 1, 0)
+            .add(this.variables["fire" + fireId + "/squeeze1x1_b:0"])
+            .relu();
+        var left = dl.conv2d(y, this.variables["fire" + fireId + "/expand1x1_W:0"], 1, 0)
+            .add(this.variables["fire" + fireId + "/expand1x1_b:0"])
+            .relu();
+        var right = dl.conv2d(y, this.variables["fire" + fireId + "/expand3x3_W:0"], 1, 1)
+            .add(this.variables["fire" + fireId + "/expand3x3_b:0"])
+            .relu();
+        return left.concat(right, 2);
     };
     SqueezeNet.prototype.getTopKClasses = function (logits, topK) {
         return __awaiter(this, void 0, void 0, function () {
-            var _this = this;
             var predictions, topk, _a, _b, topkIndices, topkValues, topClassesToProbability, i;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        predictions = this.math.scope(function () {
-                            return _this.math.softmax(logits).asType('float32');
+                        predictions = dl.tidy(function () {
+                            return dl.softmax(logits).asType('float32');
                         });
                         _b = (_a = model_util).topK;
                         return [4, predictions.data()];
