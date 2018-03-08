@@ -1262,9 +1262,9 @@ window.ecraft2learn =
       return get_costumes(sprite).length;
   },
   training_window_ready: function () {
-      return ecraft2learn.machine_learning_window && 
-      !ecraft2learn.machine_learning_window.closed &&
-      ecraft2learn.machine_learning_window_ready;
+      return ecraft2learn.machine_learning_window === true && 
+             !ecraft2learn.machine_learning_window.closed &&
+             ecraft2learn.machine_learning_window_ready === true;
   },
         
 }} ());
