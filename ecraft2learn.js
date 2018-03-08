@@ -371,12 +371,10 @@ window.ecraft2learn =
             utterance.volume = volume;
         }
         utterance.onend = function (event) {
+            ecraft2learn.speaking_ongoing = false;
             invoke_callback(finished_callback, message);
         };
-    //     if (speech_recognition) {
-    //         // don't recognise synthetic speech
-    //         ecraft2learn.speech_recognition.abort();
-    //     }
+        ecraft2learn.speaking_ongoing = true;
         window.speechSynthesis.speak(utterance);
     };
     var no_voices_alert = function () {
@@ -552,8 +550,9 @@ window.ecraft2learn =
               }
               return;
           }
-          if (window.speechSynthesis.speaking || ecraft2learn.speech_recognition) { 
+          if (window.speechSynthesis.speaking || ecraft2learn.speaking_ongoing || ecraft2learn.speech_recognition) { 
               // don't listen while speaking or while listening is still in progress
+              // added ecraft2learn.speaking_ongoing since window.speechSynthesis.speaking wasn't sufficient on some systems
               if (debugging) {
                   console.log("Delaying start due to " + (window.speechSynthesis.speaking ? "speaking" : "listen in progress"));
               }
