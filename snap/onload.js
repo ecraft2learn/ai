@@ -12,23 +12,25 @@ window.addEventListener('DOMContentLoaded', function () {
 	if (window.frameElement) { // if running in an iframe see if a local project_path is declared
 		var project_path = window.frameElement.getAttribute("project_path");
 		var run_full_screen = window.frameElement.getAttribute("run_full_screen");
-		var full_screen = run_full_screen || window.frameElement.getAttribute("full_screen"); 
+		var full_screen = run_full_screen || window.frameElement.getAttribute("full_screen");
+		var load_project_string = 
+			function (project_text) {
+				// listener wasn't needed before Snap 4.1
+				// without it iframes show only Snap! background texture
+				window.addEventListener('load',
+										function () {
+											ide_morph.rawOpenProjectString(project_text);
+											if (full_screen) {
+												ide_morph.toggleAppMode(true);
+											} 
+											if (run_full_screen) {
+												ide_morph.runScripts();
+											}
+										 });
+								   };
 		if (project_path) {
 			fetch(project_path).then(function (response) {
-										 response.text().then(function (project_text) {
-										 	// timeout wasn't needed before Snap 4.1
-										 	// without it iframes show only Snap! background texture
-											 setTimeout(function () {
-															ide_morph.rawOpenProjectString(project_text);
-														    if (full_screen) {
-																ide_morph.toggleAppMode(true);
-															} 
-															if (run_full_screen) {
-																ide_morph.runScripts();
-															}
-														},
-														1000);
-										 });
+										 response.text().then(load_project_string);
 									 }).catch(function (error) {
 										 console.error("Error fetching " + project_path + ": " + error.message);
 									 });
@@ -40,6 +42,6 @@ window.addEventListener('DOMContentLoaded', function () {
 		window.onbeforeunload = function () {}; // don't bother the user about reloading
 		ecraft2learn.get_voice_names();         // no need to wait for them to load
 	}
-    loop();
+	window.addEventListener('load', loop);
 });
 
