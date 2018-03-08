@@ -15,19 +15,19 @@ window.addEventListener('DOMContentLoaded', function () {
 		var full_screen = run_full_screen || window.frameElement.getAttribute("full_screen");
 		var load_project_string = 
 			function (project_text) {
-				// listener wasn't needed before Snap 4.1
+				// timeout wasn't needed before Snap 4.1
 				// without it iframes show only Snap! background texture
-				window.addEventListener('load',
-										function () {
-											ide_morph.rawOpenProjectString(project_text);
-											if (full_screen) {
-												ide_morph.toggleAppMode(true);
-											} 
-											if (run_full_screen) {
-												ide_morph.runScripts();
-											}
-										 });
-								   };
+				setTimeout(function () {
+							   ide_morph.rawOpenProjectString(project_text);
+							   if (full_screen) {
+								   ide_morph.toggleAppMode(true);
+							    } 
+								if (run_full_screen) {
+									ide_morph.runScripts();
+								}
+							},
+							1000);
+			};
 		if (project_path) {
 			fetch(project_path).then(function (response) {
 										 response.text().then(load_project_string);
@@ -42,6 +42,7 @@ window.addEventListener('DOMContentLoaded', function () {
 		window.onbeforeunload = function () {}; // don't bother the user about reloading
 		ecraft2learn.get_voice_names();         // no need to wait for them to load
 	}
-	window.addEventListener('load', loop);
+	loop();
+// 	window.addEventListener('load', loop);
 });
 
