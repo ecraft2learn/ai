@@ -26,7 +26,7 @@ window.addEventListener('DOMContentLoaded', function () {
 									ide_morph.runScripts();
 								}
 							},
-							1000);
+							3000);
 			};
 		if (project_path) {
 			fetch(project_path).then(function (response) {
