@@ -74,13 +74,21 @@ Say <span class="notranslate english" translate=no>"goodbye"</n> to quit the pro
 Sometimes you need to repeat what you said.
 Occasionally it will mishear you.</p>
 
-<p>A similar program could be written to control a physical device such as a robot or a set of lights.</p>
-
-<a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=command" target="_blank">
 <figure>
-<img src="images/command.png" class="center">
-<figcaption>Click to try the voice command example</figcaption></figure></a>
+<iframe style="width: 800px; height: 600px"
+        scrolling="no"
+        src="/ai/snap/snap.html"
+        project_path="/ai/projects/command.xml"
+        full_screen="true"> 
+</iframe>
+<figcaption>Click the green flag to to try a voice command example</figcaption>
+</figure>
+<p>
+There is a
+<a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=command" target="_blank">full screen version of this</a>.
+</p>
 
+<p>A similar program could be written to control a physical device such as a robot or a set of lights.</p>
 <p>
 <b>Exercise.</b> 
 See if you can add a <span class="notranslate english">"turn left"</span> command to the program.
@@ -92,7 +100,7 @@ How about doing animations in response to spoken commands?
 <h4>How the speech command program works</h4>
 <p>If you click on <img src="images/show-blocks.png"> you'll see the blocks behind the program.
 If you then right click on <span class="block-name">speak turtle commands</span>
-and select 'edit' you'll see its program.</p>
+and select 'edit' you'll see the following program.</p>
 
 <figure>
 <img src="images/command-program.png" class="center">
@@ -129,17 +137,12 @@ For example, it is very difficult to implement a response when
 no other parts of the program understand what was said.
 The first version responds by saying it didn't understand what was said, repeats what it thinks it heard,
 and says to try again.
-The following version cannot do so.</p>
-
-<a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=command%20broadcast%202" target="_blank">
-<figure>
-<img src="images/command.png" class="center">
-<figcaption>Click to see how to use broadcasting to implement voice commands</figcaption></figure></a>
+The <a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=command%20broadcast%202" target="_blank">broadcast version</a>
+cannot do so.</p>
 </span>
 
 <h4>An example project involving generating sentences using parts of speech concepts</h4>
-<p>This <a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=part%20of%20speech%20broadcast" target="_blank">
-sentence generating program</a> starts with a random sentence "template".
+<p>The following sentence generating program starts with a random sentence "template".
 The program considers any word starting with "?" to be a variable that is replaced by asking the user for something of that sort.
 For example,
 <blockquote class="notranslate english" translate=no>The silly ?PLURAL-NOUN like ?ADJECTIVE bananas.
@@ -152,7 +155,22 @@ and <span class="notranslate english" translate=no>"gigantic"</span> then the pr
 <blockquote class="notranslate english" translate=no>The silly potatoes like gigantic bananas.
 </blockquote></p>
 
-<p>Let's look at the code to see how it works.</p>
+<figure>
+<iframe style="width: 800px; height: 600px"
+        scrolling="no"
+        src="/ai/snap/snap.html"
+        project_path="/ai/projects/part of speech broadcast.xml"
+        full_screen="true"> 
+</iframe>
+<figcaption>Click the green flag to generate silly sentences</figcaption>
+</figure>
+
+<p>
+If you click on <img src="images/show-blocks.png"> you'll see the blocks behind the program.
+There is a
+<a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=part%20of%20speech%20broadcast" target="_blank">full window version</a>.
+Let's look at the code to see how it works.</p>
+
 <figure>
 <img src="images/part-of-speech-code.png">
 <figcaption>Screenshot of the core of the program that asks for substitutions for words beginning with "?"</figcaption></figure>
@@ -179,9 +197,20 @@ Could a program like this work without grammatical ideas like nouns, verbs, adje
 </p>
 
 <h4 id="story-generator">A more sophisticated sentence (or story) generator</h4>
-<p>This <a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=story%20generator" target="_blank">story generator</a>
-extends the sentence generator by adding a new feature.
-If it encounters a word beginning with "=" it replaces it with the last response to the request for an example of that word/phrase.
+<p>This following program extends the sentence generator by adding a new feature.
+If it encounters a word beginning with "=" it replaces it with the last response to the request for an example of that word/phrase.</p>
+
+<figure>
+<iframe style="width: 800px; height: 600px"
+        scrolling="no"
+        src="/ai/snap/snap.html"
+        project_path="/ai/projects/story generator.xml"
+        full_screen="true"> 
+</iframe>
+<figcaption>Click the green flag to generate stories based upon your answers</figcaption>
+</figure>
+
+<p>
 For example, consider this very short story:
 <blockquote class="notranslate english" translate=no>
 This is a story about ?GIRLS-NAME.
@@ -210,6 +239,13 @@ Juliet and Romeo lived barely ever after.
 <span class="student-guide">You may want to enhance the program to turn
         <span class="notranslate english" translate=no>"a amateur"</span>
          into <span class="notranslate english" translate=no>"an amateur"</span>.</span>
+Try changing to have a different template story.
+</p>
+<p>
+If you click on <img src="images/show-blocks.png"> you'll see the blocks behind the program.
+There is a
+<a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=story%20generator" target="_blank">full window version</a>
+of the story generator.
 </p>
 
 <h4>A question answering demo</h4>
