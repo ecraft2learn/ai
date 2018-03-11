@@ -1173,7 +1173,7 @@ window.ecraft2learn =
       var open_machine_learning_window = function () {
           var URL = window.location.href.indexOf("localhost") >= 0 ? 
                     "/ai/camera-train/index-dev.html?translate=1" :
-                    "/ai/camera-train/index.html?translate=1";
+                    "https://ecraft2learn.github.io/ai/camera-train/index.html?translate=1";
           return window.open(URL, "Training " + buckets);
       };
       if (!ecraft2learn.machine_learning_window || ecraft2learn.machine_learning_window.closed) {
