@@ -1319,7 +1319,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var dl = (typeof window !== "undefined" ? window['dl'] : typeof global !== "undefined" ? global['dl'] : null);
 var model_util = require("../util");
 var imagenet_classes_1 = require("./imagenet_classes");
-var GOOGLE_CLOUD_STORAGE_DIR = 'https://storage.googleapis.com/learnjs-data/checkpoint_zoo/';
+var GOOGLE_CLOUD_STORAGE_DIR = '/ai/camera-train/';
+// edited to use local storage
+// see https://github.com/PAIR-code/deeplearnjs/issues/841#issuecomment-372036034
+// was 'https://storage.googleapis.com/learnjs-data/checkpoint_zoo/';
 var SqueezeNet = (function () {
     function SqueezeNet() {
         this.preprocessOffset = dl.tensor1d([103.939, 116.779, 123.68]);
