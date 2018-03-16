@@ -26,7 +26,7 @@ window.ecraft2learn =
           // API keys are provided by Snap! reporters
           var key = run_snap_block(key_name);
           var get_hash_parameter = function (name, parameters, default_value) {
-              var parts = parameters.split('&');
+              var parts = decodeURI(parameters).split('&');
               var value = default_value;
               parts.some(function (part) {
                              var name_and_value = part.split('=');
