@@ -189,12 +189,12 @@ window.ecraft2learn =
                         if (voice[2].indexOf("-") >= 0) {
                             // language and dialect specified
                             if (voice[2] === ecraft2learn.default_language) {
-                                voice_number = index;
+                                voice_number = index+1; // 1-indexing in Snap
                                 return true;
                             }
                         } else {
                             if (voice[2] === ecraft2learn.default_language.substring(0, 2)) {
-                                voice_number = index;
+                                voice_number = index+1;
                                 return true;
                             }
                         }
@@ -202,10 +202,10 @@ window.ecraft2learn =
                 }
             }
             if (voice_number >= 0 && voice_number < voices.length) {
-               return voices[Math.floor(voice_number)];
+                return voices[Math.floor(voice_number)];
             } else {
-               ecraftlearn.inform("No such voice",
-                                  "Only voice numbers between 1 and " + voices.length + " are available. There is no voice number " + (voice_number+1));
+                ecraftlearn.inform("No such voice",
+                                   "Only voice numbers between 1 and " + voices.length + " are available. There is no voice number " + (voice_number+1));
             }
         }
     };
@@ -363,8 +363,9 @@ window.ecraft2learn =
             voices.some(function (voice, index) {
                 if (voice.lang === ecraft2learn.default_language) {
                     voice_number = index+1; // 1-indexing
+                    return true;
                 }
-            })
+            });
         }
         utterance.voice = get_voice(voice_number);
         volume = +volume;
@@ -705,11 +706,87 @@ window.ecraft2learn =
                                   });
     },
 
-    set_default_language: function (language) {
-        if (language.indexOf("-") < 0) {
-            language = language.toLowerCase() + "-" + language.toUpperCase();
+    set_default_language: function (language_mixed_case) {
+        var matching_language_entry;
+        var language = language_mixed_case.toLowerCase(); // ignore case in matching 
+        // [Language name, Language code, English language name, right-to-left]
+        ecraft2learn.chrome_languages.some(function (language_entry) {
+            if (language === language_entry[1].toLowerCase()) {
+                // code matches
+                matching_language_entry = language_entry;
+                return true;
+            }
+            if (language.length === 2 &&
+                language_entry[1].indexOf(language) === 0) {
+                // code is is just 2 letters and matches language part of code
+                matching_language_entry = language_entry;
+                return true;
+            }
+        });
+        if (!matching_language_entry) {
+            ecraft2learn.chrome_languages.some(function (language_entry) {
+                if (language === language_entry[0].toLowerCase() ||
+                    language === language_entry[2].toLowerCase()) {
+                    // language name (in itself or English) matches
+                    matching_language_entry = language_entry;
+                    return true;
+                }
+            });
         }
-        ecraft2learn.default_language = language;
+        if (!matching_language_entry && language_defaults[language]) {
+            // try again if just language name is given and it is ambiguous
+            return ecraft2learn.set_default_language(language_defaults[language]);
+        }
+        if (!matching_language_entry) {
+            ecraft2learn.chrome_languages.some(function (language_entry) {
+                if (language_entry[0].toLowerCase().indexOf(language) >= 0 ||
+                    language_entry[2].toLowerCase().indexOf(language) >= 0) {
+                    // language (in itself or English) is a substring of a language name
+                    matching_language_entry = language_entry;
+                    return true;
+                }
+            });
+        }
+        if (!matching_language_entry) {
+            ecraft2learn.inform("Unrecognised language",
+                                "Unable to recognise which language '" + language_mixed_case + "'");
+            ecraft2learn.default_language = undefined;
+        } else {
+            ecraft2learn.default_language = matching_language_entry[1];
+            var voices = window.speechSynthesis.getVoices();
+            var builtin_voice_number;
+            voices.some(function (voice, index) {
+                if (voice.lang === ecraft2learn.default_language) {
+                    builtin_voice_number = index;
+                    return true;
+                }
+            });
+            var mary_tts_voice_number;
+            mary_tts_voices.some(function (voice, index) {
+                if (voice[2].indexOf("-") >= 0) {
+                    // language and dialect specified
+                    if (voice[2] === ecraft2learn.default_language) {
+                        mary_tts_voice_number = index;
+                        return true;
+                    } else {
+                        if (voice[2] === ecraft2learn.default_language.substring(0, 2)) {
+                            mary_tts_voice_number = index;
+                            return true;
+                         }
+                    }
+                }
+            });
+            var message = "Speech recognition will expect " + matching_language_entry[2] + " to be spoken. ";
+            if (builtin_voice_number >= 0) {
+                message += "Speech synthesis will use the browser's voice " + voices[builtin_voice_number].name + ".";
+            } else if (mary_tts_voice_number >= 0) {
+                message += "No matching browser speech synthesis voice found but Mary TTS voice " + mary_tts_voices[mary_tts_voice_number][1] + " can be used. " +
+                           "Use the Speak (using Mary TTS engine) command.";
+            } else {
+                message += "No speech synthesis support for " + matching_language_entry[2] + " found so English will be used.";
+            }
+            ecraft2learn.inform("Default language set", message);
+        }
     },
 
     start_microsoft_speech_recognition: function (as_recognized_callback, final_spoken_callback, error_callback, provided_key) {
@@ -1299,3 +1376,145 @@ window.ecraft2learn =
 }} ());
 ecraft2learn.get_voice_names(); // to ensure voices are loaded
 ecraft2learn.inside_snap = true;
+ecraft2learn.chrome_languages =
+[
+// based upon https://cloud.google.com/speech/docs/languages
+// [Language name, Language code, English language name, right-to-left]
+["Afrikaans (Suid-Afrika)", "af-ZA", "Afrikaans (South Africa)"],
+["አማርኛ (ኢትዮጵያ)", "am-ET", "Amharic (Ethiopia)"],
+["Հայ (Հայաստան)", "hy-AM", "Armenian (Armenia)"],
+["Azərbaycan (Azərbaycan)", "az-AZ", "Azerbaijani (Azerbaijan)"],
+["Bahasa Indonesia (Indonesia)", "id-ID", "Indonesian (Indonesia)"],
+["Bahasa Melayu (Malaysia)", "ms-MY", "Malay (Malaysia)"],
+["বাংলা (বাংলাদেশ)", "bn-BD", "Bengali (Bangladesh)"],
+["বাংলা (ভারত)", "bn-IN", "Bengali (India)"],
+["Català (Espanya)", "ca-ES", "Catalan (Spain)"],
+["Čeština (Česká republika)", "cs-CZ", "Czech (Czech Republic)"],
+["Dansk (Danmark)", "da-DK", "Danish (Denmark)"],
+["Deutsch (Deutschland)", "de-DE", "German (Germany)"],
+["English (Australia)", "en-AU", "English (Australia)"],
+["English (Canada)", "en-CA", "English (Canada)"],
+["English (Ghana)", "en-GH", "English (Ghana)"],
+["English (Great Britain)", "en-GB", "English (United Kingdom)"],
+["English (India)", "en-IN", "English (India)"],
+["English (Ireland)", "en-IE", "English (Ireland)"],
+["English (Kenya)", "en-KE", "English (Kenya)"],
+["English (New Zealand)", "en-NZ", "English (New Zealand)"],
+["English (Nigeria)", "en-NG", "English (Nigeria)"],
+["English (Philippines)", "en-PH", "English (Philippines)"],
+["English (South Africa)", "en-ZA", "English (South Africa)"],
+["English (Tanzania)", "en-TZ", "English (Tanzania)"],
+["English (United States)", "en-US", "English (United States)"],
+["Español (Argentina)", "es-AR", "Spanish (Argentina)"],
+["Español (Bolivia)", "es-BO", "Spanish (Bolivia)"],
+["Español (Chile)", "es-CL", "Spanish (Chile)"],
+["Español (Colombia)", "es-CO", "Spanish (Colombia)"],
+["Español (Costa Rica)", "es-CR", "Spanish (Costa Rica)"],
+["Español (Ecuador)", "es-EC", "Spanish (Ecuador)"],
+["Español (El Salvador)", "es-SV", "Spanish (El Salvador)"],
+["Español (España)", "es-ES", "Spanish (Spain)"],
+["Español (Estados Unidos)", "es-US", "Spanish (United States)"],
+["Español (Guatemala)", "es-GT", "Spanish (Guatemala)"],
+["Español (Honduras)", "es-HN", "Spanish (Honduras)"],
+["Español (México)", "es-MX", "Spanish (Mexico)"],
+["Español (Nicaragua)", "es-NI", "Spanish (Nicaragua)"],
+["Español (Panamá)", "es-PA", "Spanish (Panama)"],
+["Español (Paraguay)", "es-PY", "Spanish (Paraguay)"],
+["Español (Perú)", "es-PE", "Spanish (Peru)"],
+["Español (Puerto Rico)", "es-PR", "Spanish (Puerto Rico)"],
+["Español (República Dominicana)", "es-DO", "Spanish (Dominican Republic)"],
+["Español (Uruguay)", "es-UY", "Spanish (Uruguay)"],
+["Español (Venezuela)", "es-VE", "Spanish (Venezuela)"],
+["Euskara (Espainia)", "eu-ES", "Basque (Spain)"],
+["Filipino (Pilipinas)", "fil-PH", "Filipino (Philippines)"],
+["Français (Canada)", "fr-CA", "French (Canada)"],
+["Français (France)", "fr-FR", "French (France)"],
+["Galego (España)", "gl-ES", "Galician (Spain)"],
+["ქართული (საქართველო)", "ka-GE", "Georgian (Georgia)"],
+["ગુજરાતી (ભારત)", "gu-IN", "Gujarati (India)"],
+["Hrvatski (Hrvatska)", "hr-HR", "Croatian (Croatia)"],
+["IsiZulu (Ningizimu Afrika)", "zu-ZA", "Zulu (South Africa)"],
+["Íslenska (Ísland)", "is-IS", "Icelandic (Iceland)"],
+["Italiano (Italia)", "it-IT", "Italian (Italy)"],
+["Jawa (Indonesia)", "jv-ID", "Javanese (Indonesia)"],
+["ಕನ್ನಡ (ಭಾರತ)", "kn-IN", "Kannada (India)"],
+["ភាសាខ្មែរ (កម្ពុជា)", "km-KH", "Khmer (Cambodia)"],
+["ລາວ (ລາວ)", "lo-LA", "Lao (Laos)"],
+["Latviešu (latviešu)", "lv-LV", "Latvian (Latvia)"],
+["Lietuvių (Lietuva)", "lt-LT", "Lithuanian (Lithuania)"],
+["Magyar (Magyarország)", "hu-HU", "Hungarian (Hungary)"],
+["മലയാളം (ഇന്ത്യ)", "ml-IN", "Malayalam (India)"],
+["मराठी (भारत)", "mr-IN", "Marathi (India)"],
+["Nederlands (Nederland)", "nl-NL", "Dutch (Netherlands)"],
+["नेपाली (नेपाल)", "ne-NP", "Nepali (Nepal)"],
+["Norsk bokmål (Norge)", "nb-NO", "Norwegian Bokmål (Norway)"],
+["Polski (Polska)", "pl-PL", "Polish (Poland)"],
+["Português (Brasil)", "pt-BR", "Portuguese (Brazil)"],
+["Português (Portugal)", "pt-PT", "Portuguese (Portugal)"],
+["Română (România)", "ro-RO", "Romanian (Romania)"],
+["සිංහල (ශ්රී ලංකාව)", "si-LK", "Sinhala (Sri Lanka)"],
+["Slovenčina (Slovensko)", "sk-SK", "Slovak (Slovakia)"],
+["Slovenščina (Slovenija)", "sl-SI", "Slovenian (Slovenia)"],
+["Urang (Indonesia)", "su-ID", "Sundanese (Indonesia)"],
+["Swahili (Tanzania)", "sw-TZ", "Swahili (Tanzania)"],
+["Swahili (Kenya)", "sw-KE", "Swahili (Kenya)"],
+["Suomi (Suomi)", "fi-FI", "Finnish (Finland)"],
+["Svenska (Sverige)", "sv-SE", "Swedish (Sweden)"],
+["தமிழ் (இந்தியா)", "ta-IN", "Tamil (India)"],
+["தமிழ் (சிங்கப்பூர்)", "ta-SG", "Tamil (Singapore)"],
+["தமிழ் (இலங்கை)", "ta-LK", "Tamil (Sri Lanka)"],
+["தமிழ் (மலேசியா)", "ta-MY", "Tamil (Malaysia)"],
+["తెలుగు (భారతదేశం)", "te-IN", "Telugu (India)"],
+["Tiếng Việt (Việt Nam)", "vi-VN", "Vietnamese (Vietnam)"],
+["Türkçe (Türkiye)", "tr-TR", "Turkish (Turkey)"],
+["(اردو (پاکستان", "ur-PK", "Urdu (Pakistan)", true],
+["(اردو (بھارت", "ur-IN", "Urdu (India)", true],
+["Ελληνικά (Ελλάδα)", "el-GR", "Greek (Greece)"],
+["Български (България)", "bg-BG", "Bulgarian (Bulgaria)"],
+["Русский (Россия)", "ru-RU", "Russian (Russia)"],
+["Српски (Србија)", "sr-RS", "Serbian (Serbia)"],
+["Українська (Україна)", "uk-UA", "Ukrainian (Ukraine)"],
+["(עברית (ישראל", "he-IL", "Hebrew (Israel)", true],
+["(العربية (إسرائيل", "ar-IL", "Arabic (Israel)", true],
+["(العربية (الأردن", "ar-JO", "Arabic (Jordan)", true],
+["(العربية (الإمارات", "ar-AE", "Arabic (United Arab Emirates)", true],
+["(العربية (البحرين", "ar-BH", "Arabic (Bahrain)", true],
+["(العربية (الجزائر", "ar-DZ", "Arabic (Algeria)", true],
+["(العربية (السعودية", "ar-SA", "Arabic (Saudi Arabia)", true],
+["(العربية (العراق", "ar-IQ", "Arabic (Iraq)", true],
+["(العربية (تونس", "ar-KW", "Arabic (Kuwait)", true],
+["(العربية (المغرب", "ar-MA", "Arabic (Morocco)", true],
+["(العربية (عُمان", "ar-TN", "Arabic (Tunisia)", true],
+["(العربية (فلسطين", "ar-OM", "Arabic (Oman)", true],
+["(العربية (قطر", "ar-PS", "Arabic (State of Palestine)", true],
+["(العربية (لبنان", "ar-QA", "Arabic (Qatar)", true],
+["(العربية (مصر", "ar-LB", "Arabic (Lebanon)", true],
+["(العربية (مصر", "ar-EG", "Arabic (Egypt)", true],
+["(فارسی (ایران", "fa-IR", "Persian (Iran)", true],
+["हिन्दी (भारत)", "hi-IN", "Hindi (India)"],
+["ไทย (ประเทศไทย)", "th-TH", "Thai (Thailand)"],
+["한국어 (대한민국)", "ko-KR", "Korean (South Korea)"],
+["國語 (台灣)", "cmn-Hant-TW", "Chinese, Mandarin (Traditional, Taiwan)"],
+["廣東話 (香港)", "yue-Hant-HK", "Chinese, Cantonese (Traditional, Hong Kong)"],
+["日本語（日本）", "ja-JP", "Japanese (Japan)"],
+["普通話 (香港)", "cmn-Hans-HK", "Chinese, Mandarin (Simplified, Hong Kong)"],
+["普通话 (中国大陆)", "cmn-Hans-CN", "Chinese, Mandarin (Simplified, China)"],
+];
+ecraft2learn.language_defaults =
+ // many arbitrary choices but some default is needed
+ {english:    "en-GB",
+  español:    "es-ES",
+  spanish:    "es-ES",
+  français:   "fr-FR",
+  french:     "fr-FR",
+  português:  "pt-PT",
+  portuguese: "pt-PT",
+  swahili:    "sw-KE", 
+  தமிழ்:      "ta-IN",
+  tamil:      "ta-IN",
+  "اردو":     "ur-PK",
+  urdu:       "ur-PK",
+  "العربية":  "ar-SA",
+  arabic:      "ar-SA",
+  chinese:     "cmn-Hans-CN"
+  }
