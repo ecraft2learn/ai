@@ -176,7 +176,7 @@ window.ecraft2learn =
     };
     var get_voice_from = function (voice_number, voices) {
         if (voices.length === 0) {
-            window.alert("This browser has no voices available. Either try a different browser or try using the MARY TTS instead.");
+            ecraftlearn.inform("No voices", "This browser has no voices available. Either try a different browser or try using the MARY TTS instead.");
             return;
         }
         voice_number = +voice_number; // convert to nunber if is a string
@@ -204,7 +204,8 @@ window.ecraft2learn =
             if (voice_number >= 0 && voice_number < voices.length) {
                return voices[Math.floor(voice_number)];
             } else {
-               alert("Only voice numbers between 1 and " + voices.length + " are available. There is no voice number " + (voice_number+1));
+               ecraftlearn.inform("No such voice",
+                                  "Only voice numbers between 1 and " + voices.length + " are available. There is no voice number " + (voice_number+1));
             }
         }
     };
@@ -380,7 +381,8 @@ window.ecraft2learn =
     var no_voices_alert = function () {
         if (!ecraft2learn.no_voices_alert_given) {
             ecraft2learn.no_voices_alert_given = true;
-            window.alert("This browser has no voices available. Either try a different browser or try using the MARY TTS instead.");
+            ecraftlearn.inform("No voices available",
+                               "This browser has no voices available. Either try a different browser or try using the MARY TTS instead.");
         }
     };
     var create_costume = function (canvas, name) {
@@ -402,7 +404,7 @@ window.ecraft2learn =
         var training_image_width  = 227;
         var training_image_height = 227;
         if (!ecraft2learn.machine_learning_window) {
-            window.alert(alert_message);
+            ecraftlearn.inform(alert_message);
             return;
         }
         var post_image = function (canvas, video) {
@@ -430,9 +432,10 @@ window.ecraft2learn =
     var costume_of_sprite = function (costume_number, sprite) {
         var costumes = get_costumes(sprite);
         if (costume_number < 0 || costume_number > costumes.length) {
-            alert("Cannot add costume number " + costume_number +
-                  " to " + label + " training bucket. Only numbers between 1 and " + 
-                  costumes.length + " are permitted.");
+            ecraftlearn.inform("Invalid costume number",
+                               "Cannot add costume number " + costume_number +
+                                " to " + label + " training bucket. Only numbers between 1 and " + 
+                                costumes.length + " are permitted.");
             return;
         }
         return costumes[costume_number-1]; // 1-indexing to zero-indexing
@@ -504,7 +507,8 @@ window.ecraft2learn =
               } else if (function_name === "stop_speech_recognition") {
                   return; // ignore if called before speech_recognition started
               }
-              alert("Ecraft2learn library does not have a function named " + function_name);
+              ecraft2learn.inform("No such function",
+                                  "Ecraft2learn library does not have a function named " + function_name);
               return;
           }
           return ecraft2learn[function_name].apply(null, parameters.contents);
@@ -956,7 +960,7 @@ window.ecraft2learn =
                            cloud_provider,
                            function (event) {
                                if (typeof event === 'string') {
-                                   alert(event);
+                                   ecraft2learn.inform("Error from service provider", event);
                                } else {
                                    callback(event.currentTarget.response);
                                }
@@ -969,7 +973,7 @@ window.ecraft2learn =
                    cloud_provider,
                    function (event) {
                        if (typeof event === 'string') {
-                           alert(event);
+                           ecraft2learn.inform("Error from Google", event);
                        } else {
                            callback(event.currentTarget.response);
                        }
@@ -1037,9 +1041,11 @@ window.ecraft2learn =
       var recognition = image_recognitions[cloud_provider];
       if (!recognition || !recognition.costume) {
           if (cloud_provider === "") {
-              window.alert("A vision recognition service provider needs to be chosen.");
+              ecraft2learn.inform("No service provided selected",
+                                  "A vision recognition service provider needs to be chosen.");
           } else {
-              window.alert("No photo has been created for " + cloud_provider + " to recognize.");
+              ecraft2learn.inform("No photo",
+                                  "No photo has been created for " + cloud_provider + " to recognize.");
           }
       } else {
           add_costume(recognition.costume);
@@ -1198,7 +1204,8 @@ window.ecraft2learn =
       if (add_to_previous_training && buckets_equal(buckets, ecraft2learn.image_learning_buckets)) {
           // would like to go to that window:  ecraft2learn.machine_learning_window.focus();
           // but browsers don't allow it unless clear the user initiated it
-          window.alert("Go to the training window whenever you want to add to the training.");
+          ecraft2learn.inform("Training tab ready",
+                              "Go to the training window whenever you want to add to the training.");
       } else {
           ecraft2learn.machine_learning_window.close();
           // start over
@@ -1269,14 +1276,20 @@ window.ecraft2learn =
              ecraft2learn.machine_learning_window_ready === true;
   },
   inform: function(title, message, callback) {
-      // based upon Snap4Arduino index file
+      // based upon Snap4Arduino index file  
+      if (!inside_snap) { // not inside of snap
+          window.alert(message);
+          return;
+      }
       var ide = get_snap_ide(ecraft2learn.snap_context);
       if (!ide.informing) {
           var box = new DialogBoxMorph();
           ide.informing = true;
           box.ok = function() { 
               ide.informing = false;
-              if (callback) { callback() };
+              if (callback) { 
+                  invoke_callback(callback);
+              }
               this.accept();
           };
           box.inform(title, message, world)
