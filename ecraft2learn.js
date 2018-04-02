@@ -189,12 +189,12 @@ window.ecraft2learn =
                         if (voice[2].indexOf("-") >= 0) {
                             // language and dialect specified
                             if (voice[2] === ecraft2learn.default_language) {
-                                voice_number = index+1; // 1-indexing in Snap
+                                voice_number = index;
                                 return true;
                             }
                         } else {
                             if (voice[2] === ecraft2learn.default_language.substring(0, 2)) {
-                                voice_number = index+1;
+                                voice_number = index;
                                 return true;
                             }
                         }
@@ -769,11 +769,11 @@ window.ecraft2learn =
                     if (voice[2] === ecraft2learn.default_language) {
                         mary_tts_voice_number = index;
                         return true;
-                    } else {
-                        if (voice[2] === ecraft2learn.default_language.substring(0, 2)) {
-                            mary_tts_voice_number = index;
-                            return true;
-                         }
+                    }
+                } else {
+                    if (voice[2] === ecraft2learn.default_language.substring(0, 2)) {
+                        mary_tts_voice_number = index;
+                        return true;
                     }
                 }
             });
