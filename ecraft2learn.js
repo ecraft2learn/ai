@@ -1268,6 +1268,20 @@ window.ecraft2learn =
              !ecraft2learn.machine_learning_window.closed &&
              ecraft2learn.machine_learning_window_ready === true;
   },
+  inform: function(title, message, callback) {
+      // based upon Snap4Arduino index file
+      var ide = get_snap_ide(ecraft2learn.snap_context);
+      if (!ide.informing) {
+          var box = new DialogBoxMorph();
+          ide.informing = true;
+          box.ok = function() { 
+              ide.informing = false;
+              if (callback) { callback() };
+              this.accept();
+          };
+          box.inform(title, message, world)
+      }
+  },
         
 }} ());
 ecraft2learn.get_voice_names(); // to ensure voices are loaded
