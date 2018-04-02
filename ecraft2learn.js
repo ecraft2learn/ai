@@ -716,12 +716,6 @@ window.ecraft2learn =
                 matching_language_entry = language_entry;
                 return true;
             }
-            if (language.length === 2 &&
-                language_entry[1].indexOf(language) === 0) {
-                // code is is just 2 letters and matches language part of code
-                matching_language_entry = language_entry;
-                return true;
-            }
         });
         if (!matching_language_entry) {
             ecraft2learn.chrome_languages.some(function (language_entry) {
@@ -737,11 +731,15 @@ window.ecraft2learn =
             // try again if just language name is given and it is ambiguous
             return ecraft2learn.set_default_language(ecraft2learn.language_defaults[language]);
         }
+        if (language.length === 2) {
+           // code is is just 2 letters so try repeating it (e.g. id-ID)
+           return ecraft2learn.set_default_language(language + "-" + language);
+        }
         if (!matching_language_entry) {
             ecraft2learn.chrome_languages.some(function (language_entry) {
                 if (language_entry[0].toLowerCase().indexOf(language) >= 0 ||
                     language_entry[2].toLowerCase().indexOf(language) >= 0) {
-                    // language (in itself or English) is a substring of a language name
+                    // language (in itself or in English) is a substring of a language name
                     matching_language_entry = language_entry;
                     return true;
                 }
@@ -1518,6 +1516,7 @@ ecraft2learn.chrome_languages =
 ecraft2learn.language_defaults =
  // many arbitrary choices but some default is needed
  {english:    "en-GB",
+  en:         "en-GB",
   español:    "es-ES",
   spanish:    "es-ES",
   français:   "fr-FR",
