@@ -1277,7 +1277,7 @@ window.ecraft2learn =
   },
   inform: function(title, message, callback) {
       // based upon Snap4Arduino index file  
-      if (!inside_snap) { // not inside of snap
+      if (!ecraft2learn.inside_snap) { // not inside of snap
           window.alert(message);
           return;
       }
