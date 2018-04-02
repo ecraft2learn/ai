@@ -708,6 +708,12 @@ window.ecraft2learn =
 
     set_default_language: function (language_mixed_case) {
         var matching_language_entry;
+        if (language_mixed_case === "") {
+            ecraft2learn.default_language = undefined;
+            ecraft2learn.inform("No default language",
+                                "No default language specified so English will be used.");
+            return;
+        }
         var language = language_mixed_case.toLowerCase(); // ignore case in matching 
         // [Language name, Language code, English language name, right-to-left]
         ecraft2learn.chrome_languages.some(function (language_entry) {
