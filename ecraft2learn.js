@@ -758,14 +758,6 @@ window.ecraft2learn =
 //             if (matching_language_entry[3]) {
 //                 matching_language_name = Array.from(matching_language_name).reduce((a, e) => e + a);
 //             }
-            var voices = window.speechSynthesis.getVoices();
-            var builtin_voice_number;
-            voices.some(function (voice, index) {
-                if (voice.lang === ecraft2learn.default_language) {
-                    builtin_voice_number = index;
-                    return true;
-                }
-            });
             var mary_tts_voice_number;
             mary_tts_voices.some(function (voice, index) {
                 if (voice[2].indexOf("-") >= 0) {
@@ -782,15 +774,33 @@ window.ecraft2learn =
                 }
             });
             var message = "Speech recognition will expect " + matching_language_name + " to be spoken. ";
-            if (builtin_voice_number >= 0) {
-                message += "Speech synthesis will use the browser's voice " + voices[builtin_voice_number].name + ".";
-            } else if (mary_tts_voice_number >= 0) {
-                message += "No matching browser speech synthesis voice found but Mary TTS voice " + mary_tts_voices[mary_tts_voice_number][1] + " can be used. " +
-                           "Use the Speak (using Mary TTS engine) command.";
-            } else {
-                message += "No speech synthesis support for " + matching_language_name + " found so English will be used.";
-            }
-            ecraft2learn.inform("Default language set", message);
+            var no_voices_callback = function () {
+                if (mary_tts_voice_number >= 0) {
+                    message += "No matching browser speech synthesis voice found but Mary TTS voice " + mary_tts_voices[mary_tts_voice_number][1] + " can be used. " +
+                               "Use the Speak (using Mary TTS engine) command.";
+                } else {
+                    message += "No speech synthesis support for " + matching_language_name + " found so English will be used.";
+                }
+                ecraft2learn.inform("Default language set", message);
+            };
+            var voices_callback = function () {
+                var voices = window.speechSynthesis.getVoices();
+                var builtin_voice_number;
+                voices.some(function (voice, index) {
+                    if (voice.lang === ecraft2learn.default_language) {
+                        builtin_voice_number = index;
+                        return true;
+                    }
+                });
+                if (builtin_voice_number >= 0) {
+                    message += "Speech synthesis will use the browser's voice named ''" + voices[builtin_voice_number].name + "''.";
+                    ecraft2learn.inform("Default language set", message);
+                } else {
+                    no_voices_callback();
+                }
+            };
+            // the following will wait for voices to be loaded (or time out) before responding
+            check_for_voices(no_voices_callback, voices_callback);  
         }
     },
 
@@ -1379,7 +1389,7 @@ window.ecraft2learn =
   },
         
 }} ());
-ecraft2learn.get_voice_names(); // to ensure voices are loaded
+window.speechSynthesis.getVoices(); // to ensure voices are loaded
 ecraft2learn.inside_snap = true;
 ecraft2learn.chrome_languages =
 [
