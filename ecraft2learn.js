@@ -456,6 +456,53 @@ window.ecraft2learn =
                            when_loaded(image);
                        };
     };
+    var language_entry = function (language) {
+        var matching_language_entry;
+        if (language === "") {
+            // use the browser's default language
+            return language_entry(window.navigator.language);
+        }
+        language = language.toLowerCase(); // ignore case in matching 
+        ecraft2learn.chrome_languages.some(function (language_entry) {
+            // language_entry is [Language name, Language code, English language name, right-to-left]
+            if (language === language_entry[1].toLowerCase()) {
+                // code matches
+                matching_language_entry = language_entry;
+                return true;
+            }
+        });
+        if (matching_language_entry) {
+            return matching_language_entry;
+        }
+        ecraft2learn.chrome_languages.some(function (language_entry) {
+            if (language === language_entry[0].toLowerCase() ||
+                language === language_entry[2].toLowerCase()) {
+                // language name (in itself or English) matches
+                matching_language_entry = language_entry;
+                return true;
+            }
+        });
+        if (matching_language_entry) {
+            return matching_language_entry;
+        }
+        if (ecraft2learn.language_defaults[language]) {
+            // try again if just language name is given and it is ambiguous
+            return language_entry(ecraft2learn.language_defaults[language]);
+        }
+        if (language.length === 2) {
+           // code is is just 2 letters so try repeating it (e.g. id-ID)
+           return language_entry(language + "-" + language);
+        }
+        ecraft2learn.chrome_languages.some(function (language_entry) {
+            if (language_entry[0].toLowerCase().indexOf(language) >= 0 ||
+                language_entry[2].toLowerCase().indexOf(language) >= 0) {
+                // language (in itself or in English) is a substring of a language name
+                matching_language_entry = language_entry;
+                return true;
+            }
+        });
+        return matching_language_entry; // could be undefined
+    };
     var inform = function(title, message, callback) {
         // based upon Snap4Arduino index file  
         if (!ecraft2learn.inside_snap) { // not inside of snap
@@ -747,63 +794,15 @@ window.ecraft2learn =
     },
 
     set_default_language: function (language_mixed_case) {
-        var matching_language_entry;
-        if (language_mixed_case === "") {
-            // use the browser's default language
-            return ecraft2learn.set_default_language(window.navigator.language);
-//             ecraft2learn.default_language = undefined;
-//             inform("No default language",
-//                    "No default language specified so English will be used.");
-//             return;
-        }
-        var language = language_mixed_case.toLowerCase(); // ignore case in matching 
-        // [Language name, Language code, English language name, right-to-left]
-        ecraft2learn.chrome_languages.some(function (language_entry) {
-            if (language === language_entry[1].toLowerCase()) {
-                // code matches
-                matching_language_entry = language_entry;
-                return true;
-            }
-        });
-        if (!matching_language_entry) {
-            ecraft2learn.chrome_languages.some(function (language_entry) {
-                if (language === language_entry[0].toLowerCase() ||
-                    language === language_entry[2].toLowerCase()) {
-                    // language name (in itself or English) matches
-                    matching_language_entry = language_entry;
-                    return true;
-                }
-            });
-        }
-        if (!matching_language_entry && ecraft2learn.language_defaults[language]) {
-            // try again if just language name is given and it is ambiguous
-            return ecraft2learn.set_default_language(ecraft2learn.language_defaults[language]);
-        }
-        if (language.length === 2) {
-           // code is is just 2 letters so try repeating it (e.g. id-ID)
-           return ecraft2learn.set_default_language(language + "-" + language);
-        }
-        if (!matching_language_entry) {
-            ecraft2learn.chrome_languages.some(function (language_entry) {
-                if (language_entry[0].toLowerCase().indexOf(language) >= 0 ||
-                    language_entry[2].toLowerCase().indexOf(language) >= 0) {
-                    // language (in itself or in English) is a substring of a language name
-                    matching_language_entry = language_entry;
-                    return true;
-                }
-            });
-        }
+        var matching_language_entry = language_entry(language_mixed_case);
         if (!matching_language_entry) {
             inform("Unrecognised language",
-                   "Unable to recognise which language is described by '" + language_mixed_case + "'.");
-            ecraft2learn.default_language = undefined;
-        } else {
+                   "Unable to recognise which language is described by '" + language_mixed_case + "'. " +
+                   "Default language unchanged.");
+        } else if (ecraft2learn.default_language !== matching_language_entry[1]) {
+            // default has been changed so notify user
             ecraft2learn.default_language = matching_language_entry[1];
             var matching_language_name = matching_language_entry[2];
-            // not clear if need to reverse right-to-left text...
-//             if (matching_language_entry[3]) {
-//                 matching_language_name = Array.from(matching_language_name).reduce((a, e) => e + a);
-//             }
             var mary_tts_voice_number;
             mary_tts_voices.some(function (voice, index) {
                 if (voice[2].indexOf("-") >= 0) {
