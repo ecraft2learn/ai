@@ -791,7 +791,10 @@ window.ecraft2learn =
               ecraft2learn.speech_recognition = speech_recognition;
               speech_recognition.interimResults = is_callback(interim_spoken_callback);
               if (typeof language === 'string') {
-                  speech_recognition.lang = language;
+                  var matching_language_entry = language_entry(language);
+                  if (matching_language_entry) {
+                      speech_recognition.lang = matching_language_entry[1];
+                  } 
               } else if (ecraft2learn.default_language) {
                   speech_recognition.lang = ecraft2learn.default_language;
               }
@@ -847,11 +850,11 @@ window.ecraft2learn =
                                   });
     },
 
-    set_default_language: function (language_mixed_case) {
-        var matching_language_entry = language_entry(language_mixed_case);
+    set_default_language: function (language) {
+        var matching_language_entry = language_entry(language);
         if (!matching_language_entry) {
             inform("Unrecognised language",
-                   "Unable to recognise which language is described by '" + language_mixed_case + "'. " +
+                   "Unable to recognise which language is described by '" + language + "'. " +
                    "Default language unchanged.");
         } else if (ecraft2learn.default_language !== matching_language_entry[1]) {
             // default has been changed so notify user
