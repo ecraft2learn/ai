@@ -794,8 +794,12 @@ window.ecraft2learn =
                   var matching_language_entry = language_entry(language);
                   if (matching_language_entry) {
                       speech_recognition.lang = matching_language_entry[1];
-                  } 
-              } else if (ecraft2learn.default_language) {
+                  } else {
+                      inform("No matching language",
+                             "Could not a find a language that matches '" + language + "'.");
+                  }
+              } 
+              if (ecraft2learn.default_language && !speech_recognition.lang) {
                   speech_recognition.lang = ecraft2learn.default_language;
               }
               if (max_alternatives > 1) {
