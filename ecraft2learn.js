@@ -362,6 +362,12 @@ window.ecraft2learn =
         ecraft2learn.utterance = utterance; // without this utterance may be garbage collected before onend can run
         if (typeof language === 'string') {
             utterance.lang = language;
+            if (voice_number === 0) {
+                voice_number = get_matching_voice(true, [language]);
+                if (voice_number === undefined) {
+                    voice_number = 0;
+                }
+            }
         } else if (ecraft2learn.default_language) {
             utterance.lang = ecraft2learn.default_language;
         }
