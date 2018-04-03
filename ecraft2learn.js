@@ -243,9 +243,10 @@ window.ecraft2learn =
         }
     };
     var get_matching_voice = function (builtin_voices, name_parts) { 
-      var voices = builtin_voices ? window.speechSynthesis.getVoices().map(function (voice) { return voice.name.toLowerCase(); }) :
-                                    mary_tts_voices.map(function (voice) { return voice[1].toLowerCase(); });
-      var voice_number = 0;
+      var voices = builtin_voices ? 
+                   window.speechSynthesis.getVoices().map(function (voice) { return voice.name.toLowerCase(); }) :
+                   mary_tts_voices.map(function (voice) { return voice[1].toLowerCase(); });
+      var voice_number;
       if (!Array.isArray(name_parts) && typeof name_parts !== 'string') {
           // convert from a Snap list to a JavaScript array
           name_parts = name_parts.contents;
@@ -259,7 +260,7 @@ window.ecraft2learn =
       var name_parts_left_white_space   = name_parts.map(function (part) {
                                                             return " " + part;
       });
-      var name_parts_right_white_space = name_parts.map(function (part) {
+      var name_parts_right_white_space  = name_parts.map(function (part) {
                                                             return part + " ";
       });
       var name_matches = function (name, parts) {
@@ -279,7 +280,25 @@ window.ecraft2learn =
                               });
                   return voice_number > 0;               
             });
-       return voice_number;
+       if (voice_number >= 0) {
+           return voice_number;
+       }
+       // no match so try using just the first argument to find a matching language entry
+       var matching_language_entry = language_entry(name_parts[0]);
+       if (matching_language_entry) {
+           voice_number = voice_number_of_language_code(matching_language_entry[1], builtin_voices);
+       }
+       if (voice_number >= 0) {
+           return voice_number;
+       }
+       inform("Unable to find a matching voice",
+              "This browser does not have a voice that matches " + name_parts.join("-"));
+    };
+    var voice_number_of_language_code = function (code, builtin_voices) {
+        if (builtin_voices) {
+            return builtin_voice_number_with_language_code(code);
+        }
+        return mary_tts_voice_number_with_language_code(code);
     };
     var speak = function (message, pitch, rate, voice_number, volume, language, finished_callback) {
         // speaks 'message' optionally with the specified pitch, rate, voice, volume, and language
@@ -502,6 +521,35 @@ window.ecraft2learn =
             }
         });
         return matching_language_entry; // could be undefined
+    };
+    var builtin_voice_number_with_language_code = function (language_code) {
+        var voices = window.speechSynthesis.getVoices();
+        var builtin_voice_number;
+        voices.some(function (voice, index) {
+            if (voice.lang.toLowerCase() === language_code.toLowerCase()) {
+                builtin_voice_number = index;
+                return true;
+            }
+        });
+        return builtin_voice_number;
+    };
+    var mary_tts_voice_number_with_language_code = function (language_code) {
+        var mary_tts_voice_number;
+        mary_tts_voices.some(function (voice, index) {
+            if (voice[2].indexOf("-") >= 0) {
+                // language and dialect specified
+                if (voice[2].toLowerCase() === language_code.toLowerCase()) {
+                    mary_tts_voice_number = index;
+                    return true;
+                }
+            } else {
+                if (voice[2].toLowerCase() === language_code.substring(0, 2).toLowerCase()) {
+                    mary_tts_voice_number = index;
+                    return true;
+                }
+            }
+        });
+        return mary_tts_voice_number;
     };
     var inform = function(title, message, callback) {
         // based upon Snap4Arduino index file  
@@ -803,21 +851,7 @@ window.ecraft2learn =
             // default has been changed so notify user
             ecraft2learn.default_language = matching_language_entry[1];
             var matching_language_name = matching_language_entry[2];
-            var mary_tts_voice_number;
-            mary_tts_voices.some(function (voice, index) {
-                if (voice[2].indexOf("-") >= 0) {
-                    // language and dialect specified
-                    if (voice[2] === ecraft2learn.default_language) {
-                        mary_tts_voice_number = index;
-                        return true;
-                    }
-                } else {
-                    if (voice[2] === ecraft2learn.default_language.substring(0, 2)) {
-                        mary_tts_voice_number = index;
-                        return true;
-                    }
-                }
-            });
+            var mary_tts_voice_number = mary_tts_voice_number_with_language_code(matching_language_entry[1]);
             var message = "Speech recognition will expect " + matching_language_name + " to be spoken. ";
             var no_voices_callback = function () {
                 if (mary_tts_voice_number >= 0) {
@@ -829,16 +863,10 @@ window.ecraft2learn =
                 inform("Default language set", message);
             };
             var voices_callback = function () {
-                var voices = window.speechSynthesis.getVoices();
-                var builtin_voice_number;
-                voices.some(function (voice, index) {
-                    if (voice.lang === ecraft2learn.default_language) {
-                        builtin_voice_number = index;
-                        return true;
-                    }
-                });
+                var builtin_voice_number = builtin_voice_number_with_language_code(matching_language_entry[1]);
                 if (builtin_voice_number >= 0) {
-                    message += "Speech synthesis will use the browser's voice named ''" + voices[builtin_voice_number].name + "''.";
+                    message += "Speech synthesis will use the browser's voice named ''" + 
+                               window.speechSynthesis.getVoices()[builtin_voice_number].name + "''.";
                     inform("Default language set", message);
                 } else {
                     no_voices_callback();
