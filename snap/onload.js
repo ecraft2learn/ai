@@ -40,7 +40,7 @@ window.addEventListener('DOMContentLoaded', function () {
 			ide_morph.toggleAppMode(false); // launch in edit mode
 		}
 		window.onbeforeunload = function () {}; // don't bother the user about reloading
-		ecraft2learn.get_voice_names();         // no need to wait for them to load
+		window.speechSynthesis.getVoices();     // no need to wait for them to load
 	}
 	loop();
 // 	window.addEventListener('load', loop);
