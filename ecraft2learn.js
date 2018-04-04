@@ -58,7 +58,7 @@ window.ecraft2learn =
           // key missing to explain how to obtain keys
           inform("Missing API key",
                  "No value reported by the '" + key_name +
-                 "' reporter. After obtaining the key edit the reporter in the 'Variables' area. " +
+                 "' reporter. After obtaining the key edit the reporter in the 'Variables' area.\n" +
                  "Do you want to visit https://github.com/ecraft2learn/ai/wiki to learn how to get a key?",
                  function () {
                        window.onbeforeunload = null; // don't warn about reload
@@ -179,7 +179,9 @@ window.ecraft2learn =
     };
     var get_voice_from = function (voice_number, voices) {
         if (voices.length === 0) {
-            inform("No voices", "This browser has no voices available. Either try a different browser or try using the MARY TTS instead.");
+            inform("No voices",
+                   "This browser has no voices available.\n" + 
+                   "Either try a different browser or try using the MARY TTS instead.");
             return;
         }
         voice_number = +voice_number; // convert to nunber if is a string
@@ -208,7 +210,8 @@ window.ecraft2learn =
                 return voices[Math.floor(voice_number)];
             } else {
                 inform("No such voice",
-                       "Only voice numbers between 1 and " + voices.length + " are available. There is no voice number " + (voice_number+1) + ".");
+                       "Only voice numbers between 1 and " + voices.length + " are available.\n" + 
+                       "There is no voice number " + (voice_number+1) + ".");
             }
         }
     };
@@ -411,7 +414,8 @@ window.ecraft2learn =
         if (!ecraft2learn.no_voices_alert_given) {
             ecraft2learn.no_voices_alert_given = true;
             inform("No voices available",
-                   "This browser has no voices available. Either try a different browser or try using the MARY TTS instead.");
+                   "This browser has no voices available.\n" + 
+                   "Either try a different browser or try using the MARY TTS instead.");
         }
     };
     var create_costume = function (canvas, name) {
@@ -463,7 +467,8 @@ window.ecraft2learn =
         if (costume_number < 0 || costume_number > costumes.length) {
             inform("Invalid costume number",
                    "Cannot add costume number " + costume_number +
-                   " to " + label + " training bucket. Only numbers between 1 and " + 
+                   " to " + label + " training bucket.\n" + 
+                   "Only numbers between 1 and " + 
                    costumes.length + " are permitted.");
             return;
         }
@@ -688,8 +693,8 @@ window.ecraft2learn =
           // if the browser has no support for speech recognition then the Microsoft Speech API is used (API key required)
           if (typeof SpeechRecognition === 'undefined' && typeof webkitSpeechRecognition === 'undefined') {
               // no support from this browser so try using the Microsoft Speech API
-              inform("This browser does not support speech recognition. " +
-                     "You could use Chrome or you can use Microsoft's speech recognition service. " +
+              inform("This browser does not support speech recognition.\n" +
+                     "You could use Chrome or you can use Microsoft's speech recognition service.\n" +
                      "Go ahead and use the Microsoft service? (It requires an API key.)",
                       function () {
                            ecraft2learn.start_microsoft_speech_recognition(interim_spoken_callback, final_spoken_callback, error_callback);
@@ -858,17 +863,17 @@ window.ecraft2learn =
         var matching_language_entry = language_entry(language);
         if (!matching_language_entry) {
             inform("Unrecognised language",
-                   "Unable to recognise which language is described by '" + language + "'. " +
+                   "Unable to recognise which language is described by '" + language + "'.\n" +
                    "Default language unchanged.");
         } else if (ecraft2learn.default_language !== matching_language_entry[1]) {
             // default has been changed so notify user
             ecraft2learn.default_language = matching_language_entry[1];
             var matching_language_name = matching_language_entry[2];
             var mary_tts_voice_number = mary_tts_voice_number_with_language_code(matching_language_entry[1]);
-            var message = "Speech recognition will expect " + matching_language_name + " to be spoken. ";
+            var message = "Speech recognition will expect " + matching_language_name + " to be spoken.\n";
             var no_voices_callback = function () {
                 if (mary_tts_voice_number >= 0) {
-                    message += "No matching browser speech synthesis voice found but Mary TTS voice " + mary_tts_voices[mary_tts_voice_number][1] + " can be used. " +
+                    message += "No matching browser speech synthesis voice found but Mary TTS voice " + mary_tts_voices[mary_tts_voice_number][1] + " can be used.\n" +
                                "Use the Speak (using Mary TTS engine) command.";
                 } else {
                     message += "No speech synthesis support for " + matching_language_name + " found so English will be used.";
