@@ -593,6 +593,10 @@ window.ecraft2learn =
                 box.askYesNo(title, message, world);
             } else {
                 box.inform(title, message, world);
+                if (window.frameElement && window.frameElement.className.indexOf("iframe-clipped") >= 0) {
+                    // move it from center of Snap! window to iframe window
+                    box.setPosition(new Point(230, 110));
+                }
             }   
         }
     };
