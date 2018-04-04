@@ -1407,7 +1407,7 @@ window.ecraft2learn =
                                         window.removeEventListener("message", receive_confidences);
                                     };
                                 };
-      training_window_request("You need to train the system before using 'Current image label confidences'. " +
+      training_window_request("You need to train the system before using 'Current image label confidences'.\n" +
                               "Run 'Train using camera ...' before this.", 
                               function (image) {
                                   return {predict: image};
@@ -1424,7 +1424,7 @@ window.ecraft2learn =
                                 };
         costume_to_image(costume,
                          function (image) {
-                            training_window_request("You need to train the system before using 'Image label confidences'. " +
+                            training_window_request("You need to train the system before using 'Image label confidences'.\n" +
                                                     "Run 'Train using camera ...' before this.", 
                                                     function (image_URL) {
                                                                  return {predict: image_URL};
@@ -1444,7 +1444,7 @@ window.ecraft2learn =
       var costume = costume_of_sprite(costume_number, sprite);
       costume_to_image(costume,
                        function (image) {
-                          training_window_request("You need to train the system before using 'Add image to training'. " +
+                          training_window_request("You need to train the system before using 'Add image to training'.\n" +
                                                   "Run 'Train using camera ...' before this so the system knows the list of possible labels.", 
                                                   function (image_URL) {
                                                       return {train: image_URL,
