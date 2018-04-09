@@ -1367,7 +1367,12 @@ window.ecraft2learn =
           var URL = window.location.href.indexOf("localhost") >= 0 ? 
                     "/ai/camera-train/index-dev.html?translate=1" :
                     "https://ecraft2learn.github.io/ai/camera-train/index.html?translate=1";
-          return window.open(URL, "Training " + buckets);
+          var training_window = window.open(URL, "Training " + buckets);
+          window.addEventListener('unload',
+                                  function () {
+                                      training_window.close();
+                                  });
+          return training_window;
       };
       if (!ecraft2learn.machine_learning_window || ecraft2learn.machine_learning_window.closed) {
           ecraft2learn.image_learning_buckets = buckets;
