@@ -1364,6 +1364,12 @@ window.ecraft2learn =
                   }));
       };
       var open_machine_learning_window = function () {
+          if (window.navigator.userAgent.indexOf("Chrome") < 0) {
+              inform("Machine learning has been tested in Chrome. If you encounter problems switch to Chrome.");
+          } else if (window.navigator.userAgent.indexOf("arm") >= 0 && 
+                     window.navigator.userAgent.indexOf("X11") >= 0) {
+              inform("You may find that the Raspberry Pi is too slow for machine learning to work well.");
+          }
           var URL = window.location.href.indexOf("localhost") >= 0 ? 
                     "/ai/camera-train/index-dev.html?translate=1" :
                     "https://ecraft2learn.github.io/ai/camera-train/index.html?translate=1";
