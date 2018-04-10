@@ -1,0 +1,21 @@
+/*
+* demos.css - custom css for the speech recognition demos.
+*/
+
+.playDeleteButton {
+  margin: 5px;
+}
+
+/*
+ * Based on snippet from:
+ * https://github.com/skeleton-framework/skeleton-framework
+ */
+.button.button-primary:disabled,
+button.button-primary:disabled,
+input[type="submit"].button-primary:disabled,
+input[type="reset"].button-primary:disabled,
+input[type="button"].button-primary:disabled {
+  color: #FFF;
+  background-color: #BBDDE9;
+  border-color: #BBDDE9;
+}

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>JavaScript Speech Recognition</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/skeleton.css">
+    <link rel="stylesheet" href="../../css/demos.css">
+
+</head>
+
+<body>
+
+    <!-- Include the WebRTC adapter -->
+    <script src="adapter.js"></script>
+    <!-- Include jquery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <script src="JsSpeechRecognizer.js"></script>
+
+    <script>
+        var speechRec = new JsSpeechRecognizer();
+        speechRec.openMic();
+
+        $(document).ready(function() {
+            // Add the handler for the button
+            $("#startStopRecordingButton").click(function() {
+                if (!speechRec.isRecording()) {
+                    var word = $("#currentWordText").val();
+                    speechRec.startTrainingRecording(word);
+
+                    // Update the UI
+                    $("#startStopRecordingButton").val("stop training");
+                    document.getElementById("testingStartStopRecordingButton").disabled = true;
+
+                } else {
+                    var recordingId = speechRec.stopRecording();
+
+                    // Update the UI
+                    $("#startStopRecordingButton").val("start training");
+                    document.getElementById("testingStartStopRecordingButton").disabled = false;
+
+                    // Append to the results area
+                    var playbackDivId = "playbackResultId" + recordingId;
+                    var playButtonId = "playRecordingButton" + recordingId;
+                    var deleteButtonId = "deleteRecordingButton" + recordingId;
+
+                    var appendHtml = '<div id=' + playbackDivId + '>recording #' + recordingId;
+                    appendHtml += ' for word <b>' + $("#currentWordText").val() + '</b>';
+                    appendHtml += '<input type="button" class="playDeleteButton" value="play" id="' + playButtonId + '"" />';
+                    appendHtml += '<input type="button" class="playDeleteButton" value="delete" id="' + deleteButtonId + '" />';
+                    appendHtml += '</div>';
+
+                    $("#resultsDiv").append(appendHtml);
+
+                    // Add the play click functionality
+                    var finalPlaybackId = recordingId - 1;
+                    $("#" + playButtonId).click(function() {
+                        speechRec.playTrainingBuffer((finalPlaybackId));
+                    });
+
+                    // Add the delete click functionality
+                    $("#" + deleteButtonId).click(function() {
+                        $("#" + playbackDivId).hide();
+                        speechRec.deleteTrainingBuffer(finalPlaybackId);
+                        speechRec.generateModel();
+                    });
+
+                    // regenerate the model
+                    speechRec.generateModel();
+
+                }
+            });
+
+            $("#testingStartStopRecordingButton").click(function() {
+                if (!speechRec.isRecording()) {
+                    $("#testingStartStopRecordingButton").val("stop testing");
+                    document.getElementById("startStopRecordingButton").disabled = true;
+
+                    speechRec.startRecognitionRecording();
+                } else {
+                    $("#testingStartStopRecordingButton").val("start testing");
+                    document.getElementById("startStopRecordingButton").disabled = false;
+
+                    speechRec.stopRecording();
+                    var result = speechRec.getTopRecognitionHypotheses(1);
+
+                    // Format and display results
+                    for (var i = 0; i < result.length; i++) {
+                        result[i].confidence = result[i].confidence.toFixed(3);
+                    }
+
+                    $("#testingResultsDiv").html("<h3>\"" + result[0].match + "\" - confidence: " + result[0].confidence + " </h3>");
+                }
+            });
+
+        });
+    </script>
+
+
+    <div class="section">
+        <div class="container" style="margin-top: 5%">
+            <h1 class="section-heading">JsSpeechRecognizer</h1>
+            <p class="section-description">JavaScript Speech Recognition Demo</p>
+            <a href="https://github.com/dreamdom/JsSpeechRecognizer">JsSpeechRecognizer github page</a>
+            <ol style="margin-top:20px;">
+                <li>Train by writing the word and pressing start training and stop training.</li>
+                <li>Try training a word multiple times. Try training multiple words.</li>
+                <li>Test by pressing start testing and say a word already trained.</li>
+            </ol>
+
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row" style="margin-top: 5%">
+            <div class="one-half column">
+                <h2>Training</h2>
+                <div>
+                    Word: <input id="currentWordText" type="text" value="" />
+                    <input class="button-primary" id="startStopRecordingButton" type="button" value="start training" />
+                </div>
+
+                <div id="resultsDiv">
+                </div>
+            </div>
+
+            <div class="one-half column">
+                <h2>Testing</h2>
+                <div>
+                    <input class="button-primary" id="testingStartStopRecordingButton" type="button" value="start testing" />
+                </div>
+                <div id="testingResultsDiv">
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+</html>
