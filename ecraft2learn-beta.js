@@ -7,7 +7,7 @@
  "use strict";
 window.ecraft2learn =
   (function () {
-      var this_url = document.querySelector('script[src*="ecraft2learn-beta.js"]').src; // the URL where this library lives
+      var this_url = document.querySelector('script[src*="ecraft2learn.js"]').src; // the URL where this library lives
       var load_script = function (url, when_loaded) {
           var script = document.createElement("script");
           script.type = "text/javascript";
@@ -25,15 +25,45 @@ window.ecraft2learn =
       var get_key = function (key_name) {
           // API keys are provided by Snap! reporters
           var key = run_snap_block(key_name);
+          var get_hash_parameter = function (name, parameters, default_value) {
+              var parts = decodeURI(parameters).split('&');
+              var value = default_value;
+              parts.some(function (part) {
+                             var name_and_value = part.split('=');
+                             if (name_and_value[0] === name) {
+                                 value = name_and_value[1];
+                                 return true;
+                             }
+              });
+              return value;
+          };
           if (key && key !== "Enter your key here") {
               return key;
           }
-          // key missing to explain how to obtain keys
-          if (window.confirm("No value reported by the '" + key_name +
-                             " reporter. After obtaining the key edit the reporter in the 'Variables' area. Do you want to visit https://github.com/ToonTalk/ai-cloud/wiki to learn how to get a key?")) {
-              window.onbeforeunload = null; // don't warn about reload
-              document.location.assign("https://github.com/ToonTalk/ai-cloud/wiki");
+          try {
+              if (top.window.location.hash) {
+                  // top.window in case this is running in an iframe
+                  key = get_hash_parameter(key_name, top.window.location.hash.substring(1));
+                  if (key) {
+                      return key;
+                  }
+              }
+              var element = top.document.getElementById(key_name);
+              if (element) {
+                  return element.value;
+              }
+          } catch (ignore) {
+              // top.window may signal an error if iframe and container are different domains
           }
+          // key missing to explain how to obtain keys
+          inform("Missing API key",
+                 "No value reported by the '" + key_name +
+                 "' reporter. After obtaining the key edit the reporter in the 'Variables' area.\n" +
+                 "Do you want to visit https://github.com/ecraft2learn/ai/wiki to learn how to get a key?",
+                 function () {
+                       window.onbeforeunload = null; // don't warn about reload
+                       document.location.assign("https://github.com/ecraft2learn/ai/wiki");                                 
+                 });
       };
       var run_snap_block = function (labelSpec) { // add parameters later
           // runs a Snap! block that matches labelSpec
@@ -79,7 +109,7 @@ window.ecraft2learn =
           }
           return value.contents;
     };
-    var invoke_callback = function (callback) {
+    var invoke_callback = function (callback) { // any number of additional arguments
         // callback could either be a Snap! object or a JavaScript function
         if (callback instanceof Context) { // assume Snap! callback
             // invoke the callback with the argments (other than the callback itself)
@@ -111,7 +141,7 @@ window.ecraft2learn =
         return invoke(block_morph, new List(Array.prototype.slice.call(arguments, 1)), block_morph);
     };
     var is_callback = function (x) {
-        return callback instanceof Context || typeof x === 'function';
+        return x instanceof Context || typeof x === 'function';
     };
     var javascript_to_snap = function (x) {
         if (!ecraft2learn.inside_snap) {
@@ -139,7 +169,7 @@ window.ecraft2learn =
         canvas.setAttribute('width', width);
         canvas.setAttribute('height', height);
         var context = canvas.getContext('2d');
-        context.drawImage(video, 0, 0, width, height, 0, 0, width, height);
+        context.drawImage(video, 0, 0, width, height);
     };
     var get_mary_tts_voice = function (voice_number) { // offical name
         return get_voice_from(voice_number, mary_tts_voices.map(function (voice) { return voice[0]; }));
@@ -148,28 +178,251 @@ window.ecraft2learn =
         return get_voice_from(voice_number, window.speechSynthesis.getVoices());
     };
     var get_voice_from = function (voice_number, voices) {
+        if (voices.length === 0) {
+            inform("No voices",
+                   "This browser has no voices available.\n" + 
+                   "Either try a different browser or try using the MARY TTS instead.");
+            return;
+        }
         voice_number = +voice_number; // convert to nunber if is a string
         if (typeof voice_number === 'number' && !isNaN(voice_number)) {
             voice_number--; // Snap (and Scratch) use 1-indexing so convert here
             if (voice_number === -1) {
                 voice_number = 0;
+                if (ecraft2learn.default_language) {
+                    mary_tts_voices.some(function (voice, index) {
+                        if (voice[2].indexOf("-") >= 0) {
+                            // language and dialect specified
+                            if (voice[2] === ecraft2learn.default_language) {
+                                voice_number = index;
+                                return true;
+                            }
+                        } else {
+                            if (voice[2] === ecraft2learn.default_language.substring(0, 2)) {
+                                voice_number = index;
+                                return true;
+                            }
+                        }
+                    });
+                }
             }
             if (voice_number >= 0 && voice_number < voices.length) {
-               return voices[Math.floor(voice_number)];
+                return voices[Math.floor(voice_number)];
             } else {
-               alert("Only voice numbers between 1 and " + voices.length + " are available. There is no voice number " + (voice_number+1));
+                inform("No such voice",
+                       "Only voice numbers between 1 and " + voices.length + " are available.\n" + 
+                       "There is no voice number " + (voice_number+1) + ".");
             }
+        }
+    };
+    var check_for_voices = function (no_voices_callback, voices_callback) {
+        if (window.speechSynthesis.getVoices().length === 0) {
+            // either there are no voices or they haven't loaded yet
+            if (ecraft2learn.waited_for_voices) {
+                no_voices_callback();
+            } else {
+                // voices not loaded so wait for them and try again
+                var onvoiceschanged_ran = false; // so both onvoiceschanged_ran and timeout don't both run
+                window.speechSynthesis.onvoiceschanged = function () {
+                    onvoiceschanged_ran = true;
+                    ecraft2learn.waited_for_voices = true;
+                    check_for_voices(no_voices_callback, voices_callback);
+                    window.speechSynthesis.onvoiceschanged = undefined;
+                };
+                // but don't wait forever because there might not be any
+                setTimeout(function () {
+                               if (!onvoiceschanged_ran) {
+                                   // only if onvoiceschanged didn't run
+                                   ecraft2learn.waited_for_voices = true;
+                                   no_voices_callback();
+                                   window.speechSynthesis.onvoiceschanged = undefined;
+                               }
+                           },
+                           10000);
+                return;         
+            }
+        } else {
+            voices_callback();
+        }
+    };
+    var get_matching_voice = function (builtin_voices, name_parts) { 
+      var voices = builtin_voices ? 
+                   window.speechSynthesis.getVoices().map(function (voice) { return voice.name.toLowerCase(); }) :
+                   mary_tts_voices.map(function (voice) { return voice[1].toLowerCase(); });
+      var voice_number;
+      if (!Array.isArray(name_parts) && typeof name_parts !== 'string') {
+          // convert from a Snap list to a JavaScript array
+          name_parts = name_parts.contents;
+      }
+      name_parts = name_parts.map(function (part) {
+                                      return part.toLowerCase();
+                                  });
+      var name_parts_double_white_space = name_parts.map(function (part) {
+                                                            return " " + part + " ";
+      });
+      var name_parts_left_white_space   = name_parts.map(function (part) {
+                                                            return " " + part;
+      });
+      var name_parts_right_white_space  = name_parts.map(function (part) {
+                                                            return part + " ";
+      });
+      var name_matches = function (name, parts) {
+          return parts.every(function (part) {
+                                      return name.indexOf(part) >= 0;
+                                  });
+      };
+      [name_parts_double_white_space, name_parts_left_white_space, name_parts_right_white_space, name_parts].some(
+           // prefer matches with white space
+           // so that "male" doesn't match "female" unless no other choice
+            function (parts) {
+                  voices.some(function (voice_name, index) {
+                                  if (name_matches(voice_name, parts)) {
+                                      voice_number = index+1; // using 1-indexing
+                                      return true;
+                                  }
+                              });
+                  return voice_number > 0;               
+            });
+       if (voice_number >= 0) {
+           return voice_number;
+       }
+       // no match so try using just the first argument to find a matching language entry
+       var matching_language_entry = language_entry(name_parts[0]);
+       if (matching_language_entry) {
+           voice_number = voice_number_of_language_code(matching_language_entry[1], builtin_voices);
+       }
+       if (voice_number >= 0) {
+           return voice_number;
+       }
+       inform("Unable to find a matching voice",
+              "This browser does not have a voice that matches " + name_parts.join("-"));
+    };
+    var voice_number_of_language_code = function (code, builtin_voices) {
+        if (builtin_voices) {
+            return builtin_voice_number_with_language_code(code);
+        }
+        return mary_tts_voice_number_with_language_code(code);
+    };
+    var speak = function (message, pitch, rate, voice_number, volume, language, finished_callback) {
+        // speaks 'message' optionally with the specified pitch, rate, voice, volume, and language
+        // finished_callback is called with the spoken text
+        // see https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisUtterance
+        var maximum_length = 200; // not sure what a good value is but long text isn't spoken in some browsers
+        var break_into_short_segments = function (text) {
+            var segments = [];
+            var break_text = function (text) {
+                var segment, index;
+                if (text.length < maximum_length) {
+                    return text.length+1;
+                }
+                segment = text.substring(0, maximum_length);
+                index = segment.lastIndexOf(". ") || segment.lastIndexOf(".\n");
+                if (index > 0) {
+                    return index+2;
+                }
+                index = segment.lastIndexOf(".");
+                if (index === segment.length-1) {
+                    // final period need not have space after it
+                    return index+1;
+                }
+                index = segment.lastIndexOf(", ");
+                if (index > 0) {
+                    return index+2;
+                }
+                index = segment.lastIndexOf(" ");
+                if (index > 0) {
+                    return index+1;
+                }
+                // give up - no periods, commas, or spaces
+                return Math.min(text.length+1, maximum_length);
+            };
+            var best_break;
+            while (text.length > 0) {
+                best_break = break_text(text);
+                if (best_break > 1) {
+                    segments.push(text.substring(0, best_break-1));
+                }
+                text = text.substring(best_break);
+            }
+            return segments;
+        };
+        var segments, speech_utterance_index;
+        if (message.length > maximum_length) {
+            segments = break_into_short_segments(message);
+            segments.forEach(function (segment, index) {
+                // finished_callback is only for the last segment
+                var callback = index === segments.length-1 && 
+                               finished_callback &&
+                               function () {
+                                   invoke_callback(finished_callback, message); // entire message not just the segments
+                               };
+                ecraft2learn.speak(segment, pitch, rate, voice_number, volume, language, callback)
+            });
+            return;
+        }
+        // else is less than the maximum_length
+        var utterance = new SpeechSynthesisUtterance(message);
+        ecraft2learn.utterance = utterance; // without this utterance may be garbage collected before onend can run
+        if (typeof language === 'string') {
+            utterance.lang = language;
+            if (voice_number === 0) {
+                voice_number = get_matching_voice(true, [language]);
+                if (voice_number === undefined) {
+                    voice_number = 0;
+                }
+            }
+        } else if (ecraft2learn.default_language) {
+            utterance.lang = ecraft2learn.default_language;
+        }
+        pitch = +pitch; // if string try convering to a number
+        if (typeof pitch === 'number' && pitch > 0) {
+            utterance.pitch = pitch;
+        }
+        rate = +rate;
+        if (typeof rate === 'number' && rate > 0) {
+            if (rate < .1) {
+               // A very slow rate breaks Chrome's speech synthesiser
+               rate = .1;
+            }
+            if (rate > 2) {
+               rate = 2; // high rate also breaks Chrome's speech synthesis
+            }
+            utterance.rate = rate;
+        }
+        if (voice_number === 0 && ecraft2learn.default_language) {
+            var voices = window.speechSynthesis.getVoices();
+            voices.some(function (voice, index) {
+                if (voice.lang === ecraft2learn.default_language) {
+                    voice_number = index+1; // 1-indexing
+                    return true;
+                }
+            });
+        }
+        utterance.voice = get_voice(voice_number);
+        volume = +volume;
+        if (typeof volume && volume > 0) {
+            utterance.volume = volume;
+        }
+        utterance.onend = function (event) {
+            ecraft2learn.speaking_ongoing = false;
+            invoke_callback(finished_callback, message);
+        };
+        ecraft2learn.speaking_ongoing = true;
+        window.speechSynthesis.speak(utterance);
+    };
+    var no_voices_alert = function () {
+        if (!ecraft2learn.no_voices_alert_given) {
+            ecraft2learn.no_voices_alert_given = true;
+            inform("No voices available",
+                   "This browser has no voices available.\n" + 
+                   "Either try a different browser or try using the MARY TTS instead.");
         }
     };
     var create_costume = function (canvas, name) {
         if (!name) {
-            if (typeof  ecraft2learn.photo_count === 'undefined') {
-                ecraft2learn.photo_count = 1;
-            }
-            name =  "photo " + ecraft2learn.photo_count;
-            ecraft2learn.photo_count = ecraft2learn.photo_count+1;
+            name =  "photo " + Date.now(); // needs to be unique
         }
-        return new Costume(canvas, name);;
+        return new Costume(canvas, name);
     }
     var add_costume = function (costume, sprite) {
         var ide = get_snap_ide();
@@ -179,6 +432,236 @@ window.ecraft2learn =
         sprite.addCostume(costume);
         sprite.wearCostume(costume);
         ide.hasChangedMedia = true;
+    };
+    var train = function (source, buckets_as_snap_list, add_to_previous_training, page_introduction, callback) {
+      // source can be 'camera' or 'microphone'
+      var buckets = buckets_as_snap_list.contents;
+      var buckets_equal = function (buckets1, buckets2) {
+          return buckets1 === buckets2 ||
+                 (buckets1.length === buckets2.length &&
+                  buckets1.every(function (bucket_name, index) {
+                      return bucket_name === buckets2[index];
+                  }));
+      };
+      var open_machine_learning_window = function () {
+          if (source === 'camera') {
+              if (window.navigator.userAgent.indexOf("Chrome") < 0) {
+                  inform("Possible browser compatibility problem",
+                         "Machine learning has been tested in Chrome. If you encounter problems switch to Chrome.");
+              } else if (window.navigator.userAgent.indexOf("arm") >= 0 && 
+                         window.navigator.userAgent.indexOf("X11") >= 0) {
+                  inform("Possible Raspberry Pi problem",
+                         "You may find that the Raspberry Pi is too slow for machine learning to work well.");
+              }
+          }
+          var URL = source === 'camera' ?
+                    (window.location.href.indexOf("localhost") >= 0 ? 
+                     "/ai/camera-train/index-dev.html?translate=1" :
+                     "https://ecraft2learn.github.io/ai/camera-train/index.html?translate=1") :
+                     "/ai/microphone-train/index.html?translate=1";
+          var training_window = window.open(URL, "Training " + buckets);
+          window.addEventListener('unload',
+                                  function () {
+                                      training_window.close();
+                                  });
+          return training_window;
+      };
+      if (!ecraft2learn.machine_learning_window || ecraft2learn.machine_learning_window.closed) {
+          ecraft2learn.image_learning_buckets = buckets;
+          var machine_learning_window = open_machine_learning_window();
+          ecraft2learn.machine_learning_window = machine_learning_window;
+          var receive_ready = 
+              function (event) {
+                  if (event.data === "Loaded") {
+                      machine_learning_window.postMessage({training_class_names: buckets}, "*");
+                  } else if (event.data === "Ready") {
+                      ecraft2learn.machine_learning_window_ready = true;
+                      if (page_introduction) {
+                          machine_learning_window.postMessage({new_introduction: page_introduction}, "*");
+                      }
+                      invoke_callback(callback, "Ready");
+                  }
+          };      
+          window.addEventListener("message", receive_ready, false);                     
+          return;
+      }     
+      if (add_to_previous_training && buckets_equal(buckets, ecraft2learn.image_learning_buckets)) {
+          // would like to go to that window:  ecraft2learn.machine_learning_window.focus();
+          // but browsers don't allow it unless clear the user initiated it
+          inform("Training tab ready",
+                 "Go to the training window whenever you want to add to the training.");
+      } else {
+          ecraft2learn.machine_learning_window.close();
+          // start over
+          ecraft2learn.train_using_images(buckets_as_snap_list, add_to_previous_training, page_introduction, callback);
+      }
+  };
+    var training_window_request = function (alert_message, message_maker, response_listener, image) {
+        var training_image_width  = 227;
+        var training_image_height = 227;
+        if (!ecraft2learn.machine_learning_window) {
+            inform("Training request warning", alert_message);
+            return;
+        }
+        var post_image = function (canvas, video) {
+            ecraft2learn.canvas = canvas;
+            ecraft2learn.video  = video;
+            add_photo_to_canvas(canvas, image || video, training_image_width, training_image_height);
+            var image_URL = canvas.toDataURL('image/png');
+            ecraft2learn.machine_learning_window.postMessage(message_maker(image_URL), "*");
+            window.addEventListener("message", response_listener);
+        }
+        if (ecraft2learn.canvas) {
+            post_image(ecraft2learn.canvas, ecraft2learn.video);
+        } else {
+            // better to use 640x480 and then scale it down before sending it off to the training tab
+            ecraft2learn.canvas = ecraft2learn.setup_camera(640, 480, undefined, post_image);
+        }
+    };
+    var get_costumes = function (sprite) {
+        if (!sprite) {
+            alsert("get_costumes called without specifying which sprite");
+            return;
+        }
+        return sprite.costumes.contents;  
+    };
+    var costume_of_sprite = function (costume_number, sprite) {
+        var costumes = get_costumes(sprite);
+        if (costume_number < 0 || costume_number > costumes.length) {
+            inform("Invalid costume number",
+                   "Cannot add costume number " + costume_number +
+                   " to " + label + " training bucket.\n" + 
+                   "Only numbers between 1 and " + 
+                   costumes.length + " are permitted.");
+            return;
+        }
+        return costumes[costume_number-1]; // 1-indexing to zero-indexing
+    };
+    var image_url_of_costume = function (costume) {
+        var canvas = costume.contents;
+        return canvas.toDataURL('image/png');        
+    };
+    var costume_to_image = function (costume, when_loaded) {
+        var image_url = image_url_of_costume(costume);
+        var image = document.createElement('img');
+        image.src = image_url;
+        image.onload = function () {
+                           when_loaded(image);
+                       };
+    };
+    var language_entry = function (language) {
+        var matching_language_entry;
+        if (language === "") {
+            // use the browser's default language
+            return language_entry(window.navigator.language);
+        }
+        language = language.toLowerCase(); // ignore case in matching 
+        ecraft2learn.chrome_languages.some(function (language_entry) {
+            // language_entry is [Language name, Language code, English language name, right-to-left]
+            if (language === language_entry[1].toLowerCase()) {
+                // code matches
+                matching_language_entry = language_entry;
+                return true;
+            }
+        });
+        if (matching_language_entry) {
+            return matching_language_entry;
+        }
+        ecraft2learn.chrome_languages.some(function (language_entry) {
+            if (language === language_entry[0].toLowerCase() ||
+                language === language_entry[2].toLowerCase()) {
+                // language name (in itself or English) matches
+                matching_language_entry = language_entry;
+                return true;
+            }
+        });
+        if (matching_language_entry) {
+            return matching_language_entry;
+        }
+        if (ecraft2learn.language_defaults[language]) {
+            // try again if just language name is given and it is ambiguous
+            return language_entry(ecraft2learn.language_defaults[language]);
+        }
+        if (language.length === 2) {
+           // code is is just 2 letters so try repeating it (e.g. id-ID)
+           return language_entry(language + "-" + language);
+        }
+        ecraft2learn.chrome_languages.some(function (language_entry) {
+            if (language_entry[0].toLowerCase().indexOf(language) >= 0 ||
+                language_entry[2].toLowerCase().indexOf(language) >= 0) {
+                // language (in itself or in English) is a substring of a language name
+                matching_language_entry = language_entry;
+                return true;
+            }
+        });
+        return matching_language_entry; // could be undefined
+    };
+    var builtin_voice_number_with_language_code = function (language_code) {
+        var voices = window.speechSynthesis.getVoices();
+        var builtin_voice_number;
+        voices.some(function (voice, index) {
+            if (voice.lang.toLowerCase() === language_code.toLowerCase()) {
+                builtin_voice_number = index;
+                return true;
+            }
+        });
+        return builtin_voice_number;
+    };
+    var mary_tts_voice_number_with_language_code = function (language_code) {
+        var mary_tts_voice_number;
+        mary_tts_voices.some(function (voice, index) {
+            if (voice[2].indexOf("-") >= 0) {
+                // language and dialect specified
+                if (voice[2].toLowerCase() === language_code.toLowerCase()) {
+                    mary_tts_voice_number = index;
+                    return true;
+                }
+            } else {
+                if (voice[2].toLowerCase() === language_code.substring(0, 2).toLowerCase()) {
+                    mary_tts_voice_number = index;
+                    return true;
+                }
+            }
+        });
+        return mary_tts_voice_number;
+    };
+    var inform = function(title, message, callback) {
+        // based upon Snap4Arduino index file  
+        if (!ecraft2learn.inside_snap) { // not inside of snap
+            if (callback) {
+                if (window.confirm(message)) {
+                    callback();
+                }
+            } else {
+                window.alert(message);
+            }
+            return;
+        }
+        var ide = get_snap_ide(ecraft2learn.snap_context);
+        if (!ide.informing) {
+            var box = new DialogBoxMorph();
+            ide.informing = true;
+            box.ok = function() { 
+                ide.informing = false;
+                if (callback) { 
+                    invoke_callback(callback);
+                }
+                this.accept();
+            };
+            if (callback) {
+                box.cancel = function () {
+                   ide.informing = false;
+                   this.accept();
+                }
+                box.askYesNo(title, message, world);
+            } else {
+                box.inform(title, message, world);
+                if (window.frameElement && window.frameElement.className.indexOf("iframe-clipped") >= 0) {
+                    // move it from center of Snap! window to iframe window
+                    box.setPosition(new Point(230, 110));
+                }
+            }   
+        }
     };
     // see http://mary.dfki.de:59125/documentation.html for documentation of Mary TTS
     var mary_tts_voices =
@@ -206,8 +689,6 @@ window.ecraft2learn =
 ];
    
     var image_recognitions = {}; // record of most recent results from calls to take_picture_and_analyse
-    
-    var speech_recognition_in_progress = false; // used to prevent overlapping calls to start_speech_recognition
 
     var debugging = false; // if true console will fill with information
 
@@ -218,17 +699,33 @@ window.ecraft2learn =
       run: function (function_name, parameters) {
           // runs one of the functions in this library
           if (typeof ecraft2learn[function_name] === 'undefined') {
-              if (function_name === "take_picture_and_analyse") {
-                  alert("You need to run setup camera before you can use the camera.");
+              if (function_name === "take_picture_and_analyse" ||
+                  function_name === "add_photo_as_costume" ||
+                  function_name === "update_costume_from_video") {
+                  // define it now with default image dimensions
+                  // when setup finishes then run take_picture_and_analyse
+                  ecraft2learn.setup_camera(640, 
+                                            480, 
+                                            undefined, // no key
+                                            function () {
+                                                // delay a second so camera is on when first image is captured
+                                                setTimeout(function () {
+                                                               ecraft2learn[function_name].apply(null, parameters.contents);
+                                                          },
+                                                          1000);
+                                            });
                   return;
+              } else if (function_name === "stop_speech_recognition") {
+                  return; // ignore if called before speech_recognition started
               }
-              alert("Ecraft2learn library does not have a function named " + function_name);
+              inform("No such function",
+                     "Ecraft2learn library does not have a function named ''" + function_name + "'.");
               return;
           }
           return ecraft2learn[function_name].apply(null, parameters.contents);
       },
 
-      read_url: function (url, callback, error_callback, access_token) {
+      read_url: function (url, callback, error_callback, access_token, json_format) {
           // calls callback with the contents of the 'url' unless an error occurs and then error_callback is called
           // ironically this is the rare function that may be useful when there is no Internet connection
           // since it can be used to communicate with localhost (e.g. to read/write Raspberry Pi or Arduino pins)
@@ -238,7 +735,7 @@ window.ecraft2learn =
               xhr.setRequestHeader('Authorization', 'Bearer ' + access_token);
           }
           xhr.onload = function() {
-              invoke_callback(callback, xhr.responseText);
+              invoke_callback(callback, json_format ? javascript_to_snap(JSON.parse(xhr.responseText)) : xhr.responseText);
           };
           xhr.onerror = function(error) {
               invoke_callback(error_callback, url + " error is " + error.message);
@@ -263,11 +760,17 @@ window.ecraft2learn =
           // if the browser has no support for speech recognition then the Microsoft Speech API is used (API key required)
           if (typeof SpeechRecognition === 'undefined' && typeof webkitSpeechRecognition === 'undefined') {
               // no support from this browser so try using the Microsoft Speech API
-              ecraft2learn.start_microsoft_speech_recognition(interim_spoken_callback, spoken_callback, error_callback);
+              inform("This browser does not support speech recognition.\n" +
+                     "You could use Chrome or you can use Microsoft's speech recognition service.\n" +
+                     "Go ahead and use the Microsoft service? (It requires an API key.)",
+                      function () {
+                           ecraft2learn.start_microsoft_speech_recognition(interim_spoken_callback, final_spoken_callback, error_callback);
+                      });                  
               return;
           }
-          if (window.speechSynthesis.speaking || speech_recognition_in_progress) { 
+          if (window.speechSynthesis.speaking || ecraft2learn.speaking_ongoing || ecraft2learn.speech_recognition) { 
               // don't listen while speaking or while listening is still in progress
+              // added ecraft2learn.speaking_ongoing since window.speechSynthesis.speaking wasn't sufficient on some systems
               if (debugging) {
                   console.log("Delaying start due to " + (window.speechSynthesis.speaking ? "speaking" : "listen in progress"));
               }
@@ -289,14 +792,12 @@ window.ecraft2learn =
                   return;
               }
               try {
-                  speech_recognition_in_progress = true;
                   if (debugging) {
                       console.log("Recognition started");
                   }
                   speech_recognition.start();
  //               console.log("Speech recognition started");
               } catch (error) {
-                  speech_recognition_in_progress = false;
                   if (error.name === 'InvalidStateError') {
                       if (debugging) {
                           console.log("restart delayed becuase InvalidStateError");
@@ -309,12 +810,9 @@ window.ecraft2learn =
               }
           };
           var handle_result = function (event) {
-              var spoken = event.results[event.resultIndex][0].transcript; // first result            
-//               if (event.results[0].isFinal) {
-//                   // not clear if this is still needed
-//                   speech_recognition.stop();
-//               }
-              invoke_callback(event.results[event.resultIndex].isFinal ? final_spoken_callback : interim_spoken_callback, spoken);
+              var spoken = event.results[event.resultIndex][0].transcript; // first result
+              var final = event.results[event.resultIndex].isFinal;         
+              invoke_callback(final ? final_spoken_callback : interim_spoken_callback, spoken);
               if (debugging) {
                   console.log("Just invoked callback for " + spoken + ". isFinal is " + event.results[event.resultIndex].isFinal);
               }
@@ -324,7 +822,11 @@ window.ecraft2learn =
               if (is_callback(all_confidence_values_callback)) {
                   handle_all_confidence_values(event);
               } else {
+                  // if callback for confidence values isn't used then log the top confidence value
                   console.log("Confidence is " + event.results[event.resultIndex][0].confidence + " for " + spoken);
+              }
+              if (final) {
+                  ecraft2learn.stop_speech_recognition();
               }
           };
           var handle_all_results = function (event) {
@@ -344,41 +846,60 @@ window.ecraft2learn =
               invoke_callback(all_confidence_values_callback, javascript_to_snap(confidences));
           };
           var handle_error = function (event) {
-//               if (event.error === 'aborted') {
-//                   if (!speech_recognition_stopped) {
-//                       console.log("Aborted so restarting speech recognition in half a second");
-//                       setTimeout(restart, 500);
-//                   }
-//                   return;
-//               }
               ecraft2learn.stop_speech_recognition();
               if (debugging) {
-                   console.log("Recognition error: " + event.error);
+                  console.log("Recognition error: " + event.error);
               }
               invoke_callback(error_callback, event.error);
           };
           var speech_recognition_stopped = false; // used to suspend listening when tab is hidden
-          var speech_recognition = (typeof SpeechRecognition === 'undefined') ?
+          var speech_recognition;
+          var create_speech_recognition_object = function () {
+              speech_recognition = (typeof SpeechRecognition === 'undefined') ?
                                    new webkitSpeechRecognition() :
                                    new SpeechRecognition();
-          speech_recognition.interimResults = is_callback(interim_spoken_callback);
-          if (typeof language === 'string') {
-              speech_recognition.lang = language;
-          }
-          if (max_alternatives > 1) {
-              speech_recognition.maxAlternatives = max_alternatives;
-          }
-          speech_recognition.profanityFilter = true; // so more appropriate use in schools, e.g. f*** will result
-          speech_recognition.onresult = handle_result;
-          speech_recognition.onerror = handle_error;
-          speech_recognition.onend = function (event) {
-              speech_recognition_in_progress = false;
+              // following prevents speech_recognition from being garbage collected before its listeners run
+              // it is also used to prevent multiple speech recognitions to occur simultaneously
+              ecraft2learn.speech_recognition = speech_recognition;
+              speech_recognition.interimResults = is_callback(interim_spoken_callback);
+              if (typeof language === 'string') {
+                  var matching_language_entry = language_entry(language);
+                  if (matching_language_entry) {
+                      speech_recognition.lang = matching_language_entry[1];
+                  } else {
+                      inform("No matching language",
+                             "Could not a find a language that matches '" + language + "'.");
+                  }
+              } 
+              if (ecraft2learn.default_language && !speech_recognition.lang) {
+                  speech_recognition.lang = ecraft2learn.default_language;
+              }
+              if (max_alternatives > 1) {
+                  speech_recognition.maxAlternatives = max_alternatives;
+              }
+              speech_recognition.profanityFilter = true; // so more appropriate use in schools, e.g. f*** will result
+              speech_recognition.onresult = handle_result;
+              speech_recognition.onerror = handle_error;
+              speech_recognition.onend = function (event) {
+                  if (debugging) {
+                      console.log("On end triggered.");
+                  }
+                  if (ecraft2learn.speech_recognition) {
+                      if (debugging) {
+                          console.log("On end but no result or error so stopping then restarting.");
+                      }
+                      ecraft2learn.stop_speech_recognition();
+                      create_speech_recognition_object();
+                      restart();
+                  }                
+              };
           };
+          create_speech_recognition_object();
           ecraft2learn.stop_speech_recognition = function () {
               if (debugging) {
                   console.log("Stopped.");
               }
-              speech_recognition_in_progress = false;
+              ecraft2learn.speech_recognition = null;
               if (speech_recognition) {
                   speech_recognition.onend    = null;
                   speech_recognition.onresult = null;
@@ -403,6 +924,42 @@ window.ecraft2learn =
                                           }
                                       }
                                   });
+    },
+
+    set_default_language: function (language) {
+        var matching_language_entry = language_entry(language);
+        if (!matching_language_entry) {
+            inform("Unrecognised language",
+                   "Unable to recognise which language is described by '" + language + "'.\n" +
+                   "Default language unchanged.");
+        } else if (ecraft2learn.default_language !== matching_language_entry[1]) {
+            // default has been changed so notify user
+            ecraft2learn.default_language = matching_language_entry[1];
+            var matching_language_name = matching_language_entry[2];
+            var mary_tts_voice_number = mary_tts_voice_number_with_language_code(matching_language_entry[1]);
+            var message = "Speech recognition will expect " + matching_language_name + " to be spoken.\n";
+            var no_voices_callback = function () {
+                if (mary_tts_voice_number >= 0) {
+                    message += "No matching browser speech synthesis voice found but Mary TTS voice " + mary_tts_voices[mary_tts_voice_number][1] + " can be used.\n" +
+                               "Use the Speak (using Mary TTS engine) command.";
+                } else {
+                    message += "No speech synthesis support for " + matching_language_name + " found so English will be used.";
+                }
+                inform("Default language set", message);
+            };
+            var voices_callback = function () {
+                var builtin_voice_number = builtin_voice_number_with_language_code(matching_language_entry[1]);
+                if (builtin_voice_number >= 0) {
+                    message += "Speech synthesis will use the browser's voice named ''" + 
+                               window.speechSynthesis.getVoices()[builtin_voice_number].name + "''.";
+                    inform("Default language set", message);
+                } else {
+                    no_voices_callback();
+                }
+            };
+            // the following will wait for voices to be loaded (or time out) before responding
+            check_for_voices(no_voices_callback, voices_callback);  
+        }
     },
 
     start_microsoft_speech_recognition: function (as_recognized_callback, final_spoken_callback, error_callback, provided_key) {
@@ -491,10 +1048,11 @@ window.ecraft2learn =
         }
     },
 
-  setup_camera: function (width, height, provided_key) {
+  setup_camera: function (width, height, provided_key, after_setup_callback) {
       // sets up the camera for taking photos and sending them to an AI cloud service for recognition
       // causes take_picture_and_analyse to be defined
       // supported service providers are currently 'Google', 'Microsoft', and IBM 'Watson' (or 'IBM Watson')
+      // after_setup_callback is optional and called once setup completes
       var video  = document.createElement('video');
       var canvas = document.createElement('canvas');
       var post_image = function post_image(image, cloud_provider, callback, error_callback) {
@@ -522,6 +1080,10 @@ window.ecraft2learn =
           case "IBM Watson":
               formData = new FormData();
               formData.append("images_file", image, "blob.png");
+              // beginning early December 2017 Watson began signalling No 'Access-Control-Allow-Origin' header
+              // so the following proxy should have fixed it but didn't 
+              // This may be a temporary problem at IBM and hopefully things will be restored soon
+//            var proxy_url = "https://toontalk.appspot.com/p/" + encodeURIComponent("https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key)
               XHR.open('POST', "https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key);
               XHR.send(formData);
               break;
@@ -546,9 +1108,15 @@ window.ecraft2learn =
       };
       var startup = function startup() {
           var callback = function(stream) {
-              var vendorURL = window.URL || window.webkitURL;
-              video.src = vendorURL.createObjectURL(stream);
+//               var vendorURL = window.URL || window.webkitURL;
+//               video.src = vendorURL.createObjectURL(stream);
+              video.srcObject = stream;
+              video.width  = width;
+              video.height = height;
               video.play();
+              if (after_setup_callback) {
+                  after_setup_callback(canvas, video);
+              }
           };
           var error_callback = function(error) {
               console.log("An error in getting access to camera: " + error.message);
@@ -558,8 +1126,6 @@ window.ecraft2learn =
                              audio: false};
           video.style.display  = 'none';
           canvas.style.display = 'none';
-          video.setAttribute('width', width);
-          video.setAttribute('height', height);
           canvas.setAttribute('width', width);
           canvas.setAttribute('height', height);
           document.body.appendChild(video);
@@ -577,7 +1143,9 @@ window.ecraft2learn =
       //      navigator.mediaDevices.getUserMedia(constraints, callback, error_callback);
           }
       };
-      width = +width; // convert to number
+      video.setAttribute('autoplay', '');
+      video.setAttribute('playsinline', '');
+      width  = +width; // convert to number
       height = +height;
 
   // define new functions in the scope of setup_camera
@@ -585,6 +1153,16 @@ window.ecraft2learn =
   ecraft2learn.add_photo_as_costume = function () {
       add_photo_to_canvas(canvas, video, width, height);
       add_costume(create_costume(canvas), get_snap_ide().currentSprite);
+  };
+
+  ecraft2learn.update_costume_from_video = function (costume_number, sprite) {
+      var costume = costume_of_sprite(costume_number, sprite);
+      var canvas = costume.contents;
+//       canvas.setAttribute('width', width);
+//       canvas.setAttribute('height', height);
+      var context = canvas.getContext('2d');
+      context.drawImage(video, 0, 0, width, height);
+      sprite.drawNew();
   };
 
   ecraft2learn.take_picture_and_analyse = function (cloud_provider, show_photo, snap_callback) {
@@ -606,7 +1184,8 @@ window.ecraft2learn =
                   response_as_javascript_object = JSON.parse(response);
                   break;
               default:
-                  invoke_callback(snap_callback, "Unknown cloud provider: " + cloud_provider);
+                  // already checked cloud_provider so shouldn't happen here
+                  console.error("Unknown cloud provider: " + cloud_provider);
                   return;
           }
           image_recognitions[cloud_provider].response = response_as_javascript_object;
@@ -631,7 +1210,7 @@ window.ecraft2learn =
                            cloud_provider,
                            function (event) {
                                if (typeof event === 'string') {
-                                   alert(event);
+                                   inform("Error from service provider", event);
                                } else {
                                    callback(event.currentTarget.response);
                                }
@@ -644,14 +1223,16 @@ window.ecraft2learn =
                    cloud_provider,
                    function (event) {
                        if (typeof event === 'string') {
-                           alert(event);
+                           inform("Error from Google", event);
                        } else {
                            callback(event.currentTarget.response);
                        }
                    });
         break;
     default:
-        invoke_callback(snap_callback, "Unknown cloud provider: " + cloud_provider);
+        invoke_callback(snap_callback, cloud_provider === "" ? 
+                                       "A vision recognition service provider needs to be chosen." :
+                                       "Unknown cloud provider: " + cloud_provider);
     }
   };
 
@@ -709,115 +1290,30 @@ window.ecraft2learn =
   add_current_photo_as_costume: function (cloud_provider) {
       var recognition = image_recognitions[cloud_provider];
       if (!recognition || !recognition.costume) {
-          return "No photo has been created for " + cloud_provider + " to recognize.";
+          if (cloud_provider === "") {
+              inform("No service provided selected",
+                     "A vision recognition service provider needs to be chosen.");
+          } else {
+              inform("No photo",
+                     "No photo has been created for " + cloud_provider + " to recognize.");
+          }
+      } else {
+          add_costume(recognition.costume);
       }
-      add_costume(recognition.costume);
   },
 
   speak: function (message, pitch, rate, voice_number, volume, language, finished_callback) {
-    // speaks 'message' optionally with the specified pitch, rate, voice, volume, and language
-    // finished_callback is called with the spoken text
-    // see https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisUtterance
-    if (window.speechSynthesis.getVoices().length === 0) {
-        // voices not loaded so wait for them and try again
-        window.speechSynthesis.onvoiceschanged = function () {
-            ecraft2learn.speak(message, pitch, rate, voice_number, volume, language, finished_callback);
-            window.speechSynthesis.onvoiceschanged = undefined;
-        };
-        return;
-    }
-    var maximum_length = 200; // not sure what a good value is but long text isn't spoken in some browsers
-    var break_into_short_segments = function (text) {
-        var segments = [];
-        var break_text = function (text) {
-            var segment, index;
-            if (text.length < maximum_length) {
-                return text.length+1;
-            }
-            segment = text.substring(0, maximum_length);
-            index = segment.lastIndexOf(". ") || segment.lastIndexOf(".\n");
-            if (index > 0) {
-                return index+2;
-            }
-            index = segment.lastIndexOf(".");
-            if (index === segment.length-1) {
-                // final period need not have space after it
-                return index+1;
-            }
-            index = segment.lastIndexOf(", ");
-            if (index > 0) {
-                return index+2;
-            }
-            index = segment.lastIndexOf(" ");
-            if (index > 0) {
-                return index+1;
-            }
-            // give up - no periods, commas, or spaces
-            return Math.min(text.length+1, maximum_length);
-        };
-        var best_break;
-        while (text.length > 0) {
-            best_break = break_text(text);
-            if (best_break > 1) {
-                segments.push(text.substring(0, best_break-1));
-            }
-            text = text.substring(best_break);
-        }
-        return segments;
-    };
-    var segments, speech_utterance_index;
-    if (message.length > maximum_length) {
-        segments = break_into_short_segments(message);
-        segments.forEach(function (segment, index) {
-            // finished_callback is only for the last segment
-            var callback = index === segments.length-1 && 
-                           finished_callback &&
-                           function () {
-                               invoke_callback(finished_callback, message); // entire message not just the segments
-                           };
-            ecraft2learn.speak(segment, pitch, rate, voice_number, volume, language, callback)
-        });
-        return;
-    }
-    // else is less than the maximum_length
-    var utterance = new SpeechSynthesisUtterance(message);
-    ecraft2learn.utterance = utterance; // without this utterance may be garbage collected before onend can run
-    if (typeof language === 'string') {
-        utterance.lang = language;
-    }
-    pitch = +pitch; // if string try convering to a number
-    if (typeof pitch === 'number' && pitch > 0) {
-        utterance.pitch = pitch;
-    }
-    rate = +rate;
-    if (typeof rate === 'number' && rate > 0) {
-        if (rate < .1) {
-           // A very slow rate breaks Chrome's speech synthesiser
-           rate = .1;
-        }
-        if (rate > 2) {
-           rate = 2; // high rate also breaks Chrome's speech synthesis
-        }
-        utterance.rate = rate;
-    }
-    utterance.voice = get_voice(voice_number);
-    volume = +volume;
-    if (typeof volume && volume > 0) {
-        utterance.volume = volume;
-    }
-    utterance.onend = function (event) {
-        invoke_callback(finished_callback, message);
-    };
-//     if (speech_recognition) {
-//         // don't recognise synthetic speech
-//         ecraft2learn.speech_recognition.abort();
-//     }
-    window.speechSynthesis.speak(utterance);
+      check_for_voices(function () {
+                          no_voices_alert();
+                       },
+                       function () {
+                           speak(message, pitch, rate, voice_number, volume, language, finished_callback)
+                       });
   },
   get_voice_names: function () {
-    return new List(window.speechSynthesis.getVoices().map(function (voice) {
-        return voice.name;
-    }));
+      return new List(window.speechSynthesis.getVoices().map(function (voice) {
+          return voice.name;
+      }));
   },
   get_voice_name: function (voice_number) {
       var voice = get_voice(voice_number);
@@ -825,6 +1321,12 @@ window.ecraft2learn =
           return voice.name;
       }
       return "No voice numbered " + voice_number;
+  },
+  get_voice_number_matching: function (name_parts) {
+      return get_matching_voice(true, name_parts);
+  },
+  get_mary_tts_voice_number_matching: function (name_parts) {
+      return get_matching_voice(false, name_parts);
   },
   get_mary_tts_voice_name: function (voice_number) { // user friendly name
       return get_voice_from(voice_number, mary_tts_voices.map(function (voice) { return voice[1]; }));
@@ -846,18 +1348,26 @@ window.ecraft2learn =
      if (+volume > 0) {
          sound.volume = +volume;
      }
-     sound.play();
+     sound.addEventListener('canplay',
+                            function () {
+                                sound.play();
+                            });
+     sound.addEventListener('error',
+                            function () {
+                                invoke_callback(finished_callback, javascript_to_snap(sound.error.message));
+                            });
   },
   get_mary_tts_voice_names: function () {
     return new List(mary_tts_voices.map(function (voice) { return voice[1]; }));
   },
   speak_using_browser_voices_or_mary_tts: function (message, finished_callback) {
-    if (window.speechSynthesis.getVoices().length === 0) {
-        // either there are no voices 
-        ecraft2learn.speak_using_mary_tts(message, 1, 1, finished_callback);
-    } else {
-        ecraft2learn.speak(message, 0, 0, 1, 0, 0, finished_callback);
-    }
+    check_for_voices(function () {
+                         // no voices in browser to use Mary TTS
+                         ecraft2learn.speak_using_mary_tts(message, 1, 0, finished_callback);
+                     },
+                     function () {
+                         ecraft2learn.speak(message, 0, 0, 0, 0, 0, finished_callback);
+                     });
   },
   open_project: function (name) {
       get_snap_ide().openProject(name);
@@ -883,6 +1393,16 @@ window.ecraft2learn =
   console_log: function (message) {
       console.log(message);
   },
+  open_help_page: function () {
+      // prefer window.open but then is blocked as a popup
+      document.location.assign("https://github.com/ecraft2learn/ai/wiki", "_blank");
+  },
+  wikipedia_domain: function () {
+      if (ecraft2learn.default_language) {
+          return "https://" + ecraft2learn.default_language.substring(0, 2) + ".wikipedia.org";
+      }
+      return "https://en.wikipedia.org";
+  },
   handle_server_json_response: function (response, callback) {
      invoke_callback(callback, javascript_to_snap(JSON.parse(response)));
   },
@@ -896,5 +1416,218 @@ window.ecraft2learn =
       } catch (error) {
           invoke_callback(callback_for_errors, error.message);
       }
-  }
+  },
+  train_using_images: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback) {
+      train("camera", buckets_as_snap_list, add_to_previous_training, page_introduction, callback);
+  },
+  image_confidences: function (callback) {
+      // if no costume_number provided then camera is used
+      var receive_confidences = function (event) {
+                                    if (typeof event.data.confidences !== 'undefined') {
+                                        invoke_callback(callback, javascript_to_snap(event.data.confidences));
+                                        window.removeEventListener("message", receive_confidences);
+                                    };
+                                };
+      training_window_request("You need to train the system before using 'Current image label confidences'.\n" +
+                              "Run 'Train using camera ...' before this.", 
+                              function (image) {
+                                  return {predict: image};
+                              }, 
+                              receive_confidences);
+  },
+  costume_confidences: function (costume_number, callback, sprite) {
+        var costume = costume_of_sprite(costume_number, sprite);
+        var receive_confidences = function (event) {
+                                    if (typeof event.data.confidences !== 'undefined') {
+                                        invoke_callback(callback, javascript_to_snap(event.data.confidences));
+                                        window.removeEventListener("message", receive_confidences);
+                                    };
+                                };
+        costume_to_image(costume,
+                         function (image) {
+                            training_window_request("You need to train the system before using 'Image label confidences'.\n" +
+                                                    "Run 'Train using camera ...' before this.", 
+                                                    function (image_URL) {
+                                                                 return {predict: image_URL};
+                                                    },
+                                                    receive_confidences,
+                                                    image);
+                         });                            
+  },
+  add_image_to_training: function (costume_number, label, callback, sprite) {
+      var receive_comfirmation = 
+          function (event) {
+              if (typeof event.data.confirmation !== 'undefined') {
+                  invoke_callback(callback, event.data.confirmation);
+                  window.removeEventListener("message", receive_comfirmation);
+              };
+      };
+      var costume = costume_of_sprite(costume_number, sprite);
+      costume_to_image(costume,
+                       function (image) {
+                          training_window_request("You need to train the system before using 'Add image to training'.\n" +
+                                                  "Run 'Train using camera ...' before this so the system knows the list of possible labels.", 
+                                                  function (image_URL) {
+                                                      return {train: image_URL,
+                                                              label: label};
+                                                  },
+                                                  receive_comfirmation,
+                                                  image);
+                       });
+  },
+  costume_count: function (sprite) {
+      return get_costumes(sprite).length;
+  },
+  training_window_ready: function () {
+      return ecraft2learn.machine_learning_window === true && 
+             !ecraft2learn.machine_learning_window.closed &&
+             ecraft2learn.machine_learning_window_ready === true;
+  },
+  inform: inform,
+        
 }} ());
+window.speechSynthesis.getVoices(); // to ensure voices are loaded
+ecraft2learn.inside_snap = true;
+ecraft2learn.chrome_languages =
+[
+// based upon https://cloud.google.com/speech/docs/languages
+// [Language name, Language code, English language name, right-to-left]
+["Afrikaans (Suid-Afrika)", "af-ZA", "Afrikaans (South Africa)"],
+["አማርኛ (ኢትዮጵያ)", "am-ET", "Amharic (Ethiopia)"],
+["Հայ (Հայաստան)", "hy-AM", "Armenian (Armenia)"],
+["Azərbaycan (Azərbaycan)", "az-AZ", "Azerbaijani (Azerbaijan)"],
+["Bahasa Indonesia (Indonesia)", "id-ID", "Indonesian (Indonesia)"],
+["Bahasa Melayu (Malaysia)", "ms-MY", "Malay (Malaysia)"],
+["বাংলা (বাংলাদেশ)", "bn-BD", "Bengali (Bangladesh)"],
+["বাংলা (ভারত)", "bn-IN", "Bengali (India)"],
+["Català (Espanya)", "ca-ES", "Catalan (Spain)"],
+["Čeština (Česká republika)", "cs-CZ", "Czech (Czech Republic)"],
+["Dansk (Danmark)", "da-DK", "Danish (Denmark)"],
+["Deutsch (Deutschland)", "de-DE", "German (Germany)"],
+["English (Australia)", "en-AU", "English (Australia)"],
+["English (Canada)", "en-CA", "English (Canada)"],
+["English (Ghana)", "en-GH", "English (Ghana)"],
+["English (Great Britain)", "en-GB", "English (United Kingdom)"],
+["English (India)", "en-IN", "English (India)"],
+["English (Ireland)", "en-IE", "English (Ireland)"],
+["English (Kenya)", "en-KE", "English (Kenya)"],
+["English (New Zealand)", "en-NZ", "English (New Zealand)"],
+["English (Nigeria)", "en-NG", "English (Nigeria)"],
+["English (Philippines)", "en-PH", "English (Philippines)"],
+["English (South Africa)", "en-ZA", "English (South Africa)"],
+["English (Tanzania)", "en-TZ", "English (Tanzania)"],
+["English (United States)", "en-US", "English (United States)"],
+["Español (Argentina)", "es-AR", "Spanish (Argentina)"],
+["Español (Bolivia)", "es-BO", "Spanish (Bolivia)"],
+["Español (Chile)", "es-CL", "Spanish (Chile)"],
+["Español (Colombia)", "es-CO", "Spanish (Colombia)"],
+["Español (Costa Rica)", "es-CR", "Spanish (Costa Rica)"],
+["Español (Ecuador)", "es-EC", "Spanish (Ecuador)"],
+["Español (El Salvador)", "es-SV", "Spanish (El Salvador)"],
+["Español (España)", "es-ES", "Spanish (Spain)"],
+["Español (Estados Unidos)", "es-US", "Spanish (United States)"],
+["Español (Guatemala)", "es-GT", "Spanish (Guatemala)"],
+["Español (Honduras)", "es-HN", "Spanish (Honduras)"],
+["Español (México)", "es-MX", "Spanish (Mexico)"],
+["Español (Nicaragua)", "es-NI", "Spanish (Nicaragua)"],
+["Español (Panamá)", "es-PA", "Spanish (Panama)"],
+["Español (Paraguay)", "es-PY", "Spanish (Paraguay)"],
+["Español (Perú)", "es-PE", "Spanish (Peru)"],
+["Español (Puerto Rico)", "es-PR", "Spanish (Puerto Rico)"],
+["Español (República Dominicana)", "es-DO", "Spanish (Dominican Republic)"],
+["Español (Uruguay)", "es-UY", "Spanish (Uruguay)"],
+["Español (Venezuela)", "es-VE", "Spanish (Venezuela)"],
+["Euskara (Espainia)", "eu-ES", "Basque (Spain)"],
+["Filipino (Pilipinas)", "fil-PH", "Filipino (Philippines)"],
+["Français (Canada)", "fr-CA", "French (Canada)"],
+["Français (France)", "fr-FR", "French (France)"],
+["Galego (España)", "gl-ES", "Galician (Spain)"],
+["ქართული (საქართველო)", "ka-GE", "Georgian (Georgia)"],
+["ગુજરાતી (ભારત)", "gu-IN", "Gujarati (India)"],
+["Hrvatski (Hrvatska)", "hr-HR", "Croatian (Croatia)"],
+["IsiZulu (Ningizimu Afrika)", "zu-ZA", "Zulu (South Africa)"],
+["Íslenska (Ísland)", "is-IS", "Icelandic (Iceland)"],
+["Italiano (Italia)", "it-IT", "Italian (Italy)"],
+["Jawa (Indonesia)", "jv-ID", "Javanese (Indonesia)"],
+["ಕನ್ನಡ (ಭಾರತ)", "kn-IN", "Kannada (India)"],
+["ភាសាខ្មែរ (កម្ពុជា)", "km-KH", "Khmer (Cambodia)"],
+["ລາວ (ລາວ)", "lo-LA", "Lao (Laos)"],
+["Latviešu (latviešu)", "lv-LV", "Latvian (Latvia)"],
+["Lietuvių (Lietuva)", "lt-LT", "Lithuanian (Lithuania)"],
+["Magyar (Magyarország)", "hu-HU", "Hungarian (Hungary)"],
+["മലയാളം (ഇന്ത്യ)", "ml-IN", "Malayalam (India)"],
+["मराठी (भारत)", "mr-IN", "Marathi (India)"],
+["Nederlands (Nederland)", "nl-NL", "Dutch (Netherlands)"],
+["नेपाली (नेपाल)", "ne-NP", "Nepali (Nepal)"],
+["Norsk bokmål (Norge)", "nb-NO", "Norwegian Bokmål (Norway)"],
+["Polski (Polska)", "pl-PL", "Polish (Poland)"],
+["Português (Brasil)", "pt-BR", "Portuguese (Brazil)"],
+["Português (Portugal)", "pt-PT", "Portuguese (Portugal)"],
+["Română (România)", "ro-RO", "Romanian (Romania)"],
+["සිංහල (ශ්රී ලංකාව)", "si-LK", "Sinhala (Sri Lanka)"],
+["Slovenčina (Slovensko)", "sk-SK", "Slovak (Slovakia)"],
+["Slovenščina (Slovenija)", "sl-SI", "Slovenian (Slovenia)"],
+["Urang (Indonesia)", "su-ID", "Sundanese (Indonesia)"],
+["Swahili (Tanzania)", "sw-TZ", "Swahili (Tanzania)"],
+["Swahili (Kenya)", "sw-KE", "Swahili (Kenya)"],
+["Suomi (Suomi)", "fi-FI", "Finnish (Finland)"],
+["Svenska (Sverige)", "sv-SE", "Swedish (Sweden)"],
+["தமிழ் (இந்தியா)", "ta-IN", "Tamil (India)"],
+["தமிழ் (சிங்கப்பூர்)", "ta-SG", "Tamil (Singapore)"],
+["தமிழ் (இலங்கை)", "ta-LK", "Tamil (Sri Lanka)"],
+["தமிழ் (மலேசியா)", "ta-MY", "Tamil (Malaysia)"],
+["తెలుగు (భారతదేశం)", "te-IN", "Telugu (India)"],
+["Tiếng Việt (Việt Nam)", "vi-VN", "Vietnamese (Vietnam)"],
+["Türkçe (Türkiye)", "tr-TR", "Turkish (Turkey)"],
+["(اردو (پاکستان", "ur-PK", "Urdu (Pakistan)", true],
+["(اردو (بھارت", "ur-IN", "Urdu (India)", true],
+["Ελληνικά (Ελλάδα)", "el-GR", "Greek (Greece)"],
+["Български (България)", "bg-BG", "Bulgarian (Bulgaria)"],
+["Русский (Россия)", "ru-RU", "Russian (Russia)"],
+["Српски (Србија)", "sr-RS", "Serbian (Serbia)"],
+["Українська (Україна)", "uk-UA", "Ukrainian (Ukraine)"],
+["(עברית (ישראל", "he-IL", "Hebrew (Israel)", true],
+["(العربية (إسرائيل", "ar-IL", "Arabic (Israel)", true],
+["(العربية (الأردن", "ar-JO", "Arabic (Jordan)", true],
+["(العربية (الإمارات", "ar-AE", "Arabic (United Arab Emirates)", true],
+["(العربية (البحرين", "ar-BH", "Arabic (Bahrain)", true],
+["(العربية (الجزائر", "ar-DZ", "Arabic (Algeria)", true],
+["(العربية (السعودية", "ar-SA", "Arabic (Saudi Arabia)", true],
+["(العربية (العراق", "ar-IQ", "Arabic (Iraq)", true],
+["(العربية (تونس", "ar-KW", "Arabic (Kuwait)", true],
+["(العربية (المغرب", "ar-MA", "Arabic (Morocco)", true],
+["(العربية (عُمان", "ar-TN", "Arabic (Tunisia)", true],
+["(العربية (فلسطين", "ar-OM", "Arabic (Oman)", true],
+["(العربية (قطر", "ar-PS", "Arabic (State of Palestine)", true],
+["(العربية (لبنان", "ar-QA", "Arabic (Qatar)", true],
+["(العربية (مصر", "ar-LB", "Arabic (Lebanon)", true],
+["(العربية (مصر", "ar-EG", "Arabic (Egypt)", true],
+["(فارسی (ایران", "fa-IR", "Persian (Iran)", true],
+["हिन्दी (भारत)", "hi-IN", "Hindi (India)"],
+["ไทย (ประเทศไทย)", "th-TH", "Thai (Thailand)"],
+["한국어 (대한민국)", "ko-KR", "Korean (South Korea)"],
+["國語 (台灣)", "cmn-Hant-TW", "Chinese, Mandarin (Traditional, Taiwan)"],
+["廣東話 (香港)", "yue-Hant-HK", "Chinese, Cantonese (Traditional, Hong Kong)"],
+["日本語（日本）", "ja-JP", "Japanese (Japan)"],
+["普通話 (香港)", "cmn-Hans-HK", "Chinese, Mandarin (Simplified, Hong Kong)"],
+["普通话 (中国大陆)", "cmn-Hans-CN", "Chinese, Mandarin (Simplified, China)"],
+];
+ecraft2learn.language_defaults =
+ // many arbitrary choices but some default is needed
+ {english:    "en-GB",
+  en:         "en-GB",
+  español:    "es-ES",
+  spanish:    "es-ES",
+  français:   "fr-FR",
+  french:     "fr-FR",
+  português:  "pt-PT",
+  portuguese: "pt-PT",
+  swahili:    "sw-KE", 
+  தமிழ்:      "ta-IN",
+  tamil:      "ta-IN",
+  "اردو":     "ur-PK",
+  urdu:       "ur-PK",
+  "العربية":  "ar-SA",
+  arabic:      "ar-SA",
+  chinese:     "cmn-Hans-CN"
+  }
