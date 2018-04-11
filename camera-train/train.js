@@ -32,7 +32,6 @@ class Main {
         training_class_names = ["1", "2", "3"];
     }
     // Initiate variables
-    this.infoTexts = [];
     this.training = -1; // -1 when no class is being trained
     this.videoPlaying = false;
     this.training_class_names = training_class_names;
@@ -127,42 +126,19 @@ class Main {
   
   start(){
     if (this.timer) {
-      this.stop();
+        this.stop();
     }
-//     this.video.play(); // this caused an error on Android because it wasn't directly caused by a user action
-        // Create training buttons and info texts    
-    for(let i=0;i<NUM_CLASSES; i++){
-      const div = document.createElement('div');
-      document.body.appendChild(div);
-      div.style.marginBottom = '10px';
-
-      // Create training button
-      const button = document.createElement('button')
-      button.innerText = "Click to train " + this.training_class_names[i];
-      button.className = "training-button";
-      div.appendChild(button);
-
-      // Listen for mouse events when clicking the button
-      var train_on  = () => this.training = i;
-      var train_off = () => this.training = -1;
-      button.addEventListener('mousedown', train_on);
-      button.addEventListener('touchstart', train_on);
-      button.addEventListener('mouseup', train_off);
-      button.addEventListener('touchend', train_off);
-      
-      // Create info text
-      const infoText = document.createElement('span')
-      infoText.innerText = " No examples added";
-      div.appendChild(infoText);
-      this.infoTexts.push(infoText);
-    }
+//  this.video.play(); // this caused an error on Android because it wasn't directly caused by a user action
+//  Create training buttons and info texts 
+    var train_on  = () => this.training = i;
+    var train_off = () => this.training = -1;
+    this.infoTexts = create_training_buttons(this.training_class_names, train_on, train_off);  
     var please_wait = document.getElementById("please-wait");
     if (!please_wait.getAttribute("updated")) {
         please_wait.innerText = "Ready to start training. Just hold down one of the buttons when the desired image is front of the camera. " +
                                 "Do this until the system is sufficiently confident of the correct label when a new image is presented. " +
                                 "Then return to the Snap! tab.";
     }
-
     this.timer = requestAnimationFrame(this.animate.bind(this));
   }
   
