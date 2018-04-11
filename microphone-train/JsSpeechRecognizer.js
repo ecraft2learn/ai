@@ -34,7 +34,7 @@ function JsSpeechRecognizer() {
     this.model = {};
 
     this.recordingState = this.RecordingEnum.NOT_RECORDING;
-    this.useRecognitionModel = this.RecognitionModel.COMPOSITE;
+    this.useRecognitionModel = this.RecognitionModel.AVERAGE; // was COMPOSITE;
 
     // Get an audio context
     this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
