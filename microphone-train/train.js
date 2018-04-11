@@ -1,12 +1,12 @@
 var initialise = function (training_class_names) {
     var speech_recognizer = new JsSpeechRecognizer();
     speech_recognizer.openMic();
-    var train_on = function (class_name_index, info_text) {
-        speech_recognizer.startTrainingRecording(training_class_names[class_name_index]);
+    var train_on = function (class_index, info_text) {
+        speech_recognizer.startTrainingRecording(training_class_names[class_index]);
         info_text.innerHTML = " Release the button when finished speaking";       
     };
     var train_off =
-        function (class_name_index, info_text) {
+        function (class_index, info_text) {
             var recording = speech_recognizer.stopRecording();
             // regenerate the model
             speech_recognizer.generateModel();
