@@ -1417,7 +1417,14 @@ window.ecraft2learn =
           invoke_callback(callback_for_errors, error.message);
       }
   },
+  train_using_camera: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback) {
+      train("camera", buckets_as_snap_list, add_to_previous_training, page_introduction, callback);
+  },
   train_using_images: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback) {
+      // old name kept for backwards compatibility
+      train("camera", buckets_as_snap_list, add_to_previous_training, page_introduction, callback);
+  },
+  train_using_microphone: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback) {
       train("camera", buckets_as_snap_list, add_to_previous_training, page_introduction, callback);
   },
   image_confidences: function (callback) {
