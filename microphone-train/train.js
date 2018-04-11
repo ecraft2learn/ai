@@ -23,13 +23,10 @@ var initialise = function (training_class_names) {
 };
 
 var create_test_button = function (training_class_names, speech_recognizer) {
-    const help = document.createElement('h3');
-    help.innerHTML = "Hold down the <b>test</b> button and release when finished speaking";
     const button = document.createElement('button');
-    button.innerText = "Start test";
+    button.innerText = "Start testing";
     button.className = "testing-button";
     const results_div = document.createElement('div');
-    document.body.appendChild(help);
     document.body.appendChild(button);
     document.body.appendChild(results_div);
     var button_down = function () {
