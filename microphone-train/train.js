@@ -26,7 +26,7 @@ var create_test_button = function (training_class_names, speech_recognizer) {
     const help = document.createElement('h3');
     help.innerHTML = "Hold down the <b>test</b> button and release when finished speaking";
     const button = document.createElement('button');
-    button.innerText = "Test";
+    button.innerText = "Start test";
     button.className = "testing-button";
     const results_div = document.createElement('div');
     document.body.appendChild(help);
@@ -34,13 +34,14 @@ var create_test_button = function (training_class_names, speech_recognizer) {
     document.body.appendChild(results_div);
     var button_down = function () {
         speech_recognizer.startRecognitionRecording();
+        results_div.innerText = "Release when finished speaking.";
     };
     var button_up = function () {
         speech_recognizer.stopRecording();
         var result = speech_recognizer.getTopRecognitionHypotheses(1); // top result only
         // Format and display results
         results_div.innerHTML = "";
-        if (result[0].confidence > 0) {
+        if (result.length > 0 && result[0].confidence > 0) {
             for (var i = 0; i < result.length; i++) {
                 if (result[i].confidence > 0) {
                     results_div.innerHTML +=
