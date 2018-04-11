@@ -6,7 +6,8 @@
 
  function create_training_buttons(training_class_names, train_on, train_off) {
     var info_texts = [];
-    for (let i=0; i < training_class_names.length; i++) {
+    var i;
+    for (i=0; i < training_class_names.length; i++) {
       const div = document.createElement('div');
       document.body.appendChild(div);
       div.style.marginBottom = '10px';
