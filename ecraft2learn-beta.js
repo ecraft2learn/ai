@@ -1425,7 +1425,7 @@ window.ecraft2learn =
       train("camera", buckets_as_snap_list, add_to_previous_training, page_introduction, callback);
   },
   train_using_microphone: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback) {
-      train("camera", buckets_as_snap_list, add_to_previous_training, page_introduction, callback);
+      train("microphone", buckets_as_snap_list, add_to_previous_training, page_introduction, callback);
   },
   image_confidences: function (callback) {
       // if no costume_number provided then camera is used
