@@ -23,16 +23,16 @@
       info_texts.push(info_text);
       // Listen for mouse and touch events when clicking the button
       button.addEventListener('mousedown',  function () {
-          train_on(training_class_names[i], info_text);
+          train_on(i, info_text);
       });
       button.addEventListener('touchstart', function () {
-          train_on(training_class_names[i], info_text);
+          train_on(i, info_text);
       });
       button.addEventListener('mouseup',    function () {
-          train_off(training_class_names[i], info_text);
+          train_off(i, info_text);
       });
       button.addEventListener('touchend',   function () {
-          train_off(training_class_names[i], info_text);
+          train_off(i, info_text);
       });
     }
     return info_texts;

@@ -130,8 +130,8 @@ class Main {
     }
 //  this.video.play(); // this caused an error on Android because it wasn't directly caused by a user action
 //  Create training buttons and info texts 
-    var train_on  = () => this.training = i;
-    var train_off = () => this.training = -1;
+    var train_on  = (i) => this.training = i;
+    var train_off = (i) => this.training = -1;
     this.infoTexts = create_training_buttons(this.training_class_names, train_on, train_off);  
     var please_wait = document.getElementById("please-wait");
     if (!please_wait.getAttribute("updated")) {
