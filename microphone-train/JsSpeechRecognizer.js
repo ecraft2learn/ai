@@ -168,7 +168,7 @@ JsSpeechRecognizer.prototype.stopRecording = function() {
 
     this.recordingState = this.RecordingEnum.NOT_RECORDING;
 
-    return this.recordingBufferArray.length;
+    return this.groupedValues; // was this.recordingBufferArray.length;
 };
 
 /**

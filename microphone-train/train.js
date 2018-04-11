@@ -7,7 +7,7 @@ var initialise = function (training_class_names) {
     };
     var train_off =
         function (class_name, info_text) {
-            var recordingId = speech_recognizer.stopRecording();
+            var recording = speech_recognizer.stopRecording();
             // regenerate the model
             speech_recognizer.generateModel();
             if (typeof info_text.count !== 'number') {
