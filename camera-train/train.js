@@ -148,26 +148,26 @@ class Main {
   }
   
   animate(){
-    if(this.videoPlaying){
+    if (this.videoPlaying) {
       // Get image data from video element
       const image = dl.fromPixels(this.video);
       
       // Train class if one of the buttons is held down
-      if(this.training != -1){
+      if (this.training != -1) {
         // Add current image to classifier
         if (this.log_timings) {
-          console.time("Training " + this.training);
+            console.time("Training " + this.training);
         }
         this.knn.addImage(image, this.training);
         if (this.log_timings) {
-          console.timeEnd("Training " + this.training);
+            console.timeEnd("Training " + this.training);
         }
         this.infoTexts[this.training].innerText = ` ${this.knn.getClassExampleCount()[this.training]} examples`;
       }
       
       // If any examples have been added, run predict
       const exampleCount = this.knn.getClassExampleCount();
-      if(Math.max(...exampleCount) > 0 && this.training === -1){
+      if (Math.max(...exampleCount) > 0 && this.training === -1) {
         // only predict if not also training (important for slow computers (and Android phones))
         if (this.log_timings) {
           console.time("Prediction");
