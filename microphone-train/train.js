@@ -40,9 +40,15 @@ var create_test_button = function (training_class_names, speech_recognizer) {
         var result = speech_recognizer.getTopRecognitionHypotheses(1); // top result only
         // Format and display results
         results_div.innerHTML = "";
-        for (var i = 0; i < result.length; i++) {
-             results_div.innerHTML +=
-                result[i].match + " " + (result[i].confidence*100).toFixed(0) + "% confidence<br>";
+        if (result[0].confidence > 0) {
+            for (var i = 0; i < result.length; i++) {
+                if (result[i].confidence > 0) {
+                    results_div.innerHTML +=
+                        result[i].match + " " + (result[i].confidence*100).toFixed(0) + "% confidence<br>";
+                }            
+            }
+        } else {
+            results_div.innerHTML = "No matches.";
         }
     };
     button.addEventListener('mousedown',  button_down);
