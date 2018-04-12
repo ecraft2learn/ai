@@ -444,6 +444,7 @@ window.ecraft2learn =
                   }));
       };
       var open_machine_learning_window = function () {
+          var URL, training_window;
           if (source === 'camera') {
               if (window.navigator.userAgent.indexOf("Chrome") < 0) {
                   inform("Possible browser compatibility problem",
@@ -453,17 +454,23 @@ window.ecraft2learn =
                   inform("Possible Raspberry Pi problem",
                          "You may find that the Raspberry Pi is too slow for machine learning to work well.");
               }
+              URL = window.location.href.indexOf("localhost") >= 0 ? 
+                    "/ai/camera-train/index-dev.html?translate=1" :
+                    "https://ecraft2learn.github.io/ai/camera-train/index.html?translate=1";
+              training_window = window.open(URL, "Training " + buckets);
+              window.addEventListener('unload',
+                                      function () {
+                                          training_window.close();
+                                      });
+          } else {
+              URL = "/ai/microphone-train/index.html?translate=1";
+              var iframe = document.createElement('iframe');
+              iframe.src = URL;
+              iframe.style.width  = '100%';
+              iframe.style.height = '100%';
+              iframe.style.border = 0;
+              training_window = iframe.contentWindow;
           }
-          var URL = source === 'camera' ?
-                    (window.location.href.indexOf("localhost") >= 0 ? 
-                     "/ai/camera-train/index-dev.html?translate=1" :
-                     "https://ecraft2learn.github.io/ai/camera-train/index.html?translate=1") :
-                     "/ai/microphone-train/index.html?translate=1";
-          var training_window = window.open(URL, "Training " + buckets);
-          window.addEventListener('unload',
-                                  function () {
-                                      training_window.close();
-                                  });
           return training_window;
       };
       if (!ecraft2learn.machine_learning_window || ecraft2learn.machine_learning_window.closed) {
