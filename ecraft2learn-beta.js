@@ -534,12 +534,6 @@ window.ecraft2learn =
             ecraft2learn.canvas = ecraft2learn.setup_camera(640, 480, undefined, post_image);
         }
     };
-    var receive_confidences = function (event) {
-        if (typeof event.data.confidences !== 'undefined') {
-            invoke_callback(callback, javascript_to_snap(event.data.confidences));
-            window.removeEventListener("message", receive_confidences);
-         };
-    };
     var get_costumes = function (sprite) {
         if (!sprite) {
             alsert("get_costumes called without specifying which sprite");
@@ -1450,6 +1444,12 @@ window.ecraft2learn =
       train("microphone", buckets_as_snap_list, add_to_previous_training, page_introduction, callback);
   },
   image_confidences: function (callback) {
+      var receive_confidences = function (event) {
+          if (typeof event.data.confidences !== 'undefined') {
+              invoke_callback(callback, javascript_to_snap(event.data.confidences));
+              window.removeEventListener("message", receive_confidences);
+           };
+      };
       training_window_request("You need to train the system before using 'Current image label confidences'.\n" +
                               "Run the 'Train using image buckets ...' command before this.", 
                               function (image) {
@@ -1458,6 +1458,12 @@ window.ecraft2learn =
                               receive_confidences);
   },
   costume_confidences: function (costume_number, callback, sprite) {
+      var receive_confidences = function (event) {
+          if (typeof event.data.confidences !== 'undefined') {
+                invoke_callback(callback, javascript_to_snap(event.data.confidences));
+                window.removeEventListener("message", receive_confidences);
+             };
+        };
         var costume = costume_of_sprite(costume_number, sprite);
         costume_to_image(costume,
                          function (image) {
@@ -1469,6 +1475,24 @@ window.ecraft2learn =
                                                     receive_confidences,
                                                     image);
                          });                            
+  },
+  audio_confidences: function (callback, duration) {
+      var receive_confidences = function (event) {
+          if (typeof event.data.confidences !== 'undefined') {
+              invoke_callback(callback, javascript_to_snap(event.data.confidences));
+              window.removeEventListener("message", receive_confidences);
+           };
+      };
+      if (!ecraft2learn.machine_learning_window) {
+          inform("Training request warning",
+                 "Run the 'Train with audio buckets ...' command before using 'Audio label confidences'");
+          return;
+      }
+      if (typeof duration != 'number' || duration <= 0) {
+          duration = 3000; // 3 second default 
+      }
+      ecraft2learn.machine_learning_window.postMessage({predict: duration}, "*");
+      window.addEventListener("message", receive_confidences);  
   },
   add_image_to_training: function (costume_number, label, callback, sprite) {
       var receive_comfirmation = 
