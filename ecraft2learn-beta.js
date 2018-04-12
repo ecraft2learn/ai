@@ -512,7 +512,7 @@ window.ecraft2learn =
           ecraft2learn.train_using_images(buckets_as_snap_list, add_to_previous_training, page_introduction, callback);
       }
   };
-    var training_window_request = function (alert_message, message_maker, response_listener, image) {
+  var training_window_request = function (alert_message, message_maker, response_listener, image) {
         var training_image_width  = 227;
         var training_image_height = 227;
         if (!ecraft2learn.machine_learning_window) {
@@ -533,6 +533,12 @@ window.ecraft2learn =
             // better to use 640x480 and then scale it down before sending it off to the training tab
             ecraft2learn.canvas = ecraft2learn.setup_camera(640, 480, undefined, post_image);
         }
+    };
+    var receive_confidences = function (event) {
+        if (typeof event.data.confidences !== 'undefined') {
+            invoke_callback(callback, javascript_to_snap(event.data.confidences));
+            window.removeEventListener("message", receive_confidences);
+         };
     };
     var get_costumes = function (sprite) {
         if (!sprite) {
@@ -1444,15 +1450,8 @@ window.ecraft2learn =
       train("microphone", buckets_as_snap_list, add_to_previous_training, page_introduction, callback);
   },
   image_confidences: function (callback) {
-      // if no costume_number provided then camera is used
-      var receive_confidences = function (event) {
-                                    if (typeof event.data.confidences !== 'undefined') {
-                                        invoke_callback(callback, javascript_to_snap(event.data.confidences));
-                                        window.removeEventListener("message", receive_confidences);
-                                    };
-                                };
       training_window_request("You need to train the system before using 'Current image label confidences'.\n" +
-                              "Run 'Train using camera ...' before this.", 
+                              "Run the 'Train using image buckets ...' command before this.", 
                               function (image) {
                                   return {predict: image};
                               }, 
@@ -1460,16 +1459,10 @@ window.ecraft2learn =
   },
   costume_confidences: function (costume_number, callback, sprite) {
         var costume = costume_of_sprite(costume_number, sprite);
-        var receive_confidences = function (event) {
-                                    if (typeof event.data.confidences !== 'undefined') {
-                                        invoke_callback(callback, javascript_to_snap(event.data.confidences));
-                                        window.removeEventListener("message", receive_confidences);
-                                    };
-                                };
         costume_to_image(costume,
                          function (image) {
                             training_window_request("You need to train the system before using 'Image label confidences'.\n" +
-                                                    "Run 'Train using camera ...' before this.", 
+                                                    "Run the 'Add costume ...' block before this.", 
                                                     function (image_URL) {
                                                                  return {predict: image_URL};
                                                     },
