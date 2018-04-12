@@ -1,5 +1,5 @@
-var initialise = function (training_class_names) {
-    var speech_recognizer = new JsSpeechRecognizer();
+(function (speech_recognizer) {
+ var initialise = function (training_class_names) {
     speech_recognizer.openMic();
     var train_on = function (class_index, info_text) {
         speech_recognizer.startTrainingRecording(training_class_names[class_index]);
@@ -82,12 +82,26 @@ window.addEventListener('DOMContentLoaded',
 window.addEventListener("message",
                         function (event) {
                             if (typeof event.data.training_class_names !== 'undefined') {
+                                // received the names of the classes so ready to initialise
                                 initialise(event.data.training_class_names);
                                 event.source.postMessage("Ready", "*");
                             } else if (typeof event.data.new_introduction !== 'undefined') {
+                                // introductory text overridden
                                 var introduction = document.getElementById("introduction");
                                 introduction.innerHTML = event.data.new_introduction;
                                 introduction.setAttribute("updated", true);
+                            } else if (typeof event.data.predict === 'number') {
+                                // classification requested
+                                let duration = event.data.predict;
+                                speech_recognizer.startRecognitionRecording();
+                                setTimeout(function () {
+                                               speech_recognizer.stopRecording();
+                                               // top result only for now
+                                               var results = speech_recognizer.getTopRecognitionHypotheses(1);
+                                               event.source.postMessage({confidences: results[0]}, "*");
+                                           },
+                                           duration);
                             }
                         },
                         false);
+} (new JsSpeechRecognizer()))

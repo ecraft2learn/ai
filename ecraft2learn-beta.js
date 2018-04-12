@@ -1476,7 +1476,7 @@ window.ecraft2learn =
                                                     image);
                          });                            
   },
-  audio_confidences: function (callback, duration) {
+  audio_confidences: function (callback, duration_in_seconds) {
       var receive_confidences = function (event) {
           if (typeof event.data.confidences !== 'undefined') {
               invoke_callback(callback, javascript_to_snap(event.data.confidences));
@@ -1489,9 +1489,10 @@ window.ecraft2learn =
           return;
       }
       if (typeof duration != 'number' || duration <= 0) {
-          duration = 3000; // 3 second default 
+          duration = 3; // 3 second default 
       }
-      ecraft2learn.machine_learning_window.postMessage({predict: duration}, "*");
+      // convert from milliseconds to seconds
+      ecraft2learn.machine_learning_window.postMessage({predict: duration*1000}, "*");
       window.addEventListener("message", receive_confidences);  
   },
   add_image_to_training: function (costume_number, label, callback, sprite) {
