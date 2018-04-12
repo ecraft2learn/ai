@@ -89,9 +89,3 @@ window.addEventListener("message",
                             }
                         },
                         false);
-
- // for testing
-window.addEventListener('DOMContentLoaded', 
-                        function (event) {
-                            initialise(["yes", "no"]);
-                        });

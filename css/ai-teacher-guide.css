@@ -45,7 +45,7 @@ figcaption {
   transform: scale(1.5);
 }
 .training-button, .testing-button, .return-to-snap-button {
-/*    copied from jquery-ui and padding and font-size edited */
+/*    copied from jquery-ui with padding and font-size edited */
   padding: .8em 1em;
   display: inline-block;
   position: relative;
