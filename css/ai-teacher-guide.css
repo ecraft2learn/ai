@@ -44,7 +44,7 @@ figcaption {
   -webkit-transform: scale(1.5);
   transform: scale(1.5);
 }
-.training-button, .testing-button {
+.training-button, .testing-button, .return-to-snap-button {
 /*    copied from jquery-ui and padding and font-size edited */
   padding: .8em 1em;
   display: inline-block;

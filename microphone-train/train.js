@@ -20,6 +20,7 @@ var initialise = function (training_class_names) {
     };
     create_training_buttons(training_class_names, train_on, train_off);
     create_test_button(training_class_names, speech_recognizer);
+    create_return_to_snap_button();
 };
 
 var create_test_button = function (training_class_names, speech_recognizer) {
@@ -54,6 +55,18 @@ var create_test_button = function (training_class_names, speech_recognizer) {
     button.addEventListener('mouseup',    button_up);
     button.addEventListener('touchend',   button_up);
 };
+
+create_return_to_snap_button = function () {
+    var return_to_snap_button = document.createElement('button');
+    return_to_snap_button.innerHTML = "Return to Snap!";
+    return_to_snap_button.className = "return-to-snap-button";
+    return_to_snap_button.addEventListener('click',
+                                           function(event) {
+                                               window.frameElement.style.width  = "1px";
+                                               window.frameElement.style.height = "1px";
+                                           });
+    document.body.appendChild(return_to_snap_button);
+}
 
 // tell Snap! this is loaded
 window.addEventListener('DOMContentLoaded', 

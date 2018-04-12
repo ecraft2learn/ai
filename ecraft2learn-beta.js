@@ -465,12 +465,14 @@ window.ecraft2learn =
           } else {
               URL = "/ai/microphone-train/index.html?translate=1";
               var iframe = document.createElement('iframe');
+              document.body.appendChild(iframe);
               iframe.src = URL;
               iframe.style.width  = '100%';
               iframe.style.height = '100%';
               iframe.style.border = 0;
+              iframe.style.position = 'absolute';
+              iframe.style.backgroundColor = 'white';
               training_window = iframe.contentWindow;
-              document.body.appendChild(iframe);
           }
           return training_window;
       };
