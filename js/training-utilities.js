@@ -9,7 +9,6 @@
     for (let i = 0; i < training_class_names.length; i++) {
       const div = document.createElement('div');
       document.body.appendChild(div);
-      div.style.marginBottom = '10px';
       // Create info text next to each button
       const info_text = document.createElement('span');
       info_text.innerText = " No examples added";
