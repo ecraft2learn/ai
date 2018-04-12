@@ -34,7 +34,7 @@ function JsSpeechRecognizer() {
     this.model = {};
 
     this.recordingState = this.RecordingEnum.NOT_RECORDING;
-    this.useRecognitionModel = this.RecognitionModel.AVERAGE; // was COMPOSITE;
+    this.useRecognitionModel = this.RecognitionModel.COMPOSITE;
 
     // Get an audio context
     this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -158,13 +158,13 @@ JsSpeechRecognizer.prototype.stopRecording = function() {
 
     this.groupedValues = [].concat.apply([], this.groupedValues);
     this.normalizeInput(this.groupedValues);
-
-    // commented out since not using playTrainingBuffer
+    
     // If we are training we want to save to the recognition model buffer
-//     if (this.recordingState === this.RecordingEnum.TRAINING) {
-//         this.recordingBufferArray.push(this.currentRecordingBuffer.slice(0));
-//         this.modelBuffer.push(this.groupedValues.slice(0));
-//     }
+    if (this.recordingState === this.RecordingEnum.TRAINING) {
+        // commented out since not using playTrainingBuffer
+//      this.recordingBufferArray.push(this.currentRecordingBuffer.slice(0));
+        this.modelBuffer.push(this.groupedValues.slice(0));
+    }
 
     this.recordingState = this.RecordingEnum.NOT_RECORDING;
 
