@@ -470,6 +470,7 @@ window.ecraft2learn =
               iframe.style.height = '100%';
               iframe.style.border = 0;
               training_window = iframe.contentWindow;
+              document.body.appendChild(iframe);
           }
           return training_window;
       };
