@@ -1488,11 +1488,11 @@ window.ecraft2learn =
                  "Run the 'Train with audio buckets ...' command before using 'Audio label confidences'");
           return;
       }
-      if (typeof duration != 'number' || duration <= 0) {
-          duration = 3; // 3 second default 
+      if (typeof duration_in_seconds != 'number' || duration_in_seconds <= 0) {
+          duration_in_seconds = 3; // 3 second default 
       }
       // convert from milliseconds to seconds
-      ecraft2learn.machine_learning_window.postMessage({predict: duration*1000}, "*");
+      ecraft2learn.machine_learning_window.postMessage({predict: duration_in_seconds*1000}, "*");
       window.addEventListener("message", receive_confidences);  
   },
   add_image_to_training: function (costume_number, label, callback, sprite) {
