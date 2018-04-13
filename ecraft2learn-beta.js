@@ -483,7 +483,8 @@ window.ecraft2learn =
           var receive_ready = 
               function (event) {
                   if (event.data === "Loaded") {
-                      machine_learning_window.postMessage({training_class_names: buckets}, "*");
+                      machine_learning_window.postMessage({training_class_names: buckets,
+                                                           snap_window: window}, "*");
                   } else if (event.data === "Ready") {
                       ecraft2learn.machine_learning_window_ready = true;
                       if (page_introduction) {
