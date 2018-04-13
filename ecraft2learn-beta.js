@@ -463,7 +463,7 @@ window.ecraft2learn =
                                           training_window.close();
                                       });
           } else {
-              URL = "/ai/microphone-train/index.html?translate=1";
+              URL = "https://ecraft2learn.github.io/ai/microphone-train/index.html?translate=1";
               var iframe = document.createElement('iframe');
               document.body.appendChild(iframe);
               iframe.src = URL;

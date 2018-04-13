@@ -36,7 +36,7 @@ var create_test_button = function (training_class_names, speech_recognizer) {
     };
     var button_up = function () {
         speech_recognizer.stopRecording();
-        var result = speech_recognizer.getTopRecognitionHypotheses(1); // top result only
+        var result = speech_recognizer.getTopRecognitionHypotheses(-1); // top result only
         // Format and display results
         results_div.innerHTML = "";
         if (result.length > 0 && result[0].confidence > 0) {
@@ -97,7 +97,7 @@ window.addEventListener("message",
                                 setTimeout(function () {
                                                speech_recognizer.stopRecording();
                                                // top result only for now
-                                               var results = speech_recognizer.getTopRecognitionHypotheses(1);
+                                               var results = speech_recognizer.getTopRecognitionHypotheses(-1);
                                                event.source.postMessage({confidences: results[0]}, "*");
                                            },
                                            duration);
