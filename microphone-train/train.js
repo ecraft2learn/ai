@@ -98,8 +98,9 @@ window.addEventListener("message",
                                                speech_recognizer.stopRecording();
                                                // top result only 
                                                var results = speech_recognizer.getTopRecognitionHypotheses(1);
-                                               event.source.postMessage([results[0].match,
-                                                                         (results[0].confidence*100).toFixed(0)],
+                                               event.source.postMessage({confidences:
+                                                                         [results[0].match,
+                                                                          (results[0].confidence*100).toFixed(0)]},
                                                                         "*");
                                            },
                                            duration);

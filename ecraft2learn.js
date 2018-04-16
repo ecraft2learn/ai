@@ -1478,8 +1478,8 @@ window.ecraft2learn =
   },
   audio_confidences: function (callback, duration_in_seconds) {
       var receive_confidences = function (event) {
-          if (typeof event.data.best_match !== 'undefined') {
-              invoke_callback(callback, javascript_to_snap(event.data));
+          if (typeof event.data.confidences !== 'undefined') {
+              invoke_callback(callback, javascript_to_snap(event.data.confidences));
               window.removeEventListener("message", receive_confidences);
            };
       };
