@@ -511,8 +511,7 @@ window.ecraft2learn =
           return;
       }     
       if (add_to_previous_training && buckets_equal(buckets, ecraft2learn.image_learning_buckets)) {
-          if (ecraft2learn.machine_learning_window.frameElement) {
-              // is this the best test for "hidden" training iframe?
+          if (iframe) {
               iframe.style.width  = "100%";
               iframe.style.height = "100%";
           } else {
