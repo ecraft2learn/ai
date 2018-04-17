@@ -491,7 +491,7 @@ window.ecraft2learn =
           ecraft2learn.image_learning_buckets = buckets;
           var machine_learning_window = open_machine_learning_window();
           ecraft2learn.machine_learning_window = machine_learning_window;
-          var receive_ready = 
+          var receive_messages_from_iframe = 
               function (event) {
                   if (event.data === "Loaded") {
                       machine_learning_window.postMessage({training_class_names: buckets}, "*");
@@ -501,13 +501,12 @@ window.ecraft2learn =
                           machine_learning_window.postMessage({new_introduction: page_introduction}, "*");
                       }
                       invoke_callback(callback, "Ready");
+                  } else if (event.data === 'Hide audio training iframe') {
+                      machine_learning_window.parent.style.width  = "1px";
+                      machine_learning_window.parent.style.height = "1px";
                   }
           };
-//           if (source === 'camera') {     
-              window.addEventListener("message", receive_ready, false);
-//           } else {
-//               window.addEventListener('Training iframe loaded', receive_ready, false);
-//           }                  
+          window.addEventListener("message", receive_messages_from_iframe, false);               
           return;
       }     
       if (add_to_previous_training && buckets_equal(buckets, ecraft2learn.image_learning_buckets)) {
