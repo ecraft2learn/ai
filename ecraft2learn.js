@@ -463,16 +463,16 @@ window.ecraft2learn =
                                           training_window.close();
                                       });
           } else {
-              if (window.location.href.indexOf("https://ecraft2learn.github.io/") !== 0) {
-                  inform("Unable to open audio training frame",
-                         "Due to browser security concerns the audio training frame and Snap! need to come from the same domain.\n" +
-                         "Audio training will work if you run Snap! from https://ecraft2learn.github.io/ai/snap/.\n" +
-                         "Do you want to open this version of Snap! now? (Answer NO if you haven't saved your work.)",
-                         function() {
-                             window.location.replace("https://ecraft2learn.github.io/ai/snap/");
-                         });
-                  return;
-              }
+//               if (window.location.href.indexOf("https://ecraft2learn.github.io/") !== 0) {
+//                   inform("Unable to open audio training frame",
+//                          "Due to browser security concerns the audio training frame and Snap! need to come from the same domain.\n" +
+//                          "Audio training will work if you run Snap! from https://ecraft2learn.github.io/ai/snap/.\n" +
+//                          "Do you want to open this version of Snap! now? (Answer NO if you haven't saved your work.)",
+//                          function() {
+//                              window.location.replace("https://ecraft2learn.github.io/ai/snap/");
+//                          });
+//                   return;
+//               }
               URL = "https://ecraft2learn.github.io/ai/microphone-train/index.html?translate=1";
               let iframe = document.createElement('iframe');
               document.body.appendChild(iframe);
@@ -482,6 +482,7 @@ window.ecraft2learn =
               iframe.style.border = 0;
               iframe.style.position = 'absolute';
               iframe.style.backgroundColor = 'white';
+              iframe.allow = "microphone"; // Chrome 65 requires it
               training_window = iframe.contentWindow;
           }
           return training_window;
@@ -501,8 +502,12 @@ window.ecraft2learn =
                       }
                       invoke_callback(callback, "Ready");
                   }
-          };      
-          window.addEventListener("message", receive_ready, false);                     
+          };
+          if (source === 'camera') {     
+              window.addEventListener("message", receive_ready, false);
+          } else {
+              window.addEventListener('Training iframe loaded', receive_ready, false);
+          }                  
           return;
       }     
       if (add_to_previous_training && buckets_equal(buckets, ecraft2learn.image_learning_buckets)) {
