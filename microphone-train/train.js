@@ -71,14 +71,14 @@ create_return_to_snap_button = function () {
 // tell Snap! this is loaded
 window.addEventListener('DOMContentLoaded', 
                         function (event) {
-//                             if (window.opener) {
-//                                 window.opener.postMessage("Loaded", "*");
-//                             } else 
+                            if (window.opener) {
+                                window.opener.postMessage("Loaded", "*");
+                            } else 
                             if (window.parent) {
-                                window.parent.dispatchEvent(new CustomEvent('Training iframe loaded'));
+//                                 window.parent.dispatchEvent(new CustomEvent('Training iframe loaded'));
                                 // following runs into CORS problems
                                 // Thanks https://medium.com/@Farzad_YZ/cross-domain-iframe-parent-communication-403912fff692
-//                              window.parent.postMessage("Loaded", "*");
+                             window.parent.postMessage("Loaded", "*");
                             }
                         },
                         false);

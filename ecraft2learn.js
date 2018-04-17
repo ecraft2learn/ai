@@ -503,11 +503,11 @@ window.ecraft2learn =
                       invoke_callback(callback, "Ready");
                   }
           };
-          if (source === 'camera') {     
+//           if (source === 'camera') {     
               window.addEventListener("message", receive_ready, false);
-          } else {
-              window.addEventListener('Training iframe loaded', receive_ready, false);
-          }                  
+//           } else {
+//               window.addEventListener('Training iframe loaded', receive_ready, false);
+//           }                  
           return;
       }     
       if (add_to_previous_training && buckets_equal(buckets, ecraft2learn.image_learning_buckets)) {
