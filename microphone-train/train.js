@@ -62,7 +62,7 @@ create_return_to_snap_button = function () {
     return_to_snap_button.className = "return-to-snap-button";
     return_to_snap_button.addEventListener('click',
                                            function(event) {
-                                               window.parent.postMessage('Hide audio training iframe'. "*");
+                                               window.parent.postMessage('Hide audio training iframe', "*");
                                            });
     document.body.appendChild(return_to_snap_button);
 }
