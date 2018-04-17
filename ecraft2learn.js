@@ -474,7 +474,7 @@ window.ecraft2learn =
 //                   return;
 //               }
               URL = "https://ecraft2learn.github.io/ai/microphone-train/index.html?translate=1";
-              let iframe = document.createElement('iframe');
+              iframe = document.createElement('iframe');
               document.body.appendChild(iframe);
               iframe.src = URL;
               iframe.style.width  = '100%';
@@ -487,6 +487,7 @@ window.ecraft2learn =
           }
           return training_window;
       };
+      let iframe; // so shared among functions defined here
       if (!ecraft2learn.machine_learning_window || ecraft2learn.machine_learning_window.closed) {
           ecraft2learn.image_learning_buckets = buckets;
           var machine_learning_window = open_machine_learning_window();
@@ -502,8 +503,8 @@ window.ecraft2learn =
                       }
                       invoke_callback(callback, "Ready");
                   } else if (event.data === 'Hide audio training iframe') {
-                      machine_learning_window.parent.style.width  = "1px";
-                      machine_learning_window.parent.style.height = "1px";
+                      iframe.style.width  = "1px";
+                      iframe.style.height = "1px";
                   }
           };
           window.addEventListener("message", receive_messages_from_iframe, false);               
@@ -512,8 +513,8 @@ window.ecraft2learn =
       if (add_to_previous_training && buckets_equal(buckets, ecraft2learn.image_learning_buckets)) {
           if (ecraft2learn.machine_learning_window.frameElement) {
               // is this the best test for "hidden" training iframe?
-              ecraft2learn.machine_learning_window.frameElement.style.width  = "100%";
-              ecraft2learn.machine_learning_window.frameElement.style.height = "100%";
+              iframe.style.width  = "100%";
+              iframe.style.height = "100%";
           } else {
               // would like to go to that window:  ecraft2learn.machine_learning_window.focus();
               // but browsers don't allow it unless clear the user initiated it
