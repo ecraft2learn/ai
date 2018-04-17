@@ -474,7 +474,7 @@ window.ecraft2learn =
 //                   return;
 //               }
               URL = "https://ecraft2learn.github.io/ai/microphone-train/index.html?translate=1";
-              iframe = document.createElement('iframe');
+              let iframe = document.createElement('iframe');
               document.body.appendChild(iframe);
               iframe.src = URL;
               iframe.style.width  = '100%';
@@ -484,10 +484,10 @@ window.ecraft2learn =
               iframe.style.backgroundColor = 'white';
               iframe.allow = "microphone"; // Chrome 65 requires it
               training_window = iframe.contentWindow;
+              ecraft2learn.audio_training_iframe = iframe;
           }
           return training_window;
       };
-      let iframe; // so shared among functions defined here
       if (!ecraft2learn.machine_learning_window || ecraft2learn.machine_learning_window.closed) {
           ecraft2learn.learning_buckets = buckets;
           var machine_learning_window = open_machine_learning_window();
@@ -503,17 +503,17 @@ window.ecraft2learn =
                       }
                       invoke_callback(callback, "Ready");
                   } else if (event.data === 'Hide audio training iframe') {
-                      iframe.style.width  = "1px";
-                      iframe.style.height = "1px";
+                      ecraft2learn.audio_training_iframe.style.width  = "1px";
+                      ecraft2learn.audio_training_iframe.style.height = "1px";
                   }
           };
           window.addEventListener("message", receive_messages_from_iframe, false);               
           return;
       }     
       if (add_to_previous_training && buckets_equal(buckets, ecraft2learn.learning_buckets)) {
-          if (ecraft2learn.machine_learning_window) {
-              iframe.style.width  = "100%";
-              iframe.style.height = "100%";
+          if (ecraft2learn.audio_training_iframe) {
+              ecraft2learn.audio_training_iframe.style.width  = "100%";
+              ecraft2learn.audio_training_iframe.style.height = "100%";
           } else {
               // would like to go to that window:  ecraft2learn.machine_learning_window.focus();
               // but browsers don't allow it unless clear the user initiated it
