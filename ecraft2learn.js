@@ -489,7 +489,7 @@ window.ecraft2learn =
       };
       let iframe; // so shared among functions defined here
       if (!ecraft2learn.machine_learning_window || ecraft2learn.machine_learning_window.closed) {
-          ecraft2learn.image_learning_buckets = buckets;
+          ecraft2learn.learning_buckets = buckets;
           var machine_learning_window = open_machine_learning_window();
           ecraft2learn.machine_learning_window = machine_learning_window;
           var receive_messages_from_iframe = 
@@ -510,8 +510,8 @@ window.ecraft2learn =
           window.addEventListener("message", receive_messages_from_iframe, false);               
           return;
       }     
-      if (add_to_previous_training && buckets_equal(buckets, ecraft2learn.image_learning_buckets)) {
-          if (iframe) {
+      if (add_to_previous_training && buckets_equal(buckets, ecraft2learn.learning_buckets)) {
+          if (ecraft2learn.machine_learning_window) {
               iframe.style.width  = "100%";
               iframe.style.height = "100%";
           } else {
