@@ -466,16 +466,6 @@ window.ecraft2learn =
                                           training_window.close();
                                       });
           } else {
-//               if (window.location.href.indexOf("https://ecraft2learn.github.io/") !== 0) {
-//                   inform("Unable to open audio training frame",
-//                          "Due to browser security concerns the audio training frame and Snap! need to come from the same domain.\n" +
-//                          "Audio training will work if you run Snap! from https://ecraft2learn.github.io/ai/snap/.\n" +
-//                          "Do you want to open this version of Snap! now? (Answer NO if you haven't saved your work.)",
-//                          function() {
-//                              window.location.replace("https://ecraft2learn.github.io/ai/snap/");
-//                          });
-//                   return;
-//               }
               URL = "https://ecraft2learn.github.io/ai/microphone-train/index.html?translate=1";
               let iframe = document.createElement('iframe');
               document.body.appendChild(iframe);
@@ -523,6 +513,7 @@ window.ecraft2learn =
               inform("Training tab ready",
                      "Go to the training window whenever you want to add to the training.");           
           }
+          invoke_callback(callback, "Ready");
       } else {
           ecraft2learn.machine_learning_window.close();
           // start over
