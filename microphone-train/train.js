@@ -75,10 +75,7 @@ window.addEventListener('DOMContentLoaded',
                                 window.opener.postMessage("Loaded", "*");
                             } else 
                             if (window.parent) {
-//                                 window.parent.dispatchEvent(new CustomEvent('Training iframe loaded'));
-                                // following runs into CORS problems
-                                // Thanks https://medium.com/@Farzad_YZ/cross-domain-iframe-parent-communication-403912fff692
-                             window.parent.postMessage("Loaded", "*");
+                                window.parent.postMessage("Loaded", "*");
                             }
                         },
                         false);
@@ -88,7 +85,7 @@ window.addEventListener("message",
                             if (typeof event.data.training_class_names !== 'undefined') {
                                 // received the names of the classes so ready to initialise
                                 initialise(event.data.training_class_names);
-                                event.source.postMessage("Ready", "*");
+                                window.parent.postMessage("Ready", "*");
                             } else if (typeof event.data.new_introduction !== 'undefined') {
                                 // introductory text overridden
                                 var introduction = document.getElementById("introduction");
@@ -102,7 +99,7 @@ window.addEventListener("message",
                                                speech_recognizer.stopRecording();
                                                // top result only 
                                                var results = speech_recognizer.getTopRecognitionHypotheses(1);
-                                               event.source.postMessage({confidences:
+                                               window.parent.postMessage({confidences:
                                                                          [results[0].match,
                                                                           (results[0].confidence*100).toFixed(0)]},
                                                                         "*");
