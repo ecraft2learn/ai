@@ -437,6 +437,9 @@ window.ecraft2learn =
       // source can be 'camera' or 'microphone'
       var buckets = buckets_as_snap_list.contents;
       var buckets_equal = function (buckets1, buckets2) {
+          if (!buckets1 || !buckets2) {
+              return false;
+          }
           return buckets1 === buckets2 ||
                  (buckets1.length === buckets2.length &&
                   buckets1.every(function (bucket_name, index) {
@@ -523,7 +526,7 @@ window.ecraft2learn =
       } else {
           ecraft2learn.machine_learning_window.close();
           // start over
-          ecraft2learn.train_using_images(buckets_as_snap_list, add_to_previous_training, page_introduction, callback);
+          train(source, buckets_as_snap_list, add_to_previous_training, page_introduction, callback);
       }
   };
   var training_window_request = function (alert_message, message_maker, response_listener, image) {
