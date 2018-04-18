@@ -65,7 +65,11 @@ They run best in the Chrome browser.
 <span class="requirements">&nbsp;(requires speaker/headphones)</span>
 </li>
 <li><a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=command%20broadcast%202">
-<b>Speak commands to a sprite</b></a>
+<b>Speak single word commands to a sprite (with synonym support)</b></a>
+<span class="requirements">&nbsp;(requires microphone and speaker/headphones)</span>
+</li>
+<li><a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=command%20sentences">
+<b>Speak full sentence commands to a sprite (with keyword search)</b></a>
 <span class="requirements">&nbsp;(requires microphone and speaker/headphones)</span>
 </li>
 <li><a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=part%20of%20speech%20broadcast">
@@ -92,6 +96,10 @@ They run best in the Chrome browser.
 <b>After training the turtle moves depending on which way your finger is pointed</b></a>
 <span class="requirements">&nbsp;(requires webcam, <a href="#gpu">a GPU</a>, and <a href="#popup">popups</a>)</span>
 </li>
+<li><a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=train%20and%20speak%20commands">
+<b>After training the turtle moves depending on the voice commands you give</b></a>
+<span class="requirements">&nbsp;(requires microphone)</span>
+</li>
 <li><a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=follow%20lean">
 <b>After training the turtle moves left or right depending on which way you lean</b></a>
 <span class="requirements">&nbsp;(requires webcam, <a href="#gpu">a GPU</a>, and <a href="#popup">popups</a>)</span>
@@ -105,11 +113,12 @@ They run best in the Chrome browser.
 <p>
 Send email to <a href="mailto:toontalk@gmail.com">Ken Kahn</a> if you encounter problems or have questions.
 </p>
-<h3 id="gpu">GPU required for chapter 4 and some demos</h3>
+<h3 id="gpu">GPU required for chapter 4 image recognition and some demos</h3>
 <p>
 Nearly all modern computers have a <a href="http://www.nvidia.com/object/what-is-gpu-computing.html" target="_blank">GPU</a>.
 Without one or with a very primitive one programs using machine learning may run very slow.
-For example, it runs very slow on Raspberry Pis.
+For example, the image machine learning commands run very slowly on Raspberry Pis.
+The audio training primitives, however, do run well on Raspberry Pis.
 </p>
 <h3 id="popup">Popups need permission</h3>
 <p>
