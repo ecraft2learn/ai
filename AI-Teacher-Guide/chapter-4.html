@@ -282,6 +282,44 @@ And AI vision services can do more than just
 <a href="chapter-3.html#advanced-image-recognition" target="_blank">choose a label</a> for an image.
 </p>
 
+<h4>Recognising sounds</h4>
+<p>
+Computers can be trained to distinguish different sounds including spoken speech.
+<a href="chapter-2.html">Chapter 3</a> describes how to use cloud services that do speech recognition.
+Here you can create programs that respond to any sound.
+Also you can train it recognise a few different words or phrases that works locally on your computer without sending
+any audio to a cloud server.
+This is useful in contexts without a reliable network connection or for increased privacy.
+</p>
+<figure>
+<div class="iframe-container"
+     style="width: 800px; height: 400px;">
+<iframe class="iframe-clipped"
+        scrolling="no"
+        src="/ai/snap/snap.html"
+        project_path="/ai/AI-teacher-guide-projects/train audio.xml"> 
+</iframe></div>
+<figcaption>A block for training the system to recognise what the microphone is hearing. TRY IT</figcaption>
+</figure>
+<p>
+The <span class="block-name">Train with audio buckets...</span> block currently uses a simple learning algorithm.
+The plan is to replace it with a deep learning model.
+</p>
+<h4>An Example Program using the Microphone and Machine Learning</h4>
+<p>
+Using machine learning one can make a rock paper scissors game that can be played
+by putting your hand into one of three configurations.
+If the game below doesn't work visit this <a href="#browser-compatibility">help</a>.
+</p>
+<figure>
+<iframe style="width: 800px; height: 600px"
+        scrolling="no"
+        src="/ai/snap/snap.html"
+        project_path="/ai/projects/train and speak commands.xml"
+        full_screen="true"> 
+</iframe>
+<figcaption>Click the green flag to train it to recognise a few voice command</figcaption>
+</figure>
 <h4 id="project-ideas">Possible project ideas using image recognition</h4>
 <p>
 Most of the <a class="guide-link" href="chapter-3.html#project-ideas" target="_blank">project ideas listed for using image recognition services</a>
@@ -343,7 +381,7 @@ also has sample projects.
 <h4>Future directions for this chapter</h4>
 <p>
 Several enhancements to this chapter are planned.
-These include support for other kinds of input such as audio or text,
+These include support for other kinds of input such as text or numbers,
 blocks for saving and restoring a trained model, and more.
 </p>
 
