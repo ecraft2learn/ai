@@ -1448,7 +1448,8 @@ window.ecraft2learn =
       // old name kept for backwards compatibility
       train("camera", buckets_as_snap_list, add_to_previous_training, page_introduction, callback);
   },
-  train_using_microphone: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback) {
+  train_using_microphone: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback, version) {
+      // version is for when this is replaced by a deep learning model
       train("microphone", buckets_as_snap_list, add_to_previous_training, page_introduction, callback);
   },
   image_confidences: function (callback) {
@@ -1484,7 +1485,8 @@ window.ecraft2learn =
                                                     image);
                          });                            
   },
-  audio_confidences: function (callback, duration_in_seconds) {
+  audio_confidences: function (callback, duration_in_seconds, version) {
+      // version is for when this is replaced by a deep learning model
       var receive_confidences = function (event) {
           if (typeof event.data.confidences !== 'undefined') {
               invoke_callback(callback, javascript_to_snap(event.data.confidences));
