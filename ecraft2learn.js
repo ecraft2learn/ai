@@ -70,7 +70,10 @@ window.ecraft2learn =
           // labelSpec if it takes areguments will look something like 'label %txt of size %n'
           var ide = get_snap_ide(ecraft2learn.snap_context);
           // based upon https://github.com/jmoenig/Snap--Build-Your-Own-Blocks/issues/1791#issuecomment-313529328
-          var allBlocks = ide.sprites.asArray().concat([ide.stage]).map(function (item) {return item.customBlocks}).reduce(function (a, b) {return a.concat(b)}).concat(ide.stage.globalBlocks);
+          var allBlocks = ide.sprites.asArray().concat([ide.stage])
+                         .map(function (item) {return item.customBlocks})
+                         .reduce(function (a, b) {return a.concat(b)})
+                         .concat(ide.stage.globalBlocks);
           var blockSpecs = allBlocks.map(function (block) {return block.blockSpec()});
           var index = blockSpecs.indexOf(labelSpec);
           if (index < 0) {
@@ -964,7 +967,8 @@ window.ecraft2learn =
             var message = "Speech recognition will expect " + matching_language_name + " to be spoken.\n";
             var no_voices_callback = function () {
                 if (mary_tts_voice_number >= 0) {
-                    message += "No matching browser speech synthesis voice found but Mary TTS voice " + mary_tts_voices[mary_tts_voice_number][1] + " can be used.\n" +
+                    message += "No matching browser speech synthesis voice found but Mary TTS voice " +
+                               mary_tts_voices[mary_tts_voice_number][1] + " can be used.\n" +
                                "Use the Speak (using Mary TTS engine) command.";
                 } else {
                     message += "No speech synthesis support for " + matching_language_name + " found so English will be used.";
@@ -1107,7 +1111,8 @@ window.ecraft2learn =
               // beginning early December 2017 Watson began signalling No 'Access-Control-Allow-Origin' header
               // so the following proxy should have fixed it but didn't 
               // This may be a temporary problem at IBM and hopefully things will be restored soon
-//            var proxy_url = "https://toontalk.appspot.com/p/" + encodeURIComponent("https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key)
+// var proxy_url = "https://toontalk.appspot.com/p/" + 
+// encodeURIComponent("https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key)
               XHR.open('POST', "https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key);
               XHR.send(formData);
               break;
@@ -1430,7 +1435,10 @@ window.ecraft2learn =
   handle_server_json_response: function (response, callback) {
      invoke_callback(callback, javascript_to_snap(JSON.parse(response)));
   },
-  handle_server_json_response_to_pins_request: function (response_text, callback_for_pins_read, callback_for_pins_written, callback_for_errors) {
+  handle_server_json_response_to_pins_request: function (response_text,
+                                                         callback_for_pins_read,
+                                                         callback_for_pins_written,
+                                                         callback_for_errors) {
       try {
           var response = JSON.parse(response_text);
           var read = response.pins;
@@ -1517,7 +1525,8 @@ window.ecraft2learn =
       costume_to_image(costume,
                        function (image) {
                           training_window_request("You need to train the system before using 'Add image to training'.\n" +
-                                                  "Run 'Train using camera ...' before this so the system knows the list of possible labels.", 
+                                                  "Run 'Train using camera ...' before this " +
+                                                  " so the system knows the list of possible labels.", 
                                                   function (image_URL) {
                                                       return {train: image_URL,
                                                               label: label};
