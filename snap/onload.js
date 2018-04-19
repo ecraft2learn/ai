@@ -13,6 +13,7 @@ window.addEventListener('DOMContentLoaded', function () {
 		var project_path = window.frameElement.getAttribute("project_path");
 		var run_full_screen = window.frameElement.getAttribute("run_full_screen");
 		var full_screen = run_full_screen || window.frameElement.getAttribute("full_screen");
+		var stage_scale = window.frameElement.getAttribute("stage_ratio");
 		var load_project_string = 
 			function (project_text) {
 				// timeout wasn't needed before Snap 4.1
@@ -38,6 +39,9 @@ window.addEventListener('DOMContentLoaded', function () {
 		if (!full_screen) {
 			ide_morph.controlBar.hide();    // no need for the control bar
 			ide_morph.toggleAppMode(false); // launch in edit mode
+		}
+		if (stage_scale) {
+			ide_morph.toggleStageSize(true, +stage_scale);
 		}
 		window.onbeforeunload = function () {}; // don't bother the user about reloading
 		window.speechSynthesis.getVoices();     // no need to wait for them to load
