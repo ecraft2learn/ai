@@ -114,7 +114,7 @@ window.ecraft2learn =
     };
     var invoke_callback = function (callback) { // any number of additional arguments
         // callback could either be a Snap! object or a JavaScript function
-        if (callback instanceof Context) { // assume Snap! callback
+        if (Context && callback instanceof Context) { // assume Snap! callback
             // invoke the callback with the argments (other than the callback itself)
             // if BlockMorph then needs a receiver -- apparently callback is good enough
 //             return invoke(callback, new List(Array.prototype.slice.call(arguments, 1)), (callback instanceof BlockMorph && callback)); 
@@ -640,12 +640,12 @@ window.ecraft2learn =
             if (voice[2].indexOf("-") >= 0) {
                 // language and dialect specified
                 if (voice[2].toLowerCase() === language_code.toLowerCase()) {
-                    mary_tts_voice_number = index;
+                    mary_tts_voice_number = index+1; // 1-indexing
                     return true;
                 }
             } else {
                 if (voice[2].toLowerCase() === language_code.substring(0, 2).toLowerCase()) {
-                    mary_tts_voice_number = index;
+                    mary_tts_voice_number = index+1;
                     return true;
                 }
             }
