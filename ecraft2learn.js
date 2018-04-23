@@ -1109,11 +1109,11 @@ window.ecraft2learn =
               formData = new FormData();
               formData.append("images_file", image, "blob.png");
               // beginning early December 2017 Watson began signalling No 'Access-Control-Allow-Origin' header
-              // so the following proxy should have fixed it but didn't 
-              // This may be a temporary problem at IBM and hopefully things will be restored soon
-// var proxy_url = "https://toontalk.appspot.com/p/" + 
-// encodeURIComponent("https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key)
-              XHR.open('POST', "https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key);
+              // Note that "Lite" plans are deleted after 30 days of inactivity...
+              var proxy_url = "https://toontalk.appspot.com/p/" + 
+              encodeURIComponent("https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key);
+              XHR.open('POST', proxy_url);
+//               XHR.open('POST', "https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key);
               XHR.send(formData);
               break;
           case "Google":
