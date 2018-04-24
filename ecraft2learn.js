@@ -114,7 +114,7 @@ window.ecraft2learn =
     };
     var invoke_callback = function (callback) { // any number of additional arguments
         // callback could either be a Snap! object or a JavaScript function
-        if (Context && callback instanceof Context) { // assume Snap! callback
+        if (ecraft2learn.inside_snap && callback instanceof Context) { // assume Snap! callback
             // invoke the callback with the argments (other than the callback itself)
             // if BlockMorph then needs a receiver -- apparently callback is good enough
 //             return invoke(callback, new List(Array.prototype.slice.call(arguments, 1)), (callback instanceof BlockMorph && callback)); 
@@ -1548,7 +1548,6 @@ window.ecraft2learn =
         
 }} ());
 window.speechSynthesis.getVoices(); // to ensure voices are loaded
-ecraft2learn.inside_snap = true;
 ecraft2learn.chrome_languages =
 [
 // based upon https://cloud.google.com/speech/docs/languages
