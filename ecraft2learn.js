@@ -841,7 +841,7 @@ window.ecraft2learn =
           var handle_result = function (event) {
               var spoken = event.results[event.resultIndex][0].transcript; // first result
               var final = event.results[event.resultIndex].isFinal;         
-              invoke_callback(final ? final_spoken_callback : interim_spoken_callback, spoken);
+              invoke_callback(final ? final_spoken_callback : interim_spoken_callback, spoken, event);
               if (debugging) {
                   console.log("Just invoked callback for " + spoken + ". isFinal is " + event.results[event.resultIndex].isFinal);
               }
