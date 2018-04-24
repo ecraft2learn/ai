@@ -132,7 +132,7 @@ window.ecraft2learn =
             process.initializeFor(callback, new List(Array.prototype.slice.call(arguments, 1)));
             stage.threads.processes.push(process);
         } else if (typeof callback === 'function') { // assume JavaScript callback
-            callback.apply(this, arguments);
+            callback.apply(this, Array.prototype.slice.call(arguments, 1));
         }
         // otherwise no callback provided so ignore it
     };
@@ -144,7 +144,7 @@ window.ecraft2learn =
         return invoke(block_morph, new List(Array.prototype.slice.call(arguments, 1)), block_morph);
     };
     var is_callback = function (x) {
-        return x instanceof Context || typeof x === 'function';
+        return (ecraft2learn.inside_snap() && x instanceof Context) || typeof x === 'function';
     };
     var javascript_to_snap = function (x) {
         if (!ecraft2learn.inside_snap()) {
