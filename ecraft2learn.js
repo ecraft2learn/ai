@@ -114,7 +114,7 @@ window.ecraft2learn =
     };
     var invoke_callback = function (callback) { // any number of additional arguments
         // callback could either be a Snap! object or a JavaScript function
-        if (ecraft2learn.inside_snap && callback instanceof Context) { // assume Snap! callback
+        if (ecraft2learn.inside_snap() && callback instanceof Context) { // assume Snap! callback
             // invoke the callback with the argments (other than the callback itself)
             // if BlockMorph then needs a receiver -- apparently callback is good enough
 //             return invoke(callback, new List(Array.prototype.slice.call(arguments, 1)), (callback instanceof BlockMorph && callback)); 
@@ -147,7 +147,7 @@ window.ecraft2learn =
         return x instanceof Context || typeof x === 'function';
     };
     var javascript_to_snap = function (x) {
-        if (!ecraft2learn.inside_snap) {
+        if (!ecraft2learn.inside_snap()) {
             return x;
         }
         if (Array.isArray(x)) {
@@ -654,7 +654,7 @@ window.ecraft2learn =
     };
     var inform = function(title, message, callback) {
         // based upon Snap4Arduino index file  
-        if (!ecraft2learn.inside_snap) { // not inside of snap
+        if (!ecraft2learn.inside_snap()) { // not inside of snap
             if (callback) {
                 if (window.confirm(message)) {
                     callback();
@@ -722,7 +722,9 @@ window.ecraft2learn =
     // the following are the ecraft2learn functions available via this library
 
     return {
-      inside_snap: typeof world === 'object' && world instanceof WorldMorph,
+      inside_snap: function () {
+                       return typeof world === 'object' && world instanceof WorldMorph;
+      },
       run: function (function_name, parameters) {
           // runs one of the functions in this library
           if (typeof ecraft2learn[function_name] === 'undefined') {
