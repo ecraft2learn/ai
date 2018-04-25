@@ -779,13 +779,23 @@ window.ecraft2learn =
           xhr.send();
       },
 
-      start_speech_recognition: function (final_spoken_callback, error_callback, interim_spoken_callback, language, 
-                                          max_alternatives, all_results_callback, all_confidence_values_callback) {
-          // final_spoken_callback and interim_spoken_callback are called with the text recognised by the browser's speech recognition capability
-          // interim_spoken_callback is optional 
+      start_speech_recognition: function (final_spoken_callback, 
+                                          // following are optional
+                                          error_callback, 
+                                          interim_spoken_callback, 
+                                          language, 
+                                          max_alternatives,
+                                          all_results_callback,
+                                          all_confidence_values_callback,
+                                          grammar) {
+          // final_spoken_callback and interim_spoken_callback are called
+          // with the text recognised by the browser's speech recognition capability
+          // interim_spoken_callback 
           // or error_callback if an error occurs
           // language is of the form en-US and is optional
-          // maxAlternatives 
+          // maxAlternatives
+          // all_results_callback and all_confidence_values_callback receive the list of results and their confidences
+          // grammar -- see https://www.w3.org/TR/jsgf/ for JSGF format
           // if the browser has no support for speech recognition then the Microsoft Speech API is used (API key required)
           if (typeof SpeechRecognition === 'undefined' && typeof webkitSpeechRecognition === 'undefined') {
               // no support from this browser so try using the Microsoft Speech API
@@ -805,7 +815,8 @@ window.ecraft2learn =
               }
               setTimeout(function () {
                              ecraft2learn.start_speech_recognition(final_spoken_callback, error_callback, interim_spoken_callback, language, 
-                                                                   max_alternatives, all_results_callback, all_confidence_values_callback); 
+                                                                   max_alternatives, all_results_callback, all_confidence_values_callback,
+                                                                   grammar); 
                          },
                          100); // try again in a tenth of a second
               return;
@@ -907,6 +918,13 @@ window.ecraft2learn =
                   speech_recognition.maxAlternatives = max_alternatives;
               }
               speech_recognition.profanityFilter = true; // so more appropriate use in schools, e.g. f*** will result
+              if (grammar) {
+                  let SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList;
+                  grammar = '#JSGF V1.0; grammar commands; public <commands> = ' + grammar + ';';
+                  speechRecognitionList = new SpeechGrammarList();
+                  speechRecognitionList.addFromString(grammar, 1);
+                  speech_recognition.grammars = speechRecognitionList;
+              }
               speech_recognition.onresult = handle_result;
               speech_recognition.onerror = handle_error;
               speech_recognition.onend = function (event) {
