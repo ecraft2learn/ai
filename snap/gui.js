@@ -75,7 +75,7 @@ isRetinaSupported, SliderMorph, Animation, BoxMorph, MediaRecorder*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.gui = '2018-March-05';
+modules.gui = '2018-March-19';
 
 // Declarations
 
@@ -2259,7 +2259,11 @@ IDE_Morph.prototype.saveSetting = function (key, value) {
 
 IDE_Morph.prototype.getSetting = function (key) {
     if (this.hasLocalStorage()) {
-        return localStorage['-snap-setting-' + key];
+        let value = localStorage['-snap-setting-' + key];
+        if (value === 'null') {
+            return null; // not sure how this is happening only with localhost - Ken Kahn 
+        }
+        return value;
     }
     return null;
 };
@@ -3499,7 +3503,7 @@ IDE_Morph.prototype.aboutSnap = function () {
         module, btn1, btn2, btn3, btn4, licenseBtn, translatorsBtn,
         world = this.world();
 
-    aboutTxt = 'Snap! 4.1.2.3\nBuild Your Own Blocks\n\n'
+    aboutTxt = 'Snap! 4.1.2.7\nBuild Your Own Blocks\n\n'
         + 'Copyright \u24B8 2018 Jens M\u00F6nig and '
         + 'Brian Harvey\n'
         + 'jens@moenig.org, bh@cs.berkeley.edu\n\n'
@@ -5608,8 +5612,11 @@ IDE_Morph.prototype.getURL = function (url, callback, responseType) {
         async = callback instanceof Function,
         myself = this,
         rsp;
-    request.responseType = responseType || 'text';
-    rsp = (request.responseType === 'text') ? 'responseText' : 'response';
+	if (async) {
+    	request.responseType = responseType || 'text';
+    }
+    rsp = (!async || request.responseType === 'text') ? 'responseText'
+    	: 'response';
     try {
         request.open('GET', url, async);
         if (async) {
@@ -9113,6 +9120,11 @@ SoundRecorderDialogMorph.prototype.buildProgressBar = function () {
 };
 
 SoundRecorderDialogMorph.prototype.record = function () {
+    if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+        this.stop();
+        return;
+    }
+
     this.mediaRecorder.start();
     this.recordButton.label.setColor(new Color(255, 0, 0));
     this.playButton.label.setColor(new Color(0, 0, 0));

@@ -4010,3 +4010,36 @@ Translation Updates:
 * Spanish and German translation updates
 
 === v4.1.2.3 maintenance release ===
+
+180308
+------
+* Objects: fixed #2053
+* GUI: fixed #2052
+
+180309
+------
+* Blocks, Objects, Threads: added "random" option for "go to", "point towards" and "point in direction" primitives
+
+=== v4.1.2.4 maintenance release ===
+
+180313
+------
+* Objects: draw a "dot" pentrail when moving zero steps while the pen is down
+
+=== v4.1.2.5 maintenance release ===
+
+180314
+------
+* Threads: changed testing order for type inferral, speeds up list operations significantly
+* Cloud: remix project method, thanks, Bernat!
+
+=== v4.1.2.6 maintenance release ===
+
+180316
+------
+* Threads: experimental JIT compiler support for multi-word formal parameters and a single implicit formal parameter mapped to all empty input slots
+
+180319
+------
+* Threads: initialize Process>>gensyms with null (because it's hardly ever needed)
+* Objects: remove obsolete STOP primitive from the stage's palette
