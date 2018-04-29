@@ -130,6 +130,7 @@ window.addEventListener(
                      div.className = "iframe-container";
                      div.style = style;
                      div.appendChild(iframe);
+                     figure.insertBefore(div, figcaption);
                  }
                  iframe.setAttribute('project_path', project_folder + name + ".xml"); 
              };
