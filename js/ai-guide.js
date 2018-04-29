@@ -97,9 +97,10 @@ window.addEventListener(
          let elements = document.getElementsByClassName('snap-iframe');
          let snap_iframe = function(element) {
              let name = element.id;
-             let style = element.getAttribute('iframe_style');
+             let style = element.getAttribute('container_style');
              let caption = element.getAttribute('caption');
              let full_screen = element.getAttribute('full_screen');
+             let stage_ratio = element.getAttribute('stage_ratio');
              let figure     = document.getElementById(name);
              let iframe     = document.createElement('iframe');
              let figcaption = document.createElement('figcaption');
@@ -120,12 +121,21 @@ window.addEventListener(
                  iframe.setAttribute('scrolling', 'no');
                  if (full_screen) {
                      project_folder = "/ai/projects/";
-                     iframe.setAttribute('full_screen', 'true');
+                     if (full_screen === 'true') {
+                         iframe.setAttribute('full_screen', 'true');
+                     }
+                     if (stage_ratio) {
+                         iframe.setAttribute('stage_ratio', stage_ratio);
+                     }
                      iframe.style = style;
                      figure.insertBefore(iframe, figcaption);
                  } else {
                      project_folder = "/ai/AI-teacher-guide-projects/";
                      iframe.className = "iframe-clipped";
+                     let iframe_style = element.getAttribute('iframe_style');
+                     if (iframe_style) {
+                         iframe.style = iframe_style;
+                     }
                      let div = document.createElement('div');
                      div.className = "iframe-container";
                      div.style = style;
