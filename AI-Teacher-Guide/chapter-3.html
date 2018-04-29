@@ -61,15 +61,10 @@ and they'll be passed to the services as you use example blocks.
 reports a list of labels of the photo.
 The list is ordered by how confident the vision provider is that the label matches the image.</p>
 
-<figure>
-<div class="iframe-container"
-     style="width: 800px; height: 350px;">
-<iframe class="iframe-clipped"
-        scrolling="no"
-        src="/ai/snap/snap.html"
-        project_path="/ai/AI-teacher-guide-projects/image labels reporter.xml"> 
-</iframe></div>
-<figcaption>A block for reporting the labels describing what the camera is showing. TRY IT</figcaption>
+<figure class = "snap-iframe"
+        id = "image labels reporter"
+        iframe_style = "width: 800px; height: 350px" 
+        caption = "A block for reporting the labels describing what the camera is showing. TRY IT">
 </figure>
 
 <h4>Displaying the image that was sent for recognition</h4>
@@ -80,28 +75,20 @@ To try it first obtain some labels from a vision service.
 You can also use the <span class="block-name">use camera to create costume</span> block
 to take a new picture and add it as a costume to the current sprite.</p>
 
-<figure>
-<div class="iframe-container" style="width: 1000px; height: 350px;">
-<iframe class="iframe-clipped"
-        style="margin-left: -800px; margin-top: 150px;"
-        scrolling="no"
-        src="/ai/snap/snap.html"
-        project_path="/ai/AI-teacher-guide-projects/image labels reporter and show photo.xml"> 
-</iframe></div>
-<figcaption>After sending a photo for analysis you can use a block to display the image. TRY IT</figcaption>
+<figure class = "snap-iframe"
+        id = "image labels reporter and show photo"
+        iframe_style = "width: 1000px; height: 350px" 
+        caption = "After sending a photo for analysis you can use a block to display the image. TRY IT">
 </figure>
 
 <h4>A sample program using image recognition</h4>
 <p>Here is a program that can contact any of Google, Microsoft, or IBM and displays the tags returned.</p>
 
-<figure>
-<iframe style="width: 800px; height: 600px"
-        scrolling="no"
-        src="/ai/snap/snap.html"
-        project_path="/ai/AI-teacher-guide-projects/camera and say.xml"
-        run_full_screen="true"> 
-</iframe></div>
-<figcaption>Click on the AI cloud provider logos and see what happens</figcaption>
+<figure class = "snap-iframe"
+        id = "camera and say"
+        full_screen = "true"
+        iframe_style = "width: 800px; height: 600px" 
+        caption = "Click on the AI cloud provider logos and see what happens">
 </figure>
 
 <h4>A sample program combining image and speech recognition and speech output</h4>
@@ -116,14 +103,11 @@ where this program is intelligent and where it isn't.</span>
 <span class="student-guide">Do you think this program <i>seems</i> intelligent? If so, why? Is it intelligent?</span>
 </p>
 
-<figure>
-<iframe style="width: 800px; height: 600px"
-        scrolling="no"
-        src="/ai/snap/snap.html"
-        project_path="/ai/AI-teacher-guide-projects/camera, listen, and speak.xml"
-        full_screen="true"> 
-</iframe></div>
-<figcaption>Click the green flag and then say a sentence containing "Google", "Microsoft", or "Watson"</figcaption>
+<figure class = "snap-iframe"
+        id = "camera, listen, and speak"
+        full_screen = "true"
+        iframe_style = "width: 800px; height: 600px" 
+        caption = "Click the green flag and then say a sentence containing "Google", "Microsoft", or "Watson"">
 </figure>
 
 <h4 id="advanced-image-recognition">Advanced image recognition blocks</h4>
@@ -219,14 +203,10 @@ Compare the documentation for the vision services from
 and
 <a href="https://www.ibm.com/watson/services/visual-recognition/" target="_blank">IBM Watson</a>.</p>
 
-<figure>
-<div class="iframe-container" style="width: 800px; height: 350px;">
-<iframe class="iframe-clipped"
-        scrolling="no"
-        src="/ai/snap/snap.html"
-        project_path="/ai/AI-teacher-guide-projects/recognize new photo.xml"> 
-</iframe></div>
-<figcaption>A block for reporting the entire analysis response. TRY IT</figcaption>
+<figure class = "snap-iframe"
+        id = "recognize new photo"
+        iframe_style = "width: 800px; height: 350px" 
+        caption = "A block for reporting the entire analysis response. TRY IT">
 </figure>
 
 <b class="student-guide advanced-topic">Click to read an advanced topic</b>
@@ -238,16 +218,11 @@ This block does not wait for a response, instead it runs the user's blocks when 
 It isn't as convenient as 'Recognize new photo' but it can support more complex usage.
 </p>
 
-<figure>
-<div class="iframe-container" style="width: 800px; height: 350px;">
-<iframe class="iframe-clipped"
-        scrolling="no"
-        src="/ai/snap/snap.html"
-        project_path="/ai/AI-teacher-guide-projects/recognize asynchronous.xml"> 
-</iframe></div>
-<figcaption>A block for obtaining the entire analysis response as a callback. TRY IT</figcaption>
+<figure class = "snap-iframe"
+        id = "recognize asynchronous"
+        iframe_style = "width: 800px; height: 350px" 
+        caption = "A block for obtaining the entire analysis response as a callback. TRY IT">
 </figure>
-</span>
 
 <h4 id="api-keys">How to provide API keys</h4>
 <p>This chapter uses the API keys provided in the text areas above.
