@@ -73,14 +73,10 @@ Click on it to try it out.
 Note that the Raspberry Pi has the open source version of Chrome called Chromium and it lacks builtin voices.
 The Mary TTS (text-to-speech) blocks below work in any browser.)</p>
 
-<figure>
-<div class="iframe-container" style="width: 800px; height: 200px"> 
-<iframe class="iframe-clipped"
-        scrolling="no"
-        src="/ai/snap/snap.html"
-        project_path="/ai/AI-teacher-guide-projects/simple speak block.xml">
-</iframe></div>
-<figcaption>A simple block for speaking text. TRY IT</figcaption>
+<figure class = "snap-iframe"
+        id = "simple speak block"
+        iframe_style = "width: 800px; height: 200px" 
+        caption = "A simple block for speaking text. TRY IT">
 </figure>
 
 <h4>Sentences are more than a series of words</h4>
@@ -91,27 +87,19 @@ This is very different from <a href="https://www.wired.com/2015/08/stephen-hawki
 old speech synthesisers such as the one Stephen Hawking uses</a>.
 </p>
 
-<figure>
-<div  class="iframe-container" style="width: 800px; height: 200px"> 
-<iframe class="iframe-clipped"
-        scrolling="no"
-        src="/ai/snap/snap.html"
-        project_path="/ai/AI-teacher-guide-projects/separate words.xml"> 
-</iframe></div>
-<figcaption>An illustration of the difference between speaking one word at a time and whole sentences. TRY IT</figcaption>
+<figure class = "snap-iframe"
+        id = "separate words"
+        iframe_style = "width: 800px; height: 200px" 
+        caption = "An illustration of the difference between speaking one word at a time and whole sentences. TRY IT">
 </figure>
 
 <p>And for a human speaking numbers and punctuation signs can be a bit challenging.
 Is this a sign of intelligence?</p>
 
-<figure>
-<div class="iframe-container" style="width: 800px; height: 200px"> 
-<iframe class="iframe-clipped"
-        scrolling="no"
-        src="/ai/snap/snap.html"
-        project_path="/ai/AI-teacher-guide-projects/numbers signs.xml"> 
-</iframe></div>
-<figcaption>An illustrations of some issues speaking text containing numbers and signs. TRY IT</figcaption>
+<figure class = "snap-iframe"
+        id = "numbers signs"
+        iframe_style = "width: 800px; height: 200px" 
+        caption = "An illustrations of some issues speaking text containing numbers and signs. TRY IT">
 </figure>
 
 <p>
@@ -123,14 +111,10 @@ Try editing it to see how different numbers are spoken and how it handles specia
 <p>Suppose one wanted the computer to speak, be interrupted by a door bell, and then respond accordingly.
 Try clicking this and you'll hear there is a problem:</p>
 
-<figure>
-<div class="iframe-container" style="width: 800px; height: 200px"> 
-<iframe class="iframe-clipped"
-        scrolling="no"
-        src="/ai/snap/snap.html"
-        project_path="/ai/AI-teacher-guide-projects/doorbell problem.xml">
-</iframe></div>
-<figcaption>An illustration of the problem of making a sequence of utterances and sound effects. TRY IT</figcaption>
+<figure class = "snap-iframe"
+        id = "doorbell problem"
+        iframe_style = "width: 800px; height: 200px" 
+        caption = "An illustration of the problem of making a sequence of utterances and sound effects. TRY IT">
 </figure>
 
 <p>The problem is that the sound effect begins the same times as the first sentence.
@@ -138,14 +122,10 @@ This because the <span class="block-name">Speak</span> block tells the browser t
 What we want is to have the door bell sound played <i>after</i> the first utterance is finished.
 For this we need a slightly more complex block that accepts actions to do after speaking:</p>
 
-<figure>
-<div class="iframe-container" style="width: 800px; height: 200px;">
-<iframe class="iframe-clipped"
-        scrolling="no"
-        src="/ai/snap/snap.html"
-        project_path="/ai/AI-teacher-guide-projects/doorbell fix.xml">
-</iframe></div>
-<figcaption>A way to control the timing of utterances and sound effects. TRY IT</figcaption>
+<figure class = "snap-iframe"
+        id = "doorbell fix"
+        iframe_style = "width: 800px; height: 200px" 
+        caption = "A way to control the timing of utterances and sound effects. TRY IT">
 </figure>
 
 <p>Being able to express what should happen when speaking finishes is a generally useful ability.
@@ -229,14 +209,10 @@ Fractional values correspond to low pitch, slow rate, or low volume.
 How high the values can be for the opposite effect depends upon the browser and the voice used.
 Note that depending upon the voice and browser some of these parameters are ignored.</p>
 
-<figure>
-<div class="iframe-container" style="width: 800px; height: 200px;">
-<iframe class="iframe-clipped"
-        scrolling="no"
-        src="/ai/snap/snap.html"
-        project_path="/ai/AI-teacher-guide-projects/rate pitch volume.xml">
-</iframe></div>
-<figcaption>A powerful block for speaking text with many customisation options. TRY IT</figcaption>
+<figure class = "snap-iframe"
+        id = "rate pitch volume"
+        iframe_style = "width: 800px; height: 200px" 
+        caption = "A powerful block for speaking text with many customisation options. TRY IT">
 </figure>
 
 <p>
@@ -263,41 +239,29 @@ You can also the <span class="block-name">voice that matches</span> to find a vo
 that matches the search terms.
 </p>
 
-<figure>
-<div class="iframe-container" style="width: 800px; height: 600px;">
-<iframe class="iframe-clipped"
-        scrolling="no"
-        src="/ai/snap/snap.html"
-        project_path="/ai/AI-teacher-guide-projects/voices.xml"> 
-</iframe></div>
-<figcaption>A demonstration of different speaking voices (and languages). TRY IT</figcaption>
+<figure class = "snap-iframe"
+        id = "voices"
+        iframe_style = "width: 800px; height: 600px" 
+        caption = "A demonstration of different speaking voices (and languages). TRY IT">
 </figure>
 
 <p>A voice is more than just a voice.
 Listen to the two ways of reading dates.</p>
 
-<figure>
-<div class="iframe-container" style="width: 800px; height: 500px;">
-<iframe class="iframe-clipped"
-        scrolling="no"
-        src="/ai/snap/snap.html"
-        project_path="/ai/AI-teacher-guide-projects/dates.xml"> 
-</iframe></div>
-<figcaption>Different voices speak dates differently depending upon whether they are speaking US or UK English. TRY IT</figcaption>
+<figure class = "snap-iframe"
+        id = "dates"
+        iframe_style = "width: 800px; height: 500px" 
+        caption = "Different voices speak dates differently depending upon whether they are speaking US or UK English. TRY IT">
 </figure>
 
 <h4>If your browser has too few available voices or you want to try a different speech engine</h4>
 <p>Some browsers and some operating systems have very few (or <i>no</i>) voices.
 An alternative speech block uses <a href="http://mary.dfki.de/" target="_blank">a server in Germany</a> that has its own set of voices.</p>
 
-<figure>
-<div class="iframe-container" style="width: 800px; height: 500px;">
-<iframe class="iframe-clipped"
-        scrolling="no"
-        src="/ai/snap/snap.html"
-        project_path="/ai/AI-teacher-guide-projects/Mary voices.xml"> 
-</iframe></div>
-<figcaption>An alternative text-to-speech engine. TRY IT</figcaption>
+<figure class = "snap-iframe"
+        id = "Mary voices"
+        iframe_style = "width: 800px; height: 500px" 
+        caption = "An alternative text-to-speech engine. TRY IT">
 </figure>
 
 <h4>Heteronyms cause problems</h4>
@@ -312,14 +276,10 @@ Explore how different voices deal with <span class="notranslate english" transla
 Try editing the sentences to see how they deal with <span class="notranslate english" translate=no>"lead"</span> and other words.
 Try this in another language.</p>
 
-<figure>
-<div class="iframe-container" style="width: 800px; height: 500px;">
-<iframe class="iframe-clipped"
-        scrolling="no"
-        src="/ai/snap/snap.html"
-        project_path="/ai/AI-teacher-guide-projects/read problem.xml"> 
-</iframe></div>
-<figcaption>An example of the problem of speaking words such as <span class="notranslate english" translate=no>'read'</span>. TRY IT</figcaption>
+<figure class = "snap-iframe"
+        id = "read problem"
+        iframe_style = "width: 800px; height: 500px" 
+        caption = "An example of the problem of speaking words such as &lt;span class=&quotnotranslate english&quot translate=no&gt;'read'&lt;/span&gt;. TRY IT">
 </figure>
 
 <p>
@@ -345,14 +305,11 @@ There is a <a href="https://snap.berkeley.edu/snapsource/snap.html#present:Usern
 full window version</a>.
 </p>
 
-<figure>
-<iframe style="width: 800px; height: 600px"
-        scrolling="no"
-        src="/ai/snap/snap.html"
-        project_path="/ai/projects/speak randomly.xml"
-        full_screen="true"> 
-</iframe>
-<figcaption>Click the green flag to hear some random talking</figcaption>
+<figure class = "snap-iframe"
+        id = "speak randomly"
+        full_screen = "true"
+        iframe_style = "width: 800px; height: 600px" 
+        caption = "Click the green flag to hear some random talking">
 </figure>
 
 <h4 id="project-ideas">Possible project ideas using speech synthesis</h4>

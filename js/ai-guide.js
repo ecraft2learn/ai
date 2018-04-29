@@ -68,18 +68,17 @@ window.addEventListener(
              element.nextElementSibling.style.display = 'none';
              element.addEventListener('click',
                                       function () {
-                                           if (element.nextElementSibling.style.display === 'none') {
-                                               element.nextElementSibling.style.display = 'block';    
-                                           } else {
-                                               element.nextElementSibling.style.display = 'none';
-                                           }
-                                              
+                                          if (element.nextElementSibling.style.display === 'none') {
+                                              element.nextElementSibling.style.display = 'block';    
+                                          } else {
+                                              element.nextElementSibling.style.display = 'none';
+                                          }                                             
                                       }); 
          };
          Array.prototype.forEach.call(elements, hide_next_sibling_until_click);
      });
 
-// stop translation of block name elments
+// stop translation of block name elements
 window.addEventListener(
      'DOMContentLoaded', 
      function () {
@@ -89,6 +88,58 @@ window.addEventListener(
              element.setAttribute("translate", "no");
          };
          Array.prototype.forEach.call(elements, notranslate);
+     });
+
+// create Snap! iframes for embedded projects
+window.addEventListener(
+     'DOMContentLoaded', 
+     function () {
+         let elements = document.getElementsByClassName('snap-iframe');
+         let snap_iframe = function(element) {
+             let name = element.id;
+             let style = element.getAttribute('iframe_style');
+             let caption = element.getAttribute('caption');
+             let full_screen = element.getAttribute('full_screen');
+             let figure     = document.getElementById(name);
+             let iframe     = document.createElement('iframe');
+             let figcaption = document.createElement('figcaption');
+             let img        = document.createElement('img');
+             img.src = "/ai/AI-teacher-guide-projects/" + name + ".png";
+             let replace_with_iframe = function (event) {
+                 // add a loading div for a few seconds...
+                 let loading = document.createElement('div');
+                 let project_folder;
+                 loading.innerHTML = "<b>Loading. Please wait.</b>";
+                 figure.insertBefore(loading, figcaption);
+                 setTimeout(function () {
+                                loading.remove();
+                            },
+                            3000);
+                 img.remove();
+                 iframe.src = "/ai/snap/snap.html";
+                 iframe.setAttribute('scrolling', 'no');
+                 if (full_screen) {
+                     project_folder = "/ai/projects/";
+                     iframe.setAttribute('full_screen', 'true');
+                     iframe.style = style;
+                     figure.insertBefore(iframe, figcaption);
+                 } else {
+                     project_folder = "/ai/AI-teacher-guide-projects/";
+                     iframe.className = "iframe-clipped";
+                     let div = document.createElement('div');
+                     div.className = "iframe-container";
+                     div.style = style;
+                     div.appendChild(iframe);
+                 }
+                 iframe.setAttribute('project_path', project_folder + name + ".xml"); 
+             };
+             img.addEventListener('click', replace_with_iframe);
+             img.addEventListener('touchstart', replace_with_iframe);
+             figcaption.innerHTML = caption;
+             figure.appendChild(img);
+             figure.appendChild(figcaption);
+         }
+         Array.prototype.forEach.call(elements, snap_iframe);
      });
 
 
