@@ -106,7 +106,7 @@ window.addEventListener(
              let figcaption = document.createElement('figcaption');
              let img        = document.createElement('img');
              img.src = "/ai/AI-teacher-guide-projects/" + name + ".png";
-             let replace_with_iframe = function (event) {
+             let replace_with_iframe = function () {
                  // add a loading div for a few seconds...
                  let loading = document.createElement('div');
                  let project_folder;
@@ -149,6 +149,9 @@ window.addEventListener(
              figcaption.innerHTML = caption;
              figure.appendChild(img);
              figure.appendChild(figcaption);
+             if (window.location.search.indexOf("preload") >= 0) {
+                 replace_with_iframe();
+             }
          }
          Array.prototype.forEach.call(elements, snap_iframe);
      });
