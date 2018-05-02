@@ -43,6 +43,7 @@ window.addEventListener('DOMContentLoaded', function () {
 		if (stage_scale) {
 			ide_morph.toggleStageSize(true, +stage_scale);
 		}
+		ide_morph.setBlocksScale(1); // the chapter projects were designed with default block size (though scaled via CSS)
 		window.onbeforeunload = function () {}; // don't bother the user about reloading
 		window.speechSynthesis.getVoices();     // no need to wait for them to load
 	}
