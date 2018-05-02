@@ -1,5 +1,5 @@
 var world;
-window.addEventListener('DOMContentLoaded', function () {
+window.addEventListener('load', function () {
 	var world_canvas = document.getElementById('world');
 	var ide_morph = new IDE_Morph();
 	var loop = function loop() {
@@ -19,9 +19,6 @@ window.addEventListener('DOMContentLoaded', function () {
 				// timeout wasn't needed before Snap 4.1
 				// without it iframes show only Snap! background texture
 				setTimeout(function () {
-					           // following didn't work well - not that important
-// 					           let message = new MenuMorph(null, "Loading. Please wait.");
-// 			                   message.popup(world, new Point(230, 110));
 							   ide_morph.rawOpenProjectString(project_text);
 							   if (full_screen) {
 								   ide_morph.toggleAppMode(true);
@@ -30,7 +27,7 @@ window.addEventListener('DOMContentLoaded', function () {
 									ide_morph.runScripts();
 								}
 							},
-							3000);
+							1000);
 			};
 		if (project_path) {
 			fetch(project_path).then(function (response) {

@@ -112,13 +112,18 @@ window.addEventListener(
                  let project_folder;
                  loading.innerHTML = "<b>Loading. Please wait.</b>";
                  figure.insertBefore(loading, figcaption);
-                 setTimeout(function () {
-                                loading.remove();
-                            },
-                            3000);
                  img.remove();
                  iframe.src = "/ai/snap/snap.html";
                  iframe.setAttribute('scrolling', 'no');
+                 // remove loading message 3 seconds after Snap! loads
+                 // since project loading takes time too
+                 iframe.addEventListener('load',    
+                                         function () {
+                                             setTimeout(function () {
+                                                loading.remove();
+                                             },
+                                             1000);
+                                         });
                  if (full_screen) {
                      project_folder = "/ai/projects/";
                      if (full_screen === 'true') {
