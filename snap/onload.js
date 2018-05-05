@@ -1,3 +1,7 @@
+// A file needed for the AI guide that loads Snap! projects into iframes
+// Written by Ken Kahn 
+// No rights reserved.
+
 var world;
 window.addEventListener('load', function () {
 	var world_canvas = document.getElementById('world');
