@@ -1393,26 +1393,44 @@ window.ecraft2learn =
      // due possible use of default_language the following can't use the voice_number
      var locale = mary_tts_voices[mary_tts_voices.findIndex(function (entry) {return entry[0] === voice;})][2];
      var locale_parameter = "&LOCALE=" + locale;
-     var sound = new Audio("http://mary.dfki.de:59125/process?INPUT_TEXT=" + (typeof message === 'string' ? message.replace(/\s/g, "+") : message) + 
-                           "&INPUT_TYPE=TEXT&OUTPUT_TYPE=AUDIO&AUDIO=WAVE_FILE" + voice_parameter + locale_parameter);
-     if (finished_callback) {
-         sound.addEventListener("ended", 
-                                function () {
-                                     invoke_callback(finished_callback, javascript_to_snap(message));
-                                },
-                                false);
-     }
-     if (+volume > 0) {
-         sound.volume = +volume;
-     }
-     sound.addEventListener('canplay',
-                            function () {
-                                sound.play();
-                            });
-     sound.addEventListener('error',
-                            function () {
-                                invoke_callback(finished_callback, javascript_to_snap(sound.error.message));
-                            });
+     let audio_url_without_domain = "/process?INPUT_TEXT=" + 
+                                    (typeof message === 'string' ? message.replace(/\s/g, "+") : message) + 
+                                    "&INPUT_TYPE=TEXT&OUTPUT_TYPE=AUDIO&AUDIO=WAVE_FILE" +
+                                    voice_parameter +
+                                    locale_parameter;
+     let create_sound = function (domain) {
+         let sound = new Audio(domain + audio_url_without_domain);
+         try {
+             if (finished_callback) {
+                 sound.addEventListener("ended", 
+                                        function () {
+                                            invoke_callback(finished_callback,
+                                                            javascript_to_snap(message));
+                                        },
+                                        false);
+             }
+             if (+volume > 0) {
+                 sound.volume = +volume;
+             }
+             sound.addEventListener('canplay',
+                                    function () {
+                                        sound.play();
+                                    });
+             sound.addEventListener('error',
+                                    function () {
+                                        if (domain !== "http://mary.dfki.de:59125") {
+                                            create_sound("http://mary.dfki.de:59125");
+                                        } else {
+                                            invoke_callback(finished_callback,
+                                                            javascript_to_snap(sound.error.message));                                    
+                                        }
+                                    });
+         } catch (e) {
+             // listening to errors so no need to have this one 
+             create_sound("http://mary.dfki.de:59125");
+         };
+     };
+     create_sound("http://localhost:59125");     
   },
   get_mary_tts_voice_names: function () {
     return new List(mary_tts_voices.map(function (voice) { return voice[1]; }));
