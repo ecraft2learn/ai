@@ -710,7 +710,7 @@ window.ecraft2learn =
 ["bits4", "BITS4 German female", "de"],
 ["bits3-hsmm", "BITS3 German male", "de"],
 ["bits2", "BITS2 German male", "de"],
-["bits1-hsmm", "BITS1 German demale", "de"],
+["bits1-hsmm", "BITS1 German female", "de"],
 ["dfki-ot-hsmm", "Ot Turkish male", "tr"],
 ["istc-lucia-hsmm", "Lucia Italian female", "it"],
 ["marylux", "Mary Luxembourgian female", "lb"],
@@ -926,9 +926,12 @@ window.ecraft2learn =
               }
               speech_recognition.profanityFilter = true; // so more appropriate use in schools, e.g. f*** will result
               if (grammar) {
-                  let SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList;
+                  // grammar currently ignored by Chrome 
+                  var speechGrammarList = typeof SpeechGrammarList === 'undefined' ?
+                                          webkitSpeechGrammarList :
+                                          SpeechGrammarList;
                   grammar = '#JSGF V1.0; grammar commands; public <commands> = ' + grammar + ';';
-                  speechRecognitionList = new SpeechGrammarList();
+                  let speechRecognitionList = new speechGrammarList();
                   speechRecognitionList.addFromString(grammar, 1);
                   speech_recognition.grammars = speechRecognitionList;
               }
