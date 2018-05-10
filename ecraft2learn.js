@@ -998,7 +998,7 @@ window.ecraft2learn =
             var no_voices_callback = function () {
                 if (mary_tts_voice_number >= 0) {
                     message += "No matching browser speech synthesis voice found but Mary TTS voice " +
-                               mary_tts_voices[mary_tts_voice_number][1] + " can be used.\n" +
+                               mary_tts_voices[mary_tts_voice_number-1][1] + " can be used.\n" +
                                "Use the Speak (using Mary TTS engine) command.";
                 } else {
                     message += "No speech synthesis support for " + matching_language_name + " found so English will be used.";
