@@ -258,11 +258,24 @@ This example was inspired by the great set of machine learning project examples 
 Much of the current success of machine learning system is a result of having trained them on <i>huge</i> data sets.
 Deep learning for machine translation, for example, didn't work well until they were trained with billions of sentences.
 So how could the examples in this chapter work with just dozens of examples for each label?
-Part of the answer is that big data leads to better accuracy.
+Part of the answer is that big data is necessary for high accuracy.
 If you try the rock paper scissors game you'll see it sometimes makes mistakes.
-The main difference however is that the image recognition services in the 
+See if you can improve its accuracy by adding more training images.
+</p>
+</p>
+The image training command relies upon something called
+<a href="https://arxiv.org/abs/1602.07360" target="_blank">SqueezeNet</a>
+that was trained on a huge number of images.
+The Snap! command uses what is called
+<a href="https://machinelearningmastery.com/transfer-learning-for-deep-learning/" target="_blank">transfer learning</a>
+to start the training using the features that a well-trained system has already learned.
+The system does not know anything about hands shaped as paper, rock, or scissors
+but it has already learned about textures, edges, colours, and more.
+</p>
+<p>
+Another difference is that the image recognition services in the 
 <a href="chapter-3.html" target="_blank">previous chapter</a> can distinguish between at least one thousand different kinds of images.
-Rock paper scissors requires only four categories.
+Rock paper scissors requires only four categories - an easier task.
 And AI vision services can do more than just
 <a href="chapter-3.html#advanced-image-recognition" target="_blank">choose a label</a> for an image.
 </p>
