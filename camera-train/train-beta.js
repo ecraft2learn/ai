@@ -24,21 +24,58 @@ const IMAGE_SIZE = 227;
 // K value for KNN
 const TOPK = 10;
 
+const TOGETHER_JS = window.location.search.indexOf('together') >= 0;
+
+var trainer;
+
+    let create_canvas = function () {
+        let canvas = document.createElement('canvas');
+        canvas.width  = IMAGE_SIZE;
+        canvas.height = IMAGE_SIZE;
+        return canvas;
+    };
+
+    let copy_video_to_canvas = function (video, canvas) {
+        canvas.getContext('2d').drawImage(video, 0, 0, IMAGE_SIZE, IMAGE_SIZE);
+    };
+
+    let load_image = function (image_url, callback) {
+        let image = document.createElement('img');
+        image.src = image_url;
+        image.width  = IMAGE_SIZE;
+        image.height = IMAGE_SIZE;
+        image.onload = function () {
+            callback(image);
+        };
+    };
+
+    let add_image_to_training = function (image_url, label_index, post_to_tab) {
+        load_image(image_url,
+                   function (image) {
+                       let image_as_Array3D = dl.fromPixels(image);
+                       trainer.knn.addImage(image_as_Array3D, label_index);
+                       response = trainer.knn.getClassExampleCount()[label_index];
+                       if (post_to_tab) {
+                           post_to_tab.postMessage({confirmation: response}, "*");
+                       }
+                       image_as_Array3D.dispose();
+                   });
+    };
+
 class Main {
-  constructor(training_class_names){
+  constructor(training_class_names) {
     if (training_class_names) {
         NUM_CLASSES = training_class_names.length;
     } else {
         training_class_names = ["1", "2", "3"];
-    }
+    }      
     // Initiate variables
-    this.infoTexts = [];
     this.training = -1; // -1 when no class is being trained
     this.videoPlaying = false;
     this.training_class_names = training_class_names;
     
     // Initiate deeplearn.js math and knn classifier objects
-    this.knn = new knn_image_classifier.KNNImageClassifier(NUM_CLASSES, TOPK, ENV.math);
+    this.knn = new knn_image_classifier.KNNImageClassifier(NUM_CLASSES, TOPK);
     
     // Create video element that will contain the webcam image
     this.video = document.createElement('video');
@@ -49,26 +86,16 @@ class Main {
     // listen for requests for predictions
     window.addEventListener("message",
                             function (event) {
-                                var load_image = function (image_url, callback) {
-                                    var image = document.createElement('img');
-                                    image.src = image_url;
-                                    image.width  = IMAGE_SIZE;
-                                    image.height = IMAGE_SIZE;
-                                    image.onload = function () {
-                                                       callback(image);
-                                    };
-                                };
+                                
                                 if (typeof event.data.predict !== 'undefined') {
 //                                  this.stop(); // done training -- might do more training later
 //                                  no need to stop this since only runs when not hidden
                                     var image_url = event.data.predict;
                                     load_image(image_url,
                                                function (image) {
-                                                  var canvas = document.createElement('canvas');
-                                                  canvas.width  = IMAGE_SIZE;
-                                                  canvas.height = IMAGE_SIZE;
-                                                  canvas.getContext('2d').drawImage(image, 0, 0, IMAGE_SIZE, IMAGE_SIZE);
-                                                  var image_as_Array3D = dl.Array3D.fromPixels(canvas);
+                                                  var canvas = create_canvas();
+                                                  copy_video_to_canvas(image, canvas);
+                                                  var image_as_Array3D = dl.fromPixels(canvas);
                                                   if (this.log_timings) {
                                                       console.time("Prediction - requested by message");
                                                   }
@@ -92,14 +119,12 @@ class Main {
                                         response = "Error: " + event.data.label + " is not one of " + this.training_class_names;
                                         event.source.postMessage({confirmation: response}, "*");
                                     } else {
-                                        load_image(image_url,
-                                                   function (image) {
-                                                       var image_as_Array3D = dl.Array3D.fromPixels(image);
-                                                       this.knn.addImage(image_as_Array3D, label_index);
-                                                       response = this.knn.getClassExampleCount()[label_index];
-                                                       event.source.postMessage({confirmation: response}, "*");
-                                                       image_as_Array3D.dispose();
-                                                   }.bind(this));
+                                        if (TOGETHER_JS) {
+                                            TogetherJS.send({type:        'add_image_to_training',
+                                                             image_url:   image_url,
+                                                             label_index: label_index});
+                                        }
+                                        add_image_to_training(image_url, label_index, event.source);
                                     }
                                     
                                 }
@@ -113,11 +138,11 @@ class Main {
     navigator.mediaDevices.getUserMedia({video: true, audio: false})
     .then((stream) => {
       this.video.srcObject = stream;
-      this.video.width = IMAGE_SIZE;
+      this.video.width  = IMAGE_SIZE;
       this.video.height = IMAGE_SIZE;
 
       this.video.addEventListener('playing', ()=> this.videoPlaying = true);
-      this.video.addEventListener('paused', ()=> this.videoPlaying = false);
+      this.video.addEventListener('paused',  ()=> this.videoPlaying = false);
     })
     
     // Load knn model
@@ -127,40 +152,19 @@ class Main {
   
   start(){
     if (this.timer) {
-      this.stop();
+        this.stop();
     }
-//     this.video.play(); // this caused an error on Android because it wasn't directly caused by a user action
-        // Create training buttons and info texts    
-    for(let i=0;i<NUM_CLASSES; i++){
-      const div = document.createElement('div');
-      document.body.appendChild(div);
-      div.style.marginBottom = '10px';
-
-      // Create training button
-      const button = document.createElement('button')
-      button.innerText = "Train " + this.training_class_names[i];
-      button.className = "training-button";
-      div.appendChild(button);
-
-      // Listen for mouse events when clicking the button
-      var train_on  = () => this.training = i;
-      var train_off = () => this.training = -1;
-      button.addEventListener('mousedown', train_on);
-      button.addEventListener('touchstart', train_on);
-      button.addEventListener('mouseup', train_off);
-      button.addEventListener('touchend', train_off);
-      
-      // Create info text
-      const infoText = document.createElement('span')
-      infoText.innerText = " No examples added";
-      div.appendChild(infoText);
-      this.infoTexts.push(infoText);
-    }
+//  this.video.play(); // this caused an error on Android because it wasn't directly caused by a user action
+//  Create training buttons and info texts 
+    var train_on  = (i) => this.training = i;
+    var train_off = (i) => this.training = -1;
+    this.infoTexts = create_training_buttons(this.training_class_names, train_on, train_off);  
     var please_wait = document.getElementById("please-wait");
-    please_wait.innerText = "Ready to start training. Just hold down one of the buttons when the desired image is front of the camera. " +
-                            "Do this until the system is sufficiently confident of the correct label when a new image is presented. " +
-                            "Then return to the Snap! tab.";
-
+    if (!please_wait.getAttribute("updated")) {
+        please_wait.innerText = "Ready to start training. Just hold down one of the buttons when the desired image is front of the camera. " +
+                                "Do this until the system is sufficiently confident of the correct label when a new image is presented. " +
+                                "Then return to the Snap! tab.";
+    }
     this.timer = requestAnimationFrame(this.animate.bind(this));
   }
   
@@ -170,26 +174,35 @@ class Main {
   }
   
   animate(){
-    if(this.videoPlaying){
+    if (this.videoPlaying) {
       // Get image data from video element
-      const image = dl.Array3D.fromPixels(this.video);
+      const image = dl.fromPixels(this.video);
       
       // Train class if one of the buttons is held down
-      if(this.training != -1){
+      if (this.training != -1) {
         // Add current image to classifier
         if (this.log_timings) {
-          console.time("Training " + this.training);
+            console.time("Training " + this.training);
+        }
+        if (TOGETHER_JS) {
+            let canvas = create_canvas()
+            copy_video_to_canvas(trainer.video, canvas);
+            let image_url = canvas.toDataURL('image/png');
+            TogetherJS.send({type:        'add_image_to_training',
+                             image_url:   image_url,
+                             label_index: this.training});
         }
         this.knn.addImage(image, this.training);
         if (this.log_timings) {
-          console.timeEnd("Training " + this.training);
+            console.timeEnd("Training " + this.training);
         }
-        this.infoTexts[this.training].innerText = ` ${this.knn.getClassExampleCount()[this.training]} examples`;
+        this.infoTexts[this.training].innerHTML = 
+            `&nbsp;&nbsp;&nbsp;${this.knn.getClassExampleCount()[this.training]} examples`;
       }
       
       // If any examples have been added, run predict
       const exampleCount = this.knn.getClassExampleCount();
-      if(Math.max(...exampleCount) > 0 && this.training === -1){
+      if (Math.max(...exampleCount) > 0 && this.training === -1) {
         // only predict if not also training (important for slow computers (and Android phones))
         if (this.log_timings) {
           console.time("Prediction");
@@ -208,7 +221,8 @@ class Main {
             }
             // Update info text
             if(exampleCount[i] > 0){
-              this.infoTexts[i].innerText = ` ${exampleCount[i]} examples - ${Math.round(res.confidences[i]*100)}%`
+              this.infoTexts[i].innerHTML = 
+                `&nbsp;&nbsp;&nbsp;${exampleCount[i]} <span class="notranslate" translate=no>examples</span> - ${Math.round(res.confidences[i]*100)}%`
             }
           }
         })
@@ -226,15 +240,79 @@ class Main {
 window.addEventListener("message",
                         function (event) {
                             if (typeof event.data.training_class_names !== 'undefined') {
-                                new Main(event.data.training_class_names);
+                                trainer = new Main(event.data.training_class_names);
                                 event.source.postMessage("Ready", "*");
+                            } else if (typeof event.data.new_introduction !== 'undefined') {
+                                var please_wait = document.getElementById("please-wait");
+                                please_wait.innerHTML = event.data.new_introduction;
+                                please_wait.setAttribute("updated", true);
                             }
                         },
                         false);
 
 // tell Snap! this is loaded
-window.addEventListener('load', 
+window.addEventListener('DOMContentLoaded', 
                         function (event) {
-                            window.opener.postMessage("Loaded", "*");
+                            if (window.opener) {
+                                // if collaboratively training only one has a Snap! window (just now)
+                                window.opener.postMessage("Loaded", "*");
+                            }
+                            if (TOGETHER_JS) {
+                                // for production add window.TogetherJSConfig_ignoreMessages = true;
+                                window.TogetherJSConfig_ignoreMessages = 
+                                    ["cursor-click", "form-focus", "cursor-update", "keydown", "scroll-update"];
+                                let script = document.createElement('script');
+                                script.src = "https://togetherjs.com/togetherjs-min.js";
+                                let add_together_listeners = function () {
+                                    let send_labels =
+                                        function (message) {
+                                            if (!message.sameUrl) {
+                                                return;
+                                            }
+                                            TogetherJS.send({type: 'training_labels',
+                                                             labels: trainer.training_class_names});
+                                        };
+                                    let remove_button =
+                                        function () {
+                                            let collaboration_button = document.getElementById('collaboration_button');
+                                            if (collaboration_button) {
+                                                collaboration_button.style.display = 'none';
+                                            }                                                
+                                         };
+                                    let receive_labels = 
+                                        function (message) {
+                                            trainer = new Main(message.labels);
+                                        };
+                                    let receive_image_url =
+                                        function (message) {
+                                            add_image_to_training(message.image_url,
+                                                                  message.label_index);
+
+                                        };
+                                    TogetherJS.hub.on("togetherjs.hello",      send_labels);
+                                    TogetherJS.hub.on('togetherjs.hello-back', remove_button);
+                                    TogetherJS.hub.on('training_labels',       receive_labels);
+                                    TogetherJS.hub.on('add_image_to_training', receive_image_url);
+                                }
+                                script.addEventListener('load', add_together_listeners);
+                                document.head.appendChild(script);
+                                let collaboration_button = document.createElement('button');
+                                collaboration_button.innerHTML = "Get URL for collaboration";
+                                collaboration_button.id = 'collaboration_button';
+                                collaboration_button.className = "together_button";
+                                let toggle_together_js = function () {
+                                    console.log(TogetherJS(collaboration_button));
+                                    if (collaboration_button.innerHTML === "Get URL for collaboration") {
+                                        collaboration_button.innerHTML = "Stop collaborating";
+                                    } else {
+                                        collaboration_button.innerHTML = "Get URL for collaboration";
+                                    }
+                                }
+                                collaboration_button.title = 
+                                    "Clicking this will turn on or off collaborative training with others.";
+                                collaboration_button.addEventListener('click',      toggle_together_js);
+                                collaboration_button.addEventListener('touchstart', toggle_together_js);
+                                document.body.insertBefore(collaboration_button, document.body.firstChild);
+                            }
                         },
                         false);
