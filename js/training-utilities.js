@@ -11,7 +11,7 @@
       document.body.appendChild(div);
       // Create info text next to each button
       const info_text = document.createElement('span');
-      info_text.innerText = " No examples added";
+      info_text.innerHTML = "&nbsp;&nbsp;&nbsp;No examples added";
       // Create training button
       const button = document.createElement('button');
       button.innerHTML = "Click to train <b>" + training_class_names[i] + "</b>";

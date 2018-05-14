@@ -44,7 +44,7 @@ figcaption {
   -webkit-transform: scale(1.5);
   transform: scale(1.5);
 }
-.training-button, .testing-button, .return-to-snap-button {
+.training-button, .testing-button, .return-to-snap-button, .together_button {
 /*    copied from jquery-ui with padding and font-size edited */
   margin-top: 10px; /* new */
   padding: .8em 1em;
@@ -60,6 +60,9 @@ figcaption {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 5px 3px 5px black;
 }
 .advanced-topic {
   cursor: pointer;
