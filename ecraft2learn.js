@@ -436,7 +436,7 @@ window.ecraft2learn =
         sprite.wearCostume(costume);
         ide.hasChangedMedia = true;
     };
-    var train = function (source, buckets_as_snap_list, add_to_previous_training, page_introduction, callback) {
+    var train = function (source, buckets_as_snap_list, add_to_previous_training, page_introduction, callback, together) {
       // source can be 'camera' or 'microphone'
       var buckets = buckets_as_snap_list.contents;
       var buckets_equal = function (buckets1, buckets2) {
@@ -463,6 +463,9 @@ window.ecraft2learn =
               URL = window.location.href.indexOf("localhost") >= 0 ? 
                     "/ai/camera-train/index-dev.html?translate=1" :
                     "https://ecraft2learn.github.io/ai/camera-train/index.html?translate=1";
+              if (together) {
+                  URL += "&together=1";
+              }
               training_window = window.open(URL, "Training " + buckets);
               window.addEventListener('unload',
                                       function () {
@@ -1526,9 +1529,9 @@ window.ecraft2learn =
   train_using_camera: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback) {
       train("camera", buckets_as_snap_list, add_to_previous_training, page_introduction, callback);
   },
-  train_using_images: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback) {
+  train_using_images: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback, together) {
       // old name kept for backwards compatibility
-      train("camera", buckets_as_snap_list, add_to_previous_training, page_introduction, callback);
+      train("camera", buckets_as_snap_list, add_to_previous_training, page_introduction, callback, together);
   },
   train_using_microphone: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback, version) {
       // version is for when this is replaced by a deep learning model
