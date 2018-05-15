@@ -9,6 +9,7 @@
     for (let i = 0; i < training_class_names.length; i++) {
       const div = document.createElement('div');
       document.body.appendChild(div);
+      div.className = 'training-button-and-info';
       // Create info text next to each button
       const info_text = document.createElement('span');
       info_text.innerHTML = "&nbsp;&nbsp;&nbsp;No examples added";

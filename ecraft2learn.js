@@ -486,16 +486,24 @@ window.ecraft2learn =
           }
           return training_window;
       };
-      if (!ecraft2learn.machine_learning_window || ecraft2learn.machine_learning_window.closed) {
-          ecraft2learn.learning_buckets = buckets;
+      if ((source === 'camera' &&
+             (!ecraft2learn.vision_training_window || ecraft2learn.vision_training_window.closed)) ||
+          (source === 'microphone' && 
+             !ecraft2learn.audio_training_window)) {
           var machine_learning_window = open_machine_learning_window();
-          ecraft2learn.machine_learning_window = machine_learning_window;
+          if (source === 'camera') {
+              ecraft2learn.vision_training_window  = machine_learning_window;
+              ecraft2learn.vision_learning_buckets = buckets;
+          } else {
+              ecraft2learn.audio_training_window  = machine_learning_window;
+              ecraft2learn.audio_learning_buckets = buckets;
+          }
           var receive_messages_from_iframe = 
               function (event) {
                   if (event.data === "Loaded") {
                       machine_learning_window.postMessage({training_class_names: buckets}, "*");
                   } else if (event.data === "Ready") {
-                      ecraft2learn.machine_learning_window_ready = true;
+                      ecraft2learn.vision_training_window_ready = true;
                       if (page_introduction) {
                           machine_learning_window.postMessage({new_introduction: page_introduction}, "*");
                       }
@@ -511,8 +519,12 @@ window.ecraft2learn =
           };
           window.addEventListener("message", receive_messages_from_iframe, false);               
           return;
-      }     
-      if (add_to_previous_training && buckets_equal(buckets, ecraft2learn.learning_buckets)) {
+      }
+      let old_learning_buckets = 
+          source === 'camera' ?
+              ecraft2learn.vision_learning_buckets :
+              ecraft2learn.audio_learning_buckets;
+      if (add_to_previous_training && buckets_equal(buckets, old_learning_buckets)) {
           if (ecraft2learn.audio_training_iframe) {
               ecraft2learn.audio_training_iframe.style.width  = "100%";
               ecraft2learn.audio_training_iframe.style.height = "100%";
@@ -521,15 +533,19 @@ window.ecraft2learn =
                   child.style.opacity = 1;
               });
           } else {
-              // would like to go to that window:  ecraft2learn.machine_learning_window.focus();
+              // would like to go to that window:  ecraft2learn.vision_training_window.focus();
               // but browsers don't allow it unless clear the user initiated it
               inform("Training tab ready",
                      "Go to the training window whenever you want to add to the training.");           
           }
           invoke_callback(callback, "Ready");
       } else {
-          ecraft2learn.machine_learning_window.close();
-          ecraft2learn.machine_learning_window = undefined;
+          if (source === 'camera') {
+              ecraft2learn.vision_training_window.close();
+              ecraft2learn.vision_training_window = undefined;
+          } else {
+              ecraft2learn.audio_training_window = undefined;
+          }
           // start over
           train(source, buckets_as_snap_list, add_to_previous_training, page_introduction, callback);
       }
@@ -537,7 +553,7 @@ window.ecraft2learn =
   var training_window_request = function (alert_message, message_maker, response_listener, image) {
         var training_image_width  = 227;
         var training_image_height = 227;
-        if (!ecraft2learn.machine_learning_window) {
+        if (!ecraft2learn.vision_training_window) {
             inform("Training request warning", alert_message);
             return;
         }
@@ -546,7 +562,7 @@ window.ecraft2learn =
             ecraft2learn.video  = video;
             add_photo_to_canvas(canvas, image || video, training_image_width, training_image_height);
             var image_URL = canvas.toDataURL('image/png');
-            ecraft2learn.machine_learning_window.postMessage(message_maker(image_URL), "*");
+            ecraft2learn.vision_training_window.postMessage(message_maker(image_URL), "*");
             window.addEventListener("message", response_listener);
         }
         if (ecraft2learn.canvas) {
@@ -1559,7 +1575,7 @@ window.ecraft2learn =
               window.removeEventListener("message", receive_confidences);
            };
       };
-      if (!ecraft2learn.machine_learning_window) {
+      if (!ecraft2learn.audio_training_window) {
           inform("Training request warning",
                  "Run the 'Train with audio buckets ...' command before using 'Audio label confidences'");
           return;
@@ -1568,7 +1584,7 @@ window.ecraft2learn =
           duration_in_seconds = 3; // 3 second default 
       }
       // convert from milliseconds to seconds
-      ecraft2learn.machine_learning_window.postMessage({predict: duration_in_seconds*1000}, "*");
+      ecraft2learn.audio_training_window.postMessage({predict: duration_in_seconds*1000}, "*");
       window.addEventListener("message", receive_confidences);  
   },
   add_image_to_training: function (costume_number, label, callback, sprite) {
@@ -1597,9 +1613,9 @@ window.ecraft2learn =
       return get_costumes(sprite).length;
   },
   training_window_ready: function () {
-      return ecraft2learn.machine_learning_window === true && 
-             !ecraft2learn.machine_learning_window.closed &&
-             ecraft2learn.machine_learning_window_ready === true;
+      return ecraft2learn.vision_training_window === true && 
+             !ecraft2learn.vision_training_window.closed &&
+             ecraft2learn.vision_training_window_ready === true;
   },
   inform: inform,
         

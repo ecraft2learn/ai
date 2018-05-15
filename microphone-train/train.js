@@ -18,6 +18,15 @@
                 info_text.innerHTML = " " + info_text.count + " examples trained";
             }
     };
+    // remove any previously added buttons
+    let buttons = document.body.getElementsByTagName('button');
+    Array.from(buttons).forEach(function (button) {
+        button.remove();
+    });
+    let training_buttons_with_info = document.body.getElementsByClassName('training-button-and-info');
+    Array.from(training_buttons_with_info).forEach(function (training_button_with_info) {
+        training_button_with_info.remove();
+    });
     create_training_buttons(training_class_names, train_on, train_off);
     create_test_button(training_class_names, speech_recognizer);
     create_return_to_snap_button();
