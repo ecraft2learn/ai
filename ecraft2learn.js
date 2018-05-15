@@ -503,6 +503,10 @@ window.ecraft2learn =
                   } else if (event.data === 'Hide audio training iframe') {
                       ecraft2learn.audio_training_iframe.style.width  = "1px";
                       ecraft2learn.audio_training_iframe.style.height = "1px";
+                      let children = ecraft2learn.audio_training_iframe.contentDocument.body.children;
+                      Array.from(children).forEach(function (child) {
+                          child.style.opacity = 0;
+                      });
                   }
           };
           window.addEventListener("message", receive_messages_from_iframe, false);               
@@ -512,6 +516,10 @@ window.ecraft2learn =
           if (ecraft2learn.audio_training_iframe) {
               ecraft2learn.audio_training_iframe.style.width  = "100%";
               ecraft2learn.audio_training_iframe.style.height = "100%";
+              let children = ecraft2learn.audio_training_iframe.contentDocument.body.children;
+              Array.from(children).forEach(function (child) {
+                  child.style.opacity = 1;
+              });
           } else {
               // would like to go to that window:  ecraft2learn.machine_learning_window.focus();
               // but browsers don't allow it unless clear the user initiated it
@@ -521,6 +529,7 @@ window.ecraft2learn =
           invoke_callback(callback, "Ready");
       } else {
           ecraft2learn.machine_learning_window.close();
+          ecraft2learn.machine_learning_window = undefined;
           // start over
           train(source, buckets_as_snap_list, add_to_previous_training, page_introduction, callback);
       }
