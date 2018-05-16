@@ -85,8 +85,7 @@ class Main {
 
     // listen for requests for predictions
     window.addEventListener("message",
-                            function (event) {
-                                
+                            function (event) {                       
                                 if (typeof event.data.predict !== 'undefined') {
 //                                  this.stop(); // done training -- might do more training later
 //                                  no need to stop this since only runs when not hidden
@@ -185,7 +184,7 @@ class Main {
             console.time("Training " + this.training);
         }
         if (TOGETHER_JS) {
-            let canvas = create_canvas()
+            let canvas = create_canvas();
             copy_video_to_canvas(trainer.video, canvas);
             let image_url = canvas.toDataURL('image/png');
             TogetherJS.send({type:        'add_image_to_training',
@@ -281,7 +280,9 @@ window.addEventListener('DOMContentLoaded',
                                          };
                                     let receive_labels = 
                                         function (message) {
-                                            trainer = new Main(message.labels);
+                                            if (!trainer) {
+                                                trainer = new Main(message.labels);
+                                            }   
                                         };
                                     let receive_image_url =
                                         function (message) {
