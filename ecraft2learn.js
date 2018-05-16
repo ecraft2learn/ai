@@ -1601,7 +1601,7 @@ window.ecraft2learn =
       var costume = costume_of_sprite(costume_number, sprite);
       costume_to_image(costume,
                        function (image) {
-                          training_window_request("You need to train the system before using 'Add image to training'.\n" +
+                          training_window_request("You need to start training before using 'Add image to training'.\n" +
                                                   "Run 'Train using camera ...' before this " +
                                                   " so the system knows the list of possible labels.", 
                                                   function (image_URL) {
