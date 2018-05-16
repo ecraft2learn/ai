@@ -587,7 +587,7 @@ window.ecraft2learn =
         if (costume_number < 0 || costume_number > costumes.length) {
             inform("Invalid costume number",
                    "Cannot add costume number " + costume_number +
-                   " to " + label + " training bucket.\n" + 
+                   " to training bucket.\n" + 
                    "Only numbers between 1 and " + 
                    costumes.length + " are permitted.");
             return;
