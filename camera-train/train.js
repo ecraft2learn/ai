@@ -279,6 +279,9 @@ window.addEventListener('DOMContentLoaded',
                                                 collaboration_button.style.display = 'none';
                                             }                                                
                                          };
+                                    let share_together_url = function() {
+                                        window.opener.postMessage({together_url: TogetherJS.shareUrl()}, "*");
+                                    };
                                     let receive_labels = 
                                         function (message) {
                                             if (!trainer) {
@@ -293,6 +296,7 @@ window.addEventListener('DOMContentLoaded',
                                         };
                                     TogetherJS.hub.on("togetherjs.hello",      send_labels);
                                     TogetherJS.hub.on('togetherjs.hello-back', remove_button);
+                                    TogetherJS.hub.on('togetherjs.hello-back', share_together_url);
                                     TogetherJS.hub.on('training_labels',       receive_labels);
                                     TogetherJS.hub.on('add_image_to_training', receive_image_url);
                                     toggle_together_js();
@@ -315,9 +319,6 @@ window.addEventListener('DOMContentLoaded',
                                     TogetherJS(collaboration_button);
                                     running = !running;
                                     label_collaboration_button();
-                                    if (running) {
-                                        window.opener.postMessage({together_url: TogetherJS.shareUrl()}, "*");
-                                    }
                                 }
                                 collaboration_button.title = 
                                     "Clicking this will turn on or off collaborative training with others.";
