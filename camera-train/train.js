@@ -322,6 +322,7 @@ window.addEventListener('DOMContentLoaded',
                                     "Clicking this will turn on or off collaborative training with others.";
                                 collaboration_button.addEventListener('click',      toggle_together_js);
                                 collaboration_button.addEventListener('touchstart', toggle_together_js);
+                                toggle_together_js();
                                 document.body.insertBefore(collaboration_button, document.body.firstChild);
                             }
                         },

@@ -436,8 +436,13 @@ window.ecraft2learn =
         sprite.wearCostume(costume);
         ide.hasChangedMedia = true;
     };
-    var train = function (source, buckets_as_snap_list, add_to_previous_training, page_introduction, callback, together) {
-      // source can be 'camera' or 'microphone'
+    var train = function (source, // currently can be 'camera' or 'microphone'
+                          buckets_as_snap_list, // list of labels (as Snap! object)
+                          add_to_previous_training, // if false will throw away any current training
+                          page_introduction, // optional HTML that will appear in place of the default on training page
+                          callback, // if bound will be called when training finished 
+                          together, // if true enable togetherJS collaboration
+                          together_url) { // another Snap! (or NetsBlox) wants to collaborate using this URL
       var buckets = buckets_as_snap_list.contents;
       var buckets_equal = function (buckets1, buckets2) {
           if (!buckets1 || !buckets2) {
@@ -460,8 +465,8 @@ window.ecraft2learn =
                   inform("Possible Raspberry Pi problem",
                          "You may find that the Raspberry Pi is too slow for machine learning to work well.");
               }
-              if (ecraft2learn.together_URL) {
-                  URL = ecraft2learn.together_URL;
+              if (together_url) {
+                  URL = together_url;
               } else {
                   URL = window.location.href.indexOf("localhost") >= 0 ? 
                         "/ai/camera-train/index-dev.html?translate=1" :
@@ -724,12 +729,6 @@ window.ecraft2learn =
             }   
         }
     };
-    window.addEventListener("message",
-                            function (event) {
-                                  if (event.data.together_url) {
-                                      ecraft2learn.together_URL = event.data.together_url;
-                                  }
-                            });
     // see http://mary.dfki.de:59125/documentation.html for documentation of Mary TTS
     var mary_tts_voices =
     [ // name, human readable name, and locale
@@ -759,11 +758,21 @@ window.ecraft2learn =
 
     var debugging = false; // if true console will fill with information
 
+    window.addEventListener("message",
+                            function (event) {
+                                  if (event.data.together_url) {
+                                      ecraft2learn.together_URL = event.data.together_url;
+                                  }
+                            });
+
     // the following are the ecraft2learn functions available via this library
 
     return {
       inside_snap: function () {
                        return typeof world === 'object' && world instanceof WorldMorph;
+      },
+      url_for_collaboration: function () {
+          return ecraft2learn.together_URL;
       },
       run: function (function_name, parameters) {
           // runs one of the functions in this library
