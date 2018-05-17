@@ -295,6 +295,7 @@ window.addEventListener('DOMContentLoaded',
                                     TogetherJS.hub.on('togetherjs.hello-back', remove_button);
                                     TogetherJS.hub.on('training_labels',       receive_labels);
                                     TogetherJS.hub.on('add_image_to_training', receive_image_url);
+                                    toggle_together_js();
                                 }
                                 script.addEventListener('load', add_together_listeners);
                                 document.head.appendChild(script);
@@ -322,7 +323,6 @@ window.addEventListener('DOMContentLoaded',
                                     "Clicking this will turn on or off collaborative training with others.";
                                 collaboration_button.addEventListener('click',      toggle_together_js);
                                 collaboration_button.addEventListener('touchstart', toggle_together_js);
-                                toggle_together_js();
                                 document.body.insertBefore(collaboration_button, document.body.firstChild);
                             }
                         },
