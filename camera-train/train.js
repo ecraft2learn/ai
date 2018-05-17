@@ -28,39 +28,39 @@ const TOGETHER_JS = window.location.search.indexOf('together') >= 0;
 
 var trainer;
 
-    let create_canvas = function () {
-        let canvas = document.createElement('canvas');
-        canvas.width  = IMAGE_SIZE;
-        canvas.height = IMAGE_SIZE;
-        return canvas;
-    };
+let create_canvas = function () {
+    let canvas = document.createElement('canvas');
+    canvas.width  = IMAGE_SIZE;
+    canvas.height = IMAGE_SIZE;
+    return canvas;
+};
 
-    let copy_video_to_canvas = function (video, canvas) {
-        canvas.getContext('2d').drawImage(video, 0, 0, IMAGE_SIZE, IMAGE_SIZE);
-    };
+let copy_video_to_canvas = function (video, canvas) {
+    canvas.getContext('2d').drawImage(video, 0, 0, IMAGE_SIZE, IMAGE_SIZE);
+};
 
-    let load_image = function (image_url, callback) {
-        let image = document.createElement('img');
-        image.src = image_url;
-        image.width  = IMAGE_SIZE;
-        image.height = IMAGE_SIZE;
-        image.onload = function () {
-            callback(image);
-        };
+let load_image = function (image_url, callback) {
+    let image = document.createElement('img');
+    image.src = image_url;
+    image.width  = IMAGE_SIZE;
+    image.height = IMAGE_SIZE;
+    image.onload = function () {
+        callback(image);
     };
+};
 
-    let add_image_to_training = function (image_url, label_index, post_to_tab) {
-        load_image(image_url,
-                   function (image) {
-                       let image_as_Array3D = dl.fromPixels(image);
-                       trainer.knn.addImage(image_as_Array3D, label_index);
-                       response = trainer.knn.getClassExampleCount()[label_index];
-                       if (post_to_tab) {
-                           post_to_tab.postMessage({confirmation: response}, "*");
-                       }
-                       image_as_Array3D.dispose();
-                   });
-    };
+let add_image_to_training = function (image_url, label_index, post_to_tab) {
+    load_image(image_url,
+               function (image) {
+                   let image_as_Array3D = dl.fromPixels(image);
+                   trainer.knn.addImage(image_as_Array3D, label_index);
+                   response = trainer.knn.getClassExampleCount()[label_index];
+                   if (post_to_tab) {
+                       post_to_tab.postMessage({confirmation: response}, "*");
+                   }
+                   image_as_Array3D.dispose();
+               });
+};
 
 class Main {
   constructor(training_class_names) {
@@ -260,6 +260,7 @@ window.addEventListener('DOMContentLoaded',
                                 // for production add window.TogetherJSConfig_ignoreMessages = true;
                                 window.TogetherJSConfig_ignoreMessages = 
                                     ["cursor-click", "form-focus", "cursor-update", "keydown", "scroll-update"];
+//                                 TogetherJSConfig_autoStart = true;
                                 let script = document.createElement('script');
                                 script.src = "https://togetherjs.com/togetherjs-min.js";
                                 let add_together_listeners = function () {
@@ -298,15 +299,23 @@ window.addEventListener('DOMContentLoaded',
                                 script.addEventListener('load', add_together_listeners);
                                 document.head.appendChild(script);
                                 let collaboration_button = document.createElement('button');
-                                collaboration_button.innerHTML = "Get URL for collaboration";
-                                collaboration_button.id = 'collaboration_button';
-                                collaboration_button.className = "together_button";
-                                let toggle_together_js = function () {
-                                    console.log(TogetherJS(collaboration_button));
-                                    if (collaboration_button.innerHTML === "Get URL for collaboration") {
+                                let running = typeof TogetherJS !== 'undefined' && TogetherJS.running;
+                                let label_collaboration_button = function () {
+                                    if (running) {
                                         collaboration_button.innerHTML = "Stop collaborating";
                                     } else {
                                         collaboration_button.innerHTML = "Get URL for collaboration";
+                                    }
+                                };
+                                label_collaboration_button();
+                                collaboration_button.id = 'collaboration_button';
+                                collaboration_button.className = "together_button";
+                                let toggle_together_js = function () {
+                                    TogetherJS(collaboration_button);
+                                    running = !running;
+                                    label_collaboration_button();
+                                    if (running) {
+                                        window.opener.postMessage({together_url: TogetherJS.shareUrl()}, "*");
                                     }
                                 }
                                 collaboration_button.title = 

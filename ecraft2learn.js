@@ -460,11 +460,15 @@ window.ecraft2learn =
                   inform("Possible Raspberry Pi problem",
                          "You may find that the Raspberry Pi is too slow for machine learning to work well.");
               }
-              URL = window.location.href.indexOf("localhost") >= 0 ? 
-                    "/ai/camera-train/index-dev.html?translate=1" :
-                    "https://ecraft2learn.github.io/ai/camera-train/index.html?translate=1";
-              if (together) {
-                  URL += "&together=1";
+              if (ecraft2learn.together_URL) {
+                  URL = ecraft2learn.together_URL;
+              } else {
+                  URL = window.location.href.indexOf("localhost") >= 0 ? 
+                        "/ai/camera-train/index-dev.html?translate=1" :
+                        "https://ecraft2learn.github.io/ai/camera-train/index.html?translate=1";
+                  if (together) {
+                      URL += "&together=1";
+                  }                  
               }
               training_window = window.open(URL, "Training " + buckets);
               window.addEventListener('unload',
@@ -720,6 +724,12 @@ window.ecraft2learn =
             }   
         }
     };
+    window.addEventListener("message",
+                            function (event) {
+                                  if (event.data.together_url) {
+                                      ecraft2learn.together_URL = event.data.together_url;
+                                  }
+                            });
     // see http://mary.dfki.de:59125/documentation.html for documentation of Mary TTS
     var mary_tts_voices =
     [ // name, human readable name, and locale
