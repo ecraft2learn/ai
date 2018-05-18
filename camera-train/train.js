@@ -281,6 +281,7 @@ window.addEventListener('DOMContentLoaded',
                                          };
                                     let share_together_url = function() {
                                         window.opener.postMessage({together_url: TogetherJS.shareUrl()}, "*");
+                                        console.log("posted " + TogetherJS.shareUrl());
                                     };
                                     let receive_labels = 
                                         function (message) {
@@ -294,11 +295,11 @@ window.addEventListener('DOMContentLoaded',
                                                                   message.label_index);
 
                                         };
-                                    TogetherJS.hub.on("togetherjs.hello",      send_labels);
-                                    TogetherJS.hub.on('togetherjs.hello-back', remove_button);
-                                    TogetherJS.hub.on('togetherjs.hello-back', share_together_url);
-                                    TogetherJS.hub.on('training_labels',       receive_labels);
-                                    TogetherJS.hub.on('add_image_to_training', receive_image_url);
+                                    TogetherJS.hub.on("togetherjs.hello",           send_labels);
+                                    TogetherJS.hub.on('togetherjs.hello-back',      remove_button);
+                                    TogetherJS.hub.on('togetherjs.init-connection', share_together_url);
+                                    TogetherJS.hub.on('training_labels',            receive_labels);
+                                    TogetherJS.hub.on('add_image_to_training',      receive_image_url);
                                     toggle_together_js();
                                 }
                                 script.addEventListener('load', add_together_listeners);
