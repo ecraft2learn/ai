@@ -50,6 +50,11 @@ let load_image = function (image_url, callback) {
 };
 
 let add_image_to_training = function (image_url, label_index, post_to_tab) {
+//     let hash = sha256(image_url + label_index);
+//     if (hashes_of_images_added.indexOf(hash) >= 0) {
+//         return;
+//     }
+//     hashes_of_images_added.push(hash);
     load_image(image_url,
                function (image) {
                    let image_as_Array3D = dl.fromPixels(image);
@@ -61,6 +66,32 @@ let add_image_to_training = function (image_url, label_index, post_to_tab) {
                    image_as_Array3D.dispose();
                });
 };
+
+// // hash copied from https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest
+// let hex = function hex(buffer) {
+//   var hexCodes = [];
+//   var view = new DataView(buffer);
+//   for (var i = 0; i < view.byteLength; i += 4) {
+//     // Using getUint32 reduces the number of iterations needed (we process 4 bytes each time)
+//     var value = view.getUint32(i)
+//     // toString(16) will give the hex representation of the number without padding
+//     var stringValue = value.toString(16)
+//     // We use concatenation and slice for padding
+//     var padding = '00000000'
+//     var paddedValue = (padding + stringValue).slice(-padding.length)
+//     hexCodes.push(paddedValue);
+//   };
+// };
+
+// let sha256 = function sha256(str) {
+//   // We transform the string into an arraybuffer.
+//   var buffer = new TextEncoder("utf-8").encode(str);
+//   return crypto.subtle.digest("SHA-256", buffer).then(function (hash) {
+//     return hex(hash);
+//   });
+// };
+
+// let hashes_of_images_added = [];
 
 class Main {
   constructor(training_class_names) {
@@ -252,16 +283,14 @@ window.addEventListener("message",
 // tell Snap! this is loaded
 window.addEventListener('DOMContentLoaded', 
                         function (event) {
-                            let previous_image_url;
                             if (window.opener) {
                                 // if collaboratively training only one has a Snap! window (just now)
                                 window.opener.postMessage("Loaded", "*");
                             }
                             if (TOGETHER_JS) {
                                 // for production add window.TogetherJSConfig_ignoreMessages = true;
-                                window.TogetherJSConfig_ignoreMessages = 
-                                    ["cursor-click", "form-focus", "cursor-update", "keydown", "scroll-update"];
-//                                 TogetherJSConfig_autoStart = true;
+                                TogetherJSConfig_dontShowClicks = true;
+//                                 TogetherJSConfig_suppressInvite = true;
                                 let script = document.createElement('script');
                                 script.src = "https://togetherjs.com/togetherjs-min.js";
                                 let add_together_listeners = function () {
@@ -280,11 +309,12 @@ window.addEventListener('DOMContentLoaded',
                                                 collaboration_button.style.display = 'none';
                                             }                                                
                                          };
-                                    let share_together_url = function() {
-                                        if (window.opener) {
-                                            window.opener.postMessage({together_url: TogetherJS.shareUrl()}, "*");
-                                        }
-                                    };
+                                    let share_together_url = 
+                                        function() {
+                                            if (window.opener) {
+                                                window.opener.postMessage({together_url: TogetherJS.shareUrl()}, "*");
+                                            }
+                                        };
                                     let receive_labels = 
                                         function (message) {
                                             if (!trainer) {
@@ -293,19 +323,15 @@ window.addEventListener('DOMContentLoaded',
                                         };
                                     let receive_image_url =
                                         function (message) {
-                                            if (message.image_url !== previous_image_url) {
-                                                add_image_to_training(message.image_url,
-                                                                      message.label_index);
-                                                previous_image_url = message.image_url;
-
-                                            }
+                                            add_image_to_training(message.image_url,
+                                                                  message.label_index);
                                         };
                                     TogetherJS.hub.on("togetherjs.hello",           send_labels);
                                     TogetherJS.hub.on('togetherjs.hello-back',      remove_button);
                                     TogetherJS.hub.on('togetherjs.init-connection', share_together_url);
                                     TogetherJS.hub.on('training_labels',            receive_labels);
                                     TogetherJS.hub.on('add_image_to_training',      receive_image_url);
-                                    toggle_together_js();
+//                                     toggle_together_js(); // somehow this caused messages to be received twice
                                 }
                                 script.addEventListener('load', add_together_listeners);
                                 document.head.appendChild(script);
