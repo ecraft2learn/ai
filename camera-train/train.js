@@ -281,7 +281,6 @@ window.addEventListener('DOMContentLoaded',
                                          };
                                     let share_together_url = function() {
                                         window.opener.postMessage({together_url: TogetherJS.shareUrl()}, "*");
-                                        console.log("posted " + TogetherJS.shareUrl());
                                     };
                                     let receive_labels = 
                                         function (message) {

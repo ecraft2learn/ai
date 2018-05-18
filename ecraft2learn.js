@@ -559,7 +559,7 @@ window.ecraft2learn =
               ecraft2learn.audio_training_window = undefined;
           }
           // start over
-          train(source, buckets_as_snap_list, add_to_previous_training, page_introduction, callback);
+          train(source, buckets_as_snap_list, add_to_previous_training, page_introduction, callback, together, together_url);
       }
   };
   var training_window_request = function (alert_message, message_maker, response_listener, image) {
@@ -1545,12 +1545,12 @@ window.ecraft2learn =
           invoke_callback(callback_for_errors, error.message);
       }
   },
-  train_using_camera: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback) {
-      train("camera", buckets_as_snap_list, add_to_previous_training, page_introduction, callback);
+  train_using_camera: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback, together, together_url) {
+      train("camera", buckets_as_snap_list, add_to_previous_training, page_introduction, callback, together, together_url);
   },
-  train_using_images: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback, together) {
+  train_using_images: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback, together, together_url) {
       // old name kept for backwards compatibility
-      train("camera", buckets_as_snap_list, add_to_previous_training, page_introduction, callback, together);
+      train("camera", buckets_as_snap_list, add_to_previous_training, page_introduction, callback, together, together_url);
   },
   train_using_microphone: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback, version) {
       // version is for when this is replaced by a deep learning model
