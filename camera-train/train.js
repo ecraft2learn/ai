@@ -281,7 +281,9 @@ window.addEventListener('DOMContentLoaded',
                                             }                                                
                                          };
                                     let share_together_url = function() {
-                                        window.opener.postMessage({together_url: TogetherJS.shareUrl()}, "*");
+                                        if (window.opener) {
+                                            window.opener.postMessage({together_url: TogetherJS.shareUrl()}, "*");
+                                        }
                                     };
                                     let receive_labels = 
                                         function (message) {
