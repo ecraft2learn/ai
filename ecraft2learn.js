@@ -443,6 +443,7 @@ window.ecraft2learn =
                           callback, // if bound will be called when training finished 
                           together, // if true enable togetherJS collaboration
                           together_url) { // another Snap! (or NetsBlox) wants to collaborate using this URL
+      console.log("together_url", together_url);
       var buckets = buckets_as_snap_list.contents;
       var buckets_equal = function (buckets1, buckets2) {
           if (!buckets1 || !buckets2) {
