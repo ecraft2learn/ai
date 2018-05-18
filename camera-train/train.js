@@ -252,6 +252,7 @@ window.addEventListener("message",
 // tell Snap! this is loaded
 window.addEventListener('DOMContentLoaded', 
                         function (event) {
+                            let previous_image_url;
                             if (window.opener) {
                                 // if collaboratively training only one has a Snap! window (just now)
                                 window.opener.postMessage("Loaded", "*");
@@ -290,9 +291,12 @@ window.addEventListener('DOMContentLoaded',
                                         };
                                     let receive_image_url =
                                         function (message) {
-                                            add_image_to_training(message.image_url,
-                                                                  message.label_index);
+                                            if (message.image_url !== previous_image_url) {
+                                                add_image_to_training(message.image_url,
+                                                                      message.label_index);
+                                                previous_image_url = message.image_url;
 
+                                            }
                                         };
                                     TogetherJS.hub.on("togetherjs.hello",           send_labels);
                                     TogetherJS.hub.on('togetherjs.hello-back',      remove_button);
