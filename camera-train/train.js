@@ -290,7 +290,8 @@ window.addEventListener('DOMContentLoaded',
                             if (TOGETHER_JS) {
                                 // for production add window.TogetherJSConfig_ignoreMessages = true;
                                 TogetherJSConfig_dontShowClicks = true;
-                                TogetherJSConfig_suppressInvite = true;
+                                // following made the interface less confusing but didn't invite the othe either
+//                              TogetherJSConfig_suppressInvite = true;
                                 let script = document.createElement('script');
                                 script.src = "https://togetherjs.com/togetherjs-min.js";
                                 let add_together_listeners = function () {
