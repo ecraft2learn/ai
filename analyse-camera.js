@@ -24,9 +24,9 @@ var get_key = function (provider) {
         return key;
     }
     if (window.confirm("No value provided for the variable '" + provider + 
-                       " key'. Do you want to visit https://github.com/ToonTalk/ai-cloud/wiki to learn how to get a key?")) {
+                       " key'. Do you want to visit https://github.com/ecraft2learn/ai/wiki to learn how to get a key?")) {
         window.onbeforeunload = null; // don't warn about reload
-        document.location.assign("https://github.com/ToonTalk/ai-cloud/wiki");
+        document.location.assign("https://github.com/ecraft2learn/ai/wiki");
     }
 };
 
