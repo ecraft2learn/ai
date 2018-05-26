@@ -368,7 +368,7 @@ window.ecraft2learn =
         ecraft2learn.utterance = utterance; // without this utterance may be garbage collected before onend can run
         if (typeof language === 'string') {
             utterance.lang = language;
-            if (voice_number === 0) {
+            if (!voice_number) {
                 voice_number = get_matching_voice(true, [language]);
                 if (voice_number === undefined) {
                     voice_number = 0;
@@ -392,7 +392,7 @@ window.ecraft2learn =
             }
             utterance.rate = rate;
         }
-        if (voice_number === 0 && ecraft2learn.default_language) {
+        if (!voice_number && ecraft2learn.default_language) {
             var voices = window.speechSynthesis.getVoices();
             voices.some(function (voice, index) {
                 if (voice.lang === ecraft2learn.default_language) {
