@@ -667,7 +667,7 @@ window.ecraft2learn =
         var builtin_voice_number;
         voices.some(function (voice, index) {
             if (voice.lang.toLowerCase() === language_code.toLowerCase()) {
-                builtin_voice_number = index;
+                builtin_voice_number = index+1; // 1-indexing
                 return true;
             }
         });
