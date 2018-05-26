@@ -297,6 +297,14 @@ window.ecraft2learn =
        if (voice_number >= 0) {
            return voice_number;
        }
+       if (ecraft2learn.language_defaults[name_parts[0]]) {
+           // try again since the defaults don't necessaryily match the list of languages
+           // e.g. zh-CN is not the same as cmn-Hans-CN
+           voice_number = voice_number_of_language_code(ecraft2learn.language_defaults[name_parts[0]], builtin_voices);
+       }
+       if (voice_number >= 0) {
+           return voice_number;
+       }
        inform("Unable to find a matching voice",
               "This browser does not have a voice that matches " + name_parts.join("-"));
     };
@@ -1784,5 +1792,5 @@ ecraft2learn.language_defaults =
   urdu:       "ur-PK",
   "العربية":  "ar-SA",
   arabic:      "ar-SA",
-  chinese:     "cmn-Hans-CN"
+  chinese:     "zh-CN"
   }
