@@ -249,64 +249,64 @@ window.ecraft2learn =
         }
     };
     var get_matching_voice = function (builtin_voices, name_parts) { 
-      var voices = builtin_voices ? 
-                   window.speechSynthesis.getVoices().map(function (voice) { return voice.name.toLowerCase(); }) :
-                   mary_tts_voices.map(function (voice) { return voice[1].toLowerCase(); });
-      var voice_number;
-      if (!Array.isArray(name_parts) && typeof name_parts !== 'string') {
-          // convert from a Snap list to a JavaScript array
-          name_parts = name_parts.contents;
-      }
-      name_parts = name_parts.map(function (part) {
-                                      return part.toLowerCase();
-                                  });
-      var name_parts_double_white_space = name_parts.map(function (part) {
-                                                            return " " + part + " ";
-      });
-      var name_parts_left_white_space   = name_parts.map(function (part) {
-                                                            return " " + part;
-      });
-      var name_parts_right_white_space  = name_parts.map(function (part) {
-                                                            return part + " ";
-      });
-      var name_matches = function (name, parts) {
-          return parts.every(function (part) {
-                                      return name.indexOf(part) >= 0;
-                                  });
-      };
-      [name_parts_double_white_space, name_parts_left_white_space, name_parts_right_white_space, name_parts].some(
-           // prefer matches with white space
-           // so that "male" doesn't match "female" unless no other choice
-            function (parts) {
-                  voices.some(function (voice_name, index) {
-                                  if (name_matches(voice_name, parts)) {
-                                      voice_number = index+1; // using 1-indexing
-                                      return true;
-                                  }
-                              });
-                  return voice_number > 0;               
-            });
-       if (voice_number >= 0) {
-           return voice_number;
-       }
-       // no match so try using just the first argument to find a matching language entry
-       var matching_language_entry = language_entry(name_parts[0]);
-       if (matching_language_entry) {
-           voice_number = voice_number_of_language_code(matching_language_entry[1], builtin_voices);
-       }
-       if (voice_number >= 0) {
-           return voice_number;
-       }
-       if (ecraft2learn.language_defaults[name_parts[0]]) {
-           // try again since the defaults don't necessaryily match the list of languages
-           // e.g. zh-CN is not the same as cmn-Hans-CN
-           voice_number = voice_number_of_language_code(ecraft2learn.language_defaults[name_parts[0]], builtin_voices);
-       }
-       if (voice_number >= 0) {
-           return voice_number;
-       }
-       inform("Unable to find a matching voice",
-              "This browser does not have a voice that matches " + name_parts.join("-"));
+        var voices = builtin_voices ? 
+                     window.speechSynthesis.getVoices().map(function (voice) { return voice.name.toLowerCase(); }) :
+                     mary_tts_voices.map(function (voice) { return voice[1].toLowerCase(); });
+        var voice_number;
+        if (!Array.isArray(name_parts) && typeof name_parts !== 'string') {
+            // convert from a Snap list to a JavaScript array
+            name_parts = name_parts.contents;
+        }
+        name_parts = name_parts.map(function (part) {
+                                        return part.toLowerCase();
+                                    });
+        var name_parts_double_white_space = name_parts.map(function (part) {
+                                                              return " " + part + " ";
+        });
+        var name_parts_left_white_space   = name_parts.map(function (part) {
+                                                              return " " + part;
+        });
+        var name_parts_right_white_space  = name_parts.map(function (part) {
+                                                              return part + " ";
+        });
+        var name_matches = function (name, parts) {
+            return parts.every(function (part) {
+                                   return name.indexOf(part) >= 0;
+                               });
+        };
+        [name_parts_double_white_space, name_parts_left_white_space, name_parts_right_white_space, name_parts].some(
+             // prefer matches with white space
+             // so that "male" doesn't match "female" unless no other choice
+             function (parts) {
+                 voices.some(function (voice_name, index) {
+                                 if (name_matches(voice_name, parts)) {
+                                     voice_number = index+1; // using 1-indexing
+                                     return true;
+                                 }
+                             });
+                 return voice_number > 0;               
+        });          
+        if (voice_number >= 0) {
+            return voice_number;
+        }
+        // no match so try using just the first argument to find a matching language entry
+        var matching_language_entry = language_entry(name_parts[0]);
+        if (matching_language_entry) {
+            voice_number = voice_number_of_language_code(matching_language_entry[1], builtin_voices);
+        }
+        if (voice_number >= 0) {
+            return voice_number;
+        }
+        if (ecraft2learn.language_defaults[name_parts[0]]) {
+            // try again since the defaults don't necessaryily match the list of languages
+            // e.g. zh-CN is not the same as cmn-Hans-CN
+            voice_number = voice_number_of_language_code(ecraft2learn.language_defaults[name_parts[0]], builtin_voices);
+        }
+        if (voice_number >= 0) {
+            return voice_number;
+        }
+        inform("Unable to find a matching voice",
+               "This browser does not have a voice that matches " + name_parts.join("-"));
     };
     var voice_number_of_language_code = function (code, builtin_voices) {
         if (builtin_voices) {
@@ -374,7 +374,7 @@ window.ecraft2learn =
         // else is less than the maximum_length
         var utterance = new SpeechSynthesisUtterance(message);
         ecraft2learn.utterance = utterance; // without this utterance may be garbage collected before onend can run
-        if (typeof language === 'string') {
+        if (typeof language === 'string' && language !== "") {
             utterance.lang = language;
             if (!voice_number) {
                 voice_number = get_matching_voice(true, [language]);
@@ -1064,6 +1064,7 @@ window.ecraft2learn =
                 var builtin_voice_number = builtin_voice_number_with_language_code(matching_language_entry[1]);
                 if (builtin_voice_number >= 0) {
                     message += "Speech synthesis will use the browser's voice named ''" + 
+                               // subtract 1 since getVoices is zero-indexed
                                window.speechSynthesis.getVoices()[builtin_voice_number-1].name + "''.";
                     inform("Default language set", message);
                 } else {
