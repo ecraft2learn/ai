@@ -1064,7 +1064,7 @@ window.ecraft2learn =
                 var builtin_voice_number = builtin_voice_number_with_language_code(matching_language_entry[1]);
                 if (builtin_voice_number >= 0) {
                     message += "Speech synthesis will use the browser's voice named ''" + 
-                               window.speechSynthesis.getVoices()[builtin_voice_number].name + "''.";
+                               window.speechSynthesis.getVoices()[builtin_voice_number-1].name + "''.";
                     inform("Default language set", message);
                 } else {
                     no_voices_callback();
