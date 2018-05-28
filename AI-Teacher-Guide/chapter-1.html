@@ -79,6 +79,15 @@ The Mary TTS (text-to-speech) blocks below work in any browser.)</p>
         caption = "A simple block for speaking text. TRY IT">
 </figure>
 
+<p>
+The <span class="command-name">set default language</span> command sets what language is to be used if none is specified
+(see <a href="#controlling-speech-synthesis">full featured <span class="command-name">speak</span> command</a>).
+It can be the language's name in the language or in English.
+Or you can use language code followed by the dialect code.
+E.g. en-GB for English as spoken in Great Britain.
+Language codes should be one of the <a href="https://en.wikipedia.org/wiki/IETF_language_tag" target="_blank">IETF language tags</a>.
+</p>
+
 <h4>Sentences are more than a series of words</h4>
 </p>Speech synthesizers do more than just say each word in a sentence.
 They attempt to produce a natural prosody, i.e., the intonation, tone, stress, and rhythm.
@@ -200,7 +209,7 @@ and <i>articulatory</i> where human tongues and vocal chords are simulated.
 the <a href="#additional-resources">Additional resources</a> section at the bottom of this page.</p>
 </span>
 
-<h4>Controlling speech synthesis</h4>
+<h4 id="controlling-speech-synthesis">Controlling speech synthesis</h4>
 <p>A person can speak slow or fast, in a low or high pitch, quietly or loudly, and more.
 And different people have different voices and accents.
 To mirror these abilities a more complex block is available.
