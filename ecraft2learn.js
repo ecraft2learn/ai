@@ -1644,7 +1644,7 @@ window.ecraft2learn =
       return get_costumes(sprite).length;
   },
   training_window_ready: function () {
-      return ecraft2learn.vision_training_window && 
+      return typeof ecraft2learn.vision_training_window !== 'undefined' && 
              !ecraft2learn.vision_training_window.closed &&
              ecraft2learn.vision_training_window_ready === true;
   },
