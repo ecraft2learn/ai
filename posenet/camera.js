@@ -319,5 +319,14 @@ const respond_to_messages =
                        });
         }
     };
+
 window.addEventListener("message", respond_to_messages);
+
+// tell Snap! this is loaded
+window.addEventListener('DOMContentLoaded', 
+                        function (event) {
+                            if (window.opener) {
+                                window.opener.postMessage("Loaded", "*");
+                            }
+                        });
                             

@@ -1685,20 +1685,31 @@ window.ecraft2learn =
              ecraft2learn.vision_training_window_ready === true;
   },
   poses: function (callback) {
-      if (!ecraft2learn.posenet_window || ecraft2learn.posenet_window.closed) {
-          ecraft2learn.posenet_window = open_posenet_window();
-      }
-      const message_maker = function (image_URL) {
-                                return {compute_poses: image_URL};
-                            };
-      posenet_window_request(message_maker, 400, 400);
-      const receive_poses = function (event) {
-          if (typeof event.data.poses !== 'undefined') {
-              invoke_callback(callback, javascript_to_snap(event.data.poses));
-              window.removeEventListener("message", receive_poses);
+      var ask_for_poses = function () {
+          if (!ecraft2learn.posenet_window || ecraft2learn.posenet_window.closed) {
+              ecraft2learn.posenet_window = open_posenet_window();
+              const listen_for_posenet_window_loaded = function (event) {
+                  if (typeof event.data == "Loaded") {
+                      ask_for_poses()
+                      winodw.removeEventListener(listen_for_posenet_window_loaded);
+                  }
+              }
+              window.addEventListener("message", listen_for_posenet_window_loaded);
+              return;                      
+          }
+          const message_maker = function (image_URL) {
+                                    return {compute_poses: image_URL};
+                                };
+          posenet_window_request(message_maker, 400, 400);
+          const receive_poses = function (event) {
+              if (typeof event.data.poses !== 'undefined') {
+                  invoke_callback(callback, javascript_to_snap(event.data.poses));
+                  window.removeEventListener("message", receive_poses);
+              };
           };
+          window.addEventListener("message", receive_poses);
       };
-      window.addEventListener("message", receive_poses);
+      ask_for_poses();
   },
   inform: inform,
         
