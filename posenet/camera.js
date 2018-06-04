@@ -241,8 +241,12 @@ function detectPoseInRealTime(video, net) {
 
     requestAnimationFrame(poseDetectionFrame);
   }
-
-  poseDetectionFrame();
+  try {
+      // can lead to Error: The DOM is not ready yet.
+      poseDetectionFrame();
+  } catch (error) {
+      setTimeout(poseDetectionFrame, 1000); // try again in a second
+  }
 }
 
 async function bindPage() {
@@ -291,35 +295,36 @@ const respond_to_messages =
             };
         };                
         if (typeof event.data.compute_poses !== 'undefined') {
-            var image_url = event.data.compute_poses;
-            load_image(image_url,
-                       async function (image) {
-                           const canvas = create_canvas();
-                           const flipHorizontal = true; // better to come from guiState?
-                           copy_video_to_canvas(image, canvas);
-                           const image_as_Array3D = tf.fromPixels(canvas);
-                           let poses = [];
-                           switch (guiState.algorithm) {
-                               case 'single-pose':
-                                   const pose = await guiState.net.estimateSinglePose(video, 
-                                                                                      guiState.input.imageScaleFactor,
-                                                                                      flipHorizontal,
-                                                                                      guiState.input.outputStride);
-                                   poses.push(pose);
-                                   break;
-                               case 'multi-pose':
-                                   poses = await guiState.net.estimateMultiplePoses(video, 
-                                                                                    guiState.input.imageScaleFactor, 
-                                                                                    flipHorizontal, 
-                                                                                    guiState.input.outputStride,
-                                                                                    guiState.multiPoseDetection.maxPoseDetections,
-                                                                                    guiState.multiPoseDetection.minPartConfidence,
-                                                                                    guiState.multiPoseDetection.nmsRadius);
-                                   break;
-                            }
-                            event.source.postMessage({poses: poses}, "*");
-                            image_as_Array3D.dispose();
-                       });
+            const image_url = event.data.compute_poses;
+            const compute_poses =
+                async function (image) {
+                    const canvas = create_canvas();
+                    const flipHorizontal = true; // better to come from guiState?
+                    copy_video_to_canvas(image, canvas);
+                    const image_as_Array3D = tf.fromPixels(canvas);
+                    let poses = [];
+                    switch (guiState.algorithm) {
+                        case 'single-pose':
+                            const pose = await guiState.net.estimateSinglePose(video, 
+                                                                               guiState.input.imageScaleFactor,
+                                                                               flipHorizontal,
+                                                                               guiState.input.outputStride);
+                            poses.push(pose);
+                            break;
+                         case 'multi-pose':
+                            poses = await guiState.net.estimateMultiplePoses(video, 
+                                                                             guiState.input.imageScaleFactor, 
+                                                                             flipHorizontal, 
+                                                                             guiState.input.outputStride,
+                                                                             guiState.multiPoseDetection.maxPoseDetections,
+                                                                             guiState.multiPoseDetection.minPartConfidence,
+                                                                             guiState.multiPoseDetection.nmsRadius);
+                            break;
+                       }
+                       event.source.postMessage({poses: poses}, "*");
+                       image_as_Array3D.dispose();
+                 };
+             load_image(image_url,compute_poses);
         }
     };
 
@@ -333,8 +338,7 @@ window.addEventListener('DOMContentLoaded',
                                     // an alternative would be listen for this tab losing the focus as the user switches to back to Snap!
                                     window.addEventListener("message", respond_to_messages);
                                     window.opener.postMessage("Loaded", "*");
-                                },
-                                1000);                              
+                                });                              
                             }
                         });
                             
