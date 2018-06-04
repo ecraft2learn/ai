@@ -11,7 +11,7 @@ function googleTranslateElementInit() {
 if (window.location.search.indexOf('translate=') >= 0) {
     var div = document.createElement('div');
     var add_div_and_script = function () {
-        document.body.appendChild(div);
+        document.body.insertBefore(div, document.body.firstChild);
         var script = document.createElement('script');
         script.type = "text/javascript";
         script.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
