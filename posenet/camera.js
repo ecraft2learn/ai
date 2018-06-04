@@ -328,8 +328,13 @@ window.addEventListener('DOMContentLoaded',
                         async function (event) {
                             await bindPage();
                             if (window.opener) {
-                                window.addEventListener("message", respond_to_messages);
-                                window.opener.postMessage("Loaded", "*");  
+                                setTimeout(function () {
+                                    // bindPage creates the video canvas etc but it might not yet be ready
+                                    // an alternative would be listen for this tab losing the focus as the user switches to back to Snap!
+                                    window.addEventListener("message", respond_to_messages);
+                                    window.opener.postMessage("Loaded", "*");
+                                },
+                                1000);                              
                             }
                         });
                             
