@@ -268,8 +268,6 @@ async function bindPage() {
 navigator.getUserMedia = navigator.getUserMedia ||
   navigator.webkitGetUserMedia ||
   navigator.mozGetUserMedia;
-  
-window.addEventListener('DOMContentLoaded', bindPage);
 
 // listen for requests for poses
 const respond_to_messages =
@@ -327,7 +325,8 @@ const respond_to_messages =
 
 // tell Snap! this is loaded
 window.addEventListener('DOMContentLoaded', 
-                        function (event) {
+                        async function (event) {
+                            await bindPage();
                             if (window.opener) {
                                 window.opener.postMessage("Loaded", "*");
                                 window.addEventListener("message", respond_to_messages);
