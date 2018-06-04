@@ -165,6 +165,7 @@ function setupGui(cameras, net) {
 
 function setupFPS() {
   stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+  stats.dom.style.left = '200px'; // to avoid operlap with possible language translation element
   document.body.appendChild(stats.dom);
 }
 
@@ -267,6 +268,7 @@ async function bindPage() {
 navigator.getUserMedia = navigator.getUserMedia ||
   navigator.webkitGetUserMedia ||
   navigator.mozGetUserMedia;
+  
 window.addEventListener('DOMContentLoaded', bindPage);
 
 // listen for requests for poses
@@ -323,13 +325,12 @@ const respond_to_messages =
         }
     };
 
-window.addEventListener("message", respond_to_messages);
-
 // tell Snap! this is loaded
 window.addEventListener('DOMContentLoaded', 
                         function (event) {
                             if (window.opener) {
                                 window.opener.postMessage("Loaded", "*");
+                                window.addEventListener("message", respond_to_messages);
                             }
                         });
                             
