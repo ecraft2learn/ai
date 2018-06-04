@@ -14,6 +14,9 @@
  * limitations under the License.
  * =============================================================================
  */
+
+// based upon https://github.com/hpssjellis/beginner-tensorflowjs-examples-in-javascript/tree/master/tf-examples/posenet/camera
+
 // import dat from 'dat.gui';
 // import Stats from 'stats.js';
 // import * as posenet from '../src';
@@ -264,7 +267,7 @@ async function bindPage() {
 navigator.getUserMedia = navigator.getUserMedia ||
   navigator.webkitGetUserMedia ||
   navigator.mozGetUserMedia;
-bindPage();
+window.addEventListener('DOMContentLoaded', bindPage);
 
 // listen for requests for poses
 const respond_to_messages =
