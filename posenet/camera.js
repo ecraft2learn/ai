@@ -328,8 +328,8 @@ window.addEventListener('DOMContentLoaded',
                         async function (event) {
                             await bindPage();
                             if (window.opener) {
-                                window.opener.postMessage("Loaded", "*");
                                 window.addEventListener("message", respond_to_messages);
+                                window.opener.postMessage("Loaded", "*");  
                             }
                         });
                             
