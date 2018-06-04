@@ -241,12 +241,8 @@ function detectPoseInRealTime(video, net) {
 
     requestAnimationFrame(poseDetectionFrame);
   }
-  try {
-      // can lead to Error: The DOM is not ready yet.
-      poseDetectionFrame();
-  } catch (error) {
-      setTimeout(poseDetectionFrame, 1000); // try again in a second
-  }
+  // can lead to Error: The DOM is not ready yet.
+  setTimeout(poseDetectionFrame, 3000); // wait to be sure DOM is ready
 }
 
 async function bindPage() {
