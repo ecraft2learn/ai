@@ -322,7 +322,10 @@ If the game below doesn't work visit this <a href="#browser-compatibility">help<
         caption = "Click the green flag to train it to recognise a few voice commands. TRY IT">
 </figure>
 
-<h4>Detecting poses of people</h4>
+<h4 id="pose-detection">Detecting poses of people</h4>
+<figure>
+<img src="/ai/images/pose-detection.gif" width=300 height=300 class="center">
+<figcaption>A demonstration of pose detection</figcaption></figure>
 <p>
 Google Creative Lab recently released browser-based software for
 <a href="https://medium.com/tensorflow/real-time-human-pose-estimation-in-the-browser-with-tensorflow-js-7dd0bc881cd5" target="_blank">
@@ -334,7 +337,7 @@ One pose for each person in front of the camera.
 This block creates a new tab (be sure that <a href="troubleshooting.html#train-camera">popups are not blocked</a>).
 The system can be configured on the "poses" tab to be optimised for scenes with only one person.
 Tradeoffs between speed and accuracy can also be made.
-The "poses" tab is also a good place to test pose detection.
+The "poses" tab is also a good place to explore pose detection.
 </p>
 <p>
 There are two kinds of <span class="block-name">pose property</span> blocks that can fetch information for a <i>pose</i>.
@@ -442,6 +445,11 @@ Maybe as it gets faster make the <a href="chapter-1.html" target="_blank">speech
 The game shows what the camera sees add to the display the body parts that are to touch.
 If you are also doing a robotics project how can you combine it with this game?
 Think up even more ways to make the game better.
+</li>
+<li>
+There are many other things one can use <a href="#pose-detection">pose detection</a> for than just <i>Simon Says</i>.
+Think animation, <a href="https://en.wikipedia.org/wiki/Telepresence" target="_blank">telepresence</a>,
+interactive art, fitness, and more.
 </li>
 <li>
 And thousands more. Be creative.
