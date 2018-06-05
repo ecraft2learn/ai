@@ -1684,13 +1684,19 @@ window.ecraft2learn =
              !ecraft2learn.vision_training_window.closed &&
              ecraft2learn.vision_training_window_ready === true;
   },
+  posenet_window_ready: function () {
+      return typeof ecraft2learn.posenet_window !== 'undefined' && 
+             !ecraft2learn.posenet_window.closed &&
+             ecraft2learn.posenet_window_loaded === true;
+  },
   poses: function (callback) {
-      var ask_for_poses = function () {
+      var ask_for_poses = function (window_just_created) {
           if (!ecraft2learn.posenet_window || ecraft2learn.posenet_window.closed) {
               ecraft2learn.posenet_window = open_posenet_window();
               const listen_for_posenet_window_loaded = function (event) {
                   if (event.data == "Loaded") {
-                      ask_for_poses()
+                      ecraft2learn.posenet_window_loaded = true;
+                      ask_for_poses(true)
                       window.removeEventListener("message", listen_for_posenet_window_loaded);
                   }
               }
@@ -1703,7 +1709,7 @@ window.ecraft2learn =
           posenet_window_request(message_maker, 400, 400);
           const receive_poses = function (event) {
               if (typeof event.data.poses !== 'undefined') {
-                  invoke_callback(callback, javascript_to_snap(event.data.poses));
+                  invoke_callback(callback, javascript_to_snap(event.data.poses), !!window_just_created);
                   window.removeEventListener("message", receive_poses);
               };
           };
