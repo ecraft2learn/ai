@@ -16,7 +16,7 @@ This chapter relies upon there being a camera that the browser can access.
 Note that the blocks described here create a second browser tab for "training" the system.
 The first time the <span class="block-name">Train with image buckets ...</span> block
 is run you may see it blocked as a "popup".
-See the <a href="troubleshooting.html" target="_blank">troubleshooting guide</a>
+See the <a href="troubleshooting.html#train-camera" target="_blank">troubleshooting guide</a>
 for how to handle this or if other problems are encountered.</p>
 <h3>Introduction</h3>
 <p>
@@ -227,9 +227,9 @@ because it is designed to be smaller and faster than more accurate architectures
 </p>
 </span>
 
-<h4>A Rock Paper Scissors game using Machine Learning</h4>
+<h4>A <i>Rock Paper Scissors</i> game using Machine Learning</h4>
 <p>
-Using machine learning one can make a rock paper scissors game that can be played
+Using machine learning one can make a <i>rock paper scissors</i> game that can be played
 by putting your hand into one of three configurations.
 If the game below doesn't work visit this <a href="#browser-compatibility">help</a>.
 </p>
@@ -275,7 +275,7 @@ but it has already learned about textures, edges, colours, and more.
 <p>
 Another difference is that the image recognition services in the 
 <a href="chapter-3.html" target="_blank">previous chapter</a> can distinguish between at least one thousand different kinds of images.
-Rock paper scissors requires only four categories - an easier task.
+The <i>Rock paper scissors</i> game requires only four categories - an easier task.
 And AI vision services can do more than just
 <a href="chapter-3.html#advanced-image-recognition" target="_blank">choose a label</a> for an image.
 </p>
@@ -303,10 +303,17 @@ The plan is to replace it with a deep learning model.
 </p>
 <h4>An Example Program using the Microphone and Machine Learning</h4>
 <p>
-Using machine learning one can make a rock paper scissors game that can be played
+Using machine learning one can make a <i>Rock paper scissors</i> game that can be played
 by putting your hand into one of three configurations.
 If the game below doesn't work visit this <a href="#browser-compatibility">help</a>.
 </p>
+<figure class = "snap-iframe"
+        id = "train audio"
+        full_screen = "false"
+        stage_ratio = ".01"
+        container_style = "width: 825px; height: 625px" 
+        caption = "A block for training the system to recognise what the microphone is hearing. TRY IT">
+</figure>
 
 <figure class = "snap-iframe"
         id = "train and speak commands"
@@ -314,6 +321,53 @@ If the game below doesn't work visit this <a href="#browser-compatibility">help<
         container_style = "width: 800px; height: 600px" 
         caption = "Click the green flag to train it to recognise a few voice commands. TRY IT">
 </figure>
+
+<h4>Detecting poses of people</h4>
+<p>
+Google Creative Lab recently released browser-based software for
+<a href="https://medium.com/tensorflow/real-time-human-pose-estimation-in-the-browser-with-tensorflow-js-7dd0bc881cd5" target="_blank">
+real-time human pose estimation</a>.
+This software can determine the locations of 17 different body parts
+such as eyes, ears, shoulders, elbows, wrists, hips, knees, and ankles.
+The <span class="block-name">poses</span> block passes a list of poses to the blocks provided.
+One pose for each person in front of the camera.
+This block creates a new tab (be sure that <a href="troubleshooting.html#train-camera">popups are not blocked</a>).
+The system can be configured on the "poses" tab to be optimised for scenes with only one person.
+Tradeoffs between speed and accuracy can also be made.
+The "poses" tab is also a good place to test pose detection.
+</p>
+<p>
+There are two kinds of <span class="block-name">pose property</span> blocks that can fetch information for a <i>pose</i>.
+They both can specify that one wants the confidence the system has that it has correctly identified a particular body part
+(values between 0 and 100).
+Or that the location of the body part is desired which is reported as a list of the x and y coordinates
+(again values between 0 and 100).
+</p>
+<figure class = "snap-iframe"
+        id = "pose"
+        stage_ratio = ".1"
+        container_style = "width: 705px; height: 525px" 
+        caption = "A block for detecting the location of 17 different body parts. TRY IT">
+</figure>
+
+<h4 id="simon-says-game">Using pose detection to implement a <i>Simon Says</i> game</h4>
+<p>
+Using the <span class="block-name">poses</span> block a <i>Simon Says</i> game can be built.
+It chooses whether to preface its statement with "Simon says" and picks two body parts for the player to bring together.
+</p>
+<figure class = "snap-iframe"
+        id = "simon says"
+        full_screen = "true"
+        container_style = "width: 800px; height: 600px" 
+        caption = "Click the green flag to play Simon Says. TRY IT!">
+</figure>
+<p>
+<b>Exercise.</b>
+The <a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=simon%20says" target="_blank">
+full screen version of the game</a>
+can be enhanced in <a href="#simon-says-enhancements">many ways</a>.
+Be creative.
+</p>
 
 <h4 id="project-ideas">Possible project ideas using image recognition</h4>
 <p>
@@ -326,11 +380,11 @@ your robots may encounter in its particular environment.
 Here are some project ideas that exploit the ability of users to train the system:
 <ul>
 <li>
-A different rock, paper, scissors app would be one that is trained watching two human players.
+A different <i>Rock paper scissors</i> game would be one that is trained watching two human players.
 It can then keep score as people play the game.
 </li>
 <li>
-Yet another different rock, paper, scissors app could learn patterns in how a human
+Yet another different <i>Rock paper scissors</i> game could learn patterns in how a human
 player plays and predict what they will do next with better than 1/3 accuracy.
 </li>
 <li>
@@ -373,6 +427,19 @@ Who might want to use such a system?
 <li>
 Train the computer to know which part of a face is being pointed to.
 Have the program do different things depending upon whether you point to your eyes, ears, or mouth.
+</li>
+<li id="simon-says-enhancements">
+There are many improvements one can make to the <a href="#simon-says-game"><i>Simon Says</i></a> game.
+The nose is the only recognised body part that doesn't have a left and right version, try to add it to the game.
+Occasionally the game will say something like "touch your right wrist to your right wrist"; see if you can avoid that.
+Add score keeping.
+The game can be tuned to use better values for how close two body parts need to be to be touching.
+And what the minimal confidence that the body parts are what the system claims they are.
+The game gives players a limited amount of time to comply with instructions, try speeding up the game as it goes on.
+Maybe as it gets faster make the <a href="chapter-1.html" target="_blank">speech synthesis</a> go faster as well.
+The game shows what the camera sees add to the display the body parts that are to touch.
+If you are also doing a robotics project how can you combine it with this game?
+Think up even more ways to make the game better.
 </li>
 <li>
 And thousands more. Be creative.
