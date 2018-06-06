@@ -101,7 +101,9 @@ window.ecraft2learn =
               if (window.speechSynthesis) {
                   window.speechSynthesis.cancel(); // should stop all utterances
               }
-              ecraft2learn.stop_speech_recognition();
+              if (ecraft2learn.stop_speech_recognition) {
+                  ecraft2learn.stop_speech_recognition();
+              }
               ecraft2learn.outstanding_callbacks.forEach(function (callback) {
 //                   callback.stopped_by_user = true;
               });
