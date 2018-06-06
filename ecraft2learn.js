@@ -94,6 +94,23 @@ window.ecraft2learn =
           }
           return ide;
       };
+      const track_whether_snap_is_stopped = function () {
+          var ide = get_snap_ide();
+          var original_stopAllScripts = ide.stopAllScripts.bind(ide);
+          ide.stopAllScripts = function () {
+              if (window.speechSynthesis) {
+                  window.speechSynthesis.cancel(); // should stop all utterances
+              }
+              ecraft2learn.stop_speech_recognition();
+              ecraft2learn.outstanding_callbacks = []; // removes all outstanding callbacks
+              original_stopAllScripts();
+          };      
+      };
+      if (document.body) {
+          track_whether_snap_is_stopped();
+      } else {
+          window.addEventListener('load', track_whether_snap_is_stopped, false);
+      }
       var get_global_variable_value = function (name, default_value) {
           // returns the value of the Snap! global variable named 'name'
           // if none exists returns default_value
@@ -112,9 +129,25 @@ window.ecraft2learn =
           }
           return value.contents;
     };
+    const record_callbacks = function () {
+        if (typeof ecraft2learn.outstanding_callbacks === 'undefined') {
+            ecraft2learn.outstanding_callbacks = [];
+        }
+        Array.from(arguments).forEach(function (callback) {
+            if (callback && callback instanceof Context) {
+                ecraft2learn.outstanding_callbacks.push(callback);
+            }
+        });
+    };
     var invoke_callback = function (callback) { // any number of additional arguments
         // callback could either be a Snap! object or a JavaScript function
         if (ecraft2learn.inside_snap() && callback instanceof Context) { // assume Snap! callback
+            const callback_index = ecraft2learn.outstanding_callbacks.indexOf(callback);
+            if (callback_index >= 0) {
+                ecraft2learn.outstanding_callbacks.splice(callback_index, 1); // remove the callback
+            } else {
+                return; // callback has been cancelled
+            }
             // invoke the callback with the argments (other than the callback itself)
             // if BlockMorph then needs a receiver -- apparently callback is good enough
 //             return invoke(callback, new List(Array.prototype.slice.call(arguments, 1)), (callback instanceof BlockMorph && callback)); 
@@ -358,6 +391,7 @@ window.ecraft2learn =
             return segments;
         };
         var segments, speech_utterance_index;
+        record_callbacks(finished_callback);
         if (message.length > maximum_length) {
             segments = break_into_short_segments(message);
             segments.forEach(function (segment, index) {
@@ -509,6 +543,7 @@ window.ecraft2learn =
           }
           return training_window;
       };
+      record_callbacks(callback);
       if ((source === 'camera' &&
              (!ecraft2learn.vision_training_window || ecraft2learn.vision_training_window.closed)) ||
           (source === 'microphone' && 
@@ -741,6 +776,7 @@ window.ecraft2learn =
             }
             return;
         }
+        record_callbacks(callback);
         var ide = get_snap_ide(ecraft2learn.snap_context);
         if (!ide.informing) {
             var box = new DialogBoxMorph();
@@ -846,6 +882,7 @@ window.ecraft2learn =
           // ironically this is the rare function that may be useful when there is no Internet connection
           // since it can be used to communicate with localhost (e.g. to read/write Raspberry Pi or Arduino pins)
           var xhr = new XMLHttpRequest();
+          record_callbacks(callback, error_callback);
           xhr.open('GET', url);
           if (access_token) {
               xhr.setRequestHeader('Authorization', 'Bearer ' + access_token);
@@ -908,6 +945,7 @@ window.ecraft2learn =
                          100); // try again in a tenth of a second
               return;
           }
+          record_callbacks(final_spoken_callback, error_callback, interim_spoken_callback, all_results_callback, all_confidence_values_callback);
           if (debugging) {
               console.log("start_speech_recognition called.");
           }
@@ -1176,6 +1214,7 @@ window.ecraft2learn =
                 invoke_callback(error_callback);
             });
         };
+        record_callbacks(as_recognized_callback, final_spoken_callback, error_callback);
         if (ecraft2learn.microsoft_speech_sdk) {
             start_listening(ecraft2learn.microsoft_speech_sdk);
         } else {
@@ -1316,6 +1355,7 @@ window.ecraft2learn =
       if (cloud_provider === 'Watson') {
           cloud_provider = 'IBM Watson';
       }
+      record_callbacks(snap_callback);
       var callback = function (response) {
           var response_as_javascript_object;
           switch (cloud_provider) {
@@ -1519,6 +1559,7 @@ window.ecraft2learn =
              create_sound("http://mary.dfki.de:59125");
          };
      };
+     record_callbacks(finished_callback);
      create_sound("http://localhost:59125");     
   },
   get_mary_tts_voice_names: function () {
@@ -1602,6 +1643,7 @@ window.ecraft2learn =
               window.removeEventListener("message", receive_confidences);
           };
       };
+      record_callbacks(callback);
       training_window_request("You need to train the system before using 'Current image label confidences'.\n" +
                               "Run the 'Train using image buckets ...' command before this.", 
                               function (image_URL) {
@@ -1617,20 +1659,21 @@ window.ecraft2learn =
                 invoke_callback(callback, javascript_to_snap(event.data.confidences));
                 window.removeEventListener("message", receive_confidences);
              };
-        };
-        var costume = costume_of_sprite(costume_number, sprite);
-        costume_to_image(costume,
-                         function (image) {
-                            training_window_request("You need to train the system before using 'Image label confidences'.\n" +
-                                                    "Run the 'Add costume ...' block before this.", 
-                                                    function (image_URL) {
-                                                                  return {predict: image_URL};
-                                                    },
-                                                    TRAINING_IMAGE_WIDTH,
-                                                    TRAINING_IMAGE_HEIGHT,
-                                                    image);
-                             window.addEventListener("message", receive_confidences);
-                         });                            
+      };
+      var costume = costume_of_sprite(costume_number, sprite);
+      record_callbacks(callback);
+      costume_to_image(costume,
+                       function (image) {
+                           training_window_request("You need to train the system before using 'Image label confidences'.\n" +
+                                                   "Run the 'Add costume ...' block before this.", 
+                                                   function (image_URL) {
+                                                                 return {predict: image_URL};
+                                                   },
+                                                   TRAINING_IMAGE_WIDTH,
+                                                   TRAINING_IMAGE_HEIGHT,
+                                                   image);
+                            window.addEventListener("message", receive_confidences);
+                        });                            
   },
   audio_confidences: function (callback, duration_in_seconds, version) {
       // version is for when this is replaced by a deep learning model
@@ -1640,6 +1683,7 @@ window.ecraft2learn =
               window.removeEventListener("message", receive_confidences);
            };
       };
+      record_callbacks(callback);
       if (!ecraft2learn.audio_training_window) {
           inform("Training request warning",
                  "Run the 'Train with audio buckets ...' command before using 'Audio label confidences'");
@@ -1661,6 +1705,7 @@ window.ecraft2learn =
               };
       };
       var costume = costume_of_sprite(costume_number, sprite);
+      record_callbacks(callback);
       costume_to_image(costume,
                        function (image) {
                            training_window_request("You need to start training before using 'Add image to training'.\n" +
@@ -1715,6 +1760,7 @@ window.ecraft2learn =
           };
           window.addEventListener("message", receive_poses);
       };
+      record_callbacks(callback);
       ask_for_poses();
   },
   inform: inform,
