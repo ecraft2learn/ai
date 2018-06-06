@@ -105,7 +105,7 @@ window.ecraft2learn =
                   ecraft2learn.stop_speech_recognition();
               }
               ecraft2learn.outstanding_callbacks.forEach(function (callback) {
-//                   callback.stopped_by_user = true;
+                  callback.stopped_by_user = true;
               });
               ecraft2learn.outstanding_callbacks = []; // removes all outstanding callbacks
               original_stopAllScripts();
