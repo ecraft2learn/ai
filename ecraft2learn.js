@@ -102,6 +102,9 @@ window.ecraft2learn =
                   window.speechSynthesis.cancel(); // should stop all utterances
               }
               ecraft2learn.stop_speech_recognition();
+              ecraft2learn.outstanding_callbacks.forEach(function (callback) {
+//                   callback.stopped_by_user = true;
+              });
               ecraft2learn.outstanding_callbacks = []; // removes all outstanding callbacks
               original_stopAllScripts();
           };      
@@ -130,9 +133,6 @@ window.ecraft2learn =
           return value.contents;
     };
     const record_callbacks = function () {
-        if (typeof ecraft2learn.outstanding_callbacks === 'undefined') {
-            ecraft2learn.outstanding_callbacks = [];
-        }
         Array.from(arguments).forEach(function (callback) {
             if (callback && callback instanceof Context) {
                 ecraft2learn.outstanding_callbacks.push(callback);
@@ -142,11 +142,8 @@ window.ecraft2learn =
     var invoke_callback = function (callback) { // any number of additional arguments
         // callback could either be a Snap! object or a JavaScript function
         if (ecraft2learn.inside_snap() && callback instanceof Context) { // assume Snap! callback
-            const callback_index = ecraft2learn.outstanding_callbacks.indexOf(callback);
-            if (callback_index >= 0) {
-                ecraft2learn.outstanding_callbacks.splice(callback_index, 1); // remove the callback
-            } else {
-                return; // callback has been cancelled
+            if (callback.stopped_by_user) {
+                return;
             }
             // invoke the callback with the argments (other than the callback itself)
             // if BlockMorph then needs a receiver -- apparently callback is good enough
@@ -1754,7 +1751,10 @@ window.ecraft2learn =
           posenet_window_request(message_maker, 400, 400);
           const receive_poses = function (event) {
               if (typeof event.data.poses !== 'undefined') {
-                  invoke_callback(callback, javascript_to_snap(event.data.poses), !!window_just_created);
+                  event.data.poses.forEach(function (pose) {
+                      pose.window_just_created = !!window_just_created;
+                  });
+                  invoke_callback(callback, javascript_to_snap(event.data.poses));
                   window.removeEventListener("message", receive_poses);
               };
           };
@@ -1764,6 +1764,7 @@ window.ecraft2learn =
       ask_for_poses();
   },
   inform: inform,
+  outstanding_callbacks: [],
         
 }} ());
 window.speechSynthesis.getVoices(); // to ensure voices are loaded
