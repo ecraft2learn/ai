@@ -196,6 +196,7 @@ function detectPoseInRealTime(video, net) {
     let minPartConfidence;
     switch (guiState.algorithm) {
     case 'single-pose':
+//    console.log("in loop output is " + document.getElementById('output'));
       const pose = await guiState.net.estimateSinglePose(video, imageScaleFactor, flipHorizontal, outputStride);
       poses.push(pose);
 
@@ -241,8 +242,24 @@ function detectPoseInRealTime(video, net) {
 
     requestAnimationFrame(poseDetectionFrame);
   }
-  // can lead to Error: The DOM is not ready yet.
-  setTimeout(poseDetectionFrame, 3000); // wait to be sure DOM is ready
+  // poseDetectionFrame() can lead to Error: The DOM is not ready yet.
+  const wait_for_output_canvas = function () {
+      if (document.getElementById('output')) {
+          setTimeout(function () {
+              poseDetectionFrame();
+              if (window.opener) {
+                  // bindPage creates the video canvas etc but it might not yet be ready
+                  // an alternative would be listen for this tab losing the focus as the user switches to back to Snap!
+                  window.addEventListener("message", respond_to_messages);
+                  window.opener.postMessage("Loaded", "*");                          
+               }
+           }, 
+           1000); // delay reduces (eliminates?) the chance of Error: The DOM is not ready yet.
+      } else {
+          setTimeout(wait_for_output_canvas, 500); // wait for output canvas
+      }
+  };
+  wait_for_output_canvas();
 }
 
 async function bindPage() {
@@ -325,16 +342,6 @@ const respond_to_messages =
     };
 
 // tell Snap! this is loaded
-window.addEventListener('DOMContentLoaded', 
-                        async function (event) {
-                            await bindPage();
-                            if (window.opener) {
-                                setTimeout(function () {
-                                    // bindPage creates the video canvas etc but it might not yet be ready
-                                    // an alternative would be listen for this tab losing the focus as the user switches to back to Snap!
-                                    window.addEventListener("message", respond_to_messages);
-                                    window.opener.postMessage("Loaded", "*");
-                                });                              
-                            }
-                        });
+window.addEventListener('DOMContentLoaded', bindPage);
+
                             

@@ -1747,6 +1747,7 @@ window.ecraft2learn =
               window.addEventListener("message", listen_for_posenet_window_loaded);
               return;                      
           }
+          record_callbacks(callback);
           const message_maker = function (image_URL) {
                                     return {compute_poses: image_URL};
                                 };
@@ -1762,7 +1763,6 @@ window.ecraft2learn =
           };
           window.addEventListener("message", receive_poses);
       };
-      record_callbacks(callback);
       ask_for_poses();
   },
   inform: inform,
