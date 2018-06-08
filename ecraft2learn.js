@@ -22,6 +22,9 @@ window.ecraft2learn =
           }
           document.head.appendChild(script);
       };
+      const inside_snap = function () {
+          return typeof world === 'object' && world instanceof WorldMorph;
+      };
       var get_key = function (key_name) {
           // API keys are provided by Snap! reporters
           var key = run_snap_block(key_name);
