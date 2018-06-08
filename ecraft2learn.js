@@ -84,7 +84,7 @@ window.ecraft2learn =
       };
       var get_snap_ide = function (start) {
           // finds the Snap! IDE_Morph that is the element 'start' or one of its ancestors
-          if (!ecraft2learn.inside_snap()) {
+          if (!inside_snap()) {
               return;
           }
           var ide = start;
@@ -98,7 +98,7 @@ window.ecraft2learn =
           return ide;
       };
       const track_whether_snap_is_stopped = function () {
-          if (!ecraft2learn.inside_snap()) {
+          if (!inside_snap()) {
               return;
           }
           var ide = get_snap_ide();
@@ -149,7 +149,7 @@ window.ecraft2learn =
     };
     var invoke_callback = function (callback) { // any number of additional arguments
         // callback could either be a Snap! object or a JavaScript function
-        if (ecraft2learn.inside_snap() && callback instanceof Context) { // assume Snap! callback
+        if (inside_snap() && callback instanceof Context) { // assume Snap! callback
             if (callback.stopped_by_user) {
                 return;
             }
@@ -182,10 +182,10 @@ window.ecraft2learn =
         return invoke(block_morph, new List(Array.prototype.slice.call(arguments, 1)), block_morph);
     };
     var is_callback = function (x) {
-        return (ecraft2learn.inside_snap() && x instanceof Context) || typeof x === 'function';
+        return (inside_snap() && x instanceof Context) || typeof x === 'function';
     };
     var javascript_to_snap = function (x) {
-        if (!ecraft2learn.inside_snap()) {
+        if (!inside_snap()) {
             return x;
         }
         if (Array.isArray(x)) {
@@ -771,7 +771,7 @@ window.ecraft2learn =
     };
     var inform = function(title, message, callback) {
         // based upon Snap4Arduino index file  
-        if (!ecraft2learn.inside_snap()) { // not inside of snap
+        if (!inside_snap()) { // not inside of snap
             if (callback) {
                 if (window.confirm(message)) {
                     callback();
@@ -847,9 +847,7 @@ window.ecraft2learn =
     // the following are the ecraft2learn functions available via this library
 
     return {
-      inside_snap: function () {
-                       return typeof world === 'object' && world instanceof WorldMorph;
-      },
+      inside_snap: inside_snap, // determine if this is still needed
       url_for_collaboration: function () {
           return ecraft2learn.together_URL;
       },
@@ -982,7 +980,7 @@ window.ecraft2learn =
           var handle_result = function (event) {
               var spoken = event.results[event.resultIndex][0].transcript; // first result
               var final = event.results[event.resultIndex].isFinal;
-              if (ecraft2learn.inside_snap()) {
+              if (inside_snap()) {
                   // event breaks things for Snap! callbacks
                   invoke_callback(final ? final_spoken_callback : interim_spoken_callback, spoken);
               } else {
