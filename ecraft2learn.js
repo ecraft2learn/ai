@@ -84,6 +84,9 @@ window.ecraft2learn =
       };
       var get_snap_ide = function (start) {
           // finds the Snap! IDE_Morph that is the element 'start' or one of its ancestors
+          if (!ecraft2learn.inside_snap()) {
+              return;
+          }
           var ide = start;
           while (ide && !(ide instanceof IDE_Morph)) {
               ide = ide.parent;
@@ -95,6 +98,9 @@ window.ecraft2learn =
           return ide;
       };
       const track_whether_snap_is_stopped = function () {
+          if (!ecraft2learn.inside_snap()) {
+              return;
+          }
           var ide = get_snap_ide();
           var original_stopAllScripts = ide.stopAllScripts.bind(ide);
           ide.stopAllScripts = function () {
