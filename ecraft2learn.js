@@ -23,7 +23,7 @@ window.ecraft2learn =
           document.head.appendChild(script);
       };
       const inside_snap = function () {
-          return typeof world === 'object' && world instanceof WorldMorph;
+          return typeof world === 'object' && typeof WorldMorph === 'function' && world instanceof WorldMorph;
       };
       var get_key = function (key_name) {
           // API keys are provided by Snap! reporters
@@ -145,14 +145,14 @@ window.ecraft2learn =
     };
     const record_callbacks = function () {
         Array.from(arguments).forEach(function (callback) {
-            if (callback && callback instanceof Context) {
+            if (callback && inside_snap() && callback instanceof Context) {
                 ecraft2learn.outstanding_callbacks.push(callback);
             }
         });
     };
     var invoke_callback = function (callback) { // any number of additional arguments
         // callback could either be a Snap! object or a JavaScript function
-        if (inside_snap() && callback instanceof Context) { // assume Snap! callback
+        if (inside_snap() && inside_snap() && callback instanceof Context) { // assume Snap! callback
             if (callback.stopped_by_user) {
                 return;
             }
