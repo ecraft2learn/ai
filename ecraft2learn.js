@@ -1,10 +1,10 @@
  /**
- * Implements JavaScript functions that extend Snap! to access AI cloud services
+ * Implements JavaScript functions that extend Snap! to access AI cloud services and the machine learning library tensorflow.js
  * Authors: Ken Kahn
  * License: New BSD
  */
 
- "use strict";
+"use strict";
 window.ecraft2learn =
   (function () {
       var this_url = document.querySelector('script[src*="ecraft2learn.js"]').src; // the URL where this library lives
@@ -23,6 +23,8 @@ window.ecraft2learn =
           document.head.appendChild(script);
       };
       const inside_snap = function () {
+          // this library can be used directly in JavaScript or with other JavaScript-based languages
+          // a small amount is Snap! specific and this is used to make those parts conditional on being inside Snap!
           return typeof world === 'object' && typeof WorldMorph === 'function' && world instanceof WorldMorph;
       };
       var get_key = function (key_name) {
