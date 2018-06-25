@@ -822,7 +822,9 @@ window.ecraft2learn =
     };
     let dot_product = function (list1, list2) {
         if (list1.length !== list2.length) {
-            throw "Lists passed to dot_product not the same length";
+            list1 = list1.slice(Math.min(list1.length, list2.length)-1);
+            list2 = list2.slice(Math.min(list1.length, list2.length)-1);
+//             throw "Lists passed to dot_product not the same length";
         }
         let result = 0;
         list1.forEach(function (item, index) {
