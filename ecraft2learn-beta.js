@@ -813,6 +813,23 @@ window.ecraft2learn =
             }   
         }
     };
+    let magnitude = function (vector) {
+        let sum_of_squares = 0;
+        vector.forEach(function (element) {
+            sum_of_squares += element*element;
+        });
+        return Math.sqrt(sum_of_squares);
+    };
+    let dot_product = function (list1, list2) {
+        if (list1.length !== list2.length) {
+            throw "Lists passed to dot_product not the same length";
+        }
+        let result = 0;
+        list1.forEach(function (item, index) {
+            result += item*list2[index];
+        });
+        return result;
+    };
     // see http://mary.dfki.de:59125/documentation.html for documentation of Mary TTS
     var mary_tts_voices =
     [ // name, human readable name, and locale
@@ -1781,38 +1798,19 @@ window.ecraft2learn =
   // some word embedding functionality
   words_to_magnitudes: function (word) {
       ecraft2learn.words_to_magnitudes_table = {};
-      let magnitude = function (word) {
-          let sum_of_squares = 0;
-          words_to_features[word].forEach(function (feature) {
-              sum_of_squares += feature*feature;
-          });
-          words_to_magnitudes[word] = Math.sqrt(sum_of_squares);
+      let magnitude_of_word = function (word) {
+          return Math.sqrt(magnitude(words_to_features[word]));
       };
       // Object.keys(words_to_features).forEach(magnitude);
       if (!ecraft2learn.words_to_magnitudes_table[word]) {
-          ecraft2learn.words_to_magnitudes_table[word] = magnitude(word);
+          ecraft2learn.words_to_magnitudes_table[word] = magnitude_of_word(word);
       }
       return ecraft2learn.words_to_magnitudes_table[word];
   },
-  dot_product: function (list1, list2) {
-      if (list1.length === list2.length) {
-          let result = 0;
-          list1.forEach(function (item, index) {
-              result += item*list2[index];
-          });
-          return result;
-      }
-      return "Lists passed to _dot_product not the same length";
-  },
+  dot_product: dot_product,
   word_embeddings_ready: function () {
-      if (typeof tf === 'object' && typeof words_to_features === 'object') {
+      if (typeof words_to_features === 'object') {
           return true;
-      }
-      if (typeof tf !== 'object') {
-          if (!loading_tensor_flow) {
-              loading_tensor_flow = true;
-              load_script("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.11.7");
-          }
       }
       if (typeof words_to_features !== 'object') {
           if (!loading_word_embeddings) {
@@ -1833,7 +1831,10 @@ window.ecraft2learn =
       }
       return features;      
   },  
-  closest_word: function (target_features, exceptions, word_found_callback) {
+  closest_word: function (target_features, exceptions, word_found_callback, use_distance) {
+      // use_distance controls whether Euclidean distance or cosine similarity is used
+      // some researchers use cosine similarity and others Euclidean distance
+      // see https://en.wikipedia.org/wiki/Cosine_similarity
       if (typeof words_to_features !== 'object') {
           console.error("closest_word called before word embeddings loaded.")
           return;
@@ -1855,16 +1856,20 @@ window.ecraft2learn =
               result += difference*difference;
           });
           return result;
-      }
+      };
+      let cosine_similarity = function(features1, features2) {
+          return dot_product(features1, features2)/(magnitude(features1)*magnitude(features2));
+      };
       Object.keys(window.words_to_features).forEach(function (word, index) {
           if (exceptions.indexOf(word) < 0) {
               let candidate_features = words_to_features[word];
-              let distance = distance_squared(target_features, candidate_features);
+              let distance = use_distance ? distance_squared(target_features, candidate_features) :
+                             1-cosine_similarity(target_features, candidate_features); // 1 is the "best"
               if (distance < best_distance) {
                   best_word = word;
                   best_distance = distance;
                   if (word_found_callback) {
-                      let message = [word, distance, index];
+                      let message = [word, use_distance ? Math.sqrt(distance) : distance, index];
                       invoke_callback(word_found_callback, inside_snap() ? new List(message) : message);
                   }
               }            
