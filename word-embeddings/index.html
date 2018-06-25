@@ -7,18 +7,22 @@
 	<link href="/uui/help/oer-style.css" rel="stylesheet">
 	<link rel="icon" type="image/png" href="/ai/images/eCraft2Learn-Favicon.png" />
 <!-- 	<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.11.7"></script> -->
-	<script src="http://localhost:8080/ai/js/wordvecs10000.js"></script>
+	<script src="http://localhost:8080/ai/word-embeddings/words-10000.js"></script>
+<!-- 	<script src="http://localhost:8080/ai/word-embeddings/wordvecs10000.js"></script> -->
 	<script src="http://localhost:8080/ai/ecraft2learn-beta.js"></script>
 	</head>
 <body>
 use console
 <script>
 function test() {
-console.time("closest");
-console.log(ecraft2learn.closest_word(ecraft2learn.words_to_features('dog'), ['dog', 'dogs']));
-console.timeEnd("closest");
+console.time("Euclidean");
+console.log(ecraft2learn.closest_word(ecraft2learn.words_to_features('dog'), ['dog', 'dogs'], undefined, true));
+console.timeEnd("Euclidean");
+console.time("Cosine");
+console.log(ecraft2learn.closest_word(ecraft2learn.words_to_features('dog'), ['dog', 'dogs'], undefined, false));
+console.timeEnd("Cosine");
 }
-test();
+document.addEventListener('DOMContentLoaded', test);
 </script>
 </body>
 </html>
