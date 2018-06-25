@@ -1833,11 +1833,7 @@ window.ecraft2learn =
       }
       return features;      
   },  
-  closest_word: function (features, exceptions, word_found_callback) {
-      if (typeof tf !== 'object') {
-          console.error("closest_word called before Tensorflow.js loaded.");
-          return;
-      }
+  closest_word: function (target_features, exceptions, word_found_callback) {
       if (typeof words_to_features !== 'object') {
           console.error("closest_word called before word embeddings loaded.")
           return;
@@ -1847,22 +1843,23 @@ window.ecraft2learn =
       } else if (!(exceptions instanceof Array)) {
           exceptions = exceptions.asArray();
       }
-      if (!(features instanceof Array)) {
-          features = features.asArray();
+      if (!(target_features instanceof Array)) {
+          target_features = target_features.asArray();
       }
-      let target_tensor = tf.tensor1d(features);
       let best_word;
-      let best_distance = 10; // largest distance should be 2*sqrt(2)
-      if (typeof window.words_to_tensors !== 'object') {
-          window.words_to_tensors = {};
-          Object.keys(words_to_features).forEach(function (word) {
-              window.words_to_tensors[word] = tf.tensor1d(words_to_features[word]);
+      let best_distance = Number.MAX_VALUE;
+      let distance_squared = function(features1, features2) {
+          let result = 0;
+          features1.forEach(function (feature, index) {
+              let difference = feature-features2[index];
+              result += difference*difference;
           });
+          return result;
       }
-      Object.keys(window.words_to_tensors).forEach(function (word, index) {
+      Object.keys(window.words_to_features).forEach(function (word, index) {
           if (exceptions.indexOf(word) < 0) {
-              let candidate_tensor = words_to_tensors[word];
-              let distance = tf.squaredDifference(target_tensor, candidate_tensor).sum().dataSync()[0];
+              let candidate_features = words_to_features[word];
+              let distance = distance_squared(target_features, candidate_features);
               if (distance < best_distance) {
                   best_word = word;
                   best_distance = distance;
