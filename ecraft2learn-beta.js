@@ -1796,17 +1796,6 @@ window.ecraft2learn =
   },
   inform: inform,
   // some word embedding functionality
-  words_to_magnitudes: function (word) {
-      ecraft2learn.words_to_magnitudes_table = {};
-      let magnitude_of_word = function (word) {
-          return Math.sqrt(magnitude(words_to_features[word]));
-      };
-      // Object.keys(words_to_features).forEach(magnitude);
-      if (!ecraft2learn.words_to_magnitudes_table[word]) {
-          ecraft2learn.words_to_magnitudes_table[word] = magnitude_of_word(word);
-      }
-      return ecraft2learn.words_to_magnitudes_table[word];
-  },
   dot_product: dot_product,
   word_embeddings_ready: function () {
       if (typeof words_to_features === 'object') {
@@ -1857,14 +1846,16 @@ window.ecraft2learn =
           });
           return result;
       };
-      let cosine_similarity = function(features1, features2) {
-          return dot_product(features1, features2)/(magnitude(features1)*magnitude(features2));
+      let cosine_similarity = function(features1, features2, magnitude1, magnitude2) {
+          return dot_product(features1, features2)/
+                 (magnitude1 || (magnitude(features1))*(magnitude2 || magnitude(features2)));
       };
       Object.keys(window.words_to_features).forEach(function (word, index) {
           if (exceptions.indexOf(word) < 0) {
               let candidate_features = words_to_features[word];
               let distance = use_distance ? distance_squared(target_features, candidate_features) :
-                             1-cosine_similarity(target_features, candidate_features); // 1 is the "best"
+                             // subtract 1 since closest cosine similarity is 1
+                             1-cosine_similarity(target_features, candidate_features, undefined, 1); 
               if (distance < best_distance) {
                   best_word = word;
                   best_distance = distance;
