@@ -1839,7 +1839,8 @@ window.ecraft2learn =
           target_features = target_features.asArray();
       }
       let use_distance = distance_measure === 'Euclidean distance';
-      let best_word;
+      let words_considered = 0;
+      let best_word, distance;
       let best_distance = Number.MAX_VALUE;
       let distance_squared = function(features1, features2) {
           let result = 0;
@@ -1853,22 +1854,30 @@ window.ecraft2learn =
           return dot_product(features1, features2)/
                  (magnitude1 || (magnitude(features1))*(magnitude2 || magnitude(features2)));
       };
-      Object.keys(window.words_to_features).forEach(function (word, index) {
+      let report_progress = function () {
+          if (word_found_callback) {
+              if (use_distance) {
+                  distance = Math.sqrt(distance); // distance was squared for efficiency
+              }
+              distance = Math.trunc(100000*distance)/100000;
+              invoke_callback(word_found_callback, best_word, distance, words_considered);
+          }
+      };
+      Object.keys(window.words_to_features).forEach(function (word) {
           if (exceptions.indexOf(word) < 0) {
               let candidate_features = words_to_features[word];
-              let distance = use_distance ? distance_squared(target_features, candidate_features) :
-                             // subtract 1 since closest cosine similarity is 1
-                             1-cosine_similarity(target_features, candidate_features, undefined, 1); 
+              words_considered++;
+              distance = use_distance ? distance_squared(target_features, candidate_features) :
+                         // subtract 1 since closest cosine similarity is 1
+                         1-cosine_similarity(target_features, candidate_features, undefined, 1); 
               if (distance < best_distance) {
                   best_word = word;
                   best_distance = distance;
-                  if (word_found_callback) {
-                      let message = [word, use_distance ? Math.sqrt(distance) : distance, index];
-                      invoke_callback(word_found_callback, inside_snap() ? new List(message) : message);
-                  }
+                  report_progress();
               }            
           }
       });
+      report_progress();
       return best_word;
   },
   outstanding_callbacks: [],
