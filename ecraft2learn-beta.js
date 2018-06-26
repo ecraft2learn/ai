@@ -158,6 +158,9 @@ window.ecraft2learn =
             if (callback.stopped_by_user) {
                 return;
             }
+            if (!(callback.expression instanceof CommandBlockMorph)) {
+                return;
+            }
             // invoke the callback with the argments (other than the callback itself)
             // if BlockMorph then needs a receiver -- apparently callback is good enough
 //             return invoke(callback, new List(Array.prototype.slice.call(arguments, 1)), (callback instanceof BlockMorph && callback)); 
