@@ -1822,8 +1822,8 @@ window.ecraft2learn =
       }
       return features;      
   },  
-  closest_word: function (target_features, exceptions, word_found_callback, use_distance) {
-      // use_distance controls whether Euclidean distance or cosine similarity is used
+  closest_word: function (target_features, exceptions, word_found_callback, distance_measure) {
+      // distance_measure is either Euclidean distance or Cosine similarity 
       // some researchers use cosine similarity and others Euclidean distance
       // see https://en.wikipedia.org/wiki/Cosine_similarity
       if (typeof words_to_features !== 'object') {
@@ -1838,6 +1838,7 @@ window.ecraft2learn =
       if (!(target_features instanceof Array)) {
           target_features = target_features.asArray();
       }
+      let use_distance = distance_measure === 'Euclidean distance';
       let best_word;
       let best_distance = Number.MAX_VALUE;
       let distance_squared = function(features1, features2) {
