@@ -1857,13 +1857,15 @@ window.ecraft2learn =
           return dot_product(features1, features2)/
                  (magnitude1 || (magnitude(features1))*(magnitude2 || magnitude(features2)));
       };
-      let report_progress = function () {
+      let report_progress = function (best_word, best_distance, words_considered) {
           if (word_found_callback) {
               if (use_distance) {
-                  distance = Math.sqrt(distance); // distance was squared for efficiency
+                  best_distance = Math.sqrt(best_distance); // distance was squared for efficiency
               }
-              distance = Math.trunc(100000*distance)/100000;
-              invoke_callback(word_found_callback, best_word, distance, words_considered);
+              // report only 5 decimal digits
+              best_distance = Math.trunc(100000*best_distance)/100000;
+              invoke_callback(word_found_callback, best_word, best_distance, words_considered);
+              console.log(best_word, best_distance, words_considered);
           }
       };
       Object.keys(window.words_to_features).forEach(function (word) {
@@ -1876,11 +1878,11 @@ window.ecraft2learn =
               if (distance < best_distance) {
                   best_word = word;
                   best_distance = distance;
-                  report_progress();
-              }            
+                  report_progress(best_word, best_distance, words_considered);
+              }
           }
       });
-      report_progress();
+      report_progress(best_word, best_distance, words_considered);
       return best_word;
   },
   outstanding_callbacks: [],
