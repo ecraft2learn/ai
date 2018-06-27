@@ -1,5 +1,5 @@
 document.write(
-'<h3 id="library">Where to get these blocks to use in projects</h3> ' +
+'<h4 id="library">Where to get these blocks to use in projects</h4> ' +
 '<p>All of the blocks described in these chapters are available to use in ' +
 '<a href="https://snap.berkeley.edu/" target="_blank">Snap!</a> in ' +
 'this <a href="https://snap.berkeley.edu/snapsource/snap.html#present:Username=toontalk&ProjectName=eCraft2Learn&editMode" target="_blank">Snap project</a>. ' +
