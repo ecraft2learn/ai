@@ -113,7 +113,11 @@ window.addEventListener(
                  loading.innerHTML = "<b>Loading. Please wait.</b>";
                  figure.insertBefore(loading, figcaption);
                  img.remove();
-                 iframe.src = "/ai/snap/snap.html";
+                 if (window.location.hostname === 'localhost') {
+                     iframe.src = "/ai/snap/snap-beta.html";
+                 } else {
+                     iframe.src = "/ai/snap/snap.html";
+                 }
                  iframe.setAttribute('scrolling', 'no');
                  // remove loading message 3 seconds after Snap! loads
                  // since project loading takes time too
