@@ -9,6 +9,8 @@ document.write(
 '&nbsp;' +
 '<a href="https://project.ecraft2learn.eu"><img src="/ai/images/logo_ecraft_face.png" alt="" width="35" height="30"></a>' +
 '&nbsp;' +
-'eCraft2Learn H2020-731345 - University of Oxford.');
-
+'eCraft2Learn H2020-731345 -&nbsp;' +
+'<img src="/ai/images/oxford-crestsq.png" alt="" width="45" height="45">' +
+'&nbsp;' +
+'University of Oxford');
 
