@@ -226,6 +226,7 @@ window.ecraft2learn =
     var get_voice = function (voice_number) {
         return get_voice_from(voice_number, window.speechSynthesis.getVoices());
     };
+    var warned_about_missing_voice_numbers = [];
     var get_voice_from = function (voice_number, voices) {
         if (voices.length === 0) {
             inform("No voices",
@@ -257,7 +258,8 @@ window.ecraft2learn =
             }
             if (voice_number >= 0 && voice_number < voices.length) {
                 return voices[Math.floor(voice_number)];
-            } else {
+            } else if (warned_about_missing_voice_numbers.indexOf(voice_number) < 0) {
+                warned_about_missing_voice_numbers.push(voice_number);
                 inform("No such voice",
                        "Only voice numbers between 1 and " + voices.length + " are available.\n" + 
                        "There is no voice number " + (voice_number+1) + ".");
