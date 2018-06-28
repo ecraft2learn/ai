@@ -958,7 +958,7 @@ window.ecraft2learn =
           // if the browser has no support for speech recognition then the Microsoft Speech API is used (API key required)
           if (typeof SpeechRecognition === 'undefined' && typeof webkitSpeechRecognition === 'undefined') {
               // no support from this browser so try using the Microsoft Speech API
-              inform("This browser does not support speech recognition.\n" +
+              inform("This browser does not support speech recognition",
                      "You could use Chrome or you can use Microsoft's speech recognition service.\n" +
                      "Go ahead and use the Microsoft service? (It requires an API key.)",
                       function () {
