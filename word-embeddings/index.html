@@ -9,18 +9,25 @@
 <!-- 	<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.11.7"></script> -->
 <!-- 	<script src="http://localhost:8080/ai/word-embeddings/words-10000.js"></script> -->
 	<script src="http://localhost:8080/ai/word-embeddings/wordvecs10000.js"></script>
+	<script src="http://localhost:8080/ai/word-embeddings/animal-words.js"</script>
 	<script src="http://localhost:8080/ai/ecraft2learn-beta.js"></script>
 	</head>
 <body>
 use console
 <script>
 function test() {
-console.time("Euclidean");
-console.log(ecraft2learn.closest_word(ecraft2learn.words_to_features('dog'), ['dog', 'dogs'], undefined, true));
-console.timeEnd("Euclidean");
-console.time("Cosine");
-console.log(ecraft2learn.closest_word(ecraft2learn.words_to_features('dog'), ['dog', 'dogs'], undefined, false));
-console.timeEnd("Cosine");
+// console.time("Euclidean");
+// console.log(ecraft2learn.closest_word(ecraft2learn.words_to_features('dog'), ['dog', 'dogs'], undefined, true));
+// console.timeEnd("Euclidean");
+// console.time("Cosine");
+// console.log(ecraft2learn.closest_word(ecraft2learn.words_to_features('dog'), ['dog', 'dogs'], undefined, false));
+// console.timeEnd("Cosine");
+window.animal_words_to_features = {};
+Object.keys(words_to_features).forEach(function (word) {
+	if (animal_words.indexOf(word) >= 0) {
+		animal_words_to_features[word] = words_to_features[word];
+	}
+});
 }
 document.addEventListener('DOMContentLoaded', test);
 </script>
