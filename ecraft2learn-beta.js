@@ -175,7 +175,11 @@ window.ecraft2learn =
 //                                                      false,
 //                                                      false);
             var process = new Process(null, callback.receiver, null, true);
-            process.initializeFor(callback, new List(Array.prototype.slice.call(arguments, 1)));
+            // callback.emptySlots+1 is in case callback is passed more arguments than callback has empty slots
+            let parameters = callback.emptySlots > 0 ?
+                             Array.prototype.slice.call(arguments, 1, callback.emptySlots+1) :
+                             Array.prototype.slice.call(arguments, 1);
+            process.initializeFor(callback, new List(parameters));
             stage.threads.processes.push(process);
         } else if (typeof callback === 'function') { // assume JavaScript callback
             callback.apply(this, Array.prototype.slice.call(arguments, 1));
