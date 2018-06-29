@@ -74,5 +74,9 @@ figcaption {
   padding-left:  .2em;
   padding-right: .2em;
 }
+.this-is-new {
+  color: red;
+  font-weight: bold;
+}
 
 
