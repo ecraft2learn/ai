@@ -41,11 +41,6 @@ Translation between languages.
 </ol>
 </p>
 
-<h4>Benefits and risks</h4>
-<p>
-to do
-</p>
-
 <h4>Doing arithmetic with words and sentences</h4>
 <p>
 While computers can deal with text as strings of characters a technique called
@@ -116,6 +111,25 @@ Try solving "slow is to slower as fast is to what?".
 You might need to add 'fast' as an exception.
 </p>
 
+<h4>Benefits and risks using word embeddings</h4>
+<p>
+Word embeddings can be used as a component in AI programs that do
+sentiment analysis, entity detection, recommendations, summarising text, translation, and question answering.
+This is typically done by replacing the words in a text with their embeddings and then doing machine learning on the 
+approximate meaning of the words.
+This makes the systems work better with synonyms and paraphrasings.
+</p>
+<p>
+Word embeddings are learned by examining text with billions of words.
+These texts may capture societal biases.
+For example, the following example seems to have captured the bias that doctors are male and nurses female.
+<figure class = "snap-iframe"
+        id = "word analogy bias"
+        container_style = "width: 850px; height: 300px" 
+        caption = "Bias in word analogy solutions. See if you can find more.">
+</figure>
+</p>
+
 <h4>How does this work?</h4>
 <p>
 While we don't really know what the numbers mean they must be encoding lots of things about words such as
@@ -123,7 +137,8 @@ gender, grammatical category, family relationships, and hundreds more things.
 But the numbers aren't perfect.
 See if you can create some examples where the results are not good.
 One knowwn problem with how the numbers are generated is that it combines features of differnt senses of the same word.
-There is only one entry, for example, for 'jaguar' which combines the ways that word is used in sentences about cats and those about cars.
+There is only one entry, for example, for 'bank' which combines the ways that word is
+used in sentences about financial institutions and those about the sides of rivers.
 </p>
 
 <h4>A 'Guess My Word' game using word embeddings</h4>
@@ -153,12 +168,25 @@ technique since it ignores the order of the words just as if they were put in a 
 
 <h4>Future directions for this chapter</h4>
 <p>
-to do
+There is plenty more that AI programs can do with language including
+determining the grammatical structure of sentences (this is called "parsing"),
+figuring out the sentiment in some text,
+and question answering.
+More to come here.
+</p>
+<p>
+Currently the word embeddings blocks only work for English words.
+We plan to extend it for other languages.
 </p>
 
 <h3 id="additional-resources">Additional resources</h3>
 <p>
-to do
+Wikipedia's <a href="https://en.wikipedia.org/wiki/Word_embedding" target="_blank">word embedding</a> article is short and
+written for an advanced audience.
+The Wikipedia article on <a href="https://en.wikipedia.org/wiki/Word2vec" target="_blank">the word2vec research</a> that the
+Snap! word embeddings blocks builds upon is good but very technical.
+The <a href="https://gist.github.com/aparrish/2f562e3737544cf29aaf1af30362f469" target="_blank">Understanding word vectors</a> web page
+has a very good introduction to the subject and the contains examples that are helpful but require familiarity with Python.
 </p>
 <p>
 Return to 
