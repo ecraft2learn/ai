@@ -1300,10 +1300,10 @@ window.ecraft2learn =
               formData.append("images_file", image, "blob.png");
               // beginning early December 2017 Watson began signalling No 'Access-Control-Allow-Origin' header
               // Note that "Lite" plans are deleted after 30 days of inactivity...
-              var proxy_url = "https://toontalk.appspot.com/p/" + 
-              encodeURIComponent("https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key);
-              XHR.open('POST', proxy_url);
-//               XHR.open('POST', "https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key);
+//               var proxy_url = "https://toontalk.appspot.com/p/" + 
+//               encodeURIComponent("https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key);
+//               XHR.open('POST', proxy_url);
+              XHR.open('POST', "https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key);
               XHR.send(formData);
               break;
           case "Google":
