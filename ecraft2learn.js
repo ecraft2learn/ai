@@ -7,8 +7,8 @@
 "use strict";
 window.ecraft2learn =
   (function () {
-      var this_url = document.querySelector('script[src*="ecraft2learn.js"]').src; // the URL where this library lives
-      var load_script = function (url, when_loaded) {
+      let this_url = document.querySelector('script[src*="ecraft2learn.js"]').src; // the URL where this library lives
+      let load_script = function (url, when_loaded) {
           var script = document.createElement("script");
           script.type = "text/javascript";
           if (url.indexOf("//") < 0) {
@@ -27,7 +27,7 @@ window.ecraft2learn =
           // a small amount is Snap! specific and this is used to make those parts conditional on being inside Snap!
           return typeof world === 'object' && typeof WorldMorph === 'function' && world instanceof WorldMorph;
       };
-      var get_key = function (key_name) {
+      let get_key = function (key_name) {
           // API keys are provided by Snap! reporters
           var key = run_snap_block(key_name);
           var get_hash_parameter = function (name, parameters, default_value) {
@@ -70,7 +70,7 @@ window.ecraft2learn =
                        document.location.assign("https://github.com/ecraft2learn/ai/wiki");                                 
                  });
       };
-      var run_snap_block = function (labelSpec) { // add parameters later
+      let run_snap_block = function (labelSpec) { // add parameters later
           // runs a Snap! block that matches labelSpec
           // labelSpec if it takes areguments will look something like 'label %txt of size %n'
           var ide = get_snap_ide(ecraft2learn.snap_context);
@@ -87,7 +87,7 @@ window.ecraft2learn =
           var blockTemplate = allBlocks[index].templateInstance();
           return invoke_block_morph(blockTemplate);
       };
-      var get_snap_ide = function (start) {
+      let get_snap_ide = function (start) {
           // finds the Snap! IDE_Morph that is the element 'start' or one of its ancestors
           if (!inside_snap()) {
               return;
@@ -127,7 +127,7 @@ window.ecraft2learn =
       } else {
           window.addEventListener('load', track_whether_snap_is_stopped, false);
       }
-      var get_global_variable_value = function (name, default_value) {
+      let get_global_variable_value = function (name, default_value) {
           // returns the value of the Snap! global variable named 'name'
           // if none exists returns default_value
           var ide = get_snap_ide(ecraft2learn.snap_context);
@@ -152,10 +152,13 @@ window.ecraft2learn =
             }
         });
     };
-    var invoke_callback = function (callback) { // any number of additional arguments
+    let invoke_callback = function (callback) { // any number of additional arguments
         // callback could either be a Snap! object or a JavaScript function
         if (inside_snap() && inside_snap() && callback instanceof Context) { // assume Snap! callback
             if (callback.stopped_by_user) {
+                return;
+            }
+            if (!(callback.expression instanceof CommandBlockMorph)) {
                 return;
             }
             // invoke the callback with the argments (other than the callback itself)
@@ -172,24 +175,28 @@ window.ecraft2learn =
 //                                                      false,
 //                                                      false);
             var process = new Process(null, callback.receiver, null, true);
-            process.initializeFor(callback, new List(Array.prototype.slice.call(arguments, 1)));
+            // callback.emptySlots+1 is in case callback is passed more arguments than callback has empty slots
+            let parameters = callback.emptySlots > 0 ?
+                             Array.prototype.slice.call(arguments, 1, callback.emptySlots+1) :
+                             Array.prototype.slice.call(arguments, 1);
+            process.initializeFor(callback, new List(parameters));
             stage.threads.processes.push(process);
         } else if (typeof callback === 'function') { // assume JavaScript callback
             callback.apply(this, Array.prototype.slice.call(arguments, 1));
         }
         // otherwise no callback provided so ignore it
     };
-    var invoke_block_morph = function (block_morph) {
+    let invoke_block_morph = function (block_morph) {
         if (!(block_morph instanceof BlockMorph)) {
             console.error("Invoke_block_morph called on non-BlockMorph");
             return;
         }
         return invoke(block_morph, new List(Array.prototype.slice.call(arguments, 1)), block_morph);
     };
-    var is_callback = function (x) {
+    let is_callback = function (x) {
         return (inside_snap() && x instanceof Context) || typeof x === 'function';
     };
-    var javascript_to_snap = function (x) {
+    let javascript_to_snap = function (x) {
         if (!inside_snap()) {
             return x;
         }
@@ -206,7 +213,7 @@ window.ecraft2learn =
         }
         return x;
     };
-    var add_photo_to_canvas = function (canvas, video, width, height) {
+    let add_photo_to_canvas = function (canvas, video, width, height) {
         // Capture a photo by fetching the current contents of the video
         // and drawing it into a canvas, then converting that to a PNG
         // format data URL. By drawing it on an offscreen canvas and then
@@ -217,12 +224,13 @@ window.ecraft2learn =
         var context = canvas.getContext('2d');
         context.drawImage(video, 0, 0, width, height);
     };
-    var get_mary_tts_voice = function (voice_number) { // offical name
+    let get_mary_tts_voice = function (voice_number) { // offical name
         return get_voice_from(voice_number, mary_tts_voices.map(function (voice) { return voice[0]; }));
     };
     var get_voice = function (voice_number) {
         return get_voice_from(voice_number, window.speechSynthesis.getVoices());
     };
+    var warned_about_missing_voice_numbers = [];
     var get_voice_from = function (voice_number, voices) {
         if (voices.length === 0) {
             inform("No voices",
@@ -254,7 +262,8 @@ window.ecraft2learn =
             }
             if (voice_number >= 0 && voice_number < voices.length) {
                 return voices[Math.floor(voice_number)];
-            } else {
+            } else if (warned_about_missing_voice_numbers.indexOf(voice_number) < 0) {
+                warned_about_missing_voice_numbers.push(voice_number);
                 inform("No such voice",
                        "Only voice numbers between 1 and " + voices.length + " are available.\n" + 
                        "There is no voice number " + (voice_number+1) + ".");
@@ -813,6 +822,25 @@ window.ecraft2learn =
             }   
         }
     };
+    let magnitude = function (vector) {
+        let sum_of_squares = 0;
+        vector.forEach(function (element) {
+            sum_of_squares += element*element;
+        });
+        return Math.sqrt(sum_of_squares);
+    };
+    let dot_product = function (list1, list2) {
+        if (list1.length !== list2.length) {
+            list1 = list1.slice(Math.min(list1.length, list2.length)-1);
+            list2 = list2.slice(Math.min(list1.length, list2.length)-1);
+//             throw "Lists passed to dot_product not the same length";
+        }
+        let result = 0;
+        list1.forEach(function (item, index) {
+            result += item*list2[index];
+        });
+        return result;
+    };
     // see http://mary.dfki.de:59125/documentation.html for documentation of Mary TTS
     var mary_tts_voices =
     [ // name, human readable name, and locale
@@ -841,6 +869,9 @@ window.ecraft2learn =
     var image_recognitions = {}; // record of most recent results from calls to take_picture_and_analyse
 
     var debugging = false; // if true console will fill with information
+
+    let loading_tensor_flow = false;
+    let loading_word_embeddings = false;
 
     window.addEventListener("message",
                             function (event) {
@@ -931,7 +962,7 @@ window.ecraft2learn =
           // if the browser has no support for speech recognition then the Microsoft Speech API is used (API key required)
           if (typeof SpeechRecognition === 'undefined' && typeof webkitSpeechRecognition === 'undefined') {
               // no support from this browser so try using the Microsoft Speech API
-              inform("This browser does not support speech recognition.\n" +
+              inform("This browser does not support speech recognition",
                      "You could use Chrome or you can use Microsoft's speech recognition service.\n" +
                      "Go ahead and use the Microsoft service? (It requires an API key.)",
                       function () {
@@ -1273,10 +1304,10 @@ window.ecraft2learn =
               formData.append("images_file", image, "blob.png");
               // beginning early December 2017 Watson began signalling No 'Access-Control-Allow-Origin' header
               // Note that "Lite" plans are deleted after 30 days of inactivity...
-              var proxy_url = "https://toontalk.appspot.com/p/" + 
-              encodeURIComponent("https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key);
-              XHR.open('POST', proxy_url);
-//               XHR.open('POST', "https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key);
+//               var proxy_url = "https://toontalk.appspot.com/p/" + 
+//               encodeURIComponent("https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key);
+//               XHR.open('POST', proxy_url);
+              XHR.open('POST', "https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key);
               XHR.send(formData);
               break;
           case "Google":
@@ -1775,6 +1806,91 @@ window.ecraft2learn =
       ask_for_poses();
   },
   inform: inform,
+  // some word embedding functionality
+  dot_product: dot_product,
+  word_embeddings_ready: function () {
+      if (typeof words_to_features === 'object') {
+          return true;
+      }
+      if (typeof words_to_features !== 'object') {
+          if (!loading_word_embeddings) {
+              loading_word_embeddings = true;
+              load_script("http://localhost:8080/ai/word-embeddings/wordvecs10000.js");
+          }
+      }
+      return false;
+  },
+  words_to_features: function (word) {
+      if (typeof words_to_features !== 'object') {
+          console.error("words_to_features called before word embeddings loaded.")
+          return;
+      }
+      let features = words_to_features[word.trim().toLowerCase()] || [];
+      if (inside_snap()) {
+          return new List(features);
+      }
+      return features;      
+  },  
+  closest_word: function (target_features, exceptions, word_found_callback, distance_measure) {
+      // distance_measure is either Euclidean distance or Cosine similarity 
+      // some researchers use cosine similarity and others Euclidean distance
+      // see https://en.wikipedia.org/wiki/Cosine_similarity
+      if (typeof words_to_features !== 'object') {
+          console.error("closest_word called before word embeddings loaded.")
+          return;
+      }
+      if (typeof exceptions !== 'object') {
+          exceptions = [];
+      } else if (!(exceptions instanceof Array)) {
+          exceptions = exceptions.asArray();
+      }
+      if (!(target_features instanceof Array)) {
+          target_features = target_features.asArray();
+      }
+      let use_distance = distance_measure === 'Euclidean distance';
+      let words_considered = 0;
+      let best_word, distance;
+      let best_distance = Number.MAX_VALUE;
+      let distance_squared = function(features1, features2) {
+          let result = 0;
+          features1.forEach(function (feature, index) {
+              let difference = feature-features2[index];
+              result += difference*difference;
+          });
+          return result;
+      };
+      let cosine_similarity = function(features1, features2, magnitude1, magnitude2) {
+          return dot_product(features1, features2)/
+                 (magnitude1 || (magnitude(features1))*(magnitude2 || magnitude(features2)));
+      };
+      let report_progress = function (best_word, best_distance, words_considered) {
+          if (word_found_callback) {
+              if (use_distance) {
+                  best_distance = Math.sqrt(best_distance); // distance was squared for efficiency
+              }
+              // report only 5 decimal digits
+              best_distance = Math.trunc(100000*best_distance)/100000;
+              invoke_callback(word_found_callback, best_word, best_distance, words_considered);
+//               console.log(best_word, best_distance, words_considered);
+          }
+      };
+      Object.keys(window.words_to_features).forEach(function (word) {
+          if (exceptions.indexOf(word) < 0) {
+              let candidate_features = words_to_features[word];
+              words_considered++;
+              distance = use_distance ? distance_squared(target_features, candidate_features) :
+                         // subtract 1 since closest cosine similarity is 1
+                         1-cosine_similarity(target_features, candidate_features, undefined, 1); 
+              if (distance < best_distance) {
+                  best_word = word;
+                  best_distance = distance;
+                  report_progress(best_word, best_distance, words_considered);
+              }
+          }
+      });
+      report_progress(best_word, best_distance, words_considered);
+      return best_word;
+  },
   outstanding_callbacks: [],
         
 }} ());

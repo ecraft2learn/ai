@@ -1871,7 +1871,7 @@ window.ecraft2learn =
               // report only 5 decimal digits
               best_distance = Math.trunc(100000*best_distance)/100000;
               invoke_callback(word_found_callback, best_word, best_distance, words_considered);
-              console.log(best_word, best_distance, words_considered);
+//               console.log(best_word, best_distance, words_considered);
           }
       };
       Object.keys(window.words_to_features).forEach(function (word) {
