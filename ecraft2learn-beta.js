@@ -1815,7 +1815,7 @@ window.ecraft2learn =
       if (typeof words_to_features !== 'object') {
           if (!loading_word_embeddings) {
               loading_word_embeddings = true;
-              load_script("http://localhost:8080/ai/word-embeddings/wordvecs10000.js");
+              load_script("word-embeddings/wordvecs10000.js");
           }
       }
       return false;
