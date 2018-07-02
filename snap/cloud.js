@@ -54,7 +54,8 @@ Cloud.prototype.knownDomains = {
     'Snap!Cloud (cs10)' : 'https://snap-cloud.cs10.org',
     'Snap!Cloud (staging)': 'https://snap-staging.cs10.org',
     'localhost': 'http://localhost:8080',
-    'localhost (secure)': 'https://localhost:4431'
+    'localhost (secure)': 'https://localhost:4431',
+    'ecraft2learn': 'https://ecraft2learn.github.io'
 };
 
 Cloud.prototype.defaultDomain = Cloud.prototype.knownDomains['Snap!Cloud'];
