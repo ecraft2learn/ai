@@ -121,7 +121,9 @@ This makes the systems work better with synonyms and paraphrasings.
 </p>
 <p>
 Word embeddings are learned by examining text with billions of words.
-These texts may capture societal biases.
+These texts may have captured
+<a href="https://developers.googleblog.com/2018/04/text-embedding-models-contain-bias.html" target="_blank">
+societal biases</a>.
 For example, the following example seems to have captured the bias that doctors are male and nurses female.
 <figure class = "snap-iframe"
         id = "word analogy bias"
@@ -163,6 +165,12 @@ One idea is to average all the words in the sentence.
 This is called the <a href="https://en.wikipedia.org/wiki/Bag-of-words_model" target="_blank">bag of words</a>
 technique since it ignores the order of the words just as if they were put in a bag.
 </li>
+<li>
+Find a chain of similar words by finding the nearest word to the starting word.
+Then repeatedly find the nearest word to that while making sure to never repeat the same word.
+Use this to repeatedly change random words one at a time in a famous poem or text
+(e.g. "roses are red and violets are blue").
+</li>
 </ol>
 </p>
 
@@ -189,6 +197,8 @@ The Wikipedia article on <a href="https://en.wikipedia.org/wiki/Word2vec" target
 Snap! word embeddings blocks builds upon is good but very technical.
 The <a href="https://gist.github.com/aparrish/2f562e3737544cf29aaf1af30362f469" target="_blank">Understanding word vectors</a> web page
 has a very good introduction to the subject and the contains examples that are helpful but require familiarity with Python.
+This <a href="https://developers.googleblog.com/2018/04/text-embedding-models-contain-bias.html" target="_blank">
+Google blog about biases in word embeddings</a> is very good and clear.
 </p>
 <p>
 Return to 
