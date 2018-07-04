@@ -1981,7 +1981,7 @@ ecraft2learn.chrome_languages =
 ["Svenska (Sverige)", "sv-SE", "Swedish (Sweden)"],
 ["தமிழ் (இந்தியா)", "ta-IN", "Tamil (India)"],
 ["தமிழ் (சிங்கப்பூர்)", "ta-SG", "Tamil (Singapore)"],
-["தமிழ் (இலங்கை)", "ta-LK", "Tamil (Sri Lanka)"],k
+["தமிழ் (இலங்கை)", "ta-LK", "Tamil (Sri Lanka)"],
 ["தமிழ் (மலேசியா)", "ta-MY", "Tamil (Malaysia)"],
 ["తెలుగు (భారతదేశం)", "te-IN", "Telugu (India)"],
 ["Tiếng Việt (Việt Nam)", "vi-VN", "Vietnamese (Vietnam)"],
