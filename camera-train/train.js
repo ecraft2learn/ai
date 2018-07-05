@@ -196,7 +196,7 @@ class Main {
                                 "Then return to the Snap! tab.</p>" +
                                 "<p>Don't worry, we aren't sending any of your images to a remote server. " +
                                 "All the machine learning is being done " +
-                                "locally on device, and you can check out the source code on Github.</p>";
+                                "locally on device, and you can check out our source code on Github.</p>";
     }
     this.timer = requestAnimationFrame(this.animate.bind(this));
   }
