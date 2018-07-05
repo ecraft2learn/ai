@@ -191,9 +191,12 @@ class Main {
     this.infoTexts = create_training_buttons(this.training_class_names, train_on, train_off);  
     var please_wait = document.getElementById("please-wait");
     if (!please_wait.getAttribute("updated")) {
-        please_wait.innerText = "Ready to start training. Just hold down one of the buttons when the desired image is front of the camera. " +
+        please_wait.innerHTML = "<p>Ready to start training. Just hold down one of the buttons when the desired image is front of the camera. " +
                                 "Do this until the system is sufficiently confident of the correct label when a new image is presented. " +
-                                "Then return to the Snap! tab.";
+                                "Then return to the Snap! tab.</p>" +
+                                "<p>Don't worry, we aren't sending any of your images to a remote server. " +
+                                "All the machine learning is being done " +
+                                "locally on device, and you can check out the source code on Github.</p>";
     }
     this.timer = requestAnimationFrame(this.animate.bind(this));
   }
