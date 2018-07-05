@@ -67,6 +67,11 @@ figcaption {
 .advanced-topic {
   cursor: pointer;
 }
+.advanced-topic-body {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid black;
+}
 .english {
   font-style: italic;
 }
