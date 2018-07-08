@@ -274,7 +274,7 @@ window.ecraft2learn =
         if (window.speechSynthesis.getVoices().length === 0) {
             // either there are no voices or they haven't loaded yet
             if (ecraft2learn.waited_for_voices) {
-                no_voices_callback();
+                invoke_callback(no_voices_callback);
             } else {
                 // voices not loaded so wait for them and try again
                 var onvoiceschanged_ran = false; // so both onvoiceschanged_ran and timeout don't both run
@@ -289,7 +289,7 @@ window.ecraft2learn =
                                if (!onvoiceschanged_ran) {
                                    // only if onvoiceschanged didn't run
                                    ecraft2learn.waited_for_voices = true;
-                                   no_voices_callback();
+                                   invoke_callback(no_voices_callback);
                                    window.speechSynthesis.onvoiceschanged = undefined;
                                }
                            },
@@ -297,7 +297,7 @@ window.ecraft2learn =
                 return;         
             }
         } else {
-            voices_callback();
+            invoke_callback(voices_callback);
         }
     };
     var get_matching_voice = function (builtin_voices, name_parts) { 
@@ -359,6 +359,7 @@ window.ecraft2learn =
         }
         inform("Unable to find a matching voice",
                "This browser does not have a voice that matches " + name_parts.join("-"));
+        return 0; // interpreted as the default voice for the default_language
     };
     var voice_number_of_language_code = function (code, builtin_voices) {
         if (builtin_voices) {
@@ -1534,6 +1535,7 @@ window.ecraft2learn =
                            speak(message, pitch, rate, voice_number, volume, language, finished_callback)
                        });
   },
+  check_for_voices: check_for_voices, // export this to Snap! to test if voices available
   get_voice_names: function () {
       return new List(window.speechSynthesis.getVoices().map(function (voice) {
           return voice.name;
@@ -1894,7 +1896,6 @@ window.ecraft2learn =
   outstanding_callbacks: [],
         
 }} ());
-window.speechSynthesis.getVoices(); // to ensure voices are loaded
 ecraft2learn.chrome_languages =
 [
 // based upon https://cloud.google.com/speech/docs/languages
