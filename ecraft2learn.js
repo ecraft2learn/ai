@@ -784,7 +784,16 @@ window.ecraft2learn =
         });
         return mary_tts_voice_number;
     };
-    var inform = function(title, message, callback) {
+    var history_of_informs = [];
+    var inform = function(title, message, callback, ok_to_repeat) {
+        if (!ok_to_repeat) {
+            let title_and_message = title + "::::" + message;
+            if (history_of_informs.indexOf(title_and_message) >= 0) {
+                console.log('Repeat of message "' + message + '" with title "' + title + '".');
+                return;
+            }
+            history_of_informs.push(title_and_message);
+        }
         // based upon Snap4Arduino index file  
         if (!inside_snap()) { // not inside of snap
             if (callback) {
@@ -1896,6 +1905,7 @@ window.ecraft2learn =
   outstanding_callbacks: [],
         
 }} ());
+window.speechSynthesis.getVoices(); // to avoid a possible long wait while voices are loaded
 ecraft2learn.chrome_languages =
 [
 // based upon https://cloud.google.com/speech/docs/languages
