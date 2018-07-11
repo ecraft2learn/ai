@@ -755,6 +755,22 @@ window.ecraft2learn =
         });
         return matching_language_entry; // could be undefined
     };
+    const extract_language_code = function (language) {
+        if (language) {
+            if (language.length === 2) {
+                return language;
+            }
+            language = language_entry(language);
+            if (language) {
+                return language[1].substring(0, 2);
+            }
+        }
+        if (ecraft2learn.default_language) {
+            return ecraft2learn.default_language.substring(0, 2);
+        } else {
+            return 'en';
+        }
+    };
     var builtin_voice_number_with_language_code = function (language_code) {
         var voices = window.speechSynthesis.getVoices();
         var builtin_voice_number;
@@ -851,6 +867,7 @@ window.ecraft2learn =
         });
         return result;
     };
+    window.words_to_features = {};
     // see http://mary.dfki.de:59125/documentation.html for documentation of Mary TTS
     var mary_tts_voices =
     [ // name, human readable name, and locale
@@ -920,7 +937,7 @@ window.ecraft2learn =
                   return; // ignore if called before speech_recognition started
               }
               inform("No such function",
-                     "Ecraft2learn library does not have a function named ''" + function_name + "'.");
+                     "eCraft2learn library does not have a function named ''" + function_name + "'.");
               return;
           }
           return ecraft2learn[function_name].apply(null, parameters.contents);
@@ -1569,7 +1586,7 @@ window.ecraft2learn =
   speak_using_mary_tts: function (message, volume, voice_number, finished_callback) {
      var voice = get_mary_tts_voice(voice_number);
      var voice_parameter = voice ? "&VOICE=" + voice : "";
-     // due possible use of default_language the following can't use the voice_number
+     // due to possible use of default_language the following can't use the voice_number
      var locale = mary_tts_voices[mary_tts_voices.findIndex(function (entry) {return entry[0] === voice;})][2];
      var locale_parameter = "&LOCALE=" + locale;
      let audio_url_without_domain = "/process?INPUT_TEXT=" + 
@@ -1819,34 +1836,46 @@ window.ecraft2learn =
   inform: inform,
   // some word embedding functionality
   dot_product: dot_product,
-  word_embeddings_ready: function () {
-      if (typeof words_to_features === 'object') {
+  word_embeddings_ready: function (language, word_embeddings_url) {
+      language = extract_language_code(language);
+      if (typeof words_to_features[language] === 'object') {
           return true;
       }
-      if (typeof words_to_features !== 'object') {
+      if (typeof words_to_features[language] !== 'object') {
           if (!loading_word_embeddings) {
               loading_word_embeddings = true;
-              load_script("word-embeddings/wordvecs10000.js");
+              if (!word_embeddings_url) {
+                  word_embeddings_url = "word-embeddings/" + language + "/wiki-words.js";
+              }
+              load_script(word_embeddings_url,
+                          function () {
+                              loading_word_embeddings = false;
+                          });
           }
       }
       return false;
   },
-  words_to_features: function (word) {
-      if (typeof words_to_features !== 'object') {
+  word_to_features: function (word, language) {
+      language = extract_language_code(language);
+      if (typeof words_to_features[language] !== 'object') {
           console.error("words_to_features called before word embeddings loaded.")
           return;
       }
-      let features = words_to_features[word.trim().toLowerCase()] || [];
+      let features = words_to_features[language][word.trim().toLowerCase()] || [];
       if (inside_snap()) {
           return new List(features);
       }
       return features;      
-  },  
-  closest_word: function (target_features, exceptions, word_found_callback, distance_measure) {
+  },
+  all_words_with_features: function (language) {
+      return new List(Object.keys(words_to_features[extract_language_code(language)]));
+  },
+  closest_word: function (target_features, exceptions, word_found_callback, distance_measure, language) {
       // distance_measure is either Euclidean distance or Cosine similarity 
       // some researchers use cosine similarity and others Euclidean distance
       // see https://en.wikipedia.org/wiki/Cosine_similarity
-      if (typeof words_to_features !== 'object') {
+      language = extract_language_code(language);
+      if (typeof words_to_features[language] !== 'object') {
           console.error("closest_word called before word embeddings loaded.")
           return;
       }
@@ -1872,7 +1901,7 @@ window.ecraft2learn =
       };
       let cosine_similarity = function(features1, features2, magnitude1, magnitude2) {
           return dot_product(features1, features2)/
-                 (magnitude1 || (magnitude(features1))*(magnitude2 || magnitude(features2)));
+                 ((magnitude1 || magnitude(features1))*(magnitude2 || magnitude(features2)));
       };
       let report_progress = function (best_word, best_distance, words_considered) {
           if (word_found_callback) {
@@ -1885,9 +1914,9 @@ window.ecraft2learn =
 //               console.log(best_word, best_distance, words_considered);
           }
       };
-      Object.keys(window.words_to_features).forEach(function (word) {
+      Object.keys(words_to_features[language]).forEach(function (word) {
           if (exceptions.indexOf(word) < 0) {
-              let candidate_features = words_to_features[word];
+              let candidate_features = words_to_features[language][word];
               words_considered++;
               distance = use_distance ? distance_squared(target_features, candidate_features) :
                          // subtract 1 since closest cosine similarity is 1
