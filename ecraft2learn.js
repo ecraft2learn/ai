@@ -2093,4 +2093,5 @@ ecraft2learn.language_defaults =
   "العربية":  "ar-SA",
   arabic:      "ar-SA",
   chinese:     "zh-CN"
-  }
+  };
+ecraft2learn.words_to_features = ecraft2learn.word_to_features;
