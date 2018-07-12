@@ -801,6 +801,14 @@ window.ecraft2learn =
         return mary_tts_voice_number;
     };
     var history_of_informs = [];
+    const show_message = function (message, seconds) {
+        if (inside_snap()) {
+            var ide = get_snap_ide(ecraft2learn.snap_context);
+            ide.showMessage(message, seconds);
+        } else {
+            alert(message);
+        }
+    };
     var inform = function(title, message, callback, ok_to_repeat) {
         if (!ok_to_repeat) {
             let title_and_message = title + "::::" + message;
@@ -1317,6 +1325,7 @@ window.ecraft2learn =
           }
           XHR = new XMLHttpRequest();
           XHR.addEventListener('load', function(event) {
+              show_message(""); // remove loading message
               callback(event);
           });
           if (!error_callback) {
@@ -1324,7 +1333,11 @@ window.ecraft2learn =
                   console.error(event);
               }
           }
-          XHR.addEventListener('error', error_callback);
+          XHR.addEventListener('error', function (event) {
+              show_message(""); // remove loading message
+              error_callback(event);
+          });
+          show_message("Contacting " + cloud_provider);
           switch (cloud_provider) {
           case "IBM Watson":
               formData = new FormData();
@@ -1834,6 +1847,7 @@ window.ecraft2learn =
       ask_for_poses();
   },
   inform: inform,
+  show_message: show_message,
   // some word embedding functionality
   dot_product: dot_product,
   word_embeddings_ready: function (language, word_embeddings_url) {
@@ -1847,9 +1861,11 @@ window.ecraft2learn =
               if (!word_embeddings_url) {
                   word_embeddings_url = "word-embeddings/" + language + "/wiki-words.js";
               }
+              show_message("Loading script...");
               load_script(word_embeddings_url,
                           function () {
                               loading_word_embeddings = false;
+                              show_message("");
                           });
           }
       }
