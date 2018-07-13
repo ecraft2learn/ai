@@ -1946,7 +1946,7 @@ window.ecraft2learn =
                       if (!called_by_timeout) {
                           pending_callbacks.push(
                               function () {
-                                  console.log(best_word, best_distance, words_considered);
+//                                console.log(best_word, best_distance, words_considered);
                                   current_process = invoke_callback(word_found_callback, 
                                                                     best_word, best_distance, words_considered);
                                });
