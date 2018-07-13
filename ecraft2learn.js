@@ -764,6 +764,10 @@ window.ecraft2learn =
             if (language.length === 2) {
                 return language;
             }
+            if (language.toLowerCase() === "chinese") {
+                // many forms of Chinese and none use the zh code
+                return "zh";
+            }
             language = language_entry(language);
             if (language) {
                 return language[1].substring(0, 2);
@@ -914,7 +918,6 @@ window.ecraft2learn =
     var debugging = false; // if true console will fill with information
 
     let loading_tensor_flow = false;
-    let loading_word_embeddings = false;
 
     window.addEventListener("message",
                             function (event) {
