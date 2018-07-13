@@ -1951,7 +1951,7 @@ window.ecraft2learn =
                                                                     best_word, best_distance, words_considered);
                                });
                       }
-                      if (!current_process || current_process.readyToTerminate) {
+                      if (!current_process || !current_process.context || current_process.readyToTerminate) {
                           if (pending_callbacks.length > 0) {
                               // dequeue a callback and run it
                               pending_callbacks.splice(0, 1)[0]();
