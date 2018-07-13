@@ -184,6 +184,7 @@ window.ecraft2learn =
                              Array.prototype.slice.call(arguments, 1);
             process.initializeFor(callback, new List(parameters));
             stage.threads.processes.push(process);
+            return process;
         } else if (typeof callback === 'function') { // assume JavaScript callback
             callback.apply(this, Array.prototype.slice.call(arguments, 1));
         }
@@ -1931,6 +1932,8 @@ window.ecraft2learn =
           return dot_product(features1, features2)/
                  ((magnitude1 || magnitude(features1))*(magnitude2 || magnitude(features2)));
       };
+      let current_process;
+      let pending_callbacks = [];
       let report_progress = function (best_word, best_distance, words_considered) {
           if (word_found_callback) {
               if (use_distance) {
@@ -1938,9 +1941,31 @@ window.ecraft2learn =
               }
               // report only 5 decimal digits
               best_distance = Math.trunc(100000*best_distance)/100000;
-              invoke_callback(word_found_callback, best_word, best_distance, words_considered);
-//               console.log(best_word, best_distance, words_considered);
-          }
+              let invoke_callback_or_wait_for_previous_callback = 
+                  function (called_by_timeout, best_word, best_distance, words_considered) {
+                      if (!called_by_timeout) {
+                          pending_callbacks.push(
+                              function () {
+                                  console.log(best_word, best_distance, words_considered);
+                                  current_process = invoke_callback(word_found_callback, 
+                                                                    best_word, best_distance, words_considered);
+                               });
+                      }
+                      if (!current_process || current_process.readyToTerminate) {
+                          if (pending_callbacks.length > 0) {
+                              // dequeue a callback and run it
+                              pending_callbacks.splice(0, 1)[0]();
+                          }
+                          return;
+                      }
+                      // check again in a while if previous process finished
+                      setTimeout(function () {
+                                     invoke_callback_or_wait_for_previous_callback(true);
+                                 },
+                                 500);                         
+              };
+              invoke_callback_or_wait_for_previous_callback(false, best_word, best_distance, words_considered);                    
+          };
       };
       Object.keys(words_to_features[language]).forEach(function (word) {
           if (exceptions.indexOf(word) < 0) {
