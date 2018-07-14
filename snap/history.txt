@@ -4179,7 +4179,6 @@ Translation Updates:
 ------
 * Threads, Objects: made "When I am stopped" scripts atomic, so you can use loops
 
-
 === v4.2 major release ===
 
 v4.2 New Features:
@@ -4211,3 +4210,88 @@ Translation Updates:
 * German, thanks, Jadga!
 * Portuguese, thanks, Manuel!
 * Catalan, thanks, Joan!
+
+
+180703
+------
+* speed up HTTP based hardware APIs (by not waiting for the result if the URL reporter is used inside a REPORT block within a custom COMMAND block definition)
+
+180705
+------
+* Threads: added JIT compiler support for "change variable" primitive
+* Threads: optimized RUN with reportURL (fire-and-forget)
+
+180706
+------
+* Objects: fixed #2142 - search and keyboard entry support for custom block translations
+
+180709
+------
+* Portuguese translation update, thanks, Manuel!
+* New Basque translation, thanks, Asier Iturralde Sarasola!
+* French translation update, thanks, Nathalie and Joan!
+* Spanish, Catalan and French translations of the tools library, thanks, Joan!
+* New JSON library, thanks, Bernat!
+* URL cache issue fix, thanks, Joan!
+
+=== v4.2.1 minor release ===
+
+v4.2.1 New Features:
+* new libraries for parallelization and JSON support
+* new "loudness" reporter in audio comp library, thanks, Bernat!
+
+Notable Changes:
+* significant speed-up for HTTP based robot APIs such as the Hummingbird kit
+
+Notable Fixes:
+* "When I am stopped" hat block now also works for stacks of HTTP based robot commands
+* resolved name conflicts in pixels and audio comp libraries
+
+Translation Updates:
+* New Basque translation, thanks, Asier Iturralde Sarasola!
+* Portuguese, thanks, Manuel!
+* French, thanks, Nathalie and Joan!
+* Spanish, Catalan and French translations of the tools library, thanks, Nathalie and Joan!
+
+180710
+------
+* Threads, GUI: reverted Cache-Control header for HTTP requests b/c of CORS issues
+
+=== v4.2.1.1 maintenance release ===
+
+180710
+------
+* Threads, GUI: fixed #712 - false "reporter didn't report" error messages
+
+180711
+------
+* GUI: added support for "&lang=nn" url parameter, made it non-permanent
+* Threads: fixed outer script variable scope for TELL/ASK and OF
+* Tools: fixed JOIN WORDS and LIST -> SENTENCE
+
+180712
+------
+* Threads: tweaked outer script variable scope for TELL/ASK and OF
+* Blocks: fixed #2145 - newlines in block labels conflict with input declarations
+* GUI: increased project dialog width to accommodate translations for the "recover" button
+
+180713
+------
+* Blocks: enabled smart ternary Boolean slots by default
+
+=== v4.2.1.2 maintenance release ===
+
+New Feature:
+* new "&lang=nn" url parameter for specifying a session translation in a web-link
+
+Changed:
+* smart ternary Boolean slots - only 2 states except inside rings and in the palette
+* made project dialog wider to accommodate translations for the "recover" button
+
+Fixes:
+* corrected scope for outer script variables in inter-sprite messages (TELL, ASK, OF)
+* eliminated false "reporter didn't report" error messages
+
+
+=== in development ===
+

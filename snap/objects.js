@@ -83,7 +83,7 @@ BlockEditorMorph, BlockDialogMorph, PrototypeHatBlockMorph, localize,
 TableMorph, TableFrameMorph, normalizeCanvas, BooleanSlotMorph, HandleMorph,
 AlignmentMorph, Process, XML_Element, VectorPaintEditorMorph*/
 
-modules.objects = '2018-June-21';
+modules.objects = '2018-July-06';
 
 var SpriteMorph;
 var StageMorph;
@@ -2691,7 +2691,7 @@ SpriteMorph.prototype.blocksMatching = function (
     [this.customBlocks, stage.globalBlocks].forEach(function (blocksList) {
         blocksList.forEach(function (definition) {
             if (contains(types, definition.type)) {
-                var spec = localize(definition.blockSpec()).toLowerCase(),
+                var spec = definition.localizedSpec().toLowerCase(),
                     rel = relevance(labelOf(spec), search);
                 if (rel !== -1) {
                     blocks.push([definition.templateInstance(), rel + '2']);
@@ -6702,9 +6702,7 @@ StageMorph.prototype.step = function () {
     // handle keyboard events
     if (world.keyboardReceiver === null) {
         world.keyboardReceiver = this;
-        // Ken Kahn commented out the following since it causes the loading pages with Snap! iframes
-        // to jump around
-//         world.worldCanvas.focus(); // addresses a Safari 11 bug
+        world.worldCanvas.focus(); // addresses a Safari 11 bug
     }
     if (world.currentKey === null) {
         this.keyPressed = null;

@@ -62,7 +62,7 @@ StageMorph, SpriteMorph, StagePrompterMorph, Note, modules, isString, copy,
 isNil, WatcherMorph, List, ListWatcherMorph, alert, console, TableMorph,
 TableFrameMorph, ColorSlotMorph, isSnapObject*/
 
-modules.threads = '2018-June-21';
+modules.threads = '2018-July-12';
 
 var ThreadManager;
 var Process;
@@ -789,7 +789,7 @@ Process.prototype.doReport = function (block) {
     if (this.isClicked && (block.topBlock() === this.topBlock)) {
         this.isShowingResult = true;
     }
-    if (this.context.expression.partOfCustomCommand) {
+    if (block.partOfCustomCommand) {
         this.doStopCustomBlock();
         this.popContext();
     } else {
@@ -812,8 +812,9 @@ Process.prototype.doReport = function (block) {
     }
     // in any case evaluate (and ignore)
     // the input, because it could be
-    // and HTTP Request for a hardware extension
+    // an HTTP Request for a hardware extension
     this.pushContext(block.inputs()[0], outer);
+    this.context.isCustomCommand = block.partOfCustomCommand;
 };
 
 // Process: Non-Block evaluation
@@ -1104,6 +1105,7 @@ Process.prototype.evaluate = function (
         outer,
         context.receiver
     );
+    runnable.isCustomCommand = isCommand; // for short-circuiting HTTP requests
     this.context.parentContext = runnable;
 
     if (context.expression instanceof ReporterBlockMorph) {
@@ -1181,12 +1183,12 @@ Process.prototype.fork = function (context, args) {
         stage = this.homeContext.receiver.parentThatIsA(StageMorph);
     proc.instrument = this.instrument;
     proc.receiver = this.receiver;
-    proc.initializeFor(context, args, this.enableSingleStepping);
+    proc.initializeFor(context, args);
     // proc.pushContext('doYield');
     stage.threads.processes.push(proc);
 };
 
-Process.prototype.initializeFor = function (context, args, ignoreExit) {
+Process.prototype.initializeFor = function (context, args) {
     // used by Process.fork() and global invoke()
     if (context.isContinuation) {
         throw new Error(
@@ -1204,8 +1206,7 @@ Process.prototype.initializeFor = function (context, args, ignoreExit) {
             ),
         parms = args.asArray(),
         i,
-        value,
-        exit;
+        value;
 
     // remember the receiver
     this.context = context.receiver;
@@ -1254,20 +1255,6 @@ Process.prototype.initializeFor = function (context, args, ignoreExit) {
 
     if (runnable.expression instanceof CommandBlockMorph) {
         runnable.expression = runnable.expression.blockSequence();
-
-        // insert a tagged exit context
-        // which "report" can catch later
-        // needed for invoke() situations
-        if (!ignoreExit) { // when single stepping LAUNCH
-	        exit = new Context(
-    	        runnable.parentContext,
-        	    'expectReport',
-            	outer,
-            	outer.receiver
-        	);
-        	exit.tag = 'exit';
-        	runnable.parentContext = exit;
-    	}
     }
 
     this.homeContext = new Context(); // context.outerContext;
@@ -2300,7 +2287,16 @@ Process.prototype.reportURL = function (url) {
         }
         this.httpRequest = new XMLHttpRequest();
         this.httpRequest.open("GET", url, true);
+        // cache-control, commented out for now
+        // added for Snap4Arduino but has issues with local robot servers
+        // this.httpRequest.setRequestHeader('Cache-Control', 'max-age=0');
         this.httpRequest.send(null);
+        if (this.context.isCustomCommand) {
+            // special case when ignoring the result, e.g. when
+            // communicating with a robot to control its motors
+            this.httpRequest = null;
+            return null;
+        }
     } else if (this.httpRequest.readyState === 4) {
         response = this.httpRequest.responseText;
         this.httpRequest = null;
@@ -3405,7 +3401,14 @@ Process.prototype.reportContextFor = function (context, otherObj) {
         result.outerContext = copy(result.outerContext);
         result.outerContext.variables = copy(result.outerContext.variables);
         result.outerContext.receiver = otherObj;
-        result.outerContext.variables.parentFrame = otherObj.variables;
+        if (result.outerContext.variables.parentFrame) {
+            result.outerContext.variables.parentFrame =
+                copy(result.outerContext.variables.parentFrame);
+            result.outerContext.variables.parentFrame.parentFrame =
+                otherObj.variables;
+        } else {
+            result.outerContext.variables.parentFrame = otherObj.variables;
+        }
     }
     return result;
 };
@@ -3830,6 +3833,11 @@ Process.prototype.setVarNamed = function (name, value) {
     frame.vars[name].value = value;
 };
 
+Process.prototype.incrementVarNamed = function (name, delta) {
+    // private - special form for compiled expressions
+    this.setVarNamed(name, this.getVarNamed(name) + (+delta));
+};
+
 // Process: Atomic HOFs using experimental JIT-compilation
 
 Process.prototype.reportAtomicMap = function (reporter, list) {
@@ -4004,6 +4012,7 @@ Process.prototype.reportAtomicSort = function (list, reporter) {
     activeNote      audio oscillator for interpolated ops, don't persist
     activeSends		forked processes waiting to be completed
     isCustomBlock   marker for return ops
+    isCustomCommand marker for interpolated blocking reporters (reportURL)
     emptySlots      caches the number of empty slots for reification
     tag             string or number to optionally identify the Context,
                     as a "return" target (for the "stop block" primitive)
@@ -4034,6 +4043,7 @@ function Context(
     this.activeAudio = null;
     this.activeNote = null;
     this.isCustomBlock = false; // marks the end of a custom block's stack
+    this.isCustomCommand = null; // used for ignoring URL reporters' results
     this.emptySlots = 0; // used for block reification
     this.tag = null;  // lexical catch-tag for custom blocks
     this.isFlashing = false; // for single-stepping
@@ -4503,6 +4513,12 @@ JSCompiler.prototype.compileExpression = function (block) {
     // special command forms
     case 'doSetVar': // redirect var to process
         return 'arguments[arguments.length - 1].setVarNamed(' +
+            this.compileInput(inputs[0]) +
+            ',' +
+            this.compileInput(inputs[1]) +
+            ')';
+    case 'doChangeVar': // redirect var to process
+        return 'arguments[arguments.length - 1].incrementVarNamed(' +
             this.compileInput(inputs[0]) +
             ',' +
             this.compileInput(inputs[1]) +

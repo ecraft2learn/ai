@@ -75,7 +75,7 @@ isRetinaSupported, SliderMorph, Animation, BoxMorph, MediaRecorder*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.gui = '2018-June-21';
+modules.gui = '2018-July-13';
 
 // Declarations
 
@@ -361,6 +361,9 @@ IDE_Morph.prototype.openIn = function (world) {
         if (dict.noExitWarning) {
             window.onbeforeunload = nop;
         }
+        if (dict.lang) {
+            myself.setLanguage(dict.lang, null, true); // don't persist
+        }
     }
 
     // dynamic notifications from non-source text files
@@ -392,6 +395,13 @@ IDE_Morph.prototype.openIn = function (world) {
                 )) {
                 this.droppedText(hash);
             } else {
+                idx = hash.indexOf("&");
+                if (idx > 0) {
+                    dict = myself.cloud.parseDict(hash.substr(idx));
+                    dict.editMode = true;
+                    hash = hash.slice(0, idx);
+                    applyFlags(dict);
+                }
                 this.droppedText(getURL(hash));
             }
         } else if (location.hash.substr(0, 5) === '#run:') {
@@ -512,13 +522,12 @@ IDE_Morph.prototype.openIn = function (world) {
             );
         } else if (location.hash.substr(0, 6) === '#lang:') {
             urlLanguage = location.hash.substr(6);
-            this.setLanguage(urlLanguage);
+            this.setLanguage(urlLanguage, null, true); // don't persist
             this.loadNewProject = true;
         } else if (location.hash.substr(0, 7) === '#signup') {
             this.createCloudAccount();
         }
     this.loadNewProject = false;
-
     }
 
     if (this.userLanguage) {
@@ -3508,7 +3517,7 @@ IDE_Morph.prototype.aboutSnap = function () {
         module, btn1, btn2, btn3, btn4, licenseBtn, translatorsBtn,
         world = this.world();
 
-    aboutTxt = 'Snap! 4.2\nBuild Your Own Blocks\n\n'
+    aboutTxt = 'Snap! 4.2.1.2\nBuild Your Own Blocks\n\n'
         + 'Copyright \u24B8 2018 Jens M\u00F6nig and '
         + 'Brian Harvey\n'
         + 'jens@moenig.org, bh@cs.berkeley.edu\n\n'
@@ -4960,7 +4969,7 @@ IDE_Morph.prototype.languageMenu = function () {
     menu.popup(world, pos);
 };
 
-IDE_Morph.prototype.setLanguage = function (lang, callback) {
+IDE_Morph.prototype.setLanguage = function (lang, callback, noSave) {
     var translation = document.getElementById('language'),
         src = this.resourceURL('lang-' + lang + '.js'),
         myself = this;
@@ -4969,18 +4978,18 @@ IDE_Morph.prototype.setLanguage = function (lang, callback) {
         document.head.removeChild(translation);
     }
     if (lang === 'en') {
-        return this.reflectLanguage('en', callback);
+        return this.reflectLanguage('en', callback, noSave);
     }
     translation = document.createElement('script');
     translation.id = 'language';
     translation.onload = function () {
-        myself.reflectLanguage(lang, callback);
+        myself.reflectLanguage(lang, callback, noSave);
     };
     document.head.appendChild(translation);
     translation.src = src;
 };
 
-IDE_Morph.prototype.reflectLanguage = function (lang, callback) {
+IDE_Morph.prototype.reflectLanguage = function (lang, callback, noSave) {
     var projectData,
         urlBar = location.hash;
     SnapTranslator.language = lang;
@@ -5006,7 +5015,9 @@ IDE_Morph.prototype.reflectLanguage = function (lang, callback) {
     } else {
         this.openProjectString(projectData);
     }
-    this.saveSetting('language', lang);
+    if (!noSave) {
+        this.saveSetting('language', lang);
+    }
     if (callback) {callback.call(this); }
 };
 
@@ -5645,6 +5656,9 @@ IDE_Morph.prototype.getURL = function (url, callback, responseType) {
                 }
             };
         }
+        // cache-control, commented out for now
+        // added for Snap4Arduino but has issues with local robot servers
+        // request.setRequestHeader('Cache-Control', 'max-age=0');
         request.send();
         if (!async) {
             if (request.status === 200) {
@@ -5895,9 +5909,9 @@ ProjectDialogMorph.prototype.buildContents = function () {
     this.addButton('cancel', 'Cancel');
 
     if (notification) {
-        this.setExtent(new Point(455, 335).add(notification.extent()));
+        this.setExtent(new Point(555, 335).add(notification.extent()));
     } else {
-        this.setExtent(new Point(455, 335));
+        this.setExtent(new Point(555, 335));
     }
     this.fixLayout();
 
