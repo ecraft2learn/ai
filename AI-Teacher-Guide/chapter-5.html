@@ -52,31 +52,50 @@ The numbers are created by considering text with billions word (e.g. all Wikiped
 People don't understand what the numbers mean but similar words have similar numbers and unrelated words have very different numbers.
 Each number measures a 'feature' of the word but what feature is a mystery.
 </p>
+<p>
+The word embeddings used in this chapter were created by <a href="https://fasttext.cc/docs/en/support.html" target="_blank">Facebook</a>.
+They trained their machine learning models on 157 different languages on all Wikipedia articles in each language.
+Even though that was about a billion words each that wasn't enough,
+so they also trained their models on tens of billions more words found by crawling the web.
+They created tables for each language of at least a million words.
+The blocks described here provide the 20,000 most common words for 13 languages.
+(Larger tables and more languages can be added. Send requests to toontalk@gmail.com.)
+</p>
 <h4>Turning a word into lots of numbers</h4>
 <p>
 We have created Snap! blocks for exploring how word embeddings can be used to find similar words, 
 words which are between other words, and most surprisingly solve word analogy problems.
 The <span class='block-name'>features of</span> block will report a list of 300 numbers.
+If the language field is left empty the default language will be used.
 You can think of the numbers as placing the word in a 300-dimensional space.
-The numbers were adjusted so all 10,000 words fit inside a 300-dimensional 
-<a href="https://en.wikipedia.org/wiki/Hypersphere" target="_blank">hypersphere<a/>.
+The numbers were adjusted so all 20,000 words fit inside a 300-dimensional 
+<a href="https://en.wikipedia.org/wiki/Hypersphere" target="_blank">hypersphere</a> with a radius of 1.
+</p>
 <figure class = "snap-iframe"
         id = "features of"
         container_style = "width: 600px; height: 600px" 
         caption = "A block for converting words into lists of 300 numbers. TRY IT! (First time it may take some time to load.)">
 </figure>
-</p>
 <p>
 <h4>Finding the closest word to a list of feature numbers</h4>
 <p>
 A program can search through all the words to find the word that is closest to a list of numbers.
 The <span class="block-name">closest word to</span> reporter block does this.
+</p>
+
+<b class="student-guide advanced-topic">Click to read an advanced topic</b>
+<span class="advanced-topic-body">
+<h4>Different ways of measuring distances in high dimensional spaces</h4>
 There are two common ways of measuring distance in a high-dimensional space.
 One is <a href="https://en.wikipedia.org/wiki/Euclidean_distance" target="_blank">Euclidean distance</a>
 which is a generalisation of how distance is computed in 2 and 3 dimensional space.
 The idea is to take the sum of the squares of the differences along each of the 300 dimensions and then report the square root of that.
 The other measure is called <a href="https://en.wikipedia.org/wiki/Cosine_similarity" target="_blank">cosine similarity</a>.
 Both work pretty well in the <span class="block-name">closest word to</span> reporter which lets you choose which to use.
+While they usually agree sometimes small differences can be observed.
+For example, the third closest word to "dog" can be "canine" or "puppy" depending on the measure.
+</span>
+
 <figure class = "snap-iframe"
         id = "closest word to"
         container_style = "width: 800px; height: 600px" 
@@ -125,6 +144,7 @@ These texts may have captured
 <a href="https://developers.googleblog.com/2018/04/text-embedding-models-contain-bias.html" target="_blank">
 societal biases</a>.
 For example, the following example seems to have captured the bias that butchers are male and bakers female.
+Other word embedding databases have the bias that doctors are male and nurses female.
 <figure class = "snap-iframe"
         id = "word analogy bias"
         container_style = "width: 850px; height: 450px" 
@@ -138,7 +158,7 @@ While we don't really know what the numbers mean they must be encoding lots of t
 gender, grammatical category, family relationships, and hundreds more things.
 But the numbers aren't perfect.
 See if you can create some examples where the results are not good.
-One knowwn problem with how the numbers are generated is that it combines features of differnt senses of the same word.
+One known problem with how the numbers are generated is that it combines features of different senses of the same word.
 There is only one entry, for example, for 'bank' which combines the ways that word is
 used in sentences about financial institutions and those about the sides of rivers.
 </p>
@@ -193,8 +213,9 @@ We plan to extend it for other languages.
 <p>
 Wikipedia's <a href="https://en.wikipedia.org/wiki/Word_embedding" target="_blank">word embedding</a> article is short and
 written for an advanced audience.
-The Wikipedia article on <a href="https://en.wikipedia.org/wiki/Word2vec" target="_blank">the word2vec research</a> that the
-Snap! word embeddings blocks builds upon is good but very technical.
+The Facebook team wrote a paper detailing how they generated the word embeddings we used here:
+E. Grave, P. Bojanowski, P. Gupta, A. Joulin, T. Mikolov,
+<i><a href="https://arxiv.org/abs/1802.06893" target="_blank">Learning Word Vectors for 157 Languages</a></i>.
 The <a href="https://gist.github.com/aparrish/2f562e3737544cf29aaf1af30362f469" target="_blank">Understanding word vectors</a> web page
 has a very good introduction to the subject and the contains examples that are helpful but require familiarity with Python.
 This <a href="https://developers.googleblog.com/2018/04/text-embedding-models-contain-bias.html" target="_blank">
