@@ -8,7 +8,7 @@
 window.ecraft2learn =
   (function () {
       let this_url = document.querySelector('script[src*="ecraft2learn-beta.js"]').src; // the URL where this library lives
-      let load_script = function (url, when_loaded) {
+      let load_script = function (url, when_loaded, if_error) {
           var script = document.createElement("script");
           script.type = "text/javascript";
           if (url.indexOf("//") < 0) {
@@ -19,6 +19,9 @@ window.ecraft2learn =
           script.src = url;
           if (when_loaded) {
               script.addEventListener('load', when_loaded);
+          }
+          if (if_error) {
+              script.addEventListener('error', if_error);
           }
           document.head.appendChild(script);
       };
@@ -181,6 +184,7 @@ window.ecraft2learn =
                              Array.prototype.slice.call(arguments, 1);
             process.initializeFor(callback, new List(parameters));
             stage.threads.processes.push(process);
+            return process;
         } else if (typeof callback === 'function') { // assume JavaScript callback
             callback.apply(this, Array.prototype.slice.call(arguments, 1));
         }
@@ -755,14 +759,23 @@ window.ecraft2learn =
         });
         return matching_language_entry; // could be undefined
     };
-    const extract_language_code = function (language) {
+    const extract_language_code = function (language_string) {
+        let language = language_string;
         if (language) {
             if (language.length === 2) {
                 return language;
             }
+            if (language.toLowerCase() === "chinese") {
+                // many forms of Chinese and none use the zh code
+                return "zh";
+            }
             language = language_entry(language);
             if (language) {
                 return language[1].substring(0, 2);
+            } else {
+                inform("Unknown language",
+                       "Unable to understand what language '" + language_string + "' is.\n" + 
+                       "Using the current default language: " + (ecraft2learn.default_language_name || "English"));
             }
         }
         if (ecraft2learn.default_language) {
@@ -801,6 +814,14 @@ window.ecraft2learn =
         return mary_tts_voice_number;
     };
     var history_of_informs = [];
+    const show_message = function (message, seconds) {
+        if (inside_snap()) {
+            var ide = get_snap_ide(ecraft2learn.snap_context);
+            ide.showMessage(message, seconds);
+        } else {
+            alert(message);
+        }
+    };
     var inform = function(title, message, callback, ok_to_repeat) {
         if (!ok_to_repeat) {
             let title_and_message = title + "::::" + message;
@@ -898,7 +919,6 @@ window.ecraft2learn =
     var debugging = false; // if true console will fill with information
 
     let loading_tensor_flow = false;
-    let loading_word_embeddings = false;
 
     window.addEventListener("message",
                             function (event) {
@@ -1181,16 +1201,16 @@ window.ecraft2learn =
         } else if (ecraft2learn.default_language !== matching_language_entry[1]) {
             // default has been changed so notify user
             ecraft2learn.default_language = matching_language_entry[1];
-            var matching_language_name = matching_language_entry[2];
+            ecraft2learn.default_language_name = matching_language_entry[2];
             var mary_tts_voice_number = mary_tts_voice_number_with_language_code(matching_language_entry[1]);
-            var message = "Speech recognition will expect " + matching_language_name + " to be spoken.\n";
+            var message = "Speech recognition will expect " + ecraft2learn.default_language_name + " to be spoken.\n";
             var no_voices_callback = function () {
                 if (mary_tts_voice_number >= 0) {
                     message += "No matching browser speech synthesis voice found but Mary TTS voice " +
                                mary_tts_voices[mary_tts_voice_number-1][1] + " can be used.\n" +
                                "Use the Speak (using Mary TTS engine) command.";
                 } else {
-                    message += "No speech synthesis support for " + matching_language_name + " found so English will be used.";
+                    message += "No speech synthesis support for " + ecraft2learn.default_language_name + " found so English will be used.";
                 }
                 inform("Default language set", message);
             };
@@ -1317,6 +1337,7 @@ window.ecraft2learn =
           }
           XHR = new XMLHttpRequest();
           XHR.addEventListener('load', function(event) {
+              show_message(""); // remove loading message
               callback(event);
           });
           if (!error_callback) {
@@ -1324,7 +1345,11 @@ window.ecraft2learn =
                   console.error(event);
               }
           }
-          XHR.addEventListener('error', error_callback);
+          XHR.addEventListener('error', function (event) {
+              show_message(""); // remove loading message
+              error_callback(event);
+          });
+          show_message("Contacting " + cloud_provider);
           switch (cloud_provider) {
           case "IBM Watson":
               formData = new FormData();
@@ -1334,7 +1359,7 @@ window.ecraft2learn =
 //               var proxy_url = "https://toontalk.appspot.com/p/" + 
 //               encodeURIComponent("https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key);
 //               XHR.open('POST', proxy_url);
-              XHR.open('POST', "https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key);
+              XHR.open('POST', "https:/gateway.watsonplatform.net/visual-recognition/api/v3/classify?version=2018-03-19&api_key=" + key);
               XHR.send(formData);
               break;
           case "Google":
@@ -1834,26 +1859,30 @@ window.ecraft2learn =
       ask_for_poses();
   },
   inform: inform,
+  show_message: show_message,
   // some word embedding functionality
   dot_product: dot_product,
-  word_embeddings_ready: function (language, word_embeddings_url) {
+  word_embeddings_ready: function (language, callback, word_embeddings_url) {
       language = extract_language_code(language);
       if (typeof words_to_features[language] === 'object') {
-          return true;
+          invoke_callback(callback, "loaded");
+          return;
       }
       if (typeof words_to_features[language] !== 'object') {
-          if (!loading_word_embeddings) {
-              loading_word_embeddings = true;
-              if (!word_embeddings_url) {
-                  word_embeddings_url = "word-embeddings/" + language + "/wiki-words.js";
-              }
-              load_script(word_embeddings_url,
-                          function () {
-                              loading_word_embeddings = false;
-                          });
+          if (!word_embeddings_url) {
+              word_embeddings_url = "word-embeddings/" + language + "/wiki-words.js";
           }
+          show_message("Loading words ...");
+          load_script(word_embeddings_url,
+                      function () {
+                          show_message("");
+                          invoke_callback(callback, "loaded");
+                      },
+                      function (event) {
+                          show_message("Error while loading '" + word_embeddings_url + "'.\nTry another language.");
+                          invoke_callback(callback, "error");
+                      });
       }
-      return false;
   },
   word_to_features: function (word, language) {
       language = extract_language_code(language);
@@ -1903,6 +1932,8 @@ window.ecraft2learn =
           return dot_product(features1, features2)/
                  ((magnitude1 || magnitude(features1))*(magnitude2 || magnitude(features2)));
       };
+      let current_process;
+      let pending_callbacks = [];
       let report_progress = function (best_word, best_distance, words_considered) {
           if (word_found_callback) {
               if (use_distance) {
@@ -1910,9 +1941,31 @@ window.ecraft2learn =
               }
               // report only 5 decimal digits
               best_distance = Math.trunc(100000*best_distance)/100000;
-              invoke_callback(word_found_callback, best_word, best_distance, words_considered);
-//               console.log(best_word, best_distance, words_considered);
-          }
+              let invoke_callback_or_wait_for_previous_callback = 
+                  function (called_by_timeout, best_word, best_distance, words_considered) {
+                      if (!called_by_timeout) {
+                          pending_callbacks.push(
+                              function () {
+//                                console.log(best_word, best_distance, words_considered);
+                                  current_process = invoke_callback(word_found_callback, 
+                                                                    best_word, best_distance, words_considered);
+                               });
+                      }
+                      if (!current_process || !current_process.context || current_process.readyToTerminate) {
+                          if (pending_callbacks.length > 0) {
+                              // dequeue a callback and run it
+                              pending_callbacks.splice(0, 1)[0]();
+                          }
+                          return;
+                      }
+                      // check again in a while if previous process finished
+                      setTimeout(function () {
+                                     invoke_callback_or_wait_for_previous_callback(true);
+                                 },
+                                 500);                         
+              };
+              invoke_callback_or_wait_for_previous_callback(false, best_word, best_distance, words_considered);                    
+          };
       };
       Object.keys(words_to_features[language]).forEach(function (word) {
           if (exceptions.indexOf(word) < 0) {
@@ -2077,4 +2130,5 @@ ecraft2learn.language_defaults =
   "العربية":  "ar-SA",
   arabic:      "ar-SA",
   chinese:     "zh-CN"
-  }
+  };
+ecraft2learn.words_to_features = ecraft2learn.word_to_features;
