@@ -161,6 +161,9 @@ See if you can create some examples where the results are not good.
 One known problem with how the numbers are generated is that it combines features of different senses of the same word.
 There is only one entry, for example, for 'bank' which combines the ways that word is
 used in sentences about financial institutions and those about the sides of rivers.
+This can cause words to be closer than they should be.
+For example, "rat" and "screen" end up being closer together than otherwise due to "rat" being close to "mouse"
+and "mouse" (the computer input device) being close to (computer) "screen".
 </p>
 
 <h4>A 'Guess My Word' game using word embeddings</h4>
