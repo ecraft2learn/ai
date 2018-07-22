@@ -70,6 +70,10 @@ If the language field is left empty the default language will be used.
 You can think of the numbers as placing the word in a 300-dimensional space.
 The numbers were adjusted so all 20,000 words fit inside a 300-dimensional 
 <a href="https://en.wikipedia.org/wiki/Hypersphere" target="_blank">hypersphere</a> with a radius of 1.
+There are databases with word embeddings for one million words
+but loading and searching such a large data set would be very slow.
+The <span class='block-name'>features of</span> block is based upon the most frequently occuring 20,000 entries that 
+are lower case and contain only letters (no puncutation or digits).
 </p>
 <figure class = "snap-iframe"
         id = "features of"
@@ -164,6 +168,10 @@ used in sentences about financial institutions and those about the sides of rive
 This can cause words to be closer than they should be.
 For example, "rat" and "screen" end up being closer together than otherwise due to "rat" being close to "mouse"
 and "mouse" (the computer input device) being close to (computer) "screen".
+This is a problem researchers are working on.
+Another problem is that sometimes short phrases act like words.
+"Ice cream" for example has no word embedding while "sherbet" and "sorbet" do.
+
 </p>
 
 <h4>A 'Guess My Word' game using word embeddings</h4>
