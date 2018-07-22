@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+<head>
+	<title>tSNE of Word embeddings</title>
+	<meta charset='utf-8'>
+	<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-tsne"></script>
+    <script>
+    words_to_features = {};
+    </script>
+    <script src="en/wiki-words.js"></script>
+    <script>
+// Create some data
+// const data = tf.randomUniform([20000,300]);
+const language = 'en';
+const embeddings = Object.values(words_to_features[language]);
+const data = tf.tensor2d(embeddings);
+
+// Get a tsne optimizer
+const tsneOpt = tsne.tsne(data);
+
+// Compute a T-SNE embedding, returns a promise.
+// Runs for 1000 iterations be default.
+document.writeln("words_to_locations['" + language + "'] = {");
+tsneOpt.compute().then(() => {
+  // tsne.coordinate returns a *tensor* with x, y coordinates of
+  // the embedded data.
+  const coordinates = tsneOpt.coordinates().dataSync();
+  const words = Object.keys(words_to_features[language]);
+  const precision = function (x) {
+  	return Math.round(x*10000)/10000;
+  };
+  words.forEach(function (word, index) {
+  	  document.writeln(word + ":[" + precision(coordinates[2*index]) + "," + precision(coordinates[2*index+1]) + "],");
+  });
+  document.writeln("};");
+});
+    </script>
+	</head>
+<body>
+</body>
+</html>
