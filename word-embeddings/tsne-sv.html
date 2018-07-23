@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+<head>
+	<title>tSNE of Word embeddings</title>
+	<meta charset='utf-8'>
+	<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-tsne"></script>
+    <script>
+    words_to_features = {}; // need to create this before loading the wiki words
+    </script>
+    <script src="sv/wiki-words.js"></script>
+    <script>
+
+const language = 'sv';
+const embeddings = Object.values(words_to_features[language]);
+const data = tf.tensor2d(embeddings);
+
+// Get a tsne optimizer
+const tsneOpt = tsne.tsne(data);
+
+// Compute a T-SNE embedding, returns a promise.
+// Runs for 1000 iterations be default.
+let locations = "";
+locations += "words_to_locations['" + language + "'] = {\n";
+tsneOpt.compute().then(() => {
+  // tsne.coordinate returns a *tensor* with x, y coordinates of
+  // the embedded data.
+  const coordinates = tsneOpt.coordinates().dataSync();
+  const words = Object.keys(words_to_features[language]);
+  const precision = function (x) {
+  	  return Math.round(x*10000)/10000;
+  };
+  words.forEach(function (word, index) {
+  	  locations += '"' + word + '"' + ":[" + precision(coordinates[2*index]) + "," + precision(coordinates[2*index+1]) + "],\n";
+  });
+  locations += "};\n";
+});
+document.addEventListener('DOMContentLoaded', function () {
+	const locations_element = document.getElementById('locations');
+	locations_element.value = locations;	
+});
+    </script>
+	</head>
+<body>
+<textarea id="locations" style="width:800px; height:800px"></textarea>
+</body>
+</html>
