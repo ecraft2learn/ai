@@ -888,7 +888,23 @@ window.ecraft2learn =
         });
         return result;
     };
-    window.words_to_features = {};
+    const word_to_features_or_location = function (word, language, features) {
+        language = extract_language_code(language);
+        if (typeof words_to_features[language] !== 'object') {
+            console.error("word_to_features_or_location called before word embeddings loaded.")
+            return;
+        }
+        const canonical_word = word.trim().toLowerCase();
+        const result = (features ? words_to_features [language][canonical_word]:
+                                   words_to_locations[language][canonical_word]) || 
+                       [];
+        if (inside_snap()) {
+            return new List(result);
+        }
+        return result;      
+    };
+    window.words_to_features  = {};
+    window.words_to_locations = {};
     // see http://mary.dfki.de:59125/documentation.html for documentation of Mary TTS
     var mary_tts_voices =
     [ // name, human readable name, and locale
@@ -1863,6 +1879,7 @@ window.ecraft2learn =
   // some word embedding functionality
   dot_product: dot_product,
   word_embeddings_ready: function (language, callback, word_embeddings_url) {
+      let word_locations_url;
       language = extract_language_code(language);
       if (typeof words_to_features[language] === 'object') {
           invoke_callback(callback, "loaded");
@@ -1871,30 +1888,36 @@ window.ecraft2learn =
       if (typeof words_to_features[language] !== 'object') {
           if (!word_embeddings_url) {
               word_embeddings_url = "word-embeddings/" + language + "/wiki-words.js";
+              word_locations_url  = "word-embeddings/" + language + "/word-locations.js";
           }
           show_message("Loading words ...");
-          load_script(word_embeddings_url,
-                      function () {
-                          show_message("");
-                          invoke_callback(callback, "loaded");
-                      },
-                      function (event) {
-                          show_message("Error while loading '" + word_embeddings_url + "'.\nTry another language.");
-                          invoke_callback(callback, "error");
-                      });
+          let error_handler = function (event) {
+                                  show_message("Error while loading '" + word_embeddings_url + "'.\nTry another language.");
+                                  invoke_callback(callback, "error");
+                              }
+          let load_word_embeddings = function () {
+              load_script(word_embeddings_url,
+                          function () {
+                              show_message("");
+                              invoke_callback(callback, "loaded");
+                          },
+                          error_handler);           
+          };
+          if (word_locations_url) {
+              load_script(word_locations_url, load_word_embeddings, error_handler);
+          }
+          
       }
   },
+  word_to_location: function (word, language) {
+      return word_to_features_or_location(word, language, false);
+  },
   word_to_features: function (word, language) {
-      language = extract_language_code(language);
-      if (typeof words_to_features[language] !== 'object') {
-          console.error("words_to_features called before word embeddings loaded.")
-          return;
-      }
-      let features = words_to_features[language][word.trim().toLowerCase()] || [];
-      if (inside_snap()) {
-          return new List(features);
-      }
-      return features;      
+      return word_to_features_or_location(word, language, true);
+  },
+  words_to_features: function (word, language) {
+      // for backwards compatibility
+      return word_to_features_or_location(word, language, true);
   },
   all_words_with_features: function (language) {
       return new List(Object.keys(words_to_features[extract_language_code(language)]));
@@ -2131,4 +2154,3 @@ ecraft2learn.language_defaults =
   arabic:      "ar-SA",
   chinese:     "zh-CN"
   };
-ecraft2learn.words_to_features = ecraft2learn.word_to_features;
