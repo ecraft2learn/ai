@@ -6,8 +6,8 @@
         20000,
         300
       ],
-      "tensorPath": "https://ecraft2learn.github.io/ai/word-embeddings/en/projector.vectors",
-      "metadataPath": "https://ecraft2learn.github.io/ai/word-embeddings/en/projector.labels"
+      "tensorPath": "https://ecraft2learn.github.io/ai/word-embeddings/en/projector-vectors.tsv",
+      "metadataPath": "https://ecraft2learn.github.io/ai/word-embeddings/en/projector.labels.tsv"
     }
   ]
 }
