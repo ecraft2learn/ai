@@ -20,8 +20,8 @@ document.addEventListener('DOMContentLoaded', function () {
 		words_string += word + '\n';
 	});
 
-	vectors.forEach(function (vector, index) {
-		vector.forEach(function (number) {
+	vectors.forEach(function (vector) {
+		vector.forEach(function (number, index) {
 			vectors_string += number;
 			if (index === vector.length-1) {
 				vectors_string += '\n';
@@ -29,7 +29,6 @@ document.addEventListener('DOMContentLoaded', function () {
 				vectors_string += '\t';
 			}
 		});
-		vectors_string += '\n';
 	});
 	const labels_element = document.getElementById('labels');
 	labels_element.value = words_string;
