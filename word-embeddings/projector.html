@@ -20,9 +20,14 @@ document.addEventListener('DOMContentLoaded', function () {
 		words_string += word + '\n';
 	});
 
-	vectors.forEach(function (vector) {
+	vectors.forEach(function (vector, index) {
 		vector.forEach(function (number) {
-			vectors_string += number + '\t';
+			vectors_string += number;
+			if (index === vector.length-1) {
+				vectors_string +=  + '\n';
+			} else {
+				vectors_string +=  + '\t';
+			}
 		});
 		vectors_string += '\n';
 	});
