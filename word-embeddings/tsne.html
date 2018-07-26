@@ -13,6 +13,7 @@
 
 const language = 'ja';
 const embeddings = Object.values(words_to_features[language]);
+const words = Object.keys(words_to_features[language]);
 const data = tf.tensor2d(embeddings);
 
 // Get a tsne optimizer
@@ -26,7 +27,6 @@ tsneOpt.compute().then(() => {
   // tsne.coordinate returns a *tensor* with x, y coordinates of
   // the embedded data.
   const coordinates = tsneOpt.coordinates().dataSync();
-  const words = Object.keys(words_to_features[language]);
   const precision = function (x) {
   	  return Math.round(x*10000)/10000;
   };

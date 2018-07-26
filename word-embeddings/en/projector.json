@@ -1,0 +1,13 @@
+{
+  "embeddings": [
+    {
+      "tensorName": "English",
+      "tensorShape": [
+        20000,
+        300
+      ],
+      "tensorPath": "projector.vectors",
+      "metadataPath": "projector.labels"
+    }
+  ]
+}
