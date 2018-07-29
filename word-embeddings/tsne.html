@@ -10,38 +10,59 @@
     </script>
     <script src="en/wiki-words.js"></script>
     <script>
-
-const language = 'en';
-const embeddings = Object.values(words_to_features[language]);
-const words = Object.keys(words_to_features[language]);
-const data = tf.tensor2d(embeddings);
-
-// Get a tsne optimizer
-const tsneOpt = tsne.tsne(data, {perplexity: 36});
-
-// Compute a T-SNE embedding, returns a promise.
-// Runs for 1000 iterations be default.
-let locations = "";
-locations += "words_to_locations['" + language + "'] = {\n";
-tsneOpt.compute().then(() => {
-  // tsne.coordinate returns a *tensor* with x, y coordinates of
-  // the embedded data.
-  const coordinates = tsneOpt.coordinates().dataSync();
-  const precision = function (x) {
-  	  return Math.round(x*10000)/10000;
-  };
-  words.forEach(function (word, index) {
-  	  locations += '"' + word + '"' + ":[" + precision(coordinates[2*index]) + "," + precision(coordinates[2*index+1]) + "],\n";
-  });
-  locations += "};\n";
-});
 document.addEventListener('DOMContentLoaded', function () {
-	const locations_element = document.getElementById('locations');
-	locations_element.value = locations;	
+	const language = 'en';
+	const embeddings = Object.values(words_to_features[language]);
+	const words = Object.keys(words_to_features[language]);
+	const data = tf.tensor2d(embeddings);
+
+	// Get a tsne optimizer
+	const tsneOpt = tsne.tsne(data, {perplexity: 36});
+
+	// Compute a T-SNE embedding, returns a promise.
+	// Runs for 1000 iterations be default.
+	let locations = "";
+	locations += "words_to_locations['" + language + "'] = {\n";
+	tsneOpt.compute().then(() => {
+	    // tsne.coordinate returns a *tensor* with x, y coordinates of
+	    // the embedded data.
+	    const coordinates = tsneOpt.coordinates().dataSync();
+	    const precision = function (x) {
+		    return Math.round(x*10000)/10000;
+	    };
+	    let minimum_x = Number.MAX_VALUE;
+	    let minimum_y = Number.MAX_VALUE;
+	    let maximum_x = Number.MIN_VALUE;
+	    let maximum_y = Number.MIN_VALUE;
+	    words.forEach(function (word, index) {
+		    let x = coordinates[2*index];
+		    let y = coordinates[2*index+1];
+		    locations += '"' + word + '"' + ":[" + precision(x) + "," + precision(y) + "],\n";
+		    if (x > maximum_x) {
+		        maximum_x = x;
+		    }
+		    if (y > maximum_y) {
+			    maximum_y = y;
+		    }
+		    if (x < minimum_x) {
+			    minimum_x = x;
+		    }
+		    if (y < minimum_y) {
+			    minimum_y = y;
+		    }
+	    });
+	    locations += "minimum_x:" + minimum_x + ",\n";
+	    locations += "minimum_y:" + minimum_y + ",\n";
+	    locations += "maximum_x:" + maximum_x + ",\n";
+	    locations += "maximum_y:" + maximum_y + ",\n";
+	    locations += "};\n";
+	  });
+	  const locations_element = document.getElementById('locations');
+	  locations_element.value = locations;	
 });
     </script>
 	</head>
 <body>
-<textarea id="locations" style="width:800px; height:800px"></textarea>
+<textarea id="locations" style="width:800px; height:400px"></textarea>
 </body>
 </html>
