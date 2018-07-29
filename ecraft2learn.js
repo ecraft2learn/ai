@@ -1939,6 +1939,9 @@ window.ecraft2learn =
       if (!(target_features instanceof Array)) {
           target_features = target_features.asArray();
       }
+      if (target_features.length === 0) {
+          return "Can't find the closest word to the empty vector.\nProbably due to requesting the features of an unknown word.";
+      }
       let use_distance = distance_measure === 'Euclidean distance';
       let words_considered = 0;
       let best_word, distance;
@@ -1963,7 +1966,7 @@ window.ecraft2learn =
                   best_distance = Math.sqrt(best_distance); // distance was squared for efficiency
               }
               // report only 5 decimal digits
-              best_distance = Math.trunc(100000*best_distance)/100000;
+              best_distance = Math.round(100000*best_distance)/100000;
               let invoke_callback_or_wait_for_previous_callback = 
                   function (called_by_timeout, best_word, best_distance, words_considered) {
                       if (!called_by_timeout) {
