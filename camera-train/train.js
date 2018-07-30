@@ -94,7 +94,7 @@ let add_image_to_training = function (image_url, label_index, post_to_tab) {
 // let hashes_of_images_added = [];
 
 class Main {
-  constructor(training_class_names) {
+  constructor(training_class_names, source) {
     if (training_class_names) {
         NUM_CLASSES = training_class_names.length;
     } else {
@@ -177,7 +177,9 @@ class Main {
     
     // Load knn model
     this.knn.load()
-    .then(() => this.start()); 
+    .then(() => {this.start();
+                 source.postMessage("Ready", "*");
+    }); 
   }
   
   start(){
@@ -274,8 +276,7 @@ class Main {
 window.addEventListener("message",
                         function (event) {
                             if (typeof event.data.training_class_names !== 'undefined') {
-                                trainer = new Main(event.data.training_class_names);
-                                event.source.postMessage("Ready", "*");
+                                trainer = new Main(event.data.training_class_names, event.source);
                             } else if (typeof event.data.new_introduction !== 'undefined') {
                                 var please_wait = document.getElementById("please-wait");
                                 please_wait.innerHTML = event.data.new_introduction;
@@ -323,7 +324,7 @@ window.addEventListener('DOMContentLoaded',
                                     let receive_labels = 
                                         function (message) {
                                             if (!trainer) {
-                                                trainer = new Main(message.labels);
+                                                trainer = new Main(message.labels, event.source);
                                             }   
                                         };
                                     let receive_image_url =

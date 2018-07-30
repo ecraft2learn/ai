@@ -616,15 +616,19 @@ window.ecraft2learn =
           source === 'camera' ?
               ecraft2learn.vision_learning_buckets :
               ecraft2learn.audio_learning_buckets;
+      let iframe = 
+          source === 'camera' ?
+              ecraft2learn.vision_training_iframe :
+              ecraft2learn.audio_training_iframe;              
       if (add_to_previous_training && buckets_equal(buckets, old_learning_buckets)) {
-          if (ecraft2learn.audio_training_iframe) {
-              ecraft2learn.audio_training_iframe.style.width  = "100%";
-              ecraft2learn.audio_training_iframe.style.height = "100%";
-              let children = ecraft2learn.audio_training_iframe.contentDocument.body.children;
+          if (iframe) {
+              iframe.style.width  = "100%";
+              iframe.style.height = "100%";
+              let children = iframe.contentDocument.body.children;
               Array.from(children).forEach(function (child) {
                   child.style.opacity = 1;
               });
-          } else {
+          } else if (iframe_in_new_tab) {
               // would like to go to that window:  ecraft2learn.vision_training_window.focus();
               // but browsers don't allow it unless clear the user initiated it
               inform("Training tab ready",
