@@ -188,7 +188,8 @@ class Main {
 //  Create training buttons and info texts 
     var train_on  = (i) => this.training = i;
     var train_off = (i) => this.training = -1;
-    this.infoTexts = create_training_buttons(this.training_class_names, train_on, train_off);  
+    this.infoTexts = create_training_buttons(this.training_class_names, train_on, train_off); 
+    create_return_to_snap_button(); 
     var please_wait = document.getElementById("please-wait");
     if (!please_wait.getAttribute("updated")) {
         please_wait.innerHTML = "<p>Ready to start training. Just hold down one of the buttons when the desired image is front of the camera. " +
@@ -293,7 +294,7 @@ window.addEventListener('DOMContentLoaded',
                             if (TOGETHER_JS) {
                                 // for production add window.TogetherJSConfig_ignoreMessages = true;
                                 TogetherJSConfig_dontShowClicks = true;
-                                // following made the interface less confusing but didn't invite the othe either
+                                // following made the interface less confusing but didn't invite the other either
 //                              TogetherJSConfig_suppressInvite = true;
                                 let script = document.createElement('script');
                                 script.src = "https://togetherjs.com/togetherjs-min.js";

@@ -37,3 +37,25 @@
     }
     return info_texts;
 }
+
+function create_return_to_snap_button() {
+    var return_to_snap_button = document.createElement('button');
+    return_to_snap_button.innerHTML = "Return to Snap!";
+    return_to_snap_button.className = "return-to-snap-button";
+    return_to_snap_button.addEventListener('click',
+                                           function(event) {
+                                               window.parent.postMessage('Hide training iframe', "*");
+                                           });
+    document.body.appendChild(return_to_snap_button);
+}
+
+// tell Snap! this is loaded
+window.addEventListener('DOMContentLoaded', 
+                        function (event) {
+                            if (window.opener) {
+                                window.opener.postMessage("Loaded", "*");
+                            } else if (window.parent) {
+                                window.parent.postMessage("Loaded", "*");
+                            }
+                        },
+                        false);

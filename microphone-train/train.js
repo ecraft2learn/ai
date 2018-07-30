@@ -65,27 +65,6 @@ var create_test_button = function (training_class_names, speech_recognizer) {
     button.addEventListener('touchend',   button_up);
 };
 
-create_return_to_snap_button = function () {
-    var return_to_snap_button = document.createElement('button');
-    return_to_snap_button.innerHTML = "Return to Snap!";
-    return_to_snap_button.className = "return-to-snap-button";
-    return_to_snap_button.addEventListener('click',
-                                           function(event) {
-                                               window.parent.postMessage('Hide audio training iframe', "*");
-                                           });
-    document.body.appendChild(return_to_snap_button);
-}
-
-// tell Snap! this is loaded
-window.addEventListener('DOMContentLoaded', 
-                        function (event) {
-                            if (window.opener) {
-                                window.opener.postMessage("Loaded", "*");
-                            } else if (window.parent) {
-                                window.parent.postMessage("Loaded", "*");
-                            }
-                        },
-                        false);
 // receive class names
 window.addEventListener("message",
                         function (event) {

@@ -518,7 +518,8 @@ window.ecraft2learn =
                           page_introduction, // optional HTML that will appear in place of the default on training page
                           callback, // if bound will be called when training finished 
                           together, // if true enable togetherJS collaboration
-                          together_url) { // another Snap! (or NetsBlox) wants to collaborate using this URL
+                          together_url, // another Snap! (or NetsBlox) wants to collaborate using this URL
+                          iframe_in_new_tab) { // if not true then iframe or Snap! is visible but not both at the same time
       var buckets = buckets_as_snap_list.contents;
       var buckets_equal = function (buckets1, buckets2) {
           if (!buckets1 || !buckets2) {
@@ -532,27 +533,28 @@ window.ecraft2learn =
       };
       var open_machine_learning_window = function () {
           var URL, training_window;
-          if (source === 'camera') {
+          if (together_url) {
+              URL = together_url;
+          } else if (source === 'camera') {
+              URL = window.location.href.indexOf("localhost") >= 0 ? 
+                    "/ai/camera-train/index-dev.html?translate=1" :
+                    "https://ecraft2learn.github.io/ai/camera-train/index.html?translate=1";
+              if (together) {
+                  URL += "&together=1";
+              }                  
+          } else if (source === 'microphone') {
+              URL = window.location.href.indexOf("localhost") >= 0 ? 
+                    "/ai/microphone-train/index.html?translate=1" :
+                    "https://ecraft2learn.github.io/ai/microphone-train/index.html?translate=1";
+          }
+          if (iframe_in_new_tab) {
               machine_learning_browser_warning();
-              if (together_url) {
-                  URL = together_url;
-              } else {
-                  URL = window.location.href.indexOf("localhost") >= 0 ? 
-                        "/ai/camera-train/index-dev.html?translate=1" :
-                        "https://ecraft2learn.github.io/ai/camera-train/index.html?translate=1";
-                  if (together) {
-                      URL += "&together=1";
-                  }                  
-              }
               training_window = window.open(URL, "Training " + buckets);
               window.addEventListener('unload',
                                       function () {
                                           training_window.close();
                                       });
           } else {
-              URL = window.location.href.indexOf("localhost") >= 0 ? 
-                    "/ai/microphone-train/index.html?translate=1" :
-                    "https://ecraft2learn.github.io/ai/microphone-train/index.html?translate=1";
               let iframe = document.createElement('iframe');
               document.body.appendChild(iframe);
               iframe.src = URL;
@@ -561,9 +563,14 @@ window.ecraft2learn =
               iframe.style.border = 0;
               iframe.style.position = 'absolute';
               iframe.style.backgroundColor = 'white';
-              iframe.allow = "microphone"; // Chrome 65 requires it
+              if (source === 'microphone') {
+                  iframe.allow = "microphone"; // Chrome 65 requires it
+                  ecraft2learn.audio_training_iframe  = iframe;
+              } else {
+                  ecraft2learn.vision_training_iframe = iframe;
+              }
               training_window = iframe.contentWindow;
-              ecraft2learn.audio_training_iframe = iframe;
+              
           }
           return training_window;
       };
@@ -571,7 +578,7 @@ window.ecraft2learn =
       if ((source === 'camera' &&
              (!ecraft2learn.vision_training_window || ecraft2learn.vision_training_window.closed)) ||
           (source === 'microphone' && 
-             !ecraft2learn.audio_training_window)) {
+             (!ecraft2learn.audio_training_window  || ecraft2learn.vision_training_window.closed))) {
           var machine_learning_window = open_machine_learning_window();
           if (source === 'camera') {
               ecraft2learn.vision_training_window  = machine_learning_window;
@@ -590,10 +597,13 @@ window.ecraft2learn =
                           machine_learning_window.postMessage({new_introduction: page_introduction}, "*");
                       }
                       invoke_callback(callback, "Ready");
-                  } else if (event.data === 'Hide audio training iframe') {
-                      ecraft2learn.audio_training_iframe.style.width  = "1px";
-                      ecraft2learn.audio_training_iframe.style.height = "1px";
-                      let children = ecraft2learn.audio_training_iframe.contentDocument.body.children;
+                  } else if (event.data === 'Hide training iframe') {
+                      const iframe = (source === 'camera') ? ecraft2learn.vision_training_iframe :
+                                                             ecraft2learn.audio_training_iframe;
+
+                      iframe.style.width  = "1px";
+                      iframe.style.height = "1px";
+                      let children = iframe.contentDocument.body.children;
                       Array.from(children).forEach(function (child) {
                           child.style.opacity = 0;
                       });
@@ -622,8 +632,14 @@ window.ecraft2learn =
           }
           invoke_callback(callback, "Ready");
       } else {
+          if (iframe_in_new_tab) {
+              if (source === 'camera') {
+                  ecraft2learn.vision_training_window.close();
+              } else {
+                  ecraft2learn.audio_training_window.close();
+              }              
+          }
           if (source === 'camera') {
-              ecraft2learn.vision_training_window.close();
               ecraft2learn.vision_training_window = undefined;
           } else {
               ecraft2learn.audio_training_window = undefined;
