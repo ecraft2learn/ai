@@ -118,6 +118,11 @@ window.ecraft2learn =
               if (ecraft2learn.stop_speech_recognition) {
                   ecraft2learn.stop_speech_recognition();
               }
+              if (ecraft2learn.training_window) {
+                  Object.values(ecraft2learn.training_window).forEach(function (window) {
+                      window.postMessage('stop', '*');
+                  });
+              }
               ecraft2learn.outstanding_callbacks.forEach(function (callback) {
                   callback.stopped_by_user = true;
               });
@@ -519,7 +524,7 @@ window.ecraft2learn =
                           callback, // if bound will be called when training finished 
                           together, // if true enable togetherJS collaboration
                           together_url, // another Snap! (or NetsBlox) wants to collaborate using this URL
-                          iframe_in_new_tab) { // if not true then iframe or Snap! is visible but not both at the same time
+                          iframe_in_new_tab) { // if not true then iframe is either full size covering up Snap! or a single pixel
       var buckets = buckets_as_snap_list.contents;
       var buckets_equal = function (buckets1, buckets2) {
           if (!buckets1 || !buckets2) {
@@ -564,90 +569,79 @@ window.ecraft2learn =
               iframe.style.position = 'absolute';
               iframe.style.backgroundColor = 'white';
               if (source === 'microphone') {
-                  iframe.allow = "microphone"; // Chrome 65 requires it
-                  ecraft2learn.audio_training_iframe  = iframe;
-              } else {
-                  ecraft2learn.vision_training_iframe = iframe;
+                  iframe.allow = "microphone"; // at least Chrome 65 requires this
               }
-              training_window = iframe.contentWindow;
-              
+              ecraft2learn.training_iframe[source] = iframe;
+              ecraft2learn.training_iframe_visible[source] = true;
+              training_window = iframe.contentWindow;     
           }
           return training_window;
       };
+      if (!ecraft2learn.training_window) {
+          ecraft2learn.training_window = {};
+      }
+      if (!ecraft2learn.training_window_ready) {
+          ecraft2learn.training_window_ready = {};
+      }
+      if (!ecraft2learn.training_iframe) {
+          ecraft2learn.training_iframe = {};
+      }
+      if (!ecraft2learn.training_buckets) {
+          ecraft2learn.training_buckets = {};
+      }
+      if (!ecraft2learn.training_iframe_visible) {
+          ecraft2learn.training_iframe_visible = {};
+      }
       record_callbacks(callback);
-      if ((source === 'camera' &&
-             (!ecraft2learn.vision_training_window || ecraft2learn.vision_training_window.closed)) ||
-          (source === 'microphone' && 
-             (!ecraft2learn.audio_training_window  || ecraft2learn.vision_training_window.closed))) {
+      if (!ecraft2learn.training_window[source] || ecraft2learn.training_window[source].closed) {
           var machine_learning_window = open_machine_learning_window();
-          if (source === 'camera') {
-              ecraft2learn.vision_training_window  = machine_learning_window;
-              ecraft2learn.vision_learning_buckets = buckets;
-          } else {
-              ecraft2learn.audio_training_window  = machine_learning_window;
-              ecraft2learn.audio_learning_buckets = buckets;
-          }
+          ecraft2learn.training_window[source]  = machine_learning_window;
+          ecraft2learn.training_buckets[source] = buckets;
           var receive_messages_from_iframe = 
               function (event) {
                   if (event.data === "Loaded") {
                       machine_learning_window.postMessage({training_class_names: buckets}, "*");
                   } else if (event.data === "Ready") {
-                      ecraft2learn.vision_training_window_ready = true;
+                      ecraft2learn.training_window_ready[source] = true;
                       if (page_introduction) {
                           machine_learning_window.postMessage({new_introduction: page_introduction}, "*");
                       }
                       invoke_callback(callback, "Ready");
                   } else if (event.data === 'Hide training iframe') {
-                      const iframe = (source === 'camera') ? ecraft2learn.vision_training_iframe :
-                                                             ecraft2learn.audio_training_iframe;
-
-                      iframe.style.width  = "1px";
-                      iframe.style.height = "1px";
-                      let children = iframe.contentDocument.body.children;
+                      ecraft2learn.training_iframe[source].style.width  = "1px";
+                      ecraft2learn.training_iframe[source].style.height = "1px";
+                      let children = ecraft2learn.training_iframe[source].contentDocument.body.children;
                       Array.from(children).forEach(function (child) {
                           child.style.opacity = 0;
                       });
+                      ecraft2learn.training_iframe_visible[source] = false;
                   }
           };
           window.addEventListener("message", receive_messages_from_iframe, false);               
           return;
-      }
-      let old_learning_buckets = 
-          source === 'camera' ?
-              ecraft2learn.vision_learning_buckets :
-              ecraft2learn.audio_learning_buckets;
-      let iframe = 
-          source === 'camera' ?
-              ecraft2learn.vision_training_iframe :
-              ecraft2learn.audio_training_iframe;              
-      if (add_to_previous_training && buckets_equal(buckets, old_learning_buckets)) {
-          if (iframe) {
-              iframe.style.width  = "100%";
-              iframe.style.height = "100%";
-              let children = iframe.contentDocument.body.children;
+      }           
+      if (add_to_previous_training && buckets_equal(buckets, ecraft2learn.training_buckets[source])) {
+          if (ecraft2learn.training_iframe[source]) {
+              ecraft2learn.training_iframe[source].style.width  = "100%";
+              ecraft2learn.training_iframe[source].style.height = "100%";
+              let children = ecraft2learn.training_iframe[source].contentDocument.body.children;
               Array.from(children).forEach(function (child) {
                   child.style.opacity = 1;
               });
+              ecraft2learn.training_iframe_visible[source] = true;
           } else if (iframe_in_new_tab) {
-              // would like to go to that window:  ecraft2learn.vision_training_window.focus();
+              // would like to go to that window: ecraft2learn.training_window.focus[source]();
               // but browsers don't allow it unless clear the user initiated it
               inform("Training tab ready",
                      "Go to the training window whenever you want to add to the training.");           
           }
+          ecraft2learn.training_window[source].postMessage('restart', '*');
           invoke_callback(callback, "Ready");
       } else {
           if (iframe_in_new_tab) {
-              if (source === 'camera') {
-                  ecraft2learn.vision_training_window.close();
-              } else {
-                  ecraft2learn.audio_training_window.close();
-              }              
+              ecraft2learn.training_window[source].close();              
           }
-          if (source === 'camera') {
-              ecraft2learn.vision_training_window = undefined;
-          } else {
-              ecraft2learn.audio_training_window = undefined;
-          }
+          ecraft2learn.training_window[source] = undefined;
           // start over
           train(source, buckets_as_snap_list, add_to_previous_training, page_introduction, callback, together, together_url);
       }
@@ -696,8 +690,9 @@ window.ecraft2learn =
           // if alert_message is undefined no message is displayed if the posenet window hasn't been created
           machine_learning_window_request(ecraft2learn.posenet_window, message_maker, training_image_width, training_image_height, image, alert_message);
       };
-  const training_window_request = function (alert_message, message_maker, training_image_width, training_image_height, image) {
-      machine_learning_window_request(ecraft2learn.vision_training_window, message_maker, training_image_width, training_image_height, image, alert_message);
+  const training_window_request = 
+      function (alert_message, message_maker, training_image_width, training_image_height, image) {
+          machine_learning_window_request(ecraft2learn.training_window['camera'], message_maker, training_image_width, training_image_height, image, alert_message);
   };
   const TRAINING_IMAGE_WIDTH  = 227;
   const TRAINING_IMAGE_HEIGHT = 227;
@@ -1812,7 +1807,7 @@ window.ecraft2learn =
            };
       };
       record_callbacks(callback);
-      if (!ecraft2learn.audio_training_window) {
+      if (!ecraft2learn.training_window['microphone']) {
           inform("Training request warning",
                  "Run the 'Train with audio buckets ...' command before using 'Audio label confidences'");
           return;
@@ -1821,7 +1816,7 @@ window.ecraft2learn =
           duration_in_seconds = 3; // 3 second default 
       }
       // convert from milliseconds to seconds
-      ecraft2learn.audio_training_window.postMessage({predict: duration_in_seconds*1000}, "*");
+      ecraft2learn.training_window['microphone'].postMessage({predict: duration_in_seconds*1000}, "*");
       window.addEventListener("message", receive_confidences);  
   },
   add_image_to_training: function (costume_number, label, callback, sprite) {
@@ -1852,10 +1847,20 @@ window.ecraft2learn =
   costume_count: function (sprite) {
       return get_costumes(sprite).length;
   },
-  training_window_ready: function () {
-      return typeof ecraft2learn.vision_training_window !== 'undefined' && 
-             !ecraft2learn.vision_training_window.closed &&
-             ecraft2learn.vision_training_window_ready === true;
+  training_window_ready: function (source) {
+      if (!source) {
+          source = 'camera';
+      }
+      return typeof ecraft2learn.training_window !== 'undefined' && 
+             typeof ecraft2learn.training_window[source] !== 'undefined' && 
+             !ecraft2learn.training_window[source].closed &&
+             ecraft2learn.training_window_ready[source] === true;
+  },
+  training_window_visible: function (source) {
+      if (!source) {
+          source = 'camera';
+      }
+      return ecraft2learn.training_iframe_visible[source];
   },
   posenet_window_ready: function () {
       return typeof ecraft2learn.posenet_window !== 'undefined' && 

@@ -204,12 +204,17 @@ class Main {
     this.timer = requestAnimationFrame(this.animate.bind(this));
   }
   
-  stop(){
+  stop() {
     this.video.pause();
     cancelAnimationFrame(this.timer);
   }
+
+  restart() {
+    this.video.play();
+    this.timer = requestAnimationFrame(this.animate.bind(this));
+  }
   
-  animate(){
+  animate() {
     if (this.videoPlaying) {
       // Get image data from video element
       const image = dl.fromPixels(this.video);
@@ -269,21 +274,31 @@ class Main {
       }
     }
     this.timer = requestAnimationFrame(this.animate.bind(this));
+    window.addEventListener("message",
+                            function (event) {
+                                if (event.data === 'stop') {
+                                    this.stop();
+                                } else if (event.data === 'restart') {
+                                    this.restart();
+                                }
+                            }.bind(this),
+                            false);
   }
 }
 
-// receive class names
 window.addEventListener("message",
                         function (event) {
                             if (typeof event.data.training_class_names !== 'undefined') {
+                                // receive class names
                                 trainer = new Main(event.data.training_class_names, event.source);
                             } else if (typeof event.data.new_introduction !== 'undefined') {
+                                // update HTML of the page with custom introduction
                                 var please_wait = document.getElementById("please-wait");
                                 please_wait.innerHTML = event.data.new_introduction;
                                 please_wait.setAttribute("updated", true);
                             }
-                        },
-                        false);
+                         },
+                         false);
 
 // tell Snap! this is loaded
 window.addEventListener('DOMContentLoaded', 
