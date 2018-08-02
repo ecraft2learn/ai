@@ -38,13 +38,16 @@
     return info_texts;
 }
 
-function create_return_to_snap_button() {
+function create_return_to_snap_button(innerHTML) {
     var return_to_snap_button = document.createElement('button');
-    return_to_snap_button.innerHTML = "Return to Snap!";
+    if (!innerHTML) {
+        innerHTML = "Return to Snap!";
+    }
+    return_to_snap_button.innerHTML = innerHTML;
     return_to_snap_button.className = "return-to-snap-button";
     return_to_snap_button.addEventListener('click',
                                            function(event) {
-                                               window.parent.postMessage('Hide training iframe', "*");
+                                               window.parent.postMessage('Hide support iframe', "*");
                                            });
     document.body.appendChild(return_to_snap_button);
 }

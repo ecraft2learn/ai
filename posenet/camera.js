@@ -247,12 +247,8 @@ function detectPoseInRealTime(video, net) {
       if (document.getElementById('output')) {
           setTimeout(function () {
               poseDetectionFrame();
-              if (window.opener) {
-                  // bindPage creates the video canvas etc but it might not yet be ready
-                  // an alternative would be listen for this tab losing the focus as the user switches to back to Snap!
-                  window.addEventListener("message", respond_to_messages);
-                  window.opener.postMessage("Loaded", "*");                          
-               }
+              window.addEventListener("message", respond_to_messages);
+              window.parent.postMessage("Loaded", "*");                          
            }, 
            1000); // delay reduces (eliminates?) the chance of Error: The DOM is not ready yet.
       } else {
@@ -280,6 +276,8 @@ async function bindPage() {
   setupGui(cameras, net);
   setupFPS();
   detectPoseInRealTime(video, net);
+  window.parent.postMessage("Ready", "*");
+  create_return_to_snap_button();
 }
 
 navigator.getUserMedia = navigator.getUserMedia ||
