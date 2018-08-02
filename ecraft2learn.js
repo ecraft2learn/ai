@@ -1857,10 +1857,22 @@ window.ecraft2learn =
              ecraft2learn.training_window_ready[source] === true;
   },
   training_window_visible: function (source) {
+      if (!ecraft2learn.training_iframe_visible) {
+          return false;
+      }
       if (!source) {
           source = 'camera';
       }
-      return ecraft2learn.training_iframe_visible[source];
+      return !!ecraft2learn.training_iframe_visible[source];
+  },
+  training_window_ready: function (source) {
+      if (!ecraft2learn.training_window_ready) {
+          return false;
+      }
+      if (!source) {
+          source = 'camera';
+      }
+      return !!ecraft2learn.training_window_ready[source];
   },
   posenet_window_ready: function () {
       return typeof ecraft2learn.posenet_window !== 'undefined' && 

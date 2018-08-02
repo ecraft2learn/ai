@@ -207,11 +207,14 @@ class Main {
   stop() {
     this.video.pause();
     cancelAnimationFrame(this.timer);
+    this.timer = undefined; // so don't restart multiple times
   }
 
   restart() {
-    this.video.play();
-    this.timer = requestAnimationFrame(this.animate.bind(this));
+    if (!this.timer) {
+        this.video.play();
+        this.timer = requestAnimationFrame(this.animate.bind(this));
+    }
   }
   
   animate() {
