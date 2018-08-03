@@ -535,7 +535,7 @@ window.ecraft2learn =
                 ecraft2learn.support_iframe_visible = {};
             }              
         };
-    var train = function (source, // currently can be 'camera' or 'microphone'
+    var train = function (source, // can be 'training using camera','training using microphone', or "posenet"
                           buckets_as_snap_list, // list of labels (as Snap! object)
                           add_to_previous_training, // if false will throw away any current training
                           page_introduction, // optional HTML that will appear in place of the default on training page
@@ -557,7 +557,7 @@ window.ecraft2learn =
       initialise_support_window_variables();
       record_callbacks(callback);
       if (!ecraft2learn.support_window[source] || ecraft2learn.support_window[source].closed) {
-          var machine_learning_window = create_machine_learning_window();
+          var machine_learning_window = create_machine_learning_window(source);
           ecraft2learn.training_buckets[source] = buckets;
           var receive_messages_from_iframe = 
               function (event) {
@@ -611,14 +611,14 @@ window.ecraft2learn =
       initialise_support_window_variables();
       if (together_url) {
           URL = together_url;
-      } else if (source === 'camera') {
+      } else if (source === 'training using camera') {
           URL = window.location.href.indexOf("localhost") >= 0 ? 
                 "/ai/camera-train/index-dev.html?translate=1" :
                 "https://ecraft2learn.github.io/ai/camera-train/index.html?translate=1";
           if (together) {
               URL += "&together=1";
           }                  
-      } else if (source === 'microphone') {
+      } else if (source === 'training using microphone') {
           URL = window.location.href.indexOf("localhost") >= 0 ? 
                 "/ai/microphone-train/index.html?translate=1" :
                 "https://ecraft2learn.github.io/ai/microphone-train/index.html?translate=1";
@@ -628,7 +628,7 @@ window.ecraft2learn =
                 "https://ecraft2learn.github.io/ai/posenet/index.html?translate=1"; 
       }
       if (iframe_in_new_tab) {
-          // deprecated -- only works for source === 'camera'
+          // deprecated -- only works for source === 'training using camera'
           machine_learning_browser_warning();
           support_window = window.open(URL, "Training " + buckets);
           window.addEventListener('unload',
@@ -644,7 +644,7 @@ window.ecraft2learn =
           iframe.style.border = 0;
           iframe.style.position = 'absolute';
           iframe.style.backgroundColor = 'white';
-          if (source === 'microphone') {
+          if (source === 'training using microphone') {
               iframe.allow = "microphone"; // at least Chrome 65 requires this
           }
           ecraft2learn.support_iframe[source] = iframe;
@@ -717,7 +717,7 @@ window.ecraft2learn =
       };
   const support_window_request = 
       function (alert_message, message_maker, training_image_width, training_image_height, image) {
-          machine_learning_window_request(ecraft2learn.support_window['camera'], message_maker, training_image_width, training_image_height, image, alert_message);
+          machine_learning_window_request(ecraft2learn.support_window['training using camera'], message_maker, training_image_width, training_image_height, image, alert_message);
   };
   const TRAINING_IMAGE_WIDTH  = 227;
   const TRAINING_IMAGE_HEIGHT = 227;
@@ -1774,15 +1774,15 @@ window.ecraft2learn =
       }
   },
   train_using_camera: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback, together, together_url) {
-      train("camera", buckets_as_snap_list, add_to_previous_training, page_introduction, callback, together, together_url);
+      train('training using camera', buckets_as_snap_list, add_to_previous_training, page_introduction, callback, together, together_url);
   },
   train_using_images: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback, together, together_url) {
       // old name kept for backwards compatibility
-      train("camera", buckets_as_snap_list, add_to_previous_training, page_introduction, callback, together, together_url);
+      train('training using camera', buckets_as_snap_list, add_to_previous_training, page_introduction, callback, together, together_url);
   },
   train_using_microphone: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback, version) {
       // version is for when this is replaced by a deep learning model
-      train("microphone", buckets_as_snap_list, add_to_previous_training, page_introduction, callback);
+      train('training using microphone', buckets_as_snap_list, add_to_previous_training, page_introduction, callback);
   },
   image_confidences: function (callback) {
       var receive_confidences = function (event) {
@@ -1832,7 +1832,7 @@ window.ecraft2learn =
            };
       };
       record_callbacks(callback);
-      if (!ecraft2learn.support_window['microphone']) {
+      if (!ecraft2learn.support_window['training using microphone']) {
           inform("Training request warning",
                  "Run the 'Train with audio buckets ...' command before using 'Audio label confidences'");
           return;
@@ -1841,7 +1841,7 @@ window.ecraft2learn =
           duration_in_seconds = 3; // 3 second default 
       }
       // convert from milliseconds to seconds
-      ecraft2learn.support_window['microphone'].postMessage({predict: duration_in_seconds*1000}, "*");
+      ecraft2learn.support_window['training using microphone'].postMessage({predict: duration_in_seconds*1000}, "*");
       window.addEventListener("message", receive_confidences);  
   },
   add_image_to_training: function (costume_number, label, callback, sprite) {
@@ -1874,7 +1874,7 @@ window.ecraft2learn =
   },
   support_window_ready: function (source) {
       if (!source) {
-          source = 'camera';
+          source = 'training using camera';
       }
       return typeof ecraft2learn.support_window !== 'undefined' && 
              typeof ecraft2learn.support_window[source] !== 'undefined' && 
@@ -1886,7 +1886,7 @@ window.ecraft2learn =
           return false;
       }
       if (!source) {
-          source = 'camera';
+          source = 'training using camera';
       }
       return !!ecraft2learn.support_iframe_visible[source];
   },
@@ -1895,7 +1895,7 @@ window.ecraft2learn =
           return false;
       }
       if (!source) {
-          source = 'camera';
+          source = 'training using camera';
       }
       return !!ecraft2learn.support_window_ready[source];
   },
