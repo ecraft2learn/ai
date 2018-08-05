@@ -100,6 +100,7 @@ window.addEventListener(
              let style = element.getAttribute('container_style');
              let caption = element.getAttribute('caption');
              let full_screen = element.getAttribute('full_screen');
+             let edit_mode = element.getAttribute('edit_mode');
              let stage_ratio = element.getAttribute('stage_ratio');
              let figure     = document.getElementById(name);
              let iframe     = document.createElement('iframe');
@@ -132,6 +133,9 @@ window.addEventListener(
                      project_folder = "/ai/projects/";
                      if (full_screen === 'true') {
                          iframe.setAttribute('full_screen', 'true');
+                     }
+                     if (edit_mode) {
+                         iframe.setAttribute('edit_mode', 'true');
                      }
                      if (stage_ratio) {
                          iframe.setAttribute('stage_ratio', stage_ratio);
