@@ -29,31 +29,13 @@ Saving your work, closing the tab, and then reopening the tab seems to fix this.
 <h3 id="train-camera">Nothing happens when using the <span class="block-name">Train using camera</span>
 or <span class="block-name">Poses</span> blocks</h3>
 <p>
-The first time the <span class="block-name">Train using camera</span>
-or the <span class="block-name">poses</span> blocks from <a href="chapter-4.html">chapter 4</a>
-is run you may see it blocked as a "popup".
-</p>
-<figure>
-<img src="images/popup-blocked.png" class="center">
-<figcaption>The first time a training window is created it will be treated as a blocked 'popup'</figcaption>
-</figure>
-<p>
-To fix the problem click the tiny icon that shows a page with a red box containing a white 'x' and
-select 'Always allow popups from ...'.
-</p>
-<figure>
-<img src="images/popup-dialog.png" class="center">
-<figcaption>How to allow popups needed for training</figcaption>
-</figure>
-<p>After allowing popups you may need to refresh the page.
-</p>
-<p>
 Training a computer to recognise images runs quickly on modern PCs because it is able to use the
 <a href="http://www.nvidia.com/object/what-is-gpu-computing.html" target="_blank">GPU</a> that is part of nearly all computers.
 There is a GPU on a Raspberry Pi but you may find it runs very slowly.
 On a high-end laptop training takes 100 to 200 milliseconds per image and prediction takes 40 to 60 milliseconds.
 On a high-end Android phone training ranges from 60 to 1500 milliseconds and prediction takes 1.1 to 1.3 seconds.
 On a Raspberry Pi training takes 80 to 250 seconds and prediction 100 to 2500 seconds (2 or 3 minutes is typical).
+At the time of writing this developers are actively working on the Android version of deep learning and not all examples work yet.
 </p>
 <p>
 Developers are working on a means to save a model after training.

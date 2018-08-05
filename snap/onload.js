@@ -13,10 +13,15 @@ window.addEventListener('load', function () {
 	let full_screen = true;
 	let run_full_screen = true;
 	let edit_mode = false;
+	let project_path;
 	const load_project_string = 
 		function (project_text) {
 			// timeout wasn't needed before Snap 4.1
 			// without it iframes show only Snap! background texture
+			if (!project_text || project_text.indexOf('Status 404 – Not Found') >= 0) {
+				ide_morph.showMessage("Error fetching " + project_path);
+				return;
+			}
 			setTimeout(function () {
 						   ide_morph.rawOpenProjectString(project_text);
 						   if (full_screen) {
@@ -32,17 +37,19 @@ window.addEventListener('load', function () {
 					   1000);
 	};
     const fetch_and_load = function (project_path) {
+    	ide_morph.showMessage("Loading...", 10);
     	fetch(project_path).then(function (response) {
+    		                         ide_morph.showMessage("");
 									 response.text().then(load_project_string);
 								 }).catch(function (error) {
-									 console.error("Error fetching " + project_path + ": " + error.message);
+									 ide_morph.showMessage("Error fetching " + project_path + ": " + error.message);
 								 });
     };
 	world = new WorldMorph(world_canvas);
 //  world.worldCanvas.focus(); // not good for pages with iframes containing Snap! programs
 	ide_morph.openIn(world);
 	if (window.frameElement) { // if running in an iframe see if a local project_path is declared
-		var project_path = window.frameElement.getAttribute("project_path");
+		project_path = window.frameElement.getAttribute("project_path");
 		run_full_screen = window.frameElement.getAttribute("run_full_screen");
 		full_screen = run_full_screen || window.frameElement.getAttribute("full_screen");
 		edit_mode = window.frameElement.getAttribute("edit_mode");
@@ -64,11 +71,12 @@ window.addEventListener('load', function () {
 		const parameters = new URLSearchParams(window.location.search);
 		if (parameters.has('project')) {
 			let project_name = parameters.get('project');
-			let project_path = project_name;
+			project_path = project_name;
 			if (project_name.indexOf('/') < 0) {
 				// if just a name use the default folder and extension
 				project_path = "/ai/projects/" + project_path  + ".xml";
 			}
+			edit_mode = parameters.has('editMode');
 			fetch_and_load(project_path);
 		}
 	}
