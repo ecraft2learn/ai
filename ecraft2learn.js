@@ -1928,6 +1928,7 @@ window.ecraft2learn =
           };
           window.addEventListener("message", receive_poses);
       };
+      initialise_support_window_variables();
       ask_for_poses();
   },
   display_support_window: open_support_window,
