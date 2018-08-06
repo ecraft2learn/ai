@@ -39,6 +39,15 @@ function JsSpeechRecognizer() {
     // Get an audio context
     this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
+    // following added by Ken Kahn
+    // see https://developers.google.com/web/updates/2017/09/autoplay-policy-changes#webaudio
+    if (this.audioCtx) {
+        document.querySelectorAll('button').forEach(function (button) {
+            button.addEventListener('click', function() {
+                this.audioCtx.resume().then(() => {});
+            });
+        });
+    }
 
     // Generate functions for keyword spotting
     this.findDistanceForKeywordSpotting = this.generateFindDistanceForKeywordSpotting(-1);
