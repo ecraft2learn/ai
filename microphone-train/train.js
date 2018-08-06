@@ -29,6 +29,14 @@
     });
     create_training_buttons(training_class_names, train_on, train_off);
     create_test_button(training_class_names, speech_recognizer);
+    // see https://developers.google.com/web/updates/2017/09/autoplay-policy-changes#webaudio
+    if (speech_recognizer.audioCtx) {
+        document.querySelectorAll('button').forEach(function (button) {
+            button.addEventListener('click', function() {
+                speech_recognizer.audioCtx.resume();
+            });
+        });
+    }
     create_return_to_snap_button();
 };
 
