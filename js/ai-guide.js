@@ -63,6 +63,8 @@ window.addEventListener(
          var hide_next_sibling_until_click = function (element) {
              if (window.location.search.indexOf("student") < 0)  {
                  // for teachers always show the advanced material
+                 // no need for the box around this material
+                 element.nextElementSibling.classList.remove('advanced-topic-body');
                  return;
              }
              element.nextElementSibling.style.display = 'none';
