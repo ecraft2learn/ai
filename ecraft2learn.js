@@ -644,8 +644,11 @@ window.ecraft2learn =
           iframe.style.border = 0;
           iframe.style.position = 'absolute';
           iframe.style.backgroundColor = 'white';
+          // see https://sites.google.com/a/chromium.org/dev/Home/chromium-security/deprecating-permissions-in-cross-origin-iframes
           if (source === 'training using microphone') {
-              iframe.allow = "microphone"; // at least Chrome 65 requires this
+              iframe.allow = "microphone"; 
+          } else if (source === 'training using camera') {
+              iframe.allow = "camera";
           }
           ecraft2learn.support_iframe[source] = iframe;
           ecraft2learn.support_iframe_visible[source] = true;
