@@ -709,10 +709,12 @@ window.ecraft2learn =
       function (message_maker, training_image_width, training_image_height, image, alert_message) {
           // if image is undefined then the video element is used
           // if alert_message is undefined no message is displayed if the posenet window hasn't been created
+          initialise_support_window_variables();
           machine_learning_window_request(ecraft2learn.support_window['posenet'], message_maker, training_image_width, training_image_height, image, alert_message);
       };
   const support_window_request = 
       function (alert_message, message_maker, training_image_width, training_image_height, image) {
+          initialise_support_window_variables();
           machine_learning_window_request(ecraft2learn.support_window['training using camera'], message_maker, training_image_width, training_image_height, image, alert_message);
   };
   const TRAINING_IMAGE_WIDTH  = 227;
