@@ -48,7 +48,19 @@ function create_return_to_snap_button(innerHTML) {
     return_to_snap_button.addEventListener('click',
                                            function(event) {
                                                window.parent.postMessage('Hide support iframe', "*");
+                                               let children = document.body.children;
+                                               Array.from(children).forEach(function (child) {
+                                                   child.style.opacity = 0;
+                                               });
                                            });
+     window.addEventListener('message', function (event) {
+         if (event.data === 'Show support iframe') {
+             let children = document.body.children;
+                 Array.from(children).forEach(function (child) {
+                     child.style.opacity = 1;
+                 });             
+         }
+     });                                                
     document.body.appendChild(return_to_snap_button);
 }
 

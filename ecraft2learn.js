@@ -600,10 +600,7 @@ window.ecraft2learn =
       }
       ecraft2learn.support_iframe[source].style.width  = "100%";
       ecraft2learn.support_iframe[source].style.height = "100%";
-      let children = ecraft2learn.support_iframe[source].contentDocument.body.children;
-      Array.from(children).forEach(function (child) {
-          child.style.opacity = 1;
-      });
+      ecraft2learn.support_window[source].postMessage('Show support iframe', '*');
       ecraft2learn.support_iframe_visible[source] = true; 
   };
   const create_machine_learning_window = function (source, iframe_in_new_tab, together_url, together) {
@@ -661,10 +658,6 @@ window.ecraft2learn =
               if (event.data === 'Hide support iframe') {
                   ecraft2learn.support_iframe[source].style.width  = "1px";
                   ecraft2learn.support_iframe[source].style.height = "1px";
-                  let children = ecraft2learn.support_iframe[source].contentDocument.body.children;
-                  Array.from(children).forEach(function (child) {
-                      child.style.opacity = 0;
-                  });
                   ecraft2learn.support_iframe_visible[source] = false;
               } else if (event.data === "Ready") {
                   ecraft2learn.support_window_ready[source] = true;             
