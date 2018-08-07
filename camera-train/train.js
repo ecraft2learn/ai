@@ -120,6 +120,12 @@ class Main {
                                 if (typeof event.data.predict !== 'undefined') {
 //                                  this.stop(); // done training -- might do more training later
 //                                  no need to stop this since only runs when not hidden
+                                    if (this.knn.getNumExamples() === 0) {
+                                        event.source.postMessage({error: "Cannot make any predictions before training. " + 
+                                                                         "Try this again after doing some training."},
+                                                                 "*");
+                                        return;
+                                    }
                                     var image_url = event.data.predict;
                                     load_image(image_url,
                                                function (image) {

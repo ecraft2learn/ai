@@ -1786,6 +1786,9 @@ window.ecraft2learn =
               invoke_callback(callback, javascript_to_snap(event.data.confidences));
               window.removeEventListener("message", receive_confidences);
           };
+          if (typeof event.data.error !== 'undefined') {
+              inform("Message received from training window", event.data.error);
+          }
       };
       record_callbacks(callback);
       support_window_request("You need to train the system before using 'Current image label confidences'.\n" +
