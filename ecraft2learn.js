@@ -2019,7 +2019,7 @@ window.ecraft2learn =
       };
       let current_process;
       let pending_callbacks = [];
-      let report_progress = function (best_word, best_distance, words_considered) {
+      let report_progress = function (best_word, best_distance, words_considered, status) {
           if (word_found_callback) {
               if (use_distance) {
                   best_distance = Math.sqrt(best_distance); // distance was squared for efficiency
@@ -2027,13 +2027,13 @@ window.ecraft2learn =
               // report only 5 decimal digits
               best_distance = Math.round(100000*best_distance)/100000;
               let invoke_callback_or_wait_for_previous_callback = 
-                  function (called_by_timeout, best_word, best_distance, words_considered) {
+                  function (called_by_timeout, best_word, best_distance, words_considered, status) {
                       if (!called_by_timeout) {
                           pending_callbacks.push(
                               function () {
 //                                console.log(best_word, best_distance, words_considered);
                                   current_process = invoke_callback(word_found_callback, 
-                                                                    best_word, best_distance, words_considered);
+                                                                    best_word, best_distance, words_considered, status);
                                });
                       }
                       if (!current_process || !current_process.context || current_process.readyToTerminate) {
@@ -2049,24 +2049,25 @@ window.ecraft2learn =
                                  },
                                  500);                         
               };
-              invoke_callback_or_wait_for_previous_callback(false, best_word, best_distance, words_considered);                    
+              invoke_callback_or_wait_for_previous_callback(false, best_word, best_distance, words_considered, status);                    
           };
       };
+      const target_magnitude = magnitude(target_features);
       Object.keys(words_to_features[language]).forEach(function (word) {
           if (exceptions.indexOf(word) < 0) {
               let candidate_features = words_to_features[language][word];
               words_considered++;
               distance = use_distance ? distance_squared(target_features, candidate_features) :
-                         // subtract 1 since closest cosine similarity is 1
-                         1-cosine_similarity(target_features, candidate_features, undefined, 1); 
+                                        // subtract 1 since closest cosine similarity is 1
+                                        1-cosine_similarity(target_features, candidate_features, target_magnitude); 
               if (distance < best_distance) {
                   best_word = word;
                   best_distance = distance;
-                  report_progress(best_word, best_distance, words_considered);
+                  report_progress(best_word, best_distance, words_considered, 'interim');
               }
           }
       });
-      report_progress(best_word, best_distance, words_considered);
+      report_progress(best_word, best_distance, words_considered, 'final');
       return best_word;
   },
   outstanding_callbacks: [],
