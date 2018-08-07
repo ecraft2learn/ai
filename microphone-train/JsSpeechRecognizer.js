@@ -687,7 +687,7 @@ JsSpeechRecognizer.prototype.calcConfidence = function(distance, modelEntry) {
         sum += modelEntry[i];
     }
 
-    return (1 - (distance / sum));
+    return (1 - (distance / (sum+1))); // Ken Kahn added +1 to this to avoid division by zero
 };
 
 /**
