@@ -1449,12 +1449,20 @@ window.ecraft2learn =
         }
     },
 
+  camera_ready_with_dimensions: function (width, height) {
+     return ecraft2learn.video && 
+            ecraft2learn.video.readyState === 4 && // video is ready
+            (width === 0 || // dimensions not specified or unchanged
+             (ecraft2learn.canvas.width === +width && ecraft2learn.canvas.height === +height)); 
+  },
+
   setup_camera: function (width, height, after_setup_callback) {
       // sets up the camera for taking photos and sending them to an AI cloud service for recognition
       // causes some methods to be defined in this scope
       // supported service providers are currently 'Google', 'Microsoft', and IBM 'Watson' (or 'IBM Watson')
       // after_setup_callback is optional and called once setup completes
-      if (width === 0 && ecraft2learn.canvas) {
+      if (ecraft2learn.canvas &&
+           (width === 0 || (ecraft2learn.canvas.width === +width && ecraft2learn.canvas.height === +height))) {
           // already initialised and not changing the dimensions
           invoke_callback(after_setup_callback);
           return;
