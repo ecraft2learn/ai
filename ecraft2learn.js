@@ -1513,11 +1513,18 @@ window.ecraft2learn =
         }
     },
 
-  camera_ready_with_dimensions: function (width, height) {
-     return ecraft2learn.video && 
-            ecraft2learn.video.readyState === 4 && // video is ready
-            (width === 0 || // dimensions not specified or unchanged
-             (ecraft2learn.canvas.width === +width && ecraft2learn.canvas.height === +height)); 
+  camera_ready: function () {
+     return !!ecraft2learn.video && 
+            ecraft2learn.video.readyState === 4; 
+  },
+
+  set_camera_dimensions: function (width, height) {
+      if (ecraft2learn.canvas && width && height) {
+          ecraft2learn.canvas.width  = +width;
+          ecraft2learn.canvas.height = +height;
+          return true;
+      }
+      return false;
   },
 
   setup_camera: function (width, height, after_setup_callback) {
@@ -1585,18 +1592,18 @@ window.ecraft2learn =
       video.setAttribute('playsinline', '');
   },
 
-  ecraft2learn.add_photo_as_costume = function (sprite) {
+  add_photo_as_costume: function (sprite) {
       // deprecated once I understood that costumes were first-class objects - see costume_from_camera
       add_ecraft2learn_photo_to_ecraft2learn_canvas();
       add_costume(create_costume(ecraft2learn.canvas), sprite);
-  };
+  },
 
-  ecraft2learn.costume_from_camera = function () {
+  costume_from_camera: function () {
       add_ecraft2learn_photo_to_ecraft2learn_canvas();
       return create_costume(ecraft2learn.canvas);
-  };
+  },
 
-  ecraft2learn.update_costume_from_video = function (costume_or_costume_number, sprite) {
+  update_costume_from_video: function (costume_or_costume_number, sprite) {
       // costume_number is deprecated but kept for backwards compatibility
       var costume = typeof costume_or_costume_number === 'object' ?
                            costume_or_costume_number :
@@ -1605,9 +1612,9 @@ window.ecraft2learn =
       var context = canvas.getContext('2d');
       context.drawImage(ecraft2learn.video, 0, 0, ecraft2learn.canvas.width, ecraft2learn.canvas.height);
       sprite.drawNew();
-  };
+  },
 
-  ecraft2learn.take_picture_and_analyse = function (cloud_provider, show_photo_or_costume, snap_callback) {
+  take_picture_and_analyse: function (cloud_provider, show_photo_or_costume, snap_callback) {
       // snap_callback is called with the result of the image recognition
       // show_photo_or_costume if a boolean displays the photo when it is taken -- for backwards compatibility
       // the new normal use if that show_photo_or_costume is a costume to be sent to the services
@@ -1692,7 +1699,7 @@ window.ecraft2learn =
                                        "A vision recognition service provider needs to be chosen." :
                                        "Unknown cloud provider: " + cloud_provider);
     }
-  };
+  },
 
   image_property: function (cloud_provider, property_name_or_names) {
       cloud_provider = cloud_provider.trim();
