@@ -8,22 +8,23 @@
     <script>
     words_to_features = {}; // need to create this before loading the wiki words
     </script>
-    <script src="ja/wiki-words.js"></script>
+    <script src="wiki-words.js"></script>
     <script>
 document.addEventListener('DOMContentLoaded', function () {
-	const language = 'ja';
+	const path = window.location.pathname;
+	const language = path.substr(path.lastIndexOf('/')-2, 2);
 	const embeddings = Object.values(words_to_features[language]);
 	const words = Object.keys(words_to_features[language]);
 	const data = tf.tensor2d(embeddings);
 
 	// Get a tsne optimizer
-	const tsneOpt = tsne.tsne(data, {verbose: true}); //, {perplexity: 36});
+	const tsneOpt = tsne.tsne(data, {perplexity: 36});
 
 	// Compute a T-SNE embedding, returns a promise.
-	// Runs for 1000 iterations be default.
+	// Runs for 1000 iterations by default.
 	let locations = "";
 	locations += "words_to_locations['" + language + "'] = {\n";
-	tsneOpt.compute(250).then(() => {
+	tsneOpt.compute().then(() => {
 	    // tsne.coordinate returns a *tensor* with x, y coordinates of
 	    // the embedded data.
 	    const coordinates = tsneOpt.coordinates().dataSync();

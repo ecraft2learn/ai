@@ -1,0 +1,13 @@
+{
+  "embeddings": [
+    {
+      "tensorName": "Swedish",
+      "tensorShape": [
+        20000,
+        300
+      ],
+      "tensorPath": "https://ecraft2learn.github.io/ai/word-embeddings/sv/projector-vectors.tsv",
+      "metadataPath": "https://ecraft2learn.github.io/ai/word-embeddings/sv/projector-labels.tsv",
+    }
+  ]
+}

@@ -6,11 +6,11 @@
     <script>
     words_to_features = {}; // need to create this before loading the wiki words
     </script>
-    <script src="en/wiki-words.js"></script>
+    <script src="wiki-words.js"></script>
     <script>
 
 document.addEventListener('DOMContentLoaded', function () {
-	const language = 'en';
+	const language = Object.keys(words_to_features)[0];
 	const vectors = Object.values(words_to_features[language]);
 	let vectors_string = "";
 	const words = Object.keys(words_to_features[language]);

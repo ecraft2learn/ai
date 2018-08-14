@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+<head>
+	<title>tSNE of Word embeddings</title>
+	<meta charset='utf-8'>
+	<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-tsne"></script>
+    <script>
+    words_to_features = {}; // need to create this before loading the wiki words
+    </script>
+    <script src="wiki-words.js"></script>
+    <script>
+document.addEventListener('DOMContentLoaded', function () {
+	const path = window.location.pathname;
+	const language = path.substr(path.lastIndexOf('/')-2, 2);
+	const embeddings = Object.values(words_to_features[language]);
+	const words = Object.keys(words_to_features[language]);
+	const data = tf.tensor2d(embeddings);
+
+	// Get a tsne optimizer
+	const tsneOpt = tsne.tsne(data, {verbose: true}); //, {perplexity: 36});
+
+	// Compute a T-SNE embedding, returns a promise.
+	// Runs for 1000 iterations by default.
+	let locations = "";
+	locations += "words_to_locations['" + language + "'] = {\n";
+	tsneOpt.compute().then(() => {
+	    // tsne.coordinate returns a *tensor* with x, y coordinates of
+	    // the embedded data.
+	    const coordinates = tsneOpt.coordinates().dataSync();
+	    const precision = function (x) {
+	    	// enough accuracy
+		    return Math.round(x*10000)/10000;
+	    };
+	    let minimum_x = Number.MAX_VALUE;
+	    let minimum_y = Number.MAX_VALUE;
+	    let maximum_x = Number.MIN_VALUE;
+	    let maximum_y = Number.MIN_VALUE;
+	    words.forEach(function (word, index) {
+		    let x = coordinates[2*index];
+		    let y = coordinates[2*index+1];
+		    locations += '"' + word + '"' + ":[" + precision(x) + "," + precision(y) + "],\n";
+		    if (x > maximum_x) {
+		        maximum_x = x;
+		    }
+		    if (y > maximum_y) {
+			    maximum_y = y;
+		    }
+		    if (x < minimum_x) {
+			    minimum_x = x;
+		    }
+		    if (y < minimum_y) {
+			    minimum_y = y;
+		    }
+	    });
+	    locations += "minimum_x:" + minimum_x + ",\n";
+	    locations += "minimum_y:" + minimum_y + ",\n";
+	    locations += "maximum_x:" + maximum_x + ",\n";
+	    locations += "maximum_y:" + maximum_y + ",\n";
+	    locations += "};\n";
+	    const locations_element = document.getElementById('locations');
+	    locations_element.value = locations;
+	  });	
+});
+    </script>
+	</head>
+<body>
+<textarea id="locations" style="width:800px; height:400px"></textarea>
+</body>
+</html>
