@@ -110,7 +110,7 @@ window.ecraft2learn =
       const enhance_snap_openProject = function () {
           let original_open_project = SnapSerializer.prototype.openProject;
           SnapSerializer.prototype.openProject = function (project, ide) {
-              if (ecraft2learn.snap_project_opened && top !== window) {
+              if (ecraft2learn.snap_project_opened && window.parent === window) {
                   // already been opened and not inside an iframe
                   // problem with the following is that some ecraft2learn functions have
                   // closed over outer variables and also some window's listeners have been added
