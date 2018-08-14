@@ -251,6 +251,12 @@ window.ecraft2learn =
         }
         return x;
     };
+    let add_ecraft2learn_photo_to_ecraft2learn_canvas = function () {
+        add_photo_to_canvas(ecraft2learn.canvas,
+                            ecraft2learn.video,
+                            ecraft2learn.canvas.width,
+                            ecraft2learn.canvas.height);
+    };
     let add_photo_to_canvas = function (canvas, video, width, height) {
         // Capture a photo by fetching the current contents of the video
         // and drawing it into a canvas, then converting that to a PNG
@@ -548,6 +554,64 @@ window.ecraft2learn =
         sprite.addCostume(costume);
         sprite.wearCostume(costume);
         ide.hasChangedMedia = true;
+    };
+    const post_image = function post_image(image, cloud_provider, callback, error_callback) {
+        // based upon https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/Sending_forms_through_JavaScript
+        cloud_provider = cloud_provider.trim();
+        if (cloud_provider === 'Watson') {
+            cloud_provider = 'IBM Watson';
+        }
+        let key = get_key(cloud_provider + " image key");
+        let formData;
+        if (!key) {
+            callback("No key provided so unable to ask " + cloud_provider + " to analyse an image.");
+            return;
+        }
+        let XHR = new XMLHttpRequest();
+        XHR.addEventListener('load', function(event) {
+            show_message(""); // remove loading message
+            callback(event);
+        });
+        if (!error_callback) {
+            error_callback = function (event) {
+                console.error(event);
+            }
+        }
+        XHR.addEventListener('error', function (event) {
+            show_message(""); // remove loading message
+            error_callback(event);
+        });
+        show_message("Contacting " + cloud_provider);
+        switch (cloud_provider) {
+          case "IBM Watson":
+              formData = new FormData();
+              formData.append("images_file", image, "blob.png");
+              // beginning early December 2017 Watson began signalling No 'Access-Control-Allow-Origin' header
+              // Note that "Lite" plans are deleted after 30 days of inactivity...
+//               var proxy_url = "https://toontalk.appspot.com/p/" + 
+//               encodeURIComponent("https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key);
+//               XHR.open('POST', proxy_url);
+              XHR.open('POST', "https://apikey:" + key + "gateway.watsonplatform.net/visual-recognition/api/v3/classify?version=2018-03-19");
+              XHR.send(formData);
+              break;
+          case "Google":
+              XHR.open('POST', "https://vision.googleapis.com/v1/images:annotate?key=" + key);
+              XHR.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+              XHR.send(JSON.stringify({"requests":[{"image":{"content": image.substring("data:image/png;base64,".length)},
+                                                    "features":[{"type": "LABEL_DETECTION",  "maxResults":32},
+                                                                {"type": "TEXT_DETECTION",   "maxResults":32},
+                                                                {"type": "FACE_DETECTION",   "maxResults":32},
+                                                                {"type": "IMAGE_PROPERTIES", "maxResults":32}
+                                                               ]}]
+                                      }));
+              break;
+          case "Microsoft":
+              // see https://social.msdn.microsoft.com/Forums/en-US/807ee18d-45e5-410b-a339-c8dcb3bfa25b/testing-project-oxford-ocr-how-to-use-a-local-file-in-base64-for-example?forum=mlapi
+              XHR.open('POST', "https://westeurope.api.cognitive.microsoft.com/vision/v1.0/analyze?visualFeatures=Description,Tags,Faces,Color,Categories&subscription-key=" + key);
+              XHR.setRequestHeader('Content-Type', 'application/octet-stream');
+              XHR.send(image);
+              break;
+          }
     };
     const machine_learning_browser_warning = function () {
         if (window.navigator.userAgent.indexOf("Chrome") < 0) {
@@ -1485,115 +1549,51 @@ window.ecraft2learn =
       // if video and canvas already exist this may change its dimensions
       let video  = ecraft2learn.video  || document.createElement('video');
       let canvas = ecraft2learn.canvas || document.createElement('canvas');
-      const post_image = function post_image(image, cloud_provider, callback, error_callback) {
-          // based upon https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/Sending_forms_through_JavaScript
-          cloud_provider = cloud_provider.trim();
-          if (cloud_provider === 'Watson') {
-              cloud_provider = 'IBM Watson';
-          }
-          var key = get_key(cloud_provider + " image key");
-          var formData, XHR;
-          if (!key) {
-             callback("No key provided so unable to ask " + cloud_provider + " to analyse an image.");
-             return;
-          }
-          XHR = new XMLHttpRequest();
-          XHR.addEventListener('load', function(event) {
-              show_message(""); // remove loading message
-              callback(event);
-          });
-          if (!error_callback) {
-              error_callback = function (event) {
-                  console.error(event);
-              }
-          }
-          XHR.addEventListener('error', function (event) {
-              show_message(""); // remove loading message
-              error_callback(event);
-          });
-          show_message("Contacting " + cloud_provider);
-          switch (cloud_provider) {
-          case "IBM Watson":
-              formData = new FormData();
-              formData.append("images_file", image, "blob.png");
-              // beginning early December 2017 Watson began signalling No 'Access-Control-Allow-Origin' header
-              // Note that "Lite" plans are deleted after 30 days of inactivity...
-//               var proxy_url = "https://toontalk.appspot.com/p/" + 
-//               encodeURIComponent("https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key);
-//               XHR.open('POST', proxy_url);
-              XHR.open('POST', "https://apikey:" + key + "gateway.watsonplatform.net/visual-recognition/api/v3/classify?version=2018-03-19");
-              XHR.send(formData);
-              break;
-          case "Google":
-              XHR.open('POST', "https://vision.googleapis.com/v1/images:annotate?key=" + key);
-              XHR.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-              XHR.send(JSON.stringify({"requests":[{"image":{"content": image.substring("data:image/png;base64,".length)},
-                                                    "features":[{"type": "LABEL_DETECTION",  "maxResults":32},
-                                                                {"type": "TEXT_DETECTION",   "maxResults":32},
-                                                                {"type": "FACE_DETECTION",   "maxResults":32},
-                                                                {"type": "IMAGE_PROPERTIES", "maxResults":32}
-                                                               ]}]
-                                      }));
-              break;
-          case "Microsoft":
-              // see https://social.msdn.microsoft.com/Forums/en-US/807ee18d-45e5-410b-a339-c8dcb3bfa25b/testing-project-oxford-ocr-how-to-use-a-local-file-in-base64-for-example?forum=mlapi
-              XHR.open('POST', "https://westeurope.api.cognitive.microsoft.com/vision/v1.0/analyze?visualFeatures=Description,Tags,Faces,Color,Categories&subscription-key=" + key);
-              XHR.setRequestHeader('Content-Type', 'application/octet-stream');
-              XHR.send(image);
-              break;
-          }
+      let callback = function(stream) {
+          video.srcObject = stream;
+          video.width  = width;
+          video.height = height;
+          video.play();
+          ecraft2learn.video = video;
+          ecraft2learn.canvas = canvas;
+          invoke_callback(after_setup_callback);
       };
-      const startup = function startup() {
-          let callback = function(stream) {
-//               var vendorURL = window.URL || window.webkitURL;
-//               video.src = vendorURL.createObjectURL(stream);
-              video.srcObject = stream;
-              video.width  = width;
-              video.height = height;
-              video.play();
-              ecraft2learn.video = video;
-              ecraft2learn.canvas = canvas;
-              invoke_callback(after_setup_callback);
-          };
-          const error_callback = function(error) {
-              inform("Camera access error", error.message);
-              console.log(error);
-          };
-          var constraints = {video: true,
-                             audio: false};
-          video.style.display  = 'none';
-          canvas.style.display = 'none';
-          canvas.setAttribute('width', width);
-          canvas.setAttribute('height', height);
-          document.body.appendChild(video);
-          document.body.appendChild(canvas);
-          if (navigator.mediaDevices) {
-              navigator.mediaDevices.getUserMedia(constraints)
-                  .then(callback)
-                  .catch(error_callback);
-          } else {
-              console.log("test this");
-              navigator.getMedia = (navigator.getUserMedia ||
-                                    navigator.webkitGetUserMedia ||
-                                    navigator.msGetUserMedia);
-              navigator.getMedia(constraints, callback, error_callback);
-      //      navigator.mediaDevices.getUserMedia(constraints, callback, error_callback);
-          }
+      const error_callback = function(error) {
+          inform("Camera access error", error.message);
+          console.log(error);
       };
+      let constraints = {video: true,
+                         audio: false};
+      video.style.display  = 'none';
+      canvas.style.display = 'none';
+      canvas.setAttribute('width', width);
+      canvas.setAttribute('height', height);
+      document.body.appendChild(video);
+      document.body.appendChild(canvas);
+      if (navigator.mediaDevices) {
+          navigator.mediaDevices.getUserMedia(constraints)
+              .then(callback)
+              .catch(error_callback);
+      } else {
+          console.log("test this");
+          navigator.getMedia = (navigator.getUserMedia ||
+                                navigator.webkitGetUserMedia ||
+                                navigator.msGetUserMedia);
+          navigator.getMedia(constraints, callback, error_callback);
+      }
       video.setAttribute('autoplay', '');
       video.setAttribute('playsinline', '');
-
-  // define new functions in the scope of setup_camera
+  },
 
   ecraft2learn.add_photo_as_costume = function (sprite) {
       // deprecated once I understood that costumes were first-class objects - see costume_from_camera
-      add_photo_to_canvas(canvas, video, width, height);
-      add_costume(create_costume(canvas), sprite);
+      add_ecraft2learn_photo_to_ecraft2learn_canvas();
+      add_costume(create_costume(ecraft2learn.canvas), sprite);
   };
 
   ecraft2learn.costume_from_camera = function () {
-      add_photo_to_canvas(canvas, video, width, height);
-      return create_costume(canvas);
+      add_ecraft2learn_photo_to_ecraft2learn_canvas();
+      return create_costume(ecraft2learn.canvas);
   };
 
   ecraft2learn.update_costume_from_video = function (costume_or_costume_number, sprite) {
@@ -1603,7 +1603,7 @@ window.ecraft2learn =
                            costume_of_sprite(costume_or_costume_number, sprite);
       var canvas = costume.contents;
       var context = canvas.getContext('2d');
-      context.drawImage(video, 0, 0, width, height);
+      context.drawImage(ecraft2learn.video, 0, 0, ecraft2learn.canvas.width, ecraft2learn.canvas.height);
       sprite.drawNew();
   };
 
@@ -1651,9 +1651,9 @@ window.ecraft2learn =
         costume = show_photo_or_costume;
         canvas_for_analysis = costume.contents;
     } else {
-        add_photo_to_canvas(canvas, video, width, height);
-        costume = create_costume(canvas);
-        canvas_for_analysis = canvas;
+        add_ecraft2learn_photo_to_ecraft2learn_canvas();
+        costume = create_costume(ecraft2learn.canvas);
+        canvas_for_analysis = ecraft2learn.canvas;
     }
     if (show_photo_or_costume === true) {
         add_costume(costume);
@@ -1693,13 +1693,6 @@ window.ecraft2learn =
                                        "Unknown cloud provider: " + cloud_provider);
     }
   };
-
-    if (document.body) {
-        startup();
-    } else {
-        window.addEventListener('load', startup, false);
-    }
-  },
 
   image_property: function (cloud_provider, property_name_or_names) {
       cloud_provider = cloud_provider.trim();
