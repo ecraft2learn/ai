@@ -2048,13 +2048,13 @@ window.ecraft2learn =
       var ask_for_poses = function (window_just_created) {
           if (!ecraft2learn.support_window['posenet'] || ecraft2learn.support_window['posenet'].closed) {
               open_posenet_window();
-              const listen_for_posenet_window_loaded = function (event) {
-                  if (event.data == "Loaded") {
+              const listen_for_posenet_window_ready = function (event) {
+                  if (event.data == "Ready") {
                       ask_for_poses(true);
-                      window.removeEventListener("message", listen_for_posenet_window_loaded);
+                      window.removeEventListener("message", listen_for_posenet_window_ready);
                   }
               }
-              window.addEventListener("message", listen_for_posenet_window_loaded);
+              window.addEventListener("message", listen_for_posenet_window_ready);
               return;                      
           }
           record_callbacks(callback);

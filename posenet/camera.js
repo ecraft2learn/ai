@@ -169,6 +169,8 @@ function setupFPS() {
   document.body.appendChild(stats.dom);
 }
 
+let first_time = true;
+
 function detectPoseInRealTime(video, net) {
   const canvas = document.getElementById('output');
   const ctx = canvas.getContext('2d');
@@ -240,6 +242,11 @@ function detectPoseInRealTime(video, net) {
 
     stats.end();
 
+    if (first_time) {
+        window.parent.postMessage("Ready", "*");
+        first_time = false;
+    }
+
     requestAnimationFrame(poseDetectionFrame);
   }
   // poseDetectionFrame() can lead to Error: The DOM is not ready yet.
@@ -272,11 +279,9 @@ async function bindPage() {
   }
 
   const video = await loadVideo(cameras[0].deviceId);
-
   setupGui(cameras, net);
   setupFPS();
   detectPoseInRealTime(video, net);
-  window.parent.postMessage("Ready", "*");
   create_return_to_snap_button();
 }
 
@@ -335,7 +340,8 @@ const respond_to_messages =
                        event.source.postMessage({poses: poses}, "*");
                        image_as_Array3D.dispose();
                  };
-             load_image(image_url,compute_poses);
+             load_image(image_url, compute_poses);
+//              window.removeEventListener("message", respond_to_messages);
         }
     };
 
