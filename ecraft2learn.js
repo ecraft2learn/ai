@@ -1665,7 +1665,7 @@ window.ecraft2learn =
     if (show_photo_or_costume === true) {
         add_costume(costume);
     }
-    image_recognitions[cloud_provider] = {costume: create_costume(canvas)};
+    image_recognitions[cloud_provider] = {costume: create_costume(ecraft2learn.canvas)};
     switch (cloud_provider) {
     case "IBM Watson":
     case "Microsoft":
