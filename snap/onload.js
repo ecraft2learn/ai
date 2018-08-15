@@ -57,7 +57,7 @@ window.addEventListener('load', function () {
 		if (project_path) {
 			fetch_and_load(project_path);
 		}
-		if (!full_screen || edit_mode) {
+		if (!full_screen && edit_mode) {
 			ide_morph.controlBar.hide();    // no need for the control bar
 			ide_morph.toggleAppMode(false); // launch in edit mode
 		}
