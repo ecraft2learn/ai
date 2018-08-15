@@ -66,6 +66,8 @@ figcaption {
 }
 .advanced-topic {
   cursor: pointer;
+  color: #316d37;
+  font-weight: bold;
 }
 .advanced-topic-body {
   padding: 10px;
