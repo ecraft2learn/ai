@@ -1959,7 +1959,7 @@ window.ecraft2learn =
       };
       var costume = typeof costume_or_costume_number === 'object' ?
                            costume_or_costume_number :
-                           costume_of_sprite(costume_number, sprite);
+                           costume_of_sprite(costume_or_costume_number, sprite);
       record_callbacks(callback);
       costume_to_image(costume,
                        function (image) {
