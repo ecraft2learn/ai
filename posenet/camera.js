@@ -170,6 +170,30 @@ function setupFPS() {
 }
 
 let first_time = true;
+let timer = undefined;
+let poseDetectionFrame; // at this scope so can easily restart
+
+let stop = function stop() { 
+    document.getElementById('video').pause();
+    cancelAnimationFrame(timer);
+    timer = undefined; // so don't restart multiple times
+};
+
+let restart = function restart() {
+    if (!timer) {
+        document.getElementById('video').play();
+        timer = requestAnimationFrame(poseDetectionFrame);
+    }
+};
+
+window.addEventListener("message",
+                        function (event) {
+                            if (event.data === 'stop') {
+                                stop();
+                            } else if (event.data === 'restart') {
+                                restart();
+                            }
+                        });
 
 function detectPoseInRealTime(video, net) {
   const canvas = document.getElementById('output');
@@ -179,7 +203,7 @@ function detectPoseInRealTime(video, net) {
   canvas.width = canvasSize;
   canvas.height = canvasSize;
 
-  async function poseDetectionFrame() {
+  poseDetectionFrame = async function poseDetectionFrame() {
     if (guiState.changeToArchitecture) {
       guiState.net.dispose();
 
