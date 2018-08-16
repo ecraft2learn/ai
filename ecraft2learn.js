@@ -832,7 +832,9 @@ window.ecraft2learn =
             "Mathura Style": 'mathura',
             "Leonid Afremov's Rain Princess": 'rain_princess',
             "Edvard Munch's Scream": 'scream',
-            "Théodore Géricault's Raft of the Medusa": 'wreck'
+            "Théodore Géricault's Raft of the Medusa": 'wreck',
+            "Matilde Pérez": 'matilde_perez', // this one doesn't work well so isn't in the menu of styles
+            "Roberto Matta": 'matta',
         };
         let time_stamp = Date.now();
         let send_request = function() {
