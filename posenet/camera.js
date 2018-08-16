@@ -244,6 +244,7 @@ function detectPoseInRealTime(video, net) {
 
     if (first_time) {
         window.parent.postMessage("Ready", "*");
+        create_return_to_snap_button();
         first_time = false;
     }
 
@@ -282,7 +283,6 @@ async function bindPage() {
   setupGui(cameras, net);
   setupFPS();
   detectPoseInRealTime(video, net);
-  create_return_to_snap_button();
 }
 
 navigator.getUserMedia = navigator.getUserMedia ||
