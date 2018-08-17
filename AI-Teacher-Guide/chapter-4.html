@@ -319,7 +319,8 @@ and the program should work just fine.
 <h4 id="pose-detection">Detecting poses of people</h4>
 <figure>
 <img src="/ai/images/pose-detection.gif" width=300 height=300 class="center">
-<figcaption>A demonstration of pose detection</figcaption></figure>
+<figcaption>A demonstration of pose detection</figcaption>
+</figure>
 <p>
 Google Creative Lab recently released browser-based software called <i>Posenet</i> for
 <a href="https://medium.com/tensorflow/real-time-human-pose-estimation-in-the-browser-with-tensorflow-js-7dd0bc881cd5" target="_blank">
@@ -371,7 +372,67 @@ can be enhanced in <a href="#simon-says-enhancements">many ways</a>.
 Be creative.
 </p>
 
-<h4 id="project-ideas">Possible project ideas using image recognition</h4>
+<h4 id="style-transfer">Creating images in the style of famous paintings</h4>
+<p>
+Recently researchers have invented a way to use two machine learning programs to take an image and turn it into one that 
+looks like a famous painting.
+This is called <a href="https://medium.com/data-science-group-iitr/artistic-style-transfer-with-convolutional-neural-network-7ce2476039fd" target="_blank">style transfer</a>.
+The <span class="block-name">Create costume in style ...</span> block takes in a Snap! sprite costume
+(that can be any image or captured from the camera) and a style name and produces a new costume in that style.
+</p>
+<figure class = "snap-iframe"
+        id = "style transfer exercise"
+        full_screen = "true"
+        edit_mode = "true"
+        stage_ratio = ".8"
+        container_style = "width: 1200px; height: 800px" 
+        caption = "Click the block to take a photo and recreate it in the style you select. TRY IT!">
+</figure>
+<p>
+The available styles are based upon these paintings:
+<figure>
+<img src="/ai/images/style-transfer/Tsunami_by_hokusai_19th_century.jpg">
+<figcaption><a href="https://en.wikipedia.org/wiki/The_Great_Wave_off_Kanagawa" target="_blank">Katsushika Hokusai's Great Wave off Kanagawa</a></figcaption>
+</figure>
+<figure>
+<img src="/ai/images/style-transfer/udnie-young-american-girl-1913.jpg">
+<figcaption><a href="https://www.wikiart.org/en/francis-picabia/udnie-young-american-girl-1913" target="_blank">Francis Picabia's Udnie</a></figcaption>
+</figure>
+<figure>
+<img src="/ai/images/style-transfer/la-muse_picasso.jpg">
+<figcaption><a href="https://en.wikipedia.org/wiki/Pablo_Picasso" target="_blank">Pablo Picasso</a>'s La Muse</figcaption>
+</figure>
+</p>
+<p>
+Here is a sample program that takes a photo and creates all available styles of it.
+It uses Snap!'s "ghost effect" to disolve in and out the styled images.
+</p>
+<figure class = "snap-iframe"
+        id = "style transfer"
+        full_screen = "true"
+        container_style = "width: 800px; height: 600px" 
+        caption = "Click the green flag, smile, wait, sit back and watch. TRY IT!">
+</figure>
+<h4>How style transfer works</h4>
+<p>
+The <span class="block-name">Create costume in style ...</span> block relies upon the work done by
+<a href="https://ml5js.org/docs/StyleTransfer" target="_blank">students at the New York University Tisch School of the Arts</a>
+who created web-based versions of style transfer models.
+The core idea is use a deep learning model that can recognise images to generate a new image that
+matches well the low-level style features of the style image and at the same time matches the
+high-level content features of a content image.
+Another machine learning model has been trained to do this quickly.
+</p>
+<p>
+A very good short video explaining how style transfer works is here:
+<iframe width="560" 
+        height="315"
+        src="https://www.youtube.com/embed/WHmp26bh0tI?rel=0"
+        frameborder="0"
+        allow="autoplay; encrypted-media"
+        allowfullscreen></iframe>
+</p>
+<h4 id="project-ideas">Possible project ideas using machine learning</h4>
 <p>
 Most of the <a class="guide-link" href="chapter-3.html#project-ideas" target="_blank">project ideas listed for using image recognition services</a>
 can be based upon the blocks described in this chapter.
@@ -379,6 +440,8 @@ There is much that training by users enables that cloud services can't do.
 You can train the system to recognise yourself, distinguish between your friends,
 gestures, and the things that
 your robots may encounter in its particular environment.
+</p>
+<p>
 Here are some project ideas that exploit the ability of users to train the system:
 <ul>
 <li>
@@ -438,6 +501,13 @@ Who might want to use such a system?
 Train the computer to know which part of a face is being pointed to.
 Have the program do different things depending upon whether you point to your eyes, ears, or mouth.
 </li>
+<li>
+And thousands more. Be creative.
+</li>
+</p>
+<p>
+Many projects are posible by using the pose detection block and style transfer block:
+<ul>
 <li id="simon-says-enhancements">
 There are many improvements one can make to the <a href="#simon-says-game"><i>Simon Says</i></a> game.
 The nose is the only recognised body part that doesn't have a left and right version, try to add it to the game.
@@ -457,11 +527,17 @@ Think animation, <a href="https://en.wikipedia.org/wiki/Telepresence" target="_b
 interactive art, fitness, sport science, security, and more.
 </li>
 <li>
-And thousands more. Be creative.
+Create a virtual art museum filled with style transfer images.
+The content images can come from a camera, web pages, drawings, and screenshots of programs like Google Earth or Street View.
+</li>
+<li>
+And much more. Imagine art projects using style transfer or games using pose detection.
 </li>
 </ul>
+</p>
+<p>
 The <a href="https://machinelearningforkids.co.uk/#!/worksheets" target="_blank">machine learning for kids site</a>
-also has sample projects.
+also has sample projects that can be adapted.
 </p>
 <h4>Future directions for this chapter</h4>
 <p>
@@ -484,6 +560,12 @@ What is machine learning?</a> and
 Machine learning in the world</a>.
 Technical details on the deep learning model used here are <a href="https://github.com/googlecreativelab/teachable-machine-boilerplate"
 target="_blank">documented here</a>.
+</p>
+<p>
+There is the <a href="https://ai.googleblog.com/2016/10/supercharging-style-transfer.html" target="_blank">Google blog post about style transfer</a>
+that explains the ideas and introduces the idea of generating images that match multiple styles.
+<a href="https://arxiv.org/pdf/1508.06576.pdf" target="_blank">A Neural Algorithm of Artistic Style</a> is the paper that pioneered
+the idea of using deep learning models to transfer style while preserving content.
 </p>
 <p>
 <h4>Learn about AI and language</h4>
