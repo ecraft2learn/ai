@@ -5,7 +5,7 @@ body {
 figure {
   display: block;
   text-align: center;
-  left-margin: 20px;
+/*   margin-left: 20px; */
 }
 figure img {
   display:      block;
@@ -84,6 +84,14 @@ figcaption {
 .this-is-new {
   color: red;
   font-weight: bold;
+}
+.flow-row {
+  display: inline;
+  /* margin: 0 1em 0 1em; */
+}
+.flow-row-child {
+  display: inline-block;
+  margin-left: 4px;
 }
 
 
