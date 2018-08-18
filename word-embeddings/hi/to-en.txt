@@ -3,7 +3,7 @@
 कि that
 वह he
 था was
-केलिए for
+के लिए for
 पर on
 हैं are
 साथ with
@@ -25,13 +25,14 @@
 आप you
 या or
 था had
+the
 की of
 तक to
 और and
 एक a
 में in
 हम we
-करसकतेहैं can
+कर सकते हैं can
 बाहर out
 अन्य other
 थे were
@@ -46,12 +47,12 @@
 एक an
 प्रत्येक each
 बता tell
-करताहै does
+करता है does
 सेट set
 तीन three
-चाहतेहैं want
+चाहते हैं want
 हवा air
-अच्छीतरहसे well
+अच्छी तरह से well
 भी also
 खेलने play
 छोटे small
@@ -64,20 +65,20 @@
 बड़ा large
 जादू spell
 जोड़ add
-औरभी even
+और भी even
 भूमि land
 यहाँ here
 चाहिए must
 बड़ा big
 उच्च high
 ऐसा such
-कापालनकरें follow
+का पालन करें follow
 अधिनियम act
 क्यों why
 पूछना ask
 पुरुषों men
 परिवर्तन change
-चलागया went
+चला गया went
 प्रकाश light
 तरह kind
 बंद off
@@ -96,7 +97,7 @@
 आत्म self
 पृथ्वी earth
 पिता father
-किसीभी any
+किसी भी any
 नई new
 काम work
 हिस्सा part
@@ -106,7 +107,7 @@
 निर्मित made
 जीना live
 जहां where
-केबाद after
+के बाद after
 वापस back
 थोड़ा little
 केवल only
@@ -123,12 +124,12 @@
 नीचे under
 नाम name
 बहुत very
-केमाध्यमसे through
+के माध्यम से through
 बस just
 फार्म form
 वाक्य sentence
 महान great
-लगताहै think
+लगता है think
 कहना say
 मदद help
 कम low
@@ -153,7 +154,7 @@
 उपयोग use
 अपने your
 रास्ता way
-केबारेमें about
+के बारे में about
 कई many
 तो then
 उन्हें them
@@ -163,7 +164,7 @@
 तो so
 इन these
 उसके her
-लंबेसमयतक long
+लंबे समय तक long
 कर make
 बात thing
 देखना see
@@ -173,7 +174,7 @@
 देखो look
 अधिक more
 दिन day
-सकताहै could
+सकता है could
 जाना go
 आ come
 किया did
@@ -195,7 +196,7 @@
 पक्ष side
 गया been
 अब now
-लगताहै find
+लगता है find
 सिर head
 खड़े stand
 खुद own
@@ -207,18 +208,18 @@
 स्कूल school
 बढ़ने grow
 अध्ययन study
-अबतक still
+अब तक still
 सीखना learn
 संयंत्र plant
 कवर cover
 भोजन food
 सूरज sun
 चार four
-केबीच between
+के बीच between
 राज्य state
 रखना keep
 आंख eye
-कभीनहीं never
+कभी नहीं never
 पिछले last
 चलो let
 सोचा thought
@@ -228,14 +229,14 @@
 खेत farm
 कठिन hard
 शुरुआत start
-होसकताहै might
+हो सकता है might
 कहानी story
 देखा saw
 दूर far
 समुद्र sea
 आकर्षित draw
 छोड़ा left
-देरसे late
+देर से late
 चलाने run
 जबकि while
 प्रेस press
@@ -247,17 +248,17 @@
 उत्तर north
 किताब book
 ले carry
-लेलिया took
+ले लिया took
 विज्ञान science
 खाने eat
 कमरे room
 दोस्त friend
-शुरूहुआ began
+शुरू हुआ began
 विचार idea
 मछली fish
 पहाड़ mountain
 रोक stop
-एकबार once
+एक बार once
 आधार base
 सुनना hear
 घोड़ा horse
@@ -270,11 +271,11 @@
 मुख्य main
 खुला open
 प्रतीत seem
-एकसाथ together
+एक साथ together
 अगला next
 सफेद white
 बच्चों children
-प्रारंभकरना begin
+प्रारंभ करना begin
 मिला got
 चलना walk
 उदाहरण example
@@ -288,7 +289,7 @@
 मार्क mark
 अक्सर often
 पत्र letter
-जबतक until
+जब तक until
 मील mile
 नदी river
 कार car
@@ -298,7 +299,7 @@
 पर्याप्त enough
 सादे plain
 लड़की girl
-हमेशाकीतरह usual
+हमेशा की तरह usual
 युवा young
 तैयार ready
 ऊपर above
@@ -306,7 +307,7 @@
 लाल red
 सूची list
 हालांकि though
-लगरहाहै feel
+लग रहा है feel
 वार्ता talk
 पक्षी bird
 शीघ्र soon
@@ -338,16 +339,16 @@
 समस्या problem
 टुकड़ा piece
 बताया told
-पताथा knew
+पता था knew
 पास pass
-केबादसे since
+के बाद से since
 शीर्ष top
 पूरे whole
 राजा king
 सड़क street
 इंच inch
 गुणा multiply
-कुछनहीं nothing
+कुछ नहीं nothing
 कोर्स course
 रहना stay
 पहिया wheel
@@ -394,7 +395,7 @@
 पूर्व east
 रंग paint
 भाषा language
-केबीच among
+के बीच among
 इकाई unit
 बिजली power
 शहर town
@@ -421,14 +422,14 @@
 किया done
 सुंदरता beauty
 ड्राइव drive
-खड़ाहुआ stood
-होतेहैं contain
+खड़ा हुआ stood
+होते हैं contain
 सामने front
 सिखाना teach
 सप्ताह week
 अंतिम final
 दिया gave
-हरेरंग green
+हरे रंग green
 ओह oh
 त्वरित quick
 विकसित develop
@@ -460,7 +461,7 @@
 पश्चिम west
 जमीन ground
 ब्याज interest
-तकपहुँचने reach
+तक पहुँचने reach
 तेजी fast
 क्रिया verb
 गाना sing
@@ -474,17 +475,17 @@
 सरल simple
 कई several
 स्वर vowel
-कीओर toward
+की ओर toward
 युद्ध war
 रखना lay
-केखिलाफ against
+के खिलाफ against
 पैटर्न pattern
 धीमी slow
 केंद्र center
 प्यार love
 व्यक्ति person
 धन money
-सेवाकर serve
+सेवा कर serve
 प्रकट appear
 सड़क road
 नक्शा map
@@ -503,7 +504,7 @@
 अंडा egg
 सवारी ride
 सेल cell
-विश्वासहै believe
+विश्वास है believe
 शायद perhaps
 उठाओ pick
 अचानक sudden
@@ -511,12 +512,12 @@
 वर्ग square
 कारण reason
 लंबाई length
-काप्रतिनिधित्व represent
+का प्रतिनिधित्व represent
 कला art
 विषय subject
 क्षेत्र region
 आकार size
-भिन्नहो vary
+भिन्न हो vary
 बसा settle
 बोलना speak
 वजन weight
@@ -531,7 +532,7 @@
 लगा felt
 भव्य grand
 गेंद ball
-अभीतक yet
+अभी तक yet
 लहर wave
 ड्रॉप drop
 दिल heart
@@ -543,7 +544,7 @@ AM am
 स्थिति position
 बांह arm
 विस्तृत wide
-स्टीलअथॉरिटीऑफइंडिया sail
+स्टील अथॉरिटी ऑफ इंडिया sail
 सामग्री material
 अंश fraction
 वन forest
@@ -593,26 +594,26 @@ AM am
 फूल flower
 कपड़े clothe
 अजीब strange
-चलागया gone
+चला गया gone
 व्यापार trade
 राग melody
 यात्रा trip
 कार्यालय office
-प्राप्तकरना receive
+प्राप्त करना receive
 पंक्ति row
 मुंह mouth
 सटीक exact
 प्रतीक symbol
 मरना die
-कमसेकम least
+कम से कम least
 मुसीबत trouble
 चिल्लाओ shout
 सिवाय except
 लिखा wrote
 बीज seed
 स्वर tone
-शामिलहोने join
-सुझावहै suggest
+शामिल होने join
+सुझाव है suggest
 साफ clean
 तोड़ break
 महिला lady
@@ -636,7 +637,7 @@ AM am
 बराबर equal
 भेजा sent
 चयन choose
-गिरगया fell
+गिर गया fell
 फिट fit
 प्रवाह flow
 मेला fair
@@ -648,7 +649,7 @@ AM am
 कान ear
 बाकी else
 काफी quite
-तोड़दिया broke
+तोड़ दिया broke
 मामले case
 बीच middle
 हत्या kill
@@ -722,7 +723,7 @@ AM am
 सुरक्षित safe
 बिल्ली cat
 सदी century
-विचारकरना consider
+विचार करना consider
 प्रकार type
 कानून law
 बिट bit
@@ -770,13 +771,13 @@ AM am
 पार्टी party
 आपूर्ति supply
 जिसका whose
-स्थितिजानें locate
+स्थिति जानें locate
 अंगूठी ring
 चरित्र character
 कीट insect
 पकड़ा caught
 अवधि period
-संकेतमिलताहै indicate
+संकेत मिलता है indicate
 रेडियो radio
 बात spoke
 एटम atom
@@ -790,7 +791,7 @@ AM am
 कल्पना imagine
 प्रदान provide
 सहमत agree
-इसप्रकार thus
+इस प्रकार thus
 कोमल gentle
 महिला woman
 कप्तान captain
@@ -821,7 +822,7 @@ AM am
 पतली thin
 त्रिकोण triangle
 ग्रह planet
-जल्दीकरो hurry
+जल्दी करो hurry
 प्रमुख chief
 कॉलोनी colony
 घड़ी clock
@@ -834,7 +835,7 @@ AM am
 भेजें send
 पीले yellow
 बंदूक gun
-कीअनुमति allow
+की अनुमति allow
 प्रिंट print
 मृत dead
 हाजिर spot
@@ -846,7 +847,7 @@ AM am
 पहुंचना arrive
 मास्टर master
 ट्रैक track
-मातापिता parent
+माता पिता parent
 किनारे shore
 विभाजन division
 चादर sheet
@@ -888,7 +889,7 @@ AM am
 प्रस्ताव motion
 पथ path
 तरल liquid
-लॉगइनकरें log
+लॉग इन करें log
 मतलब meant
 भागफल quotient
 दांत teeth
@@ -908,7 +909,7 @@ AM am
 शाखा branch
 मैच match
 प्रत्यय suffix
-विशेषरूपसे especially
+विशेष रूप से especially
 अंजीर fig
 डर afraid
 भारी huge
@@ -916,7 +917,7 @@ AM am
 स्टील steel
 चर्चा discuss
 आगे forward
-इसीतरह similar
+इसी तरह similar
 गाइड guide
 अनुभव experience
 स्कोर score
@@ -940,10 +941,10 @@ AM am
 बुनियादी basic
 गंध smell
 घाटी valley
-औरनही nor
+और न ही nor
 डबल double
 सीट seat
-जारीरखनेके continue
+जारी रखने के continue
 खंड block
 चार्ट chart
 टोपी hat
@@ -967,7 +968,7 @@ AM am
 कपास cotton
 Born born
 निर्धारित determine
-चौथाईगेलन quart
+चौथाई गेलन quart
 नौ nine
 ट्रक truck
 शोर noise
