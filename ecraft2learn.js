@@ -940,7 +940,7 @@ window.ecraft2learn =
         return matching_language_entry; // could be undefined
     };
     const extract_language_code = function (language_string) {
-        let language = language_string;
+        let language = language_string.trim();
         if (language) {
             if (language.length === 2) {
                 return language;
