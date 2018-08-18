@@ -168,6 +168,7 @@ Compare it with <a href="https://translate.google.com/" target="_blank">Google T
 Tip: it is easy to copy and paste words that your keyboard can't type from the Google Translate page.
 Supported languages are Chinese, English, Finnish, French, German, Greek, Hindi, Indonesian, Italian,
 Japanese, Portuguese, Sinhalese, Spanish, and Swedish.
+Note: we are investigating why the translations work well for some languages and not others.
 <figure class = "snap-iframe"
         id = "translate exercise"
         container_style = "width: 800px; height: 400px" 
@@ -212,9 +213,7 @@ and "mouse" (the computer input device) being close to (computer) "screen".
 This is a problem researchers are working on.
 Another problem is that sometimes short phrases act like words.
 "Ice cream" for example has no word embedding while "sherbet" and "sorbet" do.
-
 </p>
-
 <h4>A 'Guess My Word' game using word embeddings</h4>
 <p>
 The following game picks a random word and gives the player warmer or colder feedback as the player makes guesses.
@@ -229,6 +228,17 @@ See if you can!
         container_style = "width: 800px; height: 800px" 
         caption = "Click the green flag to play Guess My Word. TRY IT!">
 </figure>
+</p>
+<h4>A sample project using word embeddings for translation</h4>
+<p>
+Here is <a href="/ai/snap/snap.html?project=translate" target="_blank">a program that asks the user for two languages</a>,
+obtains the feature vector of a random word from the first language,
+and then displays several of the words closest to that feature vector.
+It places the words in the t-SNE two-dimensional approximation of where the 300-dimensional words really are.
+</p>
+<h4>How does translation using word embeddings work?</h4>
+<p>
+
 </p>
 
 <h4 id="project-ideas">Possible project ideas using image recognition</h4>
