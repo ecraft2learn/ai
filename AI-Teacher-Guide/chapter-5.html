@@ -56,7 +56,7 @@ Each number measures a 'feature' of the word but what feature is a mystery.
 The word embeddings used in this chapter were created by <a href="https://fasttext.cc/docs/en/support.html" target="_blank">Facebook</a>.
 They trained their machine learning models on 157 different languages on all Wikipedia articles in each language.
 Even though that was about a billion words each that wasn't enough,
-so they also trained their models on tens of billions more words found by crawling the web.
+so they also trained their models on tens of billions more words found by <a href="http://commoncrawl.org/" target="_blank">crawling the web</a>.
 They created tables for each language of at least a million words.
 The blocks described here provide the 20,000 most common words for 13 languages.
 (Larger tables and more languages can be added. Send requests to toontalk@gmail.com.)
@@ -168,7 +168,6 @@ Compare it with <a href="https://translate.google.com/" target="_blank">Google T
 Tip: it is easy to copy and paste words that your keyboard can't type from the Google Translate page.
 Supported languages are Chinese, English, Finnish, French, German, Greek, Hindi, Indonesian, Italian,
 Japanese, Portuguese, Sinhalese, Spanish, and Swedish.
-Note: we are investigating why the translations work well for some languages and not others.
 <figure class = "snap-iframe"
         id = "translate exercise"
         container_style = "width: 800px; height: 400px" 
@@ -238,7 +237,22 @@ It places the words in the t-SNE two-dimensional approximation of where the 300-
 </p>
 <h4>How does translation using word embeddings work?</h4>
 <p>
-
+The word embeddings for each language were generated independently based upon text from Wikipedia and the web.
+The location in 300-dimenstional space of the features for a word like 'dog' have no relationship 
+to the location of features of transations of the word 'dog'.
+Researchers noticed that in most (all?) languages some words are close together.
+For example 'dog', 'dogs', puppy', and 'canine' are close.
+Words like 'wolf', 'cow', and 'mouse' are not as close to the words near 'dog'.
+And all of these words are far from abstract words like 'truth' and 'logic'.
+So they discovered that it is possible to find a rotation that will cause many word embeddings
+in one language to cause translations of those words to be close.
+The way it was done at first and in these Snap! blocks is by giving a program a word list between
+English and each other language.
+500 or 1000 words is enough to find a good rotation that brings most of the other 19000 words
+close to where their translations are.
+A rotation is all that is needed because all the word embeddings are centered around zero
+so they don't need to be translated (in the mathematical sense, i.e. moved) as well.
+But note that the translation happens in 299 dimensions!
 </p>
 
 <h4 id="project-ideas">Possible project ideas using image recognition</h4>
