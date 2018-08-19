@@ -1,13 +1,14 @@
 {
   "embeddings": [
     {
-      "tensorName": "English",
+      "tensorName": "German",
       "tensorShape": [
         20000,
         300
       ],
       "tensorPath": "https://ecraft2learn.github.io/ai/word-embeddings/de/projector-vectors.tsv",
       "metadataPath": "https://ecraft2learn.github.io/ai/word-embeddings/de/projector-labels.tsv",
+      "bookmarksPath": "https://ecraft2learn.github.io/ai/word-embeddings/de/t-sne-with-dog.txt"
     }
   ]
 }

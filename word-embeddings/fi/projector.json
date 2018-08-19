@@ -1,14 +1,14 @@
 {
   "embeddings": [
     {
-      "tensorName": "English",
+      "tensorName": "Finnish",
       "tensorShape": [
         20000,
         300
       ],
-      "tensorPath": "https://ecraft2learn.github.io/ai/word-embeddings/en/projector-vectors.tsv",
-      "metadataPath": "https://ecraft2learn.github.io/ai/word-embeddings/en/projector-labels.tsv",
-      "bookmarksPath": "https://ecraft2learn.github.io/ai/word-embeddings/en/t-sne-with-love.txt"
+      "tensorPath": "https://ecraft2learn.github.io/ai/word-embeddings/fi/projector-vectors.tsv",
+      "metadataPath": "https://ecraft2learn.github.io/ai/word-embeddings/fi/projector-labels.tsv",
+      "bookmarksPath": "https://ecraft2learn.github.io/ai/word-embeddings/fi/t-sne-with-dog.txt"
     }
   ]
 }
