@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+<head>
+	<title>Creating data for use in https://projector.tensorflow.org/</title>
+	<meta charset='utf-8'>
+    <script>
+    words_to_features = {}; // need to create this before loading the wiki words
+    </script>
+    <script src="wiki-words.js"></script>
+    <script>
+
+document.addEventListener('DOMContentLoaded', function () {
+	const language = Object.keys(words_to_features)[0];
+	const vectors = Object.values(words_to_features[language]);
+	let vectors_string = "";
+	const words = Object.keys(words_to_features[language]);
+	let words_string = "";
+
+	words.forEach(function (word) {
+		words_string += word + '\n';
+	});
+
+	vectors.forEach(function (vector) {
+		vector.forEach(function (number, index) {
+			vectors_string += number;
+			if (index === vector.length-1) {
+				vectors_string += '\n';
+			} else {
+				vectors_string += '\t';
+			}
+		});
+	});
+	const labels_element = document.getElementById('labels');
+	labels_element.value = words_string;
+	const vectors_element = document.getElementById('vectors');
+	vectors_element.value = vectors_string;	
+});
+    </script>
+	</head>
+<body>
+<p>
+Creating data for use in <a href="https://projector.tensorflow.org/" target="_blank">projector.tensorflow.org</a>.
+</p>
+<textarea id="vectors" style="width:800px; height:300px"></textarea>
+<br>
+<textarea id="labels"  style="width:800px; height:300px"></textarea>
+</body>
+</html>
