@@ -72,8 +72,8 @@ The numbers were adjusted so all 20,000 words fit inside a 300-dimensional
 <a href="https://en.wikipedia.org/wiki/Hypersphere" target="_blank">hypersphere</a> with a radius of 1.
 There are databases with word embeddings for one million words
 but loading and searching such a large data set would be very slow.
-The <span class='block-name'>features of</span> block is based upon the most frequently occuring 20,000 entries that 
-are lower case and contain only letters (no puncutation or digits).
+The <span class='block-name'>features of</span> block is based upon the most frequently occurring 20,000 entries that 
+are lower case and contain only letters (no punctuation or digits).
 </p>
 <figure class = "snap-iframe"
         id = "features of"
@@ -168,13 +168,29 @@ Compare it with <a href="https://translate.google.com/" target="_blank">Google T
 Tip: it is easy to copy and paste words that your keyboard can't type from the Google Translate page.
 Supported languages are Chinese, English, Finnish, French, German, Greek, Hindi, Indonesian, Italian,
 Japanese, Portuguese, Sinhalese, Spanish, and Swedish.
+A mystery is that this works to find the nearest words to 'dog' in all the languages supported except German.
+Perhaps German's use of long compound words interferes with the technique.
 <figure class = "snap-iframe"
         id = "translate exercise"
         container_style = "width: 800px; height: 400px" 
         caption = "Find the closest word in a different language.">
 </figure>
 </p>
-
+<h4>A 'Guess My Word' game using word embeddings</h4>
+<p>
+The following game picks a random word and gives the player warmer or colder feedback as the player makes guesses.
+This does so by comparing the distance to the secret word with the previous distance.
+It uses the <span class="command-block">location of ...</span> reporter block to display your guesses.
+The game is very hard!
+There are many ways to make the game better.
+See if you can!
+<figure class = "snap-iframe"
+        id = "guess my word"
+        full_screen = "true"
+        container_style = "width: 800px; height: 800px" 
+        caption = "Click the green flag to play Guess My Word. TRY IT!">
+</figure>
+</p>
 <h4>Benefits and risks using word embeddings</h4>
 <p>
 Word embeddings can be used as a component in AI programs that do
@@ -213,24 +229,10 @@ This is a problem researchers are working on.
 Another problem is that sometimes short phrases act like words.
 "Ice cream" for example has no word embedding while "sherbet" and "sorbet" do.
 </p>
-<h4>A 'Guess My Word' game using word embeddings</h4>
-<p>
-The following game picks a random word and gives the player warmer or colder feedback as the player makes guesses.
-This does so by comparing the distance to the secret word with the previous distance.
-It uses the <span class="command-block">location of ...</span> reporter block to display your guesses.
-The game is very hard!
-There are many ways to make the game better.
-See if you can!
-<figure class = "snap-iframe"
-        id = "guess my word"
-        full_screen = "true"
-        container_style = "width: 800px; height: 800px" 
-        caption = "Click the green flag to play Guess My Word. TRY IT!">
-</figure>
-</p>
 <h4>A sample project using word embeddings for translation</h4>
 <p>
-Here is <a href="/ai/snap/snap.html?project=translate" target="_blank">a program that asks the user for two languages</a>,
+Here is
+<a href="/ai/snap/snap.html?project=translate" target="_blank">a program that asks the user for two languages</a>,
 obtains the feature vector of a random word from the first language,
 and then displays several of the words closest to that feature vector.
 It places the words in the t-SNE two-dimensional approximation of where the 300-dimensional words really are.
@@ -238,9 +240,10 @@ It places the words in the t-SNE two-dimensional approximation of where the 300-
 <h4>How does translation using word embeddings work?</h4>
 <p>
 The word embeddings for each language were generated independently based upon text from Wikipedia and the web.
-The location in 300-dimenstional space of the features for a word like 'dog' have no relationship 
-to the location of features of transations of the word 'dog'.
-Researchers noticed that in most (all?) languages some words are close together.
+The location in 300-dimensional space of the features for a word like 'dog' have no relationship 
+to the location of features of translations of the word 'dog'.
+<a href="https://arxiv.org/abs/1309.4168" target="_blank">Researchers</a>
+noticed that in most (all?) languages some words are close together.
 For example 'dog', 'dogs', puppy', and 'canine' are close.
 Words like 'wolf', 'cow', and 'mouse' are not as close to the words near 'dog'.
 And all of these words are far from abstract words like 'truth' and 'logic'.
@@ -250,7 +253,10 @@ The way it was done at first and in these Snap! blocks is by giving a program a 
 English and each other language.
 500 or 1000 words is enough to find a good rotation that brings most of the other 19000 words
 close to where their translations are.
-A rotation is all that is needed because all the word embeddings are centered around zero
+While it is impressive that translation works at all given a word list that covers 5% of the vocabulary
+<a href="https://arxiv.org/abs/1710.04087" target="_blank">Word Translation Without Parallel Data</a>
+describes a technique that uses no word lists or translated texts.
+A rotation is all that is needed because all the word embeddings are centred around zero
 so they don't need to be translated (in the mathematical sense, i.e. moved) as well.
 But note that the translation happens in 299 dimensions!
 </p>
@@ -304,6 +310,11 @@ This <a href="https://developers.googleblog.com/2018/04/text-embedding-models-co
 Google blog about biases in word embeddings</a> is very good and clear.
 <a href="https://distill.pub/2016/misread-tsne/" target="_blank">How to Use t-SNE Effectively</a>
 is a clear interactive description of how t-SNE works.
+<a href="https://arxiv.org/abs/1309.4168" target="_blank">Exploiting Similarities among Languages for Machine Translation</a>
+pioneered the idea adjusting the word embeddings to support translation.
+<a href="https://arxiv.org/abs/1710.04087" target="_blank">Word Translation Without Parallel Data</a>
+explores how word embeddings can be used for translation without using word lists or translated texts.
+<a href="https://arxiv.org/abs/1710.04087" target="_blank">Word Translation Without Parallel Data</a>
 <a href="https://projector.tensorflow.org/" target="_blank">projector.tensorflow.org</a>
 is a great website for interactively exploring different ways of visualising high-dimensional spaces.
 Here is a video of <a href="https://www.youtube.com/watch?v=RJVL80Gg3lA" target="_blank">
