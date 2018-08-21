@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+<head>
+	<title>Rotating word embeddings</title>
+	<meta charset='utf-8'>
+	<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script>
+    words_to_features = {}; // need to create this before loading the wiki words
+    </script>
+    <script src="wiki-words.js"></script>
+    <script src="wiki-words.matrix"></script>
+    <script>
+document.addEventListener('DOMContentLoaded', function () {
+	const path = window.location.pathname;
+	const language = path.substr(path.lastIndexOf('/')-2, 2);
+	const embeddings = Object.values(words_to_features[language]);
+	const words = Object.keys(words_to_features[language]);
+	const data = tf.tensor2d(embeddings);
+	const translation = tf.tensor2d(translation_matrix);
+	const tf_new_embeddings = tf.matMul(data, translation);
+	tf.dispose(data);
+	tf.dispose(translation);
+//     const textarea = document.getElementById('translated');
+    document.writeln("words_to_features['" + language + "'] = {");
+    const shape = tf_new_embeddings.shape;
+    for (let i = 0; i < shape[0]; i++) {
+    	const row = tf_new_embeddings.slice(i, 1).dataSync();
+    	document.write('"' + words[i] + '":['); // + row + 
+        for (j = 0; j < shape[1]; j++) {
+        	// four digits of accuracy is enough
+        	document.write(Math.round(10000*row[j])/10000 + ",");
+        }
+    	document.writeln('],');
+    	console.log("working");
+    	tf.dispose(row);
+    }
+    document.writeln("};");
+});
+    </script>
+</head>
+<body>
+<!-- <textarea id="translated" style="width:800px; height:400px"></textarea> -->
+</body>
+</html>
