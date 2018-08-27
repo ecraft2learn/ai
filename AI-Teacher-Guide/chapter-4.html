@@ -153,6 +153,7 @@ A full screen version of the following program can be
 Look at the script, it isn't very complicated considering what it does.
 There is a similar <a href="/ai/snap/snap.html?project=follow%20lean" target="_blank">
 program where the sprite moves left or right depending upon which way you are leaning</a>.
+Think of modifying it in interesting ways, e.g. a face whose eyes look left and right as you lean left and right.
 </p>
 
 <figure class = "snap-iframe"
@@ -327,7 +328,7 @@ Google Creative Lab recently released browser-based software called <i>Posenet</
 real-time human pose estimation</a>.
 This software can determine the locations of 17 different body parts:
 noses, eyes, ears, shoulders, elbows, wrists, hips, knees, and ankles.
-Posenet was created by a team at Google using deep machine learning.
+Posenet was created using deep machine learning and makes use of<a href="https://js.tensorflow.org/" target="_blank">Tensorflow.js</a>.
 Many are familiar with how pose detection can be embedded in video games via
 <a href="https://en.wikipedia.org/wiki/Kinect">Microsoft's Xbox Kinect</a>.
 What is so impressive about Posenet is that it works in the browser without any special software or hardware (other than a webcam).
@@ -544,6 +545,17 @@ Maybe as it gets faster make the <a href="chapter-1.html" target="_blank">speech
 The game shows what the camera sees add to the display the body parts that are to touch.
 If you are also doing a robotics project how can you combine it with this game?
 Think up even more ways to make the game better.
+</li>
+<li>
+Use body poses as program commands.
+E.g. hands over your head means stop while arms down means to continue.
+</li>
+<li>
+Display a pair of eyes that moves to the left or right as you do.
+</li>
+<li>
+Create a program that figures out how far away someone is from the camera.
+Hint how does the distance between the eyes change as someone moves closer?
 </li>
 <li>
 There are many other things one can use <a href="#pose-detection">pose detection</a> for than just <i>Simon Says</i>.
