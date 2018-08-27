@@ -3,7 +3,7 @@
     {
       "tensorName": "Japanese",
       "tensorShape": [
-        20000,
+        15989,
         300
       ],
       "tensorPath": "https://ecraft2learn.github.io/ai/word-embeddings/ja/projector-vectors.tsv",
