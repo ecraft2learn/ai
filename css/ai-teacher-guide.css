@@ -127,17 +127,12 @@ figcaption {
 .guide-body {
   background-color: #ebf0f1;
 }
-.instructions {
-  background-color: #ebcacf;
-}
-.background-information {
-  background-color: #e4ebca;
-}
+
 .advanced-information {
   background-color: #d8f4e6;
 }
-.project-ideas {
-  background-color: #f8e2ec;
+.background-information {
+  background-color: #e4ebca;
 }
 .exercise {
   background-color: #eae2f8;
@@ -145,17 +140,24 @@ figcaption {
 .guide-to-guide {
   background-color: #f8f2e2;
 }
-.societal-impact {
-  background-color: #c0f3db;
+.how-it-works {
+  background-color: #c8dbd9;
 }
-.sample-program {
-  background-color: #d4d8f3;
+.instructions {
+  background-color: #ebcacf;
+}
+.project-ideas {
+  background-color: #f8e2ec;
 }
 .resources {
   background-color: #f2d4f3;
 }
-.how-it-works {
-  background-color: #c8dbd9;
+.sample-program {
+  background-color: #d4d8f3;
 }
+.societal-impact {
+  background-color: #c0f3db;
+}
+
 
 

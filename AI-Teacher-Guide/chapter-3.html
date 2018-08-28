@@ -11,13 +11,16 @@
 <h3>Chapter 3 - Adding image recognition to programs</h3>
 <h4>Ken Kahn, University of Oxford</h4>
 <h4>Browser compatibility</h4>
-<p>This chapter of the guide includes many interactive elements that currently only run well in the Chrome browser.
+<p class="guide-to-guide">
+This chapter of the guide includes many interactive elements that currently only run well in the Chrome browser.
 This chapter relies upon there being a camera that the browser can access.
 There is a <a href="troubleshooting.html" target="_blank">troubleshooting guide</a>
-that should be consulted if problems are encountered.</p>
+that should be consulted if problems are encountered.
+</p>
 
 <h4>Introduction</h4>
-<p>A camera connected to a computer can report the colour of each pixel in an image and not much else.
+<p class="background-information">
+A camera connected to a computer can report the colour of each pixel in an image and not much else.
 A description of what is in front of the camera is returned when those pixels
 are sent to an image recognition service.
 There are many kinds of things an image description may contain.
@@ -25,21 +28,27 @@ With speech recognition the description is what was spoken, how confident the sy
 With image recognition there are many possible descriptions: descriptive tags, possible captions, dominant colours,
 location of faces and parts of the face if there are any,
 and the presence of landmarks, celebrities, well-known entities, and logos.
-Hand-written and scanned text can also be recognised.</p>
+Hand-written and scanned text can also be recognised.
+</p>
 
-<p>A challenge in providing student-friendly programming blocks for image recognition is that
+<p class="advanced-information non-essential">
+A challenge in providing student-friendly programming blocks for image recognition is that
 different AI cloud services report different descriptions in different ways.
 We currently provide interfaces to image recognition services provided by Google, Microsoft, and IBM.
 A further challenge is how to provide simple interfaces for simple tasks
-while still supporting more sophisticated uses and projects.</p>
+while still supporting more sophisticated uses and projects.
+</p>
 
-<p>In the last few years there has been tremendous progress in computer vision.
+<p class="societal-impact">
+In the last few years there has been tremendous progress in computer vision.
 There are high performance systems for identifying objects, recognising faces, interpreting sketches,
 and using medical images to aid diagnosis.
-Driverless cars rely heavily upon computer vision.</p>
+Driverless cars rely heavily upon computer vision.
+</p>
 
 <h4>API keys are needed</h4>
-<p>Chrome has builtin support for speech synthesis and recognition.
+<p class="background-information">
+Chrome has builtin support for speech synthesis and recognition.
 No browser, however, currently supports image recognition.
 To access vision recognition services from companies such as Google, Microsoft, or IBM
 one needs to <a href="https://github.com/ecraft2learn/ai/wiki" target="_blank">open an account</a>.
@@ -47,9 +56,11 @@ Accounts are free and provide some degree of free usage.
 IBM permits 250 free vision queries per day, Microsoft 5000 per month, and Google 1000 per month.
 To try the vision blocks described here you need at least one account.
 Comparing and contrasting the results from different services is an interesting ways
-to gain some insight into how these services work.</p>
+to gain some insight into how these services work.
+</p>
 
-<p>In projects there is a different way of providing keys to Snap!
+<p class="background-information">
+In projects there is a different way of providing keys to Snap!
 (as described <a href="#api-keys">here</a>) but in this chapter you can paste your key or keys below
 and they'll be passed to the services as you use example blocks.
 <br><label>Copy and paste your Google key here:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input id="Google image key" type="text"></label>
@@ -57,9 +68,11 @@ and they'll be passed to the services as you use example blocks.
 <br><label>Copy and paste your IBM Watson key here: <input id="IBM Watson image key" type="text"></label></p>
 
 <h4>A simple image recognition block</h4>
-<p>This block takes a picture, sends it to the AI vision cloud server provider, waits for a response, and then
+<p class="instructions">
+This block takes a picture, sends it to the AI vision cloud server provider, waits for a response, and then
 reports a list of labels of the photo.
-The list is ordered by how confident the vision provider is that the label matches the image.</p>
+The list is ordered by how confident the vision provider is that the label matches the image.
+</p>
 
 <figure class = "snap-iframe"
         id = "image labels reporter"
@@ -68,12 +81,14 @@ The list is ordered by how confident the vision provider is that the label match
 </figure>
 
 <h4>Displaying the image that was sent for recognition</h4>
-<p>The <span class="block-name">show current photo</span> block will display
+<p class="instructions">
+The <span class="block-name">show current photo</span> block will display
 the most recent image sent to the specified AI vision services
 as the background of the Snap! stage.
 To try it first obtain some labels from a vision service.
 You can also use the <span class="block-name">use camera to create costume</span> block
-to take a new picture and add it as a costume to the current sprite.</p>
+to take a new picture and add it as a costume to the current sprite.
+</p>
 
 <figure class = "snap-iframe"
         id = "image labels reporter and show photo"
@@ -83,7 +98,9 @@ to take a new picture and add it as a costume to the current sprite.</p>
 </figure>
 
 <h4>A sample program using image recognition</h4>
-<p>Here is a program that can contact any of Google, Microsoft, or IBM and displays the tags returned.</p>
+<p class="sample-program">
+Here is a program that can contact any of Google, Microsoft, or IBM and displays the tags returned.
+</p>
 
 <figure class = "snap-iframe"
         id = "camera and say"
@@ -93,7 +110,8 @@ to take a new picture and add it as a costume to the current sprite.</p>
 </figure>
 
 <h4>A sample program combining image and speech recognition and speech output</h4>
-<p>This program is similar to the previous one except it is listening for the words "Google", "Microsoft", or "Watson".
+<p class="sample-program">
+This program is similar to the previous one except it is listening for the words "Google", "Microsoft", or "Watson".
 When it hears one of these words it contacts that service.
 When the response is received it turns it into speech.
 As a demo it is impressive if you say things like "Tell me Google what do you see?" and "What do you see Microsoft?".
@@ -111,8 +129,10 @@ where this program is intelligent and where it isn't.</span>
         caption = "Click the green flag and then say a sentence containing "Google", "Microsoft", or "Watson"">
 </figure>
 
+<span class="non-essential">
 <h4 id="advanced-image-recognition">Advanced image recognition blocks</h4>
-<p>Image recognisers can do more than label images.
+<p class="advanced-information">
+Image recognisers can do more than label images.
 Some can detect and locate faces.
 Some of those will estimate the age of the person and their gender.
 Some recognise landmarks and logos.
@@ -123,7 +143,7 @@ different services have different capabilities and different structures to captu
 <p class="student-guide advanced-topic">Click to read an advanced topic</p>
 <span class="advanced-topic-body">
 <h4 id="current-image-properies">Getting properties of an image</h4>
-<p>
+<p class="instructions">
 The <span class="block-name">Recognize new photo</span> block addresses this problem
 by reporting a data structure capturing the entire response from
 the vision service.
@@ -132,7 +152,7 @@ numbers for confidence scores, and even more lists for complex data.
 You can double click on the <img src="images/sub-list-icon.png" alt="icon for opening lists in lists">
 icons to drill down the structure.
 </p>
-<p>
+<p class="instructions">
 The <span class="block-name">Current image property</span> block
 takes an argument that describes what piece of the response structure
 should be reported.
@@ -145,7 +165,7 @@ Note that after a response is received from any of the AI services it is stored 
 <span class="block-name">Current image property</span> use the most recent response rather than ask for a new one.
 This is because a project may need to access multiple pieces of a response.
 </p>
-<p>
+<p class="instructions">
 After having run <span class="block-name">Recognize new photo</span> block
 you should select the same AI cloud provider
 (currently Google, Microsoft, or IBM Watson)
@@ -153,7 +173,7 @@ when you run the <span class="block-name">Current image property</span> block.
 The second argument can be a string or a list of strings specifying what information
 is desired from the image recognition.
 Each AI cloud provider supports different image properties:
-<ul>
+<ul class="instructions">
 <li>
 <b>IBM Watson.</b> Currently the only properties supported are
 <span class="block-name">class</span> and <span class="block-name">score</span>.
@@ -180,7 +200,7 @@ More details
 </li>
 </ul>
 </p>
-<p>
+<p class="instructions">
 Common calls to the get property reporter are pre-defined.
 They are <span class="block-name">IBM Watson classes</span>, <span class="block-name">IBM Watson scores</span>,
 <span class="block-name">Microsoft labels</span>, <span class="block-name">Microsoft first caption</span>,
@@ -207,9 +227,10 @@ and
         caption = "A block for reporting the entire analysis response. TRY IT">
 </figure>
 </span>
+</span>
 <p class="student-guide advanced-topic">Click to read another advanced topic</p>
 <span class="advanced-topic-body">
-<p>
+<p class="advanced-information">
 The <span class="block-name">Recognize new photo</span> reporter block is implemented
 using the <span class="block-name">Ask &lt;provider&gt; to say what it sees</span> block.
 This block does not wait for a response, instead it runs the user's blocks when a response is received.
@@ -223,9 +244,10 @@ It isn't as convenient as 'Recognize new photo' but it can support more complex 
 </figure>
 </span>
 <h4 id="api-keys">How to provide API keys</h4>
-<p>This chapter uses the API keys provided in the text areas above.
+<p class="instructions">
+This chapter uses the API keys provided in the text areas above.
 When constructing a project there are two ways to provide keys:
-<ol>
+<ol class="instructions">
 <li>Add extra information to the page's URL.
 Appending any (or all) of
 <span class="block-name">&IBM Watson image key=..</span> or
@@ -249,16 +271,19 @@ Refresh the page after adding the keys.
 <figcaption>Reporters for API keys that users edit to provide service keys.</figcaption>
 </figure>
 
-<p class="teacher-guide">Because all the AI cloud services are commercial services heavy use can be costly.
+<p class="teacher-guide background-information">
+Because all the AI cloud services are commercial services heavy use can be costly.
 Consequently it is best if each student has their own account and minimises the sharing of their keys.
 This conflicts with one of the great things about tools like Scratch and Snap! --
 that it is so easy to share one's projects with a wider community.
 Adding the keys to the URL solves this problem if one is careful to keep the URL with keys private
 and share the version without the keys.
-It is possible but more awkward to maintain private and public versions when using reporters for keys.</p>
+It is possible but more awkward to maintain private and public versions when using reporters for keys.
+</p>
 
 <h4 id="image-recognition-good-for">What is image recognition good for?</h4>
-<p>This is like asking what is vision good for.
+<p class="societal-impact">
+This is like asking what is vision good for.
 According to <a href="https://en.wikipedia.org/wiki/Evolution_of_the_eye" target="_blank">Wikipedia</a>
 eyes have independently evolved between 50 and 100 times since animals first appeared.
 Computer vision enables robots to see, self-driving cars (which really are just a kind of robot),
@@ -267,33 +292,43 @@ It can help blind people to navigate their surroundings and to use devices.
 </p>
 
 <h4 id="image-recognition-dangers">What are the dangers of image recognition?</h4>
-<p>Like much of AI technology it may take away many jobs.
+<p class="societal-impact">
+Like much of AI technology it may take away many jobs.
 It may reduce our privacy since it makes it much easier to track people's movements and activities.
-It can enable autonomous weapons that may kill many.</p>
+It can enable autonomous weapons that may kill many.
+</p>
 
-<p>Another danger is that either intentionally or unintentionally the data
+<p class="societal-impact">
+Another danger is that either intentionally or unintentionally the data
 the machine learning system is trained on may contain biases.
-Here is a nice short video on bias and machine learning published by Google.</p>
+Here is a nice short video on bias and machine learning published by Google.
+</p>
+
 <iframe width="560" height="315"
         src="https://www.youtube.com/embed/59bMh59JQDo"
         frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
 <h4 id="how-does-computer-vision-work">How does computer vision work?</h4>
-<p>Image recognition begins with pixels.
+<p class="how-it-works">
+Image recognition begins with pixels.
 Each pixel is a number or three numbers (for red, green, and blue components)
 that corresponds to a tiny piece of an image.
 There are two main approaches to processing images:
-<ol>
+</p>
+<ol class="how-it-works">
 <li>A sequence of programmed processing steps to find edges, determine textures, identify objects, etc.</li>
 <li>A machine learning system</li>
 </ol>
 
+<p class="societal-impact">
 Most of the recent progress has been with machine learning systems that for many tasks are near human level.
 For some tasks such as
 <a href="https://www.extremetech.com/extreme/233746-ai-beats-doctors-at-visual-diagnosis-observes-many-times-more-lung-cancer-signals" target="_blank">
-detecting lung cancer from x-rays</a> machine learning has exceeded the ability of experts.</p>
+detecting lung cancer from x-rays</a> machine learning has exceeded the ability of experts.
+</p>
 
-<p>A neural net is a program that is inspired by what little is known
+<p class="background-information">
+A neural net is a program that is inspired by what little is known
 about how neurons in animal and human brains work.
 It can be trained to identify images.
 In the most common case it is trained on thousands or millions of images that have already been labelled.
@@ -303,7 +338,8 @@ You can train a neural net to do this kind of vision recognition in the
 <a class="guide-link" href="chapter-4.html">next chapter</a>.
 </p>
 
-<p>Different levels or stages of the processing by the neural net recognise different elements of an image.
+<p class="background-information">
+Different levels or stages of the processing by the neural net recognise different elements of an image.
 Researchers have built
 <a href="https://distill.pub/2017/feature-visualization/" target="_blank">
 software that figures out what images produce the greatest response from the different layers</a>.
@@ -325,16 +361,21 @@ software that figures out what images produce the greatest response from the dif
 <img src="images/objects layer.png" class="center">
 <figcaption>Ideal images for a neural net layer that looks for objects</figcaption></figure>
 
+<span class="non-essential">
 <h4>What about <i>video</i> recognition services?</h4>
-<p>Some AI cloud providers such as
+<p class="background-information">
+Some AI cloud providers such as
 <a href="https://cloud.google.com/video-intelligence/" target="_blank">Google</a>
 can accept a video stream and produce labels.
 It can also detect scene changes.
 This service can be expensive, though Google will analyse 1000 minutes of video per month at no cost.
-There currently are no Snap! blocks for supporting video input.</p>
+There currently are no Snap! blocks for supporting video input.
+</p>
+</span>
 
 <h4 id="project-ideas">Possible project ideas using image recognition</h4>
-<p>Adding image recognition to a robotics project can make the robot behave much more intelligently.
+<p class="project-ideas">
+Adding image recognition to a robotics project can make the robot behave much more intelligently.
 It can head towards goals and avoid specified objects.
 A simple example would be a robot told to move to X
 (where X can be "the red ball", "the toy truck", "a person", or whatever).
@@ -344,8 +385,9 @@ If the description returned matches X then go forward a few steps
 If not then turn a little and try again.
 Repeat until X is reached.
 </p>
-<p>For projects that use a camera that can't move there are many possibilities:
-<ol>
+<p class="project-ideas">
+For projects that use a camera that can't move there are many possibilities:
+<ol class="project-ideas">
 <li>Engages in a simple conversation about what it thinks it is seeing.</li>
 <li>Responds to what it sees.
 E.g. says "How cute" when the description includes words such as "kitten" or "puppy"
@@ -361,6 +403,7 @@ The app can then add know where to place glasses, mustaches, etc. to the image.<
 <p class="student-guide advanced-topic">Click to read an advanced topic</p>
 <span class="advanced-topic-body">
 <h4 id="additional-resources">Additional resources</h4>
+<p class="resources">
 <a href="https://cloud.google.com/vision/" target="_blank">Google</a>,
 <a href="https://azure.microsoft.com/en-gb/services/cognitive-services/computer-vision/" target="_blank">Microsoft</a>,
 and
@@ -381,13 +424,16 @@ good interview with a data scientist about machine learning</a>.
 <script src="/ai/js/where-to-get-library.js"></script>
 
 <h4>Learn about machine learning</h4>
-<p>The <a class="guide-link" href="chapter-4.html">next chapter</a>
-is about machine learning.</p>
-<p>
+<p class="guide-to-guide">
+The <a class="guide-link" href="chapter-4.html">next chapter</a>
+is about machine learning.
+</p>
+<p class="guide-to-guide">
 Return to
 <a class="guide-link" href="chapter-2.html">the previous chapter on speech recognition</a>.
 </p>
 
 <script src="/ai/js/bottom-of-page.js"></script>
 
-</body></html>
+</body>
+</html>
