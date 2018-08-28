@@ -11,14 +11,17 @@
 <h3>Chapter 5 - Using AI with words and sentences</h3>
 <h4>Ken Kahn, University of Oxford</h4>
 <h3 id="browser-compatibility">Browser compatibility</h3>
-<p>This chapter of the guide includes many interactive elements that currently run best in the Chrome browser.
+<p class="guide-to-guide">
+This chapter of the guide includes many interactive elements that currently run best in the Chrome browser.
 See the <a href="troubleshooting.html" target="_blank">troubleshooting guide</a>
-for how to deal with problems encountered.</p>
+for how to deal with problems encountered.
+</p>
 <h3>Introduction</h3>
-<p>
+<p class="background-information">
 AI programs can do many things with text.
 These include
-<ol>
+</p>
+<ol class="background-information">
 <li>
 Answering questions (including more intelligent handling of web searches).
 </li>
@@ -39,10 +42,9 @@ Determining the grammatical structure of a sentence.
 Translation between languages.
 </li>
 </ol>
-</p>
 
 <h4>Doing arithmetic with words and sentences</h4>
-<p>
+<p class="background-information">
 While computers can deal with text as strings of characters a technique called
 <a href="https://gist.github.com/aparrish/2f562e3737544cf29aaf1af30362f469" target="_blank">word embedding</a>
 works by converting words into a long list of numbers.
@@ -52,17 +54,17 @@ The numbers are created by considering text with billions word (e.g. all Wikiped
 People don't understand what the numbers mean but similar words have similar numbers and unrelated words have very different numbers.
 Each number measures a 'feature' of the word but what feature is a mystery.
 </p>
-<p>
+<p class="background-information">
 The word embeddings used in this chapter were created by <a href="https://fasttext.cc/docs/en/support.html" target="_blank">Facebook</a>.
 They trained their machine learning models on 157 different languages on all Wikipedia articles in each language.
 Even though that was about a billion words each that wasn't enough,
 so they also trained their models on tens of billions more words found by <a href="http://commoncrawl.org/" target="_blank">crawling the web</a>.
 They created tables for each language of at least a million words.
-The blocks described here provide the 20,000 most common words for 13 languages.
+The blocks described here provide the 20,000 most common words for 15 languages.
 (Larger tables and more languages can be added. Send requests to toontalk@gmail.com.)
 </p>
 <h4>Turning a word into lots of numbers</h4>
-<p>
+<p class="instructions">
 We have created Snap! blocks for exploring how word embeddings can be used to find similar words, 
 words which are between other words, and most surprisingly solve word analogy problems.
 The <span class='block-name'>features of</span> block will report a list of 300 numbers.
@@ -80,9 +82,9 @@ are lower case and contain only letters (no punctuation or digits).
         container_style = "width: 800px; height: 600px" 
         caption = "A block for converting words into lists of 300 numbers. TRY IT! (First time it may take some time to load.)">
 </figure>
-<p>
+<p class="instructions">
 <h4>Finding the closest word to a list of feature numbers</h4>
-<p>
+<p class="instructions">
 A program can search through all the words to find the word that is closest to a list of numbers.
 The <span class="block-name">closest word to</span> reporter block does this.
 </p>
@@ -90,6 +92,7 @@ The <span class="block-name">closest word to</span> reporter block does this.
 <p class="student-guide advanced-topic">Click to read an advanced topic</p>
 <span class="advanced-topic-body">
 <h4>Different ways of measuring distances in high dimensional spaces</h4>
+<p class="background-information advanced-information">
 There are two common ways of measuring distance in a high-dimensional space.
 One is <a href="https://en.wikipedia.org/wiki/Euclidean_distance" target="_blank">Euclidean distance</a>
 which is a generalisation of how distance is computed in 2 and 3 dimensional space.
@@ -98,6 +101,7 @@ The other measure is called <a href="https://en.wikipedia.org/wiki/Cosine_simila
 Both work pretty well in the <span class="block-name">closest word to</span> reporter which lets you choose which to use.
 While they usually agree sometimes small differences can be observed.
 For example, the third closest word to "dog" can be "canine" or "puppy" depending on the measure.
+</p>
 </span>
 
 <figure class = "snap-iframe"
@@ -108,34 +112,38 @@ For example, the third closest word to "dog" can be "canine" or "puppy" dependin
 </p>
 
 <h4>Finding the word half way between two other words</h4>
-<p>
+<p class="instructions">
 You can take two words and average their features by adding together corresponding numbers and dividing the result by 2.
 You can then use the <span class="block-name">closest word to</span> reporter to find the word closest to the average.
+</p>
 <figure class = "snap-iframe"
         id = "word average"
         container_style = "width: 750px; height: 450px" 
         caption = "Finding the word closest to the average of two words. TRY IT!">
 </figure>
+<p class="instructions">
 Try averaging more than two words.
 And see what word is the closest to somewhere between two words other than the halfway point.
 </p>
 
 <h4>Using word embeddings to solve word analogy problems</h4>
-<p>
+<p class="instructions">
 One of the most surprising thing about word embeddings is that with the right formula one solve word analogy problems.
 For example "man is to woman as father is to what?" can be expressed as "father-(man-woman)=x".
+</p>
 <figure class = "snap-iframe"
         id = "word analogy"
         container_style = "width: 850px; height: 450px" 
         caption = "Solving word analogy problems. TRY IT! Then find other analogies that work.">
 </figure>
+<p class="instructions">
 This works for grammatical analogies as well.
 Try solving "slow is to slower as fast is to what?".
 You might need to add 'fast' as an exception.
 </p>
 
 <h4>Mapping 300 dimensional points to two-dimensional points</h4>
-<p>
+<p class="background-information">
 No one can visualise 300-dimensional space.
 There are techniques for giving an impression of the relationships between very high-dimensional points
 by mapping the points to two or three dimensions.
@@ -156,11 +164,13 @@ You can also use the projector to see the word embeddings of these languages:
 <a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io/ai/word-embeddings/id/projector.json" target="_blank">Indonesian</a>,
 <a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io/ai/word-embeddings/it/projector.json" target="_blank">Italian</a>,
 <a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io/ai/word-embeddings/ja/projector.json" target="_blank">Japanese</a>,
+<a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io/ai/word-embeddings/lt/projector.json" target="_blank">Lithuanian</a>,
 <a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io/ai/word-embeddings/pt/projector.json" target="_blank">Portuguese</a>,
 <a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io/ai/word-embeddings/si/projector.json" target="_blank">Sinhalese</a>,
 <a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io/ai/word-embeddings/sv/projector.json" target="_blank">Swedish</a>, and
 <a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io/ai/word-embeddings/zh/projector.json" target="_blank">Chinese</a>.
-
+</p>
+<p class="background-information">
 Note that it takes several hundred iterations of t-SNE before it settles down on a good mapping from 300 dimensions.
 You can also search for words and their neighbours and create bookmarks.
 The above links launch the projector with a bookmark showing t-SNE and highlighting the hundred words closes to 'dog'.
@@ -168,7 +178,7 @@ The above links launch the projector with a bookmark showing t-SNE and highlight
 <img src="images/projector-bookmarks.png" class="center">
 <figcaption>In the lower right corner you can select projector bookmarks</figcaption></figure>
 </p>
-<p>
+<p class="sample-program">
 Here is a program that displays 50 random words at the location generated by t-SNE.
 <figure class = "snap-iframe"
         id = "random word locations"
@@ -179,7 +189,7 @@ Here is a program that displays 50 random words at the location generated by t-S
 </p>
 
 <h4>Word embeddings can do translations</h4>
-<p>
+<p class="instructions">
 What would happen if you took, for example, the features of the English word 'dog' and 
 asked for the closest word in say French.
 Try this with different source and target languages and different words.
@@ -194,49 +204,51 @@ Japanese, Lithuanian, Portuguese, Sinhalese, Spanish, and Swedish.
         caption = "Find the closest word in a different language.">
 </figure>
 </p>
-<p>
+<p class="advanced-information non-essential">
 It is possible to add word embeddings for more languages.
 The process is <a href="../word-embeddings/adding-more-languages.html" target="_blank">documented here</a>.
 </p>
 <h4>A 'Guess My Word' game using word embeddings</h4>
-<p>
+<p class="sample-program">
 The following game picks a random word and gives the player warmer or colder feedback as the player makes guesses.
 This does so by comparing the distance to the secret word with the previous distance.
 It uses the <span class="command-block">location of ...</span> reporter block to display your guesses.
 The game is very hard!
 There are many ways to make the game better.
 See if you can!
+</p>
+
 <figure class = "snap-iframe"
         id = "guess my word"
         full_screen = "true"
         container_style = "width: 800px; height: 800px" 
         caption = "Click the green flag to play Guess My Word. TRY IT!">
 </figure>
-</p>
+
 <h4>Benefits and risks using word embeddings</h4>
-<p>
+<p class="societal-impact">
 Word embeddings can be used as a component in AI programs that do
 sentiment analysis, entity detection, recommendations, summarising text, translation, and question answering.
 This is typically done by replacing the words in a text with their embeddings and then doing machine learning on the 
 approximate meaning of the words.
 This makes the systems work better with synonyms and paraphrasings.
 </p>
-<p>
+<p class="societal-impact">
 Word embeddings are learned by examining text with billions of words.
 These texts may have captured
 <a href="https://developers.googleblog.com/2018/04/text-embedding-models-contain-bias.html" target="_blank">
 societal biases</a>.
 For example, the following example seems to have captured the bias that butchers are male and bakers female.
 Other word embedding databases have the bias that doctors are male and nurses female.
+</p>
 <figure class = "snap-iframe"
         id = "word analogy bias"
         container_style = "width: 850px; height: 450px" 
         caption = "Bias in word analogy solutions. See if you can find more.">
 </figure>
-</p>
 
 <h4>How does this work?</h4>
-<p>
+<p class="how-it-works">
 While we don't really know what the numbers mean they must be encoding lots of things about words such as
 gender, grammatical category, family relationships, and hundreds more things.
 But the numbers aren't perfect.
@@ -252,7 +264,7 @@ Another problem is that sometimes short phrases act like words.
 "Ice cream" for example has no word embedding while "sherbet" and "sorbet" do.
 </p>
 <h4>A sample project using word embeddings for translation</h4>
-<p>
+<p class="sample-program">
 Here is
 <a href="/ai/snap/snap.html?project=translate" target="_blank">a program that asks the user for two languages</a>,
 obtains the feature vector of a random word from the first language,
@@ -260,7 +272,7 @@ and then displays several of the words closest to that feature vector.
 It places the words in the t-SNE two-dimensional approximation of where the 300-dimensional words really are.
 </p>
 <h4>How does translation using word embeddings work?</h4>
-<p>
+<p class="how-it-works">
 The word embeddings for each language were generated independently based upon text from Wikipedia and the web.
 The location in 300-dimensional space of the features for a word like 'dog' have no relationship 
 to the location of features of translations of the word 'dog'.
@@ -273,9 +285,9 @@ So they discovered that it is possible to find a rotation that will cause many w
 in one language to cause translations of those words to be close.
 The way it was done at first and in these Snap! blocks is by giving a program a word list between
 English and each other language.
-500 or 1000 words is enough to find a good rotation that brings most of the other 19000 words
+500 words is enough to find a good rotation that brings most of the other 19500 words
 close to where their translations are.
-While it is impressive that translation works at all given a word list that covers 5% of the vocabulary
+While it is impressive that translation works at all given a word list that covers 2.5% of the vocabulary
 <a href="https://arxiv.org/abs/1710.04087" target="_blank">Word Translation Without Parallel Data</a>
 describes a technique that uses no word lists or translated texts.
 A rotation is all that is needed because all the word embeddings are centred around zero
@@ -284,8 +296,10 @@ But note that the translation happens in 299 dimensions!
 </p>
 
 <h4 id="project-ideas">Possible project ideas using image recognition</h4>
-<p>
-<ol>
+<p class="project-ideas">
+Here are some project ideas:
+</p>
+<ol class="project-ideas">
 <li>
 Try using word embeddings to explore the similarity of sentences.
 One idea is to average all the words in the sentence.
@@ -308,10 +322,9 @@ A bilingual version Semantris might be a good idea.
 Be creative! Word embeddings are new and there is much that remains to discover.
 </li>
 </ol>
-</p>
 
 <h4>Future directions for this chapter</h4>
-<p>
+<p class="guide-to-guide">
 There is plenty more that AI programs can do with language including
 determining the grammatical structure of sentences (this is called "parsing"),
 figuring out the sentiment in some text,
@@ -320,13 +333,13 @@ We are considering integrating some of the tools that have been developed
 for visualising thousands of words inside of a high dimensional space.
 More to come here.
 </p>
-<p>
+<p class="guide-to-guide">
 Currently the word embeddings blocks excludes all proper nouns.
 If we added them one could solve analogies such as Paris is to France as Berlin is to X.
 </p>
 
 <h3 id="additional-resources">Additional resources</h3>
-<p>
+<p class="resources">
 Wikipedia's <a href="https://en.wikipedia.org/wiki/Word_embedding" target="_blank">word embedding</a> article is short and
 written for an advanced audience.
 The Facebook team wrote a paper detailing how they generated the word embeddings we used here:
@@ -348,7 +361,7 @@ is a great website for interactively exploring different ways of visualising hig
 Here is a video of <a href="https://www.youtube.com/watch?v=RJVL80Gg3lA" target="_blank">
 a nice talk by Laurens van der Maaten</a> who invented the idea of t-SNE.
 </p>
-<p>
+<p class="guide-to-guide">
 Return to 
 <a class="guide-link" href="chapter-4.html">the previous chapter on machine learning</a>.
 </p>
