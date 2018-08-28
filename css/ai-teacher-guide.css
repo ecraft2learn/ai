@@ -15,6 +15,12 @@ ol {
 ul {
   border-radius: 8px;
 }
+blockquote {
+  border-radius: 8px;
+  padding: 8px;
+  width: fit-content;
+  background-color: #e3edf5;
+}
 figure {
   display: block;
   text-align: center;
@@ -147,6 +153,9 @@ figcaption {
 }
 .resources {
   background-color: #f2d4f3;
+}
+.how-it-works {
+  background-color: #c8dbd9;
 }
 
 
