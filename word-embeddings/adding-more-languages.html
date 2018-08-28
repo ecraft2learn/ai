@@ -1,0 +1,51 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Adding more languages to word embeddings</title>
+<link href="/ai/css/ai-teacher-guide.css" rel="stylesheet">
+<link href="/ai/css/oer-style.css" rel="stylesheet">
+<link rel="icon" type="image/png" href="/ai/images/eCraft2Learn-Favicon.png" />
+<script src="/ai/js/ai-guide.js"></script>
+</head>
+<body>
+<h3>How to add word embeddings to more languages</h3>
+<p>
+First we download a <a href="https://fasttext.cc/docs/en/crawl-vectors.html">language file from Facebook's Fasttext site</a>.
+After unzipping it we run write_vectors to select the N most common words that are "good" (typically lowercase and only letters).
+We also run write_js which selects the same words but outputs it in a file that is JavaScript syntax.
+write_vectors and write_js are defined in <a href="http://ecraft2learn.github.io/ai/word-embeddings/fasttext.ipynb" download>
+this Python Jupyter file</a>.
+</p>
+<p>
+Then to generate the translation matrix one needs the vectors file produced by write_vectors as well as a vocabulary list.
+Between 500 words seems to work fine.
+We used <a href="http://1000mostcommonwords.com" target="_blank">1000mostcommonwords.com</a> and 
+<a href="https://ecraft2learn.github.io/ai/word-embeddings/extract-word-list.js" download>this JavaScript script</a>
+to turn a vocabulary page into the correct format and length.
+The <a href="http://ecraft2learn.github.io/ai/word-embeddings/translate.ipynb" download>Jupyter file</a> defines
+translate and old_translate.
+old_translate seems to work better and uses the file produced by extract-word-list.js script while
+translate relies upon Google Translate and expects the vocabulary to be split into two files.
+Both produce warnings that are OK to ignore.
+Finally download <a href="http://ecraft2learn.github.io/ai/word-embeddings/translate.html" download>translate.html</a>
+to the folder with the generated files and open it up.
+It will generate a rotated version of the JavaScript file of word embeddings that needs to be saved
+(and the tiny bit of HTML at the top and bottom of the file need to be removed).
+</p>
+<p>
+Finally to generate 2D locations for the words
+download <a href="http://ecraft2learn.github.io/ai/word-embeddings/tsne.html" download>tsne.html</a>
+to the folder with the generated files and open it up.
+After several minutes a text area with the locations will appear in the text area.
+Your computer may be sluggish while this is running.
+Save the generated locations in a file named word-locations.js.
+To view the word embeddings using
+<a href="https://projector.tensorflow.org" target="_blank">Tensorflow's projector<a>
+one needs to copy <a href="http://ecraft2learn.github.io/ai/word-embeddings/projector.html" download>projector.html</a>
+to the language's folder and open it.
+Save the results in two files and host them on the web along with the projector.json file described on the Projector page.
+</p>
+<p>
+To use another language there is a block called "wait for word embeddings ..." that can optionally take a URL
+to load another language.
+</p>
+</body>
+</html>
