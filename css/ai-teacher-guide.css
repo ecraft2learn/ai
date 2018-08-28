@@ -1,11 +1,24 @@
 body {
   font-family: "Tahoma", "Trebuchet MS";
   font-size: 1.1em;
+  max-width: 1024px;
+  margin: 0 auto !important;
+  float: none !important;
+}
+p {
+  border-radius: 8px;
+  padding: 8px;
+}
+ol {
+  border-radius: 8px;
+}
+ul {
+  border-radius: 8px;
 }
 figure {
   display: block;
   text-align: center;
-/*   margin-left: 20px; */
+  /*   margin-left: 20px; */
 }
 figure img {
   display:      block;
@@ -13,7 +26,14 @@ figure img {
   margin-right: auto;
 }
 figcaption {
-  font-style: italic; 
+  font-style: italic;
+  background-color: #7fff0040;
+  border-radius: 8px;
+  padding: 8px;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 8px;
 }
 .command-name, .block-name {
 /*   based on Mozilla Developer Network CSS for code */
@@ -25,7 +45,7 @@ figcaption {
     word-wrap: break-word;
 }
 .iframe-container {
-  border: 1px solid rgb(201, 0, 1);
+  border: 1px solid rgb(244, 139, 139);
   overflow: hidden;
   margin: 15px auto;
   width: 480px;
@@ -43,6 +63,9 @@ figcaption {
   -o-transform: scale(1.5);
   -webkit-transform: scale(1.5);
   transform: scale(1.5);
+}
+.image-of-iframe {
+  max-width: 950px;
 }
 .training-button, .testing-button, .return-to-snap-button, .together_button {
 /*    copied from jquery-ui with padding and font-size edited */
@@ -68,6 +91,8 @@ figcaption {
   cursor: pointer;
   color: #316d37;
   font-weight: bold;
+  background-color: #fad4c5;
+  width: fit-content;
 }
 .advanced-topic-body {
   padding: 10px;
@@ -92,6 +117,36 @@ figcaption {
 .flow-row-child {
   display: inline-block;
   margin-left: 4px;
+}
+.guide-body {
+  background-color: #ebf0f1;
+}
+.instructions {
+  background-color: #ebcacf;
+}
+.background-information {
+  background-color: #e4ebca;
+}
+.advanced-information {
+  background-color: #d8f4e6;
+}
+.project-ideas {
+  background-color: #f8e2ec;
+}
+.exercise {
+  background-color: #eae2f8;
+}
+.guide-to-guide {
+  background-color: #f8f2e2;
+}
+.societal-impact {
+  background-color: #c0f3db;
+}
+.sample-program {
+  background-color: #d4d8f3;
+}
+.resources {
+  background-color: #f2d4f3;
 }
 
 

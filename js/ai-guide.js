@@ -3,14 +3,21 @@
 window.addEventListener(
      'DOMContentLoaded',
      function () {
-        var style = document.createElement('link');
-        style.rel="stylesheet";
-        if (window.location.search.indexOf("student") >= 0) {
-           style.href = "/ai/css/student.css"; 
-        } else {
-           style.href = "/ai/css/teacher.css";
+        const add_style_sheet = function (url) {
+            let style = document.createElement('link');
+            style.rel="stylesheet";
+            style.href = url;
+            document.head.appendChild(style);
         }
-        document.head.appendChild(style);
+        const parameters = new URLSearchParams(window.location.search);
+        if (parameters.has("student")) {
+            add_style_sheet("/ai/css/student.css"); 
+        } else {
+            add_style_sheet("/ai/css/teacher.css");
+        }
+        if (parameters.has("short")) {
+            add_style_sheet("/ai/css/non-essential.css");   
+        }
 });
 
 // copy over search query and hash from ULR to appropriate links
@@ -109,6 +116,7 @@ window.addEventListener(
              let figcaption = document.createElement('figcaption');
              let img        = document.createElement('img');
              img.src = "/ai/AI-teacher-guide-projects/" + name + ".png";
+             img.className = "image-of-iframe";
              let replace_with_iframe = function () {
                  // add a loading div for a few seconds...
                  let loading = document.createElement('div');
