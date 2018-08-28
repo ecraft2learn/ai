@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	tf.dispose(data);
 	tf.dispose(translation);
 //     const textarea = document.getElementById('translated');
+    document.writeln("if (words_to_features === undefined) word_to_features = {};\n");
     document.writeln("words_to_features['" + language + "'] = {");
     const shape = tf_new_embeddings.shape;
     for (let i = 0; i < shape[0]; i++) {

@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	// Compute a T-SNE embedding, returns a promise.
 	// Runs for 1000 iterations by default.
-	let locations = "";
+	let locations = "if (words_to_locations === undefined) words_to_locations = {};\n";
 	locations += "words_to_locations['" + language + "'] = {\n";
 	tsneOpt.compute().then(() => {
 	    // tsne.coordinate returns a *tensor* with x, y coordinates of
