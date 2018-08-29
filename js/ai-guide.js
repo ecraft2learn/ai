@@ -9,6 +9,33 @@ window.addEventListener(
             style.href = url;
             document.head.appendChild(style);
         }
+        const insert_check_box = function (label, title, checked, on_value_change, before_element) {
+            const label_element = document.createElement('label');
+            label_element.innerHTML = "<input type='checkbox'>" + label;
+            label_element.title = title;
+            let check_box = label_element.firstChild;
+            check_box.checked = checked;
+            let response = function () {
+                on_value_change(check_box.checked);   
+            };
+            check_box.onchange    = response;
+            label_element.onclick = response;
+            document.body.insertBefore(label_element, before_element);
+            return label_element;
+        };
+        let show_all = function (show) {
+            const show_elements = function (selector) {
+                let elements = document.querySelectorAll(selector);
+                elements.forEach(function (element) {
+                    if (show) {
+                        element.style.display = 'block';
+                    } else {
+                        element.style.display = 'none';       
+                    }
+                });
+            };
+            ['.non-essential', '.advanced-topic', '.advanced-topic-body', '.how-it-works'].forEach(show_elements);
+        };
         const parameters = new URLSearchParams(window.location.search);
         if (parameters.has("student")) {
             add_style_sheet("/ai/css/student.css"); 
@@ -16,7 +43,14 @@ window.addEventListener(
             add_style_sheet("/ai/css/teacher.css");
         }
         if (parameters.has("short")) {
-            add_style_sheet("/ai/css/non-essential.css");   
+            show_all(false);   
+        }
+        if (window.location.href.indexOf('chapter') >= 0) {
+            insert_check_box("Display everything on this page",
+                             "Click to toggle whether you see the short or long version of this page.",
+                             !parameters.has("short"), // initial state
+                             show_all,
+                             document.body.firstChild);                
         }
 });
 
