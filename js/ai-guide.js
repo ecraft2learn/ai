@@ -23,7 +23,7 @@ window.addEventListener(
             document.body.insertBefore(label_element, before_element);
             return label_element;
         };
-        let show_all = function (hide) {
+        let hide_all = function (hide) {
             const show_elements = function (selector) {
                 let elements = document.querySelectorAll(selector);
                 elements.forEach(function (element) {
@@ -43,13 +43,13 @@ window.addEventListener(
             add_style_sheet("/ai/css/teacher.css");
         }
         if (parameters.has("short")) {
-            show_all(false);   
+            hide_all(false);   
         }
         if (window.location.href.indexOf('chapter') >= 0) {
-            insert_check_box("Display only short version of this page",
+            insert_check_box("Display only the short version of this page",
                              "Click to toggle whether you see the short or long version of this page.",
                              parameters.has("short"), // initial state
-                             show_all,
+                             hide_all,
                              document.body.firstChild);                
         }
 });
