@@ -21,20 +21,33 @@ window.addEventListener(
             check_box.onchange    = response;
             label_element.onclick = response;
             document.body.insertBefore(label_element, before_element);
-            return label_element;
+            return check_box;
         };
+        const toggle_elements = function (selector, hide) {
+            let elements = document.querySelectorAll(selector);
+            elements.forEach(function (element) {
+                if (hide) {
+                    element.style.display = 'none';
+                } else {
+                    element.style.display = 'block';       
+                }
+            });
+        };
+        let advanced_material_checkbox;
         let hide_all = function (hide) {
-            const show_elements = function (selector) {
-                let elements = document.querySelectorAll(selector);
-                elements.forEach(function (element) {
-                    if (hide) {
-                        element.style.display = 'none';
-                    } else {
-                        element.style.display = 'block';       
-                    }
+            ['.non-essential', '.advanced-topic', '.advanced-topic-body', '.how-it-works'].forEach(
+                function (selector) {
+                    toggle_elements(selector, hide)
                 });
-            };
-            ['.non-essential', '.advanced-topic', '.advanced-topic-body', '.how-it-works'].forEach(show_elements);
+            if (advanced_material_checkbox) {
+               advanced_material_checkbox.checked = hide;
+            }
+        };
+        let hide_advanced_material = function (hide) {
+            ['.advanced-topic', '.advanced-topic-body'].forEach(
+                function (selector) {
+                    toggle_elements(selector, hide)
+                });
         };
         const parameters = new URLSearchParams(window.location.search);
         if (parameters.has("student")) {
@@ -46,11 +59,18 @@ window.addEventListener(
             hide_all(false);   
         }
         if (window.location.href.indexOf('chapter') >= 0) {
-            insert_check_box("Display only the short version of this page",
+            advanced_material_checkbox =
+                insert_check_box("Hide advanced material on this page",
+                                 "Click to toggle whether you see the advanced material of this page.",
+                                 parameters.has("no-advanced-material"), // initial state
+                                 hide_advanced_material,
+                                 document.body.firstChild);
+                            
+            insert_check_box("Display only the short version of this page<br>",
                              "Click to toggle whether you see the short or long version of this page.",
                              parameters.has("short"), // initial state
                              hide_all,
-                             document.body.firstChild);                
+                             document.body.firstChild);
         }
 });
 
