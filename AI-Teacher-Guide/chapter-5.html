@@ -10,13 +10,13 @@
 <h2>A guide to building AI apps and artefacts</h2>
 <h3>Chapter 5 - Using AI with words and sentences</h3>
 <h4>Ken Kahn, University of Oxford</h4>
-<h3 id="browser-compatibility">Browser compatibility</h3>
+<h3 class="guide-to-guide-heading" id="browser-compatibility">Browser compatibility</h3>
 <p class="guide-to-guide">
 This chapter of the guide includes many interactive elements that currently run best in the Chrome browser.
 See the <a href="troubleshooting.html" target="_blank">troubleshooting guide</a>
 for how to deal with problems encountered.
 </p>
-<h3>Introduction</h3>
+<h3 class="background-information-heading">Introduction</h3>
 <p class="background-information">
 AI programs can do many things with text.
 These include
@@ -43,7 +43,7 @@ Translation between languages.
 </li>
 </ol>
 
-<h4>Doing arithmetic with words and sentences</h4>
+<h4 class="background-information-heading">Doing arithmetic with words and sentences</h4>
 <p class="background-information">
 While computers can deal with text as strings of characters a technique called
 <a href="https://gist.github.com/aparrish/2f562e3737544cf29aaf1af30362f469" target="_blank">word embedding</a>
@@ -63,7 +63,7 @@ They created tables for each language of at least a million words.
 The blocks described here provide the 20,000 most common words for 15 languages.
 (Larger tables and more languages can be added. Send requests to toontalk@gmail.com.)
 </p>
-<h4>Turning a word into lots of numbers</h4>
+<h4 class="instructions-heading">Turning a word into lots of numbers</h4>
 <p class="instructions">
 We have created Snap! blocks for exploring how word embeddings can be used to find similar words, 
 words which are between other words, and most surprisingly solve word analogy problems.
@@ -83,7 +83,7 @@ are lower case and contain only letters (no punctuation or digits).
         caption = "A block for converting words into lists of 300 numbers. TRY IT! (First time it may take some time to load.)">
 </figure>
 
-<h4>Finding the closest word to a list of feature numbers</h4>
+<h4 class="instructions-heading">Finding the closest word to a list of feature numbers</h4>
 <p class="instructions">
 A program can search through all the words to find the word that is closest to a list of numbers.
 The <span class="block-name">closest word to</span> reporter block does this.
@@ -91,7 +91,7 @@ The <span class="block-name">closest word to</span> reporter block does this.
 
 <p class="advanced-topic">Click to read an advanced topic</p>
 <span class="advanced-topic-body">
-<h4>Different ways of measuring distances in high dimensional spaces</h4>
+<h4 class="advanced-information-heading">Different ways of measuring distances in high dimensional spaces</h4>
 <p class="background-information advanced-information">
 There are two common ways of measuring distance in a high-dimensional space.
 One is <a href="https://en.wikipedia.org/wiki/Euclidean_distance" target="_blank">Euclidean distance</a>
@@ -111,7 +111,7 @@ For example, the third closest word to "dog" can be "canine" or "puppy" dependin
 </figure>
 </p>
 
-<h4>Finding the word half way between two other words</h4>
+<h4 class="instructions-heading">Finding the word half way between two other words</h4>
 <p class="instructions">
 You can take two words and average their features by adding together corresponding numbers and dividing the result by 2.
 You can then use the <span class="block-name">closest word to</span> reporter to find the word closest to the average.
@@ -126,7 +126,7 @@ Try averaging more than two words.
 And see what word is the closest to somewhere between two words other than the halfway point.
 </p>
 
-<h4>Using word embeddings to solve word analogy problems</h4>
+<h4 class="instructions-heading">Using word embeddings to solve word analogy problems</h4>
 <p class="instructions">
 One of the most surprising thing about word embeddings is that with the right formula one solve word analogy problems.
 For example "man is to woman as father is to what?" can be expressed as "father-(man-woman)=x".
@@ -142,7 +142,7 @@ Try solving "slow is to slower as fast is to what?".
 You might need to add 'fast' as an exception.
 </p>
 
-<h4>Mapping 300 dimensional points to two-dimensional points</h4>
+<h4 class="background-information-heading">Mapping 300 dimensional points to two-dimensional points</h4>
 <p class="background-information">
 No one can visualise 300-dimensional space.
 There are techniques for giving an impression of the relationships between very high-dimensional points
@@ -174,12 +174,15 @@ You can also use the projector to see the word embeddings of these languages:
 Note that it takes several hundred iterations of t-SNE before it settles down on a good mapping from 300 dimensions.
 You can also search for words and their neighbours and create bookmarks.
 The above links launch the projector with a bookmark showing t-SNE and highlighting the hundred words closes to 'dog'.
+</p>
+
 <figure>
 <img src="images/projector-bookmarks.png" class="center">
 <figcaption>In the lower right corner you can select projector bookmarks</figcaption></figure>
-</p>
+
 <p class="sample-program">
 Here is a program that displays 50 random words at the location generated by t-SNE.
+
 <figure class = "snap-iframe"
         id = "random word locations"
         full_screen = "true"
@@ -188,7 +191,7 @@ Here is a program that displays 50 random words at the location generated by t-S
 </figure>
 </p>
 
-<h4>Word embeddings can do translations</h4>
+<h4 class="instructions-heading">Word embeddings can do translations</h4>
 <p class="instructions">
 What would happen if you took, for example, the features of the English word 'dog' and 
 asked for the closest word in say French.
@@ -208,7 +211,7 @@ Japanese, Lithuanian, Portuguese, Sinhalese, Spanish, and Swedish.
 It is possible to add word embeddings for more languages.
 The process is <a href="../word-embeddings/adding-more-languages.html" target="_blank">documented here</a>.
 </p>
-<h4>A 'Guess My Word' game using word embeddings</h4>
+<h4 class="sample-program-heading">A 'Guess My Word' game using word embeddings</h4>
 <p class="sample-program">
 The following game picks a random word and gives the player warmer or colder feedback as the player makes guesses.
 This does so by comparing the distance to the secret word with the previous distance.
@@ -225,7 +228,7 @@ See if you can!
         caption = "Click the green flag to play Guess My Word. TRY IT!">
 </figure>
 
-<h4>Benefits and risks using word embeddings</h4>
+<h4 class="societal-impact-heading">Benefits and risks using word embeddings</h4>
 <p class="societal-impact">
 Word embeddings can be used as a component in AI programs that do
 sentiment analysis, entity detection, recommendations, summarising text, translation, and question answering.
@@ -247,7 +250,7 @@ Other word embedding databases have the bias that doctors are male and nurses fe
         caption = "Bias in word analogy solutions. See if you can find more.">
 </figure>
 
-<h4>How does this work?</h4>
+<h4 class="how-it-works-heading">How does this work?</h4>
 <p class="how-it-works">
 While we don't really know what the numbers mean they must be encoding lots of things about words such as
 gender, grammatical category, family relationships, and hundreds more things.
@@ -263,7 +266,7 @@ This is a problem researchers are working on.
 Another problem is that sometimes short phrases act like words.
 "Ice cream" for example has no word embedding while "sherbet" and "sorbet" do.
 </p>
-<h4>A sample project using word embeddings for translation</h4>
+<h4 class="sample-program-heading">A sample project using word embeddings for translation</h4>
 <p class="sample-program">
 Here is
 <a href="/ai/snap/snap.html?project=translate" target="_blank">a program that asks the user for two languages</a>,
@@ -271,7 +274,7 @@ obtains the feature vector of a random word from the first language,
 and then displays several of the words closest to that feature vector.
 It places the words in the t-SNE two-dimensional approximation of where the 300-dimensional words really are.
 </p>
-<h4>How does translation using word embeddings work?</h4>
+<h4 class="how-it-works-heading">How does translation using word embeddings work?</h4>
 <p class="how-it-works">
 The word embeddings for each language were generated independently based upon text from Wikipedia and the web.
 The location in 300-dimensional space of the features for a word like 'dog' have no relationship 
@@ -295,7 +298,7 @@ so they don't need to be translated (in the mathematical sense, i.e. moved) as w
 But note that the translation happens in 299 dimensions!
 </p>
 
-<h4 id="project-ideas">Possible project ideas using image recognition</h4>
+<h4 class="project-ideas-heading" id="project-ideas">Possible project ideas using image recognition</h4>
 <p class="project-ideas">
 Here are some project ideas:
 </p>
@@ -323,22 +326,20 @@ Be creative! Word embeddings are new and there is much that remains to discover.
 </li>
 </ol>
 
-<h4>Future directions for this chapter</h4>
-<p class="guide-to-guide">
+<h4 class="background-information-heading">Future directions for this chapter</h4>
+<p class="background-information">
 There is plenty more that AI programs can do with language including
 determining the grammatical structure of sentences (this is called "parsing"),
 figuring out the sentiment in some text,
 and question answering.
-We are considering integrating some of the tools that have been developed
-for visualising thousands of words inside of a high dimensional space.
-More to come here.
+We plan to add more.
 </p>
-<p class="guide-to-guide">
+<p class="background-information">
 Currently the word embeddings blocks excludes all proper nouns.
 If we added them one could solve analogies such as Paris is to France as Berlin is to X.
 </p>
 
-<h3 id="additional-resources">Additional resources</h3>
+<h3 class="resources-heading" id="additional-resources">Additional resources</h3>
 <p class="resources">
 Wikipedia's <a href="https://en.wikipedia.org/wiki/Word_embedding" target="_blank">word embedding</a> article is short and
 written for an advanced audience.

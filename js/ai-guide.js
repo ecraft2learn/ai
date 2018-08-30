@@ -9,54 +9,110 @@ window.addEventListener(
             style.href = url;
             document.head.appendChild(style);
         }
-        const insert_check_box = function (label, title, checked, on_value_change, before_element) {
+        let all_selectors = 
+            ['.non-essential', '.advanced-topic-body', '.advanced-topic',
+            '.advanced-information', '.background-information', '.exercise', '.guide-to-guide', '.how-it-works',
+             '.instructions', '.project-ideas', '.resources', '.sample-program', '.societal-impact'];
+        let current_selectors = all_selectors.slice();
+        let display_only_current_selectors = function () {
+            // hide all
+            document.querySelectorAll(all_selectors.join(",")).forEach(function (element) {
+                element.style.display = 'none';
+            });
+            // show the current selectors
+            document.querySelectorAll(current_selectors.join(",")).forEach(function (element) {
+                element.style.display = 'block';       
+            });
+            // and now do the same for the headings (h3 and h4 typically) 
+            document.querySelectorAll(all_selectors.join("-heading,")).forEach(function (element) {
+                element.style.display = 'none';
+            });
+            // show the current selectors
+            document.querySelectorAll(current_selectors.join("-heading,")).forEach(function (element) {
+                element.style.display = 'block';       
+            });
+        };
+        let remove_selectors = function (selectors_to_remove) {
+            current_selectors = current_selectors.filter(function (selector) {
+                 return selectors_to_remove.indexOf(selector) < 0; // keep those not in selectors_to_remove   
+            });
+        };
+        let add_selectors = function (selectors_to_add) {
+            selectors_to_add.forEach(function (selector) {
+                if (current_selectors.indexOf(selector) < 0) {
+                    current_selectors.push(selector);   
+                }
+            });
+        };
+        let insert_check_box = function (label, title, checked, on_value_change, before_element) {
             const label_element = document.createElement('label');
             label_element.innerHTML = "<input type='checkbox'>" + label;
             label_element.title = title;
             let check_box = label_element.firstChild;
             check_box.checked = checked;
-            let response = function () {
+            check_box.onchange = function () {
                 on_value_change(check_box.checked);   
             };
-            check_box.onchange    = response;
-            label_element.onclick = response;
             document.body.insertBefore(label_element, before_element);
             return check_box;
         };
-        const toggle_elements = function (selector, hide) {
-            let elements = document.querySelectorAll(selector);
-            elements.forEach(function (element) {
-                if (hide) {
-                    element.style.display = 'none';
-                } else {
-                    element.style.display = 'block';       
-                }
-            });
-        };
-        let advanced_material_checkbox;
+        let short_checkbox, advanced_material_checkbox;
+        let update_url_hash = function (remove, property, selectors_to_add_or_remove) {
+            if (remove) {
+                remove_selectors(selectors_to_add_or_remove);
+            } else {
+                add_selectors(selectors_to_add_or_remove);
+            }
+            display_only_current_selectors();
+            let property_index_in_hash = window.location.hash.indexOf(property);
+            if (property_index_in_hash >= 0 && !remove) {
+               window.location.hash = window.location.hash.substring(0, property_index_in_hash-2) + // -2 to include the &
+                                      window.location.hash.substring(property_index_in_hash+property.length);
+            } else if (remove) {
+               // tried using parameters.append() but wasn't updated if called a second time
+               window.location.hash += '&' + property;
+            }
+        }
         let hide_all = function (hide) {
-            ['.non-essential', '.advanced-topic', '.advanced-topic-body', '.how-it-works'].forEach(
-                function (selector) {
-                    toggle_elements(selector, hide)
-                });
+            update_url_hash(hide,
+                            'short',
+                            ['.non-essential', '.advanced-topic', '.advanced-topic-body', '.how-it-works']);
             if (advanced_material_checkbox) {
                advanced_material_checkbox.checked = hide;
             }
         };
         let hide_advanced_material = function (hide) {
-            ['.advanced-topic', '.advanced-topic-body'].forEach(
-                function (selector) {
-                    toggle_elements(selector, hide)
-                });
+            update_url_hash(hide,
+                            'no-advanced-material',
+                            ['.advanced-topic', '.advanced-topic-body']);
         };
-        const parameters = new URLSearchParams(window.location.search);
-        if (parameters.has("student")) {
-            add_style_sheet("/ai/css/student.css"); 
-        } else {
-            add_style_sheet("/ai/css/teacher.css");
-        }
+        let hide_all_but_instructions = function (hide) {
+            update_url_hash(hide,
+                            'instructions-only',
+                            ['.non-essential', '.advanced-topic-body', '.advanced-topic',
+                             '.advanced-information', '.background-information', '.exercise', '.how-it-works',
+                             '.project-ideas', '.resources', '.societal-impact']);
+            if (advanced_material_checkbox) {
+               advanced_material_checkbox.checked = hide;
+            }
+            if (short_checkbox) {
+               short_checkbox.checked = hide;
+            }
+        };
+        const parameters = new URLSearchParams(window.location.hash);
+//         if (parameters.has("student")) {
+//             add_style_sheet("/ai/css/student.css"); 
+//         } else {
+//             add_style_sheet("/ai/css/teacher.css");
+//         }
         if (parameters.has("short")) {
-            hide_all(false);   
+            hide_all(true);   
+        }
+        if (parameters.has("no-advanced-material")) {
+            hide_advanced_material(true);   
+        }
+        if (parameters.has("instructions-only")) {
+            hide_all_but_instructions(true);   
         }
         if (window.location.href.indexOf('chapter') >= 0) {
             advanced_material_checkbox =
@@ -65,11 +121,17 @@ window.addEventListener(
                                  parameters.has("no-advanced-material"), // initial state
                                  hide_advanced_material,
                                  document.body.firstChild);                
-            insert_check_box("Display only the short version of this page<br>",
-                             "Click to toggle whether you see the short or long version of this page.",
-                             parameters.has("short"), // initial state
-                             hide_all,
+            insert_check_box("Display only programming instructions&nbsp;&nbsp;",
+                             "Click to toggle whether you see more than the programming instructions on this page.",
+                             parameters.has("instructions-only"), // initial state
+                             hide_all_but_instructions,
                              document.body.firstChild);
+            short_checkbox = 
+                insert_check_box("Display only the short version of this page&nbsp;&nbsp;",
+                                 "Click to toggle whether you see the short or long version of this page.",
+                                 parameters.has("short"), // initial state
+                                 hide_all,
+                                 document.body.firstChild);
         }
 });
 
