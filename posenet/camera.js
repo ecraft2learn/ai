@@ -343,6 +343,7 @@ const respond_to_messages =
                     copy_video_to_canvas(image, canvas);
                     const image_as_Array3D = tf.fromPixels(canvas);
                     let poses = [];
+                    document.getElementById('video').play();
                     switch (guiState.algorithm) {
                         case 'single-pose':
                             const pose = await guiState.net.estimateSinglePose(video, 

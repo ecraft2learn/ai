@@ -64,8 +64,7 @@ window.addEventListener(
                                  "Click to toggle whether you see the advanced material of this page.",
                                  parameters.has("no-advanced-material"), // initial state
                                  hide_advanced_material,
-                                 document.body.firstChild);
-                            
+                                 document.body.firstChild);                
             insert_check_box("Display only the short version of this page<br>",
                              "Click to toggle whether you see the short or long version of this page.",
                              parameters.has("short"), // initial state
@@ -74,7 +73,7 @@ window.addEventListener(
         }
 });
 
-// copy over search query and hash from ULR to appropriate links
+// copy over search query and hash from URL to appropriate links
 window.addEventListener(
      'DOMContentLoaded',
      function () {
