@@ -10,7 +10,7 @@ window.addEventListener(
             document.head.appendChild(style);
         };
         // the purpose of adding '.not-to-be-used' is that
-        // when running join("-heading,") the last item doesn't get the suffix
+        // when running join("-white,") the last item doesn't get the suffix
         let all_selectors = 
             ['.non-essential', '.advanced-topic-body', '.advanced-topic',
             '.advanced-information', '.background-information', '.exercise', '.guide-to-guide', '.how-it-works',
@@ -25,12 +25,12 @@ window.addEventListener(
             document.querySelectorAll(current_selectors.join(",")).forEach(function (element) {
                 element.style.display = 'block';       
             });
-            // and now do the same for the headings (h3 and h4 typically) 
-            document.querySelectorAll(all_selectors.join("-heading,")).forEach(function (element) {
+            // and now do the same for the headings (h3 and h4 typically) and figures
+            document.querySelectorAll(all_selectors.join("-white,")).forEach(function (element) {
                 element.style.display = 'none';
             });
             // show the current selectors
-            document.querySelectorAll(current_selectors.join("-heading,")).forEach(function (element) {
+            document.querySelectorAll(current_selectors.join("-white,")).forEach(function (element) {
                 element.style.display = 'block';       
             });
         };
@@ -80,7 +80,7 @@ window.addEventListener(
                             'short',
                             ['.non-essential', '.advanced-topic', '.advanced-topic-body', '.how-it-works']);
             if (advanced_material_checkbox) {
-               advanced_material_checkbox.checked = hide;
+                advanced_material_checkbox.checked = hide;
             }
         };
         let hide_advanced_material = function (hide) {
@@ -150,8 +150,8 @@ window.addEventListener(
              var hash_start   = href.indexOf("#");
              var new_search = search_start >= 0 &&
                               (hash_start >= 0 ?
-                                  href.substring(search_start, hash_start) :
-                                  href.substring(search_start));
+                                   href.substring(search_start, hash_start) :
+                                   href.substring(search_start));
              var new_hash   = hash_start >= 0 && href.substring(hash_start);
              var url = href;
              if (search_start >= 0) {
@@ -173,6 +173,12 @@ window.addEventListener(
                 }
              } else {
                 new_hash = hash;
+             }
+             if (new_search.indexOf(window.location.search.substring(1)) < 0) { // substring(1) to ignore the #
+                 new_search += window.location.search;    
+             }
+             if (new_hash.indexOf(window.location.hash.substring(1)) < 0) {
+                new_hash += window.location.hash;
              }
              element.setAttribute('href', url + new_search + new_hash);
          };

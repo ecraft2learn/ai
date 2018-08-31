@@ -10,7 +10,7 @@
 <h2>A guide to building AI apps and artefacts</h2>
 <h3>Chapter 2 - Adding listening to programs</h3>
 <h4>Ken Kahn, University of Oxford</h4>
-<h4>Browser compatibility</h4>
+<h4 class="guide-to-guide-white">Browser compatibility</h4>
 <p class="guide-to-guide">
 This guide includes many interactive elements that currently only run well in the Chrome browser.
 This chapter relies upon there being a microphone connected to your computer.
@@ -19,7 +19,7 @@ one may need to configure the system or the browser to know how to access the mi
 There is a <a href="troubleshooting.html" target="_blank">troubleshooting guide</a>
 that should be consulted if problems are encountered.
 </p>
-<h4>Introduction</h4>
+<h4 class="background-information-white">Introduction</h4>
 <p class="background-information">
 It is much easier to get a computer to start with text and end up with speech
 than to start with speech and end up with the corresponding text.
@@ -32,7 +32,7 @@ These vibrations are converted to numbers.
 Speech recognition begins with these numbers and attempts to determine what was said.
 As you'll see the process is not perfect, mistakes occur.
 </p>
-<h4>A simple speech recognition block</h4>
+<h4 class="instructions-white">A simple speech recognition block</h4>
 <p class="instructions">
 Click on the following block, say something,
 then click on the <span class="block-name" translate=no>last thing heard</span> variable.
@@ -63,8 +63,9 @@ E.g., fr will be treated as fr-FR.
 </p>
 
 <span class="non-essential">
-<h4>Speech recognition errors</h4>
-<p class="instructions">Speech recognition can encounter errors such as the inability to access the microphone.
+<h4 class="instructions-white">Speech recognition errors</h4>
+<p class="instructions">
+Speech recognition can encounter errors such as the inability to access the microphone.
 The most common "error" is when after several seconds nothing is heard.
 The <span class="block-name">listen then ...</span> block keeps listening until there is an error.
 When the speech recogniser notices that nothing has been said then
@@ -81,7 +82,7 @@ Try the following and then be quiet for a while.
 </figure>
 </span>
 
-<h4>A sample program using speech recognition (and synthesis)</h4>
+<h4 class="sample-program-white">A sample program using speech recognition (and synthesis)</h4>
 <p class="sample-program">
 The following program uses the <span class="block-name">listen then ...</span> block to control a sprite.
 You can tell it to go forward or to the turn right.
@@ -119,7 +120,7 @@ How about doing animations in response to spoken commands?
 </p>
 
 <span class="non-essential">
-<h4>How the spoken command program works</h4>
+<h4 class="how-it-works-white">How the spoken command program works</h4>
 <p class="how-it-works">
 If you click on <img src="images/show-blocks.png"> you'll see the blocks behind the program.
 If you then right click on <span class="block-name">speak turtle commands</span>
@@ -146,7 +147,7 @@ When a number is spoken the turtle then turns or moves appropriately.
 
 <p class="advanced-topic">Click to read another advanced topic</p>
 <span class="advanced-topic-body">
-<h4>An alternative way to do the same thing</h4>
+<h4 class="advanced-information-white">An alternative way to do the same thing</h4>
 <p class="advanced-information">
 The command program relies upon what computer scientists call
 <span class="notranslate english" translate=no>'continuations'</span>.
@@ -169,7 +170,7 @@ cannot do so.</p>
 </span>
 </span>
 
-<h4>An example project involving generating sentences using parts of speech concepts</h4>
+<h4 class="sample-program-white">An example project involving generating sentences using parts of speech concepts</h4>
 <p class="sample-program">
 The following sentence generating program starts with a random sentence "template".
 The program considers any word starting with "?" to be a variable that is replaced by asking the user for something of that sort.
@@ -229,10 +230,11 @@ Issues about number agreement and tenses arise naturally.
 Could a program like this work without grammatical ideas like nouns, verbs, adjectives, etc.?
 </p>
 
-<h4 id="story-generator">A more sophisticated sentence (or story) generator</h4>
+<h4 class="sample-program-white" id="story-generator">A more sophisticated sentence (or story) generator</h4>
 <p class="sample-program">
 This following program extends the sentence generator by adding a new feature.
-If it encounters a word beginning with "=" it replaces it with the last response to the request for an example of that word/phrase.
+If it encounters a word beginning with "=" it replaces it with the last response to the request
+for an example of that word/phrase.
 </p>
 
 <figure class = "snap-iframe"
@@ -281,7 +283,7 @@ There is a
 of the story generator.
 </p>
 
-<h4>A question answering demo</h4>
+<h4 class="sample-program-white">A question answering demo</h4>
 <p class="sample-program">
 The following demo is a bit like Alexa, Cortana, and Google Assistant.
 It asks the user to say something and then sends those words off to Wikipedia.
@@ -300,7 +302,7 @@ Typically there are many matches so it picks one at random and says it.
 <figcaption>Screen shot of the entire 'Ask Wikipedia' program</figcaption>
 </figure>
 
-<h4>What is speech recognition good for?</h4>
+<h4 class="societal-impact-white">What is speech recognition good for?</h4>
 <p class="societal-impact">
 Speech recognition can be used to transcribe spoken speech.
 Those unable to type or write can use it to communicate textually and to generate notes and reports.
@@ -321,7 +323,7 @@ Assistants like Siri or Alexa can provide helpful responses to spoken queries.
 Verbal input and output can be the safest way to communicate in some circumstances such as when driving or piloting.
 </p>
 
-<h4>What are the dangers of speech recognition?</h4>
+<h4 class="societal-impact-white">What are the dangers of speech recognition?</h4>
 <p class="societal-impact">
 Like many technologies speech recognition can be misused.
 It could be used for widespread spying on a population.
@@ -385,7 +387,7 @@ What can one say about a speech recogniser if it makes the same mistakes as peop
 What if its mistakes are different?
 </p>
 
-<h4 id="project-ideas">Ideas for projects using speech synthesis and recognition</h4>
+<h4 class="project-ideas-white" id="project-ideas">Ideas for projects using speech synthesis and recognition</h4>
 <p class="project-ideas">
 Here are some ideas for projects using speech recognition
 (and sometimes also use speech synthesis as described in 
@@ -489,7 +491,7 @@ Try fractions and negative numbers.
 Try very big numbers.
 </p>
 
-<h4>Additional resources</h4>
+<h4 class="resources-white">Additional resources</h4>
 <p class="resources">
 <a href="https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition" target="_blank">
 This documentation of speech recognition</a>
@@ -516,7 +518,7 @@ that discusses these Snap! speech synthesis and recognition blocks.</p>
 
 <script src="/ai/js/where-to-get-library.js"></script>
 
-<h4>Learn about image input</h4>
+<h4 class="guide-to-guide-white">Learn about image input</h4>
 <p class="guide-to-guide">
 Go to 
 <a class="guide-link" href="chapter-3.html">the next chapter on image recognition</a>.
