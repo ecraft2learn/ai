@@ -70,7 +70,7 @@ window.addEventListener(
             if (property_index_in_hash >= 0 && !remove) {
                window.location.hash = window.location.hash.substring(0, property_index_in_hash-2) + // -2 to include the &
                                       window.location.hash.substring(property_index_in_hash+property.length);
-            } else if (remove) {
+            } else if (property_index_in_hash <= 0 && remove) {
                // tried using parameters.append() but wasn't updated if called a second time
                window.location.hash += '&' + property;
             }
