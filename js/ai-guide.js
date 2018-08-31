@@ -8,11 +8,13 @@ window.addEventListener(
             style.rel="stylesheet";
             style.href = url;
             document.head.appendChild(style);
-        }
+        };
+        // the purpose of adding '.not-to-be-used' is that
+        // when running join("-heading,") the last item doesn't get the suffix
         let all_selectors = 
             ['.non-essential', '.advanced-topic-body', '.advanced-topic',
             '.advanced-information', '.background-information', '.exercise', '.guide-to-guide', '.how-it-works',
-             '.instructions', '.project-ideas', '.resources', '.sample-program', '.societal-impact'];
+             '.instructions', '.project-ideas', '.resources', '.sample-program', '.societal-impact', '.not-to-be-used'];
         let current_selectors = all_selectors.slice();
         let display_only_current_selectors = function () {
             // hide all
