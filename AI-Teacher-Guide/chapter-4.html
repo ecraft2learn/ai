@@ -331,16 +331,16 @@ Many are familiar with how pose detection can be embedded in video games via
 What is so impressive about Posenet is that it works in the browser without any special software or hardware (other than a webcam).
 </p>
 <p class="instructions">
-The <span class="block-name">poses</span> block passes a list of poses to the blocks provided.
+The <span class="block-name">poses</span> block reports a list of poses.
 One pose for each person in front of the camera.
-The system can be configured on the "poses" tab to be optimised for scenes with only one person.
+The system can be configured on the "poses" tab to be optimised for scenes with more than one person.
 Tradeoffs between speed and accuracy can also be made.
 The "poses" tab is also a good place to explore pose detection.
 There are two kinds of <span class="block-name">pose property</span> blocks that can fetch information for a <i>pose</i>.
 They both can specify that one wants the confidence the system has that it has correctly identified a particular body part
 (values between 0 and 100).
-Or that the location of the body part is desired which is reported as a list of the x and y coordinates
-(again values between 0 and 100).
+Or that the location of the body part is desired which is reported as a list of the x and y coordinates.
+Depending upon the value of the flag the location is reported either in as values between 0 and 100 or as coordinates of the stage.
 </p>
 <figure class = "snap-iframe"
         id = "pose"
