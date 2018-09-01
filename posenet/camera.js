@@ -171,18 +171,21 @@ function setupFPS() {
 
 let first_time = true;
 let timer = undefined;
+let stopped = false;
 let poseDetectionFrame; // at this scope so can easily restart
 
 let stop = function stop() { 
     document.getElementById('video').pause();
     cancelAnimationFrame(timer);
     timer = undefined; // so don't restart multiple times
+    stopped = true;
 };
 
 let restart = function restart() {
-    if (!timer) {
+    if (stopped) {
         document.getElementById('video').play();
         timer = requestAnimationFrame(poseDetectionFrame);
+        stopped = false;
     }
 };
 
@@ -271,8 +274,9 @@ function detectPoseInRealTime(video, net) {
         create_return_to_snap_button();
         first_time = false;
     }
-
-    requestAnimationFrame(poseDetectionFrame);
+    if (!stopped) {
+       timer = requestAnimationFrame(poseDetectionFrame);
+    } 
   }
   // poseDetectionFrame() can lead to Error: The DOM is not ready yet.
   const wait_for_output_canvas = function () {
