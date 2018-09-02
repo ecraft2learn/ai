@@ -694,19 +694,23 @@ window.ecraft2learn =
       if (together_url) {
           URL = together_url;
       } else {
+          let index_file_name = window.location.hostname === "localhost" ?
+                                 // until fully tested and debugged don't use local version
+                                "index" : // "index-local" :
+                                "index";
           if (source === 'training using camera') {
-              URL = "/ai/camera-train/index-dev.html?translate=1";
+              URL = "/ai/camera-train/" + index_file_name + ".html?translate=1";
               if (together) {
                   URL += "&together=1";
               }                  
           } else if (source === 'training using microphone') {
-              URL = "/ai/microphone-train/index.html?translate=1";
+              URL = "/ai/microphone-train/" + index_file_name + ".html?translate=1";
           } else if (source === 'posenet') {
-              URL = "/ai/posenet/index-dev.html?translate=1";
+              URL = "/ai/posenet/" + index_file_name + ".html?translate=1";
           } else if (source === 'style transfer') {
-              URL = "/ai/style-transfer/index.html";
+              URL = "/ai/style-transfer/" + index_file_name + ".html";
           }
-          if (window.location.href.indexOf("localhost") < 0) {
+          if (window.location.hostname !== "localhost") {
               URL = "https://ecraft2learn.github.io" + URL;
           }
       }
