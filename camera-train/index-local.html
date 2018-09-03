@@ -7,13 +7,30 @@
     <link href="/ai/css/ai-teacher-guide.css" rel="stylesheet">
     <link rel="icon" type="image/png" href="/ai/images/eCraft2Learn-Favicon.png" />
     <title>Machine learning from the camera (local version)</title>
-    <script src="deeplearn"></script>
-    <script src="deeplearn-knn-image-classifier.js"></script>
+<!--     added the following based upon https://github.com/tensorflow/tfjs-models/tree/master/knn-classifier -->
+    <!-- Load TensorFlow.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <!-- Load MobileNet -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
+    <!-- Load KNN Classifier -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier"></script> 
     <script src="/ai/js/training-utilities.js"></script>
-    <script src="train.js"></script>
+    <script src="train-mobilenet.js"></script>
     <script src="/ai/js/translate.js"></script>
 </head>
 <body>
 <p id="please-wait">Please wait</p>
+
+<div id='main' style='display:none'>
+    <video id="video" playsinline 
+     width = "300px"
+     height = "250px"
+     style=" -moz-transform: scaleX(-1);
+             -o-transform: scaleX(-1);
+             -webkit-transform: scaleX(-1);
+             transform: scaleX(-1);
+           ">
+    </video>
+</div>
 </body>
 </html>
