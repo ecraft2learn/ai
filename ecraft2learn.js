@@ -251,35 +251,34 @@ window.ecraft2learn =
         }
         return x;
     };
-    let add_ecraft2learn_photo_to_ecraft2learn_canvas = function () {
-        add_photo_to_canvas(ecraft2learn.canvas,
-                            ecraft2learn.video,
-                            ecraft2learn.canvas.width,
-                            ecraft2learn.canvas.height);
-    };
-    let add_photo_to_canvas = function (canvas, video, width, height) {
+    let add_photo_to_canvas = function (image_or_video, width, height) {
         // Capture a photo by fetching the current contents of the video
         // and drawing it into a canvas, then converting that to a PNG
         // format data URL. By drawing it on an offscreen canvas and then
         // drawing that to the screen, we can change its size and/or apply
         // other changes before drawing it.
-        canvas.setAttribute('width', width);
-        canvas.setAttribute('height', height);
+        if (!image_or_video) {
+            image_or_video = ecraft2learn.video;
+        }
+        if (!width) {
+            width = image_or_video.width;
+        }
+        if (!height) {
+            height = image_or_video.height;
+        }
+        let canvas = document.createElement('canvas');
+        canvas.width  = width;
+        canvas.height = height;
+//         canvas.setAttribute('width',  width);
+//         canvas.setAttribute('height', height);
         let draw_image = function () {
-            canvas.getContext('2d').drawImage(video, 0, 0, width, height);
-            video.removeEventListener('waiting', draw_image);
+            // is this still used?
+            canvas.getContext('2d').drawImage(image_or_video, 0, 0, width, height);
+            ecraft2learn.video.removeEventListener('waiting', draw_image);
         };
-        video.addEventListener('waiting', draw_image);
-        canvas.getContext('2d').drawImage(video, 0, 0, width, height);
-//         const draw_image = function () {
-//             console.log(video.readyState);
-//             if (video.readyState === 4) {
-//                 canvas.getContext('2d').drawImage(video, 0, 0, width, height);
-//              } else {
-//                 setTimeout(draw_image, 1000);   
-//              }
-//         };
-//         draw_image();
+        ecraft2learn.video.addEventListener('waiting', draw_image);
+        canvas.getContext('2d').drawImage(image_or_video, 0, 0, width, height);
+        return canvas;
     };
     let get_mary_tts_voice = function (voice_number) { // official name
         return get_voice_from(voice_number, mary_tts_voices.map(function (voice) { return voice[0]; }));
@@ -784,20 +783,17 @@ window.ecraft2learn =
           return;
       }
       let post_image = function () {
-//           ecraft2learn.canvas = canvas;
-//           ecraft2learn.video  = video;
-          add_photo_to_canvas(ecraft2learn.canvas, 
-                              image || ecraft2learn.video,
-                              training_image_width,
-                              training_image_height);
-          var image_URL = ecraft2learn.canvas.toDataURL('image/png');
+          let canvas = add_photo_to_canvas(image || ecraft2learn.video,
+                                           training_image_width,
+                                           training_image_height);
+          let image_URL = canvas.toDataURL('image/png');
           machine_learning_window.postMessage(message_maker(image_URL), "*");   
       }
-      if (ecraft2learn.canvas) {
-          post_image(ecraft2learn.canvas, ecraft2learn.video);
+      if (ecraft2learn.video) {
+          post_image();
       } else {
           // better to use 640x480 and then scale it down before sending it off to the training tab
-          ecraft2learn.canvas = ecraft2learn.setup_camera(640, 480, post_image);
+          ecraft2learn.setup_camera(640, 480, post_image);
       }    
   };
   const posenet_window_request = 
@@ -810,8 +806,8 @@ window.ecraft2learn =
       function (alert_message, message_maker, training_image_width, training_image_height, image) {
           machine_learning_window_request(ecraft2learn.support_window['training using camera'], message_maker, training_image_width, training_image_height, image, alert_message);
   };
-  const TRAINING_IMAGE_WIDTH  = 227;
-  const TRAINING_IMAGE_HEIGHT = 227;
+  const TRAINING_IMAGE_WIDTH  = 300;
+  const TRAINING_IMAGE_HEIGHT = 250;
   var get_costumes = function (sprite) {
         if (!sprite) {
             alert("get_costumes called without specifying which sprite");
@@ -1533,9 +1529,10 @@ window.ecraft2learn =
   },
 
   set_camera_dimensions: function (width, height) {
-      if (ecraft2learn.canvas && width && height) {
-          ecraft2learn.canvas.width  = +width;
-          ecraft2learn.canvas.height = +height;
+      // is this still needed?
+      if (ecraft2learn.video && width && height) {
+          ecraft2learn.video.width  = +width;
+          ecraft2learn.video.height = +height;
           return true;
       }
       return false;
@@ -1546,8 +1543,8 @@ window.ecraft2learn =
       // causes some methods to be defined in this scope
       // supported service providers are currently 'Google', 'Microsoft', and IBM 'Watson' (or 'IBM Watson')
       // after_setup_callback is optional and called once setup completes
-      if (ecraft2learn.canvas &&
-           (width === 0 || (ecraft2learn.canvas.width === +width && ecraft2learn.canvas.height === +height))) {
+      if (ecraft2learn.video &&
+           (width === 0 || (ecraft2learn.video.width === +width && ecraft2learn.video.height === +height))) {
           // already initialised and not changing the dimensions
           invoke_callback(after_setup_callback);
           return;
@@ -1569,14 +1566,13 @@ window.ecraft2learn =
       }
       // if video and canvas already exist this may change its dimensions
       let video  = ecraft2learn.video  || document.createElement('video');
-      let canvas = ecraft2learn.canvas || document.createElement('canvas');
+//       let canvas = document.createElement('canvas');
       let callback = function(stream) {
           video.srcObject = stream;
           video.width  = width;
           video.height = height;
           video.play();
           ecraft2learn.video = video;
-          ecraft2learn.canvas = canvas;
           invoke_callback(after_setup_callback);
       };
       const error_callback = function(error) {
@@ -1586,11 +1582,11 @@ window.ecraft2learn =
       let constraints = {video: true,
                          audio: false};
       video.style.display  = 'none';
-      canvas.style.display = 'none';
-      canvas.setAttribute('width', width);
-      canvas.setAttribute('height', height);
+//       canvas.style.display = 'none';
+//       canvas.width = width;
+//       canvas.height = height;
       document.body.appendChild(video);
-      document.body.appendChild(canvas);
+//       document.body.appendChild(canvas);
       if (navigator.mediaDevices) {
           navigator.mediaDevices.getUserMedia(constraints)
               .then(callback)
@@ -1608,13 +1604,13 @@ window.ecraft2learn =
 
   add_photo_as_costume: function (sprite) {
       // deprecated once I understood that costumes were first-class objects - see costume_from_camera
-      add_ecraft2learn_photo_to_ecraft2learn_canvas();
-      add_costume(create_costume(ecraft2learn.canvas), sprite);
+      let canvas = add_photo_to_canvas();
+      add_costume(create_costume(canvas), sprite);
   },
 
   costume_from_camera: function () {
-      add_ecraft2learn_photo_to_ecraft2learn_canvas();
-      return create_costume(ecraft2learn.canvas);
+      let canvas = add_photo_to_canvas();
+      return create_costume(canvas);
   },
 
   update_costume_from_video: function (costume_or_costume_number, sprite) {
@@ -1624,7 +1620,7 @@ window.ecraft2learn =
                            costume_of_sprite(costume_or_costume_number, sprite);
       var canvas = costume.contents;
       var context = canvas.getContext('2d');
-      context.drawImage(ecraft2learn.video, 0, 0, ecraft2learn.canvas.width, ecraft2learn.canvas.height);
+      context.drawImage(ecraft2learn.video, 0, 0, ecraft2learn.video.width, ecraft2learn.video.height);
       sprite.drawNew();
   },
 
@@ -1672,14 +1668,14 @@ window.ecraft2learn =
         costume = show_photo_or_costume;
         canvas_for_analysis = costume.contents;
     } else {
-        add_ecraft2learn_photo_to_ecraft2learn_canvas();
-        costume = create_costume(ecraft2learn.canvas);
-        canvas_for_analysis = ecraft2learn.canvas;
+        let canvas = add_photo_to_canvas();
+        costume = create_costume(canvas);
+        canvas_for_analysis = canvas;
     }
     if (show_photo_or_costume === true) {
         add_costume(costume);
     }
-    image_recognitions[cloud_provider] = {costume: create_costume(ecraft2learn.canvas)};
+    image_recognitions[cloud_provider] = {costume: create_costume(canvas_for_analysis)};
     switch (cloud_provider) {
     case "IBM Watson":
     case "Microsoft":
