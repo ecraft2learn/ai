@@ -698,10 +698,10 @@ window.ecraft2learn =
                                 "index" : // "index-local" :
                                 "index";
           if (source === 'training using camera') {
-              if (window.location.hash.indexOf('mobilenet') >= 0) {
-                  // while debugging
-                  index_file_name = "index-local";
-              }
+//               if (window.location.hash.indexOf('mobilenet') >= 0) {
+//                   // while debugging
+//                   index_file_name = "index-local";
+//               }
               URL = "/ai/camera-train/" + index_file_name + ".html?translate=1";
               if (together) {
                   URL += "&together=1";
