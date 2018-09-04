@@ -121,7 +121,9 @@ const infer = (image) => mobilenet_model.infer(image, 'conv_preds');
  */
 async function animate() {
 //   stats.begin();
-
+  if (stopped) {
+      return;
+  }
   // Get image data from video element
   const image = tf.fromPixels(video);
   let logits;
@@ -231,14 +233,18 @@ function start() {
     }
     timer = requestAnimationFrame(animate);
 }
+
+let stopped = false;
   
 function stop() {
+    stopped = true;
     video.pause();
     cancelAnimationFrame(timer);
     timer = undefined; // so don't restart multiple times
 }
 
 function restart() {
+   stopped = false;
     if (!timer) {
         video.play();
         timer = requestAnimationFrame(animate);
