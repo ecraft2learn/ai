@@ -177,17 +177,21 @@ async function animate() {
   requestAnimationFrame(animate);
 }
 
+const set_class_names = function (class_names) {
+    if (class_names) {
+        NUM_CLASSES = class_names.length;
+        training_class_names = class_names;
+    } else {
+        training_class_names = ["1", "2", "3"];
+    }
+};
+
 /**
  * Kicks off the demo by loading the knn model, finding and loading
  * available camera devices, and setting off the animate function.
  */
 async function bindPage(incoming_training_class_names, source) {
-    if (incoming_training_class_names) {
-        NUM_CLASSES = incoming_training_class_names.length;
-        training_class_names = incoming_training_class_names;
-    } else {
-        training_class_names = ["1", "2", "3"];
-    }
+  set_class_names(incoming_training_class_names);
   classifier = knnClassifier.create();
   mobilenet_model = await mobilenet.load(); // was mobilenetModule
 
@@ -221,7 +225,7 @@ const create_save_training_button = function (innerHTML) {
     save_training_button.innerHTML = innerHTML;
     save_training_button.className = "save-training-button";
     save_training_button.title = "Clicking this will save the training you have done. " +
-                                 "To restore the training drag the saved file any where on this page.";
+                                 "To restore the training use a 'load training data ...' block.";
     let save_training = function () {
       // based upon https://stackoverflow.com/questions/19721439/download-json-object-as-a-file-from-browser
         let tensors = classifier.getClassifierDataset();
@@ -231,7 +235,7 @@ const create_save_training_button = function (innerHTML) {
 //         Object.keys(tensors).forEach(function (key, index) {
 //             arrays[key] = tensors[key].dataSync(); // move from GPU to normal memory
 //         });
-        let json = '{"saved_training":{';
+        let json = '{"saved_camera_training":{';
         let keys = Object.keys(tensors);
         keys.forEach(function (key, index) {
             json += '"' + key + '":[';
@@ -271,7 +275,7 @@ const create_save_training_button = function (innerHTML) {
 };
 
 const string_to_data_set = function (data_set_string) {
-    const start = '{"saved_training":';
+    const start = '{"saved_camera_training":';
     if (data_set_string.substring(0, start.length) === start) {
         try {
             return JSON.parse(data_set_string);
@@ -286,7 +290,7 @@ const string_to_data_set = function (data_set_string) {
 const load_data_set = function (data_set) {
     try {
         let tensor_data_set = {};
-        Object.entries(data_set.saved_training).forEach(function (entry) {
+        Object.entries(data_set.saved_camera_training).forEach(function (entry) {
             tensor_data_set[entry[0]] = tf.tensor2d(entry[1]);
         });
         classifier.setClassifierDataset(tensor_data_set);
@@ -430,7 +434,11 @@ const listen_for_messages = function (event) {
         let data_set = string_to_data_set(event.data.training_data);
         if (data_set) {
             if (data_set.labels) {
-                bindPage(data_set.labels, event.source)
+                if (training_class_names) {
+                    set_class_names(data_set.labels);
+                } else {
+                    bindPage(data_set.labels, event.source);
+                }
             }
             if (data_set.html) {
                 let introduction = decodeURIComponent(data_set.html);

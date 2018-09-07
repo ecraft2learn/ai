@@ -551,18 +551,31 @@ window.ecraft2learn =
         input.type = 'file';
         input.onchange = function () {
             document.getElementById("world").style.display = 'block';
-            input.remove();
+            input_container.remove();
             read_file(input.files[0], callback);
         }
         document.getElementById("world").style.display = 'none';
-        document.body.appendChild(input);
+        let input_container = document.createElement('div');
+        let instructions = document.createElement('p');
+        instructions.innerHTML = "Click the file chooser and select a saved training file.";
+        input_container.appendChild(instructions);
+        input_container.appendChild(input);
+        document.body.appendChild(input_container);
     };
-    const load_training_from_file = function (source, callback) {
-        source = source.trim(); // ignore white space on ends
+    const load_training_from_file = function (callback) {
         file_to_string(
             function (training_data_as_string) {
-                load_training(source, training_data_as_string, callback);
+                load_training(training_data_as_string, callback);
             });
+    };
+    const load_training_from_URL = function(URL, user_callback) {
+        let error_callback = function (message) {
+            inform("Error reading " + URL, message);
+        };
+        let callback = function (training_data_as_string) {
+            load_training(training_data_as_string, user_callback);
+        }
+        ecraft2learn.read_url(URL, callback, error_callback);
     };
     const create_costume = function (canvas, name) {
         if (!name) {
@@ -647,16 +660,30 @@ window.ecraft2learn =
                    "You may find that the Raspberry Pi is too slow for machine learning to work well.");
         }       
     };
-    let load_training = function(source, training_data, callback) {
+    let load_training = function(training_data, callback) {
         record_callbacks(callback);
-        if (!ecraft2learn.support_window[source] || ecraft2learn.support_window[source].closed) {
+        let source;
+        const camera_training_heading = '{"saved_camera_training":';
+        if (training_data.slice(0, camera_training_heading.length) === camera_training_heading) {
+            source = 'training using camera';
+        } else {
+            inform("Error loading training", "Unrecognised saved training");
+            return;
+        }
+        let new_window = !ecraft2learn.support_window[source] || ecraft2learn.support_window[source].closed;
+        if (new_window) {
             create_machine_learning_window(source);    
+        } else {
+            ecraft2learn.support_window[source].postMessage({training_data: training_data}, "*");
         }
         let receive_messages_from_iframe = 
             function (event) {
                 if (event.data === "Loaded") {
                     ecraft2learn.support_window[source].postMessage({training_data: training_data}, "*");
                 } else if (event.data === "Ready") {
+                    if (!new_window) {
+                        open_support_window(source);
+                    }
                     invoke_callback(callback, "Ready");
                 }
         };
@@ -2131,6 +2158,7 @@ window.ecraft2learn =
   inform: inform,
   show_message: show_message,
   load_training_from_file: load_training_from_file,
+  load_training_from_URL: load_training_from_URL,
   // some word embedding functionality
   dot_product: dot_product,
   word_embeddings_ready: function (language, callback, word_embeddings_url) {
