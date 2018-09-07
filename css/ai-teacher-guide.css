@@ -74,7 +74,7 @@ figcaption {
 .image-of-iframe {
   max-width: 950px;
 }
-.training-button, .testing-button, .return-to-snap-button, .together_button {
+.training-button, .testing-button, .return-to-snap-button, .save-training-button, .together_button {
 /*    copied from jquery-ui with padding and font-size edited */
   margin-top: 10px; /* new */
   padding: .8em 1em;
@@ -93,6 +93,9 @@ figcaption {
   border-radius: 8px;
   padding: 10px;
   box-shadow: 5px 3px 5px black;
+}
+.save-training-button {
+  display: block;
 }
 .advanced-topic {
   cursor: pointer;

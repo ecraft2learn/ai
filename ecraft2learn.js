@@ -539,13 +539,38 @@ window.ecraft2learn =
                    "Either try a different browser or try using the MARY TTS instead.");
         }
     };
-    var create_costume = function (canvas, name) {
+    const read_file = function (file, callback) {
+        let reader = new FileReader();
+        reader.onloadend = function () {
+            invoke_callback(callback, reader.result);
+        };
+        reader.readAsText(file);
+    };
+    const file_to_string = function (callback) {
+        let input = document.createElement('input');
+        input.type = 'file';
+        input.onchange = function () {
+            document.getElementById("world").style.display = 'block';
+            input.remove();
+            read_file(input.files[0], callback);
+        }
+        document.getElementById("world").style.display = 'none';
+        document.body.appendChild(input);
+    };
+    const load_training_from_file = function (source, callback) {
+        source = source.trim(); // ignore white space on ends
+        file_to_string(
+            function (training_data_as_string) {
+                load_training(source, training_data_as_string, callback);
+            });
+    };
+    const create_costume = function (canvas, name) {
         if (!name) {
             name =  "photo " + Date.now(); // needs to be unique
         }
         return new Costume(canvas, name);
-    }
-    var add_costume = function (costume, sprite) {
+    };
+    const add_costume = function (costume, sprite) {
         var ide = get_snap_ide();
         if (!sprite) {
             sprite = ide.stage;
@@ -622,7 +647,22 @@ window.ecraft2learn =
                    "You may find that the Raspberry Pi is too slow for machine learning to work well.");
         }       
     };
-    var train = function (source, // can be 'training using camera','training using microphone', or "posenet"
+    let load_training = function(source, training_data, callback) {
+        record_callbacks(callback);
+        if (!ecraft2learn.support_window[source] || ecraft2learn.support_window[source].closed) {
+            create_machine_learning_window(source);    
+        }
+        let receive_messages_from_iframe = 
+            function (event) {
+                if (event.data === "Loaded") {
+                    ecraft2learn.support_window[source].postMessage({training_data: training_data}, "*");
+                } else if (event.data === "Ready") {
+                    invoke_callback(callback, "Ready");
+                }
+        };
+        window.addEventListener('message', receive_messages_from_iframe, false);               
+    };
+    let train = function (source, // can be 'training using camera','training using microphone', or "posenet"
                           buckets_as_snap_list, // list of labels (as Snap! object)
                           add_to_previous_training, // if false will throw away any current training
                           page_introduction, // optional HTML that will appear in place of the default on training page
@@ -643,9 +683,9 @@ window.ecraft2learn =
       };
       record_callbacks(callback);
       if (!ecraft2learn.support_window[source] || ecraft2learn.support_window[source].closed) {
-          var machine_learning_window = create_machine_learning_window(source);
+          let machine_learning_window = create_machine_learning_window(source);
           ecraft2learn.training_buckets[source] = buckets;
-          var receive_messages_from_iframe = 
+          let receive_messages_from_iframe = 
               function (event) {
                   if (event.data === "Loaded") {
                       machine_learning_window.postMessage({training_class_names: buckets}, "*");
@@ -690,6 +730,7 @@ window.ecraft2learn =
   };
   const create_machine_learning_window = function (source, iframe_in_new_tab, together_url, together, one_pixel_iframe) {
       let URL, support_window;
+      source = source.trim(); // ignore white spaces on ends
       if (together_url) {
           URL = together_url;
       } else {
@@ -747,7 +788,7 @@ window.ecraft2learn =
           }
           ecraft2learn.support_iframe[source] = iframe;
           ecraft2learn.support_iframe_visible[source] = true;
-          support_window = iframe.contentWindow;     
+          support_window = iframe.contentWindow;
       }
       ecraft2learn.support_window[source] = support_window;
       window.addEventListener(
@@ -1161,7 +1202,7 @@ window.ecraft2learn =
                      "eCraft2learn library does not have a function named '" + function_name + "'.");
               return;
           }
-          return ecraft2learn[function_name].apply(null, parameters.contents);
+          return ecraft2learn[function_name].apply(null, (parameters.contents || [parameters]));
       },
 
       read_url: function (url, callback, error_callback, access_token, json_format) {
@@ -2089,6 +2130,7 @@ window.ecraft2learn =
   display_support_window: open_support_window,
   inform: inform,
   show_message: show_message,
+  load_training_from_file: load_training_from_file,
   // some word embedding functionality
   dot_product: dot_product,
   word_embeddings_ready: function (language, callback, word_embeddings_url) {
