@@ -220,8 +220,12 @@ The GPU can be more than one hundred times faster at the computations that deep 
 the CPU of the computer.
 The training window is based upon the <a href="https://github.com/googlecreativelab/teachable-machine-boilerplate"
 target="_blank">teachable machine boilerplate</a>.
-The deep learning model used is called <a href="https://arxiv.org/abs/1602.07360" target="_blank">SqueezeNet</a>
-because it is designed to be smaller and faster than more accurate architectures.
+The deep learning model used is called <a href="https://arxiv.org/abs/1704.04861" target="_blank">MobileNet</a>
+and it is designed to be smaller and faster than more accurate architectures.
+It works by using MobileNet to compute 1000 numbers for each trained image.
+These numbers capture high-level feature of the image.
+Then when asked to classify a new image it sees which of the images used in training are the closest and
+reports a high confidence for the labels of those images.
 </p>
 </span>
 
@@ -263,17 +267,18 @@ See if you can improve its accuracy by adding more training images.
 </p>
 <p class="background-information non-essential">
 The image training command relies upon something called
-<a href="https://arxiv.org/abs/1602.07360" target="_blank">SqueezeNet</a>
-that was trained on a huge number of images.
+<a href="https://arxiv.org/abs/1704.04861" target="_blank">MobileNet</a>
+that was trained on 1000 categories in 1.2 million images.
 The Snap! command uses what is called
 <a href="https://machinelearningmastery.com/transfer-learning-for-deep-learning/" target="_blank">transfer learning</a>
 to start the training using the features that a well-trained system has already learned.
-The system does not know anything about hands shaped as paper, rock, or scissors
+The system does not know anything about, for example, hands shaped as paper, rock, or scissors
 but it has already learned about textures, edges, colours, and more.
 </p>
 <p class="background-information">
 Another difference is that the image recognition services in the 
-<a href="chapter-3.html" target="_blank">previous chapter</a> can distinguish between at least one thousand different kinds of images.
+<a href="chapter-3.html" target="_blank">previous chapter</a> can distinguish between many thousands of different kinds of images
+and has been trained for a long time on many millions of images.
 The <i>Rock paper scissors</i> game requires only four categories - an easier task.
 And AI vision services can do more than just
 <a href="chapter-3.html#advanced-image-recognition" target="_blank">choose a label</a> for an image.
