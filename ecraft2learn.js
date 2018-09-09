@@ -807,7 +807,7 @@ window.ecraft2learn =
           // see https://sites.google.com/a/chromium.org/dev/Home/chromium-security/deprecating-permissions-in-cross-origin-iframes
           if (source === 'training using microphone') {
               iframe.allow = "microphone"; 
-          } else if (source === 'training using camera' || source === 'classify image') {
+          } else if (source === 'training using camera' || source === 'classify image' || source === 'posenet') {
               iframe.allow = "camera";
           }
           ecraft2learn.support_iframe[source] = iframe;
