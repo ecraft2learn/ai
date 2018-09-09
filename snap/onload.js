@@ -33,13 +33,14 @@ window.addEventListener('load', function () {
 						   if (edit_mode) {
 						   	   ide_morph.toggleAppMode(false);
 						   }
+						   ide_morph.showMessage(""); // remove message
 					   },
 					   1000);
 	};
     const fetch_and_load = function (project_path) {
     	ide_morph.showMessage("Loading...", 10);
     	fetch(project_path).then(function (response) {
-    		                         ide_morph.showMessage("");
+    		                         ide_morph.showMessage("Opening project");
 									 response.text().then(load_project_string);
 								 }).catch(function (error) {
 									 ide_morph.showMessage("Error fetching " + project_path + ": " + error.message);
