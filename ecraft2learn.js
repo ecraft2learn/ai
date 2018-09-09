@@ -672,7 +672,7 @@ window.ecraft2learn =
         }
         let new_window = !ecraft2learn.support_window[source] || ecraft2learn.support_window[source].closed;
         if (new_window) {
-            create_machine_learning_window(source);    
+            create_machine_learning_window(source, undefined, undefined, undefined, true);    
         } else {
             ecraft2learn.support_window[source].postMessage({training_data: training_data}, "*");
         }
@@ -680,11 +680,10 @@ window.ecraft2learn =
             function (event) {
                 if (event.data === "Loaded") {
                     ecraft2learn.support_window[source].postMessage({training_data: training_data}, "*");
-                } else if (event.data === "Ready") {
-                    if (!new_window) {
-                        open_support_window(source);
-                    }
+                } else if (typeof event.data.data_set_loaded !== 'undefined') {
+                    ecraft2learn.training_buckets[source] = event.data.data_set_loaded;
                     invoke_callback(callback, "Ready");
+                    window.removeEventListener('message', receive_messages_from_iframe);
                 }
         };
         window.addEventListener('message', receive_messages_from_iframe, false);               
@@ -766,10 +765,6 @@ window.ecraft2learn =
                                 "index" : // "index-local" :
                                 "index";
           if (source === 'training using camera') {
-//               if (window.location.hash.indexOf('mobilenet') >= 0) {
-//                   // while debugging
-//                   index_file_name = "index-local";
-//               }
               URL = "/ai/camera-train/" + index_file_name + ".html?translate=1";
               if (together) {
                   URL += "&together=1";
@@ -780,6 +775,8 @@ window.ecraft2learn =
               URL = "/ai/posenet/" + index_file_name + ".html?translate=1";
           } else if (source === 'style transfer') {
               URL = "/ai/style-transfer/" + index_file_name + ".html";
+          } else if (source === 'image classifier') {
+              URL = "/ai/mobilenet/" + index_file_name + ".html";
           }
           if (window.location.hostname !== "localhost") {
               URL = "https://ecraft2learn.github.io" + URL;
@@ -810,7 +807,7 @@ window.ecraft2learn =
           // see https://sites.google.com/a/chromium.org/dev/Home/chromium-security/deprecating-permissions-in-cross-origin-iframes
           if (source === 'training using microphone') {
               iframe.allow = "microphone"; 
-          } else if (source === 'training using camera') {
+          } else if (source === 'training using camera' || source === 'classify image') {
               iframe.allow = "camera";
           }
           ecraft2learn.support_iframe[source] = iframe;
@@ -939,20 +936,10 @@ window.ecraft2learn =
                     // create the costume and pass it to callback
                     invoke_callback(callback, create_costume(new_canvas, style + " of " + costume.name));
                 }
-            } else if (event.data === 'Loaded') {
-                // support window is ready to receive requests
-                ecraft2learn.support_window_is_ready['style transfer'] = true;
-                send_request();
             }      
         }  
-        window.addEventListener('message', recieveMessage);       
-        if (typeof ecraft2learn.support_window['style transfer'] === 'undefined') {
-            // create the support window as 1x1 pixel
-            create_machine_learning_window('style transfer', undefined, undefined, undefined, true);
-        }
-        if (ecraft2learn.support_window_is_ready['style transfer']) {
-            send_request();
-        }
+        window.addEventListener('message', recieveMessage); 
+        send_request_when_support_window_is_ready('style transfer', send_request);       
     };
     var image_url_of_costume = function (costume) {
         var canvas = costume.contents;
@@ -966,7 +953,58 @@ window.ecraft2learn =
                            when_loaded(image);
                        };
     };
-    var language_entry = function (language) {
+    const image_class = function (costume, top_k, labels_callback, probabilities_callback) {
+        image_class_from_canvas(costume.contents, top_k, labels_callback, probabilities_callback);
+    };
+    const image_class_from_canvas = function(canvas, top_k, labels_callback, probabilities_callback) {
+        // timestamp used to resp0ond appropriately to multiple outstanding requests
+        let time_stamp = Date.now();
+        let send_request = function() {
+            let data_URL = canvas.toDataURL();
+            ecraft2learn.support_window['image classifier'].postMessage(
+                {classify: {URL: data_URL,
+                            top_k: top_k,
+                            time_stamp: time_stamp}},
+                '*');
+        }
+        let recieveMessage = function(event) {
+            if (typeof event.data.classify_response !== 'undefined' &&
+                // reponse received and it is for the same request (time stamps match)
+                event.data.classify_response.time_stamp === time_stamp) {
+                let classifications = event.data.classify_response.classifications;
+                // classifications are an array of objects like
+                // {className: "croquet ball", probability: 0.6669674515724182}
+                invoke_callback(labels_callback,
+                                javascript_to_snap(classifications.map(function (classification) {
+                                    return classification.className;
+                                })));
+                invoke_callback(probabilities_callback,                
+                                javascript_to_snap(classifications.map(function (classification) {
+                                    return classification.probability;
+                                })));  
+            }      
+        }  
+        window.addEventListener('message', recieveMessage);       
+        send_request_when_support_window_is_ready('image classifier', send_request);      
+    };
+    const send_request_when_support_window_is_ready = function (source, send_request) {
+        window.addEventListener('message', function (event) {
+            if (event.data === 'Ready') {
+                // support window is ready to receive requests
+                ecraft2learn.support_window_is_ready[source] = true;
+                send_request();
+            }
+        });
+        if (typeof ecraft2learn.support_window[source] === 'undefined') {
+            // create the support window as 1x1 pixel
+            create_machine_learning_window(source, undefined, undefined, undefined, true);
+        }
+        if (ecraft2learn.support_window_is_ready[source]) {
+            // is already ready to send request
+            send_request();
+        }
+    };
+    let language_entry = function (language) {
         var matching_language_entry;
         if (language === "") {
             // use the browser's default language
@@ -2155,6 +2193,7 @@ window.ecraft2learn =
   },
   create_costume_with_style: create_costume_with_style,
   display_support_window: open_support_window,
+  image_class: image_class,
   inform: inform,
   show_message: show_message,
   load_training_from_file: load_training_from_file,

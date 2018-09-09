@@ -366,8 +366,9 @@ function stop() {
 }
 
 function restart() {
-   stopped = false;
-    if (!timer) {
+    stopped = false;
+    // video may be undefined because it is being created
+    if (!timer && video) {
         video.play();
         timer = requestAnimationFrame(animate);
     }
@@ -445,7 +446,8 @@ const listen_for_messages = function (event) {
                 update_introduction(introduction);
             }
             if (load_data_set(data_set)) {
-                event.source.postMessage("Ready", "*");
+                // pass back training_class_names since Snap! doesn't know them
+                event.source.postMessage({data_set_loaded: training_class_names}, "*");
             }
         }
     }
