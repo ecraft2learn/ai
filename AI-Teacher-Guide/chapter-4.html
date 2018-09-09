@@ -215,6 +215,30 @@ host the file on the web and use its URL to access it.
         caption = "Blocks for loading saved trainings. TRY IT">
 </figure>
 
+<h4 class="instructions-white" id="image-recognition-without-cloud-services">Recognising images without cloud services</h4>
+<p class="instructions">
+In the <a href="chapter-3.html">previous chapter</a> many blocks were introduced that do image recognition.
+These rely upon AI cloud services from large companies.
+Here we instead rely upon a trained machine learning model named <a href="https://arxiv.org/abs/1704.04861" target="_blank">MobileNet</a>.
+This model runs in your browser and does not contact any cloud services.
+While it will choose from among
+<a href="https://github.com/tensorflow/tfjs-models/blob/master/mobilenet/src/imagenet_classes.ts" target="_blank">1000 labels</a>
+it rarely does as well as the cloud services.
+For contexts where registering for <a href="/ai/AI-Teacher-Guide/chapter-3.html#api-keys">API keys</a> is a problem, or
+Internet access is limited or missing, or privacy is a concern then models like MobileNet are useful.
+It does, however, rely upon your device having a <a href="http://www.nvidia.com/object/what-is-gpu-computing.html" target="_blank">GPU</a>
+to run at reasonable speeds.
+Note this will be slow to load but should run quickly thereafter.
+</p>
+<figure class = "snap-iframe"
+        id = "mobilenet"
+        full_screen = "true"
+        edit_mode = "true"
+        stage_ratio = ".6"
+        container_style = "width: 1000px; height: 500px;"
+        caption = "Blocks for image recognition on device without cloud services. TRY IT">
+</figure>
+
 <h4 class="societal-impact-white">Benefits and risks</h4>
 <p class="societal-impact">
 Most of the <a class="guide-link" href="chapter-3.html#image-recognition-good-for" target="_blank">
