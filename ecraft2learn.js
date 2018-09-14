@@ -2191,6 +2191,54 @@ window.ecraft2learn =
       };
       ask_for_poses();
   },
+  weather: function (place, element_name, units, callback, error_callback) {
+      // element names documented at https://developer.yahoo.com/weather/documentation.html
+      // units can be either 'metric' or 'imperial'
+      place = place.trim();
+      element_name = element_name.trim();
+      units = units.trim();
+      let query_name = element_name; // except for those that are under 'item'
+
+      if (element_name === 'everything') {
+          element_name = '*';
+      } else if (element_name === 'latitude') {
+          element_name = 'lat';
+          query_name = 'item';
+      } else if (element_name === 'longitude') {
+          element_name = 'long';   
+          query_name = 'item';
+      } else if (element_name === 'forecast' || element_name === 'condition') {
+          query_name = 'item';
+      }
+      let units_code = units === 'metric' ? 'c' : 'f';
+      window.callback_for_yahoo = function (data) {
+          if (data.query.results) {
+              let channel = data.query.results.channel;
+              let response = query_name === 'item' ? 
+                             channel.item[element_name] : 
+                             (element_name === '*' ? channel : channel[element_name]);
+              if (response) {
+                  invoke_callback(callback, javascript_to_snap(response));
+              } else {
+                  error_callback("Unable to extract " + element_name + " from response.");
+              }                     
+          } else {
+              error_callback("No results returned for " + element_name + " of " + place);
+          }
+      }
+      let URL = "https://query.yahooapis.com/v1/public/yql?q=select " +
+                query_name +
+                " from weather.forecast where u='" + units_code + "' and " +
+                "woeid in (select woeid from geo.places(1) where text='" +
+                place + 
+                "')&format=json&callback=callback_for_yahoo";
+      if (!error_callback) {
+          error_callback = function (error) {
+              inform("Error from Yahoo! weather service", error);
+          };
+      };      
+      load_script(URL, undefined, error_callback);
+  },
   create_costume_with_style: create_costume_with_style,
   display_support_window: open_support_window,
   image_class: image_class,
