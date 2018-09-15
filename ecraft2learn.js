@@ -272,7 +272,7 @@ window.ecraft2learn =
 //         canvas.setAttribute('width',  width);
 //         canvas.setAttribute('height', height);
         let draw_image = function () {
-            // is this still used?
+            // is this still used? Only if camera is being used before it has been initialised?
             canvas.getContext('2d').drawImage(image_or_video, 0, 0, width, height);
             ecraft2learn.video.removeEventListener('waiting', draw_image);
         };
@@ -848,7 +848,7 @@ window.ecraft2learn =
           return;
       }
       let post_image = function () {
-          let canvas = add_photo_to_canvas(image || ecraft2learn.video,
+          let canvas = add_photo_to_canvas(image || ecraft2learn.video, 
                                            training_image_width,
                                            training_image_height);
           let image_URL = canvas.toDataURL('image/png');
@@ -1637,8 +1637,9 @@ window.ecraft2learn =
   set_camera_dimensions: function (width, height) {
       // is this still needed?
       if (ecraft2learn.video && width && height) {
-          ecraft2learn.video.width  = +width;
-          ecraft2learn.video.height = +height;
+          let stage = world.children[0].stage;
+          ecraft2learn.video.width  = Math.min(+width, stage.width());
+          ecraft2learn.video.height = Math.min(+height, stage.height());
           return true;
       }
       return false;

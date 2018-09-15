@@ -96,7 +96,7 @@ const copy_video_to_canvas = function (video, canvas) {
 };
 
 const load_image = function (image_url, callback) {
-    let image = document.createElement('img');
+    let image = new Image(); // document.createElement('img');
     image.src = image_url;
     image.width  = videoWidth;
     image.height = videoHeight;
