@@ -3,7 +3,7 @@
     {
       "tensorName": "Hindi",
       "tensorShape": [
-        19999,
+        20000,
         300
       ],
       "tensorPath": "https://ecraft2learn.github.io/ai/word-embeddings/hi/projector-vectors_v2.tsv",
