@@ -7,8 +7,7 @@
         300
       ],
       "tensorPath": "https://ecraft2learn.github.io/ai/word-embeddings/ja/projector-vectors.tsv",
-      "metadataPath": "https://ecraft2learn.github.io/ai/word-embeddings/ja/projector-labels.tsv",
-      "bookmarksPath": "https://ecraft2learn.github.io/ai/word-embeddings/ja/t-sne-with-dog.txt"
+      "metadataPath": "https://ecraft2learn.github.io/ai/word-embeddings/ja/projector-labels.tsv"
     }
   ]
 }
