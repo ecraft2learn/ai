@@ -272,7 +272,8 @@ Here is
 <a href="/ai/snap/snap.html?project=translate" target="_blank">a program that asks the user for two languages</a>,
 obtains the feature vector of a random word from the first language,
 and then displays several of the words closest to that feature vector.
-It places the words in the t-SNE two-dimensional approximation of where the 300-dimensional words really are.
+It places the words in the <a href="https://distill.pub/2016/misread-tsne/" target="_blank">t-SNE</a>
+two-dimensional approximation of where the 300-dimensional words really are.
 </p>
 <h4 class="how-it-works-white">How does translation using word embeddings work?</h4>
 <p class="how-it-works">
@@ -296,6 +297,14 @@ describes a technique that uses no word lists or translated texts.
 A rotation is all that is needed because all the word embeddings are centred around zero
 so they don't need to be translated (in the mathematical sense, i.e. moved) as well.
 But note that the translation happens in 299 dimensions!
+</p>
+<figure>
+<img src="images/aligning-word-embeddings.png.png" class="center">
+<figcaption>Two ways of aligning word embeddings in different languages</figcaption></figure>
+<p>
+In the figure (A) and (B) show X being rotated to match Y to make a a small number of words in X align with their translation in Y.
+Many other words become roughly aligned as a result.
+<a href="https://arxiv.org/pdf/1710.04087.pdf" target="_blank">Other techniques can be applied<</a> to improve the alignment.
 </p>
 
 <h4 class="project-ideas-white" id="project-ideas">Possible project ideas using image recognition</h4>
