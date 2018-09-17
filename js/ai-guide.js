@@ -12,7 +12,7 @@ window.addEventListener(
         // the purpose of adding '.not-to-be-used' is that
         // when running join("-white,") the last item doesn't get the suffix
         let all_selectors = 
-            ['.non-essential', '.advanced-topic-body', '.advanced-topic',
+            ['.non-essential', '.advanced-topic',
             '.advanced-information', '.background-information', '.exercise', '.guide-to-guide', '.how-it-works',
              '.instructions', '.project-ideas', '.resources', '.sample-program', '.societal-impact', '.not-to-be-used'];
         let current_selectors = all_selectors.slice();
@@ -78,7 +78,7 @@ window.addEventListener(
         let hide_all = function (hide) {
             update_url_hash(hide,
                             'short',
-                            ['.non-essential', '.advanced-topic', '.advanced-topic-body', '.how-it-works']);
+                            ['.non-essential', '.advanced-topic', '.how-it-works']);
             if (advanced_material_checkbox) {
                 advanced_material_checkbox.checked = hide;
             }
@@ -86,12 +86,12 @@ window.addEventListener(
         let hide_advanced_material = function (hide) {
             update_url_hash(hide,
                             'no-advanced-material',
-                            ['.advanced-topic', '.advanced-topic-body']);
+                            ['.advanced-topic']);
         };
         let hide_all_but_instructions = function (hide) {
             update_url_hash(hide,
                             'instructions-only',
-                            ['.non-essential', '.advanced-topic-body', '.advanced-topic',
+                            ['.non-essential', '.advanced-topic',
                              '.advanced-information', '.background-information', '.exercise', '.how-it-works',
                              '.project-ideas', '.resources', '.societal-impact']);
             if (advanced_material_checkbox) {
@@ -191,12 +191,6 @@ window.addEventListener(
      function () {
          var elements = document.getElementsByClassName('advanced-topic');
          var hide_next_sibling_until_click = function (element) {
-             if (window.location.search.indexOf("student") < 0)  {
-                 // for teachers always show the advanced material
-                 // no need for the box around this material
-                 element.nextElementSibling.classList.remove('advanced-topic-body');
-                 return;
-             }
              element.nextElementSibling.style.display = 'none';
              element.addEventListener('click',
                                       function () {
