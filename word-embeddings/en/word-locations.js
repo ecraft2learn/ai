@@ -1,3 +1,4 @@
+if (typeof words_to_locations === 'undefined') words_to_locations = {};
 words_to_locations['en'] = {
 "the":[0.4979,0.5397],
 "and":[0.4964,0.5239],

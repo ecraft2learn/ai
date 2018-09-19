@@ -18,7 +18,6 @@
 උණුසුම් hot
 වචනය word
 නමුත් but
-කුමක් ද what
 සමහර some
 වේ is
 එය it
@@ -45,7 +44,6 @@
 කොහොමද how
 පවසයි said
 ක an
-එක් එක් each
 කියන්න tell
 කරන්නේ does
 කට්ටලය set
@@ -57,18 +55,15 @@
 නාට්යයේ play
 කුඩා small
 අවසානය end
-Put put
-මුල් පිටුව home
+put put
 කියවන්න read
 අත hand
 වරාය port
 විශාල large
-අක්ෂර වින්යාස spell
 එකතු add
 පවා even
 ඉඩම් land
 මෙතැන here
-කල යුතු must
 විශාල big
 ඉහළ high
 එවැනි such
@@ -126,7 +121,6 @@ Put put
 ඉතා very
 හරහා through
 පමණක් just
-ආකෘති පත්රය form
 දඬුවම sentence
 මහා great
 හිතන්න think
@@ -135,21 +129,18 @@ Put put
 අඩු low
 මාර්ගය line
 වෙනස් differ
-අනෙක් අතට turn
 හේතුව cause
 බොහෝ much
 අදහස් mean
 පෙර before
 පියවර move
 අයිතිය right
-පිරිමි ළමයා boy
 පැරණි old
 ද too
 එම same
 ඇය she
 සියලු all
 එතන there
-කවදා ද when
 දක්වා up
 භාවිතය use
 ඔබගේ your
@@ -201,7 +192,6 @@ Put put
 ස්ථාවරය stand
 ම own
 පිටුව page
-කළ යුත්තේ should
 රට country
 සොයා found
 පිළිතුර answer
@@ -221,20 +211,17 @@ Put put
 ඇස eye
 කවදාවත් never
 පසුගිය last
-ඉඩ දෙන්න let
 කල්පනා thought
 නගරය city
 ගසක් tree
 හරස් cross
 ගොවිපල farm
-වෙහෙස මහන්සි වී hard
 ආරම්භයක් start
 සමහරවිට might
 කතාව story
 කියත් saw
 දුර far
 මුහුදු sea
-දිනුම් ඇදීම draw
 වම් left
 අග late
 ලකුණු run
@@ -262,8 +249,6 @@ Put put
 පදනම base
 සවන් hear
 අශ්වයා horse
-සැපයුම අත්හිටුවන cut
-වග බලා ගන්න sure
 වොච් watch
 වර්ණ color
 මුහුණ face
@@ -282,17 +267,14 @@ Put put
 පහසුවෙන් ease
 කඩදාසි paper
 පිරිසක් group
-සෑම විටම always
 සංගීතය music
 එම those
 දෙකම both
 ලකුණ mark
-බොහෝ විට often
 ලිපිය letter
 දක්වා until
 සැතපුම් mile
 ගඟ river
-මෝටර් රථ car
 අඩි feet
 සත්කාර care
 දෙවන second
@@ -382,13 +364,9 @@ Put put
 ක්රීඩාව game
 හැඩය shape
 සමාන equate
-උණුසුම් hot
-මම ඔයාට ආදරේ miss
-ගෙන එන brought
 තාපය heat
 හිම snow
 ටයර් tire
-ගෙන ඒමට bring
 ඔව් yes
 ඈත distant
 පිරවීම fill
@@ -401,7 +379,6 @@ Put put
 නගරයේ town
 දඩ fine
 ඇතැම් certain
-පියාසර තහනම් fly
 වැටීම fall
 පෙරමුණ lead
 ගැස්මට cry
@@ -413,7 +390,6 @@ Put put
 චරිතයක් figure
 තරු star
 කොටුව box
-නාම පදයක් noun
 ක්ෂේත්රයේ field
 ඉතිරි rest
 නිවැරදි correct
@@ -449,12 +425,10 @@ Put put
 අසා heard
 හොඳම best
 පැය hour
-වඩා හොඳ better
 සැබෑ true
 තුළ during
 සියයක් hundred
 පස් five
-මතක තබා remember
 පියවර step
 මුල් early
 පැවැත්වීමට hold
@@ -463,14 +437,11 @@ Put put
 පොලී interest
 ළඟා reach
 වේගයෙන් fast
-ක්රියා පදයෙන් verb
-ගී ගයන්න sing
 සවන් listen
 හය six
 වගුව table
 සංචාරක travel
 අඩු less
-අද උදෑසන morning
 දස ten
 සරල simple
 කිහිපයක් several
@@ -494,7 +465,6 @@ Put put
 පාලනය govern
 අදින්න pull
 සීතල cold
-දැනුම් දීමකින් notice
 හඬ voice
 බලශක්ති energy
 දඩයම hunt
@@ -502,10 +472,8 @@ Put put
 ඇඳ bed
 සහෝදරයා brother
 බිත්තර egg
-සවාරියක් යෑමේ ride
 සෛල cell
 විශ්වාස believe
-සමහර විට perhaps
 පික් pick
 හදිසි sudden
 ගණන් count
@@ -517,10 +485,8 @@ Put put
 විෂය subject
 කලාපයේ region
 විශාලත්වය size
-වෙනස් විය vary
 පදිංචි settle
 කතා speak
-සිරුරේ බර weight
 පොදු general
 අයිස් ice
 කාරණය matter
@@ -528,470 +494,7 @@ Put put
 යුගල pair
 ඇතුළත් include
 බෙදීම් divide
-Syllable syllable
+syllable syllable
 දැනුණේ felt
 මහා grand
 ක්රීඞා ball
-තවමත් yet
-රැල්ල wave
-පහත drop
-හදවත heart
-am am
-වර්තමාන present
-බර heavy
-නැටුම් dance
-එන්ජිම engine
-තත්ත්වය position
-අත arm
-පුරා wide
-රුවල් sail
-ද්රව්ය material
-භාගය fraction
-වනාන්තර forest
-වාඩි sit
-ජාතිය race
-කවුළුව window
-ගබඩා store
-ගිම්හාන summer
-දුම්රිය train
-නින්ද sleep
-ඔප්පු prove
-තනි වූ lone
-කකුලක් leg
-ව්යායාම exercise
-වෝල් wall
-අතට උඩ පන්දුවක් catch
-කන්ද mount
-ප්රාර්ථනය wish
-අහස sky
-මණ්ඩලය board
-ප්රීතිය joy
-ශීත winter
-සෙන sat
-ලිඛිත written
-වල් wild
-මෙවලමක් instrument
-තබා kept
-වීදුරු glass
-තෘණ grass
-ගව cow
-රැකියා job
-වෝටර්ස් එජ් edge
-ලකුණක් sign
-සංචාරය visit
-පසුගිය past
-මෘදු soft
-විනෝද fun
-දීප්තිමත් bright
-ගෑස් gas
-කාලගුණය weather
-මාසය month
-මිලියන million
-වලසා bear
-නිමි finish
-සතුටු happy
-බලාපොරොත්තුව hope
-මල් flower
-ඇදුම් clothe
-අමුතු strange
-ගිහින් gone
-වෘත්තීය trade
-තනු නිර්මාණය melody
-චාරිකාව trip
-කාර්යාලය office
-හිමි receive
-පේළි row
-මුඛයෙන් mouth
-හරියටම exact
-සංකේතය symbol
-මිය die
-අවම වශයෙන් least
-කරදර trouble
-ඝෝෂා කරනවා shout
-හැර except
-මෙසේ ලිවීය wrote
-බීජ seed
-ස්වරය tone
-එක්වන join
-යෝජනා suggest
-පිරිසිදු clean
-විවේකයක් break
-කාන්තාව lady
-අංගනයක් yard
-නැගීම rise
-නරක bad
-පහරක් blow
-තෙල් oil
-ලේ blood
-ස්පර්ශ touch
-වර්ධනය වී grew
-සියයට cent
-මිශ්ර mix
-කණ්ඩායම team
-කම්බි wire
-පිරිවැය cost
-අහිමි lost
-දුඹුරු brown
-ඇඳීමට wear
-වත්ත garden
-සමාන equal
-එවා sent
-තෝරා choose
-රැයකින් fell
-සුදුසු fit
-ප්රවාහය flow
-සාධාරණ fair
-බැංකු bank
-එකතු collect
-බේරා save
-පාලනය control
-දශම decimal
-කණ ear
-වෙන else
-තරමක් quite
-කඩා broke
-නඩුව case
-මධ්යම middle
-මරා kill
-පුතා son
-විල lake
-මොහොතක් moment
-පරිමාණ scale
-ශබ්ද විකාශන යන්ත්ර loud
-වසන්ත spring
-නිරීක්ෂණය observe
-ළමා child
-කෙලින්ම straight
-යෙදෙන ව්යාංජනාක්ෂර consonant
-ජාතිය nation
-ශබ්ද කෝෂය dictionary
-කිරි milk
-වේගය speed
-ක්රමය method
-ඉන්ද්රිය organ
-වැටුප් pay
-වයස අවුරුදු age
-කොටස section
-ඇඳුම dress
-වලාකුළක් cloud
-පුදුම surprise
-නිහඬව quiet
-ගල් stone
-ඉතා කුඩා tiny
-ක්ලයිම්බ් climb
-සිසිල් cool
-නිර්මාණ design
-දුප්පත් poor
-ගොඩක් lot
-අත්හදා බැලීම experiment
-පහළ bottom
-ප්රධාන key
-යකඩ iron
-තනි single
-කෙවිටේ stick
-පැතලි flat
-විසි twenty
-සම skin
-සිනහව smile
-තණතීරුව crease
-කුහරය hole
-වෙත පනින්න jump
-බබා baby
-අට eight
-ගමේ village
-තරග meet
-මූල root
-මිලදී buy
-මතු raise
-විසඳීමට solve
-ලෝහ metal
-යන්න whether
-තල්ලු කරනවා push
-හත seven
-ඡේදය paragraph
-තුන්වන third
-යුතුය shall
-පැවති held
-කෙස් hair
-විස්තර describe
-කුක් cook
-බිම floor
-එක්කෝ either
-ප්රතිඵලය result
-පිළිස්සුම් burn
-කඳු hill
-ආරක්ෂිත safe
-බළලා cat
-සියවසේ century
-සලකා consider
-වර්ගය type
-නීතිය law
-ටිකක් bit
-වෙරළ coast
-පිටපතක් copy
-වැකිය phrase
-නිහඬ silent
-උස tall
-වැලි sand
-පස soil
-රෝල් roll
-උෂ්ණත්වය temperature
-ඇඟිල්ල finger
-කර්මාන්තය industry
-වටිනාකම value
-සටන fight
-බොරුවක් lie
-ගුටි beat
-උද්දීපනය excite
-ස්වාභාවික natural
-දැක්ම view
-හැඟීමක් sense
-ප්රාග්ධන capital
-පුටුවක් chair
-අනතුර danger
-පළතුරු fruit
-පොහොසත් rich
-ඝන thick
-යුද හමුදා සෙබලෙකු soldier
-ක්රියාවලිය process
-ක්රියාත්මක operate
-ප්රායෝගික practice
-වෙනම separate
-දුෂ්කර difficult
-වෛද්යවරයා doctor
-කරුණාකර please
-ආරක්ෂා protect
-දහවල් noon
-බෝග crop
-නවීන modern
-මූලද්රව්යය element
-ඝාතකයා hit
-ශිෂ්ය student
-කෙළවරේ corner
-පක්ෂ party
-සැපයුම supply
-කාගේ whose
-සොයා locate
-මුද්ද ring
-චරිත character
-කෘමි insect
-අල්ලා caught
-කාලය period
-සඳහන් indicate
-ගුවන් විදුලි radio
-කථා spoke
-පරමාණුවක් atom
-මානව human
-ඉතිහාසය history
-ක්රියාත්මක effect
-විදුලි electric
-බලාපොරොත්තු expect
-අස්ථි bone
-දුම්රිය rail
-හිතාගන්න imagine
-ලබා provide
-එකඟ agree
-මෙසේ thus
-මෘදු gentle
-කාන්තාව woman
-නායක captain
-අනුමානය guess
-අවශ්ය necessary
-තියුණු sharp
-වාමාංශික wing
-නිර්මාණය create
-අසල්වැසියා neighbor
-වොෂ් wash
-පන්දුවට පහර දුන් bat
-ඒ වෙනුවට rather
-සමූහයා crowd
-ඉරිඟු corn
-සංසන්දනය compare
-කවිය poem
-සංගීත string
-සීනුව bell
-රඳා පවතී depend
-මස් meat
-එතැනයි rub
-නළ tube
-ප්රසිද්ධ famous
-ඩොලර් dollar
-විෂය ධාරාව stream
-බිය fear
-පෙනීම sight
-සිහින් thin
-ත්රිකෝණය triangle
-ග්රහ planet
-කඩිමුඩියේ hurry
-ප්රධාන chief
-යටත් විජිතයක් colony
-ඔරලෝසුව clock
-බිම් බෝම්බ mine
-ටයි පටියක් tie
-ඇතුළු enter
-ප්රධාන major
-නැවුම් fresh
-සොයන්න search
-එවන send
-කහ yellow
-තුවක්කුවක් gun
-ඉඩ allow
-මුද්රණය print
-මිය ගිය dead
-ස්ථානයේදීම spot
-කාන්තාර desert
-ඇඳුම suit
-වත්මන් current
-විදුලි සෝපානය lift
-රෝස rose
-පැමිණීමට arrive
-ස්වාමියා master
-මාර්ගය track
-මව් parent
-වෙරළ shore
-අංශය division
-පත්රය sheet
-ද්රව්යයක් substance
-පක්ෂව favor
-සම්බන්ධ connect
-පශ්චාත් post
-වැය spend
-හැඟීම් ඇවිස්සුවේ chord
-මේදය fat
-සතුටු glad
-මුල් original
-කොටස share
-ස්ථානය station
-තාත්තා dad
-පාන් bread
-භාර charge
-නිසි proper
-තීරුව bar
-ඉල්ලුමට offer
-කොටස segment
-වහල් slave
-තාරාවා duck
-ක්ෂණික instant
-වෙළෙඳපොළ market
-උපාධිය degree
-පිරවිය populate
-කෑල්ල chick
-ආදරණීය dear
-සතුරා enemy
-පිළිතුරු reply
-බීම drink
-සිදු occur
-සහාය support
-කතාව speech
-ස්වභාවය nature
-පරාසයක range
-වාෂ්ප steam
-යෝජනාව motion
-මාර්ගය path
-දියර liquid
-ලඝු-සටහන log
-අදහස් meant
-ලබ්ධිය quotient
-දත් teeth
-ෂෙල් shell
-ගෙල neck
-ඔක්සිජන් oxygen
-සීනි sugar
-මරණය death
-ලස්සන pretty
-නිපුණතා skill
-කාන්තාවන් women
-කන්නයේ season
-විසඳුමක් solution
-චුම්භකයක් magnet
-රිදී silver
-ස්තුති thank
-ශාඛා branch
-තරගය match
-ෙපර ෙයදුම suffix
-විශේෂයෙන් especially
-රූපය fig
-බිය afraid
-විශාල huge
-සහෝදරිය sister
-වානේ steel
-සාකච්ඡා discuss
-ඉදිරියට forward
-සමාන similar
-Guide guide
-අත්දැකීම් experience
-ස්කෝර් score
-ඇපල් apple
-මිලදී ගත් bought
-led led
-තණතීරුව pitch
-කබාය coat
-මහා mass
-කාඩ් card
-සංගීත කණ්ඩායම band
-කඹය rope
-ස්ලිප් slip
-ජය win
-සිහිනය dream
-සවස evening
-තත්ත්වය condition
-ආහාර feed
-මෙවලමක් tool
-මුළු total
-මූලික basic
-සුවඳ smell
-නිම්නය valley
-වත්, nor
-ද්විත්ව double
-ආසන seat
-දිගටම continue
-දරන ඉඩම් ෙකොටස්ෙලස ෙපන්නුම් ෙකොට ඇත්තා block
-සටහන chart
-තොප්පිය hat
-විකුණා sell
-සාර්ථකත්වය success
-සමාගම company
-අඩු subtract
-උත්සවය event
-විශේෂයෙන් particular
-ගනුදෙනුව deal
-පිහිනීම swim
-කාලීන term
-ප්රතිවිරුද්ධ opposite
-බිරිඳ wife
-සපත්තු shoe
-උරහිස් shoulder
-පැතිරීම spread
-සූදානම් arrange
-කඳවුරේ camp
-නිර්මාණය invent
-කපු cotton
-උපත born
-තීරණය determine
-නැළියකට විකිණීම quart
-නවය nine
-ට්රක් රථ truck
-ශබ්ද noise
-මට්ටමින් level
-අවස්ථාවක් chance
-රැස් gather
-වෙළඳ සැලක් shop
-දුර stretch
-විසි throw
-ඔප දමන shine
-දේපල property
-තීරුව column
-අණුවක් molecule
-තෝරා select
-වැරදි wrong
-අළු gray
-නැවත repeat
-අවශ්ය require
-පුළුල් broad
-සූදානම් prepare
-ලුණු salt
-නාසය nose
-බහු වචන plural
-කෝපය anger
-හිමිකම claim
-මහාද්වීපය continent
