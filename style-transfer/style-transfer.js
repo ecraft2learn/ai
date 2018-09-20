@@ -1,5 +1,5 @@
 window.addEventListener('load', function() {
-    window.parent.postMessage("Loaded", "*");   
+    window.parent.postMessage("Ready", "*");   
 });
 
 const WIDTH  = 250;
