@@ -309,29 +309,29 @@ const load_data_set_file = function (file) {
     reader.readAsText(file);
 };
 
-const receive_drop = function (event) {
-  // following based on https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/File_drag_and_drop
-  // Prevent default behavior (Prevent file from being opened)
-  event.preventDefault();
+// const receive_drop = function (event) {
+//   // following based on https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/File_drag_and_drop
+//   // Prevent default behavior (Prevent file from being opened)
+//   event.preventDefault();
 
-  let file;
-  if (event.dataTransfer.items) {
-      // Use DataTransferItemList interface to access the file(s)
-      for (let i = 0; i < event.dataTransfer.items.length; i++) {
-        // If dropped items aren't files, reject them
-        if (event.dataTransfer.items[i].kind === 'file') {
-          file = event.dataTransfer.items[i].getAsFile();
-          break;
-        }
-      }
-  } else {
-      // Use DataTransfer interface to access the file(s)
-      file = event.dataTransfer.files[0].name;
-  }
+//   let file;
+//   if (event.dataTransfer.items) {
+//       // Use DataTransferItemList interface to access the file(s)
+//       for (let i = 0; i < event.dataTransfer.items.length; i++) {
+//         // If dropped items aren't files, reject them
+//         if (event.dataTransfer.items[i].kind === 'file') {
+//           file = event.dataTransfer.items[i].getAsFile();
+//           break;
+//         }
+//       }
+//   } else {
+//       // Use DataTransfer interface to access the file(s)
+//       file = event.dataTransfer.files[0].name;
+//   }
 
-  load_data_set_file(file); 
+//   load_data_set_file(file); 
   
-};
+// };
 
 function start() {
     if (timer) {
@@ -463,7 +463,7 @@ window.addEventListener('DOMContentLoaded',
                             }
                             // following used to use addEventListener but Snap!'s drop listener interfered
                             // ecraft2learn.support_iframe['training using camera']
-                            window.parent.document.body.ondrop = receive_drop;
+//                             window.parent.document.body.ondrop = receive_drop;
                             if (TOGETHER_JS) {
                                 // for production add window.TogetherJSConfig_ignoreMessages = true;
                                 TogetherJSConfig_dontShowClicks = true;
