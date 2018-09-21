@@ -765,7 +765,7 @@ window.ecraft2learn =
       } else {
           let index_file_name = window.location.hostname === "localhost" ?
                                  // until fully tested and debugged don't use local version
-                                "index" : // "index-local" :
+                                "index-local" : // "index-local" :
                                 "index";
           if (source === 'training using camera') {
               URL = "/ai/camera-train/" + index_file_name + ".html?translate=1";

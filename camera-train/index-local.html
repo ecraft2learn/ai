@@ -9,11 +9,11 @@
     <title>Machine learning from the camera (local version)</title>
 <!--     added the following based upon https://github.com/tensorflow/tfjs-models/tree/master/knn-classifier -->
     <!-- Load TensorFlow.js -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="../tfjs.js"></script>
     <!-- Load MobileNet -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
+    <script src="mobilenet.js"></script>
     <!-- Load KNN Classifier -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier"></script> 
+    <script src="knn-classifier.js"></script> 
     <script src="/ai/js/training-utilities.js"></script>
     <script src="train-mobilenet.js"></script>
     <script src="/ai/js/translate.js"></script>
@@ -23,8 +23,9 @@
 
 <div id='main' style='display:none'>
     <video id="video" playsinline 
-     width = "300px"
-     height = "250px"
+     width  = "300"
+     height = "250"
+<!--      reverse left and right -->
      style=" -moz-transform: scaleX(-1);
              -o-transform: scaleX(-1);
              -webkit-transform: scaleX(-1);
