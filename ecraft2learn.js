@@ -108,6 +108,9 @@ window.ecraft2learn =
           return ide;
       };
       const enhance_snap_openProject = function () {
+          if (!inside_snap()) {
+              return;
+          }
           let original_open_project = SnapSerializer.prototype.openProject;
           SnapSerializer.prototype.openProject = function (project, ide) {
               if (ecraft2learn.snap_project_opened && window.parent === window) {
