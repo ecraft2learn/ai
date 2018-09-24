@@ -1190,6 +1190,11 @@ window.ecraft2learn =
         return result;
     };
     const word_to_features_or_location = function (word, language, features) {
+        if (typeof word !== 'string') {
+            inform((features ? 'features' : 'location') + " of word",
+                   "Expected word to be text but instead is a " + typeof word);
+            return;
+        }
         language = extract_language_code(language);
         if (typeof words_to_features[language] !== 'object') {
             console.error("word_to_features_or_location called before word embeddings loaded.")
