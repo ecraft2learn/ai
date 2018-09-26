@@ -2393,7 +2393,7 @@ window.ecraft2learn =
       ecraft2learn = undefined;
       load_script(this_url);
   },
-  arduino_bot: function (blocks, alternative_server) {
+  send_to_arduino_bot: function (blocks, alternative_server) {
       // loads support for compiling Snap4Arduino blocks to Arduino sketch using ArduinoBot
       // and then loads it on the Arduino 
       // see https://github.com/ecraft2learn/arduinobot
@@ -2402,9 +2402,11 @@ window.ecraft2learn =
           ecraft2learn.send_blocks_to_arduinobot(blocks, alternative_server);
           return;
       }
-      load_script("https://ecraft2learn.github.io/ai/ArduinoBot/mqttws.js",
+      let this_url = document.querySelector('script[src*="ecraft2learn.js"]').src;
+      let this_folder = this_url.substring(0, this_url.lastIndexOf('/'));
+      load_script(this_folder + "ArduinoBot/mqttws.js",
                   function () {
-                      load_script("https://ecraft2learn.github.io/ai/ArduinoBot/ardinobot.js",
+                      load_script(this_folder + "ArduinoBot/arduinobot.js",
                                   function () {
                                       ecraft2learn.arduino_bot.addConnectSuccessListener(function () {
                                           ecraft2learn.send_blocks_to_arduinobot(blocks, alternative_server);

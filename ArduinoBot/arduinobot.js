@@ -6,7 +6,7 @@ ecraft2learn.send_blocks_to_arduinobot = function (blocks, alternative_server) {
     try {
         ecraft2learn.arduino_bot.verify(
                world.Arduino.transpile(
-                 "void setup() {" + expression.mappedCode() + "}",
+                 "void setup() {" + expression.mappedCode(),
                  expression.children.filter(
                      function (each) {
                            return each instanceof HatBlockMorph &&
