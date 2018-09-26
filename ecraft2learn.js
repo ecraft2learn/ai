@@ -1998,21 +1998,6 @@ window.ecraft2learn =
   save_project: function (name) {
       get_snap_ide().saveProject(name);
   },
-  // experimenting with compiling Snap4Arduino to Arduino C sketch
-//   transpile_to_arduino_sketch: function () {
-//     try {
-//         console.log(
-//                 this.world().Arduino.transpile(
-//                     this.mappedCode(),
-//                     this.parentThatIsA(ScriptsMorph).children.filter(
-//                         function (each) {
-//                             return each instanceof HatBlockMorph &&
-//                                 each.selector == 'receiveMessage';
-//                         })));
-//     } catch (error) {
-//         console.log('Error exporting to Arduino sketch!', error.message)
-//     }
-//   },
   console_log: function (message) {
       console.log(message);
   },
@@ -2408,6 +2393,26 @@ window.ecraft2learn =
       ecraft2learn = undefined;
       load_script(this_url);
   },
+  arduino_bot: function (blocks, alternative_server) {
+      // loads support for compiling Snap4Arduino blocks to Arduino sketch using ArduinoBot
+      // and then loads it on the Arduino 
+      // see https://github.com/ecraft2learn/arduinobot
+      // alternative_server should be provided if the default raspberrypi.local isn't working
+      if (ecraft2learn.send_blocks_to_arduinobot) {
+          ecraft2learn.send_blocks_to_arduinobot(blocks, alternative_server);
+          return;
+      }
+      load_script("https://ecraft2learn.github.io/ai/ArduinoBot/mqttws.js",
+                  function () {
+                      load_script("https://ecraft2learn.github.io/ai/ArduinoBot/ardinobot.js",
+                                  function () {
+                                      ecraft2learn.arduino_bot.addConnectSuccessListener(function () {
+                                          ecraft2learn.send_blocks_to_arduinobot(blocks, alternative_server);
+                                      });
+                                      ecraft2learn.arduino_bot.connect(alternative_server);
+                                   });
+                  });
+  },     
   outstanding_callbacks: [],
   support_window: {},
   support_window_is_ready: {},
