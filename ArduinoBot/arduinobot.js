@@ -121,10 +121,10 @@ ecraft2learn.arduino_bot = // based upon https://github.com/evothings/ecraft2lea
     var command = payload.command
     unsubscribe(topic)
     if (type === 'success') {
-      console.log('Exit code: ' + payload.exitCode)
-      console.log('Stdout: ' + payload.stdout)
-      console.log('Stderr: ' + payload.stderr)
-      console.log('Errors: ' + JSON.stringify(payload.errors))
+//       console.log('Exit code: ' + payload.exitCode)
+//       console.log('Stdout: ' + payload.stdout)
+//       console.log('Stderr: ' + payload.stderr)
+//       console.log('Errors: ' + JSON.stringify(payload.errors))
       if (payload.exitCode === 0) {
         if (command === 'verify') {
           console.log('success', 'Success!', 'No compilation errors')
@@ -145,12 +145,12 @@ ecraft2learn.arduino_bot = // based upon https://github.com/evothings/ecraft2lea
 
   function onMessageArrived (message) {
     var payload = JSON.parse(message.payloadString)
-    console.log('Topic: ' + message.topic + ' payload: ' + message.payloadString)
+//     console.log('Topic: ' + message.topic + ' payload: ' + message.payloadString)
     handleMessage(message.topic, payload)
   }
 
   function onConnectSuccess (context) {
-    console.log('info', '', 'Connected', true)
+//     console.log('info', '', 'Connected', true)
     subscribeToSketch()
     onConnectSuccessListeners.forEach(function (listener) { listener()})
   }
@@ -174,7 +174,7 @@ ecraft2learn.arduino_bot = // based upon https://github.com/evothings/ecraft2lea
 
   function subscribe (topic) {
     mqttClient.subscribe(topic)
-    console.log('Subscribed: ' + topic)
+//     console.log('Subscribed: ' + topic)
   }
 
   function subscribeToSketch () {
@@ -183,7 +183,7 @@ ecraft2learn.arduino_bot = // based upon https://github.com/evothings/ecraft2lea
 
   function unsubscribe (topic) {
     mqttClient.unsubscribe(topic)
-    console.log('Unsubscribed: ' + topic)
+//     console.log('Unsubscribed: ' + topic)
   }
 
   function disconnectMQTT () {
