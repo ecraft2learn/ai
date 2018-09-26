@@ -111,6 +111,9 @@ window.ecraft2learn =
           if (!inside_snap()) {
               return;
           }
+          if (typeof world.Arduino === 'function') {
+              return; // inside Snap4Arduino
+          }
           let original_open_project = SnapSerializer.prototype.openProject;
           SnapSerializer.prototype.openProject = function (project, ide) {
               if (ecraft2learn.snap_project_opened && window.parent === window) {
