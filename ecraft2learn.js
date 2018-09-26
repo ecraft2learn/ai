@@ -2404,9 +2404,9 @@ window.ecraft2learn =
       }
       let this_url = document.querySelector('script[src*="ecraft2learn.js"]').src;
       let this_folder = this_url.substring(0, this_url.lastIndexOf('/'));
-      load_script(this_folder + "ArduinoBot/mqttws.js",
+      load_script(this_folder + "/ArduinoBot/mqttws.js",
                   function () {
-                      load_script(this_folder + "ArduinoBot/arduinobot.js",
+                      load_script(this_folder + "/ArduinoBot/arduinobot.js",
                                   function () {
                                       ecraft2learn.arduino_bot.addConnectSuccessListener(function () {
                                           ecraft2learn.send_blocks_to_arduinobot(blocks, alternative_server);
