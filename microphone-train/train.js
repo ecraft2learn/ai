@@ -1,10 +1,12 @@
 const initialise = async function (training_class_names) {
     const builtin_recognizer = SpeechCommands.create('BROWSER_FFT');
     await builtin_recognizer.ensureModelLoaded();
-    let user_recognizer;
+    builtin_recognizer.params().sampleRateHz = 48000;
+    let tuser_recognizer;
     if (training_class_names !== []) {
         const base_recognizer = SpeechCommands.create('BROWSER_FFT');
         await base_recognizer.ensureModelLoaded();
+        base_recognizer.params().sampleRateHz = 48000;
         user_recognizer = base_recognizer.createTransfer('user trained');
     }
     let currently_listening_recognizer;
@@ -22,7 +24,7 @@ const initialise = async function (training_class_names) {
                       recognitions => {
                           window.parent.postMessage({confidences: recognitions}, "*");
                       });
-        } else if (typeof event.data === 'stop') { // from clicking on stop sign
+        } else if (event.data === 'stop') { // from clicking on stop sign
             pending_recognitions = [];
             stop_recognising();
         } else if (event.data === 'stop_recognising') {
@@ -45,20 +47,28 @@ const initialise = async function (training_class_names) {
             return;
         }
         currently_listening_recognizer = recognizer;
-        recognizer.startStreaming(
-            recognition => {
-                let scores = recognition.scores.slice().sort().reverse(); // slice() to not clobber it using 'sort'
-                let labels = recognizer.wordLabels();
-                let results = [];
-                scores.forEach(function (score, index) {
-                    if (score >= minimum_probability) {
-                        results.push([labels[recognition.scores.indexOf(score)], (score*100).toFixed(0)]);
+        try {
+            recognizer.startStreaming(
+                recognition => {
+                    let scores = recognition.scores.slice().sort().reverse(); // slice() to not clobber it using 'sort'
+                    let labels = recognizer.wordLabels();
+                    let results = [];
+                    scores.forEach(function (score, index) {
+                        let original_index = recognition.scores.indexOf(score);
+                        if (original_index > 1 && score >= minimum_probability) {
+                            results.push([labels[original_index], (score*100).toFixed(0)]);
+                        }
+                    });
+                    console.log(recognition.scores.indexOf(Math.max(...recognition.scores)));
+                    if (results.length > 0) {
+                        callback(results);
                     }
-                });
-                callback(results);
-            },
-            {probabilityThreshold: 0.5,
-             invokeCallbackOnNoiseAndUnknown: true});
+                },
+                {probabilityThreshold: 0.75,
+                 invokeCallbackOnNoiseAndUnknown: true});
+           } catch (error) {
+               window.parent.postMessage({error: error.message}, "*");
+           }
     };
     const stop_recognising = function () {
         if (currently_listening_recognizer) {
@@ -150,10 +160,10 @@ const initialise = async function (training_class_names) {
 
 window.addEventListener(
     "message", 
-    function (event) {
+    async function (event) {
         if (typeof event.data.training_class_names !== 'undefined') {
             // received the names of the classes so ready to initialise
-            initialise(event.data.training_class_names);
+            await initialise(event.data.training_class_names);
             let please_wait_element = document.getElementById('please-wait');
             if (please_wait_element) {
                 please_wait_element.remove();

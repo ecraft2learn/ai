@@ -2087,7 +2087,10 @@ window.ecraft2learn =
       let receive_confidences = function (event) {
           if (typeof event.data.confidences !== 'undefined') {
               invoke_callback(callback, javascript_to_snap(event.data.confidences));
-              window.removeEventListener("message", receive_confidences);
+              // remove this when stopped 
+              ecraft2learn.outstanding_callbacks.push(function () {
+                  window.removeEventListener("message", receive_confidences);
+              });              
            }
            if (typeof event.data.error !== 'undefined') {
               inform("Message received from audio training window", event.data.error);
@@ -2108,10 +2111,13 @@ window.ecraft2learn =
                                   function (event) {
                                       if (event.data === "Loaded") {
                                           ecraft2learn.support_window['training using microphone'].postMessage({training_class_names: []}, "*");
+                                      } else if (event.data === "Ready") {
+                                          ecraft2learn.support_window['training using microphone'].postMessage({predict: !builtin_recognizer}, "*");
                                       }
                                   });
+      } else {
+          ecraft2learn.support_window['training using microphone'].postMessage({predict: !builtin_recognizer}, "*");
       }
-      ecraft2learn.support_window['training using microphone'].postMessage({predict: !builtin_recognizer}, "*");
       window.addEventListener("message", receive_confidences);  
   },
   stop_audio_recognition: function () {
