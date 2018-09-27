@@ -1,5 +1,10 @@
-  // support for compiling Snap4Arduino to Arduino sketch using ArduinoBot
-  // see https://github.com/ecraft2learn/arduinobot
+ /**
+ * Implements JavaScript functions to support running and compiling Snap4Arduino blocks to Arduino sketches using ArduinoBot
+ * see https://github.com/ecraft2learn/arduinobot
+ * Authors: Ken Kahn
+ * License: New BSD
+ */
+
 ecraft2learn.send_blocks_to_arduinobot = function (blocks, alternative_server) {
     // alternative_server should be provided if the default raspberrypi.local isn't working
     let expression = blocks.expression;
