@@ -701,7 +701,7 @@ window.ecraft2learn =
                           callback, // if bound will be called when training finished 
                           together, // if true enable togetherJS collaboration
                           together_url, // another Snap! (or NetsBlox) wants to collaborate using this URL
-                          iframe_in_new_tab) { // if not true then iframe is either full size covering up Snap! or a single pixel
+                          iframe_in_new_tab) { // if not true then iframe is either full size covering up Snap! or a single pixel 
       var buckets = buckets_as_snap_list.contents;
       var buckets_equal = function (buckets1, buckets2) {
           if (!buckets1 || !buckets2) {
@@ -766,10 +766,7 @@ window.ecraft2learn =
       if (together_url) {
           URL = together_url;
       } else {
-          let index_file_name = window.location.hostname === "localhost" ?
-                                 // until fully tested and debugged don't use local version
-                                "index-local" : // "index-local" :
-                                "index";
+          let index_file_name = window.location.hostname === "localhost" ? "index-local" : "index";
           if (source === 'training using camera') {
               URL = "/ai/camera-train/" + index_file_name + ".html?translate=1";
               if (together) {
@@ -2038,8 +2035,7 @@ window.ecraft2learn =
       // old name kept for backwards compatibility
       train('training using camera', buckets_as_snap_list, add_to_previous_training, page_introduction, callback, together, together_url);
   },
-  train_using_microphone: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback, version) {
-      // version is for when this is replaced by a deep learning model
+  train_using_microphone: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback) {
       train('training using microphone', buckets_as_snap_list, add_to_previous_training, page_introduction, callback);
   },
   image_confidences: function (callback) {
@@ -2087,26 +2083,41 @@ window.ecraft2learn =
                             window.addEventListener("message", receive_confidences);
                         });                            
   },
-  audio_confidences: function (callback, duration_in_seconds, version) {
-      // version is for when this is replaced by a deep learning model
-      var receive_confidences = function (event) {
+  audio_confidences: function (builtin_recognizer, callback) {
+      let receive_confidences = function (event) {
           if (typeof event.data.confidences !== 'undefined') {
               invoke_callback(callback, javascript_to_snap(event.data.confidences));
               window.removeEventListener("message", receive_confidences);
-           };
+           }
+           if (typeof event.data.error !== 'undefined') {
+              inform("Message received from audio training window", event.data.error);
+              window.removeEventListener("message", receive_confidences);
+          }
       };
       record_callbacks(callback);
       if (!ecraft2learn.support_window['training using microphone']) {
-          inform("Training request warning",
-                 "Run the 'Train with audio buckets ...' command before using 'Audio label confidences'");
-          return;
+          if (!builtin_recognizer) {
+              inform("Training request warning",
+                     "Run the 'Train with audio buckets ...' command before using 'Audio label confidences'");
+              return;              
+          }
+          // create a hidden support window
+          ecraft2learn.support_window['training using microphone'] =
+              create_machine_learning_window('training using microphone', undefined, undefined, undefined, true);
+          window.addEventListener('message',
+                                  function (event) {
+                                      if (event.data === "Loaded") {
+                                          ecraft2learn.support_window['training using microphone'].postMessage({training_class_names: []}, "*");
+                                      }
+                                  });
       }
-      if (typeof duration_in_seconds != 'number' || duration_in_seconds <= 0) {
-          duration_in_seconds = 3; // 3 second default 
-      }
-      // convert from milliseconds to seconds
-      ecraft2learn.support_window['training using microphone'].postMessage({predict: duration_in_seconds*1000}, "*");
+      ecraft2learn.support_window['training using microphone'].postMessage({predict: !builtin_recognizer}, "*");
       window.addEventListener("message", receive_confidences);  
+  },
+  stop_audio_recognition: function () {
+      if (ecraft2learn.support_window['training using microphone']) {
+          ecraft2learn.support_window['training using microphone'].postMessage('stop_recognising', "*");
+      }
   },
   add_image_to_training: function (costume_or_costume_number, label, callback, sprite) {
       // costume_number supported for backwards compatibility

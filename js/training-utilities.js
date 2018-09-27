@@ -54,15 +54,15 @@ function create_return_to_snap_button(innerHTML) {
                                                    child.style.opacity = 0;
                                                });
                                            });
-     window.addEventListener('message', function (event) {
-         if (event.data === 'Show support iframe') {
-             let children = document.body.children;
-             Array.from(children).forEach(function (child) {
-                 child.style.opacity = 1;
-             });
-             window.postMessage('restart', "*");             
-         }
-     });                                                
+    window.addEventListener('message', function (event) {
+        if (event.data === 'Show support iframe') {
+            let children = document.body.children;
+            Array.from(children).forEach(function (child) {
+                child.style.opacity = 1;
+            });
+            window.postMessage('restart', "*");             
+        }
+    });                                                
     document.body.appendChild(return_to_snap_button);
 }
 
