@@ -1,9 +1,11 @@
 const initialise = async function (training_class_names) {
+    window.parent.postMessage({show_message: "Loading..."});
     const builtin_recognizer = SpeechCommands.create('BROWSER_FFT');
     await builtin_recognizer.ensureModelLoaded();
     builtin_recognizer.params().sampleRateHz = 48000;
-    let tuser_recognizer;
-    if (training_class_names !== []) {
+    let user_recognizer;
+    if (training_class_names.length !== 0) {
+        training_class_names.push('_background_noise_');
         const base_recognizer = SpeechCommands.create('BROWSER_FFT');
         await base_recognizer.ensureModelLoaded();
         base_recognizer.params().sampleRateHz = 48000;
@@ -18,7 +20,7 @@ const initialise = async function (training_class_names) {
                 window.parent.postMessage({error: "Cannot predict with user trained model before it is trained."});
                 return;
             }
-            let recognizer = user_training ? User_recognizer : builtin_recognizer;
+            let recognizer = user_training ? user_recognizer : builtin_recognizer;
             recognise(recognizer,
                       minimum_probability,
                       recognitions => {
@@ -26,9 +28,9 @@ const initialise = async function (training_class_names) {
                       });
         } else if (event.data === 'stop') { // from clicking on stop sign
             pending_recognitions = [];
-            stop_recognising();
+            stop_recognising(true);
         } else if (event.data === 'stop_recognising') {
-            stop_recognising(); // just the current recognition - let the next one start 
+            stop_recognising(true); // just the current recognition - let the next one start 
         };
     };
     // these listeners need to be in the scope of initialise
@@ -47,8 +49,8 @@ const initialise = async function (training_class_names) {
             return;
         }
         currently_listening_recognizer = recognizer;
-        try {
-            recognizer.startStreaming(
+        recognizer
+            .startStreaming(
                 recognition => {
                     let scores = recognition.scores.slice().sort().reverse(); // slice() to not clobber it using 'sort'
                     let labels = recognizer.wordLabels();
@@ -65,21 +67,30 @@ const initialise = async function (training_class_names) {
                     }
                 },
                 {probabilityThreshold: 0.75,
-                 invokeCallbackOnNoiseAndUnknown: true});
-           } catch (error) {
-               window.parent.postMessage({error: error.message}, "*");
-           }
+                 invokeCallbackOnNoiseAndUnknown: false})
+            .catch (error => {
+                window.parent.postMessage({error: error.message}, "*");
+            });
     };
-    const stop_recognising = function () {
+    const stop_recognising = function (clear_pending_recognitions) {
         if (currently_listening_recognizer) {
-            currently_listening_recognizer.stopStreaming();
-            currently_listening_recognizer = undefined;
+            currently_listening_recognizer.stopStreaming()
+                .then(() => {
+                    currently_listening_recognizer = undefined;
+                })
+                .catch(error => {
+                          console.log(error);
+                       });  
+        }
+        if (clear_pending_recognitions) {
+            pending_recognitions = [];
         }
         if (pending_recognitions && pending_recognitions.length > 0) {
             (pending_recognitions.pop()());
         }
     };
     let train_on = async function (class_index, info_text) {
+        stop_recognising(true);
         await user_recognizer.collectExample(training_class_names[class_index]);
         if (typeof info_text.count !== 'number') {
             info_text.count = 1;
@@ -110,7 +121,7 @@ const initialise = async function (training_class_names) {
                                   label_and_score[0] + " " + label_and_score[1] + "% confidence score<br>";
                           });
                       });
-            results_div.innerText = "Release when finished speaking.";
+            results_div.innerHTML = "<p>Release when finished speaking.</p>";
         };
         let button_up = function () {
             stop_recognising();
@@ -121,19 +132,19 @@ const initialise = async function (training_class_names) {
         button.addEventListener('touchend',   button_up);
     };
     const add_samples_to_model = async function () {
-        try {
-            console.log(user_recognizer.countExamples());
-            await user_recognizer.train({
+        console.log(user_recognizer.countExamples());
+        user_recognizer
+            .train({
                   epochs: 25,
                   callback: {
                     onEpochEnd: async (epoch, logs) => {
                       console.log(`Epoch ${epochs}: loss=${logs.loss}, accuracy=${logs.acc}`);
                     }
                   }
-                });
-        } catch (error) {
-            window.parent.postMessage({error: error.message}, "*");
-        }
+                })
+            .catch (error => {
+                window.parent.postMessage({error: error.message}, "*");
+            });
     };
     // remove any previously added buttons
     let buttons = document.body.getElementsByTagName('button');
@@ -147,6 +158,8 @@ const initialise = async function (training_class_names) {
     create_training_buttons(training_class_names, train_on, train_off);
     create_test_button(training_class_names);
     create_return_to_snap_button();
+    window.parent.postMessage({show_message: "Ready",
+                               duration: 2});
     // see https://developers.google.com/web/updates/2017/09/autoplay-policy-changes#webaudio
 //     if (speech_recognizer.audioCtx) {
 //         document.querySelectorAll('button').forEach(function (button) {
@@ -155,7 +168,6 @@ const initialise = async function (training_class_names) {
 //             });
 //         });
 //     }
-
 };
 
 window.addEventListener(

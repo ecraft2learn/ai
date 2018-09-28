@@ -829,6 +829,8 @@ window.ecraft2learn =
                   }
               } else if (event.data === "Ready" && typeof ecraft2learn.support_window_is_ready[source] !== 'undefined') {
                   ecraft2learn.support_window_is_ready[source] = true;             
+              } else if (typeof event.data.show_message !== 'undefined') {
+                  show_message(event.data.show_message, event.data.duration);
               }
           },
           false);
@@ -2107,14 +2109,15 @@ window.ecraft2learn =
           // create a hidden support window
           ecraft2learn.support_window['training using microphone'] =
               create_machine_learning_window('training using microphone', undefined, undefined, undefined, true);
-          window.addEventListener('message',
-                                  function (event) {
-                                      if (event.data === "Loaded") {
-                                          ecraft2learn.support_window['training using microphone'].postMessage({training_class_names: []}, "*");
-                                      } else if (event.data === "Ready") {
-                                          ecraft2learn.support_window['training using microphone'].postMessage({predict: !builtin_recognizer}, "*");
-                                      }
-                                  });
+          window.addEventListener(
+              'message',
+              function (event) {
+                  if (event.data === "Loaded") {
+                      ecraft2learn.support_window['training using microphone'].postMessage({training_class_names: []}, "*");
+                  } else if (event.data === "Ready") {
+                      ecraft2learn.support_window['training using microphone'].postMessage({predict: !builtin_recognizer}, "*");
+                  }
+          });
       } else {
           ecraft2learn.support_window['training using microphone'].postMessage({predict: !builtin_recognizer}, "*");
       }

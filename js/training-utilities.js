@@ -5,7 +5,8 @@
  */
 
  function create_training_buttons(training_class_names, train_on, train_off) {
-    var info_texts = [];
+    let info_texts = [];
+    let button_down;
     for (let i = 0; i < training_class_names.length; i++) {
       const div = document.createElement('div');
       document.body.appendChild(div);
@@ -23,15 +24,25 @@
       // Listen for mouse and touch events when clicking the button
       let class_index = i; // close over a variable that doesn't change (as i does)
       button.addEventListener('mousedown',  function () {
+          if (button_down) {
+              return;
+          }
+          button_down = true;
           train_on(class_index, info_text);
       });
       button.addEventListener('touchstart', function () {
+          if (button_down) {
+              return;
+          }
+          button_down = true;
           train_on(class_index, info_text);
       });
       button.addEventListener('mouseup',    function () {
+          button_down = false;
           train_off(class_index, info_text);
       });
       button.addEventListener('touchend',   function () {
+          button_down = false;
           train_off(class_index, info_text);
       });
     }
