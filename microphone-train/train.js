@@ -61,7 +61,7 @@ const initialise = async function (training_class_names) {
                             results.push([labels[original_index], (score*100).toFixed(0)]);
                         }
                     });
-                    console.log(recognition.scores.indexOf(Math.max(...recognition.scores)));
+//                     console.log(recognition.scores.indexOf(Math.max(...recognition.scores)));
                     if (results.length > 0) {
                         callback(results);
                     }
@@ -77,32 +77,33 @@ const initialise = async function (training_class_names) {
             currently_listening_recognizer.stopStreaming()
                 .then(() => {
                     currently_listening_recognizer = undefined;
+                    if (pending_recognitions && pending_recognitions.length > 0) {
+                        (pending_recognitions.pop()());
+                    }
                 })
                 .catch(error => {
                           console.log(error);
+                          currently_listening_recognizer = undefined;
                        });  
         }
         if (clear_pending_recognitions) {
             pending_recognitions = [];
         }
-        if (pending_recognitions && pending_recognitions.length > 0) {
-            (pending_recognitions.pop()());
-        }
     };
+    let examples_collected = 0;
     let train_on = async function (class_index, info_text) {
-        recognising(true)
+        await stop_recognising(true);
+        await user_recognizer.collectExample(training_class_names[class_index])
             .then(() => {
-                user_recognizer.collectExample(training_class_names[class_index])
-                    .then(() => {
-                              if (typeof info_text.count !== 'number') {
-                                  info_text.count = 1;
-                                  info_text.innerHTML = " " + info_text.count + " example trained";
-                              } else {
-                                  info_text.count++;
-                                  info_text.innerHTML = " " + info_text.count + " examples trained";
-                              }                         
-                    });
-            });
+                examples_collected++;
+                if (typeof info_text.count !== 'number') {
+                    info_text.count = 1;
+                    info_text.innerHTML = " " + info_text.count + " example trained";
+                } else {
+                     info_text.count++;
+                     info_text.innerHTML = " " + info_text.count + " examples trained";
+                }                         
+         });
     };
     let train_off = function (class_index, info_text) {
         // obsolete
@@ -137,8 +138,12 @@ const initialise = async function (training_class_names) {
         button.addEventListener('touchend',   button_up);
     };
     const add_samples_to_model = async function () {
-        console.log(user_recognizer.countExamples());
-        window.parent.postMessage({show_message: "Training model with new examples"});
+        if (examples_collected === 0) {
+            return;
+        }
+        examples_collected = 0;
+//         console.log(user_recognizer.countExamples());
+        window.parent.postMessage({show_message: "Training model with new examples"}); // probably hidden so this won't be seen
         user_recognizer
             .train({
                   epochs: 25,
@@ -189,8 +194,8 @@ window.addEventListener(
             let please_wait_element = document.getElementById('please-wait');
             if (please_wait_element) {
                 please_wait_element.remove();
+                window.parent.postMessage("Ready", "*");
             }
-            window.parent.postMessage("Ready", "*");
          } else if (typeof event.data.new_introduction !== 'undefined') {
             // introductory text overridden
             let introduction = document.getElementById("introduction");

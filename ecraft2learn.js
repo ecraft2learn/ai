@@ -731,8 +731,15 @@ window.ecraft2learn =
           window.addEventListener('message', receive_messages_from_iframe, false);               
           return;
       }           
-      if (add_to_previous_training && buckets_equal(buckets, ecraft2learn.training_buckets[source])) {
+      if (add_to_previous_training &&
+          // either the same bucket labels or the previous one was empty 
+          (ecraft2learn.training_buckets[source] && ecraft2learn.training_buckets[source].length === 0 ||
+           buckets_equal(buckets, ecraft2learn.training_buckets[source]))) {
           if (ecraft2learn.support_iframe[source]) {
+              if (ecraft2learn.training_buckets[source].length === 0) {
+                  ecraft2learn.training_buckets[source] = buckets;
+                  ecraft2learn.support_window[source].postMessage({training_class_names: buckets}, "*");
+              }
               open_support_window(source);
           } else if (iframe_in_new_tab) {
               // would like to go to that window: ecraft2learn.support_window.focus[source]();
@@ -745,6 +752,9 @@ window.ecraft2learn =
       } else {
           if (iframe_in_new_tab) {
               ecraft2learn.support_window[source].close();              
+          }
+          if (ecraft2learn.support_iframe[source]) {
+              ecraft2learn.support_iframe[source].remove();
           }
           ecraft2learn.support_window[source] = undefined;
           // start over
@@ -2114,6 +2124,7 @@ window.ecraft2learn =
               function (event) {
                   if (event.data === "Loaded") {
                       ecraft2learn.support_window['training using microphone'].postMessage({training_class_names: []}, "*");
+                      ecraft2learn.training_buckets['training using microphone'] = [];
                   } else if (event.data === "Ready") {
                       ecraft2learn.support_window['training using microphone'].postMessage({predict: !builtin_recognizer}, "*");
                   }
@@ -2121,7 +2132,7 @@ window.ecraft2learn =
       } else {
           ecraft2learn.support_window['training using microphone'].postMessage({predict: !builtin_recognizer}, "*");
       }
-      window.addEventListener("message", receive_confidences);  
+      window.addEventListener("message", receive_confidences);
   },
   stop_audio_recognition: function () {
       if (ecraft2learn.support_window['training using microphone']) {
