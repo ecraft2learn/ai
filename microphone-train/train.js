@@ -43,8 +43,8 @@ const initialise = async function (training_class_names) {
         }
         if (currently_listening_recognizer) {
             // already listening
-            pending_recognitions.push(function () {
-                recognise(recognizer, minimum_probability, callback);
+            pending_recognitions.push(async function () {
+                await recognise(recognizer, minimum_probability, callback);
             })
             return;
         }
@@ -90,15 +90,19 @@ const initialise = async function (training_class_names) {
         }
     };
     let train_on = async function (class_index, info_text) {
-        stop_recognising(true);
-        await user_recognizer.collectExample(training_class_names[class_index]);
-        if (typeof info_text.count !== 'number') {
-            info_text.count = 1;
-            info_text.innerHTML = " " + info_text.count + " example trained";
-        } else {
-            info_text.count++;
-            info_text.innerHTML = " " + info_text.count + " examples trained";
-        }       
+        recognising(true)
+            .then(() => {
+                user_recognizer.collectExample(training_class_names[class_index])
+                    .then(() => {
+                              if (typeof info_text.count !== 'number') {
+                                  info_text.count = 1;
+                                  info_text.innerHTML = " " + info_text.count + " example trained";
+                              } else {
+                                  info_text.count++;
+                                  info_text.innerHTML = " " + info_text.count + " examples trained";
+                              }                         
+                    });
+            });
     };
     let train_off = function (class_index, info_text) {
         // obsolete
@@ -111,16 +115,17 @@ const initialise = async function (training_class_names) {
         document.body.appendChild(button);
         document.body.appendChild(results_div);
         let button_down = async function () {
-            await add_samples_to_model();
-            recognise(user_recognizer,
-                      minimum_probability,
-                      function (recognitions) {
-                          results_div.innerHTML = "";
-                          recognitions.forEach(function (label_and_score) {
-                              results_div.innerHTML +=
-                                  label_and_score[0] + " " + label_and_score[1] + "% confidence score<br>";
-                          });
-                      });
+            add_samples_to_model().then(() => {
+                recognise(user_recognizer,
+                          minimum_probability,
+                          function (recognitions) {
+                              results_div.innerHTML = "";
+                              recognitions.forEach(function (label_and_score) {
+                                  results_div.innerHTML +=
+                                      label_and_score[0] + " " + label_and_score[1] + "% confidence score<br>";
+                              });
+                          });                
+                });
             results_div.innerHTML = "<p>Release when finished speaking.</p>";
         };
         let button_up = function () {
@@ -133,6 +138,7 @@ const initialise = async function (training_class_names) {
     };
     const add_samples_to_model = async function () {
         console.log(user_recognizer.countExamples());
+        window.parent.postMessage({show_message: "Training model with new examples"});
         user_recognizer
             .train({
                   epochs: 25,
@@ -141,6 +147,10 @@ const initialise = async function (training_class_names) {
                       console.log(`Epoch ${epochs}: loss=${logs.loss}, accuracy=${logs.acc}`);
                     }
                   }
+                })
+            .then(() => {
+                    window.parent.postMessage({show_message: "Training finished",
+                                               duration: 2});
                 })
             .catch (error => {
                 window.parent.postMessage({error: error.message}, "*");
