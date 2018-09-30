@@ -694,16 +694,19 @@ window.ecraft2learn =
         };
         window.addEventListener('message', receive_messages_from_iframe, false);               
     };
-    let train = function (source, // can be 'training using camera','training using microphone', or "posenet"
-                          buckets_as_snap_list, // list of labels (as Snap! object)
-                          add_to_previous_training, // if false will throw away any current training
-                          page_introduction, // optional HTML that will appear in place of the default on training page
-                          callback, // if bound will be called when training finished 
-                          together, // if true enable togetherJS collaboration
-                          together_url, // another Snap! (or NetsBlox) wants to collaborate using this URL
-                          iframe_in_new_tab) { // if not true then iframe is either full size covering up Snap! or a single pixel 
-      var buckets = buckets_as_snap_list.contents;
-      var buckets_equal = function (buckets1, buckets2) {
+    let train = function (options) {
+      // options can be
+      let source = options.source; // can be 'training using camera','training using microphone', or "posenet"
+      let buckets_as_snap_list = options.buckets_as_snap_list; // list of labels (as Snap! object)
+      let add_to_previous_training = options.add_to_previous_training; // if false will throw away any current training
+      let page_introduction = options.page_introduction; // optional HTML that will appear in place of the default on training page
+      let callback = options.callback; // if defined will be called when training finished 
+      let together = options.together; // if true enable togetherJS collaboration
+      let together_url = options.together_url; // another Snap! (or NetsBlox) wants to collaborate using this URL
+      let iframe_in_new_tab = options.iframe_in_new_tab; // if not true then iframe is either full size covering up Snap! or a single pixel
+      let training_name = options.training_name; // used by audio training 
+      let buckets = buckets_as_snap_list.contents;
+      let buckets_equal = function (buckets1, buckets2) {
           if (!buckets1 || !buckets2) {
               return false;
           }
@@ -720,7 +723,9 @@ window.ecraft2learn =
           let receive_messages_from_iframe = 
               function (event) {
                   if (event.data === "Loaded") {
-                      machine_learning_window.postMessage({training_class_names: buckets}, "*");
+                      machine_learning_window.postMessage({training_class_names: buckets,
+                                                           training_name: training_name},
+                                                          "*");
                   } else if (event.data === "Ready") {
                       if (page_introduction) {
                           machine_learning_window.postMessage({new_introduction: page_introduction}, "*");
@@ -738,7 +743,12 @@ window.ecraft2learn =
           if (ecraft2learn.support_iframe[source]) {
               if (ecraft2learn.training_buckets[source].length === 0) {
                   ecraft2learn.training_buckets[source] = buckets;
-                  ecraft2learn.support_window[source].postMessage({training_class_names: buckets}, "*");
+                  ecraft2learn.support_window[source].postMessage({training_class_names: buckets,
+                                                                   training_name: training_name},
+                                                                  "*");
+                  if (page_introduction) {
+                      ecraft2learn.support_window[source].postMessage({new_introduction: page_introduction}, "*");
+                  }
               }
               open_support_window(source);
           } else if (iframe_in_new_tab) {
@@ -758,7 +768,7 @@ window.ecraft2learn =
           }
           ecraft2learn.support_window[source] = undefined;
           // start over
-          train(source, buckets_as_snap_list, add_to_previous_training, page_introduction, callback, together, together_url);
+          train(options);
       }
   };
   const open_support_window = function (source) {
@@ -2041,14 +2051,31 @@ window.ecraft2learn =
       }
   },
   train_using_camera: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback, together, together_url) {
-      train('training using camera', buckets_as_snap_list, add_to_previous_training, page_introduction, callback, together, together_url);
+      train({source: 'training using camera', 
+             buckets_as_snap_list: buckets_as_snap_list, 
+             add_to_previous_training: add_to_previous_training,
+             page_introduction: page_introduction,
+             callback: callback,
+             together: together,
+             together_url: together_url});
   },
   train_using_images: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback, together, together_url) {
       // old name kept for backwards compatibility
-      train('training using camera', buckets_as_snap_list, add_to_previous_training, page_introduction, callback, together, together_url);
+      train({source: 'training using camera', 
+             buckets_as_snap_list: buckets_as_snap_list, 
+             add_to_previous_training: add_to_previous_training,
+             page_introduction: page_introduction,
+             callback: callback,
+             together: together,
+             together_url: together_url});
   },
-  train_using_microphone: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback) {
-      train('training using microphone', buckets_as_snap_list, add_to_previous_training, page_introduction, callback);
+  train_using_microphone: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback, training_name) {
+      train({source: 'training using microphone', 
+             buckets_as_snap_list: buckets_as_snap_list, 
+             add_to_previous_training: add_to_previous_training,
+             page_introduction: page_introduction,
+             callback: callback,
+             training_name: training_name});
   },
   image_confidences: function (callback) {
       var receive_confidences = function (event) {

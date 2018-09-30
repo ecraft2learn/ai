@@ -11,14 +11,14 @@
 <!--     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script> -->
     <script src="/ai/js/training-utilities.js"></script>
     <script src="speech-commands/dist/speech-commands.js"></script>
-    <script src="train.js"></script>
+    <script src="audio-train.js"></script>
     <script src="/ai/js/translate.js"></script>
 </head>
 
 <body>
-<p id="please-wait">Please wait</p>
-
-<div id="introduction">
+<p id="please-wait">Loading. Please wait.</p>
+<!-- Introduction is hidden until everything is loaded -->
+<div id="introduction" style="display:none">
 <ol style="margin-top:20px; margin-left:30px;">
 <li>Train by clicking a <b>click to train</b> button and then saying the word or phrase (or making a sound).</li>
 <li>Train each word or phrase multiple times.</li>
