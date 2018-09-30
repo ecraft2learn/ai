@@ -2122,7 +2122,7 @@ window.ecraft2learn =
                             window.addEventListener("message", receive_confidences);
                         });                            
   },
-  audio_confidences: function (builtin_recognizer, callback) {
+  microphone_confidences: function (builtin_recognizer, callback) {
       let receive_confidences = function (event) {
           if (typeof event.data.confidences !== 'undefined') {
               invoke_callback(callback, javascript_to_snap(event.data.confidences));
@@ -2160,6 +2160,27 @@ window.ecraft2learn =
           ecraft2learn.support_window['training using microphone'].postMessage({predict: !builtin_recognizer}, "*");
       }
       window.addEventListener("message", receive_confidences);
+  },
+  audio_confidences: function (callback, duration_in_seconds, version) {
+      // deprecated version
+      var receive_confidences = function (event) {
+          if (typeof event.data.confidences !== 'undefined') {
+              invoke_callback(callback, javascript_to_snap(event.data.confidences));
+              window.removeEventListener("message", receive_confidences);
+           };
+      };
+      record_callbacks(callback);
+      if (!ecraft2learn.support_window['training using microphone']) {
+          inform("Training request warning",
+                 "Run the 'Train with audio buckets ...' command before using 'Audio label confidences'");
+          return;
+      }
+      if (typeof duration_in_seconds != 'number' || duration_in_seconds <= 0) {
+          duration_in_seconds = 3; // 3 second default 
+      }
+      // convert from milliseconds to seconds
+      ecraft2learn.support_window['training using microphone'].postMessage({predict: duration_in_seconds*1000}, "*");
+      window.addEventListener("message", receive_confidences);  
   },
   stop_audio_recognition: function () {
       if (ecraft2learn.support_window['training using microphone']) {
