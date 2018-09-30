@@ -6,7 +6,14 @@
 let new_introduction;
 
 const initialise = async function (training_class_names) {
-    window.parent.postMessage({show_message: "Loading..."});
+    let report_error = function (error_message) {
+        if (window.parent.ecraft2learn.support_iframe_visible['training using microphone']) {
+            alert(error_message);
+        } else {
+            window.parent.postMessage({error: error_message}, "*");
+        }
+    }
+    window.parent.postMessage({show_message: "Loading..."}, "*");
     const builtin_recognizer = SpeechCommands.create('BROWSER_FFT');
     await builtin_recognizer.ensureModelLoaded();
     builtin_recognizer.params().sampleRateHz = 48000;
@@ -24,7 +31,7 @@ const initialise = async function (training_class_names) {
             // classification requested
             let user_training = event.data.predict;
             if (user_training && !user_recognizer) {
-                window.parent.postMessage({error: "Cannot predict with user trained model before it is trained."});
+                report_error("Cannot predict with user trained model before it is trained.");
                 return;
             }
             let recognizer = user_training ? user_recognizer : builtin_recognizer;
@@ -45,7 +52,7 @@ const initialise = async function (training_class_names) {
     let minimum_probability = .01; // to be displayed - not the same as probabilityThreshold which refers to the best result
     let pending_recognitions = [];
     const recognise = async function (recognizer, minimum_probability, callback) {
-        if (recognizer.vocabulary !== '18w') {
+        if (recognizer !== builtin_recognizer) {
             await add_samples_to_model();
         }
         if (currently_listening_recognizer) {
@@ -76,7 +83,7 @@ const initialise = async function (training_class_names) {
                 {probabilityThreshold: 0.75,
                  invokeCallbackOnNoiseAndUnknown: false})
             .catch (error => {
-                window.parent.postMessage({error: error.message}, "*");
+                 report_error(error.message);
             });
     };
     const stop_recognising = function (clear_pending_recognitions) {
@@ -150,7 +157,7 @@ const initialise = async function (training_class_names) {
         }
         examples_collected = 0;
 //         console.log(user_recognizer.countExamples());
-        window.parent.postMessage({show_message: "Training model with new examples"}); // probably hidden so this won't be seen
+        window.parent.postMessage({show_message: "Training model with new examples"}, "*"); // probably hidden so this won't be seen
         user_recognizer
             .train({
                   epochs: 25,
@@ -162,10 +169,11 @@ const initialise = async function (training_class_names) {
                 })
             .then(() => {
                     window.parent.postMessage({show_message: "Training finished",
-                                               duration: 2});
+                                               duration: 2},
+                                               "*");
                 })
             .catch (error => {
-                window.parent.postMessage({error: error.message}, "*");
+                 report_error(error.message);
             });
     };
     // remove any previously added buttons
@@ -181,7 +189,8 @@ const initialise = async function (training_class_names) {
     create_test_button(training_class_names);
     create_return_to_snap_button();
     window.parent.postMessage({show_message: "Ready",
-                               duration: 2});
+                               duration: 2},
+                               "*");
     // see https://developers.google.com/web/updates/2017/09/autoplay-policy-changes#webaudio
 //     if (speech_recognizer.audioCtx) {
 //         document.querySelectorAll('button').forEach(function (button) {
