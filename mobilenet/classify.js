@@ -8,8 +8,12 @@
 window.addEventListener('DOMContentLoaded',
     async function () {
         // Load the model and tell the spawner this is ready
+        window.parent.postMessage({show_message: "Loading..."}, "*");
         let model = await mobilenet.load();
         window.parent.postMessage("Ready", '*');
+        window.parent.postMessage({show_message: "Ready",
+                                   duration: 2},
+                                  "*");
         window.addEventListener('message', function(event) {
             if (typeof event.data.classify !== 'undefined') {
                 let image = new Image();
