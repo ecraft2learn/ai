@@ -4,7 +4,8 @@
 
 async function tic_tac_toe() {
   const GAMES_PER_FIT = 5;
-  const FIT_COUNT = 100;
+  const FIT_COUNT = 10;
+  let model_players = [1, 2]; // by default model used for both playes
   const model = tf.sequential();
   let model_trained = false;
   let game_number = 0;
@@ -12,6 +13,10 @@ async function tic_tac_toe() {
   model.add(tf.layers.dense({units: 1,
                              inputShape: [9],
                              activation: 'relu'}));
+  model.add(tf.layers.dense({units: 1,
+                             activation: 'relu'}));
+//   model.add(tf.layers.dense({units: 1,
+//                              activation: 'relu'}));
 
   model.compile({
       loss: 'meanSquaredError',
@@ -22,19 +27,18 @@ async function tic_tac_toe() {
   let outcomes = [];
   const outcome_names = ["", "win for X", "win for O", "tie"];
 
-  const play = function () {
+  const play = function (game_history) {
       let board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
       let player = 1; // player 1 starts
-      let game_history = [];
       while (true) {
           move(player, board, game_history);
-          player = player === 1 ? 2 : 1;
+          player = player === 1 ? 2 : 1; // and next the other player will play
           let outcome = game_over(board);
-          if (outcome) {
+          if (outcome && game_history) {
               boards = boards.concat(game_history);
               if (outcome === 3) {
                  // tied
-                 game_outcomes = game_history.map(() => 2);
+                 game_outcomes = game_history.map(() => .5);
               } else if (outcome === 1) {
                  game_outcomes = game_history.map((ignore, index) => (index+1)%2);
               } else {
@@ -42,25 +46,15 @@ async function tic_tac_toe() {
               }
               outcomes = outcomes.concat(game_outcomes);
               game_number++;
-              break;
+              return outcome;
           }
       }
   };
 
-  const moves = function (board) {
-      let indices = [];
-      board.forEach((position, index) => {
-          if (position === 0) {
-              indices.push(index);
-          }
-      });
-      return indices;
-  };
-
   const move = function (player, board, history) {
-      let possible_moves = moves(board);
+      let possible_moves = empty_squares(board);
       let move;
-      if (model_trained) {
+      if (model_trained && model_players.indexOf(player) >= 0) {
           let best_move;
           let best_probability = 0;
           tf.tidy(() => {
@@ -80,9 +74,20 @@ async function tic_tac_toe() {
           move = possible_moves[Math.floor(possible_moves.length*Math.random(possible_moves.length))];
       }
       board[move] = player;
-      history.push(board.slice());
+      if (history) {
+          history.push(board.slice());
+      }
   };
 
+  const empty_squares = function (board) {
+      let indices = [];
+      board.forEach((position, index) => {
+          if (position === 0) {
+              indices.push(index);
+          }
+      });
+      return indices;
+  };
   const wins =
       [[0, 1, 2],
        [3, 4, 5],
@@ -118,7 +123,8 @@ async function tic_tac_toe() {
   const play_self = async function () {
       for (let fit = 0; fit < FIT_COUNT; fit++) {
           for (let game = 0; game < GAMES_PER_FIT; game++) {
-               play();
+               let game_history = [];
+               play(game_history);
           }
           if (model_trained) {
               tf.tidy(() => {
@@ -140,13 +146,31 @@ async function tic_tac_toe() {
           // Train the model using the data.
           await model.fit(xs, ys, {epochs: 250});
           model_trained = true;
-          tf.dispose(xs);
-          tf.dispose(ys);
-          console.log(tf.memory().numTensors);
+          xs.dispose();
+          ys.dispose();
+//           console.log(tf.memory().numTensors);
       }
   };
 
+  const play_random = function () {
+      model_players = [Math.round(Math.random()*2)]; // just one player
+      let outcome = play();
+      if (outcome === model_players[0]) {
+          return 1; // model won
+      } else if (outcome === 2) { // tied
+          return .5;
+      } else {
+          return 0; // lost
+      } 
+  }
+
   await play_self();
+
+  let model_wins = 0;
+  for (let i = 0; i < 100; i++) {
+      model_wins += play_random();
+  }
+  console.log(model_wins);
 
 }
 
