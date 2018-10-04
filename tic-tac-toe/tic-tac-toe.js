@@ -3,7 +3,7 @@
 // No rights reserved.
 
 async function tic_tac_toe() {
-  const GAMES_PER_FIT = 100;
+  const GAMES_PER_FIT = 200;
   const FIT_COUNT = 3;
   let model_players = [1, 2]; // by default model used for both playes
   const model = tf.sequential();
@@ -13,8 +13,8 @@ async function tic_tac_toe() {
   model.add(tf.layers.dense({units: 1,
                              inputShape: [9],
                              activation: 'relu'}));
-//   model.add(tf.layers.dense({units: 1,
-//                              activation: 'relu'}));
+  model.add(tf.layers.dense({units: 1,
+                             activation: 'relu'}));
 //   model.add(tf.layers.dense({units: 1,
 //                              activation: 'relu'}));
 
@@ -131,16 +131,17 @@ async function tic_tac_toe() {
                play(game_history);
           }
           if (model_trained) {
-              tf.tidy(() => {
-                  let corner  = model.predict(tf.tensor2d([1, 0, 0, 0, 0, 0, 0, 0, 0], [1, 9])).dataSync()[0];
-                  let center  = model.predict(tf.tensor2d([0, 0, 0, 0, 1, 0, 0, 0, 0], [1, 9])).dataSync()[0];
-                  let neither = model.predict(tf.tensor2d([0, 1, 0, 0, 0, 0, 0, 0, 0], [1, 9])).dataSync()[0];
-                  document.getElementById('output_div').innerHTML += 
-                      "Game#" + game_number + 
-                      " corner: "  + Math.round(100*corner) + 
-                      " center: "  + Math.round(100*center) +
-                      " neither: " + Math.round(100*neither) + "<br>";
-              });
+              let corner  = model.predict(tf.tensor2d([1, 0, 0, 0, 0, 0, 0, 0, 0], [1, 9]));
+              let center  = model.predict(tf.tensor2d([0, 0, 0, 0, 1, 0, 0, 0, 0], [1, 9]));
+              let neither = model.predict(tf.tensor2d([0, 1, 0, 0, 0, 0, 0, 0, 0], [1, 9]));
+              document.getElementById('output_div').innerHTML += 
+                  "Game#" + game_number + 
+                  " corner: "  + Math.round(100*corner.dataSync()[0]) + 
+                  " center: "  + Math.round(100*center.dataSync()[0]) +
+                  " neither: " + Math.round(100*neither.dataSync()[0]) + "<br>";
+              corner.dispose();
+              center.dispose();
+              neither.dispose();
           }
           const xs = tf.tensor2d(boards);
           const ys = tf.tensor2d(outcomes, [outcomes.length, 1]);
@@ -178,7 +179,8 @@ async function tic_tac_toe() {
       model_wins += play_random();
   }
   document.getElementById('output_div').innerHTML += (100*model_wins)/TRIAL_COUNT + "% wins<br>";
-
+  
+  console.log(tf.memory().numTensors);
 
 }
 
