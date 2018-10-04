@@ -971,8 +971,8 @@ window.ecraft2learn =
         return canvas.toDataURL('image/png');        
     };
     var costume_to_image = function (costume, when_loaded) {
-        var image_url = image_url_of_costume(costume);
-        var image = document.createElement('img');
+        let image_url = image_url_of_costume(costume);
+        let image = document.createElement('img');
         image.src = image_url;
         image.onload = function () {
                            when_loaded(image);
@@ -2099,13 +2099,13 @@ window.ecraft2learn =
        window.addEventListener("message", receive_confidences);
   },
   costume_confidences: function (costume_or_costume_number, callback, sprite) {
-      var receive_confidences = function (event) {
+      let receive_confidences = function (event) {
           if (typeof event.data.confidences !== 'undefined') {
                 invoke_callback(callback, javascript_to_snap(event.data.confidences));
                 window.removeEventListener("message", receive_confidences);
              };
       };
-      var costume = typeof costume_or_costume_number === 'object' ?
+      let costume = typeof costume_or_costume_number === 'object' ?
                            costume_or_costume_number :
                            costume_of_sprite(costume_or_costume_number, sprite);
       record_callbacks(callback);

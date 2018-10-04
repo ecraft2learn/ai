@@ -105,6 +105,20 @@ const load_image = function (image_url, callback) {
     };
 };
 
+const add_image_to_training = function (image_url, label_index, post_to_tab) {
+    load_image(image_url,
+               function (image) {
+                   logits = infer(image);
+                   // Add current image to classifier
+                   classifier.addExample(logits, label_index);
+                   logits.dispose();
+                   if (post_to_tab) {
+                       let response = classifier.getClassExampleCount()[training];
+                       post_to_tab.postMessage({confirmation: response}, "*");
+                   }         
+    });
+};
+
 // 'conv_preds' is the logits activation of MobileNet.
 const infer = (image) => mobilenet_model.infer(image, 'conv_preds');
 
@@ -394,17 +408,17 @@ const listen_for_messages = function (event) {
         }
         let image_url = event.data.predict;
         load_image(image_url,
-                   function (image) {
-                       let canvas = create_canvas();
-                       copy_video_to_canvas(image, canvas);
-                       let image_as_tensor = tf.fromPixels(canvas);
-                       logits = infer(image_as_tensor);
-                       classifier.predictClass(logits, TOPK).then(
-                           function (results) {
-                               event.source.postMessage({confidences: Object.values(results.confidences)}, "*");
-                               image_as_tensor.dispose();
-                               logits.dispose();
-                       });          
+               function (image) {
+                   let canvas = create_canvas();
+                   copy_video_to_canvas(image, canvas);
+                   let image_as_tensor = tf.fromPixels(canvas);
+                   logits = infer(image_as_tensor);
+                   classifier.predictClass(logits, TOPK).then(
+                       function (results) {
+                           event.source.postMessage({confidences: Object.values(results.confidences)}, "*");
+                           image_as_tensor.dispose();
+                           logits.dispose();
+                   });          
         });
     } else if (typeof event.data.train !== 'undefined') {
         let image_url = event.data.train;
