@@ -2101,9 +2101,9 @@ window.ecraft2learn =
   costume_confidences: function (costume_or_costume_number, callback, sprite) {
       let receive_confidences = function (event) {
           if (typeof event.data.confidences !== 'undefined') {
-                invoke_callback(callback, javascript_to_snap(event.data.confidences));
-                window.removeEventListener("message", receive_confidences);
-             };
+              invoke_callback(callback, javascript_to_snap(event.data.confidences));
+              window.removeEventListener("message", receive_confidences);
+          };
       };
       let costume = typeof costume_or_costume_number === 'object' ?
                            costume_or_costume_number :
