@@ -3,12 +3,11 @@
 // No rights reserved.
 
 async function tic_tac_toe() {
-  const GAMES_PER_FIT = 200;
-  const FIT_COUNT = 3;
+  const GAMES_PER_FIT = 100;
+  const FIT_COUNT = 10;
   let model_players = [1, 2]; // by default model used for both playes
   const model = tf.sequential();
   let model_trained = false;
-  let game_number = 0;
 
   model.add(tf.layers.dense({units: 1,
                              inputShape: [9],
@@ -47,7 +46,6 @@ async function tic_tac_toe() {
               outcomes = outcomes.concat(game_outcomes);
           }
           if (outcome) {
-              game_number++;
               return outcome;
           }
       }
@@ -62,15 +60,18 @@ async function tic_tac_toe() {
           possible_moves.forEach(possible_move => {
               let board_copy = board.slice();
               board_copy[possible_move] = player;
-              let board_tensor = tf.tensor2d(board_copy, [1, 9]);
-              let probability_tensor = model.predict(board_tensor);
-              let probability = probability_tensor.dataSync()[0];
-              board_tensor.dispose();
-              probability_tensor.dispose();
-              if (probability > best_probability) {
-                  best_move = possible_move;
-                  best_probability = probability;
-              }
+              tf.tidy(() => {
+                  let board_tensor = tf.tensor2d(board_copy, [1, 9]);
+                  let probability_tensor = model.predict(board_tensor);
+                  let probability = probability_tensor.dataSync()[0];
+                  // following shouldn't be needed since tidy should take care of this
+                  board_tensor.dispose();
+                  probability_tensor.dispose();
+                  if (probability > best_probability) {
+                      best_move = possible_move;
+                      best_probability = probability;
+                  }           
+              });
           });
           move = best_move;
       }
@@ -130,19 +131,6 @@ async function tic_tac_toe() {
                let game_history = [];
                play(game_history);
           }
-          if (model_trained) {
-              let corner  = model.predict(tf.tensor2d([1, 0, 0, 0, 0, 0, 0, 0, 0], [1, 9]));
-              let center  = model.predict(tf.tensor2d([0, 0, 0, 0, 1, 0, 0, 0, 0], [1, 9]));
-              let neither = model.predict(tf.tensor2d([0, 1, 0, 0, 0, 0, 0, 0, 0], [1, 9]));
-              document.getElementById('output_div').innerHTML += 
-                  "Game#" + game_number + 
-                  " corner: "  + Math.round(100*corner.dataSync()[0]) + 
-                  " center: "  + Math.round(100*center.dataSync()[0]) +
-                  " neither: " + Math.round(100*neither.dataSync()[0]) + "<br>";
-              corner.dispose();
-              center.dispose();
-              neither.dispose();
-          }
           const xs = tf.tensor2d(boards);
           const ys = tf.tensor2d(outcomes, [outcomes.length, 1]);
           // collect next batch of boards and outcomes
@@ -154,7 +142,21 @@ async function tic_tac_toe() {
           model_trained = true;
           xs.dispose();
           ys.dispose();
-//           console.log(tf.memory().numTensors);
+          tf.tidy(() => {
+              let corner  = model.predict(tf.tensor2d([1, 0, 0, 0, 0, 0, 0, 0, 0], [1, 9]));
+              let center  = model.predict(tf.tensor2d([0, 0, 0, 0, 1, 0, 0, 0, 0], [1, 9]));
+              let neither = model.predict(tf.tensor2d([0, 1, 0, 0, 0, 0, 0, 0, 0], [1, 9]));
+              document.getElementById('output_div').innerHTML += 
+                  "Game#" + (fit+1)*GAMES_PER_FIT + 
+                  " corner: "  + Math.round(100*corner.dataSync()[0]) + 
+                  " center: "  + Math.round(100*center.dataSync()[0]) +
+                  " neither: " + Math.round(100*neither.dataSync()[0]) + "<br>";
+              // tidy should dispose for me 
+              corner.dispose();
+              center.dispose();
+              neither.dispose();
+              model_versus_random(200);                
+          });
       }
   };
 
@@ -170,18 +172,33 @@ async function tic_tac_toe() {
       } 
   }
 
+  const model_versus_random = function (trial_count) {
+    let model_wins = 0;
+    let model_ties = 0;
+    let model_losses = 0;
+    for (let i = 0; i < trial_count; i++) {
+        let won = play_random();
+        if (won === 1) {
+            model_wins++;
+        } else if (won === 0) {
+            model_losses++;
+        } else {
+            model_ties++;
+        }
+    }
+    document.getElementById('output_div').innerHTML += 
+        (100*model_wins)/trial_count + "% wins; " +
+        (100*model_ties)/trial_count + "% ties; " + 
+        (100*model_losses)/trial_count + "% losses; " +
+        "<br>";
+  };
+
   await play_self();
 
-  const TRIAL_COUNT = 500;
-
-  let model_wins = 0;
-  for (let i = 0; i < TRIAL_COUNT; i++) {
-      model_wins += play_random();
-  }
-  document.getElementById('output_div').innerHTML += (100*model_wins)/TRIAL_COUNT + "% wins<br>";
-  
   console.log(tf.memory().numTensors);
 
 }
 
 tic_tac_toe();
+
+// tf.ENV.set('DEBUG', true);
