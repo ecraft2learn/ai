@@ -847,7 +847,7 @@ window.ecraft2learn =
                       ecraft2learn.support_iframe[source].style.height = "1px";
                       ecraft2learn.support_iframe_visible[source] = false;
                   }
-              } else if (event.data === "Ready" && typeof ecraft2learn.support_window_is_ready[source] !== 'undefined') {
+              } else if (event.data === "Ready" && typeof ecraft2learn.support_window_is_ready !== 'undefined') {
                   ecraft2learn.support_window_is_ready[source] = true;             
               } else if (typeof event.data.show_message !== 'undefined') {
                   show_message(event.data.show_message, event.data.duration);
