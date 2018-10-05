@@ -5,7 +5,7 @@
 async function tic_tac_toe() {
   const GAMES_PER_FIT = 5000;
   const FIT_COUNT = 1;
-  const EPOCHS = 50;
+  const EPOCHS = 100;
   const EVALUATION_RUNS = 200;
   const LEARNING_RATE = .001;
 
@@ -17,7 +17,7 @@ async function tic_tac_toe() {
       "; learning rate: " + LEARNING_RATE +
       "; dense layers: 100-50-20-1" + "<br>";
 
-  let model_players = [1, 2]; // by default model used for both playes
+  let model_players = [1, 2]; // by default model used for both players
   const model = tf.sequential();
   let model_trained = false;
 
