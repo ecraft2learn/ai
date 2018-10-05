@@ -3,23 +3,39 @@
 // No rights reserved.
 
 async function tic_tac_toe() {
-  const GAMES_PER_FIT = 100;
-  const FIT_COUNT = 10;
+  const GAMES_PER_FIT = 5000;
+  const FIT_COUNT = 1;
+  const EPOCHS = 50;
+  const EVALUATION_RUNS = 200;
+  const LEARNING_RATE = .001;
+
+  document.getElementById('output_div').innerHTML =
+      "games between training: " + GAMES_PER_FIT +
+      "; number of trainings: " + FIT_COUNT +
+      "; training epochs: " + EPOCHS +
+      "; evaluation runs: " + EVALUATION_RUNS +
+      "; learning rate: " + LEARNING_RATE +
+      "; dense layers: 100-50-20-1" + "<br>";
+
   let model_players = [1, 2]; // by default model used for both playes
   const model = tf.sequential();
   let model_trained = false;
 
-  model.add(tf.layers.dense({units: 1,
+  // following inspired by https://github.com/johnflux/deep-learning-tictactoe/blob/master/play.py
+  model.add(tf.layers.dense({units: 100,
                              inputShape: [9],
                              activation: 'relu'}));
-  model.add(tf.layers.dense({units: 1,
+  model.add(tf.layers.dense({units: 50,
                              activation: 'relu'}));
-//   model.add(tf.layers.dense({units: 1,
-//                              activation: 'relu'}));
+  model.add(tf.layers.dense({units: 20,
+                             activation: 'relu'}));
+  model.add(tf.layers.dense({units: 1,
+                             activation: 'relu',
+                             useBias: false}));
 
   model.compile({
       loss: 'meanSquaredError',
-      optimizer: 'sgd'
+      optimizer: tf.train.adam(LEARNING_RATE)
   });
 
   let boards = [];
@@ -138,7 +154,9 @@ async function tic_tac_toe() {
           outcomes = [];
           // Train the model using the data.
           console.log(xs.shape, ys.shape, tf.memory().numTensors);
-          await model.fit(xs, ys, {epochs: 250});
+          let start = Date.now();
+          await model.fit(xs, ys, {epochs: EPOCHS});
+          let duration = Math.round((Date.now()-start)/1000);
           model_trained = true;
           xs.dispose();
           ys.dispose();
@@ -150,12 +168,13 @@ async function tic_tac_toe() {
                   "Game#" + (fit+1)*GAMES_PER_FIT + 
                   " corner: "  + Math.round(100*corner.dataSync()[0]) + 
                   " center: "  + Math.round(100*center.dataSync()[0]) +
-                  " neither: " + Math.round(100*neither.dataSync()[0]) + "<br>";
+                  " neither: " + Math.round(100*neither.dataSync()[0]) + 
+                  " duration: " + duration + " seconds<br>";
               // tidy should dispose for me 
               corner.dispose();
               center.dispose();
               neither.dispose();
-              model_versus_random(200);                
+              model_versus_random(EVALUATION_RUNS);                
           });
       }
   };
@@ -194,6 +213,8 @@ async function tic_tac_toe() {
   };
 
   await play_self();
+
+  document.getElementById('output_div').innerHTML += "---------------------<br><br>";
 
   console.log(tf.memory().numTensors);
 
