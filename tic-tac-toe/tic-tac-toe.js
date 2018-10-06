@@ -3,21 +3,24 @@
 // No rights reserved.
 
 async function tic_tac_toe() {
-  const GAMES_PER_FIT = 5000;
-  const FIT_COUNT = 1;
+  const GAMES_PER_FIT = 500;
+  const FIT_COUNT = 10;
   const EPOCHS = 100;
   const EVALUATION_RUNS = 200;
-  const LEARNING_RATE = .001;
+  const LEARNING_RATE = .0001;
 
-  document.getElementById('output_div').innerHTML =
+  const output_div = document.getElementById('output_div');
+
+  output_div.innerHTML =
       "games between training: " + GAMES_PER_FIT +
       "; number of trainings: " + FIT_COUNT +
       "; training epochs: " + EPOCHS +
       "; evaluation runs: " + EVALUATION_RUNS +
       "; learning rate: " + LEARNING_RATE +
-      "; dense layers: 100-50-20-1" + "<br>";
+      "; dense layers: 100-50-20-1" + 
+//       "; only random-random play" +
+      "<br>";
 
-  let model_players = [1, 2]; // by default model used for both players
   const model = tf.sequential();
   let model_trained = false;
 
@@ -42,11 +45,11 @@ async function tic_tac_toe() {
   let outcomes = [];
   const outcome_names = ["", "win for X", "win for O", "tie"];
 
-  const play = function (game_history) {
+  const play = function (model_players, game_history) {
       let board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
       let player = 1; // player 1 starts
       while (true) {
-          move(player, board, game_history);
+          move(model_players, player, board, game_history);
           player = player === 1 ? 2 : 1; // and next the other player will play
           let outcome = game_over(board);
           if (outcome && game_history) {
@@ -67,7 +70,7 @@ async function tic_tac_toe() {
       }
   };
 
-  const move = function (player, board, history) {
+  const move = function (model_players, player, board, history) {
       let possible_moves = empty_squares(board);
       let move;
       if (model_trained && model_players.indexOf(player) >= 0) {
@@ -81,8 +84,8 @@ async function tic_tac_toe() {
                   let probability_tensor = model.predict(board_tensor);
                   let probability = probability_tensor.dataSync()[0];
                   // following shouldn't be needed since tidy should take care of this
-                  board_tensor.dispose();
-                  probability_tensor.dispose();
+//                   board_tensor.dispose();
+//                   probability_tensor.dispose();
                   if (probability > best_probability) {
                       best_move = possible_move;
                       best_probability = probability;
@@ -145,7 +148,7 @@ async function tic_tac_toe() {
       for (let fit = 0; fit < FIT_COUNT; fit++) {
           for (let game = 0; game < GAMES_PER_FIT; game++) {
                let game_history = [];
-               play(game_history);
+               play([1, 2], game_history);
           }
           const xs = tf.tensor2d(boards);
           const ys = tf.tensor2d(outcomes, [outcomes.length, 1]);
@@ -161,27 +164,33 @@ async function tic_tac_toe() {
           xs.dispose();
           ys.dispose();
           tf.tidy(() => {
-              let corner  = model.predict(tf.tensor2d([1, 0, 0, 0, 0, 0, 0, 0, 0], [1, 9]));
-              let center  = model.predict(tf.tensor2d([0, 0, 0, 0, 1, 0, 0, 0, 0], [1, 9]));
-              let neither = model.predict(tf.tensor2d([0, 1, 0, 0, 0, 0, 0, 0, 0], [1, 9]));
-              document.getElementById('output_div').innerHTML += 
-                  "Game#" + (fit+1)*GAMES_PER_FIT + 
-                  " corner: "  + Math.round(100*corner.dataSync()[0]) + 
-                  " center: "  + Math.round(100*center.dataSync()[0]) +
-                  " neither: " + Math.round(100*neither.dataSync()[0]) + 
-                  " duration: " + duration + " seconds<br>";
-              // tidy should dispose for me 
-              corner.dispose();
-              center.dispose();
-              neither.dispose();
+              output_div.innerHTML += 
+                  "<br>Games played " + (fit+1)*GAMES_PER_FIT + " last training duration " + duration + " seconds<br>";
+              let board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+              for (let i = 0; i < 9; i++) {
+                  board[i] = 1;
+                  let prediction = Math.round(100*model.predict(tf.tensor2d(board, [1, 9])).dataSync()[0]);
+                  board[i] = 0;
+                  if (prediction < 10) {
+                      output_div.innerHTML += "&nbsp;";
+                  }
+                  output_div.innerHTML += prediction;
+                  if ((i+1)%3 !== 0) {
+                      output_div.innerHTML += " | ";
+                  } else if (i < 8) {
+                      output_div.innerHTML += "<br>&nbsp;------------&nbsp;<br>";
+                  } else {
+                      output_div.innerHTML += "<br>";
+                  }
+              }
               model_versus_random(EVALUATION_RUNS);                
           });
       }
   };
 
   const play_random = function () {
-      model_players = [Math.random() > .5 ? 1 : 2]; // just one player
-      let outcome = play();
+      let model_players = [Math.random() > .5 ? 1 : 2]; // just one player
+      let outcome = play(model_players);
       if (outcome === model_players[0]) {
           return 1; // model won
       } else if (outcome === 2) { // tied
@@ -205,7 +214,7 @@ async function tic_tac_toe() {
             model_ties++;
         }
     }
-    document.getElementById('output_div').innerHTML += 
+    output_div.innerHTML += 
         (100*model_wins)/trial_count + "% wins; " +
         (100*model_ties)/trial_count + "% ties; " + 
         (100*model_losses)/trial_count + "% losses; " +
@@ -214,7 +223,7 @@ async function tic_tac_toe() {
 
   await play_self();
 
-  document.getElementById('output_div').innerHTML += "---------------------<br><br>";
+  output_div.innerHTML += "---------------------<br><br>";
 
   console.log(tf.memory().numTensors);
 
