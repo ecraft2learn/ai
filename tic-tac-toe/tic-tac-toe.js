@@ -2,48 +2,52 @@
 // Written by Ken Kahn 
 // No rights reserved.
 
-async function tic_tac_toe() {
-  const GAMES_PER_FIT = 500;
-  const FIT_COUNT = 10;
-  const EPOCHS = 100;
-  const EVALUATION_RUNS = 200;
-  const LEARNING_RATE = .0001;
+((async function () {
 
-  const output_div = document.getElementById('output_div');
+let games_per_batch = 100;
+let batch_count = 1;
+let training_epochs = 50;
+let evaluation_runs = 50;
+let learning_rate = .0001;
+let model_configuration = [100, 50, 20]; // later may add more options
+let model_players = []; // if [1, 2] is model-versus-model
 
-  output_div.innerHTML =
-      "games between training: " + GAMES_PER_FIT +
-      "; number of trainings: " + FIT_COUNT +
-      "; training epochs: " + EPOCHS +
-      "; evaluation runs: " + EVALUATION_RUNS +
-      "; learning rate: " + LEARNING_RATE +
-      "; dense layers: 100-50-20-1" + 
-//       "; only random-random play" +
-      "<br>";
+let model_trained = false;
+const model = tf.sequential();
 
-  const model = tf.sequential();
-  let model_trained = false;
+let data;
+let batch_number;
 
+const output_div = document.getElementById('output_div');
+
+output_div.innerHTML =
+    "<b>games between training: " + games_per_batch +
+    "; number of trainings: " + batch_count +
+    "; training training_epochs: " + training_epochs +
+    "; evaluation runs: " + evaluation_runs +
+    "; learning rate: " + learning_rate +
+    "; dense layers: " + model_configuration +
+    "; players using model: " + (model_players.length === 0 ? "none" : model_players) +
+    "</b><br>";
+
+const create_model = function (model_configuration, learning_rate) {
   // following inspired by https://github.com/johnflux/deep-learning-tictactoe/blob/master/play.py
-  model.add(tf.layers.dense({units: 100,
-                             inputShape: [9],
-                             activation: 'relu'}));
-  model.add(tf.layers.dense({units: 50,
-                             activation: 'relu'}));
-  model.add(tf.layers.dense({units: 20,
-                             activation: 'relu'}));
+  model_configuration.forEach((size, index) => {
+      let configuration = {units: size,
+                           activation: 'relu'};
+      if (index === 0) {
+          configuration.inputShape = [9];
+      }
+      model.add(tf.layers.dense(configuration));  
+  });
   model.add(tf.layers.dense({units: 1,
                              activation: 'relu',
                              useBias: false}));
-
   model.compile({
       loss: 'meanSquaredError',
-      optimizer: tf.train.adam(LEARNING_RATE)
+      optimizer: tf.train.adam(learning_rate)
   });
-
-  let boards = [];
-  let outcomes = [];
-  const outcome_names = ["", "win for X", "win for O", "tie"];
+};
 
   const play = function (model_players, game_history) {
       let board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -83,9 +87,6 @@ async function tic_tac_toe() {
                   let board_tensor = tf.tensor2d(board_copy, [1, 9]);
                   let probability_tensor = model.predict(board_tensor);
                   let probability = probability_tensor.dataSync()[0];
-                  // following shouldn't be needed since tidy should take care of this
-//                   board_tensor.dispose();
-//                   probability_tensor.dispose();
                   if (probability > best_probability) {
                       best_move = possible_move;
                       best_probability = probability;
@@ -145,46 +146,11 @@ async function tic_tac_toe() {
   };
 
   const play_self = async function () {
-      for (let fit = 0; fit < FIT_COUNT; fit++) {
-          for (let game = 0; game < GAMES_PER_FIT; game++) {
+      for (batch_number = 0; batch_number < batch_count; batch_number++) {
+          for (let game = 0; game < games_per_batch; game++) {
                let game_history = [];
-               play([1, 2], game_history);
+               play(model_players, game_history);
           }
-          const xs = tf.tensor2d(boards);
-          const ys = tf.tensor2d(outcomes, [outcomes.length, 1]);
-          // collect next batch of boards and outcomes
-          boards = [];
-          outcomes = [];
-          // Train the model using the data.
-          console.log(xs.shape, ys.shape, tf.memory().numTensors);
-          let start = Date.now();
-          await model.fit(xs, ys, {epochs: EPOCHS});
-          let duration = Math.round((Date.now()-start)/1000);
-          model_trained = true;
-          xs.dispose();
-          ys.dispose();
-          tf.tidy(() => {
-              output_div.innerHTML += 
-                  "<br>Games played " + (fit+1)*GAMES_PER_FIT + " last training duration " + duration + " seconds<br>";
-              let board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-              for (let i = 0; i < 9; i++) {
-                  board[i] = 1;
-                  let prediction = Math.round(100*model.predict(tf.tensor2d(board, [1, 9])).dataSync()[0]);
-                  board[i] = 0;
-                  if (prediction < 10) {
-                      output_div.innerHTML += "&nbsp;";
-                  }
-                  output_div.innerHTML += prediction;
-                  if ((i+1)%3 !== 0) {
-                      output_div.innerHTML += " | ";
-                  } else if (i < 8) {
-                      output_div.innerHTML += "<br>&nbsp;------------&nbsp;<br>";
-                  } else {
-                      output_div.innerHTML += "<br>";
-                  }
-              }
-              model_versus_random(EVALUATION_RUNS);                
-          });
       }
   };
 
@@ -221,14 +187,62 @@ async function tic_tac_toe() {
         "<br>";
   };
 
+let boards = [];
+let outcomes = [];
+
+const create_data = async function () {
+  boards = [];
+  outcomes = [];
   await play_self();
+  return {boards: boards,
+          outcomes: outcomes};
+};
 
-  output_div.innerHTML += "---------------------<br><br>";
+const train_model = async function (data) {
+  const xs = tf.tensor2d(data.boards);
+  const ys = tf.tensor2d(data.outcomes, [data.outcomes.length, 1]);
+  // Train the model using the data.
+  console.log(xs.shape, ys.shape, tf.memory().numTensors);
+  let start = Date.now();
+  await model.fit(xs, ys, {epochs: training_epochs});
+  let duration = Math.round((Date.now()-start)/1000);
+  model_trained = true;
+  xs.dispose();
+  ys.dispose();
+  tf.tidy(() => {
+      output_div.innerHTML += 
+          "<br>Games played " + (batch_number+1)*games_per_batch + " last training, Duration " + duration + " seconds<br>";
+          let board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+          for (let i = 0; i < 9; i++) {
+              board[i] = 1;
+              let prediction = Math.round(100*model.predict(tf.tensor2d(board, [1, 9])).dataSync()[0]);
+              board[i] = 0;
+              if (prediction < 10) {
+                  output_div.innerHTML += "&nbsp;";
+              }
+              output_div.innerHTML += prediction;
+              if ((i+1)%3 !== 0) {
+                  output_div.innerHTML += " | ";
+              } else if (i < 8) {
+                  output_div.innerHTML += "<br>&nbsp;------------&nbsp;<br>";
+              } else {
+                   output_div.innerHTML += "<br>";
+              }
+          }
+          model_versus_random(evaluation_runs);                
+      });
+};
 
-  console.log(tf.memory().numTensors);
+const show_examples = function () {
+    const surface = tfVis.visor().surface({name: 'Tic Tac Toe', tab: 'Input Data'});
+};
 
-}
+  create_model(model_configuration, learning_rate);
 
-tic_tac_toe();
+  data = await create_data();
 
-// tf.ENV.set('DEBUG', true);
+  await train_model(data);
+
+  console.log(tf.memory());
+  
+}()));
