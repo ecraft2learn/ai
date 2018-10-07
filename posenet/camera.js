@@ -17,11 +17,6 @@
 
 // based upon https://github.com/hpssjellis/beginner-tensorflowjs-examples-in-javascript/tree/master/tf-examples/posenet/camera
 
-// import dat from 'dat.gui';
-// import Stats from 'stats.js';
-// import * as posenet from '../src';
-
-// import {drawKeypoints, drawSkeleton} from './demo_util';
 const maxVideoSize = 513;
 const canvasSize = 400;
 const stats = new Stats();
