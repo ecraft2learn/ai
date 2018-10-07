@@ -23,6 +23,7 @@ const settings_element = document.getElementById('settings');
 const create_data_button = document.getElementById('create_data');
 const create_model_button = document.getElementById('create_model');
 const train_button = document.getElementById('train');
+const evaluate_button = document.getElementById('evaluate');
 
 // output_div.innerHTML =
 //     "<b>games between training: " + games_per_batch +
@@ -149,13 +150,13 @@ const create_model = function (model_configuration, learning_rate) {
       }
   };
 
-  const play_self = async function () {
-      for (batch_number = 0; batch_number < batch_count; batch_number++) {
-          for (let game = 0; game < games_per_batch; game++) {
+  const play_self = async function (number_of_games, model_players) {
+//       for (batch_number = 0; batch_number < batch_count; batch_number++) {
+          for (let game = 0; game < number_of_games; game++) {
                let game_history = [];
                play(model_players, game_history);
           }
-      }
+//       }
   };
 
   const play_random = function () {
@@ -194,10 +195,10 @@ const create_model = function (model_configuration, learning_rate) {
 let boards = [];
 let outcomes = [];
 
-const create_data = async function () {
+const create_data = async function (number_of_games, model_players) {
   boards = [];
   outcomes = [];
-  await play_self();
+  await play_self(number_of_games, model_players);
   return {boards: boards,
           outcomes: outcomes};
 };
@@ -213,28 +214,7 @@ const train_model = async function (data, epochs) {
   model_trained = true;
   xs.dispose();
   ys.dispose();
-  tf.tidy(() => {
-      output_div.innerHTML += 
-          "<br>Games played " + (batch_number+1)*games_per_batch + " last training, Duration " + duration + " seconds<br>";
-          let board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-          for (let i = 0; i < 9; i++) {
-              board[i] = 1;
-              let prediction = Math.round(100*model.predict(tf.tensor2d(board, [1, 9])).dataSync()[0]);
-              board[i] = 0;
-              if (prediction < 10) {
-                  output_div.innerHTML += "&nbsp;";
-              }
-              output_div.innerHTML += prediction;
-              if ((i+1)%3 !== 0) {
-                  output_div.innerHTML += " | ";
-              } else if (i < 8) {
-                  output_div.innerHTML += "<br>&nbsp;------------&nbsp;<br>";
-              } else {
-                   output_div.innerHTML += "<br>";
-              }
-          }
-                          
-      });
+  return duration;
 };
 
 const moves_to_html = function (moves, board) {
@@ -253,50 +233,29 @@ const moves_to_html = function (moves, board) {
   return html;
 }
 
-let parameters_tabs;
-
-const create_data_with_parameters = async function () {
-    const surface = tfvis.visor().surface({name: 'Tic Tac Toe', tab: 'Input Data'});
-    const draw_area = surface.drawArea;
-    const please_wait = document.createElement('p');
-    const game_element = document.createElement('p');
-    draw_area.innerHTML = ""; // reset if rerun
-    if (!parameters_tabs) {
-        parameters_tabs = parameters_interface();
-    }
-    parameters_tabs.input_data.open();
-    please_wait.innerHTML = "Please wait.";
-    draw_area.appendChild(please_wait);
-    let number_of_games = Math.round(gui_state["Input data"]["Number of games"]);
-    data = await create_data(number_of_games);
-    please_wait.innerHTML = number_of_games + " games created.";
-    draw_area.appendChild(game_element);
-    const show_random_game_button = document.createElement('button');
-    show_random_game_button.innerHTML = "Show a random game";
-    show_random_game_button.className = "support-window-button";
-    const show_random_game = function () {
-      let board_number = Math.floor(Math.random()*data.boards.length);
-      let board = data.boards[board_number];
-      let board_without_blanks;
-      const board_difference = function (previous_board, current_board) {
+const show_random_game = function (boards, element) {
+    let board_number = Math.floor(Math.random()*data.boards.length);
+    let board = data.boards[board_number];
+    let board_without_blanks;
+    const board_difference = function (previous_board, current_board) {
         for (let i = 0; i < 9; i++) {
           if (previous_board[i] !== current_board[i]) {
             return i;
           }
         }
-      };
-      // go back to the first move
-      while (true) {
+    };
+    // go back to the first move
+    while (true) {
          board_without_blanks = board.filter(position => position !== 0);
          if (board_without_blanks.length === 1) {
            break;
          }
          board_number--;
          board = data.boards[board_number];
-      }
-      let moves = [];
-      let previous_board = [0, 0, 0, 0, 0, 0, 0, 0, 0]; // empty board
-      while (true) {
+    }
+    let moves = [];
+    let previous_board = [0, 0, 0, 0, 0, 0, 0, 0, 0]; // empty board
+    while (true) {
         moves.push(board_difference(previous_board, board));
         previous_board = board;
         board_number++;
@@ -305,12 +264,43 @@ const create_data_with_parameters = async function () {
           // next game 
           break;
         }
-      }
-      game_element.innerHTML = moves_to_html(moves, data.boards[board_number-1]);                            
-    };
-    show_random_game_button.addEventListener('click', show_random_game);
-    draw_area.appendChild(show_random_game_button);
-    draw_area.appendChild(game_element);
+    }
+    element.innerHTML = moves_to_html(moves, data.boards[board_number-1]);                            
+};
+
+const create_data_interface = async function(number_of_games_function, element, model_players) {
+    const please_wait = document.createElement('p');
+    const game_element = document.createElement('p');
+    please_wait.innerHTML = "Please wait.";
+    element.appendChild(please_wait);
+    let number_of_games = number_of_games_function();
+    data = await create_data(number_of_games, model_players);
+    please_wait.innerHTML = number_of_games + " games created.";
+    element.appendChild(game_element);
+    const show_random_game_button = document.createElement('button');
+    show_random_game_button.innerHTML = "Show a random game";
+    show_random_game_button.className = "support-window-button";
+    show_random_game_button.addEventListener('click', 
+                                             function () {
+                                               show_random_game(data, game_element)
+                                             });
+    element.appendChild(show_random_game_button);
+    element.appendChild(game_element);
+};
+
+let parameters_tabs;
+
+const create_data_with_parameters = async function () {
+    const surface = tfvis.visor().surface({name: 'Tic Tac Toe', tab: 'Input Data'});
+    const draw_area = surface.drawArea;
+    draw_area.innerHTML = ""; // reset if rerun
+    if (!parameters_tabs) {
+        parameters_tabs = parameters_interface();
+    }
+    parameters_tabs.input_data.open();
+    create_data_interface(() => Math.round(gui_state["Input data"]["Random player versus random player games"]),
+                          draw_area,
+                          []); // no players use the model
     create_model_button.disabled = false;
 };
 
@@ -335,23 +325,66 @@ const create_model_with_parameters = function () {
 const train_with_parameters = async function () {
   const surface = tfvis.visor().surface({name: 'Tic Tac Toe', tab: 'Training'});
   const draw_area = surface.drawArea;
+  draw_area.innerHTML = ""; // reset if retraining
   let message = document.createElement('div');
   message.innerHTML = "Training started. Please wait.";
   draw_area.appendChild(message);
   parameters_tabs.training.open();
   let duration = await train_model(data, Math.round(gui_state["Training"]["Number of epochs"]));
   message.innerHTML = "Training took " + duration + " seconds.";
+  evaluate_button.disabled = false;
+};
+
+const evaluate_training = function () {
+  const surface = tfvis.visor().surface({name: 'Tic Tac Toe', tab: 'Evaluation'});
+  const draw_area = surface.drawArea;
+  draw_area.innerHTML = ""; // reset if evaluation button pressed again
+  const show_first_move_scores_button = document.createElement('button');
+  show_first_move_scores_button.innerHTML = "Show the scores for different first moves";
+  show_first_move_scores_button.className = "support-window-button";
+  const display = document.createElement('div');
+  let html = "<br>";
+  const show_first_moves = function () {
+    tf.tidy(() => {
+      let board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+      for (let i = 0; i < 9; i++) {
+          board[i] = 1;
+          let prediction = Math.round(100*model.predict(tf.tensor2d(board, [1, 9])).dataSync()[0]);
+          board[i] = 0;
+          if (prediction < 10) {
+              html += "&nbsp;";
+          }
+          html += prediction;
+          if ((i+1)%3 !== 0) {
+              html += " | ";
+          } else if (i < 8) {
+              html += "<br>&nbsp;------------&nbsp;<br>";
+          } else {
+              html += "<br>";
+          }
+      }
+      display.innerHTML = html;
+      show_first_move_scores_button.remove();                   
+    });
+  };
+  show_first_move_scores_button.addEventListener('click', show_first_moves);
+  draw_area.appendChild(show_first_move_scores_button);
+  draw_area.appendChild(display);
+  parameters_tabs.evaluation.open();
+  create_data_interface(() => Math.round(gui_state["Evaluation"]["Trained player versus trained player games"]),
+                        draw_area,
+                        [1, 2]); // both players use the model (could have more)
 };
 
 const gui_state = 
-  {"Input data": {"Number of games": 100},
+  {"Input data": {"Random player versus random player games": 100},
    "Model": {"Learning rate": .0001,
              "Size of first layer": 100,
              "Size of second layer": 50,
              "Size of third layer": 20},
    "Training": {"Number of epochs": 50},
    "Testing": {},
-   "Evaluation:": {}
+   "Evaluation": {"Trained player versus trained player games": 100}
 };
 
 const parameters_interface = function () {
@@ -364,7 +397,7 @@ const parameters_interface = function () {
 //   const architectureController =
 //     input.add(guiState.input, 'mobileNetArchitecture', ['1.01', '1.00', '0.75', '0.50']);
 //   input.add(guiState.input, 'outputStride', [8, 16, 32]);
-  input_data.add(gui_state["Input data"], 'Number of games').min(1).max(10000);
+  input_data.add(gui_state["Input data"], 'Random player versus random player games').min(1).max(10000);
   let model = parameters_gui.addFolder("Model");
   model.add(gui_state["Model"], 'Learning rate').min(.00001).max(.1);
   model.add(gui_state["Model"], 'Size of first layer').min(1).max(100);
@@ -372,14 +405,18 @@ const parameters_interface = function () {
   model.add(gui_state["Model"], 'Size of third layer').min(0).max(100);
   let training = parameters_gui.addFolder("Training");
   training.add(gui_state["Training"], 'Number of epochs').min(1).max(1000);
+  let evaluation = parameters_gui.addFolder("Evaluation");
+  evaluation.add(gui_state["Evaluation"], "Trained player versus trained player games").min(1).max(1000);
   return {input_data: input_data,
           model: model,
-          training: training};
+          training: training,
+          evaluation: evaluation};
 };
 
 create_data_button.addEventListener('click', create_data_with_parameters);
 create_model_button.addEventListener('click', create_model_with_parameters);
 train_button.addEventListener('click', train_with_parameters);
+evaluate_button.addEventListener('click', evaluate_training);
 
 //   create_model(model_configuration, learning_rate);
 
