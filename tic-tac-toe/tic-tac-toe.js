@@ -19,16 +19,20 @@ let data;
 let batch_number;
 
 const output_div = document.getElementById('output');
+const settings_element = document.getElementById('settings');
+const create_data_button = document.getElementById('create_data');
+const create_model_button = document.getElementById('create_model');
+const train_button = document.getElementById('train');
 
-output_div.innerHTML =
-    "<b>games between training: " + games_per_batch +
-    "; number of trainings: " + batch_count +
-    "; training training_epochs: " + training_epochs +
-    "; evaluation runs: " + evaluation_runs +
-    "; learning rate: " + learning_rate +
-    "; dense layers: " + model_configuration +
-    "; players using model: " + (model_players.length === 0 ? "none" : model_players) +
-    "</b><br>";
+// output_div.innerHTML =
+//     "<b>games between training: " + games_per_batch +
+//     "; number of trainings: " + batch_count +
+//     "; training training_epochs: " + training_epochs +
+//     "; evaluation runs: " + evaluation_runs +
+//     "; learning rate: " + learning_rate +
+//     "; dense layers: " + model_configuration +
+//     "; players using model: " + (model_players.length === 0 ? "none" : model_players) +
+//     "</b><br>";
 
 const create_model = function (model_configuration, learning_rate) {
   // following inspired by https://github.com/johnflux/deep-learning-tictactoe/blob/master/play.py
@@ -198,13 +202,13 @@ const create_data = async function () {
           outcomes: outcomes};
 };
 
-const train_model = async function (data) {
+const train_model = async function (data, epochs) {
   const xs = tf.tensor2d(data.boards);
   const ys = tf.tensor2d(data.outcomes, [data.outcomes.length, 1]);
   // Train the model using the data.
   console.log(xs.shape, ys.shape, tf.memory().numTensors);
   let start = Date.now();
-  await model.fit(xs, ys, {epochs: training_epochs});
+  await model.fit(xs, ys, {epochs: epochs});
   let duration = Math.round((Date.now()-start)/1000);
   model_trained = true;
   xs.dispose();
@@ -229,7 +233,7 @@ const train_model = async function (data) {
                    output_div.innerHTML += "<br>";
               }
           }
-          model_versus_random(evaluation_runs);                
+                          
       });
 };
 
@@ -249,16 +253,23 @@ const moves_to_html = function (moves, board) {
   return html;
 }
 
-const surface = tfvis.visor().surface({name: 'Tic Tac Toe', tab: 'Input Data'});
-const draw_area = surface.drawArea;
-    
-const show_examples = async function () {
+let parameters_tabs;
+
+const create_data_with_parameters = async function () {
+    const surface = tfvis.visor().surface({name: 'Tic Tac Toe', tab: 'Input Data'});
+    const draw_area = surface.drawArea;
     const please_wait = document.createElement('p');
     const game_element = document.createElement('p');
+    draw_area.innerHTML = ""; // reset if rerun
+    if (!parameters_tabs) {
+        parameters_tabs = parameters_interface();
+    }
+    parameters_tabs.input_data.open();
     please_wait.innerHTML = "Please wait.";
     draw_area.appendChild(please_wait);
-    data = await create_data();
-    please_wait.remove();
+    let number_of_games = Math.round(gui_state["Input data"]["Number of games"]);
+    data = await create_data(number_of_games);
+    please_wait.innerHTML = number_of_games + " games created.";
     draw_area.appendChild(game_element);
     const show_random_game_button = document.createElement('button');
     show_random_game_button.innerHTML = "Show a random game";
@@ -300,16 +311,84 @@ const show_examples = async function () {
     show_random_game_button.addEventListener('click', show_random_game);
     draw_area.appendChild(show_random_game_button);
     draw_area.appendChild(game_element);
+    create_model_button.disabled = false;
 };
 
-document.getElementById('create_data').addEventListener('click', show_examples);
+const create_model_with_parameters = function () {
+  const surface = tfvis.visor().surface({name: 'Tic Tac Toe', tab: 'Define model'});
+  const draw_area = surface.drawArea;
+  parameters_tabs.model.open();
+  let model_configuration = [Math.round(gui_state["Model"]["Size of first layer"])];
+  if (gui_state["Model"]["Size of second layer"] > .5) {
+    model_configuration.push(Math.round(gui_state["Model"]["Size of second layer"]));
+  }
+  if (gui_state["Model"]["Size of third layer"] > .5) {
+    model_configuration.push(Math.round(gui_state["Model"]["Size of third layer"]));
+  }
+  create_model(model_configuration, gui_state["Model"]["Learning rate"]);
+  train_button.disabled = false;
+  let ready = document.createElement('div');
+  ready.innerHTML = "Model created and ready to be trained.";
+  draw_area.appendChild(ready);
+};
 
-  create_model(model_configuration, learning_rate);
+const train_with_parameters = async function () {
+  const surface = tfvis.visor().surface({name: 'Tic Tac Toe', tab: 'Training'});
+  const draw_area = surface.drawArea;
+  let message = document.createElement('div');
+  message.innerHTML = "Training started. Please wait.";
+  draw_area.appendChild(message);
+  parameters_tabs.training.open();
+  let duration = await train_model(data, Math.round(gui_state["Training"]["Number of epochs"]));
+  message.innerHTML = "Training took " + duration + " seconds.";
+};
 
-  data = await create_data();
+const gui_state = 
+  {"Input data": {"Number of games": 100},
+   "Model": {"Learning rate": .0001,
+             "Size of first layer": 100,
+             "Size of second layer": 50,
+             "Size of third layer": 20},
+   "Training": {"Number of epochs": 50},
+   "Testing": {},
+   "Evaluation:": {}
+};
 
-  await train_model(data);
+const parameters_interface = function () {
+  const parameters_gui = new dat.GUI({width: 300,
+                                      autoPlace: false});
+  settings_element.appendChild(parameters_gui.domElement);
+  settings_element.style.display = "block";
+  parameters_gui.domElement.style.padding = "12px";
+  let input_data = parameters_gui.addFolder("Input data");
+//   const architectureController =
+//     input.add(guiState.input, 'mobileNetArchitecture', ['1.01', '1.00', '0.75', '0.50']);
+//   input.add(guiState.input, 'outputStride', [8, 16, 32]);
+  input_data.add(gui_state["Input data"], 'Number of games').min(1).max(10000);
+  let model = parameters_gui.addFolder("Model");
+  model.add(gui_state["Model"], 'Learning rate').min(.00001).max(.1);
+  model.add(gui_state["Model"], 'Size of first layer').min(1).max(100);
+  model.add(gui_state["Model"], 'Size of second layer').min(0).max(100);
+  model.add(gui_state["Model"], 'Size of third layer').min(0).max(100);
+  let training = parameters_gui.addFolder("Training");
+  training.add(gui_state["Training"], 'Number of epochs').min(1).max(1000);
+  return {input_data: input_data,
+          model: model,
+          training: training};
+};
 
-  console.log(tf.memory());
+create_data_button.addEventListener('click', create_data_with_parameters);
+create_model_button.addEventListener('click', create_model_with_parameters);
+train_button.addEventListener('click', train_with_parameters);
+
+//   create_model(model_configuration, learning_rate);
+
+//   data = await create_data(games_per_batch);
+
+//   await train_model(data, training_epochs);
+
+//   model_versus_random(evaluation_runs);
+
+//   console.log(tf.memory());
   
 }()));

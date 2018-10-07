@@ -3,6 +3,7 @@
   <head>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"> </script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dat.gui"></script>
     <link href="/ai/css/ai-teacher-guide.css" rel="stylesheet">
 	<link href="/uui/help/oer-style.css" rel="stylesheet">
   </head>
@@ -10,11 +11,20 @@
 <h2>
 Training a computer to play Tic Tac Toe
 </h2>
+<h3 id="settings" style="display:none">Settings</h3>
+<h3>Tutorial</h3>
 <p>
 Let's start by having the computer play games where both players just make random moves.
 <br/>
-<button class="support-window-button" id="create_data">Play games with random players</button>
-
+<button id="create_data" class="support-window-button" >Play games with random players</button>
+<p>
+Now let's define how the computer will learn.
+</p>
+<button disabled id="create_model" class="support-window-button">Define the model</button>
+<p>
+Now let's traing the computer using the games you just generated.
+</p>
+<button disabled id="train" class="support-window-button" >Train the model</button>
 
 <div id="output"></div>
 
