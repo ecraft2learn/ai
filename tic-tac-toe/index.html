@@ -2,11 +2,22 @@
 <html>
   <head>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"> </script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis"></script>
+    <link href="/ai/css/ai-teacher-guide.css" rel="stylesheet">
+	<link href="/uui/help/oer-style.css" rel="stylesheet">
   </head>
-  <body>
-    <hr/>
-    <div id="output_div"></div>
-    <hr/>
-    <script src="./tic-tac-toe.js"> </script>
-  </body>
+<body style="max-width: none;">
+<h2>
+Training a computer to play Tic Tac Toe
+</h2>
+<p>
+Let's start by having the computer play games where both players just make random moves.
+<br/>
+<button class="support-window-button" id="create_data">Play games with random players</button>
+
+
+<div id="output"></div>
+
+<script src="./tic-tac-toe.js"> </script>
+</body>
 </html>

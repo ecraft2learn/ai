@@ -18,7 +18,7 @@ const model = tf.sequential();
 let data;
 let batch_number;
 
-const output_div = document.getElementById('output_div');
+const output_div = document.getElementById('output');
 
 output_div.innerHTML =
     "<b>games between training: " + games_per_batch +
@@ -233,9 +233,76 @@ const train_model = async function (data) {
       });
 };
 
-const show_examples = function () {
-    const surface = tfVis.visor().surface({name: 'Tic Tac Toe', tab: 'Input Data'});
+const moves_to_html = function (moves, board) {
+  let html = "";
+  for (let i = 0; i < 9; i++) {
+    html += board[i] === 1 ? "&nbsp;X" : "&nbsp;O";
+    html += "<sub>" + (moves.indexOf(i)+1) + "</sub>"; // +1 for 1-indexing
+    if ((i+1)%3 !== 0) {
+        html += " | ";
+    } else if (i < 8) {
+        html += "<br>&nbsp;&nbsp;------------------&nbsp;<br>";
+    } else {
+        html += "<br>";
+    }
+  }
+  return html;
+}
+
+const surface = tfvis.visor().surface({name: 'Tic Tac Toe', tab: 'Input Data'});
+const draw_area = surface.drawArea;
+    
+const show_examples = async function () {
+    const please_wait = document.createElement('p');
+    const game_element = document.createElement('p');
+    please_wait.innerHTML = "Please wait.";
+    draw_area.appendChild(please_wait);
+    data = await create_data();
+    please_wait.remove();
+    draw_area.appendChild(game_element);
+    const show_random_game_button = document.createElement('button');
+    show_random_game_button.innerHTML = "Show a random game";
+    show_random_game_button.className = "support-window-button";
+    const show_random_game = function () {
+      let board_number = Math.floor(Math.random()*data.boards.length);
+      let board = data.boards[board_number];
+      let board_without_blanks;
+      const board_difference = function (previous_board, current_board) {
+        for (let i = 0; i < 9; i++) {
+          if (previous_board[i] !== current_board[i]) {
+            return i;
+          }
+        }
+      };
+      // go back to the first move
+      while (true) {
+         board_without_blanks = board.filter(position => position !== 0);
+         if (board_without_blanks.length === 1) {
+           break;
+         }
+         board_number--;
+         board = data.boards[board_number];
+      }
+      let moves = [];
+      let previous_board = [0, 0, 0, 0, 0, 0, 0, 0, 0]; // empty board
+      while (true) {
+        moves.push(board_difference(previous_board, board));
+        previous_board = board;
+        board_number++;
+        board = data.boards[board_number];
+        if (board.filter(position => position !== 0).length === 1) {
+          // next game 
+          break;
+        }
+      }
+      game_element.innerHTML = moves_to_html(moves, data.boards[board_number-1]);                            
+    };
+    show_random_game_button.addEventListener('click', show_random_game);
+    draw_area.appendChild(show_random_game_button);
+    draw_area.appendChild(game_element);
 };
+
+document.getElementById('create_data').addEventListener('click', show_examples);
 
   create_model(model_configuration, learning_rate);
 

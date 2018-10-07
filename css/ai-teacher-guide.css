@@ -74,7 +74,7 @@ figcaption {
 .image-of-iframe {
   max-width: 950px;
 }
-.training-button, .testing-button, .return-to-snap-button, .save-training-button, .together_button {
+.training-button, .testing-button, .return-to-snap-button, .save-training-button, .together_button, .support-window-button {
 /*    copied from jquery-ui with padding and font-size edited */
   margin-top: 10px; /* new */
   padding: .8em 1em;
