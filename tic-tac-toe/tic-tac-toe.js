@@ -13,7 +13,7 @@ let model_configuration = [100, 50, 20]; // later may add more options
 let model_players = []; // if [1, 2] is model-versus-model
 
 let model_trained = false;
-const model = tf.sequential();
+let model;
 
 let data;
 let batch_number;
@@ -37,6 +37,7 @@ const evaluate_button = document.getElementById('evaluate');
 
 const create_model = function (model_configuration, learning_rate) {
   // following inspired by https://github.com/johnflux/deep-learning-tictactoe/blob/master/play.py
+  model = tf.sequential();
   model_configuration.forEach((size, index) => {
       let configuration = {units: size,
                            activation: 'relu'};
@@ -374,13 +375,16 @@ const create_data_with_parameters = async function () {
     const draw_area = surface.drawArea;
     draw_area.innerHTML = ""; // reset if rerun
     if (!parameters_tabs) {
+        // first time this is run
         parameters_tabs = parameters_interface();
+        create_data_interface("Play random player against random player",
+                              () => Math.round(gui_state["Input data"]["Random player versus random player games"]),
+                              draw_area,
+                              []); // no players use the model
+        parameters_tabs.input_data.open();
+    } else {
+//         surface.label.click();
     }
-    parameters_tabs.input_data.open();
-    create_data_interface("Play random player against random player",
-                          () => Math.round(gui_state["Input data"]["Random player versus random player games"]),
-                          draw_area,
-                          []); // no players use the model
 };
 
 const create_model_with_parameters = function () {
