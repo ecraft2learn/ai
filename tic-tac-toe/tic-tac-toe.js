@@ -352,6 +352,7 @@ const create_data_interface = async function(button_label, number_of_games_funct
           number_of_games++; // make it even in case need to split it in two
       }
       data = await create_data(number_of_games, model_players);
+      let boards = data.boards; // buttons showing games closes over this
       create_model_button.disabled = false; // there is data so can move forward (though really only training needs data)
       message.style.font = "Courier"; // looks better with monospaced font
       let statistics = data.statistics;
@@ -365,7 +366,7 @@ const create_data_interface = async function(button_label, number_of_games_funct
               create_button(model_players.length === 0 ? "Show a two random players game" : "Show a trained player versus self game",
                             function () {
                                 replace_button_results(show_random_game_button,
-                                                       random_game_display(data.boards));
+                                                       random_game_display(boards));
                             });
           interface_element.appendChild(show_random_game_button);
       } else {
@@ -376,7 +377,7 @@ const create_data_interface = async function(button_label, number_of_games_funct
           const show_model_playing_x_button = 
               create_button("Show a game where trained player was X",
                             function () {
-                                const playing_first_boards = data.boards.slice(0, statistics.last_board_with_model_playing_x);
+                                const playing_first_boards = boards.slice(0, statistics.last_board_with_model_playing_x);
                                 replace_button_results(show_model_playing_x_button,
                                                        random_game_display(playing_first_boards));
                             });
@@ -384,7 +385,7 @@ const create_data_interface = async function(button_label, number_of_games_funct
           const show_model_playing_o_button = 
               create_button("Show a game where trained player was O",
                             function () {
-                                const playing_second_boards = data.boards.slice(statistics.last_board_with_model_playing_x);
+                                const playing_second_boards = boards.slice(statistics.last_board_with_model_playing_x);
                                  replace_button_results(show_model_playing_o_button,
                                                         random_game_display(playing_second_boards));
                             });
