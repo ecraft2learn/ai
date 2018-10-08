@@ -55,11 +55,11 @@ const create_model = function (model_configuration, learning_rate) {
   });
 };
 
-  const play = function (model_players, game_history) {
+  const play = function (model_players, game_history, non_deterministic) {
       let board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
       let player = 1; // player 1 starts
       while (true) {
-          move(model_players, player, board, game_history);
+          move(model_players, player, board, game_history, non_deterministic);
           player = player === 1 ? 2 : 1; // and next the other player will play
           let outcome = game_over(board);
           if (outcome && game_history) {
@@ -80,12 +80,13 @@ const create_model = function (model_configuration, learning_rate) {
       }
 };
 
-const move = function (model_players, player, board, history) {
+const move = function (model_players, player, board, history, non_deterministic) {
       let possible_moves = empty_squares(board);
       let move;
       if (model_trained && model_players.indexOf(player) >= 0) {
           let best_move;
           let best_probability = 0;
+          let predictions = [];
           possible_moves.forEach(possible_move => {
               let board_copy = board.slice();
               board_copy[possible_move] = player;
@@ -93,12 +94,23 @@ const move = function (model_players, player, board, history) {
                   let board_tensor = tf.tensor2d(board_copy, [1, 9]);
                   let probability_tensor = model.predict(board_tensor);
                   let probability = probability_tensor.dataSync()[0];
+                  predictions.push(probability);
                   if (probability > best_probability) {
                       best_move = possible_move;
                       best_probability = probability;
                   }           
               });
           });
+          if (non_deterministic) {
+              predictions = predictions.sort().reverse(); // consider the most likely first
+              const sum = predictions.reduce((accumulator, value) => accumulator + value);
+              predictions.some((prediction, index) => {
+                 if (Math.random() <= prediction/sum) {
+                     best_move = possible_moves[index]
+                     return true;
+                 }
+              });
+          }
           move = best_move;
       }
       if (typeof move === 'undefined') {
@@ -151,13 +163,13 @@ const game_over = function (board) {
       }
 };
 
-const play_self = async function (number_of_games, model_players) {
+const play_self = async function (number_of_games, model_players, non_deterministic) {
     let x_wins = 0;
     let ties = 0;
     let x_losses = 0;
     for (let game = 0; game < number_of_games; game++) {
          let game_history = [];
-         let outcome = play(model_players, game_history);
+         let outcome = play(model_players, game_history, non_deterministic);
          switch (outcome) {
            case 1: 
              x_wins++;
@@ -213,8 +225,11 @@ const create_data = async function (number_of_games, model_players) {
   boards = [];
   outcomes = [];
   let statistics;
-  if (model_players.length === 0 || typeof model_players[0] === 'number') {
-      statistics = await play_self(number_of_games, model_players);
+  let random_versus_random = model_players.length === 0;
+  let model_versus_model = typeof model_players[0] === 'number';
+  if (random_versus_random || model_versus_model) {
+      // model_versus_model needs to run non_deterministic otherwise all games are the same
+      statistics = await play_self(number_of_games, model_players, model_versus_model);
   } else {
       // run half with model player being first
       let plays_first  = await play_self(number_of_games/2, [1]);
@@ -315,7 +330,7 @@ const random_game_display = function (boards) {
     }
     let element = document.createElement('div');
     element.innerHTML = "<br>" + moves_to_html(moves, board);
-    return element;                            
+    return element;
 };
 
 const replace_button_results = function(element, child) {
@@ -436,10 +451,13 @@ const train_with_parameters = async function () {
     let message = document.createElement('div');
     message.innerHTML = "<br>Training started. Learning from " + boards.length + " game moves. Please wait.";
     draw_area.appendChild(message);
-    let {duration, loss} = await train_model(data, Math.round(gui_state["Training"]["Number of iterations"]));
-    message.innerHTML = "<br>Training took " + duration + " seconds. Final error rate is " + Math.round(100*loss) +"%.";
-    evaluate_button.disabled = false;    
-  }
+    setTimeout(async function () {
+        // without the timeout the message above isn't displayed
+        let {duration, loss} = await train_model(data, Math.round(gui_state["Training"]["Number of iterations"]));
+        message.innerHTML = "<br>Training took " + duration + " seconds. Final error rate is " + Math.round(100*loss) +"%.";
+        evaluate_button.disabled = false;       
+    });
+  };
   parameters_tabs.training.open();
   if (!train_with_current_settings_button) {
       train_with_current_settings_button = create_button("Train model with current settings", train_with_current_settings);
