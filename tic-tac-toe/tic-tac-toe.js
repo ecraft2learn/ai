@@ -77,9 +77,9 @@ const create_model = function (model_configuration, learning_rate) {
               return outcome;
           }
       }
-  };
+};
 
-  const move = function (model_players, player, board, history) {
+const move = function (model_players, player, board, history) {
       let possible_moves = empty_squares(board);
       let move;
       if (model_trained && model_players.indexOf(player) >= 0) {
@@ -107,9 +107,9 @@ const create_model = function (model_configuration, learning_rate) {
       if (history) {
           history.push(board.slice());
       }
-  };
+};
 
-  const empty_squares = function (board) {
+const empty_squares = function (board) {
       let indices = [];
       board.forEach((position, index) => {
           if (position === 0) {
@@ -117,8 +117,8 @@ const create_model = function (model_configuration, learning_rate) {
           }
       });
       return indices;
-  };
-  const wins =
+};
+const wins =
       [[0, 1, 2],
        [3, 4, 5],
        [6, 7, 8],
@@ -128,7 +128,7 @@ const create_model = function (model_configuration, learning_rate) {
        [0, 4, 8],
        [2, 4, 6]];
 
-  const game_over = function (board) {
+const game_over = function (board) {
       // returns 1, 2, or 3 (for tie)
       let result;
       wins.some(win => {
@@ -148,49 +148,62 @@ const create_model = function (model_configuration, learning_rate) {
           // no empty squares left
           return 3;
       }
-  };
+};
 
-  const play_self = async function (number_of_games, model_players) {
-//       for (batch_number = 0; batch_number < batch_count; batch_number++) {
-          for (let game = 0; game < number_of_games; game++) {
-               let game_history = [];
-               play(model_players, game_history);
-          }
-//       }
-  };
-
-  const play_random = function () {
-      let model_players = [Math.random() > .5 ? 1 : 2]; // just one player
-      let outcome = play(model_players);
-      if (outcome === model_players[0]) {
-          return 1; // model won
-      } else if (outcome === 2) { // tied
-          return .5;
-      } else {
-          return 0; // lost
-      } 
-  }
-
-  const model_versus_random = function (trial_count) {
-    let model_wins = 0;
-    let model_ties = 0;
-    let model_losses = 0;
-    for (let i = 0; i < trial_count; i++) {
-        let won = play_random();
-        if (won === 1) {
-            model_wins++;
-        } else if (won === 0) {
-            model_losses++;
-        } else {
-            model_ties++;
-        }
+const play_self = async function (number_of_games, model_players) {
+    let x_wins = 0;
+    let ties = 0;
+    let x_losses = 0;
+    for (let game = 0; game < number_of_games; game++) {
+         let game_history = [];
+         let outcome = play(model_players, game_history);
+         switch (outcome) {
+           case 1: 
+             x_wins++;
+             break;
+           case 2:
+             x_losses++;
+             break;
+           case 3:
+             ties++;
+             break;
+         }
     }
-    output_div.innerHTML += 
-        (100*model_wins)/trial_count + "% wins; " +
-        (100*model_ties)/trial_count + "% ties; " + 
-        (100*model_losses)/trial_count + "% losses; " +
-        "<br>";
-  };
+    return {x_wins: x_wins,
+            ties: ties,
+            x_losses: x_losses};
+};
+
+// const play_random = function () {
+//       let model_players = [Math.random() > .5 ? 1 : 2]; // just one player
+//       let outcome = play(model_players);
+//       if (outcome === model_players[0]) {
+//           return 1; // model won
+//       } else if (outcome === 2) { // tied
+//           return .5;
+//       } else {
+//           return 0; // lost
+//       } 
+// };
+
+// const model_versus_random = function (trial_count) {
+//     let model_wins = 0;
+//     let model_ties = 0;
+//     let model_losses = 0;
+//     for (let i = 0; i < trial_count; i++) {
+//         let won = play_random();
+//         if (won === 1) {
+//             model_wins++;
+//         } else if (won === 0) {
+//             model_losses++;
+//         } else {
+//             model_ties++;
+//         }
+//     }
+//     return {wins: model_wins,
+//             ties: model_ties,
+//             losses: model_losses};
+// };
 
 let boards = [];
 let outcomes = [];
@@ -198,9 +211,24 @@ let outcomes = [];
 const create_data = async function (number_of_games, model_players) {
   boards = [];
   outcomes = [];
-  await play_self(number_of_games, model_players);
+  let statistics;
+  if (model_players.length === 0 || typeof model_players[0] === 'number') {
+      statistics = await play_self(number_of_games, model_players);
+  } else {
+      // run half with model player being first
+      let plays_first  = await play_self(number_of_games/2, [1]);
+      let last_board_with_model_playing_x = boards.length;
+      let plays_second = await play_self(number_of_games/2, [2]);
+      statistics = {x_wins:   plays_first.x_wins + plays_second.x_wins,
+                    x_losses: plays_first.x_losses + plays_second.x_losses,
+                    model_wins:   plays_first.x_wins   + plays_second.x_losses,
+                    model_losses: plays_first.x_losses + plays_second.x_wins,
+                    ties: plays_first.ties + plays_second.ties,
+                    last_board_with_model_playing_x: last_board_with_model_playing_x};
+  }
   return {boards: boards,
-          outcomes: outcomes};
+          outcomes: outcomes,
+          statistics: statistics};
 };
 
 const train_model = async function (data, epochs) {
@@ -220,8 +248,14 @@ const train_model = async function (data, epochs) {
 const moves_to_html = function (moves, board) {
   let html = "";
   for (let i = 0; i < 9; i++) {
-    html += board[i] === 1 ? "&nbsp;X" : "&nbsp;O";
-    html += "<sub>" + (moves.indexOf(i)+1) + "</sub>"; // +1 for 1-indexing
+    let move_number = moves.indexOf(i);
+    if (move_number >= 0) {
+        html += board[i] === 1 ? "&nbsp;X" : "&nbsp;O";
+        html += "<sub>" + (move_number+1) + "</sub>"; // +1 for 1-indexing
+    } else {
+        // otherwise empty square at end of game_history
+        html += "&nbsp;&nbsp;&nbsp;&nbsp;";
+    }
     if ((i+1)%3 !== 0) {
         html += " | ";
     } else if (i < 8) {
@@ -233,9 +267,9 @@ const moves_to_html = function (moves, board) {
   return html;
 }
 
-const show_random_game = function (boards, element) {
-    let board_number = Math.floor(Math.random()*data.boards.length);
-    let board = data.boards[board_number];
+const random_game_display = function (boards) {
+    let board_number = Math.floor(Math.random()*boards.length);
+    let board = boards[board_number];
     let board_without_blanks;
     const board_difference = function (previous_board, current_board) {
         for (let i = 0; i < 9; i++) {
@@ -247,11 +281,11 @@ const show_random_game = function (boards, element) {
     // go back to the first move
     while (true) {
          board_without_blanks = board.filter(position => position !== 0);
-         if (board_without_blanks.length === 1) {
-           break;
+         if (board_without_blanks.length === 1) { // first move
+             break;
          }
          board_number--;
-         board = data.boards[board_number];
+         board = boards[board_number];
     }
     let moves = [];
     let previous_board = [0, 0, 0, 0, 0, 0, 0, 0, 0]; // empty board
@@ -259,33 +293,78 @@ const show_random_game = function (boards, element) {
         moves.push(board_difference(previous_board, board));
         previous_board = board;
         board_number++;
-        board = data.boards[board_number];
-        if (board.filter(position => position !== 0).length === 1) {
-          // next game 
-          break;
+        board = boards[board_number];
+        if (game_over(board)) {
+            // add last move to moves
+            moves.push(board_difference(previous_board, board)); 
+            break;
         }
     }
-    element.innerHTML = moves_to_html(moves, data.boards[board_number-1]);                            
+    let element = document.createElement('div');
+    element.innerHTML = "<br>" + moves_to_html(moves, board);
+    return element;                            
 };
 
-const create_data_interface = async function(number_of_games_function, element, model_players) {
-    const please_wait = document.createElement('p');
-    const game_element = document.createElement('p');
-    please_wait.innerHTML = "Please wait.";
-    element.appendChild(please_wait);
-    let number_of_games = number_of_games_function();
-    data = await create_data(number_of_games, model_players);
-    please_wait.innerHTML = number_of_games + " games created.";
-    element.appendChild(game_element);
-    const show_random_game_button = document.createElement('button');
-    show_random_game_button.innerHTML = "Show a random game";
-    show_random_game_button.className = "support-window-button";
-    show_random_game_button.addEventListener('click', 
-                                             function () {
-                                               show_random_game(data, game_element)
-                                             });
-    element.appendChild(show_random_game_button);
-    element.appendChild(game_element);
+const create_data_interface = async function(button_label, number_of_games_function, interface_element, model_players) {
+  const play_games = async function () {
+    const message = document.createElement('p');
+    const replace_button_results = function(element, child) {
+        if (element.firstChild.nextSibling) {
+            element.firstChild.nextSibling.remove();
+        }
+        element.appendChild(child);
+    }
+    message.innerHTML = "Please wait.";
+    button.appendChild(message);
+    setTimeout(async function () {
+      // without the timeout the please wait message isn't seen
+      let number_of_games = number_of_games_function();
+      if (number_of_games%2 === 1) {
+          number_of_games++; // make it even in case need to split it in two
+      }
+      data = await create_data(number_of_games, model_players);
+      create_model_button.disabled = false; // there is data so can move forward (though really only training needs data)
+      message.style.font = "Courier"; // looks better with monospaced font
+      let statistics = data.statistics;
+      message.innerHTML = 
+          number_of_games + " games created.<br>" +
+          "X wins = " + statistics.x_wins + " ("   + Math.round(100*statistics.x_wins/number_of_games) +"%); " +
+          "O wins = " + statistics.x_losses + " (" + Math.round(100*statistics.x_losses/number_of_games) +"%); " +
+          "Ties = "   + statistics.ties + " ("     + Math.round(100*statistics.ties/number_of_games) + "%)<br>";
+      if (typeof statistics.model_wins === 'undefined') {
+          const show_random_game_button = 
+              create_button(model_players.length === 0 ? "Show a two random players game" : "Show a trained player versus self game",
+                            function () {
+                                replace_button_results(show_random_game_button,
+                                                       random_game_display(data.boards));
+                            });
+          interface_element.appendChild(show_random_game_button);
+      } else {
+          message.innerHTML +=
+              "<b>Trained model: </b>" +
+              "Wins = " + statistics.model_wins + " (" + Math.round(100*statistics.model_wins/number_of_games) + "%); " +
+              "Losses = " + statistics.model_losses + " (" + Math.round(100*statistics.model_losses/number_of_games) + "%)<br>";
+          const show_model_playing_x_button = 
+              create_button("Show a game where trained player was X",
+                            function () {
+                                const playing_first_boards = data.boards.slice(0, statistics.last_board_with_model_playing_x);
+                                replace_button_results(show_model_playing_x_button,
+                                                       random_game_display(playing_first_boards));
+                            });
+          interface_element.appendChild(show_model_playing_x_button);
+          const show_model_playing_o_button = 
+              create_button("Show a game where trained player was O",
+                            function () {
+                                const playing_second_boards = data.boards.slice(statistics.last_board_with_model_playing_x);
+                                 replace_button_results(show_model_playing_o_button,
+                                                        random_game_display(playing_second_boards));
+                            });
+          interface_element.appendChild(show_model_playing_o_button);
+      }
+    });
+  };
+  let button = create_button(button_label, play_games);
+  interface_element.appendChild(button);
 };
 
 let parameters_tabs;
@@ -298,10 +377,10 @@ const create_data_with_parameters = async function () {
         parameters_tabs = parameters_interface();
     }
     parameters_tabs.input_data.open();
-    create_data_interface(() => Math.round(gui_state["Input data"]["Random player versus random player games"]),
+    create_data_interface("Play random player against random player",
+                          () => Math.round(gui_state["Input data"]["Random player versus random player games"]),
                           draw_area,
                           []); // no players use the model
-    create_model_button.disabled = false;
 };
 
 const create_model_with_parameters = function () {
@@ -327,7 +406,7 @@ const train_with_parameters = async function () {
   const draw_area = surface.drawArea;
   draw_area.innerHTML = ""; // reset if retraining
   let message = document.createElement('div');
-  message.innerHTML = "Training started. Please wait.";
+  message.innerHTML = "Training started. Learning from " + boards.length + " game moves. Please wait.";
   draw_area.appendChild(message);
   parameters_tabs.training.open();
   let duration = await train_model(data, Math.round(gui_state["Training"]["Number of epochs"]));
@@ -339,9 +418,6 @@ const evaluate_training = function () {
   const surface = tfvis.visor().surface({name: 'Tic Tac Toe', tab: 'Evaluation'});
   const draw_area = surface.drawArea;
   draw_area.innerHTML = ""; // reset if evaluation button pressed again
-  const show_first_move_scores_button = document.createElement('button');
-  show_first_move_scores_button.innerHTML = "Show the scores for different first moves";
-  show_first_move_scores_button.className = "support-window-button";
   const display = document.createElement('div');
   let html = "<br>";
   const show_first_moves = function () {
@@ -364,16 +440,22 @@ const evaluate_training = function () {
           }
       }
       display.innerHTML = html;
-      show_first_move_scores_button.remove();                   
+      display.style.font = "Courier"; // looks better with monospaced font
+//       show_first_move_scores_button.remove();                 
     });
   };
-  show_first_move_scores_button.addEventListener('click', show_first_moves);
+  const show_first_move_scores_button = create_button("Show the scores for different first moves", show_first_moves);
   draw_area.appendChild(show_first_move_scores_button);
-  draw_area.appendChild(display);
+  show_first_move_scores_button.appendChild(display);
   parameters_tabs.evaluation.open();
-  create_data_interface(() => Math.round(gui_state["Evaluation"]["Trained player versus trained player games"]),
+  create_data_interface("Play trained player against random player",
+                        () => Math.round(gui_state["Evaluation"]["Games with trained versus random player"]),
                         draw_area,
-                        [1, 2]); // both players use the model (could have more)
+                        [[1], [2]]); // split the games between trained player going first or not
+  create_data_interface("Play trained player against itself",
+                        () => Math.round(gui_state["Evaluation"]["Games with trained versus self"]),
+                        draw_area,
+                        [1, 2]); // both players use the model
 };
 
 const gui_state = 
@@ -384,11 +466,12 @@ const gui_state =
              "Size of third layer": 20},
    "Training": {"Number of epochs": 50},
    "Testing": {},
-   "Evaluation": {"Trained player versus trained player games": 100}
+   "Evaluation": {"Games with trained versus random player": 100,
+                  "Games with trained versus self": 100}
 };
 
 const parameters_interface = function () {
-  const parameters_gui = new dat.GUI({width: 300,
+  const parameters_gui = new dat.GUI({width: 600,
                                       autoPlace: false});
   settings_element.appendChild(parameters_gui.domElement);
   settings_element.style.display = "block";
@@ -406,26 +489,25 @@ const parameters_interface = function () {
   let training = parameters_gui.addFolder("Training");
   training.add(gui_state["Training"], 'Number of epochs').min(1).max(1000);
   let evaluation = parameters_gui.addFolder("Evaluation");
-  evaluation.add(gui_state["Evaluation"], "Trained player versus trained player games").min(1).max(1000);
+  evaluation.add(gui_state["Evaluation"], "Games with trained versus self").min(1).max(1000);
+  evaluation.add(gui_state["Evaluation"], "Games with trained versus self").min(1).max(1000);
   return {input_data: input_data,
           model: model,
           training: training,
           evaluation: evaluation};
 };
 
+let create_button = function (label, click_handler) {
+  const button = document.createElement('button');
+  button.innerHTML = label;
+  button.className = "support-window-button";
+  button.addEventListener('click', click_handler);
+  return button;
+};
+
 create_data_button.addEventListener('click', create_data_with_parameters);
 create_model_button.addEventListener('click', create_model_with_parameters);
 train_button.addEventListener('click', train_with_parameters);
 evaluate_button.addEventListener('click', evaluate_training);
-
-//   create_model(model_configuration, learning_rate);
-
-//   data = await create_data(games_per_batch);
-
-//   await train_model(data, training_epochs);
-
-//   model_versus_random(evaluation_runs);
-
-//   console.log(tf.memory());
   
 }()));

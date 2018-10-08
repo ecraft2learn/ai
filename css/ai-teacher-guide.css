@@ -94,7 +94,7 @@ figcaption {
   padding: 10px;
   box-shadow: 5px 3px 5px black;
 }
-.save-training-button {
+.save-training-button, .support-window-button {
   display: block;
 }
 .advanced-topic {
