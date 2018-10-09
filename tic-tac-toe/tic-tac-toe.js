@@ -359,14 +359,22 @@ const create_data_interface = async function(button_label, number_of_games_funct
           "X wins = " + statistics.x_wins + " ("   + Math.round(100*statistics.x_wins/number_of_games) +"%); " +
           "O wins = " + statistics.x_losses + " (" + Math.round(100*statistics.x_losses/number_of_games) +"%); " +
           "Ties = "   + statistics.ties + " ("     + Math.round(100*statistics.ties/number_of_games) + "%)<br>";
+      const update_button = function (button) {
+          const old_version = document.getElementById(button.id);
+          if (old_version) {
+              old_version.remove();
+          }
+          interface_element.appendChild(button);
+      };
       if (typeof statistics.model_wins === 'undefined') {
+          const label = model_players.length === 0 ? "Show a two random players game" : "Show a trained player versus self game";
           const show_random_game_button = 
-              create_button(model_players.length === 0 ? "Show a two random players game" : "Show a trained player versus self game",
+              create_button(label,
                             function () {
                                 replace_button_results(show_random_game_button,
                                                        random_game_display(boards));
                             });
-          interface_element.appendChild(show_random_game_button);
+          update_button(show_random_game_button);
       } else {
           message.innerHTML +=
               "<b>Trained model: </b>" +
@@ -379,7 +387,7 @@ const create_data_interface = async function(button_label, number_of_games_funct
                                 replace_button_results(show_model_playing_x_button,
                                                        random_game_display(playing_first_boards));
                             });
-          interface_element.appendChild(show_model_playing_x_button);
+          update_button(show_model_playing_x_button);
           const show_model_playing_o_button = 
               create_button("Show a game where trained player was O",
                             function () {
@@ -387,7 +395,7 @@ const create_data_interface = async function(button_label, number_of_games_funct
                                  replace_button_results(show_model_playing_o_button,
                                                         random_game_display(playing_second_boards));
                             });
-          interface_element.appendChild(show_model_playing_o_button);
+          update_button(show_model_playing_o_button);
       }
     });
   };
@@ -606,6 +614,7 @@ const load_model = async function () {
   }
   model = await tf.loadModel(tf.io.browserFiles([saved_model_element.files[0],
                                                  saved_weights_element.files[0]]));
+  model_trained = true;
   let message = document.createElement('p');
   message.innerHTML = saved_model_element.files[0].name + " loaded and ready to evaluate.";
   replace_button_results(load_button, message);  
@@ -619,6 +628,7 @@ let create_button = function (label, click_handler) {
   button.innerHTML = label;
   button.className = "support-window-button";
   button.addEventListener('click', click_handler);
+  button.id = label; // for ease of replacing it with a newer version
   return button;
 };
 
