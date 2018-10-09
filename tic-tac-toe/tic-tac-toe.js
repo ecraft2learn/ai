@@ -227,14 +227,14 @@ const create_data = async function (number_of_games, model_players) {
   let statistics;
   let random_versus_random = model_players.length === 0;
   let model_versus_model = typeof model_players[0] === 'number';
+  let non_deterministic = gui_state["Evaluation"]["Use probabilities instead of best move"] === 'true';
   if (random_versus_random || model_versus_model) {
-      // model_versus_model needs to run non_deterministic otherwise all games are the same
-      statistics = await play_self(number_of_games, model_players, model_versus_model);
+      statistics = await play_self(number_of_games, model_players, non_deterministic);
   } else {
       // run half with model player being first
-      let plays_first  = await play_self(number_of_games/2, [1]);
+      let plays_first  = await play_self(number_of_games/2, [1], non_deterministic);
       let last_board_with_model_playing_x = boards.length;
-      let plays_second = await play_self(number_of_games/2, [2]);
+      let plays_second = await play_self(number_of_games/2, [2], non_deterministic);
       statistics = {x_wins:   plays_first.x_wins + plays_second.x_wins,
                     x_losses: plays_first.x_losses + plays_second.x_losses,
                     model_wins:   plays_first.x_wins   + plays_second.x_losses,
@@ -401,7 +401,7 @@ let parameters_tabs;
 const create_data_with_parameters = async function () {
     const surface = tfvis.visor().surface({name: 'Tic Tac Toe', tab: 'Input Data'});
     const draw_area = surface.drawArea;
-    draw_area.innerHTML = ""; // reset if rerun
+//     draw_area.innerHTML = ""; // reset if rerun
     if (!parameters_tabs) {
         // first time this is run
         parameters_tabs = parameters_interface();
@@ -470,10 +470,10 @@ const evaluate_training = function () {
   const draw_area = surface.drawArea;
   draw_area.innerHTML = ""; // reset if evaluation button pressed again
   const display = document.createElement('div');
-  let html = "<br>";
   const show_first_moves = function () {
     tf.tidy(() => {
       let board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+      let html = "<br>";
       for (let i = 0; i < 9; i++) {
           board[i] = 1;
           let prediction = Math.round(100*model.predict(tf.tensor2d(board, [1, 9])).dataSync()[0]);
@@ -497,7 +497,7 @@ const evaluate_training = function () {
   };
   const show_first_move_scores_button = create_button("Show the scores for different first moves", show_first_moves);
   draw_area.appendChild(show_first_move_scores_button);
-  replace_button_results(show_first_move_scores_button, display);
+  show_first_move_scores_button.appendChild(display);
   parameters_tabs.evaluation.open();
   create_data_interface("Play trained player against random player",
                         () => Math.round(gui_state["Evaluation"]["Games with trained versus random player"]),
@@ -518,7 +518,8 @@ const gui_state =
    "Training": {"Number of iterations": 120},
    "Testing": {},
    "Evaluation": {"Games with trained versus random player": 100,
-                  "Games with trained versus self": 100}
+                  "Games with trained versus self": 100,
+                  "Use probabilities instead of best move": true}
 };
 
 const parameters_interface = function () {
@@ -542,6 +543,7 @@ const parameters_interface = function () {
   let evaluation = parameters_gui.addFolder("Evaluation");
   evaluation.add(gui_state["Evaluation"], "Games with trained versus random player").min(1).max(10000);
   evaluation.add(gui_state["Evaluation"], "Games with trained versus self").min(1).max(10000);
+  evaluation.add(gui_state["Evaluation"], "Use probabilities instead of best move", [true, false]);
   return {input_data: input_data,
           model: model,
           training: training,
