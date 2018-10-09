@@ -544,11 +544,11 @@ const evaluate_training = function () {
   show_first_move_scores_button.appendChild(display);
   parameters_interface().evaluation.open();
   create_data_interface("Play trained player against random player",
-                        () => Math.round(gui_state["Evaluation"]["Games with trained versus random player"]),
+                        () => Math.round(gui_state["Evaluation"]["Number of games to play"]),
                         draw_area,
                         [[1], [2]]); // split the games between trained player going first or not
   create_data_interface("Play trained player against itself",
-                        () => Math.round(gui_state["Evaluation"]["Games with trained versus self"]),
+                        () => Math.round(gui_state["Evaluation"]["Number of games to play"]),
                         draw_area,
                         [1, 2]); // both players use the model
 };
@@ -561,8 +561,7 @@ const gui_state =
              "Size of third layer": 20},
    "Training": {"Number of iterations": 120},
    "Testing": {},
-   "Evaluation": {"Games with trained versus random player": 100,
-                  "Games with trained versus self": 100,
+   "Evaluation": {"Number of games to play": 100,
                   "Trained model strategy": 'Use scores as probabilities',
                   "What to do with new games": 'Add to dataset for future training'}
 };
@@ -586,10 +585,11 @@ const create_parameters_interface = function () {
   let training = parameters_gui.addFolder("Training");
   training.add(gui_state["Training"], 'Number of iterations').min(1).max(10000);
   let evaluation = parameters_gui.addFolder("Evaluation");
-  evaluation.add(gui_state["Evaluation"], "Games with trained versus random player").min(1).max(10000);
-  evaluation.add(gui_state["Evaluation"], "Games with trained versus self").min(1).max(10000);
-  evaluation.add(gui_state["Evaluation"], "Trained model strategy", ['Use scores as probabilities', 'Use highest score']);
-  evaluation.add(gui_state["Evaluation"], "What to do with new games", ["Add to dataset for future training", "Replace training dataset"]);
+  evaluation.add(gui_state["Evaluation"], "Number of games to play").min(1).max(100000);
+  evaluation.add(gui_state["Evaluation"], "Trained model strategy",
+                 ['Use scores as probabilities', 'Use highest score']);
+  evaluation.add(gui_state["Evaluation"], "What to do with new games",
+                 ["Add to dataset for future training", "Replace training dataset"]);
   return {input_data: input_data,
           model: model,
           training: training,
