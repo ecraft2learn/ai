@@ -2,8 +2,8 @@ body {
   font-family: "Tahoma", "Trebuchet MS";
   font-size: 1.1em;
   max-width: 1024px;
-  margin: 0 auto !important;
-  float: none !important;
+  margin: 0 auto;
+  float: none;
 }
 p {
   border-radius: 8px;
