@@ -217,7 +217,7 @@ const create_data = async function (number_of_games, model_players) {
   let statistics;
   let random_versus_random = model_players.length === 0;
   let model_versus_model = typeof model_players[0] === 'number';
-  let non_deterministic = gui_state["Evaluation"]["Use probabilities instead of best move"] === 'true'; 
+  let non_deterministic = gui_state["Evaluation"]["Trained model strategy"] === 'Use scores as probabilities'; 
   if (random_versus_random || model_versus_model) {
       statistics = await play_self(number_of_games, model_players, non_deterministic);
   } else {
@@ -341,7 +341,7 @@ const create_data_interface = async function(button_label, number_of_games_funct
           number_of_games++; // make it even in case need to split it in two
       }
       let new_data = await create_data(number_of_games, model_players);
-      if (!data || gui_state["Evaluation"]["Replace training data with these games"] === 'true') {
+      if (!data || gui_state["Evaluation"]["What to do with new games"] === 'Replace training dataset') {
           data = new_data;
       } else {
           let merged_data = {boards: data.boards.concat(new_data.boards),
@@ -350,7 +350,6 @@ const create_data_interface = async function(button_label, number_of_games_funct
           data = merged_data;
       }
       train_button.disabled = false;
-      let boards = data.boards; // buttons showing games closes over this
       create_model_button.disabled = false; // there is data so can move forward (though really only training needs data)
       message.style.font = "Courier"; // looks better with monospaced font
       let statistics = data.statistics;
@@ -367,6 +366,7 @@ const create_data_interface = async function(button_label, number_of_games_funct
           interface_element.appendChild(button);
       };
       if (typeof statistics.model_wins === 'undefined') {
+          let boards = data.boards; // buttons showing games closes over this
           const label = model_players.length === 0 ? "Show a two random players game" : "Show a trained player versus self game";
           const show_random_game_button = 
               create_button(label,
@@ -383,7 +383,7 @@ const create_data_interface = async function(button_label, number_of_games_funct
           const show_model_playing_x_button = 
               create_button("Show a game where trained player was X",
                             function () {
-                                const playing_first_boards = boards.slice(0, statistics.last_board_with_model_playing_x);
+                                const playing_first_boards = data.boards.slice(0, data.statistics.last_board_with_model_playing_x);
                                 replace_button_results(show_model_playing_x_button,
                                                        random_game_display(playing_first_boards));
                             });
@@ -391,7 +391,7 @@ const create_data_interface = async function(button_label, number_of_games_funct
           const show_model_playing_o_button = 
               create_button("Show a game where trained player was O",
                             function () {
-                                const playing_second_boards = boards.slice(statistics.last_board_with_model_playing_x);
+                                const playing_second_boards = data.boards.slice(data.statistics.last_board_with_model_playing_x);
                                  replace_button_results(show_model_playing_o_button,
                                                         random_game_display(playing_second_boards));
                             });
@@ -534,8 +534,8 @@ const gui_state =
    "Testing": {},
    "Evaluation": {"Games with trained versus random player": 100,
                   "Games with trained versus self": 100,
-                  "Use probabilities instead of best move": true,
-                  "Replace training data with these games": false}
+                  "Trained model strategy": 'Use scores as probabilities',
+                  "What to do with new games": 'Add to dataset for future training'}
 };
 
 const create_parameters_interface = function () {
@@ -559,8 +559,8 @@ const create_parameters_interface = function () {
   let evaluation = parameters_gui.addFolder("Evaluation");
   evaluation.add(gui_state["Evaluation"], "Games with trained versus random player").min(1).max(10000);
   evaluation.add(gui_state["Evaluation"], "Games with trained versus self").min(1).max(10000);
-  evaluation.add(gui_state["Evaluation"], "Use probabilities instead of best move", [true, false]);
-  evaluation.add(gui_state["Evaluation"], "Replace training data with these games", [true, false]);
+  evaluation.add(gui_state["Evaluation"], "Trained model strategy", ['Use scores as probabilities', 'Use highest score']);
+  evaluation.add(gui_state["Evaluation"], "What to do with new games", ["Add to dataset for future training", "Replace training dataset"]);
   return {input_data: input_data,
           model: model,
           training: training,
