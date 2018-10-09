@@ -196,11 +196,12 @@ const create_data = async function (number_of_games, players) {
   boards = [];
   outcomes = [];
   let statistics;
-  let non_deterministic = gui_state["Evaluation"]["Trained model strategy"] === 'Use scores as probabilities'; 
+  let non_deterministic_1 = gui_state["Evaluation"]["Player 1's strategy"] === 'Use scores as probabilities';
+  let non_deterministic_2 = gui_state["Evaluation"]["Player 2's strategy"] === 'Use scores as probabilities'; 
   // run half with model player being first
-  let plays_first  = await play_games(number_of_games/2, players, non_deterministic);
+  let plays_first  = await play_games(number_of_games/2, players, non_deterministic_1);
   let last_board_with_player_1_going_first = boards.length;
-  let plays_second = await play_games(number_of_games/2, players.reverse(), non_deterministic);
+  let plays_second = await play_games(number_of_games/2, players.reverse(), non_deterministic_2);
   statistics = {x_wins:   plays_first.x_wins + plays_second.x_wins,
                 x_losses: plays_first.x_losses + plays_second.x_losses,
                 player_1_wins: plays_first.x_wins   + plays_second.x_losses,
@@ -528,10 +529,11 @@ const gui_state =
    "Training": {"Number of iterations": 120},
    "Testing": {},
    "Evaluation": {"Number of games to play": 100,
-                  "Trained model strategy": 'Use scores as probabilities',
-                  "What to do with new games": 'Add to dataset for future training',
                   "Player 1": 'Random player',
-                  "Player 2": 'Random player'}
+                  "Player 2": 'Random player',
+                  "Player 1's strategy": 'Use scores as probabilities',
+                  "Player 2's strategy": 'Use scores as probabilities',
+                  "What to do with new games": 'Add to dataset for future training',}
 };
 
 const create_parameters_interface = function () {
@@ -555,7 +557,10 @@ const create_parameters_interface = function () {
   evaluation = parameters_gui.addFolder("Evaluation");
   evaluation.add(gui_state["Evaluation"], "Number of games to play").min(1).max(100000);
   evaluation.add(gui_state["Evaluation"],
-                 "Trained model strategy",
+                 "Player 1's strategy",
+                 ['Use scores as probabilities', 'Use highest score']);
+  evaluation.add(gui_state["Evaluation"],
+                 "Player 2's strategy",
                  ['Use scores as probabilities', 'Use highest score']);
   evaluation.add(gui_state["Evaluation"],
                  "What to do with new games",
