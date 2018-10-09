@@ -19,20 +19,43 @@ const evaluate_button = document.getElementById('evaluate');
 const save_and_load_button = document.getElementById('save_and_load');
 
 const add_to_models = function (model) {
-  if (evaluation && !models[model.name]) {
-      // new name so update player 1 and 2 choices
-      update_evaluation_model_choices();
-  }
-  models[model.name] = model;
+    let new_name = !models[model.name];
+    models[model.name] = model;
+    if (evaluation) {
+        // new name so update player 1 and 2 choices
+        update_evaluation_model_choices();                 
+    }
 };
 
 const update_evaluation_model_choices = function () {
-    evaluation.add(gui_state["Evaluation"],
-                   "Player 1",
-                   Object.keys(models).concat('Random player'));
-    evaluation.add(gui_state["Evaluation"],
-                   "Player 2",
-                   Object.keys(models).concat('Random player'));
+    let names = Object.keys(models);
+    if (names.length === 0) {
+        return;
+    }
+    const updateDatDropdown = function(target, list) { 
+        // copied from https://stackoverflow.com/questions/16166440/refresh-dat-gui-with-new-values  
+        innerHTMLStr = "";
+        if(list.constructor.name == 'Array'){
+            for(var i=0; i<list.length; i++){
+                var str = "<option value='" + list[i] + "'>" + list[i] + "</option>";
+                innerHTMLStr += str;        
+            }
+        }
+
+        if(list.constructor.name == 'Object'){
+            for(var key in list){
+                var str = "<option value='" + list[key] + "'>" + key + "</option>";
+                innerHTMLStr += str;
+            }
+        }
+        if (innerHTMLStr != "") target.domElement.children[0].innerHTML = innerHTMLStr;
+    }
+    names.push('Random player');
+    evaluation.__controllers.forEach(function (controller) {
+        if (controller.property === 'Player 1' || controller.property === 'Player 2') {
+            updateDatDropdown(controller, names);
+        }
+    });     
 };
 
 const create_model = function (model_configuration, learning_rate, name) {
@@ -231,9 +254,7 @@ const train_model = async function (data, epochs) {
                   {epochs: epochs,
                    callbacks: callbacks});
   let duration = Math.round((Date.now()-start)/1000);
-  if (model_trained) {
-      add_to_models(model); // it is ready
-  }
+  add_to_models(model);
   model_trained = true;
   xs.dispose();
   ys.dispose();
@@ -553,9 +574,11 @@ const create_parameters_interface = function () {
   model.add(gui_state["Model"], 'Size of second layer').min(0).max(100);
   model.add(gui_state["Model"], 'Size of third layer').min(0).max(100);
   let training = parameters_gui.addFolder("Training");
-  training.add(gui_state["Training"], 'Number of iterations').min(1).max(10000);
+  training.add(gui_state["Training"], 'Number of iterations').min(1).max(1000);
   evaluation = parameters_gui.addFolder("Evaluation");
   evaluation.add(gui_state["Evaluation"], "Number of games to play").min(1).max(100000);
+  evaluation.add(gui_state["Evaluation"], "Player 1", ['Random player']);
+  evaluation.add(gui_state["Evaluation"], "Player 2", ['Random player']); 
   evaluation.add(gui_state["Evaluation"],
                  "Player 1's strategy",
                  ['Use scores as probabilities', 'Use highest score']);
