@@ -23,6 +23,7 @@ const create_data_button = document.getElementById('create_data');
 const create_model_button = document.getElementById('create_model');
 const train_button = document.getElementById('train');
 const evaluate_button = document.getElementById('evaluate');
+const save_and_load_button = document.getElementById('save_and_load');
 
 const create_model = function (model_configuration, learning_rate) {
   // following inspired by https://github.com/johnflux/deep-learning-tictactoe/blob/master/play.py
@@ -348,6 +349,7 @@ const create_data_interface = async function(button_label, number_of_games_funct
                              statistics: new_data.statistics};
           data = merged_data;
       }
+      train_button.disabled = false;
       let boards = data.boards; // buttons showing games closes over this
       create_model_button.disabled = false; // there is data so can move forward (though really only training needs data)
       message.style.font = "Courier"; // looks better with monospaced font
@@ -393,20 +395,28 @@ const create_data_interface = async function(button_label, number_of_games_funct
   interface_element.appendChild(button);
 };
 
-let parameters_tabs;
+let parameters_gui;
+
+const parameters_interface = function () {
+  if (!parameters_gui) {
+      parameters_gui = create_parameters_interface();
+  }
+  return parameters_gui;
+};
+
+let create_data_initialised = false;
 
 const create_data_with_parameters = async function () {
-    const surface = tfvis.visor().surface({name: 'Tic Tac Toe', tab: 'Input Data'});
+    const surface = tfvis.visor().surface({name: 'Tic Tac Toe', tab: 'Input'});
     const draw_area = surface.drawArea;
-//     draw_area.innerHTML = ""; // reset if rerun
-    if (!parameters_tabs) {
+    if (!create_data_initialised) {
         // first time this is run
-        parameters_tabs = parameters_interface();
         create_data_interface("Play random player against random player",
                               () => Math.round(gui_state["Input data"]["Random player versus random player games"]),
                               draw_area,
                               []); // no players use the model
-        parameters_tabs.input_data.open();
+        parameters_interface().input_data.open();
+        create_data_initialised = true;
     } else {
 //         surface.label.click();
     }
@@ -415,9 +425,9 @@ const create_data_with_parameters = async function () {
 let create_model_with_current_settings_button;
 
 const create_model_with_parameters = function () {
-  const surface = tfvis.visor().surface({name: 'Tic Tac Toe', tab: 'Define model'});
+  const surface = tfvis.visor().surface({name: 'Tic Tac Toe', tab: 'Model'});
   const draw_area = surface.drawArea;
-  parameters_tabs.model.open();
+  parameters_interface().model.open();
   const create_model_with_current_settings = function () {
       let model_configuration = [Math.round(gui_state["Model"]["Size of first layer"])];
       if (gui_state["Model"]["Size of second layer"] > .5) {
@@ -452,10 +462,10 @@ const train_with_parameters = async function () {
         // without the timeout the message above isn't displayed
         let {duration, loss} = await train_model(data, Math.round(gui_state["Training"]["Number of iterations"]));
         message.innerHTML = "<br>Training took " + duration + " seconds. Final error rate is " + Math.round(100*loss) +"%.";
-        evaluate_button.disabled = false;       
+        evaluate_button.disabled = false; 
     });
   };
-  parameters_tabs.training.open();
+  parameters_interface().training.open();
   if (!train_with_current_settings_button) {
       train_with_current_settings_button = create_button("Train model with current settings", train_with_current_settings);
       draw_area.appendChild(train_with_current_settings_button);    
@@ -495,7 +505,7 @@ const evaluate_training = function () {
   const show_first_move_scores_button = create_button("Show the scores for different first moves", show_first_moves);
   draw_area.appendChild(show_first_move_scores_button);
   show_first_move_scores_button.appendChild(display);
-  parameters_tabs.evaluation.open();
+  parameters_interface().evaluation.open();
   create_data_interface("Play trained player against random player",
                         () => Math.round(gui_state["Evaluation"]["Games with trained versus random player"]),
                         draw_area,
@@ -520,7 +530,7 @@ const gui_state =
                   "Replace training data with these games": false}
 };
 
-const parameters_interface = function () {
+const create_parameters_interface = function () {
   const parameters_gui = new dat.GUI({width: 600,
                                       autoPlace: false});
   settings_element.appendChild(parameters_gui.domElement);
@@ -549,6 +559,61 @@ const parameters_interface = function () {
           evaluation: evaluation};
 };
 
+let save_button;
+let load_button;
+
+const save_and_load = function () {
+    const surface = tfvis.visor().surface({name: 'Tic Tac Toe', tab: 'Save/Load'});
+    const draw_area = surface.drawArea;
+    if (save_button) {
+        return; // already set up 
+    }
+    draw_area.innerHTML = ""; // reset if rerun
+    save_button = create_button("Save trained model", save_model);
+    draw_area.appendChild(save_button);
+    load_button = create_button("Load a trained model", load_model);
+    draw_area.appendChild(load_button);
+    const file_input = function(label, id) {
+      const div = document.createElement('div');
+      const label_element = document.createElement('label');
+      const input_element = document.createElement('input');
+      label_element.for = id;
+      label_element.innerHTML = label;
+      input_element.type = 'file';
+      input_element.id = id;
+      input_element.name = id;
+      div.appendChild(label_element);
+      div.appendChild(input_element);
+      div.style.padding = "12px";
+      return div;
+    };
+    draw_area.appendChild(file_input('Saved model JSON file: ', 'saved_json'));
+    draw_area.appendChild(file_input('Saved model weights file: ', 'saved_weights'));
+};
+
+const save_model = async function () {
+  return await model.save('downloads://my-model');
+};
+
+const load_model = async function () {
+  const saved_model_element = document.getElementById('saved_json');
+  const saved_weights_element = document.getElementById('saved_weights');
+  if (!saved_model_element.files[0] || !saved_weights_element.files[0]) {
+      let message = document.createElement('p');
+      message.innerHTML = "Please choose files below and then click this again.";
+      replace_button_results(load_button, message);
+      return;
+  }
+  model = await tf.loadModel(tf.io.browserFiles([saved_model_element.files[0],
+                                                 saved_weights_element.files[0]]));
+  let message = document.createElement('p');
+  message.innerHTML = saved_model_element.files[0].name + " loaded and ready to evaluate.";
+  replace_button_results(load_button, message);  
+  // to add more data enable these options
+  create_model_button.disabled = false;
+  evaluate_button.disabled = false;
+};
+
 let create_button = function (label, click_handler) {
   const button = document.createElement('button');
   button.innerHTML = label;
@@ -561,5 +626,6 @@ create_data_button.addEventListener('click', create_data_with_parameters);
 create_model_button.addEventListener('click', create_model_with_parameters);
 train_button.addEventListener('click', train_with_parameters);
 evaluate_button.addEventListener('click', evaluate_training);
+save_and_load_button.addEventListener('click', save_and_load);
   
 }()));
