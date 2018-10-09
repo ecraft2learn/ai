@@ -259,7 +259,6 @@ const train_model = async function (data, epochs) {
                                                         ['loss']);
                                   }};
   // Train the model using the data.
-  console.log(xs.shape, ys.shape, tf.memory().numTensors);
   let start = Date.now();
   await model.fit(xs,
                   ys, 
@@ -539,10 +538,10 @@ const parameters_interface = function () {
   model.add(gui_state["Model"], 'Size of second layer').min(0).max(100);
   model.add(gui_state["Model"], 'Size of third layer').min(0).max(100);
   let training = parameters_gui.addFolder("Training");
-  training.add(gui_state["Training"], 'Number of iterations').min(1).max(1000);
+  training.add(gui_state["Training"], 'Number of iterations').min(1).max(10000);
   let evaluation = parameters_gui.addFolder("Evaluation");
-  evaluation.add(gui_state["Evaluation"], "Games with trained versus random player").min(1).max(1000);
-  evaluation.add(gui_state["Evaluation"], "Games with trained versus self").min(1).max(1000);
+  evaluation.add(gui_state["Evaluation"], "Games with trained versus random player").min(1).max(10000);
+  evaluation.add(gui_state["Evaluation"], "Games with trained versus self").min(1).max(10000);
   return {input_data: input_data,
           model: model,
           training: training,
