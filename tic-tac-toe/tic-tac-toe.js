@@ -4,13 +4,13 @@
 
 ((async function () {
 
-let games_per_batch = 100;
-let batch_count = 1;
-let training_epochs = 50;
-let evaluation_runs = 50;
-let learning_rate = .0001;
-let model_configuration = [100, 50, 20]; // later may add more options
-let model_players = []; // if [1, 2] is model-versus-model
+// let games_per_batch = 100;
+// let batch_count = 1;
+// let training_epochs = 50;
+// let evaluation_runs = 50;
+// let learning_rate = .0001;
+// let model_configuration = [100, 50, 20]; // later may add more options
+// let model_players = []; // if [1, 2] is model-versus-model
 
 let model_trained = false;
 let model;
@@ -18,22 +18,11 @@ let model;
 let data;
 let batch_number;
 
-const output_div = document.getElementById('output');
 const settings_element = document.getElementById('settings');
 const create_data_button = document.getElementById('create_data');
 const create_model_button = document.getElementById('create_model');
 const train_button = document.getElementById('train');
 const evaluate_button = document.getElementById('evaluate');
-
-// output_div.innerHTML =
-//     "<b>games between training: " + games_per_batch +
-//     "; number of trainings: " + batch_count +
-//     "; training training_epochs: " + training_epochs +
-//     "; evaluation runs: " + evaluation_runs +
-//     "; learning rate: " + learning_rate +
-//     "; dense layers: " + model_configuration +
-//     "; players using model: " + (model_players.length === 0 ? "none" : model_players) +
-//     "</b><br>";
 
 const create_model = function (model_configuration, learning_rate) {
   // following inspired by https://github.com/johnflux/deep-learning-tictactoe/blob/master/play.py
@@ -227,7 +216,7 @@ const create_data = async function (number_of_games, model_players) {
   let statistics;
   let random_versus_random = model_players.length === 0;
   let model_versus_model = typeof model_players[0] === 'number';
-  let non_deterministic = gui_state["Evaluation"]["Use probabilities instead of best move"] === 'true';
+  let non_deterministic = gui_state["Evaluation"]["Use probabilities instead of best move"] === 'true'; 
   if (random_versus_random || model_versus_model) {
       statistics = await play_self(number_of_games, model_players, non_deterministic);
   } else {
@@ -350,7 +339,15 @@ const create_data_interface = async function(button_label, number_of_games_funct
       if (number_of_games%2 === 1) {
           number_of_games++; // make it even in case need to split it in two
       }
-      data = await create_data(number_of_games, model_players);
+      let new_data = await create_data(number_of_games, model_players);
+      if (!data || gui_state["Evaluation"]["Replace training data with these games"] === 'true') {
+          data = new_data;
+      } else {
+          let merged_data = {boards: data.boards.concat(new_data.boards),
+                             outcomes: data.outcomes.concat(new_data.outcomes),
+                             statistics: new_data.statistics};
+          data = merged_data;
+      }
       let boards = data.boards; // buttons showing games closes over this
       create_model_button.disabled = false; // there is data so can move forward (though really only training needs data)
       message.style.font = "Courier"; // looks better with monospaced font
@@ -432,7 +429,7 @@ const create_model_with_parameters = function () {
       create_model(model_configuration, gui_state["Model"]["Learning rate"]);
       train_button.disabled = false;
       let ready = document.createElement('div');
-      ready.innerHTML = "<br>Model created and ready to be trained.";
+      ready.innerHTML = "<br>A new model created and is ready to be trained.";
       draw_area.appendChild(ready);    
   };
   if (!create_model_with_current_settings_button) {
@@ -449,7 +446,7 @@ const train_with_parameters = async function () {
   const draw_area = surface.drawArea;
   const train_with_current_settings = async function () {
     let message = document.createElement('div');
-    message.innerHTML = "<br>Training started. Learning from " + boards.length + " game moves. Please wait.";
+    message.innerHTML = "<br>Training started. Learning from " + data.boards.length + " game moves. Please wait.";
     draw_area.appendChild(message);
     setTimeout(async function () {
         // without the timeout the message above isn't displayed
@@ -519,7 +516,8 @@ const gui_state =
    "Testing": {},
    "Evaluation": {"Games with trained versus random player": 100,
                   "Games with trained versus self": 100,
-                  "Use probabilities instead of best move": true}
+                  "Use probabilities instead of best move": true,
+                  "Replace training data with these games": false}
 };
 
 const parameters_interface = function () {
@@ -544,6 +542,7 @@ const parameters_interface = function () {
   evaluation.add(gui_state["Evaluation"], "Games with trained versus random player").min(1).max(10000);
   evaluation.add(gui_state["Evaluation"], "Games with trained versus self").min(1).max(10000);
   evaluation.add(gui_state["Evaluation"], "Use probabilities instead of best move", [true, false]);
+  evaluation.add(gui_state["Evaluation"], "Replace training data with these games", [true, false]);
   return {input_data: input_data,
           model: model,
           training: training,
