@@ -447,7 +447,13 @@ const create_model_with_parameters = function () {
       create_model(model_configuration, gui_state["Model"]["Learning rate"]);
       train_button.disabled = false;
       let ready = document.createElement('div');
-      ready.innerHTML = "<br>A new model created and is ready to be trained.";
+      let html = "<br>A new model created and is ready to be trained.";
+      model.summary(50, // line length
+                    undefined,
+                    (line) => {
+                      html += "<br>" + line;
+                    });
+      ready.innerHTML = html;
       draw_area.appendChild(ready);    
   };
   if (!create_model_with_current_settings_button) {
