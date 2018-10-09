@@ -13,6 +13,7 @@
 // let model_players = []; // if [1, 2] is model-versus-model
 
 let model_trained = false;
+let models = {};
 let model;
 
 let data;
@@ -25,9 +26,9 @@ const train_button = document.getElementById('train');
 const evaluate_button = document.getElementById('evaluate');
 const save_and_load_button = document.getElementById('save_and_load');
 
-const create_model = function (model_configuration, learning_rate) {
+const create_model = function (model_configuration, learning_rate, name) {
   // following inspired by https://github.com/johnflux/deep-learning-tictactoe/blob/master/play.py
-  model = tf.sequential();
+  const model = tf.sequential({name: name});
   model_configuration.forEach((size, index) => {
       let configuration = {units: size,
                            activation: 'relu'};
@@ -43,9 +44,10 @@ const create_model = function (model_configuration, learning_rate) {
       loss: 'meanSquaredError',
       optimizer: tf.train.adam(learning_rate)
   });
+  return model;
 };
 
-  const play = function (model_players, game_history, non_deterministic) {
+const play = function (model_players, game_history, non_deterministic) {
       let board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
       let player = 1; // player 1 starts
       while (true) {
@@ -436,6 +438,8 @@ const create_model_with_parameters = function () {
   const surface = tfvis.visor().surface({name: 'Tic Tac Toe', tab: 'Model'});
   const draw_area = surface.drawArea;
   parameters_interface().model.open();
+  let name_input;
+  let message;
   const create_model_with_current_settings = function () {
       let model_configuration = [Math.round(gui_state["Model"]["Size of first layer"])];
       if (gui_state["Model"]["Size of second layer"] > .5) {
@@ -444,22 +448,41 @@ const create_model_with_parameters = function () {
       if (gui_state["Model"]["Size of third layer"] > .5) {
         model_configuration.push(Math.round(gui_state["Model"]["Size of third layer"]));
       }
-      create_model(model_configuration, gui_state["Model"]["Learning rate"]);
+      const name = name_input.value;
+      const new_model = create_model(model_configuration, gui_state["Model"]["Learning rate"], name);
+      const old_model = models[name];
+      models[name] = new_model;
+      model = new_model;
       train_button.disabled = false;
-      let ready = document.createElement('div');
-      let html = "<br>A new model created and is ready to be trained.";
+      let html = "<br>A new model named '" + name + "' created and it is ready to be trained.";
+      if (old_model) {
+          html += "<br>It replaces the old model of the same name.";
+      }
       model.summary(50, // line length
                     undefined,
                     (line) => {
                       html += "<br>" + line;
                     });
-      ready.innerHTML = html;
-      draw_area.appendChild(ready);    
+      message.innerHTML = html;
   };
   if (!create_model_with_current_settings_button) {
+      name_input = document.createElement('input');
+      name_input.type = 'text';
+      name_input.id = "name_element";
+      name_input.name = "name_element";
+      name_input.value = 'my-model';
+      const label = document.createElement('label');
+      label.for = "name_element";
+      label.innerHTML = "Name of model: ";
+      const div = document.createElement('div');
+      div.appendChild(label);
+      div.appendChild(name_input);
+      draw_area.appendChild(div);
       create_model_with_current_settings_button = 
           create_button("Create model with current settings", create_model_with_current_settings);
-      draw_area.appendChild(create_model_with_current_settings_button);    
+      draw_area.appendChild(create_model_with_current_settings_button);
+      message = document.createElement('div');
+      draw_area.appendChild(message);        
   }
 };
 
@@ -606,7 +629,8 @@ const save_and_load = function () {
 };
 
 const save_model = async function () {
-  return await model.save('downloads://my-model');
+  let URL = 'downloads://' + model.name;
+  return await model.save(URL);
 };
 
 const load_model = async function () {
@@ -622,7 +646,13 @@ const load_model = async function () {
                                                  saved_weights_element.files[0]]));
   model_trained = true;
   let message = document.createElement('p');
-  message.innerHTML = saved_model_element.files[0].name + " loaded and ready to evaluate.";
+  const model_name = saved_model_element.files[0].name.substring(0, saved_model_element.files[0].name.length-".json".length);
+  message.innerHTML = model_name + " loaded and ready to evaluate.";
+  model.name = model_name;
+  if (models[name]) {
+     message.innerHTML += "<br>Replaced a model with the same name.";
+  }
+  models[name] = model;
   replace_button_results(load_button, message);  
   // to add more data enable these options
   create_model_button.disabled = false;
