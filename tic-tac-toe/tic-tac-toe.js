@@ -4,20 +4,12 @@
 
 ((async function () {
 
-// let games_per_batch = 100;
-// let batch_count = 1;
-// let training_epochs = 50;
-// let evaluation_runs = 50;
-// let learning_rate = .0001;
-// let model_configuration = [100, 50, 20]; // later may add more options
-// let model_players = []; // if [1, 2] is model-versus-model
-
 let model_trained = false;
 let models = {};
 let model;
 
-let data;
-let batch_number;
+let data; // current data available for training
+let evaluation;
 
 const settings_element = document.getElementById('settings');
 const create_data_button = document.getElementById('create_data');
@@ -25,6 +17,23 @@ const create_model_button = document.getElementById('create_model');
 const train_button = document.getElementById('train');
 const evaluate_button = document.getElementById('evaluate');
 const save_and_load_button = document.getElementById('save_and_load');
+
+const add_to_models = function (model) {
+  if (evaluation && !models[model.name]) {
+      // new name so update player 1 and 2 choices
+      update_evaluation_model_choices();
+  }
+  models[model.name] = model;
+};
+
+const update_evaluation_model_choices = function () {
+    evaluation.add(gui_state["Evaluation"],
+                   "Player 1",
+                   Object.keys(models).concat('Random player'));
+    evaluation.add(gui_state["Evaluation"],
+                   "Player 2",
+                   Object.keys(models).concat('Random player'));
+};
 
 const create_model = function (model_configuration, learning_rate, name) {
   // following inspired by https://github.com/johnflux/deep-learning-tictactoe/blob/master/play.py
@@ -47,22 +56,22 @@ const create_model = function (model_configuration, learning_rate, name) {
   return model;
 };
 
-const play = function (model_players, game_history, non_deterministic) {
+const play = function (players, game_history, non_deterministic) {
       let board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-      let player = 1; // player 1 starts
+      let player_number = 0; // player 1 starts
       while (true) {
-          move(model_players, player, board, game_history, non_deterministic);
-          player = player === 1 ? 2 : 1; // and next the other player will play
+          move(player_number, players, board, game_history, non_deterministic);
+          player_number = (player_number+1)%2; // and next the other player will play
           let outcome = game_over(board);
           if (outcome && game_history) {
               boards = boards.concat(game_history);
               if (outcome === 3) {
-                 // tied
-                 game_outcomes = game_history.map(() => .5);
+                  // tied
+                  game_outcomes = game_history.map(() => .5);
               } else if (outcome === 1) {
-                 game_outcomes = game_history.map((ignore, index) => (index+1)%2);
+                  game_outcomes = game_history.map((ignore, index) => (index+1)%2);
               } else {
-                 game_outcomes = game_history.map((ignore, index) => index%2);
+                  game_outcomes = game_history.map((ignore, index) => index%2);
               }
               outcomes = outcomes.concat(game_outcomes);
           }
@@ -72,46 +81,47 @@ const play = function (model_players, game_history, non_deterministic) {
       }
 };
 
-const move = function (model_players, player, board, history, non_deterministic) {
-      let possible_moves = empty_squares(board);
-      let move;
-      if (model_trained && model_players.indexOf(player) >= 0) {
-          let best_move;
-          let best_probability = 0;
-          let predictions = [];
-          possible_moves.forEach(possible_move => {
-              let board_copy = board.slice();
-              board_copy[possible_move] = player;
-              tf.tidy(() => {
-                  let board_tensor = tf.tensor2d(board_copy, [1, 9]);
-                  let probability_tensor = model.predict(board_tensor);
-                  let probability = probability_tensor.dataSync()[0];
-                  predictions.push(probability);
-                  if (probability > best_probability) {
-                      best_move = possible_move;
-                      best_probability = probability;
-                  }           
-              });
-          });
-          if (non_deterministic) {
-              predictions = predictions.sort().reverse(); // consider the most likely first
-              const sum = predictions.reduce((accumulator, value) => accumulator + value);
-              predictions.some((prediction, index) => {
-                 if (Math.random() <= prediction/sum) {
-                     best_move = possible_moves[index]
-                     return true;
-                 }
-              });
-          }
-          move = best_move;
-      }
-      if (typeof move === 'undefined') {
-          move = possible_moves[Math.floor(possible_moves.length*Math.random(possible_moves.length))];
-      }
-      board[move] = player;
-      if (history) {
-          history.push(board.slice());
-      }
+const move = function (player_number, players, board, history, non_deterministic) {
+    let possible_moves = empty_squares(board);
+    let move;
+    let player = players[player_number];
+    if (player !== 'Random player') {
+        let best_move;
+        let best_probability = 0;
+        let predictions = [];
+        possible_moves.forEach(possible_move => {
+            let board_copy = board.slice();
+            board_copy[possible_move] = player_number;
+            tf.tidy(() => {
+                let board_tensor = tf.tensor2d(board_copy, [1, 9]);
+                let probability_tensor = models[player].predict(board_tensor);
+                let probability = probability_tensor.dataSync()[0];
+                predictions.push(probability);
+                if (probability > best_probability) {
+                    best_move = possible_move;
+                    best_probability = probability;
+                }           
+            });
+        });
+        if (non_deterministic) {
+            predictions = predictions.sort().reverse(); // consider the most likely first
+            const sum = predictions.reduce((accumulator, value) => accumulator + value);
+            predictions.some((prediction, index) => {
+               if (Math.random() <= prediction/sum) {
+                   best_move = possible_moves[index]
+                   return true;
+               }
+            });
+        }
+        move = best_move;
+    }
+    if (typeof move === 'undefined') {
+        move = possible_moves[Math.floor(possible_moves.length*Math.random(possible_moves.length))];
+    }
+    board[move] = player_number+1; // 1 or 2 is clearer player number 
+    if (history) {
+        history.push(board.slice());
+    }
 };
 
 const empty_squares = function (board) {
@@ -155,13 +165,13 @@ const game_over = function (board) {
       }
 };
 
-const play_self = async function (number_of_games, model_players, non_deterministic) {
+const play_games = async function (number_of_games, players, non_deterministic) {
     let x_wins = 0;
     let ties = 0;
     let x_losses = 0;
     for (let game = 0; game < number_of_games; game++) {
          let game_history = [];
-         let outcome = play(model_players, game_history, non_deterministic);
+         let outcome = play(players, game_history, non_deterministic);
          switch (outcome) {
            case 1: 
              x_wins++;
@@ -179,61 +189,24 @@ const play_self = async function (number_of_games, model_players, non_determinis
             x_losses: x_losses};
 };
 
-// const play_random = function () {
-//       let model_players = [Math.random() > .5 ? 1 : 2]; // just one player
-//       let outcome = play(model_players);
-//       if (outcome === model_players[0]) {
-//           return 1; // model won
-//       } else if (outcome === 2) { // tied
-//           return .5;
-//       } else {
-//           return 0; // lost
-//       } 
-// };
-
-// const model_versus_random = function (trial_count) {
-//     let model_wins = 0;
-//     let model_ties = 0;
-//     let model_losses = 0;
-//     for (let i = 0; i < trial_count; i++) {
-//         let won = play_random();
-//         if (won === 1) {
-//             model_wins++;
-//         } else if (won === 0) {
-//             model_losses++;
-//         } else {
-//             model_ties++;
-//         }
-//     }
-//     return {wins: model_wins,
-//             ties: model_ties,
-//             losses: model_losses};
-// };
-
 let boards = [];
 let outcomes = [];
 
-const create_data = async function (number_of_games, model_players) {
+const create_data = async function (number_of_games, players) {
   boards = [];
   outcomes = [];
   let statistics;
-  let random_versus_random = model_players.length === 0;
-  let model_versus_model = typeof model_players[0] === 'number';
   let non_deterministic = gui_state["Evaluation"]["Trained model strategy"] === 'Use scores as probabilities'; 
-  if (random_versus_random || model_versus_model) {
-      statistics = await play_self(number_of_games, model_players, non_deterministic);
-  } else {
-      // run half with model player being first
-      let plays_first  = await play_self(number_of_games/2, [1], non_deterministic);
-      let last_board_with_model_playing_x = boards.length;
-      let plays_second = await play_self(number_of_games/2, [2], non_deterministic);
-      statistics = {x_wins:   plays_first.x_wins + plays_second.x_wins,
-                    x_losses: plays_first.x_losses + plays_second.x_losses,
-                    model_wins:   plays_first.x_wins   + plays_second.x_losses,
-                    model_losses: plays_first.x_losses + plays_second.x_wins,
-                    ties: plays_first.ties + plays_second.ties,
-                    last_board_with_model_playing_x: last_board_with_model_playing_x};
-  }
+  // run half with model player being first
+  let plays_first  = await play_games(number_of_games/2, players, non_deterministic);
+  let last_board_with_player_1_going_first = boards.length;
+  let plays_second = await play_games(number_of_games/2, players.reverse(), non_deterministic);
+  statistics = {x_wins:   plays_first.x_wins + plays_second.x_wins,
+                x_losses: plays_first.x_losses + plays_second.x_losses,
+                player_1_wins: plays_first.x_wins   + plays_second.x_losses,
+                player_2_wins: plays_first.x_losses + plays_second.x_wins,
+                ties: plays_first.ties + plays_second.ties,
+                last_board_with_player_1_going_first: last_board_with_player_1_going_first};
   return {boards: boards,
           outcomes: outcomes,
           statistics: statistics};
@@ -257,6 +230,9 @@ const train_model = async function (data, epochs) {
                   {epochs: epochs,
                    callbacks: callbacks});
   let duration = Math.round((Date.now()-start)/1000);
+  if (model_trained) {
+      add_to_models(model); // it is ready
+  }
   model_trained = true;
   xs.dispose();
   ys.dispose();
@@ -331,18 +307,24 @@ const replace_button_results = function(element, child) {
     element.appendChild(child);
 };
 
-const create_data_interface = async function(button_label, number_of_games_function, interface_element, model_players) {
+const create_data_interface = async function(button_label, number_of_games_function, interface_element) {
   const play_games = async function () {
     const message = document.createElement('p');
-    message.innerHTML = "Please wait.";
+    let number_of_games = number_of_games_function();
+    if (number_of_games%2 === 1) {
+        number_of_games++; // make it even in case need to split it in two
+    }
+    let player_1 = gui_state["Evaluation"]['Player 1'];
+    let player_2 = gui_state["Evaluation"]['Player 2'];
+    message.innerHTML = "Please wait as " + player_1 + " plays " + number_of_games + 
+                        " games against " + player_2 + ".";
+    if (player_1 !== player_2) {
+        message.innerHTML += "<br>They will each go first half the time.";
+    }
     button.appendChild(message);
     setTimeout(async function () {
-      // without the timeout the please wait message isn't seen
-      let number_of_games = number_of_games_function();
-      if (number_of_games%2 === 1) {
-          number_of_games++; // make it even in case need to split it in two
-      }
-      let new_data = await create_data(number_of_games, model_players);
+      // without the timeout the please wait message isn't seen    
+      let new_data = await create_data(number_of_games, [player_1, player_2]);
       if (!data || gui_state["Evaluation"]["What to do with new games"] === 'Replace training dataset') {
           data = new_data;
       } else {
@@ -367,38 +349,26 @@ const create_data_interface = async function(button_label, number_of_games_funct
           }
           interface_element.appendChild(button);
       };
-      if (typeof statistics.model_wins === 'undefined') {
-          let boards = data.boards; // buttons showing games closes over this
-          const label = model_players.length === 0 ? "Show a two random players game" : "Show a trained player versus self game";
-          const show_random_game_button = 
-              create_button(label,
-                            function () {
-                                replace_button_results(show_random_game_button,
-                                                       random_game_display(boards));
-                            });
-          update_button(show_random_game_button);
-      } else {
-          message.innerHTML +=
-              "<b>Trained model: </b>" +
-              "Wins = " + statistics.model_wins + " (" + Math.round(100*statistics.model_wins/number_of_games) + "%); " +
-              "Losses = " + statistics.model_losses + " (" + Math.round(100*statistics.model_losses/number_of_games) + "%)<br>";
-          const show_model_playing_x_button = 
-              create_button("Show a game where trained player was X",
-                            function () {
-                                const playing_first_boards = data.boards.slice(0, data.statistics.last_board_with_model_playing_x);
-                                replace_button_results(show_model_playing_x_button,
-                                                       random_game_display(playing_first_boards));
-                            });
-          update_button(show_model_playing_x_button);
-          const show_model_playing_o_button = 
-              create_button("Show a game where trained player was O",
-                            function () {
-                                const playing_second_boards = data.boards.slice(data.statistics.last_board_with_model_playing_x);
-                                 replace_button_results(show_model_playing_o_button,
-                                                        random_game_display(playing_second_boards));
-                            });
-          update_button(show_model_playing_o_button);
-      }
+      message.innerHTML +=
+           "<b>" + player_1 + ": </b>" +
+           "Wins = "   + statistics.player_1_wins + " (" + Math.round(100*statistics.player_1_wins/number_of_games) + "%); " +
+           "Losses = " + statistics.player_2_wins + " (" + Math.round(100*statistics.player_2_wins/number_of_games) + "%)<br>";
+      const show_first_player_playing_x_button = 
+          create_button("Show a game where " + player_1 + " was X",
+                        function () {
+                            const playing_first_boards = data.boards.slice(0, data.statistics.last_board_with_player_1_going_first);
+                            replace_button_results(show_first_player_playing_x_button,
+                                                   random_game_display(playing_first_boards));
+                        });
+      update_button(show_first_player_playing_x_button);
+      const show_first_player_playing_o_button = 
+          create_button("Show a game where " + player_1 + " was O",
+                        function () {
+                             const playing_second_boards = data.boards.slice(data.statistics.last_board_with_player_1_going_first);
+                             replace_button_results(show_first_player_playing_o_button,
+                                                    random_game_display(playing_second_boards));
+                        });
+      update_button(show_first_player_playing_o_button);
     });
   };
   let button = create_button(button_label, play_games);
@@ -449,13 +419,10 @@ const create_model_with_parameters = function () {
         model_configuration.push(Math.round(gui_state["Model"]["Size of third layer"]));
       }
       const name = name_input.value;
-      const new_model = create_model(model_configuration, gui_state["Model"]["Learning rate"], name);
-      const old_model = models[name];
-      models[name] = new_model;
-      model = new_model;
+      model = create_model(model_configuration, gui_state["Model"]["Learning rate"], name);
       train_button.disabled = false;
       let html = "<br>A new model named '" + name + "' created and it is ready to be trained.";
-      if (old_model) {
+      if (models[name]) {
           html += "<br>It replaces the old model of the same name.";
       }
       model.summary(50, // line length
@@ -543,14 +510,13 @@ const evaluate_training = function () {
   draw_area.appendChild(show_first_move_scores_button);
   show_first_move_scores_button.appendChild(display);
   parameters_interface().evaluation.open();
-  create_data_interface("Play trained player against random player",
+  create_data_interface("Play games using 'Player 1' and 'Player 2' settings",
                         () => Math.round(gui_state["Evaluation"]["Number of games to play"]),
-                        draw_area,
-                        [[1], [2]]); // split the games between trained player going first or not
-  create_data_interface("Play trained player against itself",
-                        () => Math.round(gui_state["Evaluation"]["Number of games to play"]),
-                        draw_area,
-                        [1, 2]); // both players use the model
+                        draw_area);
+//   create_data_interface("Play trained player against itself",
+//                         () => Math.round(gui_state["Evaluation"]["Number of games to play"]),
+//                         draw_area,
+//                         [1, 2]); // both players use the model
 };
 
 const gui_state = 
@@ -563,7 +529,9 @@ const gui_state =
    "Testing": {},
    "Evaluation": {"Number of games to play": 100,
                   "Trained model strategy": 'Use scores as probabilities',
-                  "What to do with new games": 'Add to dataset for future training'}
+                  "What to do with new games": 'Add to dataset for future training',
+                  "Player 1": 'Random player',
+                  "Player 2": 'Random player'}
 };
 
 const create_parameters_interface = function () {
@@ -584,12 +552,15 @@ const create_parameters_interface = function () {
   model.add(gui_state["Model"], 'Size of third layer').min(0).max(100);
   let training = parameters_gui.addFolder("Training");
   training.add(gui_state["Training"], 'Number of iterations').min(1).max(10000);
-  let evaluation = parameters_gui.addFolder("Evaluation");
+  evaluation = parameters_gui.addFolder("Evaluation");
   evaluation.add(gui_state["Evaluation"], "Number of games to play").min(1).max(100000);
-  evaluation.add(gui_state["Evaluation"], "Trained model strategy",
+  evaluation.add(gui_state["Evaluation"],
+                 "Trained model strategy",
                  ['Use scores as probabilities', 'Use highest score']);
-  evaluation.add(gui_state["Evaluation"], "What to do with new games",
+  evaluation.add(gui_state["Evaluation"],
+                 "What to do with new games",
                  ["Add to dataset for future training", "Replace training dataset"]);
+  update_evaluation_model_choices();
   return {input_data: input_data,
           model: model,
           training: training,
@@ -652,7 +623,7 @@ const load_model = async function () {
   if (models[name]) {
      message.innerHTML += "<br>Replaced a model with the same name.";
   }
-  models[name] = model;
+  add_to_models(model);
   replace_button_results(load_button, message);  
   // to add more data enable these options
   create_model_button.disabled = false;
