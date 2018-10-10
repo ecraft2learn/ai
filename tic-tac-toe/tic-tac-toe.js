@@ -237,7 +237,7 @@ const create_data = async function (number_of_games, players) {
           statistics: statistics};
 };
 
-const train_model = async function (data, epochs) {
+const train_model = async function (data, epochs, success_callback, error_callback) {
   const xs = tf.tensor2d(data.boards);
   const ys = tf.tensor2d(data.outcomes, [data.outcomes.length, 1]);
   // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
@@ -251,17 +251,20 @@ const train_model = async function (data, epochs) {
   // Train the model using the data
   let start = Date.now();
   model.optimizer.learningRate = gui_state["Training"]["Learning rate"];
-  await model.fit(xs,
-                  ys, 
-                  {epochs: epochs,
-                   callbacks: callbacks});
-  let duration = Math.round((Date.now()-start)/1000);
-  add_to_models(model);
-  model_trained = true;
-  xs.dispose();
-  ys.dispose();
-  return {duration: duration,
-          loss: epoch_history[epochs-1].loss};
+  tf.tidy(() => {
+      model.fit(xs,
+                ys,
+                {epochs: epochs,
+                 callbacks: callbacks})
+          .then(() => {
+                let duration = Math.round((Date.now()-start)/1000);
+                add_to_models(model);
+                model_trained = true;
+                success_callback({duration: duration,
+                                  loss: epoch_history[epochs-1].loss});       
+                },
+                error_callback);
+       });
 };
 
 const moves_to_html = function (moves, board) {
@@ -440,10 +443,16 @@ const create_model_with_parameters = function () {
   const create_model_with_current_settings = function () {
       let model_configuration = [Math.round(gui_state["Model"]["Size of first layer"])];
       if (gui_state["Model"]["Size of second layer"] > .5) {
-        model_configuration.push(Math.round(gui_state["Model"]["Size of second layer"]));
+          model_configuration.push(Math.round(gui_state["Model"]["Size of second layer"]));
       }
       if (gui_state["Model"]["Size of third layer"] > .5) {
-        model_configuration.push(Math.round(gui_state["Model"]["Size of third layer"]));
+          model_configuration.push(Math.round(gui_state["Model"]["Size of third layer"]));
+      }
+      if (gui_state["Model"]["Size of fourth layer"] > .5) {
+          model_configuration.push(Math.round(gui_state["Model"]["Size of fourth layer"]));
+      }
+      if (gui_state["Model"]["Size of fifth layer"] > .5) {
+          model_configuration.push(Math.round(gui_state["Model"]["Size of fifth layer"]));
       }
       const name = name_input.value;
       model = create_model(model_configuration, gui_state["Training"]["Learning rate"], name);
@@ -487,13 +496,23 @@ const train_with_parameters = async function () {
   const draw_area = surface.drawArea;
   const train_with_current_settings = async function () {
     let message = document.createElement('div');
+    let success_callback = (training_statistics) => {
+        let {duration, loss} = training_statistics;
+        message.innerHTML = "<br>Training took " + duration + " seconds. Final error rate is " + Math.round(100*loss) +"%.";
+        evaluate_button.disabled = false;       
+    };
+    let error_callback = (error) => {
+        message.innerHTML = "<b>Error:</b> " + error.message + "<br>";
+        report_error(error);
+    };
     message.innerHTML = "<br>Training started. Learning from " + training_data.boards.length + " game moves. Please wait.";
     draw_area.appendChild(message);
     setTimeout(async function () {
         // without the timeout the message above isn't displayed
-        let {duration, loss} = await train_model(training_data, Math.round(gui_state["Training"]["Number of iterations"]));
-        message.innerHTML = "<br>Training took " + duration + " seconds. Final error rate is " + Math.round(100*loss) +"%.";
-        evaluate_button.disabled = false; 
+        await train_model(training_data,
+                          Math.round(gui_state["Training"]["Number of iterations"]),
+                          success_callback,
+                          error_callback); 
     });
   };
   parameters_interface().training.open();
@@ -556,7 +575,9 @@ const gui_state =
   {"Input data": {"Random player versus random player games": 100},
    "Model": {"Size of first layer": 100,
              "Size of second layer": 50,
-             "Size of third layer": 20},
+             "Size of third layer": 20,
+             "Size of fourth layer": 0,
+             "Size of fifth layer": 0},
    "Training": {"Learning rate": .001,
                 "Number of iterations": 120},
    "Testing": {},
@@ -583,6 +604,8 @@ const create_parameters_interface = function () {
   model.add(gui_state["Model"], 'Size of first layer').min(1).max(100);
   model.add(gui_state["Model"], 'Size of second layer').min(0).max(100);
   model.add(gui_state["Model"], 'Size of third layer').min(0).max(100);
+  model.add(gui_state["Model"], 'Size of fourth layer').min(0).max(100);
+  model.add(gui_state["Model"], 'Size of fifth layer').min(0).max(100);
   let training = parameters_gui.addFolder("Training");
   training.add(gui_state["Training"], 'Number of iterations').min(1).max(1000);
   training.add(gui_state["Training"], 'Learning rate').min(.00001).max(.1);
@@ -676,6 +699,10 @@ let create_button = function (label, click_handler) {
   button.addEventListener('click', click_handler);
   button.id = label; // for ease of replacing it with a newer version
   return button;
+};
+
+let report_error = function (error) {
+  console.log(error); // for now
 };
 
 create_data_button.addEventListener('click', create_data_with_parameters);
