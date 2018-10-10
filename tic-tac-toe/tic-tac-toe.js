@@ -8,7 +8,8 @@ let model_trained = false;
 let models = {};
 let model;
 
-let data; // current data available for training
+let training_data;
+let evaluation_data; // may be exploring how games go without wanting to add to training data
 let evaluation;
 
 const settings_element = document.getElementById('settings');
@@ -247,7 +248,7 @@ const train_model = async function (data, epochs) {
                                                         epoch_history,
                                                         ['loss']);
                                   }};
-  // Train the model using the data.
+  // Train the model using the data
   let start = Date.now();
   model.optimizer.learningRate = gui_state["Training"]["Learning rate"];
   await model.fit(xs,
@@ -348,18 +349,19 @@ const create_data_interface = async function(button_label, number_of_games_funct
     setTimeout(async function () {
       // without the timeout the please wait message isn't seen    
       let new_data = await create_data(number_of_games, [player_1, player_2]);
-      if (!data || gui_state["Evaluation"]["What to do with new games"] === 'Replace training dataset') {
-          data = new_data;
-      } else {
-          let merged_data = {boards: data.boards.concat(new_data.boards),
-                             outcomes: data.outcomes.concat(new_data.outcomes),
+      evaluation_data = new_data;
+      if (!training_data || gui_state["Evaluation"]["What to do with new games"] === 'Replace training dataset') {
+          training_data = new_data;
+      } else if (gui_state["Evaluation"]["What to do with new games"] === 'Add to dataset for future training') {
+          let merged_data = {boards: training_data.boards.concat(new_data.boards),
+                             outcomes: training_data.outcomes.concat(new_data.outcomes),
                              statistics: new_data.statistics};
-          data = merged_data;
-      }
+          training_data = merged_data;
+      } // do nothing for Don't add to dataset
       train_button.disabled = false;
       create_model_button.disabled = false; // there is data so can move forward (though really only training needs data)
       message.style.font = "Courier"; // looks better with monospaced font
-      let statistics = data.statistics;
+      let statistics = evaluation_data.statistics;
       message.innerHTML = 
           number_of_games + " games created.<br>" +
           "X wins = " + statistics.x_wins + " ("   + Math.round(100*statistics.x_wins/number_of_games) +"%); " +
@@ -379,7 +381,8 @@ const create_data_interface = async function(button_label, number_of_games_funct
       const show_first_player_playing_x_button = 
           create_button("Show a game where " + player_1 + " was X",
                         function () {
-                            const playing_first_boards = data.boards.slice(0, data.statistics.last_board_with_player_1_going_first);
+                            const playing_first_boards = 
+                                evaluation_data.boards.slice(0, evaluation_data.statistics.last_board_with_player_1_going_first);
                             replace_button_results(show_first_player_playing_x_button,
                                                    random_game_display(playing_first_boards));
                         });
@@ -387,7 +390,8 @@ const create_data_interface = async function(button_label, number_of_games_funct
       const show_first_player_playing_o_button = 
           create_button("Show a game where " + player_1 + " was O",
                         function () {
-                             const playing_second_boards = data.boards.slice(data.statistics.last_board_with_player_1_going_first);
+                             const playing_second_boards =
+                                evaluation_data.boards.slice(evaluation_data.statistics.last_board_with_player_1_going_first);
                              replace_button_results(show_first_player_playing_o_button,
                                                     random_game_display(playing_second_boards));
                         });
@@ -483,11 +487,11 @@ const train_with_parameters = async function () {
   const draw_area = surface.drawArea;
   const train_with_current_settings = async function () {
     let message = document.createElement('div');
-    message.innerHTML = "<br>Training started. Learning from " + data.boards.length + " game moves. Please wait.";
+    message.innerHTML = "<br>Training started. Learning from " + training_data.boards.length + " game moves. Please wait.";
     draw_area.appendChild(message);
     setTimeout(async function () {
         // without the timeout the message above isn't displayed
-        let {duration, loss} = await train_model(data, Math.round(gui_state["Training"]["Number of iterations"]));
+        let {duration, loss} = await train_model(training_data, Math.round(gui_state["Training"]["Number of iterations"]));
         message.innerHTML = "<br>Training took " + duration + " seconds. Final error rate is " + Math.round(100*loss) +"%.";
         evaluate_button.disabled = false; 
     });
@@ -594,7 +598,7 @@ const create_parameters_interface = function () {
                  ['Use scores as probabilities', 'Use highest score']);
   evaluation.add(gui_state["Evaluation"],
                  "What to do with new games",
-                 ["Add to dataset for future training", "Replace training dataset"]);
+                 ["Add to dataset for future training", "Replace training dataset", "Don't add to dataset"]);
   update_evaluation_model_choices();
   return {input_data: input_data,
           model: model,
