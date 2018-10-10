@@ -608,7 +608,7 @@ const create_parameters_interface = function () {
   model.add(gui_state["Model"], 'Size of fifth layer').min(0).max(100);
   let training = parameters_gui.addFolder("Training");
   training.add(gui_state["Training"], 'Number of iterations').min(1).max(1000);
-  training.add(gui_state["Training"], 'Learning rate').min(.00001).max(.1);
+  training.add(gui_state["Training"], 'Learning rate').min(.00001).max(.9999);
   evaluation = parameters_gui.addFolder("Evaluation");
   evaluation.add(gui_state["Evaluation"], "Number of games to play").min(1).max(100000);
   evaluation.add(gui_state["Evaluation"], "Player 1", ['Random player']);
