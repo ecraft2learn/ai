@@ -28,37 +28,6 @@ const add_to_models = function (model) {
     }
 };
 
-const update_evaluation_model_choices = function () {
-    let names = Object.keys(models);
-    if (names.length === 0) {
-        return;
-    }
-    const updateDatDropdown = function(target, list) { 
-        // copied from https://stackoverflow.com/questions/16166440/refresh-dat-gui-with-new-values  
-        innerHTMLStr = "";
-        if(list.constructor.name == 'Array'){
-            for(var i=0; i<list.length; i++){
-                var str = "<option value='" + list[i] + "'>" + list[i] + "</option>";
-                innerHTMLStr += str;        
-            }
-        }
-
-        if(list.constructor.name == 'Object'){
-            for(var key in list){
-                var str = "<option value='" + list[key] + "'>" + key + "</option>";
-                innerHTMLStr += str;
-            }
-        }
-        if (innerHTMLStr != "") target.domElement.children[0].innerHTML = innerHTMLStr;
-    }
-    names = ['Random player'].concat(names); // keep the same order of options
-    evaluation.__controllers.forEach(function (controller) {
-        if (controller.property === 'Player 1' || controller.property === 'Player 2') {
-            updateDatDropdown(controller, names);
-        }
-    });     
-};
-
 const shape_of_data = (data) => {
    if (typeof data[0] === "number") {
       return [data.length];
@@ -87,6 +56,271 @@ const create_model = function (model_configuration, learning_rate, name) {
   });
   return model;
 };
+
+const train_model = async function (data, epochs, success_callback, error_callback) {
+  const xs = tf.tensor2d(data.boards);
+  const ys = tf.tensor2d(data.outcomes, [data.outcomes.length, 1]);
+  // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
+  const epoch_history = [];
+  const callbacks = {onEpochEnd: async (epoch, h) => {
+                                     epoch_history.push(h);
+                                     tfvis.show.history({name: 'Error rate', tab: 'Training' },
+                                                        epoch_history,
+                                                        ['loss']);
+                                  }};
+  // Train the model using the data
+  let start = Date.now();
+  model.optimizer.learningRate = gui_state["Training"]["Learning rate"];
+  tf.tidy(() => {
+      model.fit(xs,
+                ys,
+                {epochs: epochs,
+                 callbacks: callbacks})
+          .then(() => {
+                let duration = Math.round((Date.now()-start)/1000);
+                add_to_models(model);
+                model_trained = true;
+                success_callback({duration: duration,
+                                  loss: epoch_history[epochs-1].loss});       
+                },
+                error_callback);
+       });
+};
+
+let create_model_with_current_settings_button;
+
+const create_model_with_parameters = function () {
+  const surface = tfvis.visor().surface({name: 'Tic Tac Toe', tab: 'Model'});
+  const draw_area = surface.drawArea;
+  parameters_interface().model.open();
+  let name_input;
+  let message;
+  const create_model_with_current_settings = function () {
+      let model_configuration = [Math.round(gui_state["Model"]["Size of first layer"])];
+      if (gui_state["Model"]["Size of second layer"] > .5) {
+          model_configuration.push(Math.round(gui_state["Model"]["Size of second layer"]));
+      }
+      if (gui_state["Model"]["Size of third layer"] > .5) {
+          model_configuration.push(Math.round(gui_state["Model"]["Size of third layer"]));
+      }
+      if (gui_state["Model"]["Size of fourth layer"] > .5) {
+          model_configuration.push(Math.round(gui_state["Model"]["Size of fourth layer"]));
+      }
+      if (gui_state["Model"]["Size of fifth layer"] > .5) {
+          model_configuration.push(Math.round(gui_state["Model"]["Size of fifth layer"]));
+      }
+      const name = name_input.value;
+      model = create_model(model_configuration, gui_state["Training"]["Learning rate"], name);
+      train_button.disabled = false;
+      let html = "<br>A new model named '" + name + "' created and it is ready to be trained.";
+      if (models[name]) {
+          html += "<br>It replaces the old model of the same name.";
+      }
+      model.summary(50, // line length
+                    undefined,
+                    (line) => {
+                      html += "<br>" + line;
+                    });
+      message.innerHTML = html;
+  };
+  if (!create_model_with_current_settings_button) {
+      name_input = document.createElement('input');
+      name_input.type = 'text';
+      name_input.id = "name_element";
+      name_input.name = "name_element";
+      name_input.value = 'my-model';
+      const label = document.createElement('label');
+      label.for = "name_element";
+      label.innerHTML = "Name of model: ";
+      const div = document.createElement('div');
+      div.appendChild(label);
+      div.appendChild(name_input);
+      draw_area.appendChild(div);
+      create_model_with_current_settings_button = 
+          create_button("Create model with current settings", create_model_with_current_settings);
+      draw_area.appendChild(create_model_with_current_settings_button);
+      message = document.createElement('div');
+      draw_area.appendChild(message);        
+  }
+};
+
+let train_with_current_settings_button;
+
+const train_with_parameters = async function () {
+  const surface = tfvis.visor().surface({name: 'Tic Tac Toe', tab: 'Training'});
+  const draw_area = surface.drawArea;
+  const train_with_current_settings = async function () {
+    let message = document.createElement('div');
+    let success_callback = (training_statistics) => {
+        let {duration, loss} = training_statistics;
+        message.innerHTML = "<br>Training took " + duration + " seconds. Final error rate is " + Math.round(100*loss) +"%.";
+        evaluate_button.disabled = false;       
+    };
+    let error_callback = (error) => {
+        message.innerHTML = "<b>Error:</b> " + error.message + "<br>";
+        report_error(error);
+    };
+    message.innerHTML = "<br>Training started. Learning from " + training_data.boards.length + " game moves. Please wait.";
+    draw_area.appendChild(message);
+    setTimeout(async function () {
+        // without the timeout the message above isn't displayed
+        await train_model(training_data,
+                          Math.round(gui_state["Training"]["Number of iterations"]),
+                          success_callback,
+                          error_callback); 
+    });
+  };
+  parameters_interface().training.open();
+  if (!train_with_current_settings_button) {
+      train_with_current_settings_button = create_button("Train model with current settings", train_with_current_settings);
+      draw_area.appendChild(train_with_current_settings_button);    
+  }
+};
+
+let parameters_gui;
+
+const parameters_interface = function () {
+  if (!parameters_gui) {
+      parameters_gui = create_parameters_interface();
+  }
+  return parameters_gui;
+};
+
+const gui_state = 
+  {"Input data": {"Random player versus random player games": 100},
+   "Model": {"Size of first layer": 100,
+             "Size of second layer": 50,
+             "Size of third layer": 20,
+             "Size of fourth layer": 0,
+             "Size of fifth layer": 0},
+   "Training": {"Learning rate": .001,
+                "Number of iterations": 120},
+   "Testing": {},
+   "Evaluation": {"Number of games to play": 100,
+                  "Player 1": 'Random player',
+                  "Player 2": 'Random player',
+                  "Player 1's strategy": 'Use scores as probabilities',
+                  "Player 2's strategy": 'Use scores as probabilities',
+                  "What to do with new games": 'Add to dataset for future training',}
+};
+
+const create_parameters_interface = function () {
+  const parameters_gui = new dat.GUI({width: 600,
+                                      autoPlace: false});
+  settings_element.appendChild(parameters_gui.domElement);
+  settings_element.style.display = "block";
+  parameters_gui.domElement.style.padding = "12px";
+  let input_data = parameters_gui.addFolder("Input data");
+//   const architectureController =
+//     input.add(guiState.input, 'mobileNetArchitecture', ['1.01', '1.00', '0.75', '0.50']);
+//   input.add(guiState.input, 'outputStride', [8, 16, 32]);
+  input_data.add(gui_state["Input data"], 'Random player versus random player games').min(1).max(10000);
+  let model = parameters_gui.addFolder("Model");
+  model.add(gui_state["Model"], 'Size of first layer').min(1).max(100);
+  model.add(gui_state["Model"], 'Size of second layer').min(0).max(100);
+  model.add(gui_state["Model"], 'Size of third layer').min(0).max(100);
+  model.add(gui_state["Model"], 'Size of fourth layer').min(0).max(100);
+  model.add(gui_state["Model"], 'Size of fifth layer').min(0).max(100);
+  let training = parameters_gui.addFolder("Training");
+  training.add(gui_state["Training"], 'Number of iterations').min(1).max(1000);
+  training.add(gui_state["Training"], 'Learning rate').min(.00001).max(.9999);
+  evaluation = parameters_gui.addFolder("Evaluation");
+  evaluation.add(gui_state["Evaluation"], "Number of games to play").min(1).max(100000);
+  evaluation.add(gui_state["Evaluation"], "Player 1", ['Random player']);
+  evaluation.add(gui_state["Evaluation"], "Player 2", ['Random player']); 
+  evaluation.add(gui_state["Evaluation"],
+                 "Player 1's strategy",
+                 ['Use scores as probabilities', 'Use highest score']);
+  evaluation.add(gui_state["Evaluation"],
+                 "Player 2's strategy",
+                 ['Use scores as probabilities', 'Use highest score']);
+  evaluation.add(gui_state["Evaluation"],
+                 "What to do with new games",
+                 ["Add to dataset for future training", "Replace training dataset", "Don't add to dataset"]);
+  update_evaluation_model_choices();
+  return {input_data: input_data,
+          model: model,
+          training: training,
+          evaluation: evaluation};
+};
+
+let save_button;
+let load_button;
+
+const save_and_load = function () {
+    const surface = tfvis.visor().surface({name: 'Tic Tac Toe', tab: 'Save/Load'});
+    const draw_area = surface.drawArea;
+    if (save_button) {
+        return; // already set up 
+    }
+    draw_area.innerHTML = ""; // reset if rerun
+    save_button = create_button("Save trained model", save_model);
+    draw_area.appendChild(save_button);
+    load_button = create_button("Load a trained model", load_model);
+    draw_area.appendChild(load_button);
+    const file_input = function(label, id) {
+      const div = document.createElement('div');
+      const label_element = document.createElement('label');
+      const input_element = document.createElement('input');
+      label_element.for = id;
+      label_element.innerHTML = label;
+      input_element.type = 'file';
+      input_element.id = id;
+      input_element.name = id;
+      div.appendChild(label_element);
+      div.appendChild(input_element);
+      div.style.padding = "12px";
+      return div;
+    };
+    draw_area.appendChild(file_input('Saved model JSON file: ', 'saved_json'));
+    draw_area.appendChild(file_input('Saved model weights file: ', 'saved_weights'));
+};
+
+const save_model = async function () {
+  let URL = 'downloads://' + model.name;
+  return await model.save(URL);
+};
+
+const load_model = async function () {
+  const saved_model_element = document.getElementById('saved_json');
+  const saved_weights_element = document.getElementById('saved_weights');
+  if (!saved_model_element.files[0] || !saved_weights_element.files[0]) {
+      let message = document.createElement('p');
+      message.innerHTML = "Please choose files below and then click this again.";
+      replace_button_results(load_button, message);
+      return;
+  }
+  model = await tf.loadModel(tf.io.browserFiles([saved_model_element.files[0],
+                                                 saved_weights_element.files[0]]));
+  model_trained = true;
+  let message = document.createElement('p');
+  const model_name = saved_model_element.files[0].name.substring(0, saved_model_element.files[0].name.length-".json".length);
+  message.innerHTML = model_name + " loaded and ready to evaluate.";
+  model.name = model_name;
+  if (models[name]) {
+     message.innerHTML += "<br>Replaced a model with the same name.";
+  }
+  add_to_models(model);
+  replace_button_results(load_button, message);  
+  // to add more data enable these options
+  create_model_button.disabled = false;
+  evaluate_button.disabled = false;
+};
+
+let create_button = function (label, click_handler) {
+  const button = document.createElement('button');
+  button.innerHTML = label;
+  button.className = "support-window-button";
+  button.addEventListener('click', click_handler);
+  button.id = label; // for ease of replacing it with a newer version
+  return button;
+};
+
+let report_error = function (error) {
+  console.log(error); // for now
+};
+
+// following is Tic Tac Toe specific
 
 const play = function (players, game_history, non_deterministic) {
       let board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -245,36 +479,6 @@ const create_data = async function (number_of_games, players) {
           statistics: statistics};
 };
 
-const train_model = async function (data, epochs, success_callback, error_callback) {
-  const xs = tf.tensor2d(data.boards);
-  const ys = tf.tensor2d(data.outcomes, [data.outcomes.length, 1]);
-  // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
-  const epoch_history = [];
-  const callbacks = {onEpochEnd: async (epoch, h) => {
-                                     epoch_history.push(h);
-                                     tfvis.show.history({name: 'Error rate', tab: 'Training' },
-                                                        epoch_history,
-                                                        ['loss']);
-                                  }};
-  // Train the model using the data
-  let start = Date.now();
-  model.optimizer.learningRate = gui_state["Training"]["Learning rate"];
-  tf.tidy(() => {
-      model.fit(xs,
-                ys,
-                {epochs: epochs,
-                 callbacks: callbacks})
-          .then(() => {
-                let duration = Math.round((Date.now()-start)/1000);
-                add_to_models(model);
-                model_trained = true;
-                success_callback({duration: duration,
-                                  loss: epoch_history[epochs-1].loss});       
-                },
-                error_callback);
-       });
-};
-
 const moves_to_html = function (moves, board) {
   let html = "";
   for (let i = 0; i < 9; i++) {
@@ -413,15 +617,6 @@ const create_data_interface = async function(button_label, number_of_games_funct
   interface_element.appendChild(button);
 };
 
-let parameters_gui;
-
-const parameters_interface = function () {
-  if (!parameters_gui) {
-      parameters_gui = create_parameters_interface();
-  }
-  return parameters_gui;
-};
-
 let create_data_initialised = false;
 
 const create_data_with_parameters = async function () {
@@ -438,96 +633,6 @@ const create_data_with_parameters = async function () {
     } else {
 //         surface.label.click();
     }
-};
-
-let create_model_with_current_settings_button;
-
-const create_model_with_parameters = function () {
-  const surface = tfvis.visor().surface({name: 'Tic Tac Toe', tab: 'Model'});
-  const draw_area = surface.drawArea;
-  parameters_interface().model.open();
-  let name_input;
-  let message;
-  const create_model_with_current_settings = function () {
-      let model_configuration = [Math.round(gui_state["Model"]["Size of first layer"])];
-      if (gui_state["Model"]["Size of second layer"] > .5) {
-          model_configuration.push(Math.round(gui_state["Model"]["Size of second layer"]));
-      }
-      if (gui_state["Model"]["Size of third layer"] > .5) {
-          model_configuration.push(Math.round(gui_state["Model"]["Size of third layer"]));
-      }
-      if (gui_state["Model"]["Size of fourth layer"] > .5) {
-          model_configuration.push(Math.round(gui_state["Model"]["Size of fourth layer"]));
-      }
-      if (gui_state["Model"]["Size of fifth layer"] > .5) {
-          model_configuration.push(Math.round(gui_state["Model"]["Size of fifth layer"]));
-      }
-      const name = name_input.value;
-      model = create_model(model_configuration, gui_state["Training"]["Learning rate"], name);
-      train_button.disabled = false;
-      let html = "<br>A new model named '" + name + "' created and it is ready to be trained.";
-      if (models[name]) {
-          html += "<br>It replaces the old model of the same name.";
-      }
-      model.summary(50, // line length
-                    undefined,
-                    (line) => {
-                      html += "<br>" + line;
-                    });
-      message.innerHTML = html;
-  };
-  if (!create_model_with_current_settings_button) {
-      name_input = document.createElement('input');
-      name_input.type = 'text';
-      name_input.id = "name_element";
-      name_input.name = "name_element";
-      name_input.value = 'my-model';
-      const label = document.createElement('label');
-      label.for = "name_element";
-      label.innerHTML = "Name of model: ";
-      const div = document.createElement('div');
-      div.appendChild(label);
-      div.appendChild(name_input);
-      draw_area.appendChild(div);
-      create_model_with_current_settings_button = 
-          create_button("Create model with current settings", create_model_with_current_settings);
-      draw_area.appendChild(create_model_with_current_settings_button);
-      message = document.createElement('div');
-      draw_area.appendChild(message);        
-  }
-};
-
-let train_with_current_settings_button;
-
-const train_with_parameters = async function () {
-  const surface = tfvis.visor().surface({name: 'Tic Tac Toe', tab: 'Training'});
-  const draw_area = surface.drawArea;
-  const train_with_current_settings = async function () {
-    let message = document.createElement('div');
-    let success_callback = (training_statistics) => {
-        let {duration, loss} = training_statistics;
-        message.innerHTML = "<br>Training took " + duration + " seconds. Final error rate is " + Math.round(100*loss) +"%.";
-        evaluate_button.disabled = false;       
-    };
-    let error_callback = (error) => {
-        message.innerHTML = "<b>Error:</b> " + error.message + "<br>";
-        report_error(error);
-    };
-    message.innerHTML = "<br>Training started. Learning from " + training_data.boards.length + " game moves. Please wait.";
-    draw_area.appendChild(message);
-    setTimeout(async function () {
-        // without the timeout the message above isn't displayed
-        await train_model(training_data,
-                          Math.round(gui_state["Training"]["Number of iterations"]),
-                          success_callback,
-                          error_callback); 
-    });
-  };
-  parameters_interface().training.open();
-  if (!train_with_current_settings_button) {
-      train_with_current_settings_button = create_button("Train model with current settings", train_with_current_settings);
-      draw_area.appendChild(train_with_current_settings_button);    
-  }
 };
 
 const evaluate_training = function () {
@@ -579,139 +684,38 @@ const evaluate_training = function () {
 //                         [1, 2]); // both players use the model
 };
 
-const gui_state = 
-  {"Input data": {"Random player versus random player games": 100},
-   "Model": {"Size of first layer": 100,
-             "Size of second layer": 50,
-             "Size of third layer": 20,
-             "Size of fourth layer": 0,
-             "Size of fifth layer": 0},
-   "Training": {"Learning rate": .001,
-                "Number of iterations": 120},
-   "Testing": {},
-   "Evaluation": {"Number of games to play": 100,
-                  "Player 1": 'Random player',
-                  "Player 2": 'Random player',
-                  "Player 1's strategy": 'Use scores as probabilities',
-                  "Player 2's strategy": 'Use scores as probabilities',
-                  "What to do with new games": 'Add to dataset for future training',}
-};
-
-const create_parameters_interface = function () {
-  const parameters_gui = new dat.GUI({width: 600,
-                                      autoPlace: false});
-  settings_element.appendChild(parameters_gui.domElement);
-  settings_element.style.display = "block";
-  parameters_gui.domElement.style.padding = "12px";
-  let input_data = parameters_gui.addFolder("Input data");
-//   const architectureController =
-//     input.add(guiState.input, 'mobileNetArchitecture', ['1.01', '1.00', '0.75', '0.50']);
-//   input.add(guiState.input, 'outputStride', [8, 16, 32]);
-  input_data.add(gui_state["Input data"], 'Random player versus random player games').min(1).max(10000);
-  let model = parameters_gui.addFolder("Model");
-  model.add(gui_state["Model"], 'Size of first layer').min(1).max(100);
-  model.add(gui_state["Model"], 'Size of second layer').min(0).max(100);
-  model.add(gui_state["Model"], 'Size of third layer').min(0).max(100);
-  model.add(gui_state["Model"], 'Size of fourth layer').min(0).max(100);
-  model.add(gui_state["Model"], 'Size of fifth layer').min(0).max(100);
-  let training = parameters_gui.addFolder("Training");
-  training.add(gui_state["Training"], 'Number of iterations').min(1).max(1000);
-  training.add(gui_state["Training"], 'Learning rate').min(.00001).max(.9999);
-  evaluation = parameters_gui.addFolder("Evaluation");
-  evaluation.add(gui_state["Evaluation"], "Number of games to play").min(1).max(100000);
-  evaluation.add(gui_state["Evaluation"], "Player 1", ['Random player']);
-  evaluation.add(gui_state["Evaluation"], "Player 2", ['Random player']); 
-  evaluation.add(gui_state["Evaluation"],
-                 "Player 1's strategy",
-                 ['Use scores as probabilities', 'Use highest score']);
-  evaluation.add(gui_state["Evaluation"],
-                 "Player 2's strategy",
-                 ['Use scores as probabilities', 'Use highest score']);
-  evaluation.add(gui_state["Evaluation"],
-                 "What to do with new games",
-                 ["Add to dataset for future training", "Replace training dataset", "Don't add to dataset"]);
-  update_evaluation_model_choices();
-  return {input_data: input_data,
-          model: model,
-          training: training,
-          evaluation: evaluation};
-};
-
-let save_button;
-let load_button;
-
-const save_and_load = function () {
-    const surface = tfvis.visor().surface({name: 'Tic Tac Toe', tab: 'Save/Load'});
-    const draw_area = surface.drawArea;
-    if (save_button) {
-        return; // already set up 
+// a hack to update the list of choices of models a player should use
+const update_evaluation_model_choices = function () {
+    let names = Object.keys(models);
+    if (names.length === 0) {
+        return;
     }
-    draw_area.innerHTML = ""; // reset if rerun
-    save_button = create_button("Save trained model", save_model);
-    draw_area.appendChild(save_button);
-    load_button = create_button("Load a trained model", load_model);
-    draw_area.appendChild(load_button);
-    const file_input = function(label, id) {
-      const div = document.createElement('div');
-      const label_element = document.createElement('label');
-      const input_element = document.createElement('input');
-      label_element.for = id;
-      label_element.innerHTML = label;
-      input_element.type = 'file';
-      input_element.id = id;
-      input_element.name = id;
-      div.appendChild(label_element);
-      div.appendChild(input_element);
-      div.style.padding = "12px";
-      return div;
-    };
-    draw_area.appendChild(file_input('Saved model JSON file: ', 'saved_json'));
-    draw_area.appendChild(file_input('Saved model weights file: ', 'saved_weights'));
+    const updateDatDropdown = function(target, list) { 
+        // copied from https://stackoverflow.com/questions/16166440/refresh-dat-gui-with-new-values  
+        innerHTMLStr = "";
+        if(list.constructor.name == 'Array'){
+            for(var i=0; i<list.length; i++){
+                var str = "<option value='" + list[i] + "'>" + list[i] + "</option>";
+                innerHTMLStr += str;        
+            }
+        }
+
+        if(list.constructor.name == 'Object'){
+            for(var key in list){
+                var str = "<option value='" + list[key] + "'>" + key + "</option>";
+                innerHTMLStr += str;
+            }
+        }
+        if (innerHTMLStr != "") target.domElement.children[0].innerHTML = innerHTMLStr;
+    }
+    names = ['Random player'].concat(names); // keep the same order of options
+    evaluation.__controllers.forEach(function (controller) {
+        if (controller.property === 'Player 1' || controller.property === 'Player 2') {
+            updateDatDropdown(controller, names);
+        }
+    });     
 };
 
-const save_model = async function () {
-  let URL = 'downloads://' + model.name;
-  return await model.save(URL);
-};
-
-const load_model = async function () {
-  const saved_model_element = document.getElementById('saved_json');
-  const saved_weights_element = document.getElementById('saved_weights');
-  if (!saved_model_element.files[0] || !saved_weights_element.files[0]) {
-      let message = document.createElement('p');
-      message.innerHTML = "Please choose files below and then click this again.";
-      replace_button_results(load_button, message);
-      return;
-  }
-  model = await tf.loadModel(tf.io.browserFiles([saved_model_element.files[0],
-                                                 saved_weights_element.files[0]]));
-  model_trained = true;
-  let message = document.createElement('p');
-  const model_name = saved_model_element.files[0].name.substring(0, saved_model_element.files[0].name.length-".json".length);
-  message.innerHTML = model_name + " loaded and ready to evaluate.";
-  model.name = model_name;
-  if (models[name]) {
-     message.innerHTML += "<br>Replaced a model with the same name.";
-  }
-  add_to_models(model);
-  replace_button_results(load_button, message);  
-  // to add more data enable these options
-  create_model_button.disabled = false;
-  evaluate_button.disabled = false;
-};
-
-let create_button = function (label, click_handler) {
-  const button = document.createElement('button');
-  button.innerHTML = label;
-  button.className = "support-window-button";
-  button.addEventListener('click', click_handler);
-  button.id = label; // for ease of replacing it with a newer version
-  return button;
-};
-
-let report_error = function (error) {
-  console.log(error); // for now
-};
 
 create_data_button.addEventListener('click', create_data_with_parameters);
 create_model_button.addEventListener('click', create_model_with_parameters);
