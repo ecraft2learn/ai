@@ -249,6 +249,7 @@ const train_model = async function (data, epochs) {
                                   }};
   // Train the model using the data.
   let start = Date.now();
+  model.optimizer.learningRate = gui_state["Training"]["Learning rate"];
   await model.fit(xs,
                   ys, 
                   {epochs: epochs,
@@ -441,7 +442,7 @@ const create_model_with_parameters = function () {
         model_configuration.push(Math.round(gui_state["Model"]["Size of third layer"]));
       }
       const name = name_input.value;
-      model = create_model(model_configuration, gui_state["Model"]["Learning rate"], name);
+      model = create_model(model_configuration, gui_state["Training"]["Learning rate"], name);
       train_button.disabled = false;
       let html = "<br>A new model named '" + name + "' created and it is ready to be trained.";
       if (models[name]) {
@@ -549,11 +550,11 @@ const evaluate_training = function () {
 
 const gui_state = 
   {"Input data": {"Random player versus random player games": 100},
-   "Model": {"Learning rate": .001,
-             "Size of first layer": 100,
+   "Model": {"Size of first layer": 100,
              "Size of second layer": 50,
              "Size of third layer": 20},
-   "Training": {"Number of iterations": 120},
+   "Training": {"Learning rate": .001,
+                "Number of iterations": 120},
    "Testing": {},
    "Evaluation": {"Number of games to play": 100,
                   "Player 1": 'Random player',
@@ -575,12 +576,12 @@ const create_parameters_interface = function () {
 //   input.add(guiState.input, 'outputStride', [8, 16, 32]);
   input_data.add(gui_state["Input data"], 'Random player versus random player games').min(1).max(10000);
   let model = parameters_gui.addFolder("Model");
-  model.add(gui_state["Model"], 'Learning rate').min(.00001).max(.1);
   model.add(gui_state["Model"], 'Size of first layer').min(1).max(100);
   model.add(gui_state["Model"], 'Size of second layer').min(0).max(100);
   model.add(gui_state["Model"], 'Size of third layer').min(0).max(100);
   let training = parameters_gui.addFolder("Training");
   training.add(gui_state["Training"], 'Number of iterations').min(1).max(1000);
+  training.add(gui_state["Training"], 'Learning rate').min(.00001).max(.1);
   evaluation = parameters_gui.addFolder("Evaluation");
   evaluation.add(gui_state["Evaluation"], "Number of games to play").min(1).max(100000);
   evaluation.add(gui_state["Evaluation"], "Player 1", ['Random player']);
