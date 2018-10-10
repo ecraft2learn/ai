@@ -59,6 +59,14 @@ const update_evaluation_model_choices = function () {
     });     
 };
 
+const shape_of_data = (data) => {
+   if (typeof data[0] === "number") {
+      return [data.length];
+   } else {
+      return [data.length].concat(shape_of_data[data[0]]);
+   }
+};
+
 const create_model = function (model_configuration, learning_rate, name) {
   // following inspired by https://github.com/johnflux/deep-learning-tictactoe/blob/master/play.py
   const model = tf.sequential({name: name});
@@ -66,7 +74,7 @@ const create_model = function (model_configuration, learning_rate, name) {
       let configuration = {units: size,
                            activation: 'relu'};
       if (index === 0) {
-          configuration.inputShape = [9];
+          configuration.inputShape = shape_of_data(training_data.boards[0]);
       }
       model.add(tf.layers.dense(configuration));  
   });
