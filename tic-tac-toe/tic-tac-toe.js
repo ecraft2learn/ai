@@ -50,7 +50,7 @@ const update_evaluation_model_choices = function () {
         }
         if (innerHTMLStr != "") target.domElement.children[0].innerHTML = innerHTMLStr;
     }
-    names.push('Random player');
+    names = ['Random player'].concat(names); // keep the same order of options
     evaluation.__controllers.forEach(function (controller) {
         if (controller.property === 'Player 1' || controller.property === 'Player 2') {
             updateDatDropdown(controller, names);
@@ -507,9 +507,15 @@ const evaluate_training = function () {
     tf.tidy(() => {
       let board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
       let html = "<br>";
+      let model_name = gui_state["Evaluation"]['Player 1'];
+      let player_1_model = models[model_name];
+      if (!player_1_model) {
+          player_1_model = model;
+          html += "Player 1 is not using a model so current model used instead.<br><br>";
+      }
       for (let i = 0; i < 9; i++) {
           board[i] = 1;
-          let prediction = Math.round(100*model.predict(tf.tensor2d(board, [1, 9])).dataSync()[0]);
+          let prediction = Math.round(100*player_1_model.predict(tf.tensor2d(board, [1, 9])).dataSync()[0]);
           board[i] = 0;
           if (prediction < 10) {
               html += "&nbsp;";
@@ -528,7 +534,7 @@ const evaluate_training = function () {
 //       show_first_move_scores_button.remove();                 
     });
   };
-  const show_first_move_scores_button = create_button("Show the scores for different first moves", show_first_moves);
+  const show_first_move_scores_button = create_button("Show the scores for first moves by Player 1", show_first_moves);
   draw_area.appendChild(show_first_move_scores_button);
   show_first_move_scores_button.appendChild(display);
   parameters_interface().evaluation.open();
