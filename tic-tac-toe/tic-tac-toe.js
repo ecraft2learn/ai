@@ -4,7 +4,6 @@
 
 ((async function () {
 
-let model_trained = false;
 let models = {};
 let model;
 
@@ -29,37 +28,58 @@ const add_to_models = function (model) {
 };
 
 const shape_of_data = (data) => {
-   if (typeof data[0] === "number") {
+   if (typeof data === 'number') {
+       return [1];
+   } else if (typeof data[0] === "number") {
       return [data.length];
    } else {
       return [data.length].concat(shape_of_data[data[0]]);
    }
 };
 
-const create_model = function (model_configuration, learning_rate, name) {
-  // following inspired by https://github.com/johnflux/deep-learning-tictactoe/blob/master/play.py
-  const model = tf.sequential({name: name});
-  model_configuration.forEach((size, index) => {
-      let configuration = {units: size,
-                           activation: 'relu'};
-      if (index === 0) {
-          configuration.inputShape = shape_of_data(training_data.boards[0]);
-      }
-      model.add(tf.layers.dense(configuration));  
-  });
-  model.add(tf.layers.dense({units: 1,
-                             activation: 'relu',
-                             useBias: false}));
-  model.compile({
-      loss: 'meanSquaredError',
-      optimizer: tf.train.adam(learning_rate)
-  });
-  return model;
+const create_model = function (model_configuration, name, optimizer) {
+    // following inspired by https://github.com/johnflux/deep-learning-tictactoe/blob/master/play.py
+    const model = tf.sequential({name: name});
+    model_configuration.forEach((size, index) => {
+        let configuration = {units: size,
+                             activation: 'relu'};
+        if (index === 0) {
+            configuration.inputShape = shape_of_data(training_data.boards[0]);
+        }
+        model.add(tf.layers.dense(configuration));  
+    });
+    if (model_configuration[model_configuration.length-1] > 1) {
+       // not needed if last layer is already 1
+       // what if prediction is more than one number? 
+       model.add(tf.layers.dense({units: 1,
+                                  activation: 'relu',
+                                  useBias: false}));     
+    }
+    model.compile({loss: 'meanSquaredError',
+                   optimizer: optimizer || 'sgd'}); // or adam
+    add_to_models(model);
+    return model;
 };
 
-const train_model = async function (data, epochs, success_callback, error_callback) {
-  const xs = tf.tensor2d(data.boards);
-  const ys = tf.tensor2d(data.outcomes, [data.outcomes.length, 1]);
+const train_model = async function (model_or_model_name, data, epochs, learning_rate, success_callback, error_callback) {
+  if (typeof model_or_model_name === 'string') {
+      model = models[model_or_model_name];
+      if (!model) {
+          error_callback({message: "No model named " + model_or_model_name});
+          return;
+      }
+  } else {
+      model = model_or_model_name;
+  }
+  let xs;
+  let ys;
+  if (typeof data.boards[0] === 'number') {
+      xs = tf.tensor2d(data.boards,   [data.boards.length, 1]);
+      ys = tf.tensor2d(data.outcomes, [data.outcomes.length, 1]);
+  } else {
+      xs =tf.tensor2d(data.boards);
+      ys = tf.tensor2d(data.outcomes, [data.outcomes.length, 1]);
+  }
   // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
   const epoch_history = [];
   const callbacks = {onEpochEnd: async (epoch, h) => {
@@ -70,7 +90,9 @@ const train_model = async function (data, epochs, success_callback, error_callba
                                   }};
   // Train the model using the data
   let start = Date.now();
-  model.optimizer.learningRate = gui_state["Training"]["Learning rate"];
+  if (model.optimizer.learningRate) { // not every optimizer needs to have this property
+      model.optimizer.learningRate = learning_rate;
+  }
   tf.tidy(() => {
       model.fit(xs,
                 ys,
@@ -78,8 +100,6 @@ const train_model = async function (data, epochs, success_callback, error_callba
                  callbacks: callbacks})
           .then(() => {
                 let duration = Math.round((Date.now()-start)/1000);
-                add_to_models(model);
-                model_trained = true;
                 success_callback({duration: duration,
                                   loss: epoch_history[epochs-1].loss});       
                 },
@@ -110,7 +130,7 @@ const create_model_with_parameters = function () {
           model_configuration.push(Math.round(gui_state["Model"]["Size of fifth layer"]));
       }
       const name = name_input.value;
-      model = create_model(model_configuration, gui_state["Training"]["Learning rate"], name);
+      model = create_model(model_configuration, name);
       train_button.disabled = false;
       let html = "<br>A new model named '" + name + "' created and it is ready to be trained.";
       if (models[name]) {
@@ -164,8 +184,10 @@ const train_with_parameters = async function () {
     draw_area.appendChild(message);
     setTimeout(async function () {
         // without the timeout the message above isn't displayed
-        await train_model(training_data,
+        await train_model(model,
+                          training_data,
                           Math.round(gui_state["Training"]["Number of iterations"]),
+                          gui_state["Training"]["Learning rate"],
                           success_callback,
                           error_callback); 
     });
@@ -292,7 +314,6 @@ const load_model = async function () {
   }
   model = await tf.loadModel(tf.io.browserFiles([saved_model_element.files[0],
                                                  saved_weights_element.files[0]]));
-  model_trained = true;
   let message = document.createElement('p');
   const model_name = saved_model_element.files[0].name.substring(0, saved_model_element.files[0].name.length-".json".length);
   message.innerHTML = model_name + " loaded and ready to evaluate.";
@@ -546,6 +567,16 @@ const replace_button_results = function(element, child) {
     element.appendChild(child);
 };
 
+const add_to_dataset = 
+  (new_input, new_output) => {
+      if (!training_data || typeof training_data.boards === 'undefined') {
+          return {boards: new_input,
+                  outcomes: new_output};
+      }
+      return {boards: training_data.boards.concat(new_input),
+              outcomes: training_data.outcomes.concat(new_output)};
+};
+
 const create_data_interface = async function(button_label, number_of_games_function, interface_element) {
   const play_games = async function () {
     const message = document.createElement('p');
@@ -568,10 +599,8 @@ const create_data_interface = async function(button_label, number_of_games_funct
       if (!training_data || gui_state["Evaluation"]["What to do with new games"] === 'Replace training dataset') {
           training_data = new_data;
       } else if (gui_state["Evaluation"]["What to do with new games"] === 'Add to dataset for future training') {
-          let merged_data = {boards: training_data.boards.concat(new_data.boards),
-                             outcomes: training_data.outcomes.concat(new_data.outcomes),
-                             statistics: new_data.statistics};
-          training_data = merged_data;
+          training_data = add_to_dataset(new_data.boards, new_data.outcomes);
+          training_data.statistics = new_data.statistics;
       } // do nothing for Don't add to dataset
       train_button.disabled = false;
       create_model_button.disabled = false; // there is data so can move forward (though really only training needs data)
@@ -632,6 +661,26 @@ const create_data_with_parameters = async function () {
         create_data_initialised = true;
     } else {
 //         surface.label.click();
+    }
+};
+
+const predict = (model_name, input, success_callback, error_callback) => {
+    let model = models[model_name];
+    if (!model) {
+        error_callback("No model named " + model_name);
+        return;
+    }
+    try {
+        let input_tensor;
+        if (typeof input === 'number') {
+            input_tensor = tf.tensor2d([input], [1, 1]);
+        } else {
+            input_tensor = tf.tensor2d([input], [1].concat(shape_of_data(input)));
+        }
+        let prediction = model.predict(input_tensor);
+        success_callback(prediction.dataSync()[0]);
+    } catch (error) {
+        error_callback(error.message);
     }
 };
 
@@ -722,5 +771,83 @@ create_model_button.addEventListener('click', create_model_with_parameters);
 train_button.addEventListener('click', train_with_parameters);
 evaluate_button.addEventListener('click', evaluate_training);
 save_and_load_button.addEventListener('click', save_and_load);
+
+window.addEventListener('DOMContentLoaded',
+                        () => {
+                            if (window.parent !== window) {
+                                // not waiting for anything fo loaded and ready are the same
+                                window.parent.postMessage("Loaded", "*"); 
+                                window.parent.postMessage("Ready", "*");
+                            }
+                        });
+
+const receive_message =
+    (event) => {
+        let message = event.data;
+        if (typeof message.training_data !== 'undefined') {
+            if (message.training_data.ignore_old_dataset) {
+                training_data = {};
+            }
+            training_data =
+                add_to_dataset(message.training_data.input,
+                               message.training_data.output);
+        } else if (typeof message.create_model !== 'undefined') {
+            // add error handling later
+            let model = create_model(message.create_model.configuration,
+                                     message.create_model.name);
+            add_to_models(model);
+        } else if (typeof message.train !== 'undefined') {
+            const success_callback = (information) => {
+                event.source.postMessage({training_completed: information}, "*");
+            };
+            const error_callback = (error) => {
+                event.source.postMessage({error: error.message}, "*");
+            };
+            train_model(message.train.model_name,
+                        training_data,
+                        (message.train.epochs || 10),
+                        (message.train.learning_rate || .01),
+                        success_callback, error_callback);
+        } else if (typeof message.predict !== 'undefined') {
+            const success_callback = (result) => {
+                event.source.postMessage({prediction: result}, "*");
+            };
+            const error_callback = (error_message) => {
+                event.source.postMessage({error: error_message}, "*");
+            };
+            predict(message.predict.model_name, message.predict.input, success_callback, error_callback);
+        } else {
+            console.log("Unhandled message: ", message);
+        }
+};
+
+window.addEventListener('message', receive_message);
+
+const test_1 = () => {
+    // equivalent to https://js.tensorflow.org/#getting-started
+    window.postMessage({training_data:
+                        {input:  [1, 2, 3, 4],
+                         output: [1, 3, 5, 7]}}, "*");
+    window.postMessage({create_model:
+                        {configuration: [1],
+                         name: 'test 1'}}, "*");
+    window.postMessage({train: 
+                        {epochs: 10,
+                         learning_rate: .01,
+                         model_name: 'test 1'}}, "*");
+    window.addEventListener('message',
+        (event) => {
+            if (event.data.training_completed) {
+                window.postMessage({predict: 
+                                    {input: 5,
+                                     model_name: 'test 1'}}, "*");
+            } else if (event.data.prediction) {
+              console.log("Prediction is " + event.data.prediction + " (should ideally be close to 9)");
+            }
+        });    
+};
+
+// test_1();      
   
 }()));
+
