@@ -105,6 +105,15 @@ const load_image = function (image_url, callback) {
     };
 };
 
+const image_url_to_features_vector = function (image_url, time_stamp, post_to_tab) {
+    load_image(image_url,
+               async function (image) {
+                   logits = await infer(image);
+                   post_to_tab.postMessage({image_features: classifier.normalizeVectorToUnitLength(logits).dataSync(),
+                                            time_stamp: time_stamp});
+               });
+};
+
 const add_image_to_training = function (image_url, label_index, post_to_tab) {
     load_image(image_url,
                function (image) {
@@ -120,7 +129,13 @@ const add_image_to_training = function (image_url, label_index, post_to_tab) {
 };
 
 // 'conv_preds' is the logits activation of MobileNet.
-const infer = (image) => mobilenet_model.infer(image, 'conv_preds');
+
+const infer = async (image) => {
+    if (!mobilenet_model) {
+        await load_mobilenet();
+    }
+    return mobilenet_model.infer(image, 'conv_preds');
+};
 
 /**
  * Sets up a frames per second panel on the top-left of the window
@@ -200,14 +215,18 @@ const set_class_names = function (class_names) {
     }
 };
 
+const load_mobilenet = async function () {
+  classifier = knnClassifier.create();
+  mobilenet_model = await mobilenet.load(); 
+};
+
 /**
- * Kicks off the demo by loading the knn model, finding and loading
+ * Initialises by loading the knn model, finding and loading
  * available camera devices, and setting off the animate function.
  */
-async function bindPage(incoming_training_class_names, source) {
+const initialise_page = async function (incoming_training_class_names, source) {
   set_class_names(incoming_training_class_names);
-  classifier = knnClassifier.create();
-  mobilenet_model = await mobilenet.load(); // was mobilenetModule
+  await load_mobilenet();
 
   document.getElementById('main').style.display = 'block';
 
@@ -435,13 +454,17 @@ const listen_for_messages = function (event) {
             }
             add_image_to_training(image_url, label_index, event.source);
          }
+    } else if (typeof event.data.get_image_features !== 'undefined') {
+        image_url_to_features_vector(event.data.get_image_features.URL, 
+                                     event.data.get_image_features.time_stamp,
+                                     event.source);
     } else if (event.data === 'stop') {
         stop();
     } else if (event.data === 'restart') {
         restart();   
     } else if (typeof event.data.training_class_names !== 'undefined') {
         // receive class names
-        bindPage(event.data.training_class_names, event.source);
+        initialise_page(event.data.training_class_names, event.source);
     } else if (typeof event.data.new_introduction !== 'undefined') {
         // update HTML of the page with custom introduction
         update_introduction(event.data.new_introduction);
@@ -452,7 +475,7 @@ const listen_for_messages = function (event) {
                 if (training_class_names) {
                     set_class_names(data_set.labels);
                 } else {
-                    bindPage(data_set.labels, event.source);
+                    initialise_page(data_set.labels, event.source);
                 }
             }
             if (data_set.html) {
@@ -510,7 +533,7 @@ window.addEventListener('DOMContentLoaded',
                                     let receive_labels = 
                                         function (message) {
                                             if (!timer) {
-                                               bindPage(message.labels, event.source);
+                                               initialise_page(message.labels, event.source);
                                             }   
                                         };
                                     let receive_image_url =

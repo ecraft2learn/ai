@@ -917,7 +917,7 @@ window.ecraft2learn =
         }
         return costumes[costume_number-1]; // 1-indexing to zero-indexing
     };
-    var create_costume_with_style = function(style, costume, callback) {
+    const create_costume_with_style = function(style, costume, callback) {
         // adds a costume to the sprite by applying the style of the sprite's costume number
         // callback if provided will be called after this completes
         // style can be any of the folloing
@@ -964,7 +964,28 @@ window.ecraft2learn =
             }      
         }  
         window.addEventListener('message', recieveMessage); 
-        send_request_when_support_window_is_ready('style transfer', send_request);       
+        send_request_when_support_window_is('Ready', 'style transfer', send_request);       
+    };
+    const get_image_features = function(costume, callback) {
+        // uses mobilenet to compute a feature vector for the costume
+        let time_stamp = Date.now();
+        let costume_canvas = costume.contents;
+        let send_request = function() {
+            ecraft2learn.support_window['training using camera'].postMessage(
+                {get_image_features: {URL: costume_canvas.toDataURL(),
+                                      time_stamp: time_stamp}},
+            '*');
+        };
+        let recieveMessage = function(event) {
+            if (typeof event.data.image_features !== 'undefined' && 
+                // reponse received and it is for the same request (time stamps match)
+                event.data.time_stamp === time_stamp) {
+                // support window has responded with the list of features
+                invoke_callback(callback, javascript_to_snap(event.data.image_features));
+            }      
+        }  
+        window.addEventListener('message', recieveMessage); 
+        send_request_when_support_window_is('Loaded', 'training using camera', send_request);       
     };
     var image_url_of_costume = function (costume) {
         var canvas = costume.contents;
@@ -1010,11 +1031,11 @@ window.ecraft2learn =
             }      
         }  
         window.addEventListener('message', recieveMessage);       
-        send_request_when_support_window_is_ready('image classifier', send_request);      
+        send_request_when_support_window_is('Ready', 'image classifier', send_request);      
     };
-    const send_request_when_support_window_is_ready = function (source, send_request) {
+    const send_request_when_support_window_is = function (state, source, send_request) {
         window.addEventListener('message', function (event) {
-            if (event.data === 'Ready') {
+            if (event.data === state) {
                 // support window is ready to receive requests
                 ecraft2learn.support_window_is_ready[source] = true;
                 send_request();
@@ -2316,6 +2337,7 @@ window.ecraft2learn =
       load_script(URL, undefined, error_callback);
   },
   create_costume_with_style: create_costume_with_style,
+  get_image_features: get_image_features,
   display_support_window: open_support_window,
   image_class: image_class,
   inform: inform,
