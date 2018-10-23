@@ -244,7 +244,7 @@ window.ecraft2learn =
         if (!inside_snap()) {
             return x;
         }
-        if (Array.isArray(x)) {
+        if (Array.isArray(x) || x instanceof Float32Array) {
             return new List(x.map(javascript_to_snap));
         }
         if (typeof x === 'object') {
