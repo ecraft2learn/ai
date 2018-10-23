@@ -1234,26 +1234,26 @@ window.ecraft2learn =
     };
     const cosine_similarity = function(features1, features2, magnitude1, magnitude2) {
         if (features1 instanceof List) {
-            features1 = features1.contents;
+            features1 = features1.asArray();
         }
         if (features2 instanceof List) {
-            features2 = features2.contents;
+            features2 = features2.asArray();
         }
         if (magnitude1 instanceof List) {
-            magnitude1 = magnitude1.contents;
+            magnitude1 = magnitude1.asArray();
         }
         if (magnitude2 instanceof List) {
-            magnitude2 = magnitude2.contents;
+            magnitude2 = magnitude2.asArray();
         }
         return dot_product(features1, features2) /
                ((magnitude1 || magnitude(features1))*(magnitude2 || magnitude(features2)));
     };
     const distance_squared = function(features1, features2) {
         if (features1 instanceof List) {
-            features1 = features1.contents;
+            features1 = features1.asArray();
         }
         if (features2 instanceof List) {
-            features2 = features2.contents;
+            features2 = features2.asArray();
         }
         let result = 0;
         features1.forEach(function (feature, index) {
@@ -2072,6 +2072,9 @@ window.ecraft2learn =
       get_snap_ide().saveProject(name);
   },
   console_log: function (message) {
+      if (message instanceof List) {
+          message = message.asArray();
+      }
       console.log(message);
   },
   open_help_page: function () {
