@@ -301,10 +301,27 @@ But note that the translation happens in 299 dimensions!
 <figure>
 <img src="images/aligning-word-embeddings.png" class="center">
 <figcaption>Two ways of aligning word embeddings in different languages</figcaption></figure>
-<p>
+<p class="how-it-works">
 In the figure (A) and (B) show X being rotated to match Y to make a small number of words in X align with their translation in Y.
 Many other words become roughly aligned as a result.
 <a href="https://arxiv.org/pdf/1710.04087.pdf" target="_blank">Other techniques can be applied</a> to improve the alignment.
+</p>
+<h4 class="instructions-white">Image embeddings are possible as well</h4>
+<p class="instructions">
+Using a similar technique to how vectors are generated for words we can also generate vectors for images.
+The <span class="block-name">get costume features of ...</span> block will pass
+a vector of 1000 numbers to the blocks provided.
+This uses MobileNet to compute the numbers from the "top" of the neural net.
+</p>
+<figure class = "snap-iframe"
+        id = "image embedding exercise"
+        container_style = "width: 800px; height: 600px" 
+        caption = "A block for converting images into lists of 1000 numbers. TRY IT!">
+</figure>
+<p class="instructions">
+One can use image embeddings to determine which images are close to other images.
+Closeness takes into account many factors including texture, colour, parts, and semantics.
+Image embeddings can be used to work out image analogy problems similar to how word analogy problems are solved.
 </p>
 
 <h4 class="project-ideas-white" id="project-ideas">Possible project ideas using image recognition</h4>
