@@ -1232,6 +1232,36 @@ window.ecraft2learn =
         });
         return result;
     };
+    const cosine_similarity = function(features1, features2, magnitude1, magnitude2) {
+        if (features1 instanceof List) {
+            features1 = features1.contents;
+        }
+        if (features2 instanceof List) {
+            features2 = features2.contents;
+        }
+        if (magnitude1 instanceof List) {
+            magnitude1 = magnitude1.contents;
+        }
+        if (magnitude2 instanceof List) {
+            magnitude2 = magnitude2.contents;
+        }
+        return dot_product(features1, features2) /
+               ((magnitude1 || magnitude(features1))*(magnitude2 || magnitude(features2)));
+    };
+    const distance_squared = function(features1, features2) {
+        if (features1 instanceof List) {
+            features1 = features1.contents;
+        }
+        if (features2 instanceof List) {
+            features2 = features2.contents;
+        }
+        let result = 0;
+        features1.forEach(function (feature, index) {
+            let difference = feature-features2[index];
+            result += difference*difference;
+        });
+        return result;
+    };
     const word_to_features_or_location = function (word, language, features) {
         if (typeof word !== 'string') {
             inform((features ? 'features' : 'location') + " of word",
@@ -2346,6 +2376,8 @@ window.ecraft2learn =
   load_training_from_URL: load_training_from_URL,
   // some word embedding functionality
   dot_product: dot_product,
+  cosine_similarity: cosine_similarity,
+  euclidean_distance: (x, y) => Math.sqrt(distance_squared(x, y)),
   word_embeddings_ready: function (language, callback, word_embeddings_url) {
       let word_locations_url;
       language = extract_language_code(language);
@@ -2414,18 +2446,6 @@ window.ecraft2learn =
       let words_considered = 0;
       let best_word, distance;
       let best_distance = Number.MAX_VALUE;
-      let distance_squared = function(features1, features2) {
-          let result = 0;
-          features1.forEach(function (feature, index) {
-              let difference = feature-features2[index];
-              result += difference*difference;
-          });
-          return result;
-      };
-      let cosine_similarity = function(features1, features2, magnitude1, magnitude2) {
-          return dot_product(features1, features2)/
-                 ((magnitude1 || magnitude(features1))*(magnitude2 || magnitude(features2)));
-      };
       let current_process;
       let pending_callbacks = [];
       let report_progress = function (best_word, best_distance, words_considered, status) {
