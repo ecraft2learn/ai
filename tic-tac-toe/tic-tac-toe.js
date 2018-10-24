@@ -56,7 +56,7 @@ const create_model = function (model_configuration, name, optimizer) {
                                   useBias: false}));     
     }
     model.compile({loss: 'meanSquaredError',
-                   optimizer: optimizer || 'sgd'}); // or adam
+                   optimizer: (optimizer || 'adam')}); // or sgd or others (create gui interface and message)
     add_to_models(model);
     return model;
 };
@@ -143,7 +143,9 @@ const create_model_with_parameters = function () {
                     });
       message.innerHTML = html;
   };
-  if (!create_model_with_current_settings_button) {
+  if (create_model_with_current_settings_button) {
+      tfvis.visor().setActiveTab('Model');
+  } else {
       name_input = document.createElement('input');
       name_input.type = 'text';
       name_input.id = "name_element";
@@ -193,7 +195,9 @@ const train_with_parameters = async function () {
     });
   };
   parameters_interface().training.open();
-  if (!train_with_current_settings_button) {
+  if (train_with_current_settings_button) {
+      tfvis.visor().setActiveTab('Training');
+  } else {
       train_with_current_settings_button = create_button("Train model with current settings", train_with_current_settings);
       draw_area.appendChild(train_with_current_settings_button);    
   }
@@ -273,6 +277,7 @@ const save_and_load = function () {
     const surface = tfvis.visor().surface({name: 'Tic Tac Toe', tab: 'Save/Load'});
     const draw_area = surface.drawArea;
     if (save_button) {
+        tfvis.visor().setActiveTab('Save/Load');
         return; // already set up 
     }
     draw_area.innerHTML = ""; // reset if rerun
@@ -660,7 +665,7 @@ const create_data_with_parameters = async function () {
         parameters_interface().input_data.open();
         create_data_initialised = true;
     } else {
-//         surface.label.click();
+        tfvis.visor().setActiveTab('Input');
     }
 };
 
@@ -687,8 +692,12 @@ const predict = (model_name, input, success_callback, error_callback) => {
 const evaluate_training = function () {
   const surface = tfvis.visor().surface({name: 'Tic Tac Toe', tab: 'Evaluation'});
   const draw_area = surface.drawArea;
-  draw_area.innerHTML = ""; // reset if evaluation button pressed again
+  if (document.getElementById('evaluation_div')) {
+      tfvis.visor().setActiveTab('Evaluation');
+      return;
+  }
   const display = document.createElement('div');
+  display.id = 'evaluation_div';
   const show_first_moves = function () {
     tf.tidy(() => {
       let board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
