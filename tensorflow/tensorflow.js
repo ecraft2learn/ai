@@ -1,15 +1,14 @@
-// Machine learning experiment for tic tac toe
+// Machine learning using Tensorflow.js as part of the eCraft2Learn Snap! library
 // Written by Ken Kahn 
 // No rights reserved.
 
-((async function () {
+window.tensorflow = 
+((function () {
 
-const models = () => tensorflow.models;
-const training_data = () => tensorflow.training_data;
-const set_training_data = (data) => {
-    tensorflow.training_data = data;
-};
+let models = {};
+let model;
 
+let training_data;
 let evaluation_data; // maybe exploring how games go without wanting to add to training data
 let evaluation;
 
@@ -21,8 +20,8 @@ const evaluate_button = document.getElementById('evaluate');
 const save_and_load_button = document.getElementById('save_and_load');
 
 const add_to_models = function (model) {
-    let new_name = !models()[model.name];
-    models()[model.name] = model;
+    let new_name = !models[model.name];
+    models[model.name] = model;
     if (evaluation) {
         // new name so update player 1 and 2 choices
         update_evaluation_model_choices();                 
@@ -46,7 +45,7 @@ const create_model = function (name, layers, optimizer, time_stamp) {
         let configuration = {units: size,
                              activation: 'relu'};
         if (index === 0) {
-            configuration.inputShape = shape_of_data(training_data().boards[0]);
+            configuration.inputShape = shape_of_data(training_data.boards[0]);
         }
         model.add(tf.layers.dense(configuration));  
     });
@@ -65,7 +64,7 @@ const create_model = function (name, layers, optimizer, time_stamp) {
 
 const train_model = async function (model_or_model_name, data, epochs, learning_rate, success_callback, error_callback) {
   if (typeof model_or_model_name === 'string') {
-      model = models()[model_or_model_name];
+      model = models[model_or_model_name];
       if (!model) {
           error_callback({message: "No model named " + model_or_model_name});
           return;
@@ -135,7 +134,7 @@ const create_model_with_parameters = function () {
       model = create_model(name, layers);
       train_button.disabled = false;
       let html = "<br>A new model named '" + name + "' created and it is ready to be trained.";
-      if (models()[name]) {
+      if (models[name]) {
           html += "<br>It replaces the old model of the same name.";
       }
       model.summary(50, // line length
@@ -184,12 +183,12 @@ const train_with_parameters = async function () {
         message.innerHTML = "<b>Error:</b> " + error.message + "<br>";
         report_error(error);
     };
-    message.innerHTML = "<br>Training started. Learning from " + training_data().boards.length + " game moves. Please wait.";
+    message.innerHTML = "<br>Training started. Learning from " + training_data.boards.length + " game moves. Please wait.";
     draw_area.appendChild(message);
     setTimeout(async function () {
         // without the timeout the message above isn't displayed
         await train_model(model,
-                          training_data(),
+                          training_data,
                           Math.round(gui_state["Training"]["Number of iterations"]),
                           gui_state["Training"]["Learning rate"],
                           success_callback,
@@ -325,7 +324,7 @@ const load_model = async function () {
   const model_name = saved_model_element.files[0].name.substring(0, saved_model_element.files[0].name.length-".json".length);
   message.innerHTML = model_name + " loaded and ready to evaluate.";
   model.name = model_name;
-  if (models()[name]) {
+  if (models[name]) {
      message.innerHTML += "<br>Replaced a model with the same name.";
   }
   add_to_models(model);
@@ -388,7 +387,7 @@ const move = function (player_number, players, board, history, non_deterministic
             board_copy[possible_move] = player_number;
             tf.tidy(() => {
                 let board_tensor = tf.tensor2d(board_copy, [1, 9]);
-                let probability_tensor = models()[player].predict(board_tensor);
+                let probability_tensor = models[player].predict(board_tensor);
                 let probability = probability_tensor.dataSync()[0];
                 predictions.push(probability);
                 if (probability > best_probability) {
@@ -576,12 +575,12 @@ const replace_button_results = function(element, child) {
 
 const add_to_dataset = 
   (new_input, new_output) => {
-      if (!training_data() || typeof training_data().boards === 'undefined') {
+      if (!training_data || typeof training_data.boards === 'undefined') {
           return {boards: new_input,
                   outcomes: new_output};
       }
-      return {boards: training_data().boards.concat(new_input),
-              outcomes: training_data().outcomes.concat(new_output)};
+      return {boards: training_data.boards.concat(new_input),
+              outcomes: training_data.outcomes.concat(new_output)};
 };
 
 const create_data_interface = async function(button_label, number_of_games_function, interface_element) {
@@ -603,11 +602,11 @@ const create_data_interface = async function(button_label, number_of_games_funct
       // without the timeout the please wait message isn't seen    
       let new_data = await create_data(number_of_games, [player_1, player_2]);
       evaluation_data = new_data;
-      if (!training_data() || gui_state["Evaluation"]["What to do with new games"] === 'Replace training dataset') {
-          set_training_data(new_data);
+      if (!training_data || gui_state["Evaluation"]["What to do with new games"] === 'Replace training dataset') {
+          training_data = new_data;
       } else if (gui_state["Evaluation"]["What to do with new games"] === 'Add to dataset for future training') {
-          set_training_data(add_to_dataset(new_data.boards, new_data.outcomes));
-          training_data().statistics = new_data.statistics;
+          training_data = add_to_dataset(new_data.boards, new_data.outcomes);
+          training_data.statistics = new_data.statistics;
       } // do nothing for Don't add to dataset
       train_button.disabled = false;
       create_model_button.disabled = false; // there is data so can move forward (though really only training needs data)
@@ -672,7 +671,7 @@ const create_data_with_parameters = async function () {
 };
 
 const predict = (model_name, input, success_callback, error_callback) => {
-    let model = models()[model_name];
+    let model = models[model_name];
     if (!model) {
         error_callback("No model named " + model_name);
         return;
@@ -705,7 +704,7 @@ const evaluate_training = function () {
       let board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
       let html = "<br>";
       let model_name = gui_state["Evaluation"]['Player 1'];
-      let player_1_model = models()[model_name];
+      let player_1_model = models[model_name];
       if (!player_1_model) {
           player_1_model = model;
           html += "Player 1 is not using a model so current model used instead.<br><br>";
@@ -776,17 +775,10 @@ const update_evaluation_model_choices = function () {
     });     
 };
 
-
-create_data_button.addEventListener('click', create_data_with_parameters);
-create_model_button.addEventListener('click', create_model_with_parameters);
-train_button.addEventListener('click', train_with_parameters);
-evaluate_button.addEventListener('click', evaluate_training);
-save_and_load_button.addEventListener('click', save_and_load);
-
 window.addEventListener('DOMContentLoaded',
                         () => {
                             if (window.parent !== window) {
-                                // not waiting for anything fo loaded and ready are the same
+                                // not waiting for anything so loaded and ready are the same
                                 window.parent.postMessage("Loaded", "*"); 
                                 window.parent.postMessage("Ready", "*");
                             }
@@ -797,10 +789,11 @@ const receive_message =
         let message = event.data;
         if (typeof message.training_data !== 'undefined') {
             if (message.training_data.ignore_old_dataset) {
-                settraining_data({});
+                training_data = {};
             }
-            set_training_data(add_to_dataset(message.training_data.input,
-                                             message.training_data.output));
+            training_data =
+                add_to_dataset(message.training_data.input,
+                               message.training_data.output);
         } else if (typeof message.create_model !== 'undefined') {
             // add error handling later
             let model = create_model(message.create_model.name,
@@ -815,7 +808,7 @@ const receive_message =
                 event.source.postMessage({error: error.message}, "*");
             };
             train_model(message.train.model_name,
-                        training_data(),
+                        training_data,
                         (message.train.epochs || 10),
                         (message.train.learning_rate || .01),
                         success_callback, error_callback);
@@ -858,7 +851,10 @@ const test_1 = () => {
         });    
 };
 
-// test_1();      
+// test_1();
+
+return {models: models,
+        training_data: training_data};
   
 }()));
 
