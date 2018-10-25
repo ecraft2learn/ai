@@ -36,6 +36,8 @@ const create_model = function (name, layers, optimizer) {
         throw new Error("Cannot create a model before knowing what the data is like.");
     }
     const model = tf.sequential({name: name});
+    model.ready_for_training = false;
+    add_to_models(model);
     layers.forEach((size, index) => {
         let configuration = {units: size,
                              activation: 'relu'};
@@ -53,7 +55,11 @@ const create_model = function (name, layers, optimizer) {
     }
     model.compile({loss: 'meanSquaredError',
                    optimizer: (optimizer || 'adam')});
-    add_to_models(model);
+    model.ready_for_training = true;
+    if (model.callback_when_ready_for_training) {
+        model.callback_when_ready_for_training();
+        model.callback_when_ready_for_training = undefined;
+    }
     return model;
 };
 
@@ -61,12 +67,20 @@ const train_model = async function (model_or_model_name, data, epochs, learning_
   if (typeof model_or_model_name === 'string') {
       model = models[model_or_model_name];
       if (!model) {
-          error_callback({message: "No model named " + model_or_model_name});
+          error_callback({message: "No model named ''" + model_or_model_name + "'"});
           return;
       }
   } else {
       model = model_or_model_name;
   }
+  if (!model.ready_for_training) {
+      model.callback_when_ready_for_training = 
+          () => {
+              train_model(model, data, epochs, learning_rate, use_tfjs_vis, success_callback, error_callback);
+          };
+      return;
+  }
+  model.ready_for_prediction = false;
   let xs;
   let ys;
   if (typeof data.input[0] === 'number') {
@@ -78,15 +92,14 @@ const train_model = async function (model_or_model_name, data, epochs, learning_
   }
   // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
   const epoch_history = [];
-  let callbacks;
-  if (use_tfjs_vis) {
-      callbacks = {onEpochEnd: async (epoch, h) => {
+  let callbacks = {onEpochEnd: async (epoch, h) => {
                        epoch_history.push(h);
-                       tfvis.show.history({name: 'Error rate', tab: 'Training'},
-                                          epoch_history,
-                                          ['loss']);
-                                  }};
-  } 
+                       if (use_tfjs_vis) {
+                           tfvis.show.history({name: 'Error rate', tab: 'Training'},
+                                              epoch_history,
+                                              ['loss']);
+                       }}
+  }; 
   // Train the model using the data
   let start = Date.now();
   if (model.optimizer.learningRate) { // not every optimizer needs to have this property
@@ -98,15 +111,61 @@ const train_model = async function (model_or_model_name, data, epochs, learning_
                 {epochs: epochs,
                  callbacks: callbacks})
           .then(() => {
-                let duration = Math.round((Date.now()-start)/1000);
-                success_callback({duration: duration,
-                                  loss: epoch_history[epochs-1].loss});       
+                  let duration = Math.round((Date.now()-start)/1000);
+                  success_callback({duration: duration,
+                                    loss: epoch_history[epochs-1].loss});
+                  model.ready_for_prediction = true;
+                  if (model.callback_when_ready_for_prediction) {
+                      model.callback_when_ready_for_prediction();
+                      model.callback_when_ready_for_prediction = undefined;
+                  }
                 },
                 error_callback);
        });
 };
 
+const predict = (model_name, input, success_callback, error_callback) => {
+    let model = models[model_name];
+    if (!model) {
+        error_callback("No model named " + model_name);
+        return;
+    }
+    if (!model.ready_for_prediction) {
+        model.callback_when_ready_for_prediction = 
+            () => {
+                predict(model_name, input, success_callback, error_callback);
+        };
+        return;
+    }
+    try {
+        let input_tensor;
+        if (typeof input === 'number') {
+            input_tensor = tf.tensor2d([input], [1, 1]);
+        } else {
+            input_tensor = tf.tensor2d([input], [1].concat(shape_of_data(input)));
+        }
+        let prediction = model.predict(input_tensor);
+        success_callback(prediction.dataSync()[0]);
+    } catch (error) {
+        error_callback(error.message);
+    }
+};
 
+let report_error = function (error) {
+    console.log(error); // for now
+};
+
+const add_to_dataset = 
+  (new_input, new_output) => {
+      if (!training_data || typeof training_data.input === 'undefined') {
+          return {input:  new_input,
+                  output: new_output};
+      }
+      return {input:  training_data.input.concat(new_input),
+              output: training_data.output.concat(new_output)};
+};
+
+// following needs to be updated
 let save_button;
 let load_button;
 
@@ -179,47 +238,12 @@ let create_button = function (label, click_handler) {
   return button;
 };
 
-let report_error = function (error) {
-    console.log(error); // for now
-};
-
-const add_to_dataset = 
-  (new_input, new_output) => {
-      if (!training_data || typeof training_data.input === 'undefined') {
-          return {input:  new_input,
-                  output: new_output};
-      }
-      return {input:  training_data.input.concat(new_input),
-              output: training_data.output.concat(new_output)};
-};
-
-const predict = (model_name, input, success_callback, error_callback) => {
-    let model = models[model_name];
-    if (!model) {
-        error_callback("No model named " + model_name);
-        return;
-    }
-    try {
-        let input_tensor;
-        if (typeof input === 'number') {
-            input_tensor = tf.tensor2d([input], [1, 1]);
-        } else {
-            input_tensor = tf.tensor2d([input], [1].concat(shape_of_data(input)));
-        }
-        let prediction = model.predict(input_tensor);
-        success_callback(prediction.dataSync()[0]);
-    } catch (error) {
-        error_callback(error.message);
-    }
-};
 
 window.addEventListener('DOMContentLoaded',
                         () => {
-                            if (window.parent !== window) {
-                                // not waiting for anything so loaded and ready are the same
-                                window.parent.postMessage("Loaded", "*"); 
-                                window.parent.postMessage("Ready", "*");
-                            }
+                            // not waiting for anything so loaded and ready are the same
+                            window.parent.postMessage("Loaded", "*"); 
+                            window.parent.postMessage("Ready", "*");
                         });
 
 const receive_message =
@@ -263,38 +287,15 @@ const receive_message =
                 event.source.postMessage({error: error_message}, "*");
             };
             predict(message.predict.model_name, message.predict.input, success_callback, error_callback);
-        } else {
-            console.log("Unhandled message: ", message);
+        } else if (message !== "Loaded" &&
+                   message !== "Ready" &&
+                   typeof message.training_completed === 'undefined' &&
+                   typeof message.prediction === 'undefined') {
+            console.log("Unhandled message: ", message); // just for debugging
         }
 };
 
 window.addEventListener('message', receive_message);
-
-const test_1 = () => {
-    // equivalent to https://js.tensorflow.org/#getting-started
-    window.postMessage({training_data:
-                        {input:  [1, 2, 3, 4],
-                         output: [1, 3, 5, 7]}}, "*");
-    window.postMessage({create_model:
-                        {layers: [1],
-                         name: 'test 1'}}, "*");
-    window.postMessage({train: 
-                        {epochs: 10,
-                         learning_rate: .01,
-                         model_name: 'test 1'}}, "*");
-    window.addEventListener('message',
-        (event) => {
-            if (event.data.training_completed) {
-                window.postMessage({predict: 
-                                    {input: 5,
-                                     model_name: 'test 1'}}, "*");
-            } else if (event.data.prediction) {
-              console.log("Prediction is " + event.data.prediction + " (should ideally be close to 9)");
-            }
-        });    
-};
-
-// test_1();
 
 return {get_model: (name) => models[name], 
         add_to_models: add_to_models,
