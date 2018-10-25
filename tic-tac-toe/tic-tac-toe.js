@@ -6,6 +6,8 @@
 
 const models = () => tensorflow.models;
 const training_data = () => tensorflow.training_data;
+const training_data_input  = () => tensorflow.training_data && tensorflow.training_data.input;
+const training_data_output = () => tensorflow.training_data && tensorflow.training_data.output;
 const set_training_data = (data) => {
     tensorflow.training_data = data;
 };
@@ -21,8 +23,7 @@ const evaluate_button = document.getElementById('evaluate');
 const save_and_load_button = document.getElementById('save_and_load');
 
 const add_to_models = function (model) {
-    let new_name = !models()[model.name];
-    models()[model.name] = model;
+    tensorflow.add_to_models(model);
     if (evaluation) {
         // new name so update player 1 and 2 choices
         update_evaluation_model_choices();                 
@@ -46,7 +47,7 @@ const create_model = function (name, layers, optimizer, time_stamp) {
         let configuration = {units: size,
                              activation: 'relu'};
         if (index === 0) {
-            configuration.inputShape = shape_of_data(training_data().boards[0]);
+            configuration.inputShape = shape_of_data(training_data_input()[0]);
         }
         model.add(tf.layers.dense(configuration));  
     });
@@ -65,7 +66,7 @@ const create_model = function (name, layers, optimizer, time_stamp) {
 
 const train_model = async function (model_or_model_name, data, epochs, learning_rate, success_callback, error_callback) {
   if (typeof model_or_model_name === 'string') {
-      model = models()[model_or_model_name];
+      model = tensorflow.get_model(model_or_model_name);
       if (!model) {
           error_callback({message: "No model named " + model_or_model_name});
           return;
@@ -75,12 +76,12 @@ const train_model = async function (model_or_model_name, data, epochs, learning_
   }
   let xs;
   let ys;
-  if (typeof data.boards[0] === 'number') {
-      xs = tf.tensor2d(data.boards,   [data.boards.length, 1]);
-      ys = tf.tensor2d(data.outcomes, [data.outcomes.length, 1]);
+  if (typeof data.input[0] === 'number') {
+      xs = tf.tensor2d(data.input,   [data.input.length, 1]);
+      ys = tf.tensor2d(data.output, [data.output.length, 1]);
   } else {
-      xs =tf.tensor2d(data.boards);
-      ys = tf.tensor2d(data.outcomes, [data.outcomes.length, 1]);
+      xs = tf.tensor2d(data.input);
+      ys = tf.tensor2d(data.output, [data.output.length, 1]);
   }
   // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
   const epoch_history = [];
@@ -135,7 +136,7 @@ const create_model_with_parameters = function () {
       model = create_model(name, layers);
       train_button.disabled = false;
       let html = "<br>A new model named '" + name + "' created and it is ready to be trained.";
-      if (models()[name]) {
+      if (tensorflow.get_model(name)) {
           html += "<br>It replaces the old model of the same name.";
       }
       model.summary(50, // line length
@@ -184,7 +185,7 @@ const train_with_parameters = async function () {
         message.innerHTML = "<b>Error:</b> " + error.message + "<br>";
         report_error(error);
     };
-    message.innerHTML = "<br>Training started. Learning from " + training_data().boards.length + " game moves. Please wait.";
+    message.innerHTML = "<br>Training started. Learning from " + training_data_input().length + " game moves. Please wait.";
     draw_area.appendChild(message);
     setTimeout(async function () {
         // without the timeout the message above isn't displayed
@@ -325,7 +326,7 @@ const load_model = async function () {
   const model_name = saved_model_element.files[0].name.substring(0, saved_model_element.files[0].name.length-".json".length);
   message.innerHTML = model_name + " loaded and ready to evaluate.";
   model.name = model_name;
-  if (models()[name]) {
+  if (tensorflow.get_model(name)) {
      message.innerHTML += "<br>Replaced a model with the same name.";
   }
   add_to_models(model);
@@ -388,7 +389,7 @@ const move = function (player_number, players, board, history, non_deterministic
             board_copy[possible_move] = player_number;
             tf.tidy(() => {
                 let board_tensor = tf.tensor2d(board_copy, [1, 9]);
-                let probability_tensor = models()[player].predict(board_tensor);
+                let probability_tensor = tensorflow.get_model(player).predict(board_tensor);
                 let probability = probability_tensor.dataSync()[0];
                 predictions.push(probability);
                 if (probability > best_probability) {
@@ -502,8 +503,8 @@ const create_data = async function (number_of_games, players) {
                 player_2_wins: plays_first.x_losses + plays_second.x_wins,
                 ties: plays_first.ties + plays_second.ties,
                 last_board_with_player_1_going_first: last_board_with_player_1_going_first};
-  return {boards: boards,
-          outcomes: outcomes,
+  return {input: boards,
+          output: outcomes,
           statistics: statistics};
 };
 
@@ -574,16 +575,6 @@ const replace_button_results = function(element, child) {
     element.appendChild(child);
 };
 
-const add_to_dataset = 
-  (new_input, new_output) => {
-      if (!training_data() || typeof training_data().boards === 'undefined') {
-          return {boards: new_input,
-                  outcomes: new_output};
-      }
-      return {boards: training_data().boards.concat(new_input),
-              outcomes: training_data().outcomes.concat(new_output)};
-};
-
 const create_data_interface = async function(button_label, number_of_games_function, interface_element) {
   const play_games = async function () {
     const message = document.createElement('p');
@@ -603,10 +594,10 @@ const create_data_interface = async function(button_label, number_of_games_funct
       // without the timeout the please wait message isn't seen    
       let new_data = await create_data(number_of_games, [player_1, player_2]);
       evaluation_data = new_data;
-      if (!training_data() || gui_state["Evaluation"]["What to do with new games"] === 'Replace training dataset') {
+      if (!training_data_input() || gui_state["Evaluation"]["What to do with new games"] === 'Replace training dataset') {
           set_training_data(new_data);
       } else if (gui_state["Evaluation"]["What to do with new games"] === 'Add to dataset for future training') {
-          set_training_data(add_to_dataset(new_data.boards, new_data.outcomes));
+          set_training_data(tensorflow.add_to_dataset(new_data.input, new_data.output));
           training_data().statistics = new_data.statistics;
       } // do nothing for Don't add to dataset
       train_button.disabled = false;
@@ -633,7 +624,7 @@ const create_data_interface = async function(button_label, number_of_games_funct
           create_button("Show a game where " + player_1 + " was X",
                         function () {
                             const playing_first_boards = 
-                                evaluation_data.boards.slice(0, evaluation_data.statistics.last_board_with_player_1_going_first);
+                                evaluation_data.input.slice(0, evaluation_data.statistics.last_board_with_player_1_going_first);
                             replace_button_results(show_first_player_playing_x_button,
                                                    random_game_display(playing_first_boards));
                         });
@@ -642,7 +633,7 @@ const create_data_interface = async function(button_label, number_of_games_funct
           create_button("Show a game where " + player_1 + " was O",
                         function () {
                              const playing_second_boards =
-                                evaluation_data.boards.slice(evaluation_data.statistics.last_board_with_player_1_going_first);
+                                evaluation_data.input.slice(evaluation_data.statistics.last_board_with_player_1_going_first);
                              replace_button_results(show_first_player_playing_o_button,
                                                     random_game_display(playing_second_boards));
                         });
@@ -672,7 +663,7 @@ const create_data_with_parameters = async function () {
 };
 
 const predict = (model_name, input, success_callback, error_callback) => {
-    let model = models()[model_name];
+    let model = tensorflow.get_model(model_name);
     if (!model) {
         error_callback("No model named " + model_name);
         return;
@@ -705,7 +696,7 @@ const evaluate_training = function () {
       let board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
       let html = "<br>";
       let model_name = gui_state["Evaluation"]['Player 1'];
-      let player_1_model = models()[model_name];
+      let player_1_model = tensorflow.get_model(model_name);
       if (!player_1_model) {
           player_1_model = model;
           html += "Player 1 is not using a model so current model used instead.<br><br>";
@@ -799,8 +790,8 @@ const receive_message =
             if (message.training_data.ignore_old_dataset) {
                 settraining_data({});
             }
-            set_training_data(add_to_dataset(message.training_data.input,
-                                             message.training_data.output));
+            set_training_data(tensorflow.add_to_dataset(message.training_data.input,
+                                                        message.training_data.output));
         } else if (typeof message.create_model !== 'undefined') {
             // add error handling later
             let model = create_model(message.create_model.name,

@@ -9,8 +9,6 @@ let models = {};
 let model;
 
 let training_data;
-let evaluation_data; // maybe exploring how games go without wanting to add to training data
-let evaluation;
 
 const settings_element = document.getElementById('settings');
 const create_data_button = document.getElementById('create_data');
@@ -22,10 +20,6 @@ const save_and_load_button = document.getElementById('save_and_load');
 const add_to_models = function (model) {
     let new_name = !models[model.name];
     models[model.name] = model;
-    if (evaluation) {
-        // new name so update player 1 and 2 choices
-        update_evaluation_model_choices();                 
-    }
 };
 
 const shape_of_data = (data) => {
@@ -45,7 +39,7 @@ const create_model = function (name, layers, optimizer, time_stamp) {
         let configuration = {units: size,
                              activation: 'relu'};
         if (index === 0) {
-            configuration.inputShape = shape_of_data(training_data.boards[0]);
+            configuration.inputShape = shape_of_data(training_data.input[0]);
         }
         model.add(tf.layers.dense(configuration));  
     });
@@ -74,12 +68,12 @@ const train_model = async function (model_or_model_name, data, epochs, learning_
   }
   let xs;
   let ys;
-  if (typeof data.boards[0] === 'number') {
-      xs = tf.tensor2d(data.boards,   [data.boards.length, 1]);
-      ys = tf.tensor2d(data.outcomes, [data.outcomes.length, 1]);
+  if (typeof data.input[0] === 'number') {
+      xs = tf.tensor2d(data.input,   [data.input.length, 1]);
+      ys = tf.tensor2d(data.output, [data.output.length, 1]);
   } else {
-      xs =tf.tensor2d(data.boards);
-      ys = tf.tensor2d(data.outcomes, [data.outcomes.length, 1]);
+      xs =tf.tensor2d(data.input);
+      ys = tf.tensor2d(data.output, [data.output.length, 1]);
   }
   // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
   const epoch_history = [];
@@ -183,7 +177,7 @@ const train_with_parameters = async function () {
         message.innerHTML = "<b>Error:</b> " + error.message + "<br>";
         report_error(error);
     };
-    message.innerHTML = "<br>Training started. Learning from " + training_data.boards.length + " game moves. Please wait.";
+    message.innerHTML = "<br>Training started. Learning from " + training_data.input.length + " game moves. Please wait.";
     draw_area.appendChild(message);
     setTimeout(async function () {
         // without the timeout the message above isn't displayed
@@ -575,12 +569,12 @@ const replace_button_results = function(element, child) {
 
 const add_to_dataset = 
   (new_input, new_output) => {
-      if (!training_data || typeof training_data.boards === 'undefined') {
-          return {boards: new_input,
-                  outcomes: new_output};
+      if (!training_data || typeof training_data.input === 'undefined') {
+          return {input:  new_input,
+                  output: new_output};
       }
-      return {boards: training_data.boards.concat(new_input),
-              outcomes: training_data.outcomes.concat(new_output)};
+      return {input:  training_data.input.concat(new_input),
+              output: training_data.output.concat(new_output)};
 };
 
 const create_data_interface = async function(button_label, number_of_games_function, interface_element) {
@@ -605,7 +599,7 @@ const create_data_interface = async function(button_label, number_of_games_funct
       if (!training_data || gui_state["Evaluation"]["What to do with new games"] === 'Replace training dataset') {
           training_data = new_data;
       } else if (gui_state["Evaluation"]["What to do with new games"] === 'Add to dataset for future training') {
-          training_data = add_to_dataset(new_data.boards, new_data.outcomes);
+          training_data = add_to_dataset(new_data.input, new_data.output);
           training_data.statistics = new_data.statistics;
       } // do nothing for Don't add to dataset
       train_button.disabled = false;
@@ -632,7 +626,7 @@ const create_data_interface = async function(button_label, number_of_games_funct
           create_button("Show a game where " + player_1 + " was X",
                         function () {
                             const playing_first_boards = 
-                                evaluation_data.boards.slice(0, evaluation_data.statistics.last_board_with_player_1_going_first);
+                                evaluation_data.input.slice(0, evaluation_data.statistics.last_board_with_player_1_going_first);
                             replace_button_results(show_first_player_playing_x_button,
                                                    random_game_display(playing_first_boards));
                         });
@@ -641,7 +635,7 @@ const create_data_interface = async function(button_label, number_of_games_funct
           create_button("Show a game where " + player_1 + " was O",
                         function () {
                              const playing_second_boards =
-                                evaluation_data.boards.slice(evaluation_data.statistics.last_board_with_player_1_going_first);
+                                evaluation_data.input.slice(evaluation_data.statistics.last_board_with_player_1_going_first);
                              replace_button_results(show_first_player_playing_o_button,
                                                     random_game_display(playing_second_boards));
                         });
@@ -853,8 +847,10 @@ const test_1 = () => {
 
 // test_1();
 
-return {models: models,
-        training_data: training_data};
+return {training_data: training_data,
+        get_model: (name) => models[name], 
+        add_to_models: add_to_models,
+        add_to_dataset: add_to_dataset};
   
 }()));
 
