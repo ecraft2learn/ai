@@ -33,7 +33,7 @@ const shape_of_data = (data) => {
 
 const create_model = function (name, layers, optimizer) {
     if (!training_data || typeof training_data.input === 'undefined') {
-        throw new Error("Cannot create a model before knowing what the data is like.");
+        throw new Error("Cannot create a model before knowing what the data is like.\nProvide at least one example of the data.");
     }
     const model = tf.sequential({name: name});
     model.ready_for_training = false;

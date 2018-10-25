@@ -853,6 +853,8 @@ window.ecraft2learn =
                   ecraft2learn.support_window_is_ready[source] = true;             
               } else if (typeof event.data.show_message !== 'undefined') {
                   show_message(event.data.show_message, event.data.duration);
+              } else if (typeof event.data.error !== 'undefined') {
+                  inform("Error message received from a support window", event.data.error);
               }
           },
           false);
@@ -943,7 +945,7 @@ window.ecraft2learn =
             '*');
         }
         let costume_canvas = costume.contents;
-        let recieveMessage = function(event) {
+        let receive_message = function(event) {
             if (typeof event.data.style_transfer_response !== 'undefined' && 
                 // reponse received and it is for the same request (time stamps match)
                 event.data.style_transfer_response.time_stamp === time_stamp) {
@@ -957,7 +959,7 @@ window.ecraft2learn =
                 // remove so this only runs once
                 // alternatively could use the {once: true} option to addEventListener 
                 // but not all browsers accept that
-                window.removeEventListener('message', recieveMessage);
+                window.removeEventListener('message', receive_message);
                 image.onload = function() {
                     new_canvas.getContext('2d').drawImage(image, 0, 0, costume_canvas.width, costume_canvas.height);
                     // create the costume and pass it to callback
@@ -965,7 +967,7 @@ window.ecraft2learn =
                 }
             }      
         }  
-        window.addEventListener('message', recieveMessage); 
+        window.addEventListener('message', receive_message); 
         send_request_when_support_window_is('Ready', 'style transfer', send_request);       
     };
     const get_image_features = function(costume, callback) {
@@ -978,16 +980,16 @@ window.ecraft2learn =
                                       time_stamp: time_stamp}},
             '*');
         };
-        let recieveMessage = function(event) {
+        let receive_message = function(event) {
             if (typeof event.data.image_features !== 'undefined' && 
                 // reponse received and it is for the same request (time stamps match)
                 event.data.time_stamp === time_stamp) {
                 // support window has responded with the list of features
                 invoke_callback(callback, javascript_to_snap(event.data.image_features));
-                window.removeEventListener('message', recieveMessage);
+                window.removeEventListener('message', receive_message);
             }      
         }  
-        window.addEventListener('message', recieveMessage); 
+        window.addEventListener('message', receive_message); 
         send_request_when_support_window_is('Loaded', 'training using camera', send_request);       
     };
     const create_tensorflow_model = function(name, layers, optimizer, callback) {
@@ -1004,7 +1006,7 @@ window.ecraft2learn =
                                 time_stamp: time_stamp}},
             '*');
         };
-        send_request_when_support_window_is('Loaded', 'tensorflow.js', send_request);       
+        send_request_when_support_window_is('Loaded', 'tensorflow.js', send_request);
     };
     var image_url_of_costume = function (costume) {
         var canvas = costume.contents;
@@ -1032,7 +1034,7 @@ window.ecraft2learn =
                             time_stamp: time_stamp}},
                 '*');
         }
-        let recieveMessage = function(event) {
+        let receive_message = function(event) {
             if (typeof event.data.classify_response !== 'undefined' &&
                 // reponse received and it is for the same request (time stamps match)
                 event.data.classify_response.time_stamp === time_stamp) {
@@ -1047,10 +1049,10 @@ window.ecraft2learn =
                                 javascript_to_snap(classifications.map(function (classification) {
                                     return classification.probability;
                                 })));
-                window.removeEventListener('message', recieveMessage);  
+                window.removeEventListener('message', receive_message);  
             }      
         }  
-        window.addEventListener('message', recieveMessage);       
+        window.addEventListener('message', receive_message);       
         send_request_when_support_window_is('Ready', 'image classifier', send_request);      
     };
     const send_request_when_support_window_is = function (state, source, send_request) {
@@ -2157,10 +2159,6 @@ window.ecraft2learn =
               invoke_callback(callback, javascript_to_snap(event.data.confidences));
               window.removeEventListener("message", receive_confidences);
           };
-          if (typeof event.data.error !== 'undefined') {
-              inform("Message received from training window", event.data.error);
-              window.removeEventListener("message", receive_confidences);
-          }
       };
       record_callbacks(callback);
       support_window_request("You need to train the system before using 'Current image label confidences'.\n" +
@@ -2205,10 +2203,6 @@ window.ecraft2learn =
                   window.removeEventListener("message", receive_confidences);
               });              
            }
-           if (typeof event.data.error !== 'undefined') {
-              inform("Message received from audio training window", event.data.error);
-              window.removeEventListener("message", receive_confidences);
-          }
       };
       record_callbacks(callback);
       if (!ecraft2learn.support_window['training using microphone']) {
