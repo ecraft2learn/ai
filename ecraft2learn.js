@@ -800,6 +800,8 @@ window.ecraft2learn =
               URL = "/ai/style-transfer/" + index_file_name + ".html";
           } else if (source === 'image classifier') {
               URL = "/ai/mobilenet/" + index_file_name + ".html";
+          } else if (source === 'tensorflow.js') {
+              URL = "/ai/tensorflow/" + index_file_name + ".html";
           }
           if (window.location.hostname !== "localhost") {
               URL = "https://ecraft2learn.github.io" + URL;
@@ -955,7 +957,7 @@ window.ecraft2learn =
                 // remove so this only runs once
                 // alternatively could use the {once: true} option to addEventListener 
                 // but not all browsers accept that
-                window.removeEventListener('message', recieveMessage); 
+                window.removeEventListener('message', recieveMessage);
                 image.onload = function() {
                     new_canvas.getContext('2d').drawImage(image, 0, 0, costume_canvas.width, costume_canvas.height);
                     // create the costume and pass it to callback
@@ -982,10 +984,27 @@ window.ecraft2learn =
                 event.data.time_stamp === time_stamp) {
                 // support window has responded with the list of features
                 invoke_callback(callback, javascript_to_snap(event.data.image_features));
+                window.removeEventListener('message', recieveMessage);
             }      
         }  
         window.addEventListener('message', recieveMessage); 
         send_request_when_support_window_is('Loaded', 'training using camera', send_request);       
+    };
+    const create_tensorflow_model = function(name, layers, optimizer, callback) {
+        // uses the layers level of tensorflow.js to create models, train, and predict
+        if (layers instanceof List) {
+            layers = layers.asArray();
+        }
+        let time_stamp = Date.now();
+        let send_request = function() {
+            ecraft2learn.support_window['tensorflow.js'].postMessage(
+                {create_model: {name: name,
+                                layers: layers,
+                                optimizer: optimizer,
+                                time_stamp: time_stamp}},
+            '*');
+        };
+        send_request_when_support_window_is('Loaded', 'tensorflow.js', send_request);       
     };
     var image_url_of_costume = function (costume) {
         var canvas = costume.contents;
@@ -1027,7 +1046,8 @@ window.ecraft2learn =
                 invoke_callback(probabilities_callback,                
                                 javascript_to_snap(classifications.map(function (classification) {
                                     return classification.probability;
-                                })));  
+                                })));
+                window.removeEventListener('message', recieveMessage);  
             }      
         }  
         window.addEventListener('message', recieveMessage);       
@@ -2371,6 +2391,7 @@ window.ecraft2learn =
   },
   create_costume_with_style: create_costume_with_style,
   get_image_features: get_image_features,
+  create_tensorflow_model: create_tensorflow_model,
   display_support_window: open_support_window,
   image_class: image_class,
   inform: inform,
