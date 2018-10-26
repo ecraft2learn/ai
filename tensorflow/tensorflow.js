@@ -9,10 +9,6 @@ let models = {};
 let model;
 let training_data;
 
-const create_data_button = document.getElementById('create_data');
-const create_model_button = document.getElementById('create_model');
-const save_and_load_button = document.getElementById('save_and_load');
-
 const add_to_models = function (model) {
     let new_name = !models[model.name];
     models[model.name] = model;
@@ -245,7 +241,6 @@ const create_model_with_parameters = function () {
       } catch (error) {
           report_error(error);
       }
-      let train_button = document.getElementById('train');
       if (train_button) {
           train_button.disabled = false;
       }
@@ -400,8 +395,19 @@ let create_button = function (label, click_handler) {
   return button;
 };
 
+let create_model_button, save_and_load_button, train_button;
+
 window.addEventListener('DOMContentLoaded',
                         () => {
+                            create_model_button = document.getElementById('create_model');
+                            save_and_load_button = document.getElementById('save_and_load');
+                            train_button = document.getElementById('train');
+                            create_model_button.addEventListener('click', create_model_with_parameters);
+                            train_button.addEventListener('click',
+                                                          () => {
+                                                              train_with_parameters('Tensorflow')
+                                                          });
+                            save_and_load_button.addEventListener('click', save_and_load);             
                             // not waiting for anything so loaded and ready are the same
                             window.parent.postMessage("Loaded", "*"); 
                             window.parent.postMessage("Ready", "*");
@@ -451,6 +457,7 @@ const receive_message =
             predict(message.predict.model_name, message.predict.input, success_callback, error_callback);
         } else if (message !== "Loaded" &&
                    message !== "Ready" &&
+                   message !== "stop" &&
                    typeof message.training_completed === 'undefined' &&
                    typeof message.prediction === 'undefined') {
             console.log("Unhandled message: ", message); // just for debugging
