@@ -9,11 +9,8 @@ let models = {};
 let model;
 let training_data;
 
-const settings_element = document.getElementById('settings');
 const create_data_button = document.getElementById('create_data');
 const create_model_button = document.getElementById('create_model');
-const train_button = document.getElementById('train');
-const evaluate_button = document.getElementById('evaluate');
 const save_and_load_button = document.getElementById('save_and_load');
 
 const add_to_models = function (model) {
@@ -169,7 +166,165 @@ const add_to_dataset =
               output: training_data.output.concat(new_output)};
 };
 
-// following needs to be updated
+const gui_state = 
+  // following inspired by https://github.com/johnflux/deep-learning-tictactoe/blob/master/play.py
+  {"Model": {"Size of first layer": 100,
+             "Size of second layer": 50,
+             "Size of third layer": 20,
+             "Size of fourth layer": 0,
+             "Size of fifth layer": 0,
+             "Optimization method": 'sgd'},
+   "Training": {"Learning rate": .001,
+                "Number of iterations": 120},
+   "Predictions": {}
+};
+
+const create_parameters_interface = function () {
+  const parameters_gui = new dat.GUI({width: 600,
+                                      autoPlace: false});
+  const settings_element = document.getElementById('settings');
+  settings_element.appendChild(parameters_gui.domElement);
+  settings_element.style.display = "block";
+  parameters_gui.domElement.style.padding = "12px";
+  return {model: create_model_parameters(parameters_gui),
+          training: create_training_parameters(parameters_gui)};
+};
+
+const create_model_parameters = (parameters_gui) => {
+    const model = parameters_gui.addFolder("Model");
+    model.add(gui_state["Model"], 'Size of first layer').min(1).max(100);
+    model.add(gui_state["Model"], 'Size of second layer').min(0).max(100);
+    model.add(gui_state["Model"], 'Size of third layer').min(0).max(100);
+    model.add(gui_state["Model"], 'Size of fourth layer').min(0).max(100);
+    model.add(gui_state["Model"], 'Size of fifth layer').min(0).max(100);
+    model.add(gui_state["Model"], 'Optimization method', ['sgd', 'momentum', 'adagrad', 'adadelta', 'adam', 'adamax', 'rmsprop']);
+    return model;  
+};
+
+const create_training_parameters = (parameters_gui) => {
+    const training = parameters_gui.addFolder("Training");
+    training.add(gui_state["Training"], 'Number of iterations').min(1).max(1000);
+    training.add(gui_state["Training"], 'Learning rate').min(.00001).max(.9999);
+    return training;
+};
+
+let parameters_gui;
+
+const parameters_interface = function (interface_creator) {
+  if (!parameters_gui) {
+      parameters_gui = interface_creator();
+  }
+  return parameters_gui;
+};
+
+let create_model_with_current_settings_button;
+
+const create_model_with_parameters = function () {
+  const surface = tfvis.visor().surface({name: 'Tic Tac Toe', tab: 'Model'});
+  const draw_area = surface.drawArea;
+  tensorflow.parameters_interface(create_parameters_interface).model.open();
+  let name_input;
+  let message;
+  const create_model_with_current_settings = function () {
+      let layers = [Math.round(gui_state["Model"]["Size of first layer"])];
+      if (gui_state["Model"]["Size of second layer"] > .5) {
+          layers.push(Math.round(gui_state["Model"]["Size of second layer"]));
+      }
+      if (gui_state["Model"]["Size of third layer"] > .5) {
+          layers.push(Math.round(gui_state["Model"]["Size of third layer"]));
+      }
+      if (gui_state["Model"]["Size of fourth layer"] > .5) {
+          layers.push(Math.round(gui_state["Model"]["Size of fourth layer"]));
+      }
+      if (gui_state["Model"]["Size of fifth layer"] > .5) {
+          layers.push(Math.round(gui_state["Model"]["Size of fifth layer"]));
+      }
+      const name = name_input.value;
+      try {
+          model = tensorflow.create_model(name, layers, gui_state["Model"]["Optimization method"]);
+      } catch (error) {
+          report_error(error);
+      }
+      let train_button = document.getElementById('train');
+      if (train_button) {
+          train_button.disabled = false;
+      }
+      let html = "<br>A new model named '" + name + "' created and it is ready to be trained.";
+      if (tensorflow.get_model(name)) {
+          html += "<br>It replaces the old model of the same name.";
+      }
+      model.summary(50, // line length
+                    undefined,
+                    (line) => {
+                      html += "<br>" + line;
+                    });
+      message.innerHTML = html;
+  };
+  if (create_model_with_current_settings_button) {
+      tfvis.visor().setActiveTab('Model');
+  } else {
+      name_input = document.createElement('input');
+      name_input.type = 'text';
+      name_input.id = "name_element";
+      name_input.name = "name_element";
+      name_input.value = 'my-model';
+      const label = document.createElement('label');
+      label.for = "name_element";
+      label.innerHTML = "Name of model: ";
+      const div = document.createElement('div');
+      div.appendChild(label);
+      div.appendChild(name_input);
+      draw_area.appendChild(div);
+      create_model_with_current_settings_button = 
+          tensorflow.create_button("Create model with current settings", create_model_with_current_settings);
+      draw_area.appendChild(create_model_with_current_settings_button);
+      message = document.createElement('div');
+      draw_area.appendChild(message);        
+  }
+};
+
+
+let train_with_current_settings_button;
+
+const train_with_parameters = async function (surface_name) {
+  const surface = tfvis.visor().surface({name: surface_name, tab: 'Training'});
+  const draw_area = surface.drawArea;
+  const train_with_current_settings = async function () {
+    let message = document.createElement('div');
+    let success_callback = (training_statistics) => {
+        let {duration, loss} = training_statistics;
+        message.innerHTML = "<br>Training took " + duration + " seconds. Final error rate is " + Math.round(100*loss) +"%.";
+        let evaluate_button = document.getElementById('evaluate');
+        if (evaluate_button) {
+            evaluate_button.disabled = false;
+        }    
+    };
+    let error_callback = (error) => {
+        message.innerHTML = "<br><b>Error:</b> " + error.message + "<br>";
+    };
+    message.innerHTML = "<br>Training started. Training data is " + training_data.input.length + " long. Please wait.";
+    draw_area.appendChild(message);
+    setTimeout(async function () {
+        // without the timeout the message above isn't displayed
+        await train_model(model,
+                          training_data,
+                          Math.round(gui_state["Training"]["Number of iterations"]),
+                          gui_state["Training"]["Learning rate"],
+                          true, // show progress using tfjs-vis 
+                          success_callback,
+                          error_callback);
+    });
+  };
+  parameters_interface(create_parameters_interface).training.open();
+  if (train_with_current_settings_button) {
+      tfvis.visor().setActiveTab('Training');
+  } else {
+      train_with_current_settings_button = tensorflow.create_button("Train model with current settings", train_with_current_settings);
+      draw_area.appendChild(train_with_current_settings_button);    
+  }
+};
+
+
 let save_button;
 let load_button;
 
@@ -230,7 +385,10 @@ const load_model = async function () {
   replace_button_results(load_button, message);  
   // to add more data enable these options
   create_model_button.disabled = false;
-  evaluate_button.disabled = false;
+  let evaluate_button = document.getElementById('evaluate');
+  if (evaluate_button) {
+      evaluate_button.disabled = false;    
+  }
 };
 
 let create_button = function (label, click_handler) {
@@ -310,7 +468,15 @@ return {get_model: (name) => models[name],
         add_to_dataset: add_to_dataset,
         create_model: create_model,
         train_model: train_model,
-        predict: predict};
+        predict: predict,
+        gui_state: gui_state,
+        parameters_interface: parameters_interface,
+        create_model_parameters: create_model_parameters,
+        create_model_with_parameters: create_model_with_parameters,
+        create_training_parameters: create_training_parameters,
+        train_with_parameters: train_with_parameters,
+        save_and_load: save_and_load,
+        create_button: create_button};
   
 }()));
 
