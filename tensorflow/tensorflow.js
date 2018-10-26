@@ -64,6 +64,10 @@ const create_model = function (name, layers, optimizer) {
 };
 
 const train_model = async function (model_or_model_name, data, epochs, learning_rate, use_tfjs_vis, success_callback, error_callback) {
+  if (!model_or_model_name) {
+      error_callback({message: "No model or name provided to train model."});
+      return;
+  }
   if (typeof model_or_model_name === 'string') {
       model = models[model_or_model_name];
       if (!model) {
@@ -256,6 +260,7 @@ const receive_message =
             training_data =
                 add_to_dataset(message.training_data.input,
                                message.training_data.output);
+            event.source.postMessage({data_received: message.training_data.time_stamp}, "*");
         } else if (typeof message.create_model !== 'undefined') {
             try {
                 let model = create_model(message.create_model.name,

@@ -1023,17 +1023,60 @@ window.ecraft2learn =
         send_request_when_support_window_is('Loaded', 'tensorflow.js', send_request);
     };
     const training_data = function(input, output, ignore_old_dataset, callback) {
-        // uses the layers level of tensorflow.js to create models, train, and predict
+        const time_stamp = Date.now();
         input = snap_to_javascript(input, true);
         output = snap_to_javascript(output, true);
         let send_request = function() {
             ecraft2learn.support_window['tensorflow.js'].postMessage(
                 {training_data: {input: input,
                                  output: output,
-                                 ignore_old_dataset: ignore_old_dataset}},
+                                 ignore_old_dataset: ignore_old_dataset,
+                                 time_stamp: time_stamp}},
             '*');
         };
+        const receive_message = function (event) {
+            if (typeof event.data.data_received !== 'undefined' &&
+                event.data.data_received === time_stamp) {
+                invoke_callback(callback, true);
+                window.removeEventListener('message', receive_message);
+            }
+        }
+        window.addEventListener('message', receive_message);
         send_request_when_support_window_is('Loaded', 'tensorflow.js', send_request);
+    };
+    const train_model = (model_name, epochs, learning_rate, callback) => {
+        let send_request = function() {
+            ecraft2learn.support_window['tensorflow.js'].postMessage(
+                {train: {model_name: model_name,
+                         epochs: epochs,
+                         learning_rate: learning_rate}},
+            '*');
+        };
+        const receive_message = function (event) {
+            if (typeof event.data.training_completed !== 'undefined') {
+                invoke_callback(callback, javascript_to_snap(event.data.training_completed));
+                window.removeEventListener('message', receive_message);
+            }
+        }
+        window.addEventListener('message', receive_message);
+        send_request_when_support_window_is('Loaded', 'tensorflow.js', send_request);
+    };
+    const prediction_from_model = (model_name, input, callback) => {
+        input = snap_to_javascript(input, true);
+        let send_request = function() {
+            ecraft2learn.support_window['tensorflow.js'].postMessage(
+                {predict: {model_name: model_name,
+                           input: input}},
+            '*');
+        };
+        const receive_message = function (event) {
+            if (typeof event.data.prediction !== 'undefined') {
+                invoke_callback(callback, javascript_to_snap(event.data.prediction));
+                window.removeEventListener('message', receive_message);
+            }
+        }
+        window.addEventListener('message', receive_message);
+        send_request_when_support_window_is('Loaded', 'tensorflow.js', send_request);        
     };
     var image_url_of_costume = function (costume) {
         var canvas = costume.contents;
@@ -2400,6 +2443,8 @@ window.ecraft2learn =
   get_image_features: get_image_features,
   create_tensorflow_model: create_tensorflow_model,
   training_data: training_data,
+  train_model: train_model,
+  prediction_from_model: prediction_from_model,
   display_support_window: open_support_window,
   image_class: image_class,
   inform: inform,
