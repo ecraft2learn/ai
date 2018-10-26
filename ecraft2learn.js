@@ -257,6 +257,24 @@ window.ecraft2learn =
         }
         return x;
     };
+    const snap_to_javascript = (x, only_numbers) => {
+        const numberify = function (x) {
+            if (typeof x === 'string') {
+                return +x;
+            }
+            if (x instanceof Array) {
+                return x.map(numberify);
+            }
+            return x;
+        }
+        if (x instanceof List) {
+            x = x.asArray();
+        }
+        if (only_numbers) {
+            return numberify(x);
+        }
+        return x;       
+    };
     let add_photo_to_canvas = function (image_or_video, width, height) {
         // Capture a photo by fetching the current contents of the video
         // and drawing it into a canvas, then converting that to a PNG
@@ -994,16 +1012,25 @@ window.ecraft2learn =
     };
     const create_tensorflow_model = function(name, layers, optimizer, callback) {
         // uses the layers level of tensorflow.js to create models, train, and predict
-        if (layers instanceof List) {
-            layers = layers.asArray();
-        }
-        let time_stamp = Date.now();
+        layers = snap_to_javascript(layers, true);
         let send_request = function() {
             ecraft2learn.support_window['tensorflow.js'].postMessage(
                 {create_model: {name: name,
                                 layers: layers,
-                                optimizer: optimizer,
-                                time_stamp: time_stamp}},
+                                optimizer: optimizer}},
+            '*');
+        };
+        send_request_when_support_window_is('Loaded', 'tensorflow.js', send_request);
+    };
+    const training_data = function(input, output, ignore_old_dataset, callback) {
+        // uses the layers level of tensorflow.js to create models, train, and predict
+        input = snap_to_javascript(input, true);
+        output = snap_to_javascript(output, true);
+        let send_request = function() {
+            ecraft2learn.support_window['tensorflow.js'].postMessage(
+                {training_data: {input: input,
+                                 output: output,
+                                 ignore_old_dataset: ignore_old_dataset}},
             '*');
         };
         send_request_when_support_window_is('Loaded', 'tensorflow.js', send_request);
@@ -1255,28 +1282,16 @@ window.ecraft2learn =
         return result;
     };
     const cosine_similarity = function(features1, features2, magnitude1, magnitude2) {
-        if (features1 instanceof List) {
-            features1 = features1.asArray();
-        }
-        if (features2 instanceof List) {
-            features2 = features2.asArray();
-        }
-        if (magnitude1 instanceof List) {
-            magnitude1 = magnitude1.asArray();
-        }
-        if (magnitude2 instanceof List) {
-            magnitude2 = magnitude2.asArray();
-        }
+        features1 = snap_to_javascript(features1);
+        features2 = snap_to_javascript(features2);
+        magnitude1 = snap_to_javascript(magnitude1);
+        magnitude2 = snap_to_javascript(magnitude2);
         return dot_product(features1, features2) /
                ((magnitude1 || magnitude(features1))*(magnitude2 || magnitude(features2)));
     };
     const distance_squared = function(features1, features2) {
-        if (features1 instanceof List) {
-            features1 = features1.asArray();
-        }
-        if (features2 instanceof List) {
-            features2 = features2.asArray();
-        }
+        features1 = snap_to_javascript(features1);
+        features2 = snap_to_javascript(features2);
         let result = 0;
         features1.forEach(function (feature, index) {
             let difference = feature-features2[index];
@@ -2094,9 +2109,7 @@ window.ecraft2learn =
       get_snap_ide().saveProject(name);
   },
   console_log: function (message) {
-      if (message instanceof List) {
-          message = message.asArray();
-      }
+      message = snap_to_javascript(message);
       console.log(message);
   },
   open_help_page: function () {
@@ -2386,6 +2399,7 @@ window.ecraft2learn =
   create_costume_with_style: create_costume_with_style,
   get_image_features: get_image_features,
   create_tensorflow_model: create_tensorflow_model,
+  training_data: training_data,
   display_support_window: open_support_window,
   image_class: image_class,
   inform: inform,
