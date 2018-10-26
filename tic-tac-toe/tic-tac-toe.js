@@ -50,7 +50,7 @@ const create_model_with_parameters = function () {
       }
       const name = name_input.value;
       try {
-          model = tensorflow.create_model(name, layers);
+          model = tensorflow.create_model(name, layers, gui_state["Model"]["Optimization method"]);
       } catch (error) {
           report_error(error);
       } 
@@ -142,7 +142,8 @@ const gui_state =
              "Size of second layer": 50,
              "Size of third layer": 20,
              "Size of fourth layer": 0,
-             "Size of fifth layer": 0},
+             "Size of fifth layer": 0,
+             "Optimization method": 'sgd'},
    "Training": {"Learning rate": .001,
                 "Number of iterations": 120},
    "Testing": {},
@@ -171,6 +172,7 @@ const create_parameters_interface = function () {
   model.add(gui_state["Model"], 'Size of third layer').min(0).max(100);
   model.add(gui_state["Model"], 'Size of fourth layer').min(0).max(100);
   model.add(gui_state["Model"], 'Size of fifth layer').min(0).max(100);
+  model.add(gui_state["Model"], 'Optimization method', ['sgd', 'momentum', 'adagrad', 'adadelta', 'adam', 'adamax', 'rmsprop']);
   let training = parameters_gui.addFolder("Training");
   training.add(gui_state["Training"], 'Number of iterations').min(1).max(1000);
   training.add(gui_state["Training"], 'Learning rate').min(.00001).max(.9999);
