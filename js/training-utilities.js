@@ -49,7 +49,7 @@
     return info_texts;
 }
 
-function create_return_to_snap_button(innerHTML) {
+function create_return_to_snap_button(innerHTML, append_to_element_with_this_id) {
     var return_to_snap_button = document.createElement('button');
     if (!innerHTML) {
         innerHTML = "Return to Snap!";
@@ -73,8 +73,12 @@ function create_return_to_snap_button(innerHTML) {
             });
             window.postMessage('restart', "*");             
         }
-    });                                                
-    document.body.appendChild(return_to_snap_button);
+    });
+    if (append_to_element_with_this_id) {
+        document.getElementById(append_to_element_with_this_id).appendChild(return_to_snap_button);
+    } else {
+        document.body.appendChild(return_to_snap_button);
+    }
 }
 
 // tell Snap! this is loaded

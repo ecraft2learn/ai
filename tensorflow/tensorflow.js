@@ -242,7 +242,6 @@ let create_button = function (label, click_handler) {
   return button;
 };
 
-
 window.addEventListener('DOMContentLoaded',
                         () => {
                             // not waiting for anything so loaded and ready are the same
