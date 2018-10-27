@@ -263,12 +263,12 @@ window.ecraft2learn =
                 return +x;
             }
             if (x instanceof Array) {
-                return x.map(numberify);
+                return x.map((y) => snap_to_javascript(y, only_numbers));
             }
             return x;
         }
         if (x instanceof List) {
-            x = x.asArray();
+            x = snap_to_javascript(x.asArray(), only_numbers);
         }
         if (only_numbers) {
             return numberify(x);
@@ -1062,6 +1062,9 @@ window.ecraft2learn =
         send_request_when_support_window_is('Loaded', 'tensorflow.js', send_request);
     };
     const prediction_from_model = (model_name, input, callback) => {
+//         if (typeof input === 'string') { // convenient but a hack
+//             input = JSON.parse(string);
+//         }
         input = snap_to_javascript(input, true);
         let send_request = function() {
             ecraft2learn.support_window['tensorflow.js'].postMessage(
