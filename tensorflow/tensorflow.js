@@ -9,10 +9,23 @@ let models = {};
 let model;
 let training_data;
 
+const MAX_LAYER_COUNT = 5;
+
+const optimization_methods =
+    {"Stochastic Gradient Descent": "sgd",
+     "Momentum": "momentum",
+     "Adaptive Stochastic Gradient Descent": "adagrad",
+     "Adaptive Learning Rate Gradiant Descent": "adadelta",
+     "Adaptive Moment Estimation": "adam",
+     "Adaptive Moment Estimation": "adamax",
+     "Root Mean Squared Prop": "rmsprop"};
+
 const add_to_models = function (model) {
     let new_name = !models[model.name];
     models[model.name] = model;
 };
+
+const get_model = (name) => models[name];
 
 const shape_of_data = (data) => {
    if (typeof data === 'number') {
@@ -24,20 +37,28 @@ const shape_of_data = (data) => {
    }
 };
 
-const create_model = function (name, layers, optimizer) {
+const create_model = function (name, layers, optimizer_full_name) {
     if (!training_data || typeof training_data.input === 'undefined') {
         throw new Error("Cannot create a model before knowing what the data is like.\nProvide at least one example of the data.");
+    }
+    const optimizer = optimization_methods[optimizer_full_name];
+    if (!optimizer) {
+        report_error("Could not recognise '" + optimizer_full_name + "' as an optimizer.");
+        return;
     }
     const model = tf.sequential({name: name});
     model.ready_for_training = false;
     add_to_models(model);
     layers.forEach((size, index) => {
-        let configuration = {units: size,
-                             activation: 'relu'};
-        if (index === 0) {
-            configuration.inputShape = shape_of_data(training_data.input[0]);
+        if (size > 0) {
+            let configuration = {units: size,
+                                 activation: 'relu'};
+            if (index === 0) {
+                configuration.inputShape = shape_of_data(training_data.input[0]);
+            }
+            model.add(tf.layers.dense(configuration));
         }
-        model.add(tf.layers.dense(configuration));  
+        gui_state["Model"]["Size of layer " + (index +1)] = size;
     });
     if (layers[layers.length-1] > 1) {
        // not needed if last layer is already 1
@@ -46,8 +67,12 @@ const create_model = function (name, layers, optimizer) {
                                   activation: 'relu',
                                   useBias: false}));     
     }
+    if (!optimizer) {
+        optimizer = 'adam';
+    }
     model.compile({loss: 'meanSquaredError',
-                   optimizer: (optimizer || 'adam')});
+                   optimizer: optimizer});
+    gui_state["Model"]["Optimization method"] = optimizer_full_name;
     model.ready_for_training = true;
     if (model.callback_when_ready_for_training) {
         model.callback_when_ready_for_training();
@@ -102,6 +127,8 @@ const train_model = async function (model_or_model_name, data, epochs, learning_
   if (model.optimizer.learningRate) { // not every optimizer needs to have this property
       model.optimizer.learningRate = learning_rate;
   }
+  gui_state["Training"]['Number of iterations'] = epochs;
+  gui_state["Training"]['Learning rate'] = learning_rate;
   tf.tidy(() => {
       model.fit(xs,
                 ys,
@@ -164,12 +191,12 @@ const add_to_dataset =
 
 const gui_state = 
   // following inspired by https://github.com/johnflux/deep-learning-tictactoe/blob/master/play.py
-  {"Model": {"Size of first layer": 100,
-             "Size of second layer": 50,
-             "Size of third layer": 20,
-             "Size of fourth layer": 0,
-             "Size of fifth layer": 0,
-             "Optimization method": 'sgd'},
+  {"Model": {"Size of layer 1": 100,
+             "Size of layer 2": 50,
+             "Size of layer 3": 20,
+             "Size of layer 4": 0,
+             "Size of layer 5": 0,
+             "Optimization method": 'Stochastic Gradient Descent'},
    "Training": {"Learning rate": .001,
                 "Number of iterations": 120},
    "Predictions": {}
@@ -188,12 +215,10 @@ const create_parameters_interface = function () {
 
 const create_model_parameters = (parameters_gui) => {
     const model = parameters_gui.addFolder("Model");
-    model.add(gui_state["Model"], 'Size of first layer').min(1).max(100);
-    model.add(gui_state["Model"], 'Size of second layer').min(0).max(100);
-    model.add(gui_state["Model"], 'Size of third layer').min(0).max(100);
-    model.add(gui_state["Model"], 'Size of fourth layer').min(0).max(100);
-    model.add(gui_state["Model"], 'Size of fifth layer').min(0).max(100);
-    model.add(gui_state["Model"], 'Optimization method', ['sgd', 'momentum', 'adagrad', 'adadelta', 'adam', 'adamax', 'rmsprop']);
+    for (let i = 1; i <= MAX_LAYER_COUNT; i++) {
+        model.add(gui_state["Model"], 'Size of layer ' + i).min(i === 1 ? 1 : 0).max(100);
+    }
+    model.add(gui_state["Model"], 'Optimization method', Object.keys(optimization_methods));
     return model;  
 };
 
@@ -215,29 +240,24 @@ const parameters_interface = function (interface_creator) {
 
 let create_model_with_current_settings_button;
 
-const create_model_with_parameters = function () {
-  const surface = tfvis.visor().surface({name: 'Tic Tac Toe', tab: 'Model'});
+const create_model_with_parameters = function (surface_name) {
+  const surface = tfvis.visor().surface({name: surface_name, tab: 'Model'});
   const draw_area = surface.drawArea;
-  tensorflow.parameters_interface(create_parameters_interface).model.open();
+  parameters_interface(create_parameters_interface).model.open();
   let name_input;
   let message;
   const create_model_with_current_settings = function () {
-      let layers = [Math.round(gui_state["Model"]["Size of first layer"])];
-      if (gui_state["Model"]["Size of second layer"] > .5) {
-          layers.push(Math.round(gui_state["Model"]["Size of second layer"]));
-      }
-      if (gui_state["Model"]["Size of third layer"] > .5) {
-          layers.push(Math.round(gui_state["Model"]["Size of third layer"]));
-      }
-      if (gui_state["Model"]["Size of fourth layer"] > .5) {
-          layers.push(Math.round(gui_state["Model"]["Size of fourth layer"]));
-      }
-      if (gui_state["Model"]["Size of fifth layer"] > .5) {
-          layers.push(Math.round(gui_state["Model"]["Size of fifth layer"]));
+      let layers = [];
+      for (let i = 1; i <= MAX_LAYER_COUNT; i++) {
+          let layer_size = gui_state["Model"]["Size of layer " + i];
+          if (layer_size > .5) {
+              layers.push(Math.round(layer_size));
+          }
       }
       const name = name_input.value;
+      const optimizer_full_name = gui_state["Model"]["Optimization method"];
       try {
-          model = tensorflow.create_model(name, layers, gui_state["Model"]["Optimization method"]);
+          model = create_model(name, layers, optimizer_full_name);
       } catch (error) {
           report_error(error);
       }
@@ -245,9 +265,10 @@ const create_model_with_parameters = function () {
           train_button.disabled = false;
       }
       let html = "<br>A new model named '" + name + "' created and it is ready to be trained.";
-      if (tensorflow.get_model(name)) {
+      if (get_model(name)) {
           html += "<br>It replaces the old model of the same name.";
       }
+      html += "<br>Its optimization method is '" + optimizer_full_name + "'.";
       model.summary(50, // line length
                     undefined,
                     (line) => {
@@ -262,7 +283,7 @@ const create_model_with_parameters = function () {
       name_input.type = 'text';
       name_input.id = "name_element";
       name_input.name = "name_element";
-      name_input.value = 'my-model';
+      name_input.value = model ? model.name : 'my-model';
       const label = document.createElement('label');
       label.for = "name_element";
       label.innerHTML = "Name of model: ";
@@ -271,7 +292,7 @@ const create_model_with_parameters = function () {
       div.appendChild(name_input);
       draw_area.appendChild(div);
       create_model_with_current_settings_button = 
-          tensorflow.create_button("Create model with current settings", create_model_with_current_settings);
+          create_button("Create model with current settings", create_model_with_current_settings);
       draw_area.appendChild(create_model_with_current_settings_button);
       message = document.createElement('div');
       draw_area.appendChild(message);        
@@ -314,7 +335,7 @@ const train_with_parameters = async function (surface_name) {
   if (train_with_current_settings_button) {
       tfvis.visor().setActiveTab('Training');
   } else {
-      train_with_current_settings_button = tensorflow.create_button("Train model with current settings", train_with_current_settings);
+      train_with_current_settings_button = create_button("Train model with current settings", train_with_current_settings);
       draw_area.appendChild(train_with_current_settings_button);    
   }
 };
@@ -402,10 +423,13 @@ window.addEventListener('DOMContentLoaded',
                             create_model_button = document.getElementById('create_model');
                             save_and_load_button = document.getElementById('save_and_load');
                             train_button = document.getElementById('train');
-                            create_model_button.addEventListener('click', create_model_with_parameters);
+                            create_model_button.addEventListener('click', 
+                                                                 () => {
+                                                                      create_model_with_parameters('Tensorflow');
+                                                                 });
                             train_button.addEventListener('click',
                                                           () => {
-                                                              train_with_parameters('Tensorflow')
+                                                              train_with_parameters('Tensorflow');
                                                           });
                             save_and_load_button.addEventListener('click', save_and_load);             
                             // not waiting for anything so loaded and ready are the same
@@ -426,9 +450,15 @@ const receive_message =
             event.source.postMessage({data_received: message.training_data.time_stamp}, "*");
         } else if (typeof message.create_model !== 'undefined') {
             try {
+                const optimizer_full_name = message.create_model.optimizer.trim();
+                const optimizer = optimization_methods[optimizer_full_name];
+                if (!optimizer) {
+                    event.source.postMessage({error: "Could not recognise '" + optimizer_full_name + "' as an optimizer."}, "*");
+                    return;
+                }
                 let model = create_model(message.create_model.name,
                                          message.create_model.layers,
-                                         message.create_model.optimizer);
+                                         optimizer_full_name);
                 add_to_models(model);
             } catch (error) {
                 event.source.postMessage({error: error.message}, "*");
@@ -466,7 +496,7 @@ const receive_message =
 
 window.addEventListener('message', receive_message);
 
-return {get_model: (name) => models[name], 
+return {get_model: get_model, 
         add_to_models: add_to_models,
         training_data: () => training_data,
         set_training_data: (data) => {

@@ -490,10 +490,13 @@ const update_evaluation_model_choices = function () {
 };
 
 create_data_button.addEventListener('click', create_data_with_parameters);
-create_model_button.addEventListener('click', tensorflow.create_model_with_parameters);
+create_model_button.addEventListener('click',
+                                     () => {
+                                         tensorflow.create_model_with_parameters('Tic Tac Toe');
+                                     });
 train_button.addEventListener('click',
                               () => {
-                                  tensorflow.train_with_parameters('Tic Tac Toe')
+                                  tensorflow.train_with_parameters('Tic Tac Toe');
                               });
 evaluate_button.addEventListener('click', evaluate_training);
 save_and_load_button.addEventListener('click', tensorflow.save_and_load);
