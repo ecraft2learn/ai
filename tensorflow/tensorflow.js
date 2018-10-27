@@ -17,7 +17,7 @@ const optimization_methods =
      "Adaptive Stochastic Gradient Descent": "adagrad",
      "Adaptive Learning Rate Gradiant Descent": "adadelta",
      "Adaptive Moment Estimation": "adam",
-     "Adaptive Moment Estimation": "adamax",
+     "Adaptive Moment Estimation Max": "adamax",
      "Root Mean Squared Prop": "rmsprop"};
 
 const add_to_models = function (model) {
@@ -148,6 +148,8 @@ const train_model = async function (model_or_model_name, data, epochs, learning_
        });
 };
 
+let last_prediction;
+
 const predict = (model_name, input, success_callback, error_callback) => {
     let model = models[model_name];
     if (!model) {
@@ -161,6 +163,7 @@ const predict = (model_name, input, success_callback, error_callback) => {
         };
         return;
     }
+    last_prediction = JSON.stringify(input);
     try {
         let input_tensor;
         if (typeof input === 'number') {
@@ -299,7 +302,6 @@ const create_model_with_parameters = function (surface_name) {
   }
 };
 
-
 let train_with_current_settings_button;
 
 const train_with_parameters = async function (surface_name) {
@@ -340,6 +342,42 @@ const train_with_parameters = async function (surface_name) {
   }
 };
 
+const create_prediction_interface = () => {
+    const surface = tfvis.visor().surface({name: 'Tensorflow', tab: 'Prediction'});
+    const draw_area = surface.drawArea;
+    if (document.getElementById('prediction-input')) {
+        tfvis.visor().setActiveTab('Evaluation');
+        return;
+    }
+    const input_input = document.createElement('input');
+    input_input.type = 'text';
+    input_input.id = "prediction-input";
+    input_input.name = "prediction-input";
+    input_input.value = (last_prediction || 1);
+    const label = document.createElement('label');
+    label.for = "input_input";
+    label.innerHTML = "Input for prediction: ";
+    const div = document.createElement('div');
+    div.appendChild(label);
+    div.appendChild(input_input);
+    draw_area.appendChild(div);
+    const make_prediction = 
+        () => {
+            try {
+                const input = JSON.parse(input_input.value);
+                predict(model.name, input, success_callback, report_error);
+            } catch (error) {
+                report_error(error);
+            }
+    };
+    const prediction_button = create_button("Make prediction", make_prediction);
+    const success_callback = (result) => {
+        const message = document.createElement('div');
+        message.innerHTML = "<br>The " + model.name + " model predicts " + result + " for input " + input_input.value + ".";
+        draw_area.appendChild(message);
+    };  
+    draw_area.appendChild(prediction_button);
+};
 
 let save_button;
 let load_button;
@@ -395,7 +433,7 @@ const load_model = async function () {
   message.innerHTML = model_name + " loaded and ready to evaluate.";
   model.name = model_name;
   if (models[name]) {
-     message.innerHTML += "<br>Replaced a model with the same name.";
+      message.innerHTML += "<br>Replaced a model with the same name.";
   }
   add_to_models(model);
   replace_button_results(load_button, message);  
@@ -416,13 +454,14 @@ let create_button = function (label, click_handler) {
   return button;
 };
 
-let create_model_button, save_and_load_button, train_button;
+let create_model_button, save_and_load_button, train_button, evaluate_button;
 
 window.addEventListener('DOMContentLoaded',
                         () => {
                             create_model_button = document.getElementById('create_model');
                             save_and_load_button = document.getElementById('save_and_load');
                             train_button = document.getElementById('train');
+                            evaluate_button = document.getElementById('evaluate');
                             create_model_button.addEventListener('click', 
                                                                  () => {
                                                                       create_model_with_parameters('Tensorflow');
@@ -431,6 +470,7 @@ window.addEventListener('DOMContentLoaded',
                                                           () => {
                                                               train_with_parameters('Tensorflow');
                                                           });
+                            evaluate_button.addEventListener('click', create_prediction_interface);
                             save_and_load_button.addEventListener('click', save_and_load);             
                             // not waiting for anything so loaded and ready are the same
                             window.parent.postMessage("Loaded", "*"); 
