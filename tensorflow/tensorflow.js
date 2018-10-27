@@ -481,7 +481,10 @@ window.addEventListener('DOMContentLoaded',
                             evaluate_button.addEventListener('click', create_prediction_interface);
                             save_and_load_button.addEventListener('click', save_and_load);             
                             // not waiting for anything so loaded and ready are the same
-                            window.parent.postMessage("Loaded", "*"); 
+                            window.parent.postMessage("Loaded", "*");
+                            if (window !== window.parent) {
+                                window.postMessage("Loaded", "*"); // for other files to react (e.g. test.js)
+                            }
                             window.parent.postMessage("Ready", "*");
                         });
 

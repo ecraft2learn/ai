@@ -5,7 +5,7 @@ const test_1 = () => {
                          output: [1, 3, 5, 7]}}, "*");
     window.postMessage({create_model:
                         {layers: [1],
-                         optimizer: 'sgd',
+                         optimizer: 'Stochastic Gradient Descent',
                          name: 'test 1'}}, "*");
     window.postMessage({train: 
                         {epochs: 10,
@@ -25,7 +25,7 @@ const test_1 = () => {
 };
 
 window.addEventListener('message', (event) => {
-    if (event.data === 'Ready') {
+    if (event.data === 'Loaded') {
         test_1();
     }
 });
