@@ -13,7 +13,7 @@ const MAX_LAYER_COUNT = 5;
 
 const optimization_methods =
     {"Stochastic Gradient Descent": "sgd",
-     "Momentum": "momentum",
+//      "Momentum": "momentum",
      "Adaptive Stochastic Gradient Descent": "adagrad",
      "Adaptive Learning Rate Gradiant Descent": "adadelta",
      "Adaptive Moment Estimation": "adam",
@@ -311,7 +311,7 @@ const train_with_parameters = async function (surface_name) {
     let message = document.createElement('div');
     let success_callback = (training_statistics) => {
         let {duration, loss} = training_statistics;
-        message.innerHTML = "<br>Training took " + duration + " seconds. Final error rate is " + Math.round(100*loss) +"%.";
+        message.innerHTML = "<br>Training took " + duration + " seconds. Final error rate is " + loss +".";
         let evaluate_button = document.getElementById('evaluate');
         if (evaluate_button) {
             evaluate_button.disabled = false;
