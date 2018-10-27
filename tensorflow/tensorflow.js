@@ -346,7 +346,7 @@ const create_prediction_interface = () => {
     const surface = tfvis.visor().surface({name: 'Tensorflow', tab: 'Prediction'});
     const draw_area = surface.drawArea;
     if (document.getElementById('prediction-input')) {
-        tfvis.visor().setActiveTab('Evaluation');
+        tfvis.visor().setActiveTab('Prediction');
         return;
     }
     const input_input = document.createElement('input');
@@ -432,6 +432,7 @@ const load_model = async function () {
   const model_name = saved_model_element.files[0].name.substring(0, saved_model_element.files[0].name.length-".json".length);
   message.innerHTML = model_name + " loaded and ready to evaluate.";
   model.name = model_name;
+  model.ready_for_prediction = true;
   if (models[name]) {
       message.innerHTML += "<br>Replaced a model with the same name.";
   }
@@ -452,6 +453,13 @@ let create_button = function (label, click_handler) {
   button.addEventListener('click', click_handler);
   button.id = label; // for ease of replacing it with a newer version
   return button;
+};
+
+const replace_button_results = function(element, child) {
+    if (element.firstChild.nextSibling) {
+        element.firstChild.nextSibling.remove();
+    }
+    element.appendChild(child);
 };
 
 let create_model_button, save_and_load_button, train_button, evaluate_button;
@@ -553,7 +561,7 @@ return {get_model: get_model,
         create_training_parameters: create_training_parameters,
         train_with_parameters: train_with_parameters,
         save_and_load: save_and_load,
-        create_button: create_button};
-  
+        create_button: create_button,
+        replace_button_results: replace_button_results};
 }()));
 

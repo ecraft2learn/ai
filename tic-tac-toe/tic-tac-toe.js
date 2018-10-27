@@ -290,13 +290,6 @@ const random_game_display = function (boards) {
     return element;
 };
 
-const replace_button_results = function(element, child) {
-    if (element.firstChild.nextSibling) {
-        element.firstChild.nextSibling.remove();
-    }
-    element.appendChild(child);
-};
-
 const create_data_interface = async function(button_label, number_of_games_function, interface_element) {
   const play_games = async function () {
     const message = document.createElement('p');
@@ -347,8 +340,8 @@ const create_data_interface = async function(button_label, number_of_games_funct
                         function () {
                             const playing_first_boards = 
                                 evaluation_data.input.slice(0, evaluation_data.statistics.last_board_with_player_1_going_first);
-                            replace_button_results(show_first_player_playing_x_button,
-                                                   random_game_display(playing_first_boards));
+                            tensorflow.replace_button_results(show_first_player_playing_x_button,
+                                                              random_game_display(playing_first_boards));
                         });
       update_button(show_first_player_playing_x_button);
       const show_first_player_playing_o_button = 
@@ -356,8 +349,8 @@ const create_data_interface = async function(button_label, number_of_games_funct
                         function () {
                              const playing_second_boards =
                                 evaluation_data.input.slice(evaluation_data.statistics.last_board_with_player_1_going_first);
-                             replace_button_results(show_first_player_playing_o_button,
-                                                    random_game_display(playing_second_boards));
+                             tensorflow.replace_button_results(show_first_player_playing_o_button,
+                                                               random_game_display(playing_second_boards));
                         });
       update_button(show_first_player_playing_o_button);
     });
