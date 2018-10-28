@@ -393,7 +393,9 @@ let stopped = false;
   
 function stop() {
     stopped = true;
-    video.pause();
+    if (video) {
+        video.pause();
+    }
     cancelAnimationFrame(timer);
     timer = undefined; // so don't restart multiple times
 }
