@@ -311,7 +311,7 @@ If you try the rock paper scissors game you'll see it sometimes makes mistakes.
 See if you can improve its accuracy by adding more training images.
 </p>
 <p class="background-information non-essential">
-The image training command relies upon something called
+The image training command relies upon a deep learning model called
 <a href="https://arxiv.org/abs/1704.04861" target="_blank">MobileNet</a>
 that was trained on 1000 categories in 1.2 million images.
 The Snap! command uses what is called
@@ -319,6 +319,12 @@ The Snap! command uses what is called
 to start the training using the features that a well-trained system has already learned.
 The system does not know anything about, for example, hands shaped as paper, rock, or scissors
 but it has already learned about textures, edges, colours, and more.
+Each training image used in transfer learning is
+<a href="chapter-5.html#image_embeddings">converted by MobileNet into a list of one thousand numbers</a>.
+The confidence scores for the labels is then computed using an algorithm called
+<a href="https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm" target="_blank">k-nearest neighbors</a>.
+To classify an image, its distance to each of the training images is computed and the "k" closest is found.
+Those closest images "vote" for their label as the classification and the sums are used to compute the confidences. 
 </p>
 <p class="background-information">
 Another difference is that the image recognition services in the 
