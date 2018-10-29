@@ -1008,7 +1008,7 @@ window.ecraft2learn =
             }      
         }  
         window.addEventListener('message', receive_message); 
-        send_request_when_support_window_is('Loaded', 'training using camera', send_request);       
+        send_request_when_support_window_is('MobileNet loaded', 'training using camera', send_request);       
     };
     const create_tensorflow_model = function(name, layers, optimizer, callback) {
         // uses the layers level of tensorflow.js to create models, train, and predict
@@ -1129,13 +1129,15 @@ window.ecraft2learn =
         send_request_when_support_window_is('Ready', 'image classifier', send_request);      
     };
     const send_request_when_support_window_is = function (state, source, send_request) {
-        window.addEventListener('message', function (event) {
+        const receive_message = (event) => {
             if (event.data === state) {
                 // support window is ready to receive requests
                 ecraft2learn.support_window_is_ready[source] = true;
                 send_request();
+                window.removeEventListener('message', receive_message);
             }
-        });
+        };
+        window.addEventListener('message', receive_message);
         if (typeof ecraft2learn.support_window[source] === 'undefined') {
             // create the support window as 1x1 pixel
             create_machine_learning_window(source, undefined, undefined, undefined, true);

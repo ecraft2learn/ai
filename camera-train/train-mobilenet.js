@@ -130,10 +130,7 @@ const add_image_to_training = function (image_url, label_index, post_to_tab) {
 
 // 'conv_preds' is the logits activation of MobileNet.
 
-const infer = async (image) => {
-    if (!mobilenet_model) {
-        await load_mobilenet();
-    }
+const infer = (image) => {
     return mobilenet_model.infer(image, 'conv_preds');
 };
 
@@ -226,11 +223,10 @@ const load_mobilenet = async function () {
  */
 const initialise_page = async function (incoming_training_class_names, source) {
   set_class_names(incoming_training_class_names);
-  await load_mobilenet();
 
   document.getElementById('main').style.display = 'block';
 
-  // Setup the GUI
+// Setup the GUI
 //   setupGui();
 //   setupFPS();
 
@@ -241,7 +237,7 @@ const initialise_page = async function (incoming_training_class_names, source) {
   } catch (e) {
     let info = document.getElementById('info');
     info.textContent = 'this browser does not support video capture,' +
-        'or this device does not have a camera';
+                       'or this device does not have a camera';
     info.style.display = 'block';
     throw e;
   }
@@ -429,17 +425,17 @@ const listen_for_messages = function (event) {
         }
         let image_url = event.data.predict;
         load_image(image_url,
-               function (image) {
-                   let canvas = create_canvas();
-                   copy_video_to_canvas(image, canvas);
-                   let image_as_tensor = tf.fromPixels(canvas);
-                   logits = infer(image_as_tensor);
-                   classifier.predictClass(logits, TOPK).then(
-                       function (results) {
-                           event.source.postMessage({confidences: Object.values(results.confidences)}, "*");
-                           image_as_tensor.dispose();
-                           logits.dispose();
-                   });          
+                   function (image) {
+                       let canvas = create_canvas();
+                       copy_video_to_canvas(image, canvas);
+                       let image_as_tensor = tf.fromPixels(canvas);
+                       logits = infer(image_as_tensor);
+                       classifier.predictClass(logits, TOPK).then(
+                           function (results) {
+                               event.source.postMessage({confidences: Object.values(results.confidences)}, "*");
+                               image_as_tensor.dispose();
+                               logits.dispose();
+                   });
         });
     } else if (typeof event.data.train !== 'undefined') {
         let image_url = event.data.train;
@@ -494,12 +490,14 @@ const listen_for_messages = function (event) {
 
 window.addEventListener('message', listen_for_messages, false);
 // tell Snap! this is loaded
-window.addEventListener('DOMContentLoaded', 
-                        function (event) {
+window.addEventListener('DOMContentLoaded',
+                        async function (event) {
                             if (window.opener) {
                                 // if collaboratively training only one has a Snap! window (just now)
                                 window.opener.postMessage("Loaded", "*");
                             }
+                            await load_mobilenet();
+                            window.parent.postMessage("MobileNet loaded", "*");
                             // following used to use addEventListener but Snap!'s drop listener interfered
                             // ecraft2learn.support_iframe['training using camera']
 //                             window.parent.document.body.ondrop = receive_drop;
