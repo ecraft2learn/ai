@@ -5309,7 +5309,10 @@ CursorMorph.prototype.initializeClipboardHandler = function () {
     document.body.appendChild(this.clipboardHandler);
 
     this.clipboardHandler.value = this.target.selection();
-    this.clipboardHandler.focus();
+    if (window === window.parent) {
+        // if Snap! is in an iframe this causes an unpleasant jump
+        this.clipboardHandler.focus();
+    }
     this.clipboardHandler.select();
 
     this.clipboardHandler.addEventListener(
