@@ -1061,15 +1061,12 @@ window.ecraft2learn =
         window.addEventListener('message', receive_message);
         send_request_when_support_window_is('Loaded', 'tensorflow.js', send_request);
     };
-    const prediction_from_model = (model_name, input, callback) => {
-//         if (typeof input === 'string') { // convenient but a hack
-//             input = JSON.parse(string);
-//         }
-        input = snap_to_javascript(input, true);
+    const predictions_from_model = (model_name, inputs, callback) => {
+        inputs = snap_to_javascript(inputs, true);
         let send_request = function() {
             ecraft2learn.support_window['tensorflow.js'].postMessage(
                 {predict: {model_name: model_name,
-                           input: input}},
+                           input: inputs}},
             '*');
         };
         const receive_message = function (event) {
@@ -2449,7 +2446,7 @@ window.ecraft2learn =
   create_tensorflow_model: create_tensorflow_model,
   training_data: training_data,
   train_model: train_model,
-  prediction_from_model: prediction_from_model,
+  predictions_from_model: predictions_from_model,
   display_support_window: open_support_window,
   image_class: image_class,
   inform: inform,

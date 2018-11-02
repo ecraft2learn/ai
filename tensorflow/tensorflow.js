@@ -149,7 +149,7 @@ const train_model = async function (model_or_model_name, data, epochs, learning_
 
 let last_prediction;
 
-const predict = (model_name, input, success_callback, error_callback) => {
+const predict = (model_name, inputs, success_callback, error_callback) => {
     let model = models[model_name];
     if (!model) {
         error_callback("No model named " + model_name);
@@ -158,20 +158,19 @@ const predict = (model_name, input, success_callback, error_callback) => {
     if (!model.ready_for_prediction) {
         model.callback_when_ready_for_prediction = 
             () => {
-                predict(model_name, input, success_callback, error_callback);
+                predict(model_name, inputs, success_callback, error_callback);
         };
         return;
     }
-    last_prediction = JSON.stringify(input);
+    last_prediction = JSON.stringify(inputs);
     try {
         let input_tensor;
-        if (typeof input === 'number') {
-            input_tensor = tf.tensor2d([input], [1, 1]);
-        } else {
-            input_tensor = tf.tensor2d([input], [1].concat(shape_of_data(input)));
+        if (typeof inputs === 'number') {
+            inputs = [inputs];
         }
+        input_tensor = tf.tensor2d(inputs); //, [inputs.length].concat(shape_of_data(inputs)));
         let prediction = model.predict(input_tensor);
-        success_callback(prediction.dataSync()[0]);
+        success_callback(prediction.dataSync());
     } catch (error) {
         error_callback(error.message);
     }
@@ -364,7 +363,7 @@ const create_prediction_interface = () => {
         () => {
             try {
                 const input = JSON.parse(input_input.value);
-                predict(model.name, input, success_callback, report_error);
+                predict(model.name, [input], success_callback, report_error);
             } catch (error) {
                 report_error(error);
             }
@@ -372,7 +371,7 @@ const create_prediction_interface = () => {
     const prediction_button = create_button("Make prediction", make_prediction);
     const success_callback = (result) => {
         const message = document.createElement('div');
-        message.innerHTML = "<br>The " + model.name + " model predicts " + result + " for input " + input_input.value + ".";
+        message.innerHTML = "<br>The " + model.name + " model predicts " + result[0] + " for input " + input_input.value + ".";
         draw_area.appendChild(message);
     };  
     draw_area.appendChild(prediction_button);
