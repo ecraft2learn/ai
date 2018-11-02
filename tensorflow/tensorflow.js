@@ -33,7 +33,7 @@ const shape_of_data = (data) => {
    } else if (typeof data[0] === "number") {
       return [data.length];
    } else {
-      return [data.length].concat(shape_of_data[data[0]]);
+      return [data.length].concat(shape_of_data(data[0]));
    }
 };
 
@@ -107,11 +107,10 @@ const train_model = async function (model_or_model_name, data, epochs, learning_
   let ys;
   if (typeof data.input[0] === 'number') {
       xs = tf.tensor2d(data.input,  [data.input.length, 1]);
-      ys = tf.tensor2d(data.output, [data.output.length, 1]);
   } else {
-      xs = tf.tensor2d(data.input);
-      ys = tf.tensor2d(data.output, [data.output.length, 1]);
+      xs = tf.tensor(data.input);
   }
+  ys = tf.tensor2d(data.output, [data.output.length, 1]);
   // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
   const epoch_history = [];
   let callbacks = {onEpochEnd: async (epoch, h) => {
