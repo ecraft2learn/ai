@@ -1010,14 +1010,19 @@ window.ecraft2learn =
         };  
         send_request_when_support_window_is('MobileNet loaded', 'training using camera', send_request);       
     };
-    const create_tensorflow_model = function(name, layers, optimizer, callback) {
+    const create_tensorflow_model = function(name, layers, optimizer, input_size, callback) {
         // uses the layers level of tensorflow.js to create models, train, and predict
         layers = snap_to_javascript(layers, true);
         let send_request = function() {
+            let configuration = {name: name,
+                                 layers: layers,
+                                 optimizer: optimizer};
+            if (input_size) {
+                // if no size is provided then it will be computed from the training data
+                configuration.input_size = snap_to_javascript(input_size);
+            }
             ecraft2learn.support_window['tensorflow.js'].postMessage(
-                {create_model: {name: name,
-                                layers: layers,
-                                optimizer: optimizer}},
+                {create_model:configuration},
             '*');
         };
         send_request_when_support_window_is('Loaded', 'tensorflow.js', send_request);
@@ -1058,6 +1063,22 @@ window.ecraft2learn =
                 window.removeEventListener('message', receive_message);
             }
         }
+        window.addEventListener('message', receive_message);
+        send_request_when_support_window_is('Loaded', 'tensorflow.js', send_request);
+    };
+    const is_model_ready_for_prediction = (model_name, callback) => {
+        let send_request = function() {
+            ecraft2learn.support_window['tensorflow.js'].postMessage(
+                {is_model_ready_for_prediction: {model_name: model_name}},
+            '*');
+        };
+        const receive_message = function (event) {
+            if (typeof event.data.ready_for_prediction !== 'undefined' &&
+                event.data.model_name === model_name) {
+                invoke_callback(callback, javascript_to_snap(event.data.ready_for_prediction));
+                window.removeEventListener('message', receive_message);
+            }
+        };
         window.addEventListener('message', receive_message);
         send_request_when_support_window_is('Loaded', 'tensorflow.js', send_request);
     };
@@ -2446,6 +2467,7 @@ window.ecraft2learn =
   create_tensorflow_model: create_tensorflow_model,
   training_data: training_data,
   train_model: train_model,
+  is_model_ready_for_prediction: is_model_ready_for_prediction,
   predictions_from_model: predictions_from_model,
   display_support_window: open_support_window,
   image_class: image_class,

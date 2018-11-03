@@ -37,8 +37,8 @@ const shape_of_data = (data) => {
    }
 };
 
-const create_model = function (name, layers, optimizer_full_name) {
-    if (!training_data || typeof training_data.input === 'undefined') {
+const create_model = function (name, layers, optimizer_full_name, input_shape) {
+    if (!input_shape && (!training_data || typeof training_data.input === 'undefined')) {
         throw new Error("Cannot create a model before knowing what the data is like.\nProvide at least one example of the data.");
     }
     const optimizer = optimization_methods[optimizer_full_name];
@@ -54,7 +54,7 @@ const create_model = function (name, layers, optimizer_full_name) {
             let configuration = {units: size,
                                  activation: 'relu'};
             if (index === 0) {
-                configuration.inputShape = shape_of_data(training_data.input[0]);
+                configuration.inputShape = input_shape || shape_of_data(training_data.input[0]);
             }
             model.add(tf.layers.dense(configuration));
         }
@@ -180,14 +180,13 @@ let report_error = function (error) {
     console.log(error); // for now
 };
 
-const add_to_dataset = 
-  (new_input, new_output) => {
-      if (!training_data || typeof training_data.input === 'undefined') {
-          return {input:  new_input,
-                  output: new_output};
-      }
-      return {input:  training_data.input.concat(new_input),
-              output: training_data.output.concat(new_output)};
+const add_to_dataset = (new_input, new_output) => {
+    if (!training_data || typeof training_data.input === 'undefined') {
+        return {input:  new_input,
+                output: new_output};
+    }
+    return {input:  training_data.input.concat(new_input),
+            output: training_data.output.concat(new_output)};
 };
 
 const gui_state = 
@@ -507,7 +506,8 @@ const receive_message =
                 }
                 let model = create_model(message.create_model.name,
                                          message.create_model.layers,
-                                         optimizer_full_name);
+                                         optimizer_full_name,
+                                         message.create_model.input_size);
                 add_to_models(model);
             } catch (error) {
                 event.source.postMessage({error: error.message}, "*");
@@ -534,6 +534,18 @@ const receive_message =
                 event.source.postMessage({error: error_message}, "*");
             };
             predict(message.predict.model_name, message.predict.input, success_callback, error_callback);
+        } else if (typeof message.is_model_ready_for_prediction !== 'undefined') {
+            let name = message.is_model_ready_for_prediction.model_name;
+            let model = models[name];
+            let ready;
+            if (model) {
+                ready = !!model.ready_for_prediction; 
+            } else {
+                event.source.postMessage({error: "Unknown model '" + name + "' asked if ready for predictions."});
+                ready = false; // unknown model is not ready
+            }
+            event.source.postMessage({ready_for_prediction: ready,
+                                      model_name: name}); 
         } else if (message !== "Loaded" &&
                    message !== "Ready" &&
                    message !== "stop" &&
