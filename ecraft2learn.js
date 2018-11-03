@@ -954,150 +954,150 @@ window.ecraft2learn =
             "Matilde Pérez": 'matilde_perez', // this one doesn't work well so isn't in the menu of styles
             "Roberto Matta": 'matta',
         };
-        let send_request = function() {
-            let time_stamp = Date.now();
-            let costume_canvas = costume.contents;
-            let receive_message = function(event) {
-                if (typeof event.data.style_transfer_response !== 'undefined' && 
-                    // reponse received and it is for the same request (time stamps match)
-                    event.data.style_transfer_response.time_stamp === time_stamp) {
-                    // support window has responded with a data URL
-                    // need to create a canvas and draw the image on it
-                    let new_canvas = document.createElement('canvas');
-                    new_canvas.height = costume_canvas.height;
-                    new_canvas.width  = costume_canvas.width;
-                    let image = new Image();
-                    image.src = event.data.style_transfer_response.URL;
-                    // remove so this only runs once
-                    // alternatively could use the {once: true} option to addEventListener 
-                    // but not all browsers accept that
-                    window.removeEventListener('message', receive_message);
-                    image.onload = function() {
-                        new_canvas.getContext('2d').drawImage(image, 0, 0, costume_canvas.width, costume_canvas.height);
-                        // create the costume and pass it to callback
-                        invoke_callback(callback, create_costume(new_canvas, style + " of " + costume.name));
-                    }
-                }      
-            };
-            window.addEventListener('message', receive_message); 
-                ecraft2learn.support_window['style transfer'].postMessage(
-                    {style_transfer_request: {URL: costume_canvas.toDataURL(),
-                                              style: style_to_folder_name[style.trim()],
-                                              time_stamp: time_stamp}},
-                '*');
-        };
-        send_request_when_support_window_is('Ready', 'style transfer', send_request);       
+        let time_stamp = Date.now();
+        let costume_canvas = costume.contents;
+        request_of_support_window('Ready',
+                                  'style transfer',
+                                  () => {
+                                      return {style_transfer_request: {URL: costume_canvas.toDataURL(),
+                                                                       style: style_to_folder_name[style.trim()],
+                                                                       time_stamp: time_stamp}};
+                                  },
+                                  (message) => {
+                                      return typeof message.style_transfer_response !== 'undefined' && 
+                                             // reponse received and it is for the same request (time stamps match)
+                                             message.style_transfer_response.time_stamp === time_stamp;
+                                  },
+                                  (message) => {
+                                      // support window has responded with a data URL
+                                      // need to create a canvas and draw the image on it
+                                      let new_canvas = document.createElement('canvas');
+                                      new_canvas.height = costume_canvas.height;
+                                      new_canvas.width  = costume_canvas.width;
+                                      let image = new Image();
+                                      image.src = event.data.style_transfer_response.URL;
+                                      // remove so this only runs once
+                                      // alternatively could use the {once: true} option to addEventListener 
+                                      // but not all browsers accept that
+                                      image.onload = function() {
+                                          new_canvas.getContext('2d').drawImage(image, 0, 0, costume_canvas.width, costume_canvas.height);
+                                          // create the costume and pass it to callback
+                                          invoke_callback(callback, create_costume(new_canvas, style + " of " + costume.name));
+                                      }
+                                   });
     };
     const get_image_features = function(costume, callback) {
         // uses mobilenet to compute a feature vector for the costume
-        let send_request = function() {
-            let time_stamp = Date.now();
-            let costume_canvas = costume.contents;
-            let receive_message = function(event) {
-                if (typeof event.data.image_features !== 'undefined' && 
-                    // reponse received and it is for the same request (time stamps match)
-                    event.data.time_stamp === time_stamp) {
-                    // support window has responded with the list of features
-                    invoke_callback(callback, javascript_to_snap(event.data.image_features));
-                    window.removeEventListener('message', receive_message);
-                }      
-            }; 
-            window.addEventListener('message', receive_message);
-            ecraft2learn.support_window['training using camera'].postMessage(
-                {get_image_features: {URL: costume_canvas.toDataURL(),
-                                      time_stamp: time_stamp}},
-            '*');
-        };  
-        send_request_when_support_window_is('MobileNet loaded', 'training using camera', send_request);       
+        let time_stamp = Date.now();
+        request_of_support_window('MobileNet loaded',
+                                  'training using camera',
+                                  () => {
+                                      return {get_image_features: {URL: costume_canvas.toDataURL(),
+                                                                   time_stamp: time_stamp}};
+                                  },
+                                  (message) => {
+                                      return typeof message.image_features !== 'undefined' && 
+                                             // reponse received and it is for the same request (time stamps match)
+                                             message.time_stamp === time_stamp;
+                                  },
+                                  (message) => {
+                                      // support window has responded with the list of features
+                                      invoke_callback(callback, javascript_to_snap(event.data.image_features));
+                                  });      
+    };
+    const request_of_support_window = (support_window_type, window_ready_state, request_generator, 
+                                       // following are optional if don't care about the response
+                                       message_filter,
+                                       message_receiver) => {
+        let send_request = () => {
+            if (message_filter) {
+                const receive_message = (event) => {
+                    if (message_filter(event.data)) {
+                        message_receiver(event.data);
+                        window.removeEventListener('message', receive_message);
+                    }
+                };
+                window.addEventListener('message', receive_message);            
+            }
+            ecraft2learn.support_window[support_window_type].postMessage(request_generator(), '*');
+        };
+        send_request_when_support_window_is(window_ready_state, support_window_type, send_request);
     };
     const create_tensorflow_model = function(name, layers, optimizer, input_size, callback) {
         // uses the layers level of tensorflow.js to create models, train, and predict
-        layers = snap_to_javascript(layers, true);
-        let send_request = function() {
-            let configuration = {name: name,
-                                 layers: layers,
-                                 optimizer: optimizer};
-            if (input_size) {
-                // if no size is provided then it will be computed from the training data
-                configuration.input_size = snap_to_javascript(input_size);
-            }
-            ecraft2learn.support_window['tensorflow.js'].postMessage(
-                {create_model:configuration},
-            '*');
-        };
-        send_request_when_support_window_is('Loaded', 'tensorflow.js', send_request);
+        request_of_support_window('tensorflow.js',
+                                  'Loaded',
+                                  () => {
+                                      let configuration = {name: name,
+                                                           layers: snap_to_javascript(layers, true),
+                                                           optimizer: optimizer};
+                                      if (input_size) {
+                                          // if no size is provided then it will be computed from the training data
+                                          configuration.input_size = snap_to_javascript(input_size);
+                                      }
+                                      return {create_model: configuration};
+                                  });
     };
     const training_data = function(input, output, ignore_old_dataset, callback) {
         const time_stamp = Date.now();
-        input = snap_to_javascript(input, true);
-        output = snap_to_javascript(output, true);
-        let send_request = function() {
-            ecraft2learn.support_window['tensorflow.js'].postMessage(
-                {training_data: {input: input,
-                                 output: output,
-                                 ignore_old_dataset: ignore_old_dataset,
-                                 time_stamp: time_stamp}},
-            '*');
-        };
-        const receive_message = function (event) {
-            if (typeof event.data.data_received !== 'undefined' &&
-                event.data.data_received === time_stamp) {
-                invoke_callback(callback, true);
-                window.removeEventListener('message', receive_message);
-            }
-        }
-        window.addEventListener('message', receive_message);
-        send_request_when_support_window_is('Loaded', 'tensorflow.js', send_request);
+        request_of_support_window('tensorflow.js',
+                                  'Loaded',
+                                  () => {
+                                      return {training_data: {input: snap_to_javascript(input, true),
+                                                              output: snap_to_javascript(output, true),
+                                                              ignore_old_dataset: ignore_old_dataset,
+                                                              time_stamp: time_stamp}};
+                                  },
+                                  (message) => {
+                                      return message.data_received === time_stamp;
+                                  },
+                                  (message) => {
+                                      invoke_callback(callback, true);
+                                  });
     };
+
     const train_model = (model_name, epochs, learning_rate, callback) => {
-        let send_request = function() {
-            ecraft2learn.support_window['tensorflow.js'].postMessage(
-                {train: {model_name: model_name,
-                         epochs: epochs,
-                         learning_rate: learning_rate}},
-            '*');
-        };
-        const receive_message = function (event) {
-            if (typeof event.data.training_completed !== 'undefined') {
-                invoke_callback(callback, javascript_to_snap(event.data.training_completed));
-                window.removeEventListener('message', receive_message);
-            }
-        }
-        window.addEventListener('message', receive_message);
-        send_request_when_support_window_is('Loaded', 'tensorflow.js', send_request);
+        request_of_support_window('tensorflow.js',
+                                  'Loaded',
+                                  () => {
+                                      return {train: {model_name: model_name,
+                                                      epochs: epochs,
+                                                      learning_rate: learning_rate}};
+                                  },
+                                  (message) => {
+                                      return typeof message.training_completed !== 'undefined';
+                                  },
+                                  (message) => {
+                                      invoke_callback(callback, javascript_to_snap(message.training_completed));
+                                  });
     };
     const is_model_ready_for_prediction = (model_name, callback) => {
-        let send_request = function() {
-            ecraft2learn.support_window['tensorflow.js'].postMessage(
-                {is_model_ready_for_prediction: {model_name: model_name}},
-            '*');
-        };
-        const receive_message = function (event) {
-            if (typeof event.data.ready_for_prediction !== 'undefined' &&
-                event.data.model_name === model_name) {
-                invoke_callback(callback, javascript_to_snap(event.data.ready_for_prediction));
-                window.removeEventListener('message', receive_message);
-            }
-        };
-        window.addEventListener('message', receive_message);
-        send_request_when_support_window_is('Loaded', 'tensorflow.js', send_request);
+        request_of_support_window('tensorflow.js',
+                                  'Loaded',
+                                  () => {
+                                      return {is_model_ready_for_prediction: {model_name: model_name}};
+                                  },
+                                  (message) => {
+                                      return typeof message.ready_for_prediction !== 'undefined' &&
+                                             message.model_name === model_name;
+                                  },
+                                  (message) => {
+                                      invoke_callback(callback, javascript_to_snap(message.ready_for_prediction));
+                                  });
     };
     const predictions_from_model = (model_name, inputs, callback) => {
-        inputs = snap_to_javascript(inputs, true);
-        let send_request = function() {
-            ecraft2learn.support_window['tensorflow.js'].postMessage(
-                {predict: {model_name: model_name,
-                           input: inputs}},
-            '*');
-        };
-        const receive_message = function (event) {
-            if (typeof event.data.prediction !== 'undefined') {
-                invoke_callback(callback, javascript_to_snap(event.data.prediction));
-                window.removeEventListener('message', receive_message);
-            }
-        }
-        window.addEventListener('message', receive_message);
-        send_request_when_support_window_is('Loaded', 'tensorflow.js', send_request);        
+        request_of_support_window('tensorflow.js',
+                                  'Loaded',
+                                  () => {
+                                      return {predict: {model_name: model_name,
+                                                        input: snap_to_javascript(inputs, true)}};
+                                  },
+                                  (message) => {
+                                      return typeof message.prediction !== 'undefined';
+                                  },
+                                  (message) => {
+                                      invoke_callback(callback, javascript_to_snap(event.data.prediction));
+                                  });
     };
     var image_url_of_costume = function (costume) {
         var canvas = costume.contents;
@@ -1115,36 +1115,33 @@ window.ecraft2learn =
         image_class_from_canvas(costume.contents, top_k, labels_callback, probabilities_callback);
     };
     const image_class_from_canvas = function(canvas, top_k, labels_callback, probabilities_callback) {
-        let send_request = function() {
-            // timestamp used to respond appropriately to multiple outstanding requests
-            let time_stamp = Date.now();
-            let receive_message = function(event) {
-                if (typeof event.data.classify_response !== 'undefined' &&
-                    // reponse received and it is for the same request (time stamps match)
-                    event.data.classify_response.time_stamp === time_stamp) {
-                    let classifications = event.data.classify_response.classifications;
-                    // classifications are an array of objects like
-                    // {className: "croquet ball", probability: 0.6669674515724182}
-                    invoke_callback(labels_callback,
-                                    javascript_to_snap(classifications.map(function (classification) {
-                                        return classification.className;
-                                    })));
-                    invoke_callback(probabilities_callback,                
-                                    javascript_to_snap(classifications.map(function (classification) {
-                                        return classification.probability;
-                                    })));
-                    window.removeEventListener('message', receive_message);  
-                }      
-            }  
-            window.addEventListener('message', receive_message); 
-            let data_URL = canvas.toDataURL();
-            ecraft2learn.support_window['image classifier'].postMessage(
-                {classify: {URL: data_URL,
-                            top_k: top_k,
-                            time_stamp: time_stamp}},
-                '*');
-        };     
-        send_request_when_support_window_is('Ready', 'image classifier', send_request);      
+        // timestamp used to respond appropriately to multiple outstanding requests
+        let time_stamp = Date.now();
+        request_of_support_window('Ready',
+                                  'image classifier',
+                                  () => {
+                                      return {classify: {URL: data_URL,
+                                                         top_k: top_k,
+                                                         time_stamp: time_stamp}};
+                                  },
+                                  (message) => {
+                                      return typeof message.classify_response !== 'undefined' &&
+                                             // reponse received and it is for the same request (time stamps match)
+                                             message.classify_response.time_stamp === time_stamp;
+                                  },
+                                  (message) => {
+                                      let classifications = event.data.classify_response.classifications;
+                                      // classifications are an array of objects like
+                                      // {className: "croquet ball", probability: 0.6669674515724182}
+                                      invoke_callback(labels_callback,
+                                                      javascript_to_snap(classifications.map(function (classification) {
+                                                          return classification.className;
+                                                      })));
+                                      invoke_callback(probabilities_callback,                
+                                                      javascript_to_snap(classifications.map(function (classification) {
+                                                          return classification.probability;
+                                                      })));
+                                                    });    
     };
     const send_request_when_support_window_is = function (state, source, send_request) {
         const receive_message = (event) => {
