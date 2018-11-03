@@ -58,8 +58,11 @@ const create_model = function (name, layers, optimizer_full_name, input_shape) {
             }
             model.add(tf.layers.dense(configuration));
         }
-        gui_state["Model"]["Size of layer " + (index +1)] = size;
+        gui_state["Model"]["Size of layer " + (index + 1)] = size;
     });
+    for (let i = layers.length; i < MAX_LAYER_COUNT; i++) {
+        gui_state["Model"]["Size of layer " + (i + 1)] = 0;
+    }
     if (layers[layers.length-1] > 1) {
        // not needed if last layer is already 1
        // what if prediction is for more than one number? 
