@@ -460,7 +460,7 @@ const load_model = async function () {
 const save_training_data = () => {
     const file = new Blob([JSON.stringify(training_data)], {type: 'text'});
     save_training_data_button.href = URL.createObjectURL(file);
-    save_training_data_button.download = 'saved-training-data.json';
+    save_training_data_button.download = 'training data - ' + model.name + '.json';
 };
 
 const load_training_data = (event) => {
