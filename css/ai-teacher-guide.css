@@ -75,25 +75,7 @@ figcaption {
   max-width: 950px;
 }
 .training-button, .testing-button, .return-to-snap-button, .save-training-button, .together_button, .support-window-button {
-/*    copied from jquery-ui with padding and font-size edited */
-  margin-top: 10px; /* new */
-  padding: .8em 1em;
-  display: inline-block;
-  position: relative;
-  line-height: normal;
-  margin-right: .1em;
-  cursor: pointer;
-  vertical-align: middle;
-  text-align: center;
-  font-size: 1.1em;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  border-radius: 8px;
-  padding: 10px;
-  box-shadow: 5px 3px 5px black;
-}
+/*    copied from jquery-ui with padding and font-size edited */margin-top: 10px; /* new */padding: .8em 1em;display: inline-block;position: relative;line-height: normal;margin-right: .1em;cursor: pointer;vertical-align: middle;text-align: center;font-size: 1.1em;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;border-radius: 8px;padding: 10px;box-shadow: 5px 3px 5px black;color: navy;cursor: pointer;text-decoration: none;width: fit-content;background-color: buttonface;}
 .save-training-button, .support-window-button {
   display: block;
 }

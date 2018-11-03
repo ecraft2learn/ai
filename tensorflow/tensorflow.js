@@ -379,21 +379,23 @@ const create_prediction_interface = () => {
     draw_area.appendChild(prediction_button);
 };
 
-let save_button;
-let load_button;
+let save_model_button;
+let load_model_button;
+let save_training_data_button;
+let load_training_data_input;
 
 const save_and_load = function () {
     const surface = tfvis.visor().surface({name: 'Tensorflow', tab: 'Save/Load'});
     const draw_area = surface.drawArea;
-    if (save_button) {
+    if (save_model_button) {
         tfvis.visor().setActiveTab('Save/Load');
         return; // already set up 
     }
     draw_area.innerHTML = ""; // reset if rerun
-    save_button = create_button("Save trained model", save_model);
-    draw_area.appendChild(save_button);
-    load_button = create_button("Load a trained model", load_model);
-    draw_area.appendChild(load_button);
+    save_model_button = create_button("Save trained model", save_model);
+    draw_area.appendChild(save_model_button);
+    load_model_button = create_button("Load a trained model", load_model);
+    draw_area.appendChild(load_model_button);
     const file_input = function(label, id) {
       const div = document.createElement('div');
       const label_element = document.createElement('label');
@@ -410,6 +412,15 @@ const save_and_load = function () {
     };
     draw_area.appendChild(file_input('Saved model JSON file: ', 'saved_json'));
     draw_area.appendChild(file_input('Saved model weights file: ', 'saved_weights'));
+    save_training_data_button = document.createElement('a');
+    save_training_data_button.innerHTML = "Save training data";
+    save_training_data_button.className = "save-training-button";
+    save_training_data_button.href = "#";
+    save_training_data_button.addEventListener('click', save_training_data);
+    draw_area.appendChild(save_training_data_button);
+    load_training_data_input = file_input("Load training data file: ", 'load_training_data');
+    load_training_data_input.onchange = load_training_data;
+    draw_area.appendChild(load_training_data_input);
 };
 
 const save_model = async function () {
@@ -423,7 +434,7 @@ const load_model = async function () {
   if (!saved_model_element.files[0] || !saved_weights_element.files[0]) {
       let message = document.createElement('p');
       message.innerHTML = "Please choose files below and then click this again.";
-      replace_button_results(load_button, message);
+      replace_button_results(load_model_button, message);
       return;
   }
   model = await tf.loadModel(tf.io.browserFiles([saved_model_element.files[0],
@@ -437,13 +448,33 @@ const load_model = async function () {
       message.innerHTML += "<br>Replaced a model with the same name.";
   }
   add_to_models(model);
-  replace_button_results(load_button, message);  
+  replace_button_results(load_model_button, message);  
   // to add more data enable these options
   create_model_button.disabled = false;
   let evaluate_button = document.getElementById('evaluate');
   if (evaluate_button) {
       evaluate_button.disabled = false;    
   }
+};
+
+const save_training_data = () => {
+    const file = new Blob([JSON.stringify(training_data)], {type: 'text'});
+    save_training_data_button.href = URL.createObjectURL(file);
+    save_training_data_button.download = 'saved-training-data.json';
+};
+
+const load_training_data = (event) => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = () => {
+        const json = reader.result;
+        try {
+            training_data = JSON.parse(json);
+        } catch (error) {
+            alert("Error interpreting the data in " + file + ". Error: " + error.message);
+        }  
+    }
+    reader.readAsText(file);
 };
 
 let create_button = function (label, click_handler) {
@@ -462,12 +493,12 @@ const replace_button_results = function(element, child) {
     element.appendChild(child);
 };
 
-let create_model_button, save_and_load_button, train_button, evaluate_button;
+let create_model_button, save_and_load_model_button, train_button, evaluate_button;
 
 window.addEventListener('DOMContentLoaded',
                         () => {
                             create_model_button = document.getElementById('create_model');
-                            save_and_load_button = document.getElementById('save_and_load');
+                            save_and_load_model_button = document.getElementById('save_and_load');
                             train_button = document.getElementById('train');
                             evaluate_button = document.getElementById('evaluate');
                             create_model_button.addEventListener('click', 
@@ -479,7 +510,7 @@ window.addEventListener('DOMContentLoaded',
                                                               train_with_parameters('Tensorflow');
                                                           });
                             evaluate_button.addEventListener('click', create_prediction_interface);
-                            save_and_load_button.addEventListener('click', save_and_load);             
+                            save_and_load_model_button.addEventListener('click', save_and_load);             
                             // not waiting for anything so loaded and ready are the same
                             window.parent.postMessage("Loaded", "*");
                             if (window !== window.parent) {
