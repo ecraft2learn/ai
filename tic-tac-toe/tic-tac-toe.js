@@ -413,6 +413,10 @@ const evaluate_training = function () {
       let model_name = gui_state["Evaluation"]['Player 1'];
       let player_1_model = tensorflow.get_model(model_name);
       if (!player_1_model) {
+          if (typeof model === 'undefined') {
+              display.innerHTML = "<br>No model found named '" + model_name + "'.<br>";
+              return;
+          }
           player_1_model = model;
           html += "Player 1 is not using a model so current model used instead.<br><br>";
       }
