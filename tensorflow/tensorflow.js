@@ -85,69 +85,69 @@ const create_model = function (name, layers, optimizer_full_name, input_shape) {
 };
 
 const train_model = async function (model_or_model_name, data, epochs, learning_rate, use_tfjs_vis, success_callback, error_callback) {
-  if (!model_or_model_name) {
-      error_callback({message: "No model or name provided to train model."});
-      return;
-  }
-  if (typeof model_or_model_name === 'string') {
-      model = models[model_or_model_name];
-      if (!model) {
-          error_callback({message: "No model named ''" + model_or_model_name + "'"});
-          return;
-      }
-  } else {
-      model = model_or_model_name;
-  }
-  if (!model.ready_for_training) {
-      model.callback_when_ready_for_training = 
-          () => {
-              train_model(model, data, epochs, learning_rate, use_tfjs_vis, success_callback, error_callback);
-          };
-      return;
-  }
-  model.ready_for_prediction = false;
-  // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
-  const epoch_history = [];
-  let callbacks = {onEpochEnd: async (epoch, h) => {
-                       epoch_history.push(h);
-                       if (use_tfjs_vis) {
-                           tfvis.show.history({name: 'Error rate', tab: 'Training'},
-                                              epoch_history,
-                                              ['loss']);
-                       }}
-  }; 
-  // Train the model using the data
-  let start = Date.now();
-  if (model.optimizer.learningRate) { // not every optimizer needs to have this property
-      model.optimizer.learningRate = learning_rate;
-  }
-  gui_state["Training"]['Number of iterations'] = epochs;
-  gui_state["Training"]['Learning rate'] = learning_rate;
-  tf.tidy(() => {
-      let xs;
-      let ys;
-      if (typeof data.input[0] === 'number') {
-          xs = tf.tensor2d(data.input,  [data.input.length, 1]);
-      } else {
-          xs = tf.tensor(data.input);
-      }
-      ys = tf.tensor2d(data.output, [data.output.length, 1]);
-      model.fit(xs,
-                ys,
-                {epochs: epochs,
-                 callbacks: callbacks})
-          .then(() => {
-                  let duration = Math.round((Date.now()-start)/1000);
-                  success_callback({duration: duration,
-                                    loss: epoch_history[epochs-1].loss});
-                  model.ready_for_prediction = true;
-                  if (model.callback_when_ready_for_prediction) {
-                      model.callback_when_ready_for_prediction();
-                      model.callback_when_ready_for_prediction = undefined;
-                  }
-                },
-                error_callback);
-       });
+    if (!model_or_model_name) {
+        error_callback({message: "No model or name provided to train model."});
+        return;
+    }
+    if (typeof model_or_model_name === 'string') {
+        model = models[model_or_model_name];
+        if (!model) {
+            error_callback({message: "No model named ''" + model_or_model_name + "'"});
+            return;
+        }
+    } else {
+        model = model_or_model_name;
+    }
+    if (!model.ready_for_training) {
+        model.callback_when_ready_for_training = 
+            () => {
+                train_model(model, data, epochs, learning_rate, use_tfjs_vis, success_callback, error_callback);
+            };
+        return;
+    }
+    model.ready_for_prediction = false;
+    // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
+    const epoch_history = [];
+    let callbacks = {onEpochEnd: async (epoch, h) => {
+                         epoch_history.push(h);
+                         if (use_tfjs_vis) {
+                             tfvis.show.history({name: 'Error rate', tab: 'Training'},
+                                                epoch_history,
+                                                ['loss']);
+                         }}
+    }; 
+    // Train the model using the data
+    let start = Date.now();
+    if (model.optimizer.learningRate) { // not every optimizer needs to have this property
+        model.optimizer.learningRate = learning_rate;
+    }
+    gui_state["Training"]['Number of iterations'] = epochs;
+    gui_state["Training"]['Learning rate'] = learning_rate;
+    tf.tidy(() => {
+        let xs;
+        let ys;
+        if (typeof data.input[0] === 'number') {
+            xs = tf.tensor2d(data.input,  [data.input.length, 1]);
+        } else {
+            xs = tf.tensor(data.input);
+        }
+        ys = tf.tensor2d(data.output, [data.output.length, 1]);
+        model.fit(xs,
+                  ys,
+                  {epochs: epochs,
+                   callbacks: callbacks})
+            .then(() => {
+                    let duration = Math.round((Date.now()-start)/1000);
+                    success_callback({duration: duration,
+                                      loss: epoch_history[epochs-1].loss});
+                    model.ready_for_prediction = true;
+                    if (model.callback_when_ready_for_prediction) {
+                        model.callback_when_ready_for_prediction();
+                        model.callback_when_ready_for_prediction = undefined;
+                    }
+                  },
+                  error_callback);
+         });
 };
 
 let last_prediction;
@@ -443,6 +443,7 @@ const load_model = async function () {
   const model_name = saved_model_element.files[0].name.substring(0, saved_model_element.files[0].name.length-".json".length);
   message.innerHTML = model_name + " loaded and ready to evaluate.";
   model.name = model_name;
+  model.ready_for_training = true;
   model.ready_for_prediction = true;
   if (models[name]) {
       message.innerHTML += "<br>Replaced a model with the same name.";
