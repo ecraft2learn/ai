@@ -106,14 +106,6 @@ const train_model = async function (model_or_model_name, data, epochs, learning_
       return;
   }
   model.ready_for_prediction = false;
-  let xs;
-  let ys;
-  if (typeof data.input[0] === 'number') {
-      xs = tf.tensor2d(data.input,  [data.input.length, 1]);
-  } else {
-      xs = tf.tensor(data.input);
-  }
-  ys = tf.tensor2d(data.output, [data.output.length, 1]);
   // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
   const epoch_history = [];
   let callbacks = {onEpochEnd: async (epoch, h) => {
@@ -132,6 +124,14 @@ const train_model = async function (model_or_model_name, data, epochs, learning_
   gui_state["Training"]['Number of iterations'] = epochs;
   gui_state["Training"]['Learning rate'] = learning_rate;
   tf.tidy(() => {
+      let xs;
+      let ys;
+      if (typeof data.input[0] === 'number') {
+          xs = tf.tensor2d(data.input,  [data.input.length, 1]);
+      } else {
+          xs = tf.tensor(data.input);
+      }
+      ys = tf.tensor2d(data.output, [data.output.length, 1]);
       model.fit(xs,
                 ys,
                 {epochs: epochs,
@@ -551,7 +551,8 @@ const receive_message =
                 event.source.postMessage({training_completed: information}, "*");
             };
             const error_callback = (error) => {
-                event.source.postMessage({error: error.message}, "*");
+//                 event.source.postMessage({error: error.message}, "*");
+                event.source.postMessage({training_failed: error.message}, "*");
             };
             train_model(message.train.model_name,
                         training_data,
