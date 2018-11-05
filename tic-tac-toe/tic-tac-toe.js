@@ -18,8 +18,10 @@ const train_button = document.getElementById('train');
 const evaluate_button = document.getElementById('evaluate');
 const save_and_load_button = document.getElementById('save_and_load');
 
-const add_to_models = function (model) {
-    tensorflow.add_to_models(model);
+const tensorflow_add_to_models = tensorflow.add_to_models;
+
+tensorflow.add_to_models = (model) => {
+    tensorflow_add_to_models(model);
     if (evaluation) {
         // new name so update player 1 and 2 choices
         update_evaluation_model_choices();                 
@@ -73,6 +75,20 @@ let report_error = function (error) {
     alert(error_message);
 };
 
+const one_hot = (board) => {
+    let board_as_one_hot = [];
+    board.forEach((position) => {
+        if (position === 1) {
+            board_as_one_hot = board_as_one_hot.concat([1, 0, 0]);
+        } else if (position === 2) {
+            board_as_one_hot = board_as_one_hot.concat([0, 1, 0]);
+        } else {
+            board_as_one_hot = board_as_one_hot.concat([0, 0, 1]); // empty
+        }
+    });
+    return board_as_one_hot;
+};
+
 const play = function (players, game_history, non_deterministic) {
       let board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
       let player_number = 0; // player 1 starts
@@ -110,7 +126,7 @@ const move = function (player_number, players, board, history, non_deterministic
             let board_copy = board.slice();
             board_copy[possible_move] = player_number;
             tf.tidy(() => {
-                let board_tensor = tf.tensor2d(board_copy, [1, 9]);
+                let board_tensor = tf.tensor2d(one_hot(board_copy), [1, 27]);
                 let probability_tensor = tensorflow.get_model(player).predict(board_tensor);
                 let probability = probability_tensor.dataSync()[0];
                 predictions.push(probability);
@@ -137,19 +153,6 @@ const move = function (player_number, players, board, history, non_deterministic
     }
     board[move] = player_number+1; // 1 or 2 is clearer player number 
     if (history) {
-        const one_hot = (board) => {
-            let board_as_one_hot = [];
-            board.forEach((position) => {
-                if (position === 1) {
-                    board_as_one_hot = board_as_one_hot.concat([1, 0, 0]);
-                } else if (position === 2) {
-                    board_as_one_hot = board_as_one_hot.concat([0, 1, 0]);
-                } else {
-                    board_as_one_hot = board_as_one_hot.concat([0, 0, 1]); // empty
-                }
-            });
-            return board_as_one_hot;
-        }
         history.push(one_hot(board)); // was board.slice());
     }
 };
@@ -304,72 +307,74 @@ const random_game_display = function (boards) {
 };
 
 const create_data_interface = async function(button_label, number_of_games_function, interface_element) {
-  const play_games = async function () {
-    const message = document.createElement('p');
-    let number_of_games = number_of_games_function();
-    if (number_of_games%2 === 1) {
-        number_of_games++; // make it even in case need to split it in two
-    }
-    let player_1 = gui_state["Evaluation"]['Player 1'];
-    let player_2 = gui_state["Evaluation"]['Player 2'];
-    message.innerHTML = "Please wait as " + player_1 + " plays " + number_of_games + 
-                        " games against " + player_2 + ".";
-    if (player_1 !== player_2) {
-        message.innerHTML += "<br>They will each go first half the time.";
-    }
-    button.appendChild(message);
-    setTimeout(async function () {
-      // without the timeout the please wait message isn't seen    
-      let new_data = await create_data(number_of_games, [player_1, player_2]);
-      evaluation_data = new_data;
-      if (!training_data_input() || gui_state["Evaluation"]["What to do with new games"] === 'Replace training dataset') {
-          tensorflow.set_training_data(new_data);
-      } else if (gui_state["Evaluation"]["What to do with new games"] === 'Add to dataset for future training') {
-          tensorflow.set_training_data(tensorflow.add_to_dataset(new_data.input, new_data.output));
-          tensorflow.training_data().statistics = new_data.statistics;
-      } // do nothing for Don't add to dataset
-      train_button.disabled = false;
-      create_model_button.disabled = false; // there is data so can move forward (though really only training needs data)
-      message.style.font = "Courier"; // looks better with monospaced font
-      let statistics = evaluation_data.statistics;
-      message.innerHTML = 
-          number_of_games + " games created.<br>" +
-          "X wins = " + statistics.x_wins + " ("   + Math.round(100*statistics.x_wins/number_of_games) +"%); " +
-          "O wins = " + statistics.x_losses + " (" + Math.round(100*statistics.x_losses/number_of_games) +"%); " +
-          "Ties = "   + statistics.ties + " ("     + Math.round(100*statistics.ties/number_of_games) + "%)<br>";
-      const update_button = function (button) {
-          const old_version = document.getElementById(button.id);
-          if (old_version) {
-              old_version.remove();
-          }
-          interface_element.appendChild(button);
-      };
-      message.innerHTML +=
-           "<b>" + player_1 + ": </b>" +
-           "Wins = "   + statistics.player_1_wins + " (" + Math.round(100*statistics.player_1_wins/number_of_games) + "%); " +
-           "Losses = " + statistics.player_2_wins + " (" + Math.round(100*statistics.player_2_wins/number_of_games) + "%)<br>";
-      const show_first_player_playing_x_button = 
-          tensorflow.create_button("Show a game where " + player_1 + " was X",
-                        function () {
-                            const playing_first_boards = 
-                                evaluation_data.input.slice(0, evaluation_data.statistics.last_board_with_player_1_going_first);
-                            tensorflow.replace_button_results(show_first_player_playing_x_button,
-                                                              random_game_display(playing_first_boards));
-                        });
-      update_button(show_first_player_playing_x_button);
-      const show_first_player_playing_o_button = 
-          tensorflow.create_button("Show a game where " + player_1 + " was O",
-                        function () {
-                             const playing_second_boards =
-                                evaluation_data.input.slice(evaluation_data.statistics.last_board_with_player_1_going_first);
-                             tensorflow.replace_button_results(show_first_player_playing_o_button,
-                                                               random_game_display(playing_second_boards));
-                        });
-      update_button(show_first_player_playing_o_button);
-    });
-  };
-  let button = tensorflow.create_button(button_label, play_games);
-  interface_element.appendChild(button);
+    const play_games = async function () {
+      const message = document.createElement('p');
+      let number_of_games = number_of_games_function();
+      if (number_of_games%2 === 1) {
+          number_of_games++; // make it even in case need to split it in two
+      }
+      let player_1 = gui_state["Evaluation"]['Player 1'];
+      let player_2 = gui_state["Evaluation"]['Player 2'];
+      message.innerHTML = "Please wait as " + player_1 + " plays " + number_of_games + 
+                          " games against " + player_2 + ".";
+      if (player_1 !== player_2) {
+          message.innerHTML += "<br>They will each go first half the time.";
+      }
+      button.appendChild(message);
+      setTimeout(async function () {
+          // without the timeout the please wait message isn't seen    
+          let new_data = await create_data(number_of_games, [player_1, player_2]);
+          evaluation_data = new_data;
+          if (!training_data_input() || gui_state["Evaluation"]["What to do with new games"] === 'Replace training dataset') {
+              tensorflow.set_training_data(new_data);
+          } else if (gui_state["Evaluation"]["What to do with new games"] === 'Add to dataset for future training') {
+              tensorflow.set_training_data(tensorflow.add_to_dataset(new_data.input, new_data.output));
+              tensorflow.training_data().statistics = new_data.statistics;
+          } // do nothing for Don't add to dataset
+          train_button.disabled = false;
+          create_model_button.disabled = false; // there is data so can move forward (though really only training needs data)
+          message.style.font = "Courier"; // looks better with monospaced font
+          let statistics = evaluation_data.statistics;
+          message.innerHTML = 
+              number_of_games + " games created.<br>" +
+              "X wins = " + statistics.x_wins + " ("   + Math.round(100*statistics.x_wins/number_of_games) +"%); " +
+              "O wins = " + statistics.x_losses + " (" + Math.round(100*statistics.x_losses/number_of_games) +"%); " +
+              "Ties = "   + statistics.ties + " ("     + Math.round(100*statistics.ties/number_of_games) + "%)<br>";
+          const update_button = function (button) {
+              const old_version = document.getElementById(button.id);
+              if (old_version) {
+                  old_version.remove();
+              }
+              interface_element.appendChild(button);
+          };
+          message.innerHTML +=
+               "<b>" + player_1 + ": </b>" +
+               "Wins = "   + statistics.player_1_wins + " (" + Math.round(100*statistics.player_1_wins/number_of_games) + "%); " +
+               "Losses = " + statistics.player_2_wins + " (" + Math.round(100*statistics.player_2_wins/number_of_games) + "%)<br>";
+          const show_first_player_playing_x_button = 
+              tensorflow.create_button(
+                  "Show a game where " + player_1 + " was X",
+                  () => {
+                      const playing_first_boards = 
+                          evaluation_data.input.slice(0, evaluation_data.statistics.last_board_with_player_1_going_first);
+                      tensorflow.replace_button_results(show_first_player_playing_x_button,
+                                                        random_game_display(playing_first_boards));
+                  });
+          update_button(show_first_player_playing_x_button);
+          const show_first_player_playing_o_button = 
+              tensorflow.create_button(
+                  "Show a game where " + player_1 + " was O",
+                  () => {
+                      const playing_second_boards =
+                          evaluation_data.input.slice(evaluation_data.statistics.last_board_with_player_1_going_first);
+                      tensorflow.replace_button_results(show_first_player_playing_o_button,
+                                                        random_game_display(playing_second_boards));
+                  });
+          update_button(show_first_player_playing_o_button);
+      });
+    };
+    let button = tensorflow.create_button(button_label, play_games);
+    interface_element.appendChild(button);
 };
 
 let create_data_initialised = false;
@@ -435,7 +440,7 @@ const evaluate_training = function () {
       }
       for (let i = 0; i < 9; i++) {
           board[i] = 1;
-          let prediction = Math.round(100*player_1_model.predict(tf.tensor2d(board, [1, 9])).dataSync()[0]);
+          let prediction = Math.round(100*player_1_model.predict(tf.tensor2d(one_hot(board), [1, 27])).dataSync()[0]);
           board[i] = 0;
           if (prediction < 10) {
               html += "&nbsp;";
@@ -454,22 +459,19 @@ const evaluate_training = function () {
 //       show_first_move_scores_button.remove();                 
     });
   };
-  const show_first_move_scores_button = tensorflow.create_button("Show the scores for first moves by Player 1", show_first_moves);
+  const show_first_move_scores_button =
+      tensorflow.create_button("Show the scores for first moves by Player 1", show_first_moves);
   draw_area.appendChild(show_first_move_scores_button);
   show_first_move_scores_button.appendChild(display);
-  tensorflow.parameters_interface(create_parameters_interface).evaluation.open();
   create_data_interface("Play games using 'Player 1' and 'Player 2' settings",
                         () => Math.round(gui_state["Evaluation"]["Number of games to play"]),
                         draw_area);
-//   create_data_interface("Play trained player against itself",
-//                         () => Math.round(gui_state["Evaluation"]["Number of games to play"]),
-//                         draw_area,
-//                         [1, 2]); // both players use the model
+  tensorflow.parameters_interface(create_parameters_interface).evaluation.open();
 };
 
 // a hack to update the list of choices of models a player should use
 const update_evaluation_model_choices = function () {
-    let names = Object.keys(models);
+    let names = Object.keys(tensorflow.models());
     if (names.length === 0) {
         return;
     }
@@ -502,7 +504,7 @@ const update_evaluation_model_choices = function () {
 create_data_button.addEventListener('click', create_data_with_parameters);
 create_model_button.addEventListener('click',
                                      () => {
-                                         tensorflow.create_model_with_parameters('Tic Tac Toe');
+                                         const model = tensorflow.create_model_with_parameters('Tic Tac Toe');
                                      });
 train_button.addEventListener('click',
                               () => {

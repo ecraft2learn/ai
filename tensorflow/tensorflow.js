@@ -47,7 +47,7 @@ const create_model = function (name, layers, optimizer_full_name, input_shape) {
     }
     const model = tf.sequential({name: name});
     model.ready_for_training = false;
-    add_to_models(model);
+    tensorflow.add_to_models(model); // using tensorflow.add_to_models incase it has been extended
     layers.forEach((size, index) => {
         if (size > 0) {
             let configuration = {units: size,
@@ -261,62 +261,63 @@ const parameters_interface = function (interface_creator) {
 let create_model_with_current_settings_button;
 
 const create_model_with_parameters = function (surface_name) {
-  const surface = tfvis.visor().surface({name: surface_name, tab: 'Model'});
-  const draw_area = surface.drawArea;
-  parameters_interface(create_parameters_interface).model.open();
-  let name_input;
-  let message;
-  const create_model_with_current_settings = function () {
-      let layers = [];
-      for (let i = 1; i <= MAX_LAYER_COUNT; i++) {
-          let layer_size = gui_state["Model"]["Size of layer " + i];
-          if (layer_size > .5) {
-              layers.push(Math.round(layer_size));
-          }
-      }
-      const name = name_input.value;
-      const optimizer_full_name = gui_state["Model"]["Optimization method"];
-      try {
-          model = create_model(name, layers, optimizer_full_name);
-      } catch (error) {
-          report_error(error);
-      }
-      if (train_button) {
-          train_button.disabled = false;
-      }
-      let html = "<br>A new model named '" + name + "' created and it is ready to be trained.";
-      if (get_model(name)) {
-          html += "<br>It replaces the old model of the same name.";
-      }
-      html += "<br>Its optimization method is '" + optimizer_full_name + "'.";
-      model.summary(50, // line length
-                    undefined,
-                    (line) => {
-                      html += "<br>" + line;
-                    });
-      message.innerHTML = html;
-  };
-  if (create_model_with_current_settings_button) {
-      tfvis.visor().setActiveTab('Model');
-  } else {
-      name_input = document.createElement('input');
-      name_input.type = 'text';
-      name_input.id = "name_element";
-      name_input.name = "name_element";
-      name_input.value = model ? model.name : 'my-model';
-      const label = document.createElement('label');
-      label.for = "name_element";
-      label.innerHTML = "Name of model: ";
-      const div = document.createElement('div');
-      div.appendChild(label);
-      div.appendChild(name_input);
-      draw_area.appendChild(div);
-      create_model_with_current_settings_button = 
-          create_button("Create model with current settings", create_model_with_current_settings);
-      draw_area.appendChild(create_model_with_current_settings_button);
-      message = document.createElement('div');
-      draw_area.appendChild(message);        
-  }
+    const surface = tfvis.visor().surface({name: surface_name, tab: 'Model'});
+    const draw_area = surface.drawArea;
+    parameters_interface(create_parameters_interface).model.open();
+    let name_input;
+    let message;
+    const create_model_with_current_settings = function () {
+        let layers = [];
+        for (let i = 1; i <= MAX_LAYER_COUNT; i++) {
+            let layer_size = gui_state["Model"]["Size of layer " + i];
+            if (layer_size > .5) {
+                layers.push(Math.round(layer_size));
+            }
+        }
+        const name = name_input.value;
+        const optimizer_full_name = gui_state["Model"]["Optimization method"];
+        try {
+            model = create_model(name, layers, optimizer_full_name);
+        } catch (error) {
+            report_error(error);
+        }
+        if (train_button) {
+            train_button.disabled = false;
+        }
+        let html = "<br>A new model named '" + name + "' created and it is ready to be trained.";
+        if (get_model(name)) {
+            html += "<br>It replaces the old model of the same name.";
+        }
+        html += "<br>Its optimization method is '" + optimizer_full_name + "'.";
+        model.summary(50, // line length
+                      undefined,
+                      (line) => {
+                        html += "<br>" + line;
+                      });
+        message.innerHTML = html;
+    };
+    if (create_model_with_current_settings_button) {
+        tfvis.visor().setActiveTab('Model');
+    } else {
+        name_input = document.createElement('input');
+        name_input.type = 'text';
+        name_input.id = "name_element";
+        name_input.name = "name_element";
+        name_input.value = model ? model.name : 'my-model';
+        const label = document.createElement('label');
+        label.for = "name_element";
+        label.innerHTML = "Name of model: ";
+        const div = document.createElement('div');
+        div.appendChild(label);
+        div.appendChild(name_input);
+        draw_area.appendChild(div);
+        create_model_with_current_settings_button = 
+            create_button("Create model with current settings", create_model_with_current_settings);
+        draw_area.appendChild(create_model_with_current_settings_button);
+        message = document.createElement('div');
+        draw_area.appendChild(message);        
+    }
+    return model;
 };
 
 let train_with_current_settings_button;
@@ -468,7 +469,7 @@ const load_model = async function () {
   if (models[name]) {
       message.innerHTML += "<br>Replaced a model with the same name.";
   }
-  add_to_models(model);
+  tensorflow.add_to_models(model);
   replace_button_results(load_model_button, message);  
   // to add more data enable these options
   create_model_button.disabled = false;
@@ -558,7 +559,7 @@ const receive_message =
                                          message.create_model.layers,
                                          message.create_model.optimizer.trim(),
                                          message.create_model.input_size);
-                add_to_models(model);
+                tensorflow.add_to_models(model);
                 event.source.postMessage({model_created: message.create_model.name}, "*");
             } catch (error) {
                 event.source.postMessage({create_model_failed: message.create_model.name,
@@ -618,6 +619,7 @@ window.addEventListener('message', receive_message);
 
 return {get_model: get_model, 
         add_to_models: add_to_models,
+        models: () => models,
         training_data: () => training_data,
         set_training_data: (data) => {
             training_data = data;
