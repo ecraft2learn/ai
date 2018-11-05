@@ -84,11 +84,11 @@ const play = function (players, game_history, non_deterministic) {
               boards = boards.concat(game_history);
               if (outcome === 3) {
                   // tied
-                  game_outcomes = game_history.map(() => .5);
-              } else if (outcome === 1) {
-                  game_outcomes = game_history.map((ignore, index) => (index+1)%2);
+                  game_outcomes = game_history.map(() => 0);
+              } else if (outcome === 1) { // first player won
+                  game_outcomes = game_history.map((ignore, index) => index%2 === 0 ? 1 : -1);
               } else {
-                  game_outcomes = game_history.map((ignore, index) => index%2);
+                  game_outcomes = game_history.map((ignore, index) => index%2 === 1 ? 1 : -1);
               }
               outcomes = outcomes.concat(game_outcomes);
           }
@@ -137,7 +137,20 @@ const move = function (player_number, players, board, history, non_deterministic
     }
     board[move] = player_number+1; // 1 or 2 is clearer player number 
     if (history) {
-        history.push(board.slice());
+        const one_hot = (board) => {
+            let board_as_one_hot = [];
+            board.forEach((position) => {
+                if (position === 1) {
+                    board_as_one_hot = board_as_one_hot.concat([1, 0, 0]);
+                } else if (position === 2) {
+                    board_as_one_hot = board_as_one_hot.concat([0, 1, 0]);
+                } else {
+                    board_as_one_hot = board_as_one_hot.concat([0, 0, 1]); // empty
+                }
+            });
+            return board_as_one_hot;
+        }
+        history.push(one_hot(board)); // was board.slice());
     }
 };
 
