@@ -99,8 +99,12 @@ const train_model = async function (model_or_model_name, data, epochs, learning_
         model = model_or_model_name;
     }
     if (!model.ready_for_training) {
+        let previous_callback = model.callback_when_ready_for_training;
         model.callback_when_ready_for_training = 
             () => {
+                if (previous_callback) {
+                    previous_callback();
+                }
                 train_model(model, data, epochs, learning_rate, use_tfjs_vis, success_callback, error_callback);
             };
         return;
@@ -159,8 +163,12 @@ const predict = (model_name, inputs, success_callback, error_callback) => {
         return;
     }
     if (!model.ready_for_prediction) {
+        let previous_callback = model.callback_when_ready_for_prediction;
         model.callback_when_ready_for_prediction = 
             () => {
+                if (previous_callback) {
+                    previous_callback();
+                }
                 predict(model_name, inputs, success_callback, error_callback);
         };
         return;
