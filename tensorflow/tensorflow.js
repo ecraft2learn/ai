@@ -112,7 +112,6 @@ const train_model = async function (model_or_model_name, data, epochs, learning_
         return;
     }
     try {
-        model.ready_for_prediction = false;
         // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
         const epoch_history = [];
         let callbacks = {onEpochEnd: async (epoch, history) => {
