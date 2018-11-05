@@ -397,6 +397,7 @@ let save_model_button;
 let load_model_button;
 let save_training_data_button;
 let load_training_data_input;
+let load_training_data_message;
 
 const save_and_load = function () {
     const surface = tfvis.visor().surface({name: 'Tensorflow', tab: 'Save/Load'});
@@ -434,7 +435,9 @@ const save_and_load = function () {
     draw_area.appendChild(save_training_data_button);
     load_training_data_input = file_input("Load training data file: ", 'load_training_data');
     load_training_data_input.onchange = load_training_data;
+    load_training_data_message = document.createElement('div');
     draw_area.appendChild(load_training_data_input);
+    draw_area.appendChild(load_training_data_message);
 };
 
 const save_model = async function () {
@@ -485,8 +488,9 @@ const load_training_data = (event) => {
         const json = reader.result;
         try {
             training_data = JSON.parse(json);
+            load_training_data_message.innerHTML = "Loaded '" + file.name + "'. (" + training_data.input.length + " data items).";
         } catch (error) {
-            alert("Error interpreting the data in " + file + ". Error: " + error.message);
+            alert("Error interpreting the data in " + file.name + ". Error: " + error.message);
         }  
     }
     reader.readAsText(file);
