@@ -138,7 +138,11 @@ const move = function (player_number, players, board, history, non_deterministic
         });
         if (non_deterministic) {
             predictions = predictions.sort().reverse(); // consider the most likely first
-            const sum = predictions.reduce((accumulator, value) => accumulator + value);
+            const sum = predictions.reduce((accumulator, value) => {
+                if (value > 0) {
+                    accumulator + value;
+                }
+            });
             predictions.some((prediction, index) => {
                if (Math.random() <= prediction/sum) {
                    best_move = possible_moves[index]
@@ -153,7 +157,7 @@ const move = function (player_number, players, board, history, non_deterministic
     }
     board[move] = player_number+1; // 1 or 2 is clearer player number 
     if (history) {
-        history.push(one_hot(board)); // was board.slice());
+        history.push(board.slice());
     }
 };
 
@@ -325,10 +329,12 @@ const create_data_interface = async function(button_label, number_of_games_funct
           // without the timeout the please wait message isn't seen    
           let new_data = await create_data(number_of_games, [player_1, player_2]);
           evaluation_data = new_data;
+          let new_input = new_data.input.map(one_hot);
           if (!training_data_input() || gui_state["Evaluation"]["What to do with new games"] === 'Replace training dataset') {
-              tensorflow.set_training_data(new_data);
+              tensorflow.set_training_data({input: new_input,
+                                            output: new_data.output});
           } else if (gui_state["Evaluation"]["What to do with new games"] === 'Add to dataset for future training') {
-              tensorflow.set_training_data(tensorflow.add_to_dataset(new_data.input, new_data.output));
+              tensorflow.set_training_data(tensorflow.add_to_dataset(new_input, new_data.output));
               tensorflow.training_data().statistics = new_data.statistics;
           } // do nothing for Don't add to dataset
           train_button.disabled = false;
@@ -463,10 +469,10 @@ const evaluate_training = function () {
       tensorflow.create_button("Show the scores for first moves by Player 1", show_first_moves);
   draw_area.appendChild(show_first_move_scores_button);
   show_first_move_scores_button.appendChild(display);
+  tensorflow.parameters_interface(create_parameters_interface).evaluation.open();
   create_data_interface("Play games using 'Player 1' and 'Player 2' settings",
                         () => Math.round(gui_state["Evaluation"]["Number of games to play"]),
                         draw_area);
-  tensorflow.parameters_interface(create_parameters_interface).evaluation.open();
 };
 
 // a hack to update the list of choices of models a player should use
