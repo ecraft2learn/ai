@@ -1107,7 +1107,7 @@ window.ecraft2learn =
                                       return {is_model_ready_for_prediction: {model_name: model_name}};
                                   },
                                   (message) => {
-                                      return message.ready_for_prediction === 'boolean' &&
+                                      return typeof message.ready_for_prediction === 'boolean' &&
                                              message.model_name === model_name;
                                   },
                                   (message) => {
