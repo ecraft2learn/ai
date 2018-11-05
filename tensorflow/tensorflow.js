@@ -20,9 +20,9 @@ const optimization_methods =
      "Adaptive Moment Estimation Max": "adamax",
      "Root Mean Squared Prop": "rmsprop"};
 
-const add_to_models = function (model) {
-    let new_name = !models[model.name];
-    models[model.name] = model;
+const add_to_models = function (new_model) {
+    models[new_model.name] = new_model;
+    model = new_model; // is now the current model
 };
 
 const get_model = (name) => models[name];
@@ -84,6 +84,9 @@ const create_model = function (name, layers, optimizer_full_name, input_shape) {
 };
 
 const train_model = async function (model_or_model_name, data, epochs, learning_rate, use_tfjs_vis, success_callback, error_callback) {
+    if (!model_or_model_name) {
+        model_or_model_name = model; // current model (if there is one)
+    }
     if (!model_or_model_name) {
         error_callback({message: "No model or name provided to train model."});
         return;
