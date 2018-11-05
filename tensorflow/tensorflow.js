@@ -43,8 +43,7 @@ const create_model = function (name, layers, optimizer_full_name, input_shape) {
     }
     const optimizer = optimization_methods[optimizer_full_name];
     if (!optimizer) {
-        report_error("Could not recognise '" + optimizer_full_name + "' as an optimizer.");
-        return;
+        throw new Error("Could not recognise '" + optimizer_full_name + "' as an optimizer.");
     }
     const model = tf.sequential({name: name});
     model.ready_for_training = false;
@@ -64,11 +63,11 @@ const create_model = function (name, layers, optimizer_full_name, input_shape) {
         gui_state["Model"]["Size of layer " + (i + 1)] = 0;
     }
     if (layers[layers.length-1] > 1) {
-       // not needed if last layer is already 1
-       // what if prediction is for more than one number? 
-       model.add(tf.layers.dense({units: 1,
-                                  activation: 'relu',
-                                  useBias: false}));     
+        // not needed if last layer is already 1
+        // what if prediction is for more than one number? 
+        model.add(tf.layers.dense({units: 1,
+                                   activation: 'relu',
+                                   useBias: false}));     
     }
     if (!optimizer) {
         optimizer = 'adam';
@@ -109,49 +108,56 @@ const train_model = async function (model_or_model_name, data, epochs, learning_
             };
         return;
     }
-    model.ready_for_prediction = false;
-    // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
-    const epoch_history = [];
-    let callbacks = {onEpochEnd: async (epoch, h) => {
-                         epoch_history.push(h);
-                         if (use_tfjs_vis) {
-                             tfvis.show.history({name: 'Error rate', tab: 'Training'},
-                                                epoch_history,
-                                                ['loss']);
-                         }}
-    }; 
-    // Train the model using the data
-    let start = Date.now();
-    if (model.optimizer.learningRate) { // not every optimizer needs to have this property
-        model.optimizer.learningRate = learning_rate;
-    }
-    gui_state["Training"]['Number of iterations'] = epochs;
-    gui_state["Training"]['Learning rate'] = learning_rate;
-    tf.tidy(() => {
+    try {
+        model.ready_for_prediction = false;
+        // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
+        const epoch_history = [];
+        let callbacks = {onEpochEnd: async (epoch, history) => {
+                             epoch_history.push(history);
+                             if (use_tfjs_vis) {
+                                 tfvis.show.history({name: 'Error rate', tab: 'Training'},
+                                                    epoch_history,
+                                                    ['loss']);
+                             }}
+        }; 
+        // Train the model using the data
+        let start = Date.now();
+        if (model.optimizer.learningRate) { // not every optimizer needs to have this property
+            model.optimizer.learningRate = learning_rate;
+        }
+        gui_state["Training"]['Number of iterations'] = epochs;
+        gui_state["Training"]['Learning rate'] = learning_rate;
+        // when following was inside of tidy I got an error about backend being undefined
         let xs;
         let ys;
         if (typeof data.input[0] === 'number') {
-            xs = tf.tensor2d(data.input,  [data.input.length, 1]);
+             xs = tf.tensor2d(data.input,  [data.input.length, 1]);
         } else {
-            xs = tf.tensor(data.input);
+             xs = tf.tensor(data.input);
         }
         ys = tf.tensor2d(data.output, [data.output.length, 1]);
-        model.fit(xs,
-                  ys,
-                  {epochs: epochs,
-                   callbacks: callbacks})
-            .then(() => {
-                    let duration = Math.round((Date.now()-start)/1000);
-                    success_callback({duration: duration,
-                                      loss: epoch_history[epochs-1].loss});
-                    model.ready_for_prediction = true;
-                    if (model.callback_when_ready_for_prediction) {
-                        model.callback_when_ready_for_prediction();
-                        model.callback_when_ready_for_prediction = undefined;
-                    }
-                  },
-                  error_callback);
-         });
+        tf.tidy(() => {
+            model.fit(xs,
+                      ys,
+                      {epochs: epochs,
+                       callbacks: callbacks})
+                .then(() => {
+                          let duration = Math.round((Date.now()-start)/1000);
+                          success_callback({duration: duration,
+                                            loss: epoch_history[epochs-1].loss});
+                          model.ready_for_prediction = true;
+                          if (model.callback_when_ready_for_prediction) {
+                              model.callback_when_ready_for_prediction();
+                              model.callback_when_ready_for_prediction = undefined;
+                          }
+                          xs.dispose();
+                          ys.dispose();
+                      },
+                      error_callback);
+             });
+    } catch (error) {
+        error_callback(error.message);
+    }
 };
 
 let last_prediction;
@@ -541,27 +547,27 @@ const receive_message =
             event.source.postMessage({data_received: message.training_data.time_stamp}, "*");
         } else if (typeof message.create_model !== 'undefined') {
             try {
-                const optimizer_full_name = message.create_model.optimizer.trim();
-                const optimizer = optimization_methods[optimizer_full_name];
-                if (!optimizer) {
-                    event.source.postMessage({error: "Could not recognise '" + optimizer_full_name + "' as an optimizer."}, "*");
-                    return;
-                }
                 let model = create_model(message.create_model.name,
                                          message.create_model.layers,
-                                         optimizer_full_name,
+                                         message.create_model.optimizer.trim(),
                                          message.create_model.input_size);
                 add_to_models(model);
+                event.source.postMessage({model_created: message.create_model.name}, "*");
             } catch (error) {
-                event.source.postMessage({error: error.message}, "*");
+                event.source.postMessage({create_model_failed: message.create_model.name,
+                                          error_message: error.message}, "*");
             }
         } else if (typeof message.train !== 'undefined') {
             const success_callback = (information) => {
-                event.source.postMessage({training_completed: information}, "*");
+                event.source.postMessage({training_completed: message.train.time_stamp,
+                                          information: information}, "*");
             };
-            const error_callback = (error) => {
-//                 event.source.postMessage({error: error.message}, "*");
-                event.source.postMessage({training_failed: error.message}, "*");
+            const error_callback = (error_message) => {
+                if (typeof error_message === 'object') {
+                    error_message = error_message.message;
+                }
+                event.source.postMessage({training_failed: message.train.time_stamp,
+                                          error_message: error_message}, "*");
             };
             train_model(message.train.model_name,
                         training_data,
@@ -572,10 +578,12 @@ const receive_message =
                         error_callback);
         } else if (typeof message.predict !== 'undefined') {
             const success_callback = (result) => {
-                event.source.postMessage({prediction: result}, "*");
+                event.source.postMessage({prediction: message.predict.time_stamp,
+                                          result: result}, "*");
             };
             const error_callback = (error_message) => {
-                event.source.postMessage({error: error_message}, "*");
+                event.source.postMessage({prediction_failed: message.predict.time_stamp, 
+                                          error_message: error_message}, "*");
             };
             predict(message.predict.model_name, message.predict.input, success_callback, error_callback);
         } else if (typeof message.is_model_ready_for_prediction !== 'undefined') {

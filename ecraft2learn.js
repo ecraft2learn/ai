@@ -1023,19 +1023,36 @@ window.ecraft2learn =
         };
         send_request_when_support_window_is(window_ready_state, support_window_type, send_request);
     };
-    const create_tensorflow_model = function(name, layers, optimizer, input_size, callback) {
-        // uses the layers level of tensorflow.js to create models, train, and predict
+    // following functions use the layers level of tensorflow.js to create models, train, and predict
+    const create_tensorflow_model = function(name, layers, optimizer, input_size, success_callback, error_callback) {
+        const time_stamp = Date.now();
         request_of_support_window('tensorflow.js',
                                   'Loaded',
                                   () => {
                                       let configuration = {name: name,
                                                            layers: snap_to_javascript(layers, true),
-                                                           optimizer: optimizer};
+                                                           optimizer: optimizer,
+                                                           time_stamp: time_stamp};
                                       if (input_size) {
                                           // if no size is provided then it will be computed from the training data
                                           configuration.input_size = snap_to_javascript(input_size);
                                       }
                                       return {create_model: configuration};
+                                  },
+                                  (message) => {
+                                      return message.model_created === name ||
+                                             message.create_model_failed === name;
+                                  },
+                                  (message) => {
+                                      if (message.model_created === name) {
+                                          invoke_callback(success_callback, true);
+                                      } else if (message.create_model_failed) {
+                                          if (error_callback) {
+                                              invoke_callback(error_callback, message.create_model_failed);
+                                          } else {
+                                              inform("Error creating a model", message.error_message);
+                                          }
+                                      }
                                   });
     };
     const training_data = function(input, output, ignore_old_dataset, callback) {
@@ -1056,19 +1073,31 @@ window.ecraft2learn =
                                   });
     };
 
-    const train_model = (model_name, epochs, learning_rate, callback) => {
+    const train_model = (model_name, epochs, learning_rate, sucess_callback, error_callback) => {
+        const time_stamp = Date.now();
         request_of_support_window('tensorflow.js',
                                   'Loaded',
                                   () => {
                                       return {train: {model_name: model_name,
                                                       epochs: epochs,
-                                                      learning_rate: learning_rate}};
+                                                      learning_rate: learning_rate,
+                                                      time_stamp: time_stamp}};
                                   },
                                   (message) => {
-                                      return typeof message.training_completed !== 'undefined';
+                                      return message.training_completed === time_stamp ||
+                                             message.training_failed === time_stamp;
                                   },
                                   (message) => {
-                                      invoke_callback(callback, javascript_to_snap(message.training_completed));
+                                      if (message.training_completed === time_stamp) {
+                                          invoke_callback(sucess_callback,
+                                                          javascript_to_snap(message.information));                                          
+                                      } else if (error_callback) {
+                                          console.log(message.error_message);
+                                          invoke_callback(error_callback,
+                                                          javascript_to_snap(message.error_message));                                          
+                                      } else {
+                                          inform("Error in training", message.error_message);
+                                      }
                                   });
     };
     const is_model_ready_for_prediction = (model_name, callback) => {
@@ -1078,25 +1107,35 @@ window.ecraft2learn =
                                       return {is_model_ready_for_prediction: {model_name: model_name}};
                                   },
                                   (message) => {
-                                      return typeof message.ready_for_prediction !== 'undefined' &&
+                                      return message.ready_for_prediction === 'boolean' &&
                                              message.model_name === model_name;
                                   },
                                   (message) => {
                                       invoke_callback(callback, javascript_to_snap(message.ready_for_prediction));
                                   });
     };
-    const predictions_from_model = (model_name, inputs, callback) => {
+    const predictions_from_model = (model_name, inputs, success_callback, error_callback) => {
+        const time_stamp = Date.now();
         request_of_support_window('tensorflow.js',
                                   'Loaded',
                                   () => {
                                       return {predict: {model_name: model_name,
-                                                        input: snap_to_javascript(inputs, true)}};
+                                                        input: snap_to_javascript(inputs, true),
+                                                        time_stamp: time_stamp}};
                                   },
                                   (message) => {
-                                      return typeof message.prediction !== 'undefined';
+                                      return message.prediction === time_stamp ||
+                                             message.prediction_failed === time_stamp;
                                   },
                                   (message) => {
-                                      invoke_callback(callback, javascript_to_snap(event.data.prediction));
+                                      if (message.prediction === time_stamp) {
+                                          invoke_callback(success_callback, javascript_to_snap(message.result));
+                                      } else if (error_callback) {
+                                          console.log(message.error_message);
+                                          invoke_callback(error_callback, javascript_to_snap(message.error_message));
+                                      } else {
+                                          inform("Error in prediction", message.error_message);
+                                      }
                                   });
     };
     var image_url_of_costume = function (costume) {
