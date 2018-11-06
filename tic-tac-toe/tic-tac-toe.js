@@ -354,7 +354,7 @@ const create_data_interface = async function(button_label, number_of_games_funct
               interface_element.appendChild(button);
           };
           message.innerHTML +=
-               "<b>" + player_1 + ": </b>" +
+               "<b>Player 1 (" + player_1 + "): </b>" +
                "Wins = "   + statistics.player_1_wins + " (" + Math.round(100*statistics.player_1_wins/number_of_games) + "%); " +
                "Losses = " + statistics.player_2_wins + " (" + Math.round(100*statistics.player_2_wins/number_of_games) + "%)<br>";
           const show_first_player_playing_x_button = 
