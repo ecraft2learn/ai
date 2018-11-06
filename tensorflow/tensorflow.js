@@ -124,6 +124,16 @@ const train_model = async function (model_or_model_name, data, epochs, learning_
         }; 
         // Train the model using the data
         let start = Date.now();
+//         if (!model.optimizer) {
+//             let full_name = gui_state["Model"]["Optimization method"];
+//             let optimizer = optimization_methods[full_name];
+//             if (optimizer) {
+//                 model.optimizer = optimizer;
+//             } else {
+//                 error_callback({message: "Don't know what optimizer to use for training."});
+//                 return;
+//             }
+//         }
         if (model.optimizer.learningRate) { // not every optimizer needs to have this property
             model.optimizer.learningRate = learning_rate;
         }
@@ -359,6 +369,12 @@ const train_with_parameters = async function (surface_name) {
   }
 };
 
+const create_message_element = (html) => {
+    const message = document.createElement('p');
+    message.innerHTML = html;
+    return message;
+};
+
 const create_prediction_interface = () => {
     const surface = tfvis.visor().surface({name: 'Tensorflow', tab: 'Prediction'});
     const draw_area = surface.drawArea;
@@ -382,16 +398,19 @@ const create_prediction_interface = () => {
         () => {
             try {
                 const input = JSON.parse(input_input.value);
-                predict(model.name, [input], success_callback, report_error);
+                predict(model.name, [input], success_callback, error_callback);
             } catch (error) {
-                report_error(error);
+                error_callback(error.message);
             }
     };
     const prediction_button = create_button("Make prediction", make_prediction);
     const success_callback = (result) => {
-        const message = document.createElement('div');
-        message.innerHTML = "<br>The " + model.name + " model predicts " + result[0] + " for input " + input_input.value + ".";
+        const message = create_message_element("<br>The " + model.name + " model predicts " + result[0] + 
+                                               " for input " + input_input.value + ".");
         draw_area.appendChild(message);
+    };
+    const error_callback = (error_message) => {
+        draw_area.appendChild(create_message_element(error_message));
     };  
     draw_area.appendChild(prediction_button);
 };
@@ -457,8 +476,13 @@ const load_model = async function () {
       replace_button_results(load_model_button, message);
       return;
   }
-  model = await tf.loadModel(tf.io.browserFiles([saved_model_element.files[0],
-                                                 saved_weights_element.files[0]]));
+  try {
+      model = await tf.loadModel(tf.io.browserFiles([saved_model_element.files[0],
+                                                    saved_weights_element.files[0]]));
+  } catch (error) {
+      replace_button_results(load_model_button, create_message_element(error.message));
+      return;
+  }
   let message = document.createElement('p');
   const model_name = saved_model_element.files[0].name.substring(0, saved_model_element.files[0].name.length-".json".length);
   message.innerHTML = model_name + " loaded and ready to evaluate.";
@@ -605,12 +629,12 @@ const receive_message =
             }
             event.source.postMessage({ready_for_prediction: ready,
                                       model_name: name}); 
-        } else if (message !== "Loaded" &&
-                   message !== "Ready" &&
-                   message !== "stop" &&
-                   typeof message.training_completed === 'undefined' &&
-                   typeof message.prediction === 'undefined') {
-            console.log("Unhandled message: ", message); // just for debugging
+//         } else if (message !== "Loaded" &&
+//                    message !== "Ready" &&
+//                    message !== "stop" &&
+//                    typeof message.training_completed === 'undefined' &&
+//                    typeof message.prediction === 'undefined') {
+//             console.log("Unhandled message: ", message); // just for debugging
         }
 };
 
