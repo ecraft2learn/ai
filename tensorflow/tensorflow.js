@@ -419,24 +419,47 @@ const create_prediction_interface = () => {
     div.appendChild(label);
     div.appendChild(input_input);
     draw_area.appendChild(div);
-    const make_prediction = 
-        () => {
-            try {
-                const input = JSON.parse(input_input.value);
-                predict(model.name, [input], success_callback, error_callback);
-            } catch (error) {
-                error_callback(error.message);
-            }
+    const make_prediction = (model_name) => {
+        const success_callback = (result) => {
+            const message = create_message_element("<br>The " + model_name + " model predicts " + result[0] + 
+                                                   "<br>for input " + input_input.value + ".");
+            draw_area.appendChild(message);
+        };
+        const error_callback = (error_message) => {
+            draw_area.appendChild(create_message_element(error_message));
+        }; 
+        try {
+            const input = JSON.parse(input_input.value);
+            predict(model_name, [input], success_callback, error_callback);
+        } catch (error) {
+            error_callback(error.message);
+        }
     };
-    const prediction_button = create_button("Make prediction", make_prediction);
-    const success_callback = (result) => {
-        const message = create_message_element("<br>The " + model.name + " model predicts " + result[0] + 
-                                               " for input " + input_input.value + ".");
-        draw_area.appendChild(message);
+    const choose_model_then_make_prediction = () => {
+        const model_names = Object.keys(models);   
+        const create_model_menu = (click_handler) => {
+            const menu = document.createElement('ul');    
+            model_names.forEach((name) => {
+                const menu_item = create_button("Make prediction using model " + name,
+                                                () => {
+                                                    menu.remove();
+                                                    draw_area.insertBefore(prediction_button,
+                                                                           draw_area.firstChild.nextSibling);
+                                                    click_handler(name);
+                                                });
+                menu.appendChild(menu_item);
+            });
+            return menu;
+        };
+        if (model_names.length === 1) {
+            make_prediction(model_names[0]);
+        } else {
+            let menu = create_model_menu(make_prediction);
+            draw_area.insertBefore(menu, prediction_button);
+            prediction_button.remove(); 
+        }
     };
-    const error_callback = (error_message) => {
-        draw_area.appendChild(create_message_element(error_message));
-    };  
+    const prediction_button = create_button("Make prediction", choose_model_then_make_prediction);
     draw_area.appendChild(prediction_button);
 };
 
