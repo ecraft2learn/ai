@@ -6,7 +6,7 @@ window.tensorflow =
 ((function () {
 
 let models = {};
-let model;
+let model; // used for defaults such as model name when creating a model
 let training_data;
 
 const MAX_LAYER_COUNT = 5;
@@ -578,7 +578,7 @@ const load_model = async function () {
 const save_training_data = () => {
     const file = new Blob([JSON.stringify(training_data)], {type: 'text'});
     save_training_data_button.href = URL.createObjectURL(file);
-    save_training_data_button.download = 'training data - ' + model.name + '.json';
+    save_training_data_button.download = 'training data.json';
 };
 
 const load_training_data = (event) => {
