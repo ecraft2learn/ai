@@ -386,7 +386,7 @@ const train_with_parameters = async function (surface_name) {
           } else {
               let menu = create_model_menu(train_with_current_settings);
               draw_area.insertBefore(menu, train_with_current_settings_button);
-              train_with_current_settings_button.remove();    
+              train_with_current_settings_button.remove();
           }
       };
       train_with_current_settings_button = create_button("Train a model with current settings", display_model_menu);
@@ -477,7 +477,32 @@ const save_and_load = function () {
         return; // already set up 
     }
     draw_area.innerHTML = ""; // reset if rerun
-    save_model_button = create_button("Save trained model", save_model);
+    const create_model_menu = (click_handler) => {
+        const menu = document.createElement('ul');
+        const model_names = Object.keys(models);
+        model_names.forEach((name) => {
+            const menu_item = create_button("Save " + name,
+                                            () => {
+                                                menu.remove();
+                                                draw_area.insertBefore(save_model_button,
+                                                                       draw_area.firstChild);
+                                                click_handler(name);
+                                            });
+            menu.appendChild(menu_item);
+        });
+        return menu;
+    };
+    const select_model_to_save = () => {
+        const model_names = Object.keys(models);
+        if (model_names.length === 1) {
+            save_model(model_names[0]);
+        } else {
+            let menu = create_model_menu(save_model);
+            draw_area.insertBefore(menu, save_model_button);
+            save_model_button.remove();    
+        }
+    };
+    save_model_button = create_button("Save a trained model", select_model_to_save);
     draw_area.appendChild(save_model_button);
     load_model_button = create_button("Load a trained model", load_model);
     draw_area.appendChild(load_model_button);
@@ -510,9 +535,9 @@ const save_and_load = function () {
     draw_area.appendChild(load_training_data_message);
 };
 
-const save_model = async function () {
-    let URL = 'downloads://' + model.name;
-    return await model.save(URL);
+const save_model = async function (model_name) {
+    let URL = 'downloads://' + model_name;
+    return await models[model_name].save(URL);
 };
 
 const load_model = async function () {
