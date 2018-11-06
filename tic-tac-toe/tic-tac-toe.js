@@ -337,7 +337,7 @@ const create_data_interface = async function(button_label, number_of_games_funct
               tensorflow.set_training_data(tensorflow.add_to_dataset(new_input, new_data.output));
               tensorflow.training_data().statistics = new_data.statistics;
           } // do nothing for Don't add to dataset
-          train_button.disabled = false;
+          train_button.disabled = false; // not really but it will behave sensibly if run too soon
           create_model_button.disabled = false; // there is data so can move forward (though really only training needs data)
           message.style.font = "Courier"; // looks better with monospaced font
           let statistics = evaluation_data.statistics;

@@ -347,6 +347,10 @@ const train_with_parameters = async function (surface_name) {
     let error_callback = (error) => {
         message.innerHTML = "<br><b>Error:</b> " + error.message + "<br>";
     };
+    if (train_with_current_settings_button.firstChild.nextSibling) {
+        // if there was an old message remove it
+        train_with_current_settings_button.firstChild.nextSibling.remove();
+    }
     message.innerHTML = "<br>Training started. Training data is " + training_data.input.length + " long. Please wait.";
     draw_area.appendChild(message);
     setTimeout(async function () {
@@ -381,7 +385,9 @@ const train_with_parameters = async function (surface_name) {
   } else {
       const display_model_menu = function () {
           const model_names = Object.keys(models);
-          if (model_names.length === 1) {
+          if (model_names.length === 0) {
+              train_with_current_settings_button.appendChild(create_message_element("No models created yet."))
+          } else if (model_names.length === 1) {
               train_with_current_settings(model_names[0]);
           } else {
               let menu = create_model_menu(train_with_current_settings);
