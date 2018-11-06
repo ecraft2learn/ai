@@ -334,11 +334,11 @@ let train_with_current_settings_button;
 const train_with_parameters = async function (surface_name) {
   const surface = tfvis.visor().surface({name: surface_name, tab: 'Training'});
   const draw_area = surface.drawArea;
-  const train_with_current_settings = async function () {
-    let message = document.createElement('div');
+  const train_with_current_settings = async function (model_name) {
+    let message = document.createElement('p');
     let success_callback = (training_statistics) => {
         let {duration, loss} = training_statistics;
-        message.innerHTML = "<br>Training took " + duration + " seconds. Final error rate is " + loss +".";
+        message.innerHTML = "<br>Training " + model_name + " took " + duration + " seconds. Final error rate is " + loss +".";
         let evaluate_button = document.getElementById('evaluate');
         if (evaluate_button) {
             evaluate_button.disabled = false;
@@ -351,7 +351,7 @@ const train_with_parameters = async function (surface_name) {
     draw_area.appendChild(message);
     setTimeout(async function () {
         // without the timeout the message above isn't displayed
-        await train_model(model,
+        await train_model(model_name,
                           training_data,
                           Math.round(gui_state["Training"]["Number of iterations"]),
                           gui_state["Training"]["Learning rate"],
@@ -360,12 +360,37 @@ const train_with_parameters = async function (surface_name) {
                           error_callback);
     });
   };
+  const create_model_menu = (click_handler) => {
+      const menu = document.createElement('ul');
+      const model_names = Object.keys(models);
+      model_names.forEach((name) => {
+          const menu_item = create_button("Train " + name + " with current settings",
+                                          () => {
+                                              menu.remove();
+                                              draw_area.insertBefore(train_with_current_settings_button,
+                                                                     draw_area.firstChild);
+                                              click_handler(name);
+                                          });
+          menu.appendChild(menu_item);
+      });
+      return menu;
+  };
   parameters_interface(create_parameters_interface).training.open();
   if (train_with_current_settings_button) {
       tfvis.visor().setActiveTab('Training');
   } else {
-      train_with_current_settings_button = create_button("Train model with current settings", train_with_current_settings);
-      draw_area.appendChild(train_with_current_settings_button);    
+      const display_model_menu = function () {
+          const model_names = Object.keys(models);
+          if (model_names.length === 1) {
+              train_with_current_settings(model_names[0]);
+          } else {
+              let menu = create_model_menu(train_with_current_settings);
+              draw_area.insertBefore(menu, train_with_current_settings_button);
+              train_with_current_settings_button.remove();    
+          }
+      };
+      train_with_current_settings_button = create_button("Train a model with current settings", display_model_menu);
+      draw_area.appendChild(train_with_current_settings_button);
   }
 };
 
@@ -463,8 +488,8 @@ const save_and_load = function () {
 };
 
 const save_model = async function () {
-  let URL = 'downloads://' + model.name;
-  return await model.save(URL);
+    let URL = 'downloads://' + model.name;
+    return await model.save(URL);
 };
 
 const load_model = async function () {
@@ -524,12 +549,14 @@ const load_training_data = (event) => {
 };
 
 let create_button = function (label, click_handler) {
-  const button = document.createElement('button');
-  button.innerHTML = label;
-  button.className = "support-window-button";
-  button.addEventListener('click', click_handler);
-  button.id = label; // for ease of replacing it with a newer version
-  return button;
+    const button = document.createElement('button');
+    button.innerHTML = label;
+    button.className = "support-window-button";
+    if (click_handler) {
+        button.addEventListener('click', click_handler);
+    }
+    button.id = label; // for ease of replacing it with a newer version
+    return button;
 };
 
 const replace_button_results = function(element, child) {
