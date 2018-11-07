@@ -654,6 +654,8 @@ const contents_of_URL = (URL, success_callback, error_callback) => {
     xhr.onreadystatechange = (event) => {
         if (xhr.readyState == 4 && xhr.status == 200) {
             success_callback(xhr.responseText);
+        } else if (xhr.status >= 400) {
+            error_callback(new Error("Received error code " + xhr.status + "."));
         }
     };
     xhr.onerror = error_callback;
