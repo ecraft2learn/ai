@@ -23,6 +23,7 @@ const optimization_methods =
 const add_to_models = function (new_model) {
     models[new_model.name] = new_model;
     model = new_model; // is now the current model
+    train_button.disabled = false;
 };
 
 const get_model = (name) => models[name];
@@ -339,10 +340,7 @@ const train_with_parameters = async function (surface_name) {
     let success_callback = (training_statistics) => {
         let {duration, loss} = training_statistics;
         message.innerHTML = "<br>Training " + model_name + " took " + duration + " seconds. Final error rate is " + loss +".";
-        let evaluate_button = document.getElementById('evaluate');
-        if (evaluate_button) {
-            evaluate_button.disabled = false;
-        }    
+        enable_evaluate_button();   
     };
     let error_callback = (error) => {
         message.innerHTML = "<br><b>Error:</b> " + error.message + "<br>";
@@ -575,10 +573,14 @@ const load_model = async function () {
   replace_button_results(load_model_button, message);  
   // to add more data enable these options
   create_model_button.disabled = false;
-  let evaluate_button = document.getElementById('evaluate');
-  if (evaluate_button) {
-      evaluate_button.disabled = false;    
-  }
+  enable_evaluate_button();
+};
+
+const enable_evaluate_button = () => {
+    let evaluate_button = document.getElementById('evaluate');
+    if (evaluate_button) {
+        evaluate_button.disabled = false;    
+    }
 };
 
 const save_training_data = () => {
@@ -646,8 +648,20 @@ window.addEventListener('DOMContentLoaded',
                             window.parent.postMessage("Ready", "*");
                         });
 
+const contents_of_URL = (URL, success_callback, error_callback) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', URL, true);
+    xhr.onreadystatechange = (event) => {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+            success_callback(xhr.responseText);
+        }
+    };
+    xhr.onerror = error_callback;
+    xhr.send();
+};
+
 const receive_message =
-    (event) => {
+    async (event) => {
         let message = event.data;
         if (typeof message.training_data !== 'undefined') {
             if (message.training_data.ignore_old_dataset) {
@@ -710,6 +724,58 @@ const receive_message =
             }
             event.source.postMessage({ready_for_prediction: ready,
                                       model_name: name}); 
+        } else if (typeof message.load_model_from_URL !== 'undefined') {
+            try {
+                let URL = message.load_model_from_URL;
+                const error_callback = (error) => {
+                    let error_message = error.message;
+                    if (error_message.indexOf('in JSON at position 0') >= 0) {
+                        // replace it with a clearer error message
+                        error_message = 'Either the URL is incorrect or is not in JSON format.';
+                    }
+                    event.source.postMessage({error_loading_model: URL,
+                                              error_message: 'Error reading ' + URL + ' to load a neural net. ' +
+                                                             error_message});
+                }
+                tf.loadModel(URL).then((model) => {
+                                           model.ready_for_prediction = true;
+                                           // until https://github.com/tensorflow/tfjs/issues/885 is resolved need to update the name
+                                           let name = URL.substring(URL.lastIndexOf('/')+1, URL.lastIndexOf('.'));
+                                           model.name = name;
+                                           add_to_models(model);
+                                           enable_evaluate_button();
+                                           event.source.postMessage({model_loaded: URL});
+                                       },
+                                       error_callback);
+            } catch (error) {
+                error_callback(error);
+            }
+        } else if (typeof message.load_training_data_from_URL !== 'undefined') {
+            let URL = message.load_training_data_from_URL;
+            const success_callback = (text) => {
+                try {
+                    let new_training_data = JSON.parse(text);
+                    if (message.add_to_previous_training) {
+                        training_data = add_to_dataset(new_training_data.input, new_training_data.output);
+                    } else {
+                        training_data = new_training_data;
+                    }
+                    let info = new_training_data.input.length + ' data items loaded.';
+                    if (message.add_to_previous_training) {
+                        info += ' Total is now ' + training_data.input.length + '.';
+                    }
+                    event.source.postMessage({training_data_loaded: URL,
+                                              info: info});
+                } catch (error) {
+                    error_callback(error);
+                }
+            };
+            const error_callback = (error) => {
+                event.source.postMessage({error_loading_training_data: URL,
+                                          error_message: "Error loading training data from " + URL + ". " + 
+                                                         error.message});
+            };
+            contents_of_URL(URL, success_callback, error_callback);
 //         } else if (message !== "Loaded" &&
 //                    message !== "Ready" &&
 //                    message !== "stop" &&

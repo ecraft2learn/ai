@@ -1138,6 +1138,49 @@ window.ecraft2learn =
                                       }
                                   });
     };
+    const load_tensorflow_model_from_URL = (URL, success_callback, error_callback) => {
+        request_of_support_window('tensorflow.js',
+                                  'Loaded',
+                                  () => {
+                                      return {load_model_from_URL: URL};
+                                  },
+                                  (message) => {
+                                      return message.model_loaded === URL ||
+                                             message.error_loading_model === URL;
+                                  },
+                                  (message) => {
+                                      if (message.model_loaded === URL) {
+                                          invoke_callback(success_callback, javascript_to_snap(message.model_loaded));
+                                      } else if (error_callback) {
+                                          console.log(message.error_message);
+                                          invoke_callback(error_callback, javascript_to_snap(message.error_message));
+                                      } else {
+                                          inform("Error in loading a model from a URL", message.error_message);
+                                      }
+                                  });
+    };
+    const load_training_data_from_URL = (URL, add_to_previous_training, success_callback, error_callback) => {
+        request_of_support_window('tensorflow.js',
+                                  'Loaded',
+                                  () => {
+                                      return {load_training_data_from_URL: URL,
+                                              add_to_previous_training: add_to_previous_training};
+                                  },
+                                  (message) => {
+                                      return message.training_data_loaded === URL ||
+                                             message.error_loading_training_data === URL;
+                                  },
+                                  (message) => {
+                                      if (message.training_data_loaded === URL) {
+                                          invoke_callback(success_callback, javascript_to_snap(message.info));
+                                      } else if (error_callback) {
+                                          console.log(message.error_message);
+                                          invoke_callback(error_callback, javascript_to_snap(message.error_message));
+                                      } else {
+                                          inform("Error in loading training data from a URL", message.error_message);
+                                      }
+                                  });
+    };
     var image_url_of_costume = function (costume) {
         var canvas = costume.contents;
         return canvas.toDataURL('image/png');        
@@ -2505,6 +2548,8 @@ window.ecraft2learn =
   train_model: train_model,
   is_model_ready_for_prediction: is_model_ready_for_prediction,
   predictions_from_model: predictions_from_model,
+  load_tensorflow_model_from_URL: load_tensorflow_model_from_URL,
+  load_training_data_from_URL: load_training_data_from_URL,
   display_support_window: open_support_window,
   image_class: image_class,
   inform: inform,
