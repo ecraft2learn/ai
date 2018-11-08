@@ -1,2 +1,2 @@
-# ai-cloud
-Experiments using AI Cloud services
+# AI extensions of Snap! for the eCraft2Learn project
+https://ecraft2learn.github.io/ai/
