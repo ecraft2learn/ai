@@ -53,8 +53,10 @@ const create_model = function (name, layers, optimizer_full_name, input_shape) {
         if (size > 0) {
             let configuration = {units: size,
                                  activation: 'relu'};
-            if (index === 0) {
+            if (index === 0) { // first one needs inputShape
                 configuration.inputShape = input_shape || shape_of_data(training_data.input[0]);
+            } else if (index === layers.length-1) { // last one should not apply bias 
+                configuration.useBias = false;     
             }
             model.add(tf.layers.dense(configuration));
         }
@@ -62,13 +64,6 @@ const create_model = function (name, layers, optimizer_full_name, input_shape) {
     });
     for (let i = layers.length; i < MAX_LAYER_COUNT; i++) {
         gui_state["Model"]["Size of layer " + (i + 1)] = 0;
-    }
-    if (layers[layers.length-1] > 1) {
-        // not needed if last layer is already 1
-        // what if prediction is for more than one number? 
-        model.add(tf.layers.dense({units: 1,
-                                   activation: 'relu',
-                                   useBias: false}));     
     }
     if (!optimizer) {
         optimizer = 'adam';
