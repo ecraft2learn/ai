@@ -1033,13 +1033,11 @@ window.ecraft2learn =
                                                            layers: snap_to_javascript(layers, true),
                                                            optimizer: optimizer,
                                                            time_stamp: time_stamp};
-                                      if (input_size) {
-                                          // if no size is provided then it will be computed from the training data
-                                          if (typeof input_size === 'number') {
-                                              configuration.input_size = [input_size];
-                                          } else {
-                                              configuration.input_size = snap_to_javascript(input_size);   
-                                          }
+                                      // if no size is provided then it will be computed from the training data
+                                      if (typeof input_size === 'number') {
+                                          configuration.input_size = [input_size];
+                                      } else if (input_size instanceof Array){
+                                           configuration.input_size = snap_to_javascript(input_size);   
                                       }
                                       return {create_model: configuration};
                                   },
