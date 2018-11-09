@@ -194,10 +194,11 @@ const predict = (model_name, inputs, success_callback, error_callback) => {
     last_prediction = JSON.stringify(inputs);
     try {
         let input_tensor;
-        if (typeof inputs === 'number') {
-            inputs = [inputs];
+        if (typeof inputs[0] === 'number') {
+            input_tensor = tf.tensor2d(inputs, [inputs.length, 1]);
+        } else {
+            input_tensor = tf.tensor2d(inputs); //, [inputs.length].concat(shape_of_data(inputs))); 
         }
-        input_tensor = tf.tensor2d(inputs); //, [inputs.length].concat(shape_of_data(inputs)));
         let prediction = model.predict(input_tensor);
         success_callback(prediction.dataSync());
     } catch (error) {
