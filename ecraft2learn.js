@@ -201,7 +201,8 @@ window.ecraft2learn =
             if (callback.stopped_by_user) {
                 return;
             }
-            if (!(callback.expression instanceof CommandBlockMorph)) {
+            if (!(callback.expression instanceof CommandBlockMorph ||
+                  callback.expression instanceof ReporterBlockMorph)) {
                 return;
             }
             // invoke the callback with the argments (other than the callback itself)
@@ -1025,6 +1026,9 @@ window.ecraft2learn =
     };
     // following functions use the layers level of tensorflow.js to create models, train, and predict
     const create_tensorflow_model = function(name, layers, optimizer, input_size, success_callback, error_callback) {
+        if (typeof input_size === 'string' && +input_size !== NaN) {
+            input_size = +input_size; // convert string to number
+        }
         const time_stamp = Date.now();
         request_of_support_window('tensorflow.js',
                                   'Loaded',
@@ -1050,7 +1054,7 @@ window.ecraft2learn =
                                           invoke_callback(success_callback, true);
                                       } else if (message.create_model_failed) {
                                           if (error_callback) {
-                                              invoke_callback(error_callback, message.create_model_failed);
+                                              invoke_callback(error_callback, message.error_message);
                                           } else {
                                               inform("Error creating a model", message.error_message);
                                           }
