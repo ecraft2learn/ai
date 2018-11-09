@@ -746,7 +746,8 @@ const receive_message =
                                            model.name = name;
                                            add_to_models(model);
                                            enable_evaluate_button();
-                                           event.source.postMessage({model_loaded: URL});
+                                           event.source.postMessage({model_loaded: URL,
+                                                                     model_name: name});
                                        },
                                        error_callback);
             } catch (error) {

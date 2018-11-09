@@ -1035,7 +1035,11 @@ window.ecraft2learn =
                                                            time_stamp: time_stamp};
                                       if (input_size) {
                                           // if no size is provided then it will be computed from the training data
-                                          configuration.input_size = snap_to_javascript(input_size);
+                                          if (typeof input_size === 'number') {
+                                              configuration.input_size = [input_size];
+                                          } else {
+                                              configuration.input_size = snap_to_javascript(input_size);   
+                                          }
                                       }
                                       return {create_model: configuration};
                                   },
@@ -1150,7 +1154,7 @@ window.ecraft2learn =
                                   },
                                   (message) => {
                                       if (message.model_loaded === URL) {
-                                          invoke_callback(success_callback, javascript_to_snap(message.model_loaded));
+                                          invoke_callback(success_callback, javascript_to_snap(message.model_name));
                                       } else if (error_callback) {
                                           console.log(message.error_message);
                                           invoke_callback(error_callback, javascript_to_snap(message.error_message));
