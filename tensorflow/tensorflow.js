@@ -139,11 +139,15 @@ const train_model = async function (model_or_model_name, data, epochs, learning_
         let xs;
         let ys;
         if (typeof data.input[0] === 'number') {
-             xs = tf.tensor2d(data.input,  [data.input.length, 1]);
+            xs = tf.tensor2d(data.input,  [data.input.length, 1]);
         } else {
-             xs = tf.tensor(data.input);
+            xs = tf.tensor(data.input);
         }
-        ys = tf.tensor2d(data.output, [data.output.length, 1]);
+        if (typeof data.output[0] === 'number') {
+            ys = tf.tensor2d(data.output,  [data.output.length, 1]);
+        } else {
+            ys = tf.tensor(data.output);
+        }
         tf.tidy(() => {
             model.fit(xs,
                       ys,
