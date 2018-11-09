@@ -5310,7 +5310,7 @@ CursorMorph.prototype.initializeClipboardHandler = function () {
 
     this.clipboardHandler.value = this.target.selection();
     if (window === window.parent) {
-        // if Snap! is in an iframe this causes an unpleasant jump
+        // if Snap! is in an iframe this causes an unpleasant jump -- edit by Ken Kahn
         this.clipboardHandler.focus();
     }
     this.clipboardHandler.select();
@@ -11906,7 +11906,10 @@ WorldMorph.prototype.initEventListeners = function () {
         "mousedown",
         function (event) {
             event.preventDefault();
-            canvas.focus();
+            if (window === window.parent) {
+                // don't do this if inside an iframe
+                canvas.focus();
+            }
             myself.hand.processMouseDown(event);
         },
         false
@@ -12520,7 +12523,9 @@ WorldMorph.prototype.stopEditing = function () {
         this.virtualKeyboard = null;
     }
     this.lastEditedText = null;
-    this.worldCanvas.focus();
+    if (window === window.parent) { // not in an iframe
+        this.worldCanvas.focus();
+    }
 };
 
 WorldMorph.prototype.toggleBlurredShadows = function () {
