@@ -252,6 +252,9 @@ window.ecraft2learn =
             if (x instanceof List) {
                 return x;
             }
+            if (x === null) {
+                return []; // is the best we can do?
+            }
             return new List(Object.keys(x).map(function (key) {
                                                    return new List([key, javascript_to_snap(x[key])]);
                                                }));
