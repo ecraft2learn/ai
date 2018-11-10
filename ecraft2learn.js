@@ -1043,8 +1043,10 @@ window.ecraft2learn =
                                       // if no size is provided then it will be computed from the training data
                                       if (typeof input_size === 'number') {
                                           configuration.input_size = [input_size];
-                                      } else if (input_size instanceof Array){
-                                           configuration.input_size = snap_to_javascript(input_size);   
+                                      } else if (input_size instanceof List) {
+                                           configuration.input_size = snap_to_javascript(input_size); 
+                                      } else if (input_size instanceof Array) {
+                                          configuration.input_size = input_size; 
                                       }
                                       return {create_model: configuration};
                                   },
