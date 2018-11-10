@@ -590,18 +590,18 @@ window.ecraft2learn =
         input_container.appendChild(input);
         document.body.appendChild(input_container);
     };
-    const load_training_from_file = function (callback) {
+    const load_camera_training_from_file = function (callback) {
         file_to_string(
             function (training_data_as_string) {
-                load_training(training_data_as_string, callback);
+                load_camera_training(training_data_as_string, callback);
             });
     };
-    const load_training_from_URL = function(URL, user_callback) {
+    const load_camera_training_from_URL = function(URL, user_callback) {
         let error_callback = function (message) {
             inform("Error reading " + URL, message);
         };
         let callback = function (training_data_as_string) {
-            load_training(training_data_as_string, user_callback);
+            load_camera_training(training_data_as_string, user_callback);
         }
         ecraft2learn.read_url(URL, callback, error_callback);
     };
@@ -688,7 +688,7 @@ window.ecraft2learn =
                    "You may find that the Raspberry Pi is too slow for machine learning to work well.");
         }       
     };
-    let load_training = function(training_data, callback) {
+    let load_camera_training = (training_data, callback) => {
         record_callbacks(callback);
         let source;
         const camera_training_heading = '{"saved_camera_training":';
@@ -2563,8 +2563,11 @@ window.ecraft2learn =
   image_class: image_class,
   inform: inform,
   show_message: show_message,
-  load_training_from_file: load_training_from_file,
-  load_training_from_URL: load_training_from_URL,
+  load_camera_training_from_file: load_camera_training_from_file,
+  load_camera_training_from_URL: load_camera_training_from_URL,
+  // following is for backwards compatibility (name change to avoid confusion with generic training data)
+  load_training_from_file: load_camera_training_from_file,
+  load_train9ing_from_URL: load_camera_training_from_URL,
   // some word embedding functionality
   dot_product: dot_product,
   cosine_similarity: cosine_similarity,
