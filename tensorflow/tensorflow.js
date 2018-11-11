@@ -830,21 +830,33 @@ const receive_message =
             } catch (error) {
                 error_callback(error);
             }
-        } else if (typeof message.load_training_data_from_URL !== 'undefined') {
-            let URL = message.load_training_data_from_URL;
+        } else if (typeof message.load_data_from_URL !== 'undefined') {
+            let URL = message.load_data_from_URL;
+            let training = message.training; // training or validation data
             const success_callback = (text) => {
                 try {
-                    let new_training_data = JSON.parse(text);
-                    if (message.add_to_previous_training) {
-                        training_data = add_to_training_data(new_training_data);
+                    let new_data = JSON.parse(text);
+                    let info = new_data.input.length + ' data items loaded.';
+                    if (training) {
+                        if (message.add_to_previous_data) {
+                            training_data = add_to_training_data(new_data);
+                        } else {
+                            training_data = new_data;
+                        }
+                        if (message.add_to_previous_data) {
+                            info += ' Total is now ' + training_data.input.length + '.';
+                        } 
                     } else {
-                        training_data = new_training_data;
+                        if (message.add_to_previous_data) {
+                            validation_data = add_to_validation_data(new_data);
+                        } else {
+                            validation_data = new_data;
+                        }
+                        if (message.add_to_previous_data) {
+                            info += ' Total is now ' + validation_data.input.length + '.';
+                        } 
                     }
-                    let info = new_training_data.input.length + ' data items loaded.';
-                    if (message.add_to_previous_training) {
-                        info += ' Total is now ' + training_data.input.length + '.';
-                    }
-                    event.source.postMessage({training_data_loaded: URL,
+                    event.source.postMessage({data_loaded: URL,
                                               info: info});
                 } catch (error) {
                     error_callback(error);

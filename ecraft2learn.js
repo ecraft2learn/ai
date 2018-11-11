@@ -1186,19 +1186,21 @@ window.ecraft2learn =
                                       }
                                   });
     };
-    const load_training_data_from_URL = (URL, add_to_previous_training, success_callback, error_callback) => {
+    const load_data_from_URL = (training, URL, add_to_previous_data, success_callback, error_callback) => {
+        // training is a boolean determing whether training or validation data is updated 
         request_of_support_window('tensorflow.js',
                                   'Loaded',
                                   () => {
-                                      return {load_training_data_from_URL: URL,
-                                              add_to_previous_training: add_to_previous_training};
+                                      return {load_data_from_URL: URL,
+                                              training: training,
+                                              add_to_previous_data: add_to_previous_data};
                                   },
                                   (message) => {
-                                      return message.training_data_loaded === URL ||
-                                             message.error_loading_training_data === URL;
+                                      return message.data_loaded === URL ||
+                                             message.error_loading_data === URL;
                                   },
                                   (message) => {
-                                      if (message.training_data_loaded === URL) {
+                                      if (message.data_loaded === URL) {
                                           invoke_callback(success_callback, javascript_to_snap(message.info));
                                       } else if (error_callback) {
                                           console.log(message.error_message);
@@ -2577,7 +2579,7 @@ window.ecraft2learn =
   is_model_ready_for_prediction: is_model_ready_for_prediction,
   predictions_from_model: predictions_from_model,
   load_tensorflow_model_from_URL: load_tensorflow_model_from_URL,
-  load_training_data_from_URL: load_training_data_from_URL,
+  load_data_from_URL: load_data_from_URL,
   display_support_window: open_support_window,
   image_class: image_class,
   inform: inform,
