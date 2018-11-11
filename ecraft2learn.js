@@ -1066,15 +1066,31 @@ window.ecraft2learn =
                                       }
                                   });
     };
-    const training_data = function(input, output, ignore_old_dataset, callback) {
+    const send_training_data = function(input, output, ignore_old_dataset, callback) {
+        send_data(input, output, ignore_old_dataset, undefined, undefined, undefined, callback);
+    };
+    const send_validation_data = function(input, output, ignore_old_dataset, callback) {
+        send_data(undefined, undefined, undefined, input, output, ignore_old_dataset, callback);
+    };
+    const send_data = function(training_input, training_output, ignore_old_training,
+                               validation_input, validation_output, validation_old_validation,
+                               callback) {
         const time_stamp = Date.now();
         request_of_support_window('tensorflow.js',
                                   'Loaded',
                                   () => {
-                                      return {training_data: {input: snap_to_javascript(input, true),
-                                                              output: snap_to_javascript(output, true),
-                                                              ignore_old_dataset: ignore_old_dataset,
-                                                              time_stamp: time_stamp}};
+                                      let message = {time_stamp: time_stamp};
+                                      if (training_input) {
+                                          message.training_data = {input: snap_to_javascript(training_input, true),
+                                                                   output: snap_to_javascript(training_output, true),
+                                                                   ignore_old_dataset: ignore_old_training};
+                                      }
+                                      if (validation_input) {
+                                          message.validataion_data = {input: snap_to_javascript(validation_input, true),
+                                                                      output: snap_to_javascript(validation_output, true),
+                                                                      ignore_old_dataset: ignore_old_validation};
+                                      }
+                                      return message;
                                   },
                                   (message) => {
                                       return message.data_received === time_stamp;
@@ -2555,7 +2571,8 @@ window.ecraft2learn =
   create_costume_with_style: create_costume_with_style,
   get_image_features: get_image_features,
   create_tensorflow_model: create_tensorflow_model,
-  training_data: training_data,
+  send_training_data: send_training_data,
+  send_validation_data: send_validation_data,
   train_model: train_model,
   is_model_ready_for_prediction: is_model_ready_for_prediction,
   predictions_from_model: predictions_from_model,

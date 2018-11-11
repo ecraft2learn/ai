@@ -221,13 +221,20 @@ let report_error = function (error) {
     console.log(error); // for now
 };
 
-const add_to_dataset = (new_input, new_output) => {
+const add_to_training_data = (new_data) => {
     if (!training_data || typeof training_data.input === 'undefined') {
-        return {input:  new_input,
-                output: new_output};
+        return new_data;
     }
-    return {input:  training_data.input.concat(new_input),
-            output: training_data.output.concat(new_output)};
+    return {input:  training_data.input.concat(new_data.input),
+            output: training_data.output.concat(new_data.output)};
+};
+
+const add_to_validation_data = (new_data) => {
+    if (!validation_data || typeof validation_data.input === 'undefined') {
+        return new_data;
+    }
+    return {input:  validation_data.input.concat(new_data.input),
+            output: validation_data.output.concat(new_data.output)};
 };
 
 const gui_state = 
@@ -492,6 +499,9 @@ let load_model_button;
 let save_training_data_button;
 let load_training_data_input;
 let load_training_data_message;
+let save_validation_data_button;
+let load_validation_data_input;
+let load_validation_data_message;
 
 const save_and_load = function () {
     const surface = tfvis.visor().surface({name: 'Tensorflow', tab: 'Save/Load'});
@@ -531,32 +541,45 @@ const save_and_load = function () {
     load_model_button = create_button("Load a trained model", load_model);
     draw_area.appendChild(load_model_button);
     const file_input = function(label, id) {
-      const div = document.createElement('div');
-      const label_element = document.createElement('label');
-      const input_element = document.createElement('input');
-      label_element.for = id;
-      label_element.innerHTML = label;
-      input_element.type = 'file';
-      input_element.id = id;
-      input_element.name = id;
-      div.appendChild(label_element);
-      div.appendChild(input_element);
-      div.style.padding = "12px";
-      return div;
+        const div = document.createElement('div');
+        const label_element = document.createElement('label');
+        const input_element = document.createElement('input');
+        label_element.for = id;
+        label_element.innerHTML = label;
+        input_element.type = 'file';
+        input_element.id = id;
+        input_element.name = id;
+        div.appendChild(label_element);
+        div.appendChild(input_element);
+        div.style.padding = "12px";
+        return div;
     };
     draw_area.appendChild(file_input('Saved model JSON file: ', 'saved_json'));
     draw_area.appendChild(file_input('Saved model weights file: ', 'saved_weights'));
-    save_training_data_button = document.createElement('a');
-    save_training_data_button.innerHTML = "Save training data";
-    save_training_data_button.className = "save-training-button";
-    save_training_data_button.href = "#";
-    save_training_data_button.addEventListener('click', save_training_data);
+    const create_anchor_that_looks_like_a_button = (label, class_name, listener) => {
+        let button = document.createElement('a');
+        button.innerHTML = label;
+        button.className = class_name;
+        button.href = "#";
+        button.addEventListener('click', listener);
+        return button;
+    };
+    save_training_data_button = 
+        create_anchor_that_looks_like_a_button("Save training data", "save-training-button", save_training_data);
+    save_validation_data_button = 
+        create_anchor_that_looks_like_a_button("Save validation data", "save-validation-button", save_validation_data);
     draw_area.appendChild(save_training_data_button);
+    draw_area.appendChild(save_validation_data_button);
     load_training_data_input = file_input("Load training data file: ", 'load_training_data');
-    load_training_data_input.onchange = load_training_data;
+    load_training_data_input.onchange = make_load_data_listener(true);
     load_training_data_message = document.createElement('div');
+    load_validation_data_input = file_input("Load validation data file: ", 'load_validation_data');
+    load_validation_data_input.onchange = make_load_data_listener(false);
+    load_validation_data_message = document.createElement('div');
     draw_area.appendChild(load_training_data_input);
     draw_area.appendChild(load_training_data_message);
+    draw_area.appendChild(load_validation_data_input);
+    draw_area.appendChild(load_validation_data_message);
 };
 
 const save_model = async function (model_name) {
@@ -604,24 +627,51 @@ const enable_evaluate_button = () => {
 };
 
 const save_training_data = () => {
+    if (typeof training_data === 'undefined' || !training_data.input) {
+        alert("No training created or loaded.");
+        return;
+    }
     const file = new Blob([JSON.stringify(training_data)], {type: 'text'});
     save_training_data_button.href = URL.createObjectURL(file);
     save_training_data_button.download = 'training data.json';
 };
 
-const load_training_data = (event) => {
-    const file = event.target.files[0];
-    const reader = new FileReader();
-    reader.onload = () => {
-        const json = reader.result;
-        try {
-            training_data = JSON.parse(json);
-            load_training_data_message.innerHTML = "Loaded '" + file.name + "'. (" + training_data.input.length + " data items).";
-        } catch (error) {
-            alert("Error interpreting the data in " + file.name + ". Error: " + error.message);
-        }  
+const save_validation_data = () => {
+    if (typeof validation_data === 'undefined' || !validation_data.input) {
+        alert("No validation created or loaded.");
+        return;
     }
-    reader.readAsText(file);
+    const file = new Blob([JSON.stringify(validation_data)], {type: 'text'});
+    save_validation_data_button.href = URL.createObjectURL(file);
+    save_validation_data_button.download = 'validation data.json';
+};
+
+const make_load_data_listener = (training) => {
+    return (event) => {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = () => {
+            const json = reader.result;
+            let message;
+            try {
+                let data = JSON.parse(json);
+                message = "Loaded '" + file.name + "'. (" + data.input.length + " data items).";
+                if (training) {
+                    training_data = data;
+                } else {
+                    validation_data = data;
+                }
+            } catch (error) {
+                message = "Error interpreting the data in " + file.name + ". Error: " + error.message;
+            }
+            if (training) {
+                load_training_data_message.innerHTML = message;
+            } else {
+                load_validation_data_message.innerHTML = message;
+            } 
+        }
+        reader.readAsText(file);
+    };
 };
 
 let create_button = function (label, click_handler) {
@@ -685,14 +735,20 @@ const contents_of_URL = (URL, success_callback, error_callback) => {
 const receive_message =
     async (event) => {
         let message = event.data;
-        if (typeof message.training_data !== 'undefined') {
-            if (message.training_data.ignore_old_dataset) {
-                training_data = {};
+        if (typeof message.training_data !== 'undefined' || typeof message.validataion_data !== 'undefined') {
+            if (message.training_data) {
+                if (message.training_data.ignore_old_dataset) {
+                    training_data = {};
+                }
+                training_data = add_to_training_data(message.training_data);
             }
-            training_data =
-                add_to_dataset(message.training_data.input,
-                               message.training_data.output);
-            event.source.postMessage({data_received: message.training_data.time_stamp}, "*");
+            if (message.validation_data) {
+                if (message.validation_data.ignore_old_dataset) {
+                    validation_data = {};
+                }
+                validation_data = add_to_validation_data(message.validation_data);
+            }
+            event.source.postMessage({data_received: message.time_stamp}, "*");
         } else if (typeof message.create_model !== 'undefined') {
             try {
                 let model = create_model(message.create_model.name,
@@ -780,7 +836,7 @@ const receive_message =
                 try {
                     let new_training_data = JSON.parse(text);
                     if (message.add_to_previous_training) {
-                        training_data = add_to_dataset(new_training_data.input, new_training_data.output);
+                        training_data = add_to_training_data(new_training_data);
                     } else {
                         training_data = new_training_data;
                     }
@@ -822,15 +878,8 @@ return {get_model: get_model,
         set_validation_data: (data) => {
             validation_data = data;
         },
-        add_to_validation_data: (data) => {
-            if (validation_data) {
-                validation_data.input  = validation_data.input.concat(data.input);
-                validation_data.output = validation_data.output.concat(data.output);              
-            } else {
-                validation_data = data;
-            }
-        },
-        add_to_dataset: add_to_dataset,
+        add_to_training_data: add_to_training_data,
+        add_to_validation_data: add_to_validation_data,
         create_model: create_model,
         train_model: train_model,
         predict: predict,
