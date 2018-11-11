@@ -61,7 +61,10 @@ const create_parameters_interface = function () {
                  ['Use scores as probabilities', 'Use highest score']);
   evaluation.add(gui_state["Evaluation"],
                  "What to do with new games",
-                 ["Add to dataset for future training", "Replace training dataset", "Don't add to dataset"]);
+                 ["Add to dataset for future training",
+                  "Replace training dataset",
+                  "Use for future training and save old games for validation",
+                  "Don't add to dataset"]);
   update_evaluation_model_choices();
   return {input_data: input_data,
           model: model,
@@ -330,12 +333,18 @@ const create_data_interface = async function(button_label, number_of_games_funct
           let new_data = await create_data(number_of_games, [player_1, player_2]);
           evaluation_data = new_data;
           let new_input = new_data.input.map(one_hot);
-          if (!training_data_input() || gui_state["Evaluation"]["What to do with new games"] === 'Replace training dataset') {
+          let what_to_do_with_new_games = gui_state["Evaluation"]["What to do with new games"];
+          if (!training_data_input() || what_to_do_with_new_games === 'Replace training dataset') {
               tensorflow.set_training_data({input: new_input,
                                             output: new_data.output});
-          } else if (gui_state["Evaluation"]["What to do with new games"] === 'Add to dataset for future training') {
+          } else if (what_to_do_with_new_games === 'Add to dataset for future training') {
               tensorflow.set_training_data(tensorflow.add_to_dataset(new_input, new_data.output));
               tensorflow.training_data().statistics = new_data.statistics;
+          } else if (what_to_do_with_new_games === 'Use for future training and save old games for validation') {
+              tensorflow.add_to_validation_data(tensorflow.training_data());
+              tensorflow.set_training_data({input: new_input,
+                                            output: new_data.output});
+
           } // do nothing for Don't add to dataset
           train_button.disabled = false; // not really but it will behave sensibly if run too soon
           create_model_button.disabled = false; // there is data so can move forward (though really only training needs data)

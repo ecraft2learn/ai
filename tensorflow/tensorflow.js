@@ -8,6 +8,7 @@ window.tensorflow =
 let models = {};
 let model; // used for defaults such as model name when creating a model
 let training_data;
+let validation_data;
 
 const MAX_LAYER_COUNT = 5;
 
@@ -79,7 +80,9 @@ const create_model = function (name, layers, optimizer_full_name, input_shape) {
     return model;
 };
 
-const train_model = async function (model_or_model_name, data, epochs, learning_rate, use_tfjs_vis, success_callback, error_callback) {
+const train_model = async (model_or_model_name, training_data, validation_data, epochs, learning_rate,
+                           use_tfjs_vis, success_callback, error_callback) => {
+    // validation_data is optional - if provided not used for training
     if (!model_or_model_name) {
         model_or_model_name = model; // current model (if there is one)
     }
@@ -103,7 +106,8 @@ const train_model = async function (model_or_model_name, data, epochs, learning_
                 if (previous_callback) {
                     previous_callback();
                 }
-                train_model(model, data, epochs, learning_rate, use_tfjs_vis, success_callback, error_callback);
+                train_model(model, training_data, validation_data, epochs, learning_rate,
+                            use_tfjs_vis, success_callback, error_callback);
             };
         return;
     }
@@ -120,16 +124,6 @@ const train_model = async function (model_or_model_name, data, epochs, learning_
         }; 
         // Train the model using the data
         let start = Date.now();
-//         if (!model.optimizer) {
-//             let full_name = gui_state["Model"]["Optimization method"];
-//             let optimizer = optimization_methods[full_name];
-//             if (optimizer) {
-//                 model.optimizer = optimizer;
-//             } else {
-//                 error_callback({message: "Don't know what optimizer to use for training."});
-//                 return;
-//             }
-//         }
         if (model.optimizer.learningRate) { // not every optimizer needs to have this property
             model.optimizer.learningRate = learning_rate;
         }
@@ -138,25 +132,38 @@ const train_model = async function (model_or_model_name, data, epochs, learning_
         // when following was inside of tidy I got an error about backend being undefined
         let xs;
         let ys;
-        if (typeof data.input[0] === 'number') {
-            xs = tf.tensor2d(data.input,  [data.input.length, 1]);
+        if (typeof training_data.input[0] === 'number') {
+            xs = tf.tensor2d(training_data.input,  [training_data.input.length, 1]);
         } else {
-            xs = tf.tensor(data.input);
+            xs = tf.tensor(training_data.input);
         }
-        if (typeof data.output[0] === 'number') {
-            ys = tf.tensor2d(data.output,  [data.output.length, 1]);
+        if (typeof training_data.output[0] === 'number') {
+            ys = tf.tensor2d(training_data.output, [training_data.output.length, 1]);
         } else {
-            ys = tf.tensor(data.output);
+            ys = tf.tensor(training_data.output);
+        }
+        let configuration = {epochs: epochs,
+                             callbacks: callbacks};
+        let validation_tensor = [];
+        if (validation_data) {
+            if (typeof validation_data.input[0] === 'number') {
+                validation_tensor.push(tf.tensor2d(validation_data.input,  [validation_data.input.length, 1]));
+            } else {
+                validation_tensor.push(tf.tensor(validation_data.input));
+            }
+            if (typeof validation_data.output[0] === 'number') {
+                validation_tensor.push(tf.tensor2d(validation_data.output, [validation_data.output.length, 1]));
+            } else {
+                validation_tensor.push(tf.tensor(validation_data.output));
+            }
+            configuration.validationData = validation_tensor;
         }
         tf.tidy(() => {
-            model.fit(xs,
-                      ys,
-                      {epochs: epochs,
-                       callbacks: callbacks})
+            model.fit(xs, ys, configuration)
                 .then(() => {
                           let duration = Math.round((Date.now()-start)/1000);
                           success_callback({duration: duration,
-                                            loss: epoch_history[epochs-1].loss});
+                                            loss: epoch_history[epoch_history.length-1].loss});
                           model.ready_for_prediction = true;
                           if (model.callback_when_ready_for_prediction) {
                               model.callback_when_ready_for_prediction();
@@ -164,6 +171,10 @@ const train_model = async function (model_or_model_name, data, epochs, learning_
                           }
                           xs.dispose();
                           ys.dispose();
+                          if (validation_tensor.length === 2) {
+                              validation_tensor[0].dispose();
+                              validation_tensor[1].dispose();
+                          }
                       },
                       error_callback);
              });
@@ -224,7 +235,7 @@ const gui_state =
   {"Model": {"Size of layer 1": 100,
              "Size of layer 2": 50,
              "Size of layer 3": 20,
-             "Size of layer 4": 0,
+             "Size of layer 4": 1,
              "Size of layer 5": 0,
              "Optimization method": 'Stochastic Gradient Descent'},
    "Training": {"Learning rate": .001,
@@ -233,7 +244,7 @@ const gui_state =
 };
 
 const create_parameters_interface = function () {
-  const parameters_gui = new dat.GUI({width: 600,
+  const parameters_gui = new dat.GUI({width: 650,
                                       autoPlace: false});
   const settings_element = document.getElementById('settings');
   settings_element.appendChild(parameters_gui.domElement);
@@ -354,11 +365,16 @@ const train_with_parameters = async function (surface_name) {
         // if there was an old message remove it
         train_with_current_settings_button.firstChild.nextSibling.remove();
     }
-    message.innerHTML = "<br>Training started. Training data is " + training_data.input.length + " long. Please wait.";
+    message.innerHTML = "<br>Training started. Training data is " + training_data.input.length + " long";
+    if (validation_data) {
+        message.innerHTML += " and validation data is " + validation_data.input.length + " long";
+    }
+    message.innerHTML += ". Please wait.";
     setTimeout(async function () {
         // without the timeout the message above isn't displayed
         await train_model(model_name,
                           training_data,
+                          validation_data,
                           Math.round(gui_state["Training"]["Number of iterations"]),
                           gui_state["Training"]["Learning rate"],
                           true, // show progress using tfjs-vis 
@@ -703,6 +719,7 @@ const receive_message =
             };
             train_model(message.train.model_name,
                         training_data,
+                        validation_data,
                         (message.train.epochs || 10),
                         (message.train.learning_rate || .01),
                         message.train.show_progress, 
@@ -800,6 +817,18 @@ return {get_model: get_model,
         training_data: () => training_data,
         set_training_data: (data) => {
             training_data = data;
+        },
+        validation_data: () => validation_data,
+        set_validation_data: (data) => {
+            validation_data = data;
+        },
+        add_to_validation_data: (data) => {
+            if (validation_data) {
+                validation_data.input  = validation_data.input.concat(data.input);
+                validation_data.output = validation_data.output.concat(data.output);              
+            } else {
+                validation_data = data;
+            }
         },
         add_to_dataset: add_to_dataset,
         create_model: create_model,
