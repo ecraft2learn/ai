@@ -6,11 +6,31 @@ window.tensorflow =
 ((function () {
 
 let models = {};
-let model; // used for defaults such as model name when creating a model
-let training_data;
-let validation_data;
+const get_model = (name) => models[name];
 
-const MAX_LAYER_COUNT = 5;
+let model; // used for defaults such as model name when creating a model
+
+let data = {}; // training and validation data either for "all models" or named models
+const get_data = (model_name, kind) => {
+    if (typeof data[model_name] === 'undefined') {
+        if (model_name !== 'all models') {
+            return get_data('all models', kind);
+        }
+        return;
+    }
+    if (typeof data[model_name][kind] === 'undefined') {
+        return;
+    }
+    return data[model_name][kind];
+};
+const set_data = (model_name, kind, value) => {
+    if (typeof data[model_name] === 'undefined') {
+        data[model_name] = {};
+    }
+    data[model_name][kind] = value;
+};
+
+const MAX_LAYER_COUNT = 6;
 
 const optimization_methods =
     {"Stochastic Gradient Descent": "sgd",
@@ -27,8 +47,6 @@ const add_to_models = function (new_model) {
     train_button.disabled = false;
 };
 
-const get_model = (name) => models[name];
-
 const shape_of_data = (data) => {
    if (typeof data === 'number') {
        return [1];
@@ -40,7 +58,7 @@ const shape_of_data = (data) => {
 };
 
 const create_model = function (name, layers, optimizer_full_name, input_shape) {
-    if (!input_shape && (!training_data || typeof training_data.input === 'undefined')) {
+    if (!input_shape && !get_data(name, 'training') && !get_data(name, 'validation')) {
         throw new Error("Cannot create a model before knowing what the data is like.\nProvide at least one example of the data.");
     }
     const optimizer = optimization_methods[optimizer_full_name];
@@ -55,7 +73,8 @@ const create_model = function (name, layers, optimizer_full_name, input_shape) {
             let configuration = {units: size,
                                  activation: 'relu'};
             if (index === 0) { // first one needs inputShape
-                configuration.inputShape = input_shape || shape_of_data(training_data.input[0]);
+                configuration.inputShape = input_shape ||
+                                           shape_of_data((get_data(name, 'training') || get_data(name, 'validation')).input[0]);
             } else if (index === layers.length-1) { // last one should not apply bias 
                 configuration.useBias = false;     
             }
@@ -130,34 +149,29 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
         gui_state["Training"]['Number of iterations'] = epochs;
         gui_state["Training"]['Learning rate'] = learning_rate;
         // when following was inside of tidy I got an error about backend being undefined
-        let xs;
-        let ys;
-        if (typeof training_data.input[0] === 'number') {
-            xs = tf.tensor2d(training_data.input,  [training_data.input.length, 1]);
-        } else {
-            xs = tf.tensor(training_data.input);
+        const get_tensors = (kind) => {
+            let data = get_data(model.name, kind);
+            if (!data) {
+                return;
+            }
+            let tensors = [];
+            if (typeof data.input[0] === 'number') {
+                tensors.push(tf.tensor2d(data.input,  [data.input.length, 1]));
+            } else {
+                tensors.push(tf.tensor(data.input));
+            }
+            if (typeof data.output[0] === 'number') {
+                tensors.push(tf.tensor2d(data.output, [data.output.length, 1]));
+            } else {
+                tensors.push(tf.tensor(data.output));
+            }
+            return tensors;
         }
-        if (typeof training_data.output[0] === 'number') {
-            ys = tf.tensor2d(training_data.output, [training_data.output.length, 1]);
-        } else {
-            ys = tf.tensor(training_data.output);
-        }
+        let [xs, ys] = get_tensors('training');
         let configuration = {epochs: epochs,
                              callbacks: callbacks};
-        let validation_tensor = [];
-        if (validation_data) {
-            if (typeof validation_data.input[0] === 'number') {
-                validation_tensor.push(tf.tensor2d(validation_data.input,  [validation_data.input.length, 1]));
-            } else {
-                validation_tensor.push(tf.tensor(validation_data.input));
-            }
-            if (typeof validation_data.output[0] === 'number') {
-                validation_tensor.push(tf.tensor2d(validation_data.output, [validation_data.output.length, 1]));
-            } else {
-                validation_tensor.push(tf.tensor(validation_data.output));
-            }
-            configuration.validationData = validation_tensor;
-        }
+        let validation_tensor = get_tensors('validation'); // undefined if no validatio data
+        configuration.validationData = validation_tensor;
         tf.tidy(() => {
             model.fit(xs, ys, configuration)
                 .then(() => {
@@ -171,7 +185,7 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
                           }
                           xs.dispose();
                           ys.dispose();
-                          if (validation_tensor.length === 2) {
+                          if (validation_tensor && validation_tensor.length === 2) {
                               validation_tensor[0].dispose();
                               validation_tensor[1].dispose();
                           }
@@ -221,20 +235,13 @@ let report_error = function (error) {
     console.log(error); // for now
 };
 
-const add_to_training_data = (new_data) => {
-    if (!training_data || typeof training_data.input === 'undefined') {
+const add_to_data = (new_data, model_name, kind) => {
+    let old_data = get_data(model_name, kind);
+    if (!old_data) {
         return new_data;
     }
-    return {input:  training_data.input.concat(new_data.input),
-            output: training_data.output.concat(new_data.output)};
-};
-
-const add_to_validation_data = (new_data) => {
-    if (!validation_data || typeof validation_data.input === 'undefined') {
-        return new_data;
-    }
-    return {input:  validation_data.input.concat(new_data.input),
-            output: validation_data.output.concat(new_data.output)};
+    return {input:  old_data.input .concat(new_data.input),
+            output: old_data.output.concat(new_data.output)};
 };
 
 const gui_state = 
@@ -244,9 +251,10 @@ const gui_state =
              "Size of layer 3": 20,
              "Size of layer 4": 1,
              "Size of layer 5": 0,
+             "Size of layer 6": 0,
              "Optimization method": 'Stochastic Gradient Descent'},
    "Training": {"Learning rate": .001,
-                "Number of iterations": 120},
+                "Number of iterations": 100},
    "Predictions": {}
 };
 
@@ -364,6 +372,8 @@ const train_with_parameters = async function (surface_name) {
         message.innerHTML = "<br><b>Error:</b> " + error.message + "<br>";
     };
     draw_area.appendChild(message);
+    let training_data   = get_data(model_name, 'training');
+    let validation_data = get_data(model_name, 'validation');
     if (!training_data || !training_data.input) {
         error_callback(new Error("Cannot begin training before creating or loading training data."));
         return;
@@ -496,12 +506,7 @@ const create_prediction_interface = () => {
 
 let save_model_button;
 let load_model_button;
-let save_training_data_button;
-let load_training_data_input;
-let load_training_data_message;
-let save_validation_data_button;
-let load_validation_data_input;
-let load_validation_data_message;
+let save_data_button;
 
 const save_and_load = function () {
     const surface = tfvis.visor().surface({name: 'Tensorflow', tab: 'Save/Load'});
@@ -564,22 +569,27 @@ const save_and_load = function () {
         button.addEventListener('click', listener);
         return button;
     };
-    save_training_data_button = 
-        create_anchor_that_looks_like_a_button("Save training data", "save-training-button", save_training_data);
-    save_validation_data_button = 
-        create_anchor_that_looks_like_a_button("Save validation data", "save-validation-button", save_validation_data);
-    draw_area.appendChild(save_training_data_button);
-    draw_area.appendChild(save_validation_data_button);
-    load_training_data_input = file_input("Load training data file: ", 'load_training_data');
-    load_training_data_input.onchange = make_load_data_listener(true);
-    load_training_data_message = document.createElement('div');
-    load_validation_data_input = file_input("Load validation data file: ", 'load_validation_data');
-    load_validation_data_input.onchange = make_load_data_listener(false);
-    load_validation_data_message = document.createElement('div');
+    save_data_button = 
+        {training: 
+            create_anchor_that_looks_like_a_button("Save training data",
+                                                   "save-training-button", 
+                                                   () => save_data('all models', 'training')),
+         validation:
+             create_anchor_that_looks_like_a_button("Save validation data",
+                                                    "save-validation-button",
+                                                    () => save_data('all models', 'validation'))};
+    draw_area.appendChild(save_data_button.training);
+    draw_area.appendChild(save_data_button.validation);
+    let load_training_data_input = file_input("Load training data file: ", 'load_training_data');
+    load_training_data_input.onchange = make_load_data_listener('training', 'all models');
+    load_data_message = {training:   document.createElement('div'),
+                         validation: document.createElement('div')};
+    let load_validation_data_input = file_input("Load validation data file: ", 'load_validation_data');
+    load_validation_data_input.onchange = make_load_data_listener('validation', 'all models');
     draw_area.appendChild(load_training_data_input);
-    draw_area.appendChild(load_training_data_message);
+    draw_area.appendChild(load_data_message.training);
     draw_area.appendChild(load_validation_data_input);
-    draw_area.appendChild(load_validation_data_message);
+    draw_area.appendChild(load_data_message.validation);
 };
 
 const save_model = async function (model_name) {
@@ -626,27 +636,18 @@ const enable_evaluate_button = () => {
     }
 };
 
-const save_training_data = () => {
-    if (typeof training_data === 'undefined' || !training_data.input) {
-        alert("No training created or loaded.");
+const save_data = (model_name, kind) => {
+    let data = get_data(model_name, kind);
+    if (!data) {
+        alert('No "' + kind + '" data created or loaded.');
         return;
     }
-    const file = new Blob([JSON.stringify(training_data)], {type: 'text'});
-    save_training_data_button.href = URL.createObjectURL(file);
-    save_training_data_button.download = 'training data.json';
+    const file = new Blob([JSON.stringify(data)], {type: 'text'});
+    save_data_button[kind].href = URL.createObjectURL(file);
+    save_data_button[kind].download = kind + ' data.json';
 };
 
-const save_validation_data = () => {
-    if (typeof validation_data === 'undefined' || !validation_data.input) {
-        alert("No validation created or loaded.");
-        return;
-    }
-    const file = new Blob([JSON.stringify(validation_data)], {type: 'text'});
-    save_validation_data_button.href = URL.createObjectURL(file);
-    save_validation_data_button.download = 'validation data.json';
-};
-
-const make_load_data_listener = (training) => {
+const make_load_data_listener = (kind, model_name) => {
     return (event) => {
         const file = event.target.files[0];
         const reader = new FileReader();
@@ -656,19 +657,11 @@ const make_load_data_listener = (training) => {
             try {
                 let data = JSON.parse(json);
                 message = "Loaded '" + file.name + "'. (" + data.input.length + " data items).";
-                if (training) {
-                    training_data = data;
-                } else {
-                    validation_data = data;
-                }
+                set_data(model_name, kind, data);
             } catch (error) {
                 message = "Error interpreting the data in " + file.name + ". Error: " + error.message;
             }
-            if (training) {
-                load_training_data_message.innerHTML = message;
-            } else {
-                load_validation_data_message.innerHTML = message;
-            } 
+            load_data_message[kind].innerHTML = message;
         }
         reader.readAsText(file);
     };
@@ -735,18 +728,13 @@ const contents_of_URL = (URL, success_callback, error_callback) => {
 const receive_message =
     async (event) => {
         let message = event.data;
-        if (typeof message.training_data !== 'undefined' || typeof message.validataion_data !== 'undefined') {
-            if (message.training_data) {
-                if (message.training_data.ignore_old_dataset) {
-                    training_data = {};
-                }
-                training_data = add_to_training_data(message.training_data);
-            }
-            if (message.validation_data) {
-                if (message.validation_data.ignore_old_dataset) {
-                    validation_data = {};
-                }
-                validation_data = add_to_validation_data(message.validation_data);
+        if (typeof message.data !== 'undefined') {
+            let kind = message.kind;
+            let model_name = message.model_name || 'all models';
+            if (message.ignore_old_dataset) {
+                set_data(model_name, kind, message.data);
+            } else {
+                set_data(model_name, kind, add_to_data(message.data, model_name, kind));
             }
             event.source.postMessage({data_received: message.time_stamp}, "*");
         } else if (typeof message.create_model !== 'undefined') {
@@ -773,9 +761,10 @@ const receive_message =
                 event.source.postMessage({training_failed: message.train.time_stamp,
                                           error_message: error_message}, "*");
             };
-            train_model(message.train.model_name,
-                        training_data,
-                        validation_data,
+            let model_name = message.train.model_name;
+            train_model(model_name,
+                        get_data(model_name, 'training'),
+                        get_data(model_name, 'validation'),
                         (message.train.epochs || 10),
                         (message.train.learning_rate || .01),
                         message.train.show_progress, 
@@ -832,30 +821,18 @@ const receive_message =
             }
         } else if (typeof message.load_data_from_URL !== 'undefined') {
             let URL = message.load_data_from_URL;
-            let training = message.training; // training or validation data
+            let kind = message.kind; // training or validation data
+            let model_name = message.model_name || 'all models';
             const success_callback = (text) => {
                 try {
                     let new_data = JSON.parse(text);
                     let info = new_data.input.length + ' data items loaded.';
-                    if (training) {
-                        if (message.add_to_previous_data) {
-                            training_data = add_to_training_data(new_data);
-                        } else {
-                            training_data = new_data;
-                        }
-                        if (message.add_to_previous_data) {
-                            info += ' Total is now ' + training_data.input.length + '.';
-                        } 
+                    if (message.add_to_previous_data) {
+                        set_data(model_name, kind, add_to_data(new_data, model_name, kind));
+                        info += ' Total is now ' + get_data(model_name, kind).input.length + '.';
                     } else {
-                        if (message.add_to_previous_data) {
-                            validation_data = add_to_validation_data(new_data);
-                        } else {
-                            validation_data = new_data;
-                        }
-                        if (message.add_to_previous_data) {
-                            info += ' Total is now ' + validation_data.input.length + '.';
-                        } 
-                    }
+                        set_data(model_name, kind, new_data);
+                    } 
                     event.source.postMessage({data_loaded: URL,
                                               info: info});
                 } catch (error) {
@@ -882,16 +859,9 @@ window.addEventListener('message', receive_message);
 return {get_model: get_model, 
         add_to_models: add_to_models,
         models: () => models,
-        training_data: () => training_data,
-        set_training_data: (data) => {
-            training_data = data;
-        },
-        validation_data: () => validation_data,
-        set_validation_data: (data) => {
-            validation_data = data;
-        },
-        add_to_training_data: add_to_training_data,
-        add_to_validation_data: add_to_validation_data,
+        get_data: get_data,
+        set_data: set_data,
+        add_to_data: add_to_data,
         create_model: create_model,
         train_model: train_model,
         predict: predict,

@@ -5,8 +5,6 @@
 ((async function () {
 
 const models = () => tensorflow.models;
-const training_data_input  = () => tensorflow.training_data() && tensorflow.training_data().input;
-const training_data_output = () => tensorflow.training_data() && tensorflow.training_data().output;
 
 let evaluation_data; // maybe exploring how games go without wanting to add to training data
 let evaluation;
@@ -334,14 +332,15 @@ const create_data_interface = async function(button_label, number_of_games_funct
           evaluation_data = new_data;
           new_data.input = new_data.input.map(one_hot);
           let what_to_do_with_new_games = gui_state["Evaluation"]["What to do with new games"];
-          if (!training_data_input() || what_to_do_with_new_games === 'Replace training dataset') {
-              tensorflow.set_training_data(new_data);
+          if (!tensorflow.get_data('all models', 'training') || what_to_do_with_new_games === 'Replace training dataset') {
+              tensorflow.set_data('all models', 'training', new_data);
           } else if (what_to_do_with_new_games === 'Add to dataset for future training') {
-              tensorflow.set_training_data(tensorflow.add_to_training_data(new_data));
-              tensorflow.training_data().statistics = new_data.statistics;
+              tensorflow.set_data('all models', 'training', tensorflow.add_to_data(new_data, 'all models', 'training'));
+              tensorflow.get_data('all models', 'training').statistics = new_data.statistics;
           } else if (what_to_do_with_new_games === 'Use for future training and save old games for validation') {
-              tensorflow.set_validation_data(tensorflow.add_to_validation_data(tensorflow.training_data()));
-              tensorflow.set_training_data(new_data);
+              // add current training data to validation data and set training data to the new data
+              tensorflow.set_data('all models', 'validation', tensorflow.add_to_data(tensorflow.get_data('all models', 'training'), 'all models', 'validation'));
+              tensorflow.set_data('all models', 'training', new_data);
           } // do nothing for Don't add to dataset
           train_button.disabled = false; // not really but it will behave sensibly if run too soon
           create_model_button.disabled = false; // there is data so can move forward (though really only training needs data)

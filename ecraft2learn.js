@@ -1066,31 +1066,22 @@ window.ecraft2learn =
                                       }
                                   });
     };
-    const send_training_data = function(input, output, ignore_old_dataset, callback) {
-        send_data(input, output, ignore_old_dataset, undefined, undefined, undefined, callback);
+    const send_training_data = function(input, output, ignore_old_dataset, which_model, callback) {
+        send_data(which_model, input, output, ignore_old_dataset, undefined, undefined, undefined, callback);
     };
-    const send_validation_data = function(input, output, ignore_old_dataset, callback) {
-        send_data(undefined, undefined, undefined, input, output, ignore_old_dataset, callback);
+    const send_validation_data = function(input, output, ignore_old_dataset, which_model, callback) {
+        send_data(which_model, undefined, undefined, undefined, input, output, ignore_old_dataset, callback);
     };
-    const send_data = function(training_input, training_output, ignore_old_training,
-                               validation_input, validation_output, validation_old_validation,
-                               callback) {
+    const send_data = function(model_name, kind, input, output, ignore_old_training, callback) {
         const time_stamp = Date.now();
         request_of_support_window('tensorflow.js',
                                   'Loaded',
                                   () => {
-                                      let message = {time_stamp: time_stamp};
-                                      if (training_input) {
-                                          message.training_data = {input: snap_to_javascript(training_input, true),
-                                                                   output: snap_to_javascript(training_output, true),
-                                                                   ignore_old_dataset: ignore_old_training};
-                                      }
-                                      if (validation_input) {
-                                          message.validataion_data = {input: snap_to_javascript(validation_input, true),
-                                                                      output: snap_to_javascript(validation_output, true),
-                                                                      ignore_old_dataset: ignore_old_validation};
-                                      }
-                                      return message;
+                                      return {data: {input: input,
+                                                     output: output},
+                                              model_name: model_name,
+                                              ignore_old_dataset: ignore_old_dataset,
+                                              time_stamp: time_stamp};
                                   },
                                   (message) => {
                                       return message.data_received === time_stamp;
@@ -1186,13 +1177,14 @@ window.ecraft2learn =
                                       }
                                   });
     };
-    const load_data_from_URL = (training, URL, add_to_previous_data, success_callback, error_callback) => {
-        // training is a boolean determing whether training or validation data is updated 
+    const load_data_from_URL = (kind, URL, add_to_previous_data, model_name, success_callback, error_callback) => {
+        // kind is either 'training' or 'validation'
         request_of_support_window('tensorflow.js',
                                   'Loaded',
                                   () => {
                                       return {load_data_from_URL: URL,
-                                              training: training,
+                                              kind: kind,
+                                              model_name: model_name,
                                               add_to_previous_data: add_to_previous_data};
                                   },
                                   (message) => {
