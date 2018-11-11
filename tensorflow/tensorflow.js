@@ -345,12 +345,16 @@ const train_with_parameters = async function (surface_name) {
     let error_callback = (error) => {
         message.innerHTML = "<br><b>Error:</b> " + error.message + "<br>";
     };
+    draw_area.appendChild(message);
+    if (!training_data || !training_data.input) {
+        error_callback(new Error("Cannot begin training before creating or loading training data."));
+        return;
+    }
     if (train_with_current_settings_button.firstChild.nextSibling) {
         // if there was an old message remove it
         train_with_current_settings_button.firstChild.nextSibling.remove();
     }
     message.innerHTML = "<br>Training started. Training data is " + training_data.input.length + " long. Please wait.";
-    draw_area.appendChild(message);
     setTimeout(async function () {
         // without the timeout the message above isn't displayed
         await train_model(model_name,
