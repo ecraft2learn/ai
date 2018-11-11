@@ -236,8 +236,14 @@ const initialise_page = async function (incoming_training_class_names, source) {
     video.play();
   } catch (e) {
     let info = document.getElementById('info');
-    info.textContent = 'this browser does not support video capture,' +
-                       'or this device does not have a camera';
+    if (!info) {
+        info = document.createElement('p');
+        info.id = 'info';
+        document.body.appendChild(info);
+    }
+    info.textContent = 'This browser does not support video capture, ' +
+                       'lacks permission to use the camera, '
+                       'or this device does not have a camera.';
     info.style.display = 'block';
     throw e;
   }
