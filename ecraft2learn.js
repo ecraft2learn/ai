@@ -1044,7 +1044,7 @@ window.ecraft2learn =
                                       if (typeof input_size === 'number') {
                                           configuration.input_size = [input_size];
                                       } else if (input_size instanceof List) {
-                                           configuration.input_size = snap_to_javascript(input_size); 
+                                          configuration.input_size = snap_to_javascript(input_size, true); 
                                       } else if (input_size instanceof Array) {
                                           configuration.input_size = input_size; 
                                       }
@@ -1066,20 +1066,15 @@ window.ecraft2learn =
                                       }
                                   });
     };
-    const send_training_data = function(input, output, ignore_old_dataset, which_model, callback) {
-        send_data(which_model, input, output, ignore_old_dataset, undefined, undefined, undefined, callback);
-    };
-    const send_validation_data = function(input, output, ignore_old_dataset, which_model, callback) {
-        send_data(which_model, undefined, undefined, undefined, input, output, ignore_old_dataset, callback);
-    };
-    const send_data = function(model_name, kind, input, output, ignore_old_training, callback) {
+    const send_data = function(model_name, kind, input, output, ignore_old_dataset, callback) {
         const time_stamp = Date.now();
         request_of_support_window('tensorflow.js',
                                   'Loaded',
                                   () => {
-                                      return {data: {input: input,
-                                                     output: output},
+                                      return {data: {input: snap_to_javascript(input, true),
+                                                     output: snap_to_javascript(output, true)},
                                               model_name: model_name,
+                                              kind: kind,
                                               ignore_old_dataset: ignore_old_dataset,
                                               time_stamp: time_stamp};
                                   },
@@ -1088,9 +1083,8 @@ window.ecraft2learn =
                                   },
                                   (message) => {
                                       invoke_callback(callback, true);
-                                  });
+                                  }); // there is no error response
     };
-
     const train_model = (model_name, epochs, learning_rate, sucess_callback, error_callback) => {
         const time_stamp = Date.now();
         request_of_support_window('tensorflow.js',
@@ -2565,8 +2559,7 @@ window.ecraft2learn =
   create_costume_with_style: create_costume_with_style,
   get_image_features: get_image_features,
   create_tensorflow_model: create_tensorflow_model,
-  send_training_data: send_training_data,
-  send_validation_data: send_validation_data,
+  send_data: send_data,
   train_model: train_model,
   is_model_ready_for_prediction: is_model_ready_for_prediction,
   predictions_from_model: predictions_from_model,

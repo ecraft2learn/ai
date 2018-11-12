@@ -176,8 +176,8 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
             model.fit(xs, ys, configuration)
                 .then(() => {
                           let duration = Math.round((Date.now()-start)/1000);
-                          success_callback({duration: duration,
-                                            loss: epoch_history[epoch_history.length-1].loss});
+                          success_callback({loss: epoch_history[epoch_history.length-1].loss,
+                                            "duration in seconds": duration});
                           model.ready_for_prediction = true;
                           if (model.callback_when_ready_for_prediction) {
                               model.callback_when_ready_for_prediction();
@@ -315,7 +315,9 @@ const create_model_with_parameters = function (surface_name) {
         try {
             model = create_model(name, layers, optimizer_full_name);
         } catch (error) {
+            message.innerHTML = error.message;
             report_error(error);
+            return;
         }
         if (train_button) {
             train_button.disabled = false;
@@ -350,7 +352,7 @@ const create_model_with_parameters = function (surface_name) {
         create_model_with_current_settings_button = 
             create_button("Create model with current settings", create_model_with_current_settings);
         draw_area.appendChild(create_model_with_current_settings_button);
-        message = document.createElement('div');
+        message = document.createElement('p');
         draw_area.appendChild(message);        
     }
     return model;
