@@ -143,6 +143,13 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
         }; 
         // Train the model using the data
         let start = Date.now();
+        if (!model.optimizer) {
+            // loaded models lack an optimizer
+            const optimizer_full_name = gui_state["Model"]["Optimization method"];
+            const optimizer = optimization_methods[optimizer_full_name];
+            model.compile({loss: 'meanSquaredError',
+                           optimizer: optimizer});
+        }
         if (model.optimizer.learningRate) { // not every optimizer needs to have this property
             model.optimizer.learningRate = learning_rate;
         }
