@@ -373,7 +373,8 @@ const train_with_parameters = async function (surface_name) {
   const train_with_current_settings = async function (model_name) {
     let message = document.createElement('p');
     let success_callback = (training_statistics) => {
-        let {duration, loss} = training_statistics;
+        let loss = training_statistics.loss;
+        let duration = training_statistics["duration in seconds"];
         message.innerHTML = "<br>Training " + model_name + " took " + duration + " seconds. Final error rate is " + loss +".";
         enable_evaluate_button();   
     };
