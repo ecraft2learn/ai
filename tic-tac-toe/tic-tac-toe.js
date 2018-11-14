@@ -125,7 +125,7 @@ const move = function (player_number, players, board, history, non_deterministic
         let predictions = [];
         possible_moves.forEach(possible_move => {
             let board_copy = board.slice();
-            board_copy[possible_move] = player_number;
+            board_copy[possible_move] = player_number+1;
             tf.tidy(() => {
                 let board_tensor = tf.tensor2d(one_hot(board_copy), [1, 27]);
                 let probability_tensor = tensorflow.get_model(player).predict(board_tensor);
@@ -134,7 +134,7 @@ const move = function (player_number, players, board, history, non_deterministic
                 if (probability > best_probability) {
                     best_move = possible_move;
                     best_probability = probability;
-                }           
+                }
             });
         });
         if (non_deterministic) {
@@ -347,9 +347,11 @@ const create_data_interface = async function(button_label, number_of_games_funct
           message.style.font = "Courier"; // looks better with monospaced font
           let statistics = evaluation_data.statistics;
           message.innerHTML = 
-              number_of_games + " games created. " + player_1 + " vs " + player_2 + "<br>" +
-              "X wins = " + statistics.x_wins + " ("   + Math.round(100*statistics.x_wins/number_of_games) +"%); " +
-              "O wins = " + statistics.x_losses + " (" + Math.round(100*statistics.x_losses/number_of_games) +"%); " +
+              number_of_games + " games created.<br>" +
+              player_1 + " (" + gui_state["Evaluation"]["Player 1's strategy"] + ")" + " vs<br> " + 
+              player_2 + " (" + gui_state["Evaluation"]["Player 2's strategy"] + ")" + "<br>" +
+              "X wins = " + statistics.x_wins + " ("   + Math.round(100*statistics.x_wins/number_of_games) + "%); " +
+              "O wins = " + statistics.x_losses + " (" + Math.round(100*statistics.x_losses/number_of_games) + "%); " +
               "Ties = "   + statistics.ties + " ("     + Math.round(100*statistics.ties/number_of_games) + "%)<br>";
           const update_button = function (button) {
               const old_version = document.getElementById(button.id);
