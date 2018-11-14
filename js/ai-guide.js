@@ -235,19 +235,15 @@ window.addEventListener(
              img.src = "/ai/AI-teacher-guide-projects/" + name + ".png";
              img.className = "image-of-iframe";
              let replace_with_iframe = function () {
-                 // add a loading div for a few seconds...
+                 // add a loading div message for a few seconds...
                  let loading = document.createElement('div');
                  let project_folder;
                  loading.innerHTML = "<b>Loading. Please wait.</b>";
                  figure.insertBefore(loading, figcaption);
                  img.remove();
-//                  if (window.location.hostname === 'localhost') {
-//                      iframe.src = "/ai/snap/snap-beta.html";
-//                  } else {
-                     iframe.src = "/ai/snap/snap.html";
-//                  }
+                 iframe.src = "/ai/snap/snap.html";
                  iframe.setAttribute('scrolling', 'no');
-                 // remove loading message 3 seconds after Snap! loads
+                 // remove loading message 1 second after Snap! loads
                  // since project loading takes time too
                  iframe.addEventListener('load',    
                                          function () {
