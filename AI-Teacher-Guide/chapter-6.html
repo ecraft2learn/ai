@@ -18,8 +18,49 @@ for how to deal with problems encountered.
 </p>
 <h3 class="background-information-white">Introduction</h3>
 <p class="background-information">
-
+In previous chapters you used blocks that relied upon pre-trained machine learning models.
+In some cases using transfer learning you were able to extend the models a little.
+In this chapter we introduce blocks that enable you to create deep machine learning models from scratch,
+train them, and use their predictions in your projects.
+We have yet to include support for models that use images or sounds but there is a good deal one can do with numbers.
 </p>
+<p class="background-information">
+One can build models that learn about real-world data such as weather, traffic, astronomy, economics, politics, 
+and any of the many other
+<a href="https://www.forbes.com/sites/bernardmarr/2018/02/26/big-data-and-ai-30-amazing-and-free-public-data-sources-for-2018/" target="_blank">
+open data sources</a>.
+You can build models that will try to guess the next number in a sequence.
+</p>
+<p class="background-information">
+As we explore later in this chapter one can <a href="#tic-tac-toe">create intelligent game playing programs</a> using these machine learning blocks.
+The trick is to turn game boards/positions into a list of numbers and the game outcome into a number so the model can be trained on previous games.
+</p>
+<h3 class="instructions-white">How to Use Machine Learning Blocks</h3>
+<p class="instructions">
+To create and use a machine learning model you need these components:
+</p>
+<ol class="instructions">
+<li>
+Create a model with the desired number and size of layers.
+The model will connect the input to the first layer, the first layer to second layer, and so on until the last layer with is the output of the model.
+More layers and wider layers typically makes the model more accurate but also slower to train and use.
+</li>
+<li>
+Provide the data as two lists.
+The elements of the first list are the input and the second list contains the corresponding outputs.
+</li>
+<li>
+Train the model.
+You can control how much learning it does on each step and how many steps it should run.
+Very many small steps usually works best but can take a very long time.
+</li>
+<li>
+Use the model to make predictions.
+This can be done with test data where the outputs are known to evaluate the model.
+And once it passes your tests you can use to predict things about the world, solve mathematics puzzles, or play games.
+</li>
+</ol>
+
 
 <p class="guide-to-guide">
 Return to 
