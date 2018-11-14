@@ -328,9 +328,9 @@ const create_data_interface = async function(button_label, number_of_games_funct
       button.appendChild(message);
       setTimeout(async function () {
           // without the timeout the please wait message isn't seen    
-          let new_data = await create_data(number_of_games, [player_1, player_2]);
-          evaluation_data = new_data;
-          new_data.input = new_data.input.map(one_hot);
+           evaluation_data= await create_data(number_of_games, [player_1, player_2]);
+          let new_data = {input: evaluation_data.input.map(one_hot),
+                          output: evaluation_data.output};
           let what_to_do_with_new_games = gui_state["Evaluation"]["What to do with new games"];
           if (!tensorflow.get_data('all models', 'training') || what_to_do_with_new_games === 'Replace training dataset') {
               tensorflow.set_data('all models', 'training', new_data);
@@ -347,7 +347,7 @@ const create_data_interface = async function(button_label, number_of_games_funct
           message.style.font = "Courier"; // looks better with monospaced font
           let statistics = evaluation_data.statistics;
           message.innerHTML = 
-              number_of_games + " games created.<br>" +
+              number_of_games + " games created. " + player_1 + " vs " + player_2 + "<br>" +
               "X wins = " + statistics.x_wins + " ("   + Math.round(100*statistics.x_wins/number_of_games) +"%); " +
               "O wins = " + statistics.x_losses + " (" + Math.round(100*statistics.x_losses/number_of_games) +"%); " +
               "Ties = "   + statistics.ties + " ("     + Math.round(100*statistics.ties/number_of_games) + "%)<br>";
@@ -359,7 +359,7 @@ const create_data_interface = async function(button_label, number_of_games_funct
               interface_element.appendChild(button);
           };
           message.innerHTML +=
-               "<b>Player 1 (" + player_1 + "): </b>" +
+               "<b>Player 1: </b>" +
                "Wins = "   + statistics.player_1_wins + " (" + Math.round(100*statistics.player_1_wins/number_of_games) + "%); " +
                "Losses = " + statistics.player_2_wins + " (" + Math.round(100*statistics.player_2_wins/number_of_games) + "%)<br>";
           const show_first_player_playing_x_button = 
