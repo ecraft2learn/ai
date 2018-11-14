@@ -60,7 +60,31 @@ This can be done with test data where the outputs are known to evaluate the mode
 And once it passes your tests you can use to predict things about the world, solve mathematics puzzles, or play games.
 </li>
 </ol>
-
+<h3 class="instructions white">Training a model to estimate square roots</h3>
+<p class="instructions">
+In the following you can use the <span class="block-name">Create a neural net model ...</span> block to create a model with four "hidden" layers.
+(Hidden in that they are inbetween the input and the output.)
+You then use the <span class="block-name">Send training data ...</span> block to set the training data to ten numbers and their square roots.
+Next you can use the <span class-"block-name">Train model named ...</span> block to train the model. 
+This can take several seconds and you should finally see the remaining "error" and how long it took.
+Smaller errors are better.
+Finally you can use the <span class="block-name">Get predictions from model ...</span> block (the version that gets only one prediction at a time)
+to test how well the model has learned.
+</p>
+<figure class = "snap-iframe"
+        id = "machine learning exercise"
+        full_screen = "true"
+        edit_mode = "true"
+        stage_ratio = ".1"
+        container_style = "width: 1000px; height: 1000px" 
+        caption = "Create, train, and test a simple model. TRY IT!">
+</figure>
+<p class="instructions">
+We suggest you first experiment with what are called the <i>hyperparameters</i> such as
+the number and size of the layers, the optimizer, learning rate, and number of learning steps.
+Then see if you can make a model that computes a different function.
+E.g. conversion from Centigrade to Fahrenheit.
+</p>
 
 <p class="guide-to-guide">
 Return to 
