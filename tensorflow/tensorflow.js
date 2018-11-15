@@ -134,6 +134,13 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
         // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
         const epoch_history = [];
         let callbacks = {onEpochEnd: async (epoch, history) => {
+                             if (epoch > 4 &&
+                                 epoch_history[epoch-1].loss === history.loss &&
+                                 epoch_history[epoch-2].loss === history.loss &&
+                                 epoch_history[epoch-3].loss === history.loss) {
+                                 // no progress for last 4 epochs 
+                                 throw new Error('Training stuck after ' + (epoch-4) + ' steps');
+                             }
                              epoch_history.push(history);
                              if (use_tfjs_vis) {
                                  tfvis.show.history({name: 'Error rate', tab: 'Training'},
@@ -179,26 +186,39 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
                              callbacks: callbacks};
         let validation_tensor = get_tensors('validation'); // undefined if no validatio data
         configuration.validationData = validation_tensor;
+        const then_handler = (extra_info) => {
+            let duration = Math.round((Date.now()-start)/1000);
+            let response = {loss: epoch_history[epoch_history.length-1].loss,
+                            "duration in seconds": duration};
+            if (typeof extra_info === 'string') {
+                response.extra_info = extra_info;
+            }
+            success_callback(response);
+            model.ready_for_prediction = true;
+            if (model.callback_when_ready_for_prediction) {
+                model.callback_when_ready_for_prediction();
+                model.callback_when_ready_for_prediction = undefined;
+            }
+            xs.dispose();
+            ys.dispose();
+            if (validation_tensor && validation_tensor.length === 2) {
+                validation_tensor[0].dispose();
+                validation_tensor[1].dispose();
+            }
+        };
         tf.tidy(() => {
             model.fit(xs, ys, configuration)
-                .then(() => {
-                          let duration = Math.round((Date.now()-start)/1000);
-                          success_callback({loss: epoch_history[epoch_history.length-1].loss,
-                                            "duration in seconds": duration});
-                          model.ready_for_prediction = true;
-                          if (model.callback_when_ready_for_prediction) {
-                              model.callback_when_ready_for_prediction();
-                              model.callback_when_ready_for_prediction = undefined;
+                .then(then_handler,
+                      (error) => {
+                          if (error.message.indexOf('Training stuck') === 0) {
+                              // only did some training but not really an error
+                              then_handler(error.message);
+                          } else {
+                              error_callback(error);
                           }
-                          xs.dispose();
-                          ys.dispose();
-                          if (validation_tensor && validation_tensor.length === 2) {
-                              validation_tensor[0].dispose();
-                              validation_tensor[1].dispose();
-                          }
-                      },
-                      error_callback);
-             });
+                      });
+                      
+            });
     } catch (error) {
         error_callback(error.message);
     }
