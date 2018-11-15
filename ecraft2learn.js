@@ -1032,6 +1032,7 @@ window.ecraft2learn =
         if (typeof input_size === 'string' && +input_size !== NaN) {
             input_size = +input_size; // convert string to number
         }
+        record_callbacks(success_callback, error_callback);
         const time_stamp = Date.now();
         request_of_support_window('tensorflow.js',
                                   'Loaded',
@@ -1067,6 +1068,7 @@ window.ecraft2learn =
                                   });
     };
     const send_data = function(model_name, kind, input, output, ignore_old_dataset, callback) {
+        record_callbacks(callback);
         const time_stamp = Date.now();
         request_of_support_window('tensorflow.js',
                                   'Loaded',
@@ -1085,7 +1087,8 @@ window.ecraft2learn =
                                       invoke_callback(callback, true);
                                   }); // there is no error response
     };
-    const train_model = (model_name, epochs, learning_rate, sucess_callback, error_callback) => {
+    const train_model = (model_name, epochs, learning_rate, success_callback, error_callback) => {
+        record_callbacks(success_callback, error_callback);
         const time_stamp = Date.now();
         request_of_support_window('tensorflow.js',
                                   'Loaded',
@@ -1101,7 +1104,7 @@ window.ecraft2learn =
                                   },
                                   (message) => {
                                       if (message.training_completed === time_stamp) {
-                                          invoke_callback(sucess_callback,
+                                          invoke_callback(success_callback,
                                                           javascript_to_snap(message.information));                                          
                                       } else if (error_callback) {
                                           console.log(message.error_message);
@@ -1113,6 +1116,7 @@ window.ecraft2learn =
                                   });
     };
     const is_model_ready_for_prediction = (model_name, callback) => {
+        record_callbacks(callback);
         request_of_support_window('tensorflow.js',
                                   'Loaded',
                                   () => {
@@ -1127,6 +1131,7 @@ window.ecraft2learn =
                                   });
     };
     const predictions_from_model = (model_name, inputs, success_callback, error_callback) => {
+        record_callbacks(success_callback, error_callback);
         const time_stamp = Date.now();
         request_of_support_window('tensorflow.js',
                                   'Loaded',
@@ -1151,6 +1156,7 @@ window.ecraft2learn =
                                   });
     };
     const load_tensorflow_model_from_URL = (URL, success_callback, error_callback) => {
+        record_callbacks(success_callback, error_callback);
         request_of_support_window('tensorflow.js',
                                   'Loaded',
                                   () => {
@@ -1172,6 +1178,7 @@ window.ecraft2learn =
                                   });
     };
     const load_data_from_URL = (kind, URL, add_to_previous_data, model_name, success_callback, error_callback) => {
+        record_callbacks(success_callback, error_callback);
         // kind is either 'training' or 'validation'
         request_of_support_window('tensorflow.js',
                                   'Loaded',
