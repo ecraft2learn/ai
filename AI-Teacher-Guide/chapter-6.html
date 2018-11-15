@@ -98,22 +98,40 @@ A simple example is
 a model that estimates the distance a point is from the origin</a>.
 Given values for <i>x</i> and <i>y</i> it estimates the square root of the sum of the squares of each.
 </p>
-<h3 class="background-white">A brief introduction to deep neural nets</h3>
-<p class="background">
+<h3 class="how-it-works-white">A brief introduction to deep neural nets</h3>
+<p class="how-it-works">
 A deep neural net consists of an input layer, some number of hiddle layers, and an output layer.
 The nets that <span class="block-name">Create a neural net model ...</span> block creates
 are always in a sequence and each neuron is connected to every neuron in the neighbouring layers.
 While this is a common architecture there are mnay models that branch and are connected more sparsely.
 </p>
-<figure class="background">
+<figure class="how-it-works-white">
 <img src="images/TB010-Deep-Neural-Network.jpg" class="center">
 <figcaption>A neural net with dense layers 8, 9, 9, 9, and 4 wide</figcaption>
 </figure>
-<figure class="background">
+<figure class="how-it-works-white">
 <img src="images/model-8-9-9-9-4.png" class="center">
 <figcaption>A block to create the neural net in the previous figure</figcaption>
 </figure>
-
+<p class="how-it-works">
+When predicting each neuron adds up all of its inputs from the previous layer after multiplying each input by a weight.
+Instead of sending the sum out to the neurons of the next layer it first checks if the value is negative and then
+sends zero instead.
+(This is a popular operation on the sum but some neural net models do other mathematical operations instead.)
+It is the weights (sometimes called "parameters") that are "learned" during training.
+They do this using a mathematical technique called
+<a href="https://en.wikipedia.org/wiki/Gradient_descent" target="_blank">gradient descent</a>.
+It repeaedly takes small steps reduce the "loss" or error.
+There are different strategies for doing this efficiently that are called
+<a href="http://ruder.io/optimizing-gradient-descent/" target="_blank">optimizers</a>.
+The size of the step taken each time is called the "learning rate".
+If the learning rate is too small progress is very slow.
+If it is too large then the error may bounce up and down rather than making progress towards a lower value.
+</p>
+<figure class="how-it-works-white non-essential">
+<img src="images/xkcd-machine-learning.png" class="center">
+<figcaption>Models make predictions by using linear algebra to compute weighted sums</figcaption>
+</figure>
 <p class="guide-to-guide">
 Return to 
 <a class="guide-link" href="chapter-5.html">the previous chapter on word embeddings</a>.
