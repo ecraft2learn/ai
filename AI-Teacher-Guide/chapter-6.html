@@ -32,8 +32,10 @@ open data sources</a>.
 You can build models that will try to guess the next number in a sequence.
 </p>
 <p class="background-information">
-As we explore later in this chapter one can <a href="#tic-tac-toe">create intelligent game playing programs</a> using these machine learning blocks.
-The trick is to turn game boards/positions into a list of numbers and the game outcome into a number so the model can be trained on previous games.
+As we explore later in this chapter one can <a href="#tic-tac-toe">create intelligent game playing programs</a>
+using these machine learning blocks.
+The trick is to turn game boards/positions into a list of numbers and the game outcome into a number
+so the model can be trained on previous games.
 </p>
 <h3 class="instructions-white">How to Use Machine Learning Blocks</h3>
 <p class="instructions">
@@ -42,7 +44,8 @@ To create and use a machine learning model you need these components:
 <ol class="instructions">
 <li>
 Create a model with the desired number and size of layers.
-The model will connect the input to the first layer, the first layer to second layer, and so on until the last layer with is the output of the model.
+The model will connect the input to the first layer, the first layer to second layer,
+and so on until the last layer with is the output of the model.
 More layers and wider layers typically makes the model more accurate but also slower to train and use.
 </li>
 <li>
@@ -60,15 +63,18 @@ This can be done with test data where the outputs are known to evaluate the mode
 And once it passes your tests you can use to predict things about the world, solve mathematics puzzles, or play games.
 </li>
 </ol>
-<h3 class="instructions white">Training a model to estimate square roots</h3>
+<h3 class="instructions-white">An example: Training a model to estimate square roots</h3>
 <p class="instructions">
-In the following you can use the <span class="block-name">Create a neural net model ...</span> block to create a model with four "hidden" layers.
+In the following you can use the <span class="block-name">Create a neural net model ...</span>
+block to create a model with four "hidden" layers.
 (Hidden in that they are inbetween the input and the output.)
-You then use the <span class="block-name">Send training data ...</span> block to set the training data to ten numbers and their square roots.
+You then use the <span class="block-name">Send training data ...</span>
+block to set the training data to ten numbers and their square roots.
 Next you can use the <span class-"block-name">Train model named ...</span> block to train the model. 
 This can take several seconds and you should finally see the remaining "error" and how long it took.
 Smaller errors are better.
-Finally you can use the <span class="block-name">Get predictions from model ...</span> block (the version that gets only one prediction at a time)
+Finally you can use the <span class="block-name">Get predictions from model ...</span> block
+(the version that gets only one prediction at a time)
 to test how well the model has learned.
 </p>
 <figure class = "snap-iframe"
@@ -85,7 +91,12 @@ the number and size of the layers, the optimizer, learning rate, and number of l
 Then see if you can make a model that computes a different function.
 E.g. conversion from Centigrade to Fahrenheit.
 </p>
-
+<p class="instructions">
+The machine learning blocks are not restricted to learning how to map one input number to an output number.
+A simple example is
+<a href="/ai/snap/snap.html?project=predict%20sequence&editMode" target="_blank">
+a model that estimates the distance a point is from the origin</a>.
+Given values for <i>x</i> and <i>y</i> it estimates the square root of the sum of the squares of each.
 <p class="guide-to-guide">
 Return to 
 <a class="guide-link" href="chapter-5.html">the previous chapter on word embeddings</a>.
