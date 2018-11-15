@@ -2272,6 +2272,12 @@ window.ecraft2learn =
       message = snap_to_javascript(message);
       console.log(message);
   },
+  console_time: function (label) {
+      console.time(label);
+  },
+  console_time_end: function (label) {
+      console.timeEnd(label);
+  },
   open_help_page: function () {
       // prefer window.open but then is blocked as a popup
       document.location.assign("https://github.com/ecraft2learn/ai/wiki", "_blank");
