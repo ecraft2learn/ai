@@ -817,11 +817,11 @@ const receive_message =
             if (model) {
                 ready = !!model.ready_for_prediction; 
             } else {
-                event.source.postMessage({error: "Unknown model '" + name + "' asked if ready for predictions."});
+                event.source.postMessage({error: "Unknown model '" + name + "' asked if ready for predictions."}, "*");
                 ready = false; // unknown model is not ready
             }
             event.source.postMessage({ready_for_prediction: ready,
-                                      model_name: name}); 
+                                      model_name: name}, "*"); 
         } else if (typeof message.load_model_from_URL !== 'undefined') {
             try {
                 let URL = message.load_model_from_URL;
@@ -833,7 +833,7 @@ const receive_message =
                     }
                     event.source.postMessage({error_loading_model: URL,
                                               error_message: 'Error reading ' + URL + ' to load a neural net. ' +
-                                                             error_message});
+                                                             error_message}, "*");
                 }
                 tf.loadModel(URL).then((model) => {
                                            model.ready_for_prediction = true;
@@ -843,7 +843,7 @@ const receive_message =
                                            add_to_models(model);
                                            enable_evaluate_button();
                                            event.source.postMessage({model_loaded: URL,
-                                                                     model_name: name});
+                                                                     model_name: name}, "*");
                                        },
                                        error_callback);
             } catch (error) {
@@ -864,7 +864,7 @@ const receive_message =
                         set_data(model_name, kind, new_data);
                     } 
                     event.source.postMessage({data_loaded: URL,
-                                              info: info});
+                                              info: info}, "*");
                 } catch (error) {
                     error_callback(error);
                 }
@@ -872,7 +872,7 @@ const receive_message =
             const error_callback = (error) => {
                 event.source.postMessage({error_loading_training_data: URL,
                                           error_message: "Error loading training data from " + URL + ". " + 
-                                                         error.message});
+                                                         error.message}, "*");
             };
             contents_of_URL(URL, success_callback, error_callback);
 //         } else if (message !== "Loaded" &&
