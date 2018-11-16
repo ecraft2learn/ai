@@ -71,12 +71,14 @@ const create_model = function (name, layers, optimizer_full_name, input_shape) {
     layers.forEach((size, index) => {
         if (size > 0) {
             let configuration = {units: size,
-                                 activation: 'relu'};
+                                 useBias: index !== layers.length-1}; // except for last layer
+            if (index !== layers.length-1) {
+                // all but the last one has a relu activation function
+                configuration.activation = 'relu';
+            }                   
             if (index === 0) { // first one needs inputShape
                 configuration.inputShape = input_shape ||
-                                           shape_of_data((get_data(name, 'training') || get_data(name, 'validation')).input[0]);
-            } else if (index === layers.length-1) { // last one should not apply bias 
-                configuration.useBias = false;     
+                                           shape_of_data((get_data(name, 'training') || get_data(name, 'validation')).input[0]);    
             }
             model.add(tf.layers.dense(configuration));
         }
