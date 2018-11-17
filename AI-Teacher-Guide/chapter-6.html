@@ -144,15 +144,39 @@ A computer could have all <a href="https://www.jesperjuul.net/ludologist/2003/12
 255,168 games</a> in memory and play perfectly by searching its memory.
 A <a href="http://www.computerhistory.org/collections/catalog/X39.81" target="_blank">Tinkertoy computer made of wooden spools and sticks</a>
 can play a perfect game.
-So can a <a href="https://www.scientificamerican.com/article/dna-computer-plays-comple/" target="_blank">computer made of DNA</a>.
+So can a <a href="https://www.scientificamerican.com/article/dna-computer-plays-comple/" target="_blank">
+computer made of DNA</a>.
 </p>
 <figure class="background-white non-essential">
 <img src="images/tinkertoy-tic-tac-toe-X39.81.03.jpg" width="600" class="center">
 <figcaption>A wooden computer that plays a perfect game of Tic Tac Toe</figcaption>
 </figure>
+<p class="background non-essential">
+<a href="https://en.wikipedia.org/wiki/Donald_Knuth" target="_blank">Donald Knuth</a>,
+a world famous computer scientist, wrote a Tic Tac Toe learning program in 1958 when he was 20 years old.
+The computer had 10 kilobytes of memory (the laptop that I'm using to write this has more than one million times more memory).
+These were the days when computers didn't have keyboards, displays, and mice.
+</p>
+<figure class="background-white non-essential">
+<img src="images/young-donald-knuth-ibm-650-1958.jpg" width="400" class="center">
+<figcaption>Donald Knuth at the computer he programmed a Tic Tac Toe learning program</figcaption>
+</figure>
+<p class="background non-essential">
+Here is a five-minute video where Donald Knuth tells stories of his Tic Tac Toe program:
+</p>
+<iframe class="background-information-white center"
+        width="560"
+        height="315"
+        style="display: block; margin-left:auto; margin-right: auto;"
+        src="https://www.youtube.com/embed/_c3dKYrjj2Q?start=33"
+        frameborder="0"
+        allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+</iframe>
+<h3 class="instructions-white">Training a neural net to play Tic Tac Toe</a>
 <p class="instructions">
 Your challenge is to train a deep neural net to play well.
-You can start with this <a href="" target="_blank">Snap! program for playing Tic Tac Toe</a> and add scripts
+You can start with this <a href="/ai/snap/snap.html?project=tic tac toe&editMode" target="_blank">Snap! program for playing Tic Tac Toe</a> and add scripts
 for recording games, creating neural nets, using those games for training your nets, and finally using the 
 train neural net models to play the game.
 This is quite challenging and only appropriate for those with a good deal of experience with Snap! and machine learning. 
@@ -165,7 +189,8 @@ Once you have a model trained to win (most of the time) you can set up tournamen
 <p class="advanced-topic">Click to see how you can train a neural net to play Tic Tac Toe in Snap!</p>
 <span class="advanced-topic-body">
 <p class="instructions">
-This <a href="" target="_blank">Snap! program</a> has a variable called <i>Players</i> whose value is a list of two player types.
+This <a href="/ai/snap/snap.html?project=tic tac toe machine learning&editMode" target="_blank">Snap! program</a>
+has a variable called <i>Players</i> whose value is a list of two player types.
 A player type can be 'human', 'random', or the name of a model you created.
 Games are recorded and are the basis for training. 
 The space bar will start a new game and if humans aren't playing a new game will start as soon as a game is over.
@@ -191,7 +216,7 @@ The problem is that by mixing things of different kinds (moves and non-moves) th
 For example, the difference between the upper left corner having O instead of X is 1 but so is
 the difference between that position being empty and having an X.
 And why should the difference between an empty square and an O be twice the difference between an empty square and an X?
-So avoid this problem machine learning programs use <a href="" target="_blank">one hot</a> vectors that are all zeros except for a single one.
+So avoid this problem machine learning programs use <a href="https://en.wikipedia.org/wiki/One-hot" target="_blank">one hot</a> vectors that are all zeros except for a single one.
 So X can be &lt;1,0,0&gt;, O can be &lt;0,1,0&gt;, and empty can be &lt;0,0,1&gt;.
 While a board could then be 9x3 (or 3x9) matrix it is easier to flatten the structure so that every board 
 is a vector of 27 zeros and ones.
@@ -200,7 +225,24 @@ is a vector of 27 zeros and ones.
 <img src="images/tic-tac-toe-board.png" width="300" class="center">
 <figcaption>This board is encoded as &lt;1,0,0,0,1,0,0,0,1,1,0,0,1,0,0,0,0,1,0,0,1,0,0,1,0,1,0&gt;</figcaption>
 </figure>
+<p class="how-does-it-work">
+Once a model has been trained there are at least two ways use it to make moves:
+</p>
+<ol class="how-does-it-work">
+<li>
+Get the predictions for each possible move and pick the one with the largest prediction of leading to a win.
+Note this isn't so good when the model is playing itself or another model that is also using the top predictions
+since the same moves will be made over and over again and not much ca be learned.
+</li>
+<li>
+Convert the predictions for each move into probabilities.
+Divide each positive predictions by the sum of all the positive predictions.
+(Recall that negative predictions are predictions of moves leading to a loss.)
+Then use Snap!'s <span class="block-name">pick random ...</span> block to pick a random number.
+Ensure that the odds of any move being chosen is determined by its probability.
+</li>
 
+</p>
 
 </span>
 
