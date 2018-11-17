@@ -132,6 +132,78 @@ If it is too large then the error may bounce up and down rather than making prog
 <img src="images/xkcd-machine-learning.png" class="center">
 <figcaption>Models make predictions by using linear algebra to compute weighted sums</figcaption>
 </figure>
+<h3 class="instructions-white">Blocks for saving and loading models and data</h3>
+<p class="instructions">
+TO DO!!!!!!!!!
+
+</p>
+<h3 id="tic-tac-toe" class="instructions-white">Learning to win at Tic Tac Toe</h3>
+<p class="background">
+<a href="https://en.wikipedia.org/wiki/Tic-tac-toe" target="_blank">Tic Tac Toe</a> (also known as Noughts and Crosses) is a simple game.
+A computer could have all <a href="https://www.jesperjuul.net/ludologist/2003/12/28/255168-ways-of-playing-tic-tac-toe/" target="_blank">
+255,168 games</a> in memory and play perfectly by searching its memory.
+A <a href="http://www.computerhistory.org/collections/catalog/X39.81" target="_blank">Tinkertoy computer made of wooden spools and sticks</a>
+can play a perfect game.
+So can a <a href="https://www.scientificamerican.com/article/dna-computer-plays-comple/" target="_blank">computer made of DNA</a>.
+</p>
+<figure class="background-white non-essential">
+<img src="images/tinkertoy-tic-tac-toe-X39.81.03.jpg" width="600" class="center">
+<figcaption>A wooden computer that plays a perfect game of Tic Tac Toe</figcaption>
+</figure>
+<p class="instructions">
+Your challenge is to train a deep neural net to play well.
+You can start with this <a href="" target="_blank">Snap! program for playing Tic Tac Toe</a> and add scripts
+for recording games, creating neural nets, using those games for training your nets, and finally using the 
+train neural net models to play the game.
+This is quite challenging and only appropriate for those with a good deal of experience with Snap! and machine learning. 
+</p>
+<p class="instructions">
+An alternative is to instead focus on learning how to design good neural nets and how to train them effectively.
+Click on the following to skip the Snap! programming challenge and start training models right away.
+Once you have a model trained to win (most of the time) you can set up tournaments with the trained models of classmates or friends!
+</p>
+<p class="advanced-topic">Click to see how you can train a neural net to play Tic Tac Toe in Snap!</p>
+<span class="advanced-topic-body">
+<p class="instructions">
+This <a href="" target="_blank">Snap! program</a> has a variable called <i>Players</i> whose value is a list of two player types.
+A player type can be 'human', 'random', or the name of a model you created.
+Games are recorded and are the basis for training. 
+The space bar will start a new game and if humans aren't playing a new game will start as soon as a game is over.
+</p>
+<p class="instructions">
+There is a supporting web page that allows you to experiment with training and provides a way to save and load models and game data.
+It is the <span class="block-name">open support panel tensorflow.js</span> block that open up this page.
+It will have a 'return to Snap!' button.
+</p>
+<p class="how-does-it-work">
+The core idea is that the board positions are recorded after each move.
+When a game ends then outcomes are associated with each move.
+If the game ended in a tied the outcome is 0.
+If the move led to a win then 1, otherwise -1.
+The model is trained to predict a value between -1 and 1 for moves that may or may not be games it has been trained on.
+</p>
+<p class="how-does-it-work">
+Neural nets work only with numbers so we need to decide how a board position will be represented with numbers.
+A straight forward way would be to use a vector of nine numbers for each board position.
+0 could mean empty, 1 X has moved there, and 2 O has.
+This works but not as well as the following scheme.
+The problem is that by mixing things of different kinds (moves and non-moves) the relationships between boards is hard to discern.
+For example, the difference between the upper left corner having O instead of X is 1 but so is
+the difference between that position being empty and having an X.
+And why should the difference between an empty square and an O be twice the difference between an empty square and an X?
+So avoid this problem machine learning programs use <a href="" target="_blank">one hot</a> vectors that are all zeros except for a single one.
+So X can be &lt;1,0,0&gt;, O can be &lt;0,1,0&gt;, and empty can be &lt;0,0,1&gt;.
+While a board could then be 9x3 (or 3x9) matrix it is easier to flatten the structure so that every board 
+is a vector of 27 zeros and ones.
+</p>
+<figure class="how-does-it-work">
+<img src="images/tic-tac-toe-board.png" width="300" class="center">
+<figcaption>This board is encoded as &lt;1,0,0,0,1,0,0,0,1,1,0,0,1,0,0,0,0,1,0,0,1,0,0,1,0,1,0&gt;</figcaption>
+</figure>
+
+
+</span>
+
 <p class="guide-to-guide">
 Return to 
 <a class="guide-link" href="chapter-5.html">the previous chapter on word embeddings</a>.
