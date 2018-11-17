@@ -431,8 +431,11 @@ const predict = (model_name, input, success_callback, error_callback) => {
 const evaluate_training = function () {
   const surface = tfvis.visor().surface({name: 'Tic Tac Toe', tab: 'Evaluation'});
   const draw_area = surface.drawArea;
-  if (document.getElementById('evaluation_div')) {
+  setTimeout(() => {
+      // delay this since the prediciton interface will open after this
       tfvis.visor().setActiveTab('Evaluation');
+  });
+  if (document.getElementById('evaluation_div')) {
       return;
   }
   const display = document.createElement('div');
