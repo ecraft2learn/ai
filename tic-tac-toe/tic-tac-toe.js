@@ -488,30 +488,24 @@ const update_evaluation_model_choices = function () {
     if (names.length === 0) {
         return;
     }
-    const updateDatDropdown = function(target, list) { 
-        // copied from https://stackoverflow.com/questions/16166440/refresh-dat-gui-with-new-values  
-        innerHTMLStr = "";
-        if(list.constructor.name == 'Array'){
-            for(var i=0; i<list.length; i++){
-                var str = "<option value='" + list[i] + "'>" + list[i] + "</option>";
-                innerHTMLStr += str;        
-            }
-        }
-
-        if(list.constructor.name == 'Object'){
-            for(var key in list){
-                var str = "<option value='" + list[key] + "'>" + key + "</option>";
-                innerHTMLStr += str;
-            }
-        }
-        if (innerHTMLStr != "") target.domElement.children[0].innerHTML = innerHTMLStr;
+    const update_dropdown_menu = (target, names) => { 
+        // based upon https://stackoverflow.com/questions/16166440/refresh-dat-gui-with-new-values  
+        let html = "";
+        names.forEach((name) => {
+            let property = target.property;
+            html += "<option value='" + name + "'" +
+                    // preserve which option is selected
+                    ((name === gui_state["Evaluation"][property]) ? " selected" : "") +
+                    ">" + name + "</option>";
+        });
+        target.domElement.children[0].innerHTML = html;
     }
     names = ['Random player'].concat(names); // keep the same order of options
-    evaluation.__controllers.forEach(function (controller) {
+    evaluation.__controllers.forEach((controller) => {
         if (controller.property === 'Player 1' || controller.property === 'Player 2') {
-            updateDatDropdown(controller, names);
+            update_dropdown_menu(controller, names);
         }
-    });     
+    });
 };
 
 create_data_button.addEventListener('click', create_data_with_parameters);
