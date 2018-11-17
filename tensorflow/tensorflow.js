@@ -73,7 +73,7 @@ const create_model = function (name, layers, optimizer_full_name, input_shape) {
             let configuration = {units: size,
                                  useBias: index !== layers.length-1}; // except for last layer
             if (index !== layers.length-1) {
-                // all but the last one has a relu activation function
+                // all but the last one has an activation function
                 configuration.activation = 'relu';
             }                   
             if (index === 0) { // first one needs inputShape
@@ -591,8 +591,12 @@ const save_and_load = function () {
         div.style.padding = "12px";
         return div;
     };
-    draw_area.appendChild(file_input('Saved model JSON file: ', 'saved_json'));
-    draw_area.appendChild(file_input('Saved model weights file: ', 'saved_weights'));
+    const json_file_input    = file_input('Saved model JSON file: ', 'saved_json');
+    const weights_file_input = file_input('Saved model weights file: ', 'saved_weights');
+    json_file_input.title = "Before clicking 'Load a trained model' select the JSON file created when the desired model was saved.";
+    weights_file_input.title = "Before clicking 'Load a trained model' select the weights file created when the desired model was saved.";
+    draw_area.appendChild(json_file_input);
+    draw_area.appendChild(weights_file_input);
     const create_anchor_that_looks_like_a_button = (label, class_name, listener) => {
         let button = document.createElement('a');
         button.innerHTML = label;
@@ -613,10 +617,12 @@ const save_and_load = function () {
     draw_area.appendChild(save_data_button.training);
     draw_area.appendChild(save_data_button.validation);
     let load_training_data_input = file_input("Load training data file: ", 'load_training_data');
+    load_training_data_input.title = "Select the saved data that will be used to train a model.";
     load_training_data_input.onchange = make_load_data_listener('training', 'all models');
     load_data_message = {training:   document.createElement('div'),
                          validation: document.createElement('div')};
     let load_validation_data_input = file_input("Load validation data file: ", 'load_validation_data');
+    load_validation_data_input.title = "Select the saved data that will be used to evaluate the progress on each training step when computing the loss."
     load_validation_data_input.onchange = make_load_data_listener('validation', 'all models');
     draw_area.appendChild(load_training_data_input);
     draw_area.appendChild(load_data_message.training);
