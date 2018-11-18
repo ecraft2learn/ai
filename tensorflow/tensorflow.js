@@ -878,17 +878,11 @@ const receive_message =
                 }
             };
             const error_callback = (error) => {
-                event.source.postMessage({error_loading_training_data: URL,
-                                          error_message: "Error loading training data from " + URL + ". " + 
+                event.source.postMessage({error_loading_data: URL,
+                                          error_message: "Error loading data from " + URL + ". " + 
                                                          error.message}, "*");
             };
             contents_of_URL(URL, success_callback, error_callback);
-//         } else if (message !== "Loaded" &&
-//                    message !== "Ready" &&
-//                    message !== "stop" &&
-//                    typeof message.training_completed === 'undefined' &&
-//                    typeof message.prediction === 'undefined') {
-//             console.log("Unhandled message: ", message); // just for debugging
         }
 };
 
