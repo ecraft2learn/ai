@@ -186,7 +186,10 @@ An alternative is to instead focus on learning how to design good neural nets an
 Click on the following to skip the Snap! programming challenge and start training models right away.
 Once you have a model trained to win (most of the time) you can set up tournaments with the trained models of classmates or friends!
 </p>
-<p class="advanced-topic">Click to see how you can train a neural net to play Tic Tac Toe in Snap!</p>
+<p class="advanced-topic">
+Click to see how you can train a neural net to play Tic Tac Toe in Snap!.
+You might want to try this on your own before reading this.
+</p>
 <span class="advanced-topic-body">
 <p class="instructions">
 This <a href="/ai/snap/snap.html?project=tic tac toe machine learning&editMode" target="_blank">Snap! program</a>
@@ -200,14 +203,14 @@ There is a supporting web page that allows you to experiment with training and p
 It is the <span class="block-name">open support panel tensorflow.js</span> block that open up this page.
 It will have a 'return to Snap!' button.
 </p>
-<p class="how-does-it-work">
+<p class="how-it-works">
 The core idea is that the board positions are recorded after each move.
 When a game ends then outcomes are associated with each move.
 If the game ended in a tied the outcome is 0.
 If the move led to a win then 1, otherwise -1.
 The model is trained to predict a value between -1 and 1 for moves that may or may not be games it has been trained on.
 </p>
-<p class="how-does-it-work">
+<p class="how-it-works">
 Neural nets work only with numbers so we need to decide how a board position will be represented with numbers.
 A straight forward way would be to use a vector of nine numbers for each board position.
 0 could mean empty, 1 X has moved there, and 2 O has.
@@ -221,31 +224,58 @@ So X can be &lt;1,0,0&gt;, O can be &lt;0,1,0&gt;, and empty can be &lt;0,0,1&gt
 While a board could then be 9x3 (or 3x9) matrix it is easier to flatten the structure so that every board 
 is a vector of 27 zeros and ones.
 </p>
-<figure class="how-does-it-work">
+<figure class="how-it-works">
 <img src="images/tic-tac-toe-board.png" width="300" class="center">
 <figcaption>This board is encoded as &lt;1,0,0,0,1,0,0,0,1,1,0,0,1,0,0,0,0,1,0,0,1,0,0,1,0,1,0&gt;</figcaption>
 </figure>
-<p class="how-does-it-work">
-Once a model has been trained there are at least two ways use it to make moves:
+<p class="how-it-works">
+Once a model has been trained the predictions for each possible move can be computed.
+There are at least two ways use these predictions to make moves:
 </p>
-<ol class="how-does-it-work">
+<ol class="how-it-works">
 <li>
-Get the predictions for each possible move and pick the one with the largest prediction of leading to a win.
+<b>Pick the largest one.</b>
+The idea is that if the model is correct this move has the highest chance of leading to a win.
 Note this isn't so good when the model is playing itself or another model that is also using the top predictions
-since the same moves will be made over and over again and not much ca be learned.
+since the same moves will be made over and over again and not much can be learned.
 </li>
 <li>
-Convert the predictions for each move into probabilities.
-Divide each positive predictions by the sum of all the positive predictions.
+<b>Convert the predictions into probabilities.</b>
+This can be done by dividing each positive prediction by the sum of all the positive predictions.
 (Recall that negative predictions are predictions of moves leading to a loss.)
 Then use Snap!'s <span class="block-name">pick random ...</span> block to pick a random number.
-Ensure that the odds of any move being chosen is determined by its probability.
+use that number to ensure that the odds of any move being chosen is determined by its probability.
 </li>
-
-</p>
+</ol>
 
 </span>
-
+<h3 class="background-information-white">Strategies for training a good Tic Tac Toe player</h3>
+<p class="background-information">
+The best advice is to experiment!
+No one knows what is best model architecture, the best way to generate good training data, how much training is required, etc..
+One way to search for a good architecture is to create two models with a different number of layers or differences in the sizes of their layers.
+After training them both with the same data have them play a large number of games and see if one wins more than another.
+Keep the good one.
+(You can save models after running the <span class="block-name">open support panel tensorflow.js</span> block.)
+Repeat with a different model architecture for the weaker player.
+Similarly you can explore different training parameters to see which optimizer or learning rate works best.
+Try to discover that number of learning steps after which very little progress is made in reducing the loss so you don't waste time.
+One way to detect if a model benefits from additional training is to have an older version play against a newer version of the same model.
+</p>
+<p class="background-information">
+You can do all these experiments using the Snap! program but it takes several seconds to run a game.
+For running many large-scale experiments with provide this <a href="/ai/tic-tac-toe/" target="_blank">
+web page for Tic Tac Toe machine learning</a>.
+It can run thousands of games in a few seonds to for evaluating models and generating lots of training data.
+Note that you can save a model created in Snap! and then load it into the Tic Tac Toe page and vice versa.
+</p>
+<p class="background-information">
+Not all training data is equally useful.
+Probably the least useful is random move player against random move player.
+But it is easiest to generate.
+A human playing another human is likely to produce very good data.
+One way to generate lots of good data is to create a Snap! script for an expert player and use records of its games for training.
+</p>
 <p class="guide-to-guide">
 Return to 
 <a class="guide-link" href="chapter-5.html">the previous chapter on word embeddings</a>.
