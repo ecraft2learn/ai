@@ -86,6 +86,10 @@ to test how well the model has learned.
         caption = "Create, train, and test a simple model. TRY IT!">
 </figure>
 <p class="instructions">
+Alternatively here is a <a href="/ai/snap/snap.html?project=machine learning exercise&editMode" target="_blank">
+full-screen version of the Snap! project for creating, training, and testing models</a>.
+</p>
+<p class="instructions">
 We suggest you first experiment with what are called the <i>hyperparameters</i> such as
 the number and size of the layers, the optimizer, learning rate, and number of learning steps.
 Then see if you can make a model that computes a different function.
@@ -134,8 +138,29 @@ If it is too large then the error may bounce up and down rather than making prog
 </figure>
 <h3 class="instructions-white">Blocks for saving and loading models and data</h3>
 <p class="instructions">
-TO DO!!!!!!!!!
-
+Models and data can be saved and loaded using the
+<span class="block-name">open support panel tensorflow.js</span> block
+to open an interface page with a Save/Load section.'Saving and loading' button.
+Your projects can load models using the <span class="block-name">Load neural net from URL ...</span> block
+if you have copied your saved model files (both the JSON that defines the model and the learned weights file)
+to a web server.
+They can load data using the <span class="block-name">Load X data from URL</span> block where <i>X</i> can
+be either "training" or "verification".
+Training data is used in training both as data to process
+and a random sample is used to calculate how well the model is doing.
+Verification data is only used to calculate the error or loss during training.
+</p>
+<figure class = "snap-iframe"
+        id = "load models and data"
+        full_screen = "true"
+        edit_mode = "true"
+        stage_ratio = ".1"
+        container_style = "width: 1000px; height: 1000px" 
+        caption = "Blocks for loading pre-trained models and data">
+</figure>
+<p class="instructions">
+Alternatively here is a <a href="/ai/snap/snap.html?project=load models and data&editMode" target="_blank">
+full-screen version of the Snap! project for loading pre-trained models</a>.
 </p>
 <h3 id="tic-tac-toe" class="instructions-white">Learning to win at Tic Tac Toe</h3>
 <p class="background">
@@ -276,6 +301,15 @@ But it is easiest to generate.
 A human playing another human is likely to produce very good data.
 One way to generate lots of good data is to create a Snap! script for an expert player and use records of its games for training.
 </p>
+<h4 class="project-ideas-white" id="project-ideas">Possible project ideas using machine learning</h4>
+<p class="project-ideas">
+Here are some project ideas:
+</p>
+<ol class="project-ideas">
+<li>
+to do
+</li>
+</ol>
 <p class="guide-to-guide">
 Return to 
 <a class="guide-link" href="chapter-5.html">the previous chapter on word embeddings</a>.
