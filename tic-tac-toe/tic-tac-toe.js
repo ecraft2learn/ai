@@ -479,10 +479,10 @@ const evaluate_training = function () {
       tensorflow.create_button("Show the scores for first moves by Player 1", show_first_moves);
   draw_area.appendChild(show_first_move_scores_button);
   show_first_move_scores_button.appendChild(display);
-  tensorflow.parameters_interface(create_parameters_interface).evaluation.open();
   create_data_interface("Play games using 'Player 1' and 'Player 2' settings",
                         () => Math.round(gui_state["Evaluation"]["Number of games to play"]),
                         draw_area);
+  tensorflow.parameters_interface(create_parameters_interface).evaluation.open();
 };
 
 // a hack to update the list of choices of models a player should use
