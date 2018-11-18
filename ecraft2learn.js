@@ -2286,7 +2286,7 @@ window.ecraft2learn =
       console.timeEnd(label);
   },
   open_help_page: function () {
-      // prefer window.open but then is blocked as a popup
+      // prefer window.open but that is blocked as a popup
       document.location.assign("https://github.com/ecraft2learn/ai/wiki", "_blank");
   },
   wikipedia_domain: function () {
