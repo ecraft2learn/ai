@@ -301,15 +301,62 @@ But it is easiest to generate.
 A human playing another human is likely to produce very good data.
 One way to generate lots of good data is to create a Snap! script for an expert player and use records of its games for training.
 </p>
-<h4 class="project-ideas-white" id="project-ideas">Possible project ideas using machine learning</h4>
+<h3 class="project-ideas-white" id="project-ideas">Possible project ideas using machine learning</h3>
 <p class="project-ideas">
 Here are some project ideas:
 </p>
 <ol class="project-ideas">
 <li>
-to do
+Apply machine learning to games other than Tic Tac Toe.
+Simple games such as <a href="https://en.wikipedia.org/wiki/Dots_and_Boxes" target="_blank">dots and boxes</a>
+could be approached in a manner similar to the Tic Tac Toe machine learning program.
+</li>
+<li>
+Enhance the Tic Tac Toe program include a perfect computer player that can generate good training data.
+</li>
+<li>
+Explore how simple models can solve simple mathematical challenges (e.g. doubling a number)
+and how complex models need to be to handle more complex problems like square root.
+</li>
+<li>
+Find one or two data sources
+(perhaps among these <a href="https://www.forbes.com/sites/bernardmarr/2018/02/26/big-data-and-ai-30-amazing-and-free-public-data-sources-for-2018/" target="_blank">
+30 data sources</a>) and solve a real-world problem.
+For example, maybe a machine learning program can predict how a rainy day will affect automobile traffic,
+the number of people who get the flu a few days later, or the number of bicycle accidents.
+</li>
+<li>
+Use <a href="chapter-5.html">word embeddings</a> to do machine learning on texts.
+For example, one can do
+<a href="https://en.wikipedia.org/wiki/Sentiment_analysis" target="_blank">sentiment analysis</a> of sentences by
+converting input sentences to the average of the embeddings of its words.
+The output could be a few numbers capturing the emotional content of the input sentences (e.g. angry, happy, excited).
 </li>
 </ol>
+<h3 class="guide-to-guide-white">Future directions for this chapter</h3>
+<p class="guide-to-guide">
+Several enhancements to this chapter are being considered.
+There are many model architectures that cannot be expressed.
+Convolutional networks are very successful at handling image and sound input.
+Recursive neural nets handle well time-based data.
+</p>
+
+<h3 class="resources-white" id="additional-resources">Additional resources</h3>
+<p class="resources">
+This chapter provides a simplified interface to
+<a href="https://js.tensorflow.org/api/latest/" target="_blank">TensorFlow.js</a>
+a JavaScript implementation of Google's TensorFlow machine learning library.
+Stephen Wolfram wrote a
+<a href="https://www.wolfram.com/language/elementary-introduction/2nd-ed/22-machine-learning.html" target="_blank">Wolfram Language textbook chapter</a>
+and a
+<a href="https://blog.stephenwolfram.com/2017/05/machine-learning-for-middle-schoolers/" target="_blank">blog post</a>
+about machine learning for middle and high school students.
+A high school student wrote this
+<a href="https://github.com/kjaisingh/high-school-guide-to-machine-learning" target="_blank">guide to learning machine learning</a>.
+In this chapter we have focussed on the high level "layers" part of TensorFlow.js that is closely based upon
+<a href="https://keras.io/" target="_blank">Keras</a>.
+There is a good article about <a href="http://ruder.io/optimizing-gradient-descent/" target="_blank">training optimizers</a>.
+</p>
 <p class="guide-to-guide">
 Return to 
 <a class="guide-link" href="chapter-5.html">the previous chapter on word embeddings</a>.
