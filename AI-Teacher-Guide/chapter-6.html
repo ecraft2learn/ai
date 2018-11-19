@@ -104,10 +104,10 @@ Given values for <i>x</i> and <i>y</i> it estimates the square root of the sum o
 </p>
 <h3 class="how-it-works-white">A brief introduction to deep neural nets</h3>
 <p class="how-it-works">
-A deep neural net consists of an input layer, some number of hiddle layers, and an output layer.
+A deep neural net consists of an input layer, some number of hidden layers, and an output layer.
 The nets that <span class="block-name">Create a neural net model ...</span> block creates
 are always in a sequence and each neuron is connected to every neuron in the neighbouring layers.
-While this is a common architecture there are mnay models that branch and are connected more sparsely.
+While this is a common architecture there are many models that branch and are connected more sparsely.
 </p>
 <figure class="how-it-works-white">
 <img src="images/TB010-Deep-Neural-Network.jpg" class="center">
@@ -125,7 +125,7 @@ sends zero instead.
 It is the weights (sometimes called "parameters") that are "learned" during training.
 They do this using a mathematical technique called
 <a href="https://en.wikipedia.org/wiki/Gradient_descent" target="_blank">gradient descent</a>.
-It repeaedly takes small steps reduce the "loss" or error.
+It repeatedly takes small steps reduce the "loss" or error.
 There are different strategies for doing this efficiently that are called
 <a href="http://ruder.io/optimizing-gradient-descent/" target="_blank">optimizers</a>.
 The size of the step taken each time is called the "learning rate".
@@ -198,7 +198,7 @@ Here is a five-minute video where Donald Knuth tells stories of his Tic Tac Toe 
         allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
         allowfullscreen>
 </iframe>
-<h3 class="instructions-white">Training a neural net to play Tic Tac Toe</a>
+<h3 class="instructions-white">Training a neural net to play Tic Tac Toe</h3>
 <p class="instructions">
 Your challenge is to train a deep neural net to play well.
 You can start with this <a href="/ai/snap/snap.html?project=tic tac toe&editMode" target="_blank">Snap! program for playing Tic Tac Toe</a> and add scripts
@@ -244,7 +244,8 @@ The problem is that by mixing things of different kinds (moves and non-moves) th
 For example, the difference between the upper left corner having O instead of X is 1 but so is
 the difference between that position being empty and having an X.
 And why should the difference between an empty square and an O be twice the difference between an empty square and an X?
-So avoid this problem machine learning programs use <a href="https://en.wikipedia.org/wiki/One-hot" target="_blank">one hot</a> vectors that are all zeros except for a single one.
+So avoid this problem machine learning programs use <a href="https://en.wikipedia.org/wiki/One-hot" target="_blank">one hot</a>
+vectors that are all zeros except for a single one.
 So X can be &lt;1,0,0&gt;, O can be &lt;0,1,0&gt;, and empty can be &lt;0,0,1&gt;.
 While a board could then be 9x3 (or 3x9) matrix it is easier to flatten the structure so that every board 
 is a vector of 27 zeros and ones.
@@ -272,8 +273,8 @@ Then use Snap!'s <span class="block-name">pick random ...</span> block to pick a
 use that number to ensure that the odds of any move being chosen is determined by its probability.
 </li>
 </ol>
-
 </span>
+
 <h3 class="background-information-white">Strategies for training a good Tic Tac Toe player</h3>
 <p class="background-information">
 The best advice is to experiment!
@@ -291,7 +292,7 @@ One way to detect if a model benefits from additional training is to have an old
 You can do all these experiments using the Snap! program but it takes several seconds to run a game.
 For running many large-scale experiments with provide this <a href="/ai/tic-tac-toe/" target="_blank">
 web page for Tic Tac Toe machine learning</a>.
-It can run thousands of games in a few seonds to for evaluating models and generating lots of training data.
+It can run thousands of games in a few seconds to for evaluating models and generating lots of training data.
 Note that you can save a model created in Snap! and then load it into the Tic Tac Toe page and vice versa.
 </p>
 <p class="background-information">
@@ -353,7 +354,7 @@ and a
 about machine learning for middle and high school students.
 A high school student wrote this
 <a href="https://github.com/kjaisingh/high-school-guide-to-machine-learning" target="_blank">guide to learning machine learning</a>.
-In this chapter we have focussed on the high level "layers" part of TensorFlow.js that is closely based upon
+In this chapter we have focused on the high level "layers" part of TensorFlow.js that is closely based upon
 <a href="https://keras.io/" target="_blank">Keras</a>.
 There is a good article about <a href="http://ruder.io/optimizing-gradient-descent/" target="_blank">training optimizers</a>.
 </p>
