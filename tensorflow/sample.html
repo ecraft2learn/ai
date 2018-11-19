@@ -10,7 +10,7 @@
 
       // Define a model for linear regression.
       const model = tf.sequential();
-      model.add(tf.layers.dense({units: 1, inputShape: [1], activation: 'relu'}));
+      model.add(tf.layers.dense({units: 1, inputShape: [1]}));
 
       // Prepare the model for training: Specify the loss and the optimizer.
       model.compile({loss: 'meanSquaredError', optimizer: 'sgd'});
@@ -24,7 +24,8 @@
           console.log(epoch, h);
       }};
       model.fit(xs, ys, {epochs: 10,
-                callbacks: callbacks}).then(() => {
+                         validationSplit: .2,
+                         callbacks: callbacks}).then(() => {
         // Use the model to do inference on a data point the model hasn't seen before:
         // Open the browser devtools to see the output
         model.predict(tf.tensor2d([5], [1, 1])).print();
