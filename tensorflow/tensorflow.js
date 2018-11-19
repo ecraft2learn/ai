@@ -91,7 +91,9 @@ const create_model = function (name, layers, optimizer_full_name, input_shape) {
         optimizer = 'adam';
     }
     model.compile({loss: 'meanSquaredError',
-                   optimizer: optimizer});
+                   optimizer: optimizer,
+//                    metrics: ['accuracy']
+                   });
     gui_state["Model"]["Optimization method"] = optimizer_full_name;
     model.ready_for_training = true;
     if (model.callback_when_ready_for_training) {
@@ -114,7 +116,7 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
     if (typeof model_or_model_name === 'string') {
         model = models[model_or_model_name];
         if (!model) {
-            error_callback({message: "No model named ''" + model_or_model_name + "'"});
+            error_callback({message: "No model named '" + model_or_model_name + "'"});
             return;
         }
     } else {
@@ -145,7 +147,7 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
                              }
                              epoch_history.push(history);
                              if (use_tfjs_vis) {
-                                 tfvis.show.history({name: 'Error rate', tab: 'Training'},
+                                 tfvis.show.history({name: 'Error and accuracy', tab: 'Training'},
                                                     epoch_history,
                                                     ['loss']);
                              }}
@@ -185,12 +187,18 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
         }
         let [xs, ys] = get_tensors('training');
         let configuration = {epochs: epochs,
+                             shuffle: true,
                              callbacks: callbacks};
         let validation_tensor = get_tensors('validation'); // undefined if no validatio data
-        configuration.validationData = validation_tensor;
+        if (validation_tensor) {
+            configuration.validationData = validation_tensor;
+        } else {
+//             configuration.validationSplit = .2; // causes an error about backend being undefined
+        }
         const then_handler = (extra_info) => {
             let duration = Math.round((Date.now()-start)/1000);
             let response = {loss: epoch_history[epoch_history.length-1].loss,
+                            accuracy: epoch_history[epoch_history.length-1].acc,
                             "duration in seconds": duration};
             if (typeof extra_info === 'string') {
                 response.extra_info = extra_info;
@@ -396,8 +404,10 @@ const train_with_parameters = async function (surface_name) {
     let message = document.createElement('p');
     let success_callback = (training_statistics) => {
         let loss = training_statistics.loss;
+        let accuracy = training_statistics.accuracy;
         let duration = training_statistics["duration in seconds"];
-        message.innerHTML = "<br>Training " + model_name + " took " + duration + " seconds. Final error rate is " + loss +".";
+        message.innerHTML = "<br>Training " + model_name + " took " + duration + " seconds. " +
+                            "Final error rate is " + loss + " and accuracy is " + accuracy + ".";
         enable_evaluate_button();   
     };
     let error_callback = (error) => {
