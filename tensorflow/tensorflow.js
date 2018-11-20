@@ -140,7 +140,9 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
     try {
         // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
         const epoch_history = [];
-        let callbacks = {onEpochEnd: (epoch, history) => {
+        const metrics = ['loss', 'val_loss', 'acc', 'val_acc'];
+        let callbacks = tfvis.show.fitCallbacks(container, metrics);
+        callbacks.onEpochEnd = (epoch, history) => {
                              if (epoch > 4 &&
                                  epoch_history[epoch-1].loss === history.loss &&
                                  epoch_history[epoch-2].loss === history.loss &&
@@ -149,12 +151,12 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
                                  throw new Error('Training stuck after ' + (epoch-4) + ' steps');
                              }
                              epoch_history.push(history);
-                             if (use_tfjs_vis) {
-                                 tfvis.show.history({name: 'Error and accuracy', tab: 'Training'},
-                                                    epoch_history,
-                                                    ['loss', 'accuracy']);
-                             }}
-        }; 
+//                              if (use_tfjs_vis) {
+//                                  tfvis.show.history({name: 'Error and accuracy', tab: 'Training'},
+//                                                     epoch_history,
+//                                                     ['loss', 'acc']);
+//                              }
+                             };
         // Train the model using the data
         let start = Date.now();
         if (!model.optimizer) {
@@ -234,7 +236,7 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
                       
             });
     } catch (error) {
-        error_callback(error.message);
+        error_callback(error);
     }
 };
 
