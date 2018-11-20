@@ -266,13 +266,12 @@ window.ecraft2learn =
             if (typeof x === 'string') {
                 return +x;
             }
-            if (x instanceof Array) {
-                return x.map((y) => snap_to_javascript(y, only_numbers));
-            }
             return x;
         }
         if (x instanceof List) {
             x = snap_to_javascript(x.asArray(), only_numbers);
+        } else if (x instanceof Array) {
+            x = x.map((y) => snap_to_javascript(y, only_numbers));
         }
         if (only_numbers) {
             return numberify(x);
@@ -1028,7 +1027,7 @@ window.ecraft2learn =
         send_request_when_support_window_is(window_ready_state, support_window_type, send_request);
     };
     // following functions use the layers level of tensorflow.js to create models, train, and predict
-    const create_tensorflow_model = function(name, layers, optimizer, input_size, success_callback, error_callback) {
+    const create_tensorflow_model = function(name, layers, optimizer, loss_function, input_size, success_callback, error_callback) {
         if (typeof input_size === 'string' && +input_size !== NaN) {
             input_size = +input_size; // convert string to number
         }
@@ -1040,6 +1039,7 @@ window.ecraft2learn =
                                       let configuration = {name: name,
                                                            layers: snap_to_javascript(layers, true),
                                                            optimizer: optimizer,
+                                                           options: {loss_function: loss_function},
                                                            time_stamp: time_stamp};
                                       // if no size is provided then it will be computed from the training data
                                       if (typeof input_size === 'number') {
