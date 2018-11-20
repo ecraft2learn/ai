@@ -57,13 +57,16 @@ const shape_of_data = (data) => {
    }
 };
 
-const create_model = function (name, layers, optimizer_full_name, input_shape) {
+const create_model = function (name, layers, optimizer_full_name, input_shape, options) {
     if (!input_shape && !get_data(name, 'training') && !get_data(name, 'validation')) {
         throw new Error("Cannot create a model before knowing what the data is like.\nProvide at least one example of the data.");
     }
     const optimizer = optimization_methods[optimizer_full_name];
     if (!optimizer) {
         throw new Error("Could not recognise '" + optimizer_full_name + "' as an optimizer.");
+    }
+    if (typeof options !== 'object') {
+        options = {}; // none
     }
     const model = tf.sequential({name: name});
     model.ready_for_training = false;
@@ -90,10 +93,10 @@ const create_model = function (name, layers, optimizer_full_name, input_shape) {
     if (!optimizer) {
         optimizer = 'adam';
     }
-    model.compile({loss: 'meanSquaredError',
+    model.compile({loss: (options.loss || 'meanSquaredError'),
                    optimizer: optimizer,
-//                    metrics: ['accuracy']
-                   });
+                   metrics: ['accuracy']
+                  });
     gui_state["Model"]["Optimization method"] = optimizer_full_name;
     model.ready_for_training = true;
     if (model.callback_when_ready_for_training) {
@@ -103,9 +106,9 @@ const create_model = function (name, layers, optimizer_full_name, input_shape) {
     return model;
 };
 
-const train_model = async (model_or_model_name, training_data, validation_data, epochs, learning_rate,
+const train_model = async (model_or_model_name, training_data, validation_data, options,
                            use_tfjs_vis, success_callback, error_callback) => {
-    // validation_data is optional - if provided not used for training
+    // validation_data is optional - if provided not used for training only calculating loss
     if (!model_or_model_name) {
         model_or_model_name = model; // current model (if there is one)
     }
@@ -129,7 +132,7 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
                 if (previous_callback) {
                     previous_callback();
                 }
-                train_model(model, training_data, validation_data, epochs, learning_rate,
+                train_model(model, training_data, validation_data, options,
                             use_tfjs_vis, success_callback, error_callback);
             };
         return;
@@ -137,7 +140,7 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
     try {
         // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
         const epoch_history = [];
-        let callbacks = {onEpochEnd: async (epoch, history) => {
+        let callbacks = {onEpochEnd: (epoch, history) => {
                              if (epoch > 4 &&
                                  epoch_history[epoch-1].loss === history.loss &&
                                  epoch_history[epoch-2].loss === history.loss &&
@@ -149,7 +152,7 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
                              if (use_tfjs_vis) {
                                  tfvis.show.history({name: 'Error and accuracy', tab: 'Training'},
                                                     epoch_history,
-                                                    ['loss']);
+                                                    ['loss', 'accuracy']);
                              }}
         }; 
         // Train the model using the data
@@ -158,14 +161,16 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
             // loaded models lack an optimizer
             const optimizer_full_name = gui_state["Model"]["Optimization method"];
             const optimizer = optimization_methods[optimizer_full_name];
-            model.compile({loss: 'meanSquaredError',
+            model.compile({loss: (options.loss || 'meanSquaredError'),
                            optimizer: optimizer});
         }
-        if (model.optimizer.learningRate) { // not every optimizer needs to have this property
-            model.optimizer.learningRate = learning_rate;
+        if (model.optimizer.learningRate && options.learning_rate) { // not every optimizer needs to have this property
+            model.optimizer.learningRate = options.learning_rate;
+            gui_state["Training"]['Learning rate'] = options.learning_rate;
         }
-        gui_state["Training"]['Number of iterations'] = epochs;
-        gui_state["Training"]['Learning rate'] = learning_rate;
+        if (options.epochs) {
+            gui_state["Training"]['Number of iterations'] = options.epochs;
+        }
         // when following was inside of tidy I got an error about backend being undefined
         const get_tensors = (kind) => {
             let data = get_data(model.name, kind);
@@ -186,14 +191,13 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
             return tensors;
         }
         let [xs, ys] = get_tensors('training');
-        let configuration = {epochs: epochs,
-                             shuffle: true,
+        let configuration = {epochs: (options.epochs || 10),
+                             shuffle: options.shuffle,
+                             validationSplit: options.validation_split,
                              callbacks: callbacks};
-        let validation_tensor = get_tensors('validation'); // undefined if no validatio data
+        let validation_tensor = get_tensors('validation'); // undefined if no validation data
         if (validation_tensor) {
             configuration.validationData = validation_tensor;
-        } else {
-//             configuration.validationSplit = .2; // causes an error about backend being undefined
         }
         const then_handler = (extra_info) => {
             let duration = Math.round((Date.now()-start)/1000);
@@ -434,8 +438,9 @@ const train_with_parameters = async function (surface_name) {
         await train_model(model_name,
                           training_data,
                           validation_data,
-                          Math.round(gui_state["Training"]["Number of iterations"]),
-                          gui_state["Training"]["Learning rate"],
+                          {epochs: Math.round(gui_state["Training"]["Number of iterations"]),
+                           learning_rate: gui_state["Training"]["Learning rate"]
+                          },
                           true, // show progress using tfjs-vis 
                           success_callback,
                           error_callback);
@@ -790,7 +795,8 @@ const receive_message =
                 let model = create_model(message.create_model.name,
                                          message.create_model.layers,
                                          message.create_model.optimizer.trim(),
-                                         message.create_model.input_size);
+                                         message.create_model.input_size,
+                                         message.create_model.options);
                 tensorflow.add_to_models(model);
                 event.source.postMessage({model_created: message.create_model.name}, "*");
             } catch (error) {
@@ -813,8 +819,7 @@ const receive_message =
             train_model(model_name,
                         get_data(model_name, 'training'),
                         get_data(model_name, 'validation'),
-                        (message.train.epochs || 10),
-                        (message.train.learning_rate || .01),
+                        message.train.options,
                         message.train.show_progress, 
                         success_callback,
                         error_callback);
