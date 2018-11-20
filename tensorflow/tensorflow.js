@@ -141,22 +141,27 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
         // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
         const epoch_history = [];
         const metrics = ['loss', 'val_loss', 'acc', 'val_acc'];
-        let callbacks = tfvis.show.fitCallbacks(container, metrics);
+        const container = {
+            name: 'show.fitCallbacks', tab: 'Training', styles: { height: '1000px' }
+        };
+        let callbacks = tfvis.show.fitCallbacks(container, metrics, {callbacks: ['onEpochEnd']});
+        let epoch_end = callbacks.onEpochEnd;
         callbacks.onEpochEnd = (epoch, history) => {
-                             if (epoch > 4 &&
-                                 epoch_history[epoch-1].loss === history.loss &&
-                                 epoch_history[epoch-2].loss === history.loss &&
-                                 epoch_history[epoch-3].loss === history.loss) {
-                                 // no progress for last 4 epochs 
-                                 throw new Error('Training stuck after ' + (epoch-4) + ' steps');
-                             }
-                             epoch_history.push(history);
+            epoch_end(epoch, history);
+            if (epoch > 4 &&
+                epoch_history[epoch-1].loss === history.loss &&
+                epoch_history[epoch-2].loss === history.loss &&
+                epoch_history[epoch-3].loss === history.loss) {
+                // no progress for last 4 epochs 
+                throw new Error('Training stuck after ' + (epoch-4) + ' steps');
+            }
+            epoch_history.push(history);
+        };
 //                              if (use_tfjs_vis) {
 //                                  tfvis.show.history({name: 'Error and accuracy', tab: 'Training'},
 //                                                     epoch_history,
 //                                                     ['loss', 'acc']);
 //                              }
-                             };
         // Train the model using the data
         let start = Date.now();
         if (!model.optimizer) {
