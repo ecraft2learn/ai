@@ -34,12 +34,19 @@ const MAX_LAYER_COUNT = 6;
 
 const optimization_methods =
     {"Stochastic Gradient Descent": "sgd",
-//      "Momentum": "momentum",
+     "Momentum": "momentum",
      "Adaptive Stochastic Gradient Descent": "adagrad",
      "Adaptive Learning Rate Gradiant Descent": "adadelta",
      "Adaptive Moment Estimation": "adam",
      "Adaptive Moment Estimation Max": "adamax",
      "Root Mean Squared Prop": "rmsprop"};
+
+const optimizer_named = (name, learning_rate) => {
+    if (name === 'Momentum') {
+        return  tf.train.momentum((learning_rate || .01), .9);
+    }
+    return optimization_methods[name];
+};
 
 const add_to_models = function (new_model) {
     models[new_model.name] = new_model;
@@ -61,7 +68,7 @@ const create_model = function (name, layers, optimizer_full_name, input_shape, o
     if (!input_shape && !get_data(name, 'training') && !get_data(name, 'validation')) {
         throw new Error("Cannot create a model before knowing what the data is like.\nProvide at least one example of the data.");
     }
-    const optimizer = optimization_methods[optimizer_full_name];
+    const optimizer = optimizer_named(optimizer_full_name);
     if (!optimizer) {
         throw new Error("Could not recognise '" + optimizer_full_name + "' as an optimizer.");
     }
@@ -139,15 +146,27 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
     }
     try {
         // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
-        const epoch_history = [];
+        let epoch_history = [];
         const metrics = ['loss', 'val_loss', 'acc', 'val_acc'];
-        const container = {
-            name: 'show.fitCallbacks', tab: 'Training', styles: { height: '1000px' }
-        };
-        let callbacks = tfvis.show.fitCallbacks(container, metrics, {callbacks: ['onEpochEnd']});
-        let epoch_end = callbacks.onEpochEnd;
+        const container = {name: 'Loss and accuracy',
+                           tab: 'Training',
+                           styles: { height: '400px' }};
+        let callbacks;
+        let epoch_end_callback;
+        if (use_tfjs_vis &&
+            (window.parent === window || // not an iframe
+             !window.parent.ecraft2learn || // parent isn't ecraft2learn library
+             window.parent.ecraft2learn.support_iframe_visible["tensorflow.js"])) { // is visible
+            callbacks = tfvis.show.fitCallbacks(container, metrics, {callbacks: ['onEpochEnd']});
+            epoch_end_callback = callbacks.onEpochEnd;
+        } else {
+            callbacks = {};
+        }
         callbacks.onEpochEnd = (epoch, history) => {
-            epoch_end(epoch, history);
+            if (epoch_end_callback) {
+                epoch_end_callback(epoch, history);
+            }
+            // and in any case do the following 
             if (epoch > 4 &&
                 epoch_history[epoch-1].loss === history.loss &&
                 epoch_history[epoch-2].loss === history.loss &&
@@ -157,17 +176,10 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
             }
             epoch_history.push(history);
         };
-//                              if (use_tfjs_vis) {
-//                                  tfvis.show.history({name: 'Error and accuracy', tab: 'Training'},
-//                                                     epoch_history,
-//                                                     ['loss', 'acc']);
-//                              }
-        // Train the model using the data
-        let start = Date.now();
         if (!model.optimizer) {
             // loaded models lack an optimizer
             const optimizer_full_name = gui_state["Model"]["Optimization method"];
-            const optimizer = optimization_methods[optimizer_full_name];
+            const optimizer = optimizer_named(optimizer_full_name);
             model.compile({loss: (options.loss || 'meanSquaredError'),
                            optimizer: optimizer});
         }
@@ -207,8 +219,8 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
             configuration.validationData = validation_tensor;
         }
         const then_handler = (extra_info) => {
-            let duration = Math.round((Date.now()-start)/1000);
-            let response = {loss: epoch_history[epoch_history.length-1].loss,
+            let duration = Math.round((Date.now()-start)/1000); // seconds to 3 decimal places
+            let response = {loss:     epoch_history[epoch_history.length-1].loss,
                             accuracy: epoch_history[epoch_history.length-1].acc,
                             "duration in seconds": duration};
             if (typeof extra_info === 'string') {
@@ -227,6 +239,8 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
                 validation_tensor[1].dispose();
             }
         };
+        // Train the model using the data
+        let start = Date.now();
         tf.tidy(() => {
             model.fit(xs, ys, configuration)
                 .then(then_handler,
