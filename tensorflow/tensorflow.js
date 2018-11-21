@@ -545,8 +545,13 @@ const create_prediction_interface = () => {
     div.appendChild(input_input);
     draw_area.appendChild(div);
     const make_prediction = (model_name) => {
-        const success_callback = (result) => {
-            const message = create_message_element("<br>The " + model_name + " model predicts " + result[0] + 
+        const success_callback = (results) => {
+            if (input_input.value.indexOf('[') < 0) {
+                results = results[0]; // only one number in inputs so only one result
+            } else {
+                results = "[" + results + "]";
+            }
+            const message = create_message_element("<br>The " + model_name + " model predicts " + results + 
                                                    "<br>for input " + input_input.value + ".");
             draw_area.appendChild(message);
         };
@@ -554,8 +559,11 @@ const create_prediction_interface = () => {
             draw_area.appendChild(create_message_element(error_message));
         }; 
         try {
-            const input = JSON.parse(input_input.value);
-            predict(model_name, [input], success_callback, error_callback);
+            let inputs = JSON.parse(input_input.value);
+            if (typeof inputs === 'number') {
+                inputs = [inputs];
+            }
+            predict(model_name, inputs, success_callback, error_callback);
         } catch (error) {
             error_callback(error.message);
         }
