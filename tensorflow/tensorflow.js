@@ -30,7 +30,7 @@ const set_data = (model_name, kind, value) => {
     data[model_name][kind] = value;
 };
 
-const MAX_LAYER_COUNT = 6;
+const MAX_LAYER_COUNT = 10;
 
 const optimization_methods =
     {"Stochastic Gradient Descent": "sgd",
@@ -121,6 +121,9 @@ const create_model = function (name, layers, optimizer_full_name, input_shape, o
                    metrics: ['accuracy']
                   });
     gui_state["Model"]["Optimization method"] = optimizer_full_name;
+    if (options.loss) {
+        gui_state["Model"]["Loss function"] = options.loss
+    }
     model.ready_for_training = true;
     if (model.callback_when_ready_for_training) {
         model.callback_when_ready_for_training();
@@ -193,10 +196,12 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
             epoch_history.push(history);
         };
         if (!model.optimizer) {
-            // loaded models lack an optimizer
+            // loaded models lack an optimizer and loss function
             const optimizer_full_name = gui_state["Model"]["Optimization method"];
             const optimizer = optimizer_named(optimizer_full_name);
-            model.compile({loss: (options.loss || 'meanSquaredError'),
+            const loss_function_full_name = gui_state["Model"]["Loss function"];
+            const loss_function = loss_function_named(loss_function_full_name);
+            model.compile({loss: (loss_function || 'meanSquaredError'),
                            optimizer: optimizer});
         }
         if (model.optimizer.learningRate && options.learning_rate) { // not every optimizer needs to have this property
@@ -205,6 +210,12 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
         }
         if (options.epochs) {
             gui_state["Training"]['Number of iterations'] = options.epochs;
+        }
+        if (options.validation_split) {
+            gui_state["Training"]['Validation split'] = options.validation_split;
+        }
+        if (typeof options.shuffle === 'boolean') {
+            gui_state["Training"]['Shuffle data'] = options.shuffle;
         }
         // when following was inside of tidy I got an error about backend being undefined
         const get_tensors = (kind) => {
@@ -255,21 +266,33 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
                 validation_tensor[1].dispose();
             }
         };
+        const error_handler = (error) => {
+            if (error.message.indexOf('Training stuck') === 0) {
+                // only did some training but not really an error
+                then_handler(error.message);
+            } else {
+                 error_callback(error);
+            }
+        };
         // Train the model using the data
         let start = Date.now();
-        tf.tidy(() => {
+        // do I really need tidy at all since I dispose of tensors explicitly
+        if (configuration.validationSplit) {
+            // see https://github.com/tensorflow/tfjs/issues/927
+            // hack until resolved - note there may be a memory leak here
             model.fit(xs, ys, configuration)
-                .then(then_handler,
-                      (error) => {
-                          if (error.message.indexOf('Training stuck') === 0) {
-                              // only did some training but not really an error
-                              then_handler(error.message);
-                          } else {
-                              error_callback(error);
-                          }
-                      });
-                      
-            });
+                .then((x) => {
+                         tf.tidy(() => {
+                             then_handler(x);
+                         });
+                     },
+                     error_handler);
+        } else {
+            tf.tidy(() => {
+                model.fit(xs, ys, configuration)
+                    .then(then_handler, error_handler);
+                });       
+        }
     } catch (error) {
         error_callback(error);
     }
@@ -330,9 +353,16 @@ const gui_state =
              "Size of layer 4": 1,
              "Size of layer 5": 0,
              "Size of layer 6": 0,
-             "Optimization method": 'Stochastic Gradient Descent'},
+             "Size of layer 7": 0,
+             "Size of layer 8": 0,
+             "Size of layer 9": 0,
+             "Size of layer 10": 0,
+             "Optimization method": 'Stochastic Gradient Descent',
+             "Loss function": 'Mean Squared Error'},
    "Training": {"Learning rate": .001,
-                "Number of iterations": 100},
+                "Number of iterations": 100,
+                "Validation split": 0.1,
+                "Shuffle data": true},
    "Predictions": {}
 };
 
@@ -350,16 +380,19 @@ const create_parameters_interface = function () {
 const create_model_parameters = (parameters_gui) => {
     const model = parameters_gui.addFolder("Model");
     for (let i = 1; i <= MAX_LAYER_COUNT; i++) {
-        model.add(gui_state["Model"], 'Size of layer ' + i).min(i === 1 ? 1 : 0).max(100);
+        model.add(gui_state["Model"], 'Size of layer ' + i).min(i === 1 ? 1 : 0).max(1000);
     }
     model.add(gui_state["Model"], 'Optimization method', Object.keys(optimization_methods));
+    model.add(gui_state["Model"], 'Loss function', Object.keys(loss_functions));
     return model;  
 };
 
 const create_training_parameters = (parameters_gui) => {
     const training = parameters_gui.addFolder("Training");
     training.add(gui_state["Training"], 'Number of iterations').min(1).max(1000);
-    training.add(gui_state["Training"], 'Learning rate').min(.00001).max(.9999);
+    training.add(gui_state["Training"], 'Learning rate').min(.00001).max(1);
+    training.add(gui_state["Training"], 'Validation split').min(0).max(.999);
+    training.add(gui_state["Training"], 'Shuffle data', [true, false]);
     return training;
 };
 
@@ -390,8 +423,9 @@ const create_model_with_parameters = function (surface_name) {
         }
         const name = name_input.value;
         const optimizer_full_name = gui_state["Model"]["Optimization method"];
+        const loss_function_full_name = gui_state["Model"]["Loss function"];
         try {
-            model = create_model(name, layers, optimizer_full_name);
+            model = create_model(name, layers, optimizer_full_name, undefined, {loss: loss_function_full_name});
         } catch (error) {
             message.innerHTML = error.message;
             report_error(error);
@@ -405,6 +439,7 @@ const create_model_with_parameters = function (surface_name) {
             html += "<br>It replaces the old model of the same name.";
         }
         html += "<br>Its optimization method is '" + optimizer_full_name + "'.";
+        html += "<br>Its loss function is '" + loss_function_full_name + "'.";
         model.summary(50, // line length
                       undefined,
                       (line) => {
@@ -476,7 +511,9 @@ const train_with_parameters = async function (surface_name) {
                           training_data,
                           validation_data,
                           {epochs: Math.round(gui_state["Training"]["Number of iterations"]),
-                           learning_rate: gui_state["Training"]["Learning rate"]
+                           learning_rate: gui_state["Training"]["Learning rate"],
+                           validation_split: gui_state["Training"]["Validation split"],
+                           shuffle: gui_state["Training"]["Shuffle data"],
                           },
                           true, // show progress using tfjs-vis 
                           success_callback,
