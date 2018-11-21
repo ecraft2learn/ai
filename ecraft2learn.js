@@ -1087,7 +1087,8 @@ window.ecraft2learn =
                                       invoke_callback(callback, true);
                                   }); // there is no error response
     };
-    const train_model = (model_name, epochs, learning_rate, success_callback, error_callback) => {
+    const train_model = (model_name, epochs, learning_rate, shuffle, validation_split,
+                         success_callback, error_callback) => {
         record_callbacks(success_callback, error_callback);
         const time_stamp = Date.now();
         request_of_support_window('tensorflow.js',
@@ -1095,7 +1096,9 @@ window.ecraft2learn =
                                   () => {
                                       return {train: {model_name: model_name,
                                                       options: {epochs: epochs,
-                                                                learning_rate: learning_rate},
+                                                                learning_rate: learning_rate,
+                                                                shuffle: shuffle,
+                                                                validation_split: validation_split},
                                                       time_stamp: time_stamp}};
                                   },
                                   (message) => {
