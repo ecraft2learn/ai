@@ -487,7 +487,7 @@ const train_with_parameters = async function (surface_name) {
       const menu = document.createElement('ul');
       const model_names = Object.keys(models);
       model_names.forEach((name) => {
-          const menu_item = create_button("Train " + name + " with current settings",
+          const menu_item = create_button("Train <b>" + name + "</b> with current settings",
                                           () => {
                                               menu.remove();
                                               draw_area.insertBefore(train_with_current_settings_button,
