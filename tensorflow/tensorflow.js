@@ -45,7 +45,22 @@ const optimizer_named = (name, learning_rate) => {
     if (name === 'Momentum') {
         return  tf.train.momentum((learning_rate || .01), .9);
     }
-    return optimization_methods[name];
+    return optimization_methods[name] || name;
+};
+
+const loss_functions = 
+    {"Absolute Distance": "absoluteDistance",
+     "Compute Weighted Loss": "computeWeigghtedLoss",
+     "Cosine Distance": "cosineDistance",
+     "Hinge Loss": "hingeLoss",
+     "Huber Loss": "huberLoss",
+     "Log Loss": "logLoss",
+     "Mean Squared Error": "meanSquaredError",
+     "Sigmoid Cross Entropy": "sigmoidCrossEntropy",
+     "Softmax Cross Entropy": "softmaxCrossEntropy"};
+
+const loss_function_named = (name) => {
+    return loss_functions[name] || name;
 };
 
 const add_to_models = function (new_model) {
@@ -100,7 +115,8 @@ const create_model = function (name, layers, optimizer_full_name, input_shape, o
     if (!optimizer) {
         optimizer = 'adam';
     }
-    model.compile({loss: (options.loss || 'meanSquaredError'),
+    let loss_function = loss_function_named((options.loss || 'meanSquaredError'));
+    model.compile({loss: loss_function,
                    optimizer: optimizer,
                    metrics: ['accuracy']
                   });
