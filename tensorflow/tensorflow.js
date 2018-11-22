@@ -30,8 +30,6 @@ const set_data = (model_name, kind, value) => {
     data[model_name][kind] = value;
 };
 
-const MAX_LAYER_COUNT = 10;
-
 const optimization_methods =
     {"Stochastic Gradient Descent": "sgd",
      "Momentum": "momentum",
@@ -107,11 +105,7 @@ const create_model = function (name, layers, optimizer_full_name, input_shape, o
             }
             model.add(tf.layers.dense(configuration));
         }
-        gui_state["Model"]["Size of layer " + (index + 1)] = size;
     });
-    for (let i = layers.length; i < MAX_LAYER_COUNT; i++) {
-        gui_state["Model"]["Size of layer " + (i + 1)] = 0;
-    }
     if (!optimizer) {
         optimizer = 'adam';
     }
@@ -347,16 +341,7 @@ const add_to_data = (new_data, model_name, kind) => {
 
 const gui_state = 
   // following inspired by https://github.com/johnflux/deep-learning-tictactoe/blob/master/play.py
-  {"Model": {"Size of layer 1": 100,
-             "Size of layer 2": 50,
-             "Size of layer 3": 20,
-             "Size of layer 4": 1,
-             "Size of layer 5": 0,
-             "Size of layer 6": 0,
-             "Size of layer 7": 0,
-             "Size of layer 8": 0,
-             "Size of layer 9": 0,
-             "Size of layer 10": 0,
+  {"Model": {"Layers": "100, 50, 20, 1",
              "Optimization method": 'Stochastic Gradient Descent',
              "Loss function": 'Mean Squared Error'},
    "Training": {"Learning rate": .001,
@@ -379,9 +364,7 @@ const create_parameters_interface = function () {
 
 const create_model_parameters = (parameters_gui) => {
     const model = parameters_gui.addFolder("Model");
-    for (let i = 1; i <= MAX_LAYER_COUNT; i++) {
-        model.add(gui_state["Model"], 'Size of layer ' + i).min(i === 1 ? 1 : 0).max(1000);
-    }
+    model.add(gui_state["Model"], "Layers");
     model.add(gui_state["Model"], 'Optimization method', Object.keys(optimization_methods));
     model.add(gui_state["Model"], 'Loss function', Object.keys(loss_functions));
     return model;  
@@ -414,12 +397,16 @@ const create_model_with_parameters = function (surface_name) {
     let name_input;
     let message;
     const create_model_with_current_settings = function () {
-        let layers = [];
-        for (let i = 1; i <= MAX_LAYER_COUNT; i++) {
-            let layer_size = gui_state["Model"]["Size of layer " + i];
-            if (layer_size > .5) {
-                layers.push(Math.round(layer_size));
+        let layers;
+        try {
+            layers = JSON.parse('[' + gui_state["Model"]["Layers"] + ']');
+            if (!layers.every((n) => n > 0 && n === Math.round(n))) {
+                alert("Layers should a list of positive whole numbers.");
+                return;
             }
+        } catch (error) {
+            alert("Layers should a list of whole numbers separated by commas.");
+            return;
         }
         const name = name_input.value;
         const optimizer_full_name = gui_state["Model"]["Optimization method"];

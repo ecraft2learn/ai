@@ -33,19 +33,28 @@ or uses the scores as probabilities of making that move.
 </p>
 <p>
 Let's start by having the computer play games where both players just make random moves.
-You can choose how many games it will play in the settings panel that will appear.
+You can choose how many games it will play in the settings panel that will appear at the top of this page.
 </p>
 <button id="create_data" class="support-window-button" >Create initial data</button>
 <p>
 Now let's define how the computer will learn.
 You can choose the learning rate which determines how much progress it can make on each training iteration.
-Larger numbers makes the training faster but less accurate.
-You can also decide on the size of up to three "hidden layers" of the neural net.
-The default numbers are 100, 50, and 20.
+The learning rate determines how much it changes the weights of the neurons to reduce the "loss".
+The loss is a measure of the distance between the values the model predicts and the known correct values.
+You can choose among several
+<a href="https://medium.com/@risingdeveloper/visualization-of-some-loss-functions-for-deep-learning-with-tensorflow-9f60be9d09f9" target="_blank">
+loss functions</a> for computing this distance.
+Larger learning rates makes the training faster
+but may cause the error to increase by taking such a big step that passes over the optimal values.
+</p>
+<p>
+You can also decide on the size of the layers of the neural net.
+The default numbers are 100, 50, 20, and 1.
 This means that that each of the nine inputs corresponding to the nine board positions are connected to 100 neurons.
 Each of those 100 neurons are then connected to a layer with 50 units which is connected to one with 20.
 Those 20 neurons are then combined to a single number which is the "score" for a board.
-If you want fewer layers then set the third (and second) layer to 0.
+Currently the only kind of connection between layers is "dense"
+which means each neuron of a layer is connected to each neuron of the next layer.
 More and wider layers up to a point should make the model more accurate but also slower
 and at some point may require too much memory (in the GPU).
 </p>
