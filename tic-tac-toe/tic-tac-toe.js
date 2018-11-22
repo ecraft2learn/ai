@@ -138,19 +138,15 @@ const move = function (player_number, players, board, history, non_deterministic
             });
         });
         if (non_deterministic) {
-            predictions = predictions.sort().reverse(); // consider the most likely first
-            const sum = predictions.reduce((accumulator, value) => {
-                if (value > 0) {
-                    accumulator + value;
-                }
-            });
+//             predictions = predictions.sort().reverse(); // consider the most likely first
+            const sum = predictions.reduce((accumulator, value) => value > 0 ? accumulator + value : accumulator);
             predictions.some((prediction, index) => {
                if (Math.random() <= prediction/sum) {
                    best_move = possible_moves[index]
                    return true;
                }
             });
-        }
+        } // otherwise best_move has already been computed when the predictions were received
         move = best_move;
     }
     if (typeof move === 'undefined') {
