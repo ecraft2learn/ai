@@ -38,14 +38,10 @@ You can choose how many games it will play in the settings panel that will appea
 <button id="create_data" class="support-window-button" >Create initial data</button>
 <p>
 Now let's define how the computer will learn.
-You can choose the learning rate which determines how much progress it can make on each training iteration.
-The learning rate determines how much it changes the weights of the neurons to reduce the "loss".
 The loss is a measure of the distance between the values the model predicts and the known correct values.
 You can choose among several
 <a href="https://medium.com/@risingdeveloper/visualization-of-some-loss-functions-for-deep-learning-with-tensorflow-9f60be9d09f9" target="_blank">
 loss functions</a> for computing this distance.
-Larger learning rates makes the training faster
-but may cause the error to increase by taking such a big step that passes over the optimal values.
 </p>
 <p>
 You can also decide on the size of the layers of the neural net.
@@ -62,10 +58,30 @@ and at some point may require too much memory (in the GPU).
 <p>
 Now let's train the computer using the games you just generated.
 You can set the number of iterations the training algorithm will take.
-Each iteration the program adjusts the weights of the neurons to increase accuracy.
+Each iteration the program adjusts the weights of the neurons to reduce the loss.
 You can see the best number of iterations from the graph by selecting the point where it starts to level off.
 </p>
-<button disabled id="train" class="support-window-button" >Train the model</button>
+<p>
+You can choose the learning rate which determines how much progress it can make on each training iteration.
+The learning rate determines how much it changes the weights of the neurons to reduce the "loss".
+Larger learning rates makes the training faster
+but may cause the error to increase by taking such a big step that passes over the optimal values.
+You can decide whether the data is shuffled on each step to eliminate the possibility that the model
+will be trained for input in a particular order.
+</p>
+<p>
+Recall that the purpose of training is to reduce the loss.
+Loss is a measure of the distance between the values the model predicts for training set inputs
+and training set output values.
+Many of the optimization methods used in training adjust internal parameters to improve the speed and accuracy of the training.
+However if they do this by relying upon only the training data they may learning neuron weights that work well
+only for the training data and not real or test data.
+To remedy this you can set the "validation split" so that some of the training data is used only for computing the loss.
+You can also load saved training data as a validation dataset.
+Read this <a href="https://towardsdatascience.com/train-validation-and-test-sets-72cb40cba9e7" target="_blank">
+article about training, validation, and test data</a> to learn more.
+</p>
+<button disabled id="train" class="support-window-button">Train the model</button>
 <p>
 How good is the computer at playing Tic Tac Toe now that you've trained it?
 One test is how well does it score the first move for X.

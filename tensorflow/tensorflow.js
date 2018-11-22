@@ -41,7 +41,7 @@ const optimization_methods =
 
 const optimizer_named = (name, learning_rate) => {
     if (name === 'Momentum') {
-        return  tf.train.momentum((learning_rate || .01), .9);
+        return  tf.train.momentum((learning_rate || .001), .9);
     }
     return optimization_methods[name] || name;
 };
@@ -198,7 +198,8 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
             model.compile({loss: (loss_function || 'meanSquaredError'),
                            optimizer: optimizer});
         }
-        if (model.optimizer.learningRate && options.learning_rate) { // not every optimizer needs to have this property
+        if (model.optimizer.learningRate && options.learning_rate) { 
+            // only if optimizer has a learningRate property
             model.optimizer.learningRate = options.learning_rate;
             gui_state["Training"]['Learning rate'] = options.learning_rate;
         }
