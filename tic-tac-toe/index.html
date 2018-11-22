@@ -107,21 +107,29 @@ In this case the least negative choice is selected.
 <button disabled id="evaluate" class="support-window-button" >Evaluate the training</button>
 <p>
 You can save a trained model to the local file system to load at a later time.
+
 </p>
 <button id="save_and_load" class="support-window-button" >Saving and loading</button>
 <h3>Things to try</h3>
 <p>
 Try different layer sizes for the model.
 Larger ones may lead to more accuracy at a cost of speed and memory usage.
+How does a narrow deep model compare with a wide shallower one?
 The learning rate is also worth exploring.
 One approach is to split the training up where each subsequent training session has a significantly smaller learning rate.
 Also set the number of iterations so that the learning is just levelling off so no need to waste time with more training.
+Experiment with different optimization methods and loss functions.
 </p>
 <p>
 In addition to experimenting with different parameter settings,
 one can use games played by trained players to do further training.
 The default settings is that games created during the evaluation phase are added
 to the dataset of games available during training.
+You can also use the games for validation.
+</p>
+<p>
+Challenge a friend or classmate (or all your classmates) to train the best Tic Tac Toe player.
+Run a thousand games for each contest to see whose player is stronger.
 </p>
 <script src="./tic-tac-toe.js"> </script>
 <script src="/ai/js/bottom-of-page.js"></script>
