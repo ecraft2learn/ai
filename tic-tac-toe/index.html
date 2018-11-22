@@ -76,8 +76,16 @@ and training set output values.
 Many of the optimization methods used in training adjust internal parameters to improve the speed and accuracy of the training.
 However if they do this by relying upon only the training data they may learning neuron weights that work well
 only for the training data and not real or test data.
-To remedy this you can set the "validation split" so that some of the training data is used only for computing the loss.
+This problem is called "overfitting" because the model fits only the training data well.
+To remedy this you can set the "validation split" so that some of the training data is used only for 
+adjusting the learning parameters.
 You can also load saved training data as a validation dataset.
+When validation data is available the training graphs will display
+loss and accuracy for both the training and the validation data (labeled 'val_loss' and 'val_acc').
+Accuracy is a measure of how often the model gave the correct answer.
+If the validation loss starts increasing (or validation accuracy decreasing)
+while your training loss is still decreasing (or training accuracy increasing),
+this is an indicator of overfitting.
 Read this <a href="https://towardsdatascience.com/train-validation-and-test-sets-72cb40cba9e7" target="_blank">
 article about training, validation, and test data</a> to learn more.
 </p>
@@ -92,7 +100,9 @@ Another way to evaluate the training is to have it play lots of games (you can d
 You can have the trained model play against itself or against a player that makes random moves.
 If the player using the trained model always picks the highest scoring move then every game will be the same.
 Another strategy is to use the scores to determine the probability of making that move.
-High scoring moves are more likely than others but all moves (except 0 scoring moves) can occur.
+High scoring moves are more likely than others but all moves can occur.
+If no moves have a positive score then all are considered likely to lead to a loss.
+In this case the least negative choice is selected.
 </p>
 <button disabled id="evaluate" class="support-window-button" >Evaluate the training</button>
 <p>
