@@ -511,18 +511,8 @@ const update_evaluation_model_choices = function () {
     });
 };
 
-create_data_button.addEventListener('click', 
-                                    (event) => {
-                                        create_data_with_parameters(event);
-                                        const load_model_button = document.getElementById("load_model_button");
-                                        if (load_model_button) {
-                                            // enable mode creation after loading data
-                                            load_model_button.addEventListener('click',
-                                                                               () => {
-                                                                                   create_model_button.disabled = false;
-                                                                               });
-                                        }
-                                    });
+create_data_button.addEventListener('click', create_data_with_parameters);
+                                    
 create_model_button.addEventListener('click',
                                      () => {
                                          const model = tensorflow.create_model_with_parameters('Tic Tac Toe');
@@ -532,7 +522,20 @@ train_button.addEventListener('click',
                                   tensorflow.train_with_parameters('Tic Tac Toe');
                               });
 evaluate_button.addEventListener('click', evaluate_training);
-save_and_load_button.addEventListener('click', tensorflow.save_and_load);
+save_and_load_button.addEventListener('click', 
+                                      (event) => {
+                                          tensorflow.save_and_load(event);
+                                          const load_training_data = document.getElementById("load_training_data");
+                                          if (load_training_data) {
+                                              // enable model creation after loading data
+                                              load_training_data.addEventListener('change',
+                                                                                  () => {
+                                                                                      create_model_button.disabled = false;
+                                                                                  });
+                                          }
+                                      });
+
+
   
 }()));
 
