@@ -12,8 +12,8 @@
 <h4>Ken Kahn, University of Oxford</h4>
 <h3 class="guide-to-guide-white" id="browser-compatibility">Browser compatibility</h3>
 <p class="guide-to-guide">
-This chapter of the guide includes many interactive elements that currently run best in the Chrome browser.
-See the <a href="troubleshooting.html" target="_blank">troubleshooting guide</a>
+This chapter of the guide relies upon a library for machine learning that currently runs best in the Chrome browser.
+See the <a href="troubleshooting.html#tensorflow" target="_blank">troubleshooting guide</a>
 for how to deal with problems encountered.
 </p>
 <h3 class="background-information-white">Introduction</h3>
@@ -35,7 +35,7 @@ You can build models that will try to guess the next number in a sequence.
 As we explore later in this chapter one can <a href="#tic-tac-toe">create intelligent game playing programs</a>
 using these machine learning blocks.
 The trick is to turn game boards/positions into a list of numbers and the game outcome into a number
-so the model can be trained on previous games.
+so the model can be trained on records of previous games.
 </p>
 <h3 class="instructions-white">How to Use Machine Learning Blocks</h3>
 <p class="instructions">
@@ -51,27 +51,31 @@ More layers and wider layers typically makes the model more accurate but also sl
 <li>
 Provide the data as two lists.
 The elements of the first list are the input and the second list contains the corresponding outputs.
+Note that the elements of the lists can be numbers or lists of numbers.
 </li>
 <li>
 Train the model.
 You can control how much learning it does on each step and how many steps it should run.
-Very many small steps usually works best but can take a very long time.
+Very many small steps usually works but can take a very long time.
+You can use advanced optimization methods to adjust the steps and improve the training.
 </li>
 <li>
 Use the model to make predictions.
-This can be done with test data where the outputs are known to evaluate the model.
-And once it passes your tests you can use to predict things about the world, solve mathematics puzzles, or play games.
+A good way to evaluate the model is to use test data that wasn't using in training. 
+If it makes good predictions on the test data you can use it to predict things about the world,
+solve mathematics puzzles, or play games.
 </li>
 </ol>
-<h3 class="instructions-white">An example: Training a model to estimate square roots</h3>
+<h3 class="instructions-white">An small example: Training a model to estimate square roots</h3>
 <p class="instructions">
 In the following you can use the <span class="block-name">Create a neural net model ...</span>
 block to create a model with four "hidden" layers.
 (Hidden in that they are inbetween the input and the output.)
 You then use the <span class="block-name">Send training data ...</span>
 block to set the training data to ten numbers and their square roots.
-Next you can use the <span class-"block-name">Train model named ...</span> block to train the model. 
-This can take several seconds and you should finally see the remaining "error" and how long it took.
+Next you can use the <span class="block-name">Train model named ...</span> block to train the model. 
+This can take several seconds and you should finally see the remaining "error"
+(often called the "loss"), the accuracy, and how long it took.
 Smaller errors are better.
 Finally you can use the <span class="block-name">Get predictions from model ...</span> block
 (the version that gets only one prediction at a time)
@@ -81,7 +85,7 @@ to test how well the model has learned.
         id = "machine learning exercise"
         full_screen = "true"
         edit_mode = "true"
-        stage_ratio = ".1"
+        stage_ratio = ".5"
         container_style = "width: 1000px; height: 1000px" 
         caption = "Create, train, and test a simple model. TRY IT!">
 </figure>
@@ -91,27 +95,28 @@ full-screen version of the Snap! project for creating, training, and testing mod
 </p>
 <p class="instructions">
 We suggest you first experiment with what are called the <i>hyperparameters</i> such as
-the number and size of the layers, the optimizer, learning rate, and number of learning steps.
+the number and size of the layers, the optimizer, the learning rate, the loss function,
+the validation split, and the number of learning steps.
 Then see if you can make a model that computes a different function.
 E.g. conversion from Centigrade to Fahrenheit.
 </p>
 <p class="instructions">
 The machine learning blocks are not restricted to learning how to map one input number to an output number.
 A simple example is
-<a href="/ai/snap/snap.html?project=predict%20sequence&editMode" target="_blank">
+<a href="/ai/snap/snap.html?project=predict distance&editMode" target="_blank">
 a model that estimates the distance a point is from the origin</a>.
 Given values for <i>x</i> and <i>y</i> it estimates the square root of the sum of the squares of each.
 </p>
 <h3 class="how-it-works-white">A brief introduction to deep neural nets</h3>
 <p class="how-it-works">
 A deep neural net consists of an input layer, some number of hidden layers, and an output layer.
-The nets that <span class="block-name">Create a neural net model ...</span> block creates
+The nets that the <span class="block-name">Create a neural net model ...</span> block creates
 are always in a sequence and each neuron is connected to every neuron in the neighbouring layers.
 While this is a common architecture there are many models that branch and are connected more sparsely.
 </p>
 <figure class="how-it-works-white">
 <img src="images/TB010-Deep-Neural-Network.jpg" class="center">
-<figcaption>A neural net with dense layers 8, 9, 9, 9, and 4 wide</figcaption>
+<figcaption>A neural net with dense layers 8 (input), 9, 9, 9, and 4 (output) neurons wide</figcaption>
 </figure>
 <figure class="how-it-works-white">
 <img src="images/model-8-9-9-9-4.png" class="center">
@@ -125,7 +130,7 @@ sends zero instead.
 It is the weights (sometimes called "parameters") that are "learned" during training.
 They do this using a mathematical technique called
 <a href="https://en.wikipedia.org/wiki/Gradient_descent" target="_blank">gradient descent</a>.
-It repeatedly takes small steps reduce the "loss" or error.
+It repeatedly takes small steps to reduce the "loss" or "error".
 There are different strategies for doing this efficiently that are called
 <a href="http://ruder.io/optimizing-gradient-descent/" target="_blank">optimizers</a>.
 The size of the step taken each time is called the "learning rate".
@@ -145,17 +150,17 @@ Your projects can load models using the <span class="block-name">Load neural net
 if you have copied your saved model files (both the JSON that defines the model and the learned weights file)
 to a web server.
 They can load data using the <span class="block-name">Load X data from URL</span> block where <i>X</i> can
-be either "training" or "verification".
+be either "training" or "validation".
 Training data is used in training both as data to process
 and a random sample is used to calculate how well the model is doing.
-Verification data is only used to calculate the error or loss during training.
+validation data is only used to calculate the error or loss during training.
 </p>
 <figure class = "snap-iframe"
         id = "load models and data"
         full_screen = "true"
         edit_mode = "true"
-        stage_ratio = ".1"
-        container_style = "width: 1000px; height: 1000px" 
+        stage_ratio = ".75"
+        container_style = "width: 1000px; height: 700px" 
         caption = "Blocks for loading pre-trained models and data">
 </figure>
 <p class="instructions">
@@ -168,8 +173,8 @@ full-screen version of the Snap! project for loading pre-trained models</a>.
 A computer could have all <a href="https://www.jesperjuul.net/ludologist/2003/12/28/255168-ways-of-playing-tic-tac-toe/" target="_blank">
 255,168 games</a> in memory and play perfectly by searching its memory.
 A <a href="http://www.computerhistory.org/collections/catalog/X39.81" target="_blank">Tinkertoy computer made of wooden spools and sticks</a>
-can play a perfect game.
-So can a <a href="https://www.scientificamerican.com/article/dna-computer-plays-comple/" target="_blank">
+plays a perfect game.
+So does a <a href="https://www.scientificamerican.com/article/dna-computer-plays-comple/" target="_blank">
 computer made of DNA</a>.
 </p>
 <figure class="background-white non-essential">
@@ -180,7 +185,7 @@ computer made of DNA</a>.
 <a href="https://en.wikipedia.org/wiki/Donald_Knuth" target="_blank">Donald Knuth</a>,
 a world famous computer scientist, wrote a Tic Tac Toe learning program in 1958 when he was 20 years old.
 The computer had 10 kilobytes of memory (the laptop that I'm using to write this has more than one million times more memory).
-These were the days when computers didn't have keyboards, displays, and mice.
+In those days computers didn't have keyboards, displays, or mice.
 </p>
 <figure class="background-white non-essential">
 <img src="images/young-donald-knuth-ibm-650-1958.jpg" width="400" class="center">
@@ -203,7 +208,7 @@ Here is a five-minute video where Donald Knuth tells stories of his Tic Tac Toe 
 Your challenge is to train a deep neural net to play well.
 You can start with this <a href="/ai/snap/snap.html?project=tic tac toe&editMode" target="_blank">Snap! program for playing Tic Tac Toe</a> and add scripts
 for recording games, creating neural nets, using those games for training your nets, and finally using the 
-train neural net models to play the game.
+trained neural net models to play the game.
 This is quite challenging and only appropriate for those with a good deal of experience with Snap! and machine learning. 
 </p>
 <p class="instructions">
@@ -225,7 +230,7 @@ The space bar will start a new game and if humans aren't playing a new game will
 </p>
 <p class="instructions">
 There is a supporting web page that allows you to experiment with training and provides a way to save and load models and game data.
-It is the <span class="block-name">open support panel tensorflow.js</span> block that open up this page.
+Use the <span class="block-name">open support panel tensorflow.js</span> block to open up this page.
 It will have a 'return to Snap!' button.
 </p>
 <p class="how-it-works">
@@ -244,7 +249,8 @@ The problem is that by mixing things of different kinds (moves and non-moves) th
 For example, the difference between the upper left corner having O instead of X is 1 but so is
 the difference between that position being empty and having an X.
 And why should the difference between an empty square and an O be twice the difference between an empty square and an X?
-So avoid this problem machine learning programs use <a href="https://en.wikipedia.org/wiki/One-hot" target="_blank">one hot</a>
+So to avoid this problem machine learning programs typically use
+<a href="https://en.wikipedia.org/wiki/One-hot" target="_blank">one hot</a>
 vectors that are all zeros except for a single one.
 So X can be &lt;1,0,0&gt;, O can be &lt;0,1,0&gt;, and empty can be &lt;0,0,1&gt;.
 While a board could then be 9x3 (or 3x9) matrix it is easier to flatten the structure so that every board 
@@ -269,8 +275,8 @@ since the same moves will be made over and over again and not much can be learne
 <b>Convert the predictions into probabilities.</b>
 This can be done by dividing each positive prediction by the sum of all the positive predictions.
 (Recall that negative predictions are predictions of moves leading to a loss.)
-Then use Snap!'s <span class="block-name">pick random ...</span> block to pick a random number.
-use that number to ensure that the odds of any move being chosen is determined by its probability.
+Then we use Snap!'s <span class="block-name">pick random ...</span> block to pick a random number.
+And then we use that number to ensure that the odds of any move being chosen is determined by its probability.
 </li>
 </ol>
 </span>
@@ -278,21 +284,21 @@ use that number to ensure that the odds of any move being chosen is determined b
 <h3 class="background-information-white">Strategies for training a good Tic Tac Toe player</h3>
 <p class="background-information">
 The best advice is to experiment!
-No one knows what is best model architecture, the best way to generate good training data, how much training is required, etc..
+No one knows what is the best model architecture, the best way to generate good training data, how much training is required, etc..
 One way to search for a good architecture is to create two models with a different number of layers or differences in the sizes of their layers.
 After training them both with the same data have them play a large number of games and see if one wins more than another.
 Keep the good one.
 (You can save models after running the <span class="block-name">open support panel tensorflow.js</span> block.)
 Repeat with a different model architecture for the weaker player.
 Similarly you can explore different training parameters to see which optimizer or learning rate works best.
-Try to discover that number of learning steps after which very little progress is made in reducing the loss so you don't waste time.
+Try to discover the number of learning steps after which very little progress is made in reducing the loss so you don't waste time.
 One way to detect if a model benefits from additional training is to have an older version play against a newer version of the same model.
 </p>
 <p class="background-information">
 You can do all these experiments using the Snap! program but it takes several seconds to run a game.
-For running many large-scale experiments with provide this <a href="/ai/tic-tac-toe/" target="_blank">
+For running many large-scale experiments we provide this <a href="/ai/tic-tac-toe/" target="_blank">
 web page for Tic Tac Toe machine learning</a>.
-It can run thousands of games in a few seconds to for evaluating models and generating lots of training data.
+It can run thousands of games in a few seconds for evaluating models or generating lots of training data.
 Note that you can save a model created in Snap! and then load it into the Tic Tac Toe page and vice versa.
 </p>
 <p class="background-information">
@@ -340,6 +346,7 @@ Several enhancements to this chapter are being considered.
 There are many model architectures that cannot be expressed.
 Convolutional networks are very successful at handling image and sound input.
 Recursive neural nets handle well time-based data.
+Reinforcement learning enables unsupervised learning (using only input datasets and in-world or in-simulation rewards).
 </p>
 
 <h3 class="resources-white" id="additional-resources">Additional resources</h3>
@@ -358,14 +365,12 @@ A high school student wrote this
 <a href="https://github.com/kjaisingh/high-school-guide-to-machine-learning" target="_blank">guide to learning machine learning</a>.
 In this chapter we have focused on the high level "layers" part of TensorFlow.js that is closely based upon
 <a href="https://keras.io/" target="_blank">Keras</a> (some familiarity with Python required).
-There is a good article about
-<a href="http://ruder.io/optimizing-gradient-descent/" target="_blank">training optimizers</a>.
-Here is a short article on
+There are good articles about
+<a href="http://ruder.io/optimizing-gradient-descent/" target="_blank">training optimizers</a>,
 <a href="https://medium.com/@risingdeveloper/visualization-of-some-loss-functions-for-deep-learning-with-tensorflow-9f60be9d09f9" target="_blank">
-loss functions</a> that are used in training.
-And here is a short good post about the different uses of
+loss functions</a>, and
 <a href="https://towardsdatascience.com/train-validation-and-test-sets-72cb40cba9e7" target="_blank">
-training, validation, and test data</a>.
+different uses of training, validation, and test data</a>.
 </p>
 <p class="guide-to-guide">
 Return to 

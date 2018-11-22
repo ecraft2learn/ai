@@ -114,6 +114,7 @@ const create_model = function (name, layers, optimizer_full_name, input_shape, o
                    optimizer: optimizer,
                    metrics: ['accuracy']
                   });
+    gui_state["Model"]["Layers"] = layers.toString();
     gui_state["Model"]["Optimization method"] = optimizer_full_name;
     if (options.loss) {
         gui_state["Model"]["Loss function"] = options.loss
