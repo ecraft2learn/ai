@@ -660,6 +660,7 @@ const save_and_load = function () {
     save_model_button = create_button("Save a trained model", select_model_to_save);
     draw_area.appendChild(save_model_button);
     load_model_button = create_button("Load a trained model", load_model);
+    load_model_button.id = "load_model_button";
     draw_area.appendChild(load_model_button);
     const file_input = function(label, id) {
         const div = document.createElement('div');

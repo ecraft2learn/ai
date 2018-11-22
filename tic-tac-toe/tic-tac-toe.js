@@ -511,7 +511,18 @@ const update_evaluation_model_choices = function () {
     });
 };
 
-create_data_button.addEventListener('click', create_data_with_parameters);
+create_data_button.addEventListener('click', 
+                                    (event) => {
+                                        create_data_with_parameters(event);
+                                        const load_model_button = document.getElementById("load_model_button");
+                                        if (load_model_button) {
+                                            // enable mode creation after loading data
+                                            load_model_button.addEventListener('click',
+                                                                               () => {
+                                                                                   create_model_button.disabled = false;
+                                                                               });
+                                        }
+                                    });
 create_model_button.addEventListener('click',
                                      () => {
                                          const model = tensorflow.create_model_with_parameters('Tic Tac Toe');
