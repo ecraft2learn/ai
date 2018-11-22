@@ -1,14 +1,21 @@
 <!doctype html>
 <html>
-  <head>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"> </script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dat.gui"></script>
-    <script src="../tensorflow/tensorflow.js"></script>
-    <link href="/ai/css/ai-teacher-guide.css" rel="stylesheet">
-	<link href="/uui/help/oer-style.css" rel="stylesheet">
-	<title>Training a model to win Tic Tac Toe games</title>
-  </head>
+<head>
+<script src="/ai/js/load-scripts.js"></script>
+<script>
+load_local_or_remote_scripts(
+    ["../js/tfjs.js",
+     "../js/tfjs-vis.js",
+     "../js/dat.gui.js"],
+    ["https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest",
+     "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis",
+     "https://cdn.jsdelivr.net/npm/dat.gui"]);
+</script>
+<script src="../tensorflow/tensorflow.js"></script>
+<link href="/ai/css/ai-teacher-guide.css" rel="stylesheet">
+<link href="/uui/help/oer-style.css" rel="stylesheet">
+<title>Training a model to win Tic Tac Toe games</title>
+</head>
 <body style="margin: 0;
              max-width: 800px;">
 <h2>
@@ -19,7 +26,7 @@ Experiment with how to train a neural net to win at Tic Tac Toe
 <p>
 To train the computer to play Tic Tac Toe we'll need to generate records of game play.
 The simplest way to start is for the computer to simulate both players making random (legal) moves.
-For every board position it associates whether it eventually led to a win for X, O, or a tie.
+For every board position it records whether it eventually led to a win for X, O, or a tie.
 The trained model on each turn will then consider all possible moves and consider their relative scores.
 You can choose whether the trained computer player just picks the highest scoring move 
 or uses the scores as probabilities of making that move.
