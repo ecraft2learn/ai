@@ -1040,7 +1040,7 @@ window.ecraft2learn =
                                       let configuration = {name: name,
                                                            layers: snap_to_javascript(layers, true),
                                                            optimizer: optimizer,
-                                                           options: {loss_function: loss_function
+                                                           options: {loss_function: loss_function,
                                                                      activation: activation_function_name},
                                                            time_stamp: time_stamp};
                                       // if no size is provided then it will be computed from the training data
