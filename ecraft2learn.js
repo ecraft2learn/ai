@@ -1027,7 +1027,8 @@ window.ecraft2learn =
         send_request_when_support_window_is(window_ready_state, support_window_type, send_request);
     };
     // following functions use the layers level of tensorflow.js to create models, train, and predict
-    const create_tensorflow_model = function(name, layers, optimizer, loss_function, input_size, success_callback, error_callback) {
+    const create_tensorflow_model = function(name, layers, optimizer, loss_function, input_size, success_callback, error_callback,
+                                             activation_function_name) { // nothing uses this just yet defaults to 'relu'
         if (typeof input_size === 'string' && +input_size !== NaN) {
             input_size = +input_size; // convert string to number
         }
@@ -1039,7 +1040,8 @@ window.ecraft2learn =
                                       let configuration = {name: name,
                                                            layers: snap_to_javascript(layers, true),
                                                            optimizer: optimizer,
-                                                           options: {loss_function: loss_function},
+                                                           options: {loss_function: loss_function
+                                                                     activation: activation_function_name},
                                                            time_stamp: time_stamp};
                                       // if no size is provided then it will be computed from the training data
                                       if (typeof input_size === 'number') {

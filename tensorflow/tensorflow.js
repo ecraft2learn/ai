@@ -97,7 +97,7 @@ const create_model = function (name, layers, optimizer_full_name, input_shape, o
                                  useBias: index !== layers.length-1}; // except for last layer
             if (index !== layers.length-1) {
                 // all but the last one has an activation function
-                configuration.activation = 'relu';
+                configuration.activation = options.activation || 'relu';
             }                   
             if (index === 0) { // first one needs inputShape
                 configuration.inputShape = input_shape ||
