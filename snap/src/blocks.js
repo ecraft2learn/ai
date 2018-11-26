@@ -148,7 +148,7 @@ CustomCommandBlockMorph, SymbolMorph, ToggleButtonMorph, DialMorph*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.blocks = '2018-July-13';
+modules.blocks = '2018-November-13';
 
 var SyntaxElementMorph;
 var BlockMorph;
@@ -596,15 +596,17 @@ SyntaxElementMorph.prototype.getVarNamesDict = function () {
             );
         } else if (morph instanceof BlockMorph) {
             morph.inputs().forEach(function (inp) {
-                if (inp instanceof TemplateSlotMorph) {
-                    tempVars.push(inp.contents());
-                } else if (inp instanceof MultiArgMorph) {
-                    inp.children.forEach(function (m) {
-                        if (m instanceof TemplateSlotMorph) {
-                            tempVars.push(m.contents());
-                        }
-                    });
-                }
+                inp.allChildren().forEach(function (child){
+                    if (child instanceof TemplateSlotMorph) {
+                        tempVars.push(child.contents());
+                    } else if (child instanceof MultiArgMorph) {
+                        child.children.forEach(function (m) {
+                            if (m instanceof TemplateSlotMorph) {
+                                tempVars.push(m.contents());
+                            }
+                        });
+                    }
+                });
             });
         }
     });
@@ -1045,6 +1047,10 @@ SyntaxElementMorph.prototype.labelPart = function (spec) {
                     'tab' : ['tab'],
                     'cr' : ['cr'],
                     'csv' : ['csv']
+                    /*
+                    'csv records' : ['csv records'],
+                    'csv fields' : ['csv fields']
+                    */
                 },
                 false // read-only
             );
@@ -2206,7 +2212,7 @@ BlockMorph.prototype.toggleSnapSound = function () {
         this.snapSound = null;
     } else {
         BlockMorph.prototype.snapSound = document.createElement('audio');
-        BlockMorph.prototype.snapSound.src = 'click.wav';
+        BlockMorph.prototype.snapSound.src = 'src/click.wav';
     }
     CommentMorph.prototype.snapSound = BlockMorph.prototype.snapSound;
 };
@@ -2999,9 +3005,18 @@ BlockMorph.prototype.showHelp = function () {
         help,
         comment,
         block,
-        spec = this.isCustomBlock ?
-                this.definition.helpSpec() : this.selector,
+        spec,
         ctx;
+
+    if (this.isCustomBlock) {
+        if (this.isGlobal) {
+            spec = this.definition.helpSpec();
+        } else {
+            spec = this.scriptTarget().getMethod(this.blockSpec).helpSpec();
+        }
+    } else {
+        spec = this.selector;
+    }
 
     if (!ide) {
         blockEditor = this.parentThatIsA(BlockEditorMorph);
@@ -3022,24 +3037,29 @@ BlockMorph.prototype.showHelp = function () {
         );
     };
 
-    if (this.isCustomBlock && this.definition.comment) {
-        block = this.fullCopy();
-        block.addShadow();
-        comment = this.definition.comment.fullCopy();
-        comment.contents.parse();
-        help = '';
-        comment.contents.lines.forEach(function (line) {
-            help = help + '\n' + line;
-        });
-        new DialogBoxMorph().inform(
-            'Help',
-            help.substr(1),
-            myself.world(),
-            block.fullImage()
-        );
-    } else {
-        pic.src = ide.resourceURL('help', spec + '.png');
+    if (this.isCustomBlock) {
+        comment = this.isGlobal ?
+            this.definition.comment
+                : this.scriptTarget().getMethod(this.blockSpec).comment;
+        if (comment) {
+            block = this.fullCopy();
+            block.addShadow();
+            comment = comment.fullCopy();
+            comment.contents.parse();
+            help = '';
+            comment.contents.lines.forEach(function (line) {
+                help = help + '\n' + line;
+            });
+            new DialogBoxMorph().inform(
+                'Help',
+                help.substr(1),
+                myself.world(),
+                block.fullImage()
+            );
+            return;
+        }
     }
+    pic.src = ide.resourceURL('help', spec + '.png');
 };
 
 // BlockMorph code mapping
@@ -8664,9 +8684,10 @@ InputSlotMorph.prototype.shadowedVariablesMenu = function () {
 
     if (!block) {return dict; }
     rcvr = block.scriptTarget();
-    if (this.parentThatIsA(RingMorph)) {
+    if (this.parentThatIsA(RingMorph) ||
+            this.topBlock().selector === 'receiveOnClone') {
     	// show own local vars and attributes, because this is likely to be
-     	// inside TELL, ASK or OF
+     	// inside TELL, ASK or OF or when initializing a new clone
         vars = rcvr.variables.names();
         vars.forEach(function (name) {
             dict[name] = name;
@@ -8976,7 +8997,7 @@ InputSlotMorph.prototype.evaluate = function () {
 };
 
 InputSlotMorph.prototype.isEmptySlot = function () {
-    return this.contents().text === '';
+    return this.contents().text === '' && !this.selectedBlock;
 };
 
 // InputSlotMorph single-stepping:

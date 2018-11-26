@@ -108,7 +108,7 @@ BooleanSlotMorph, XML_Serializer, SnapTranslator*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.byob = '2018-June-15';
+modules.byob = '2018-November-12';
 
 // Declarations
 
@@ -651,7 +651,6 @@ CustomCommandBlockMorph.prototype.restoreInputs = function (oldInputs) {
     var i = 0,
         old,
         myself = this;
-
     if (this.isPrototype) {return; }
     this.cachedInputs = null;
     this.inputs().forEach(function (inp) {
@@ -661,6 +660,9 @@ CustomCommandBlockMorph.prototype.restoreInputs = function (oldInputs) {
             myself.silentReplaceInput(inp, old.fullCopy());
         } else if (old instanceof InputSlotMorph
                 && inp instanceof InputSlotMorph) {
+            inp.setContents(old.evaluate());
+        } else if (old instanceof BooleanSlotMorph
+                && inp instanceof BooleanSlotMorph) {
             inp.setContents(old.evaluate());
         } else if (old instanceof TemplateSlotMorph
                 && inp instanceof TemplateSlotMorph) {
@@ -987,7 +989,7 @@ CustomCommandBlockMorph.prototype.userMenu = function () {
     var hat = this.parentThatIsA(PrototypeHatBlockMorph),
         rcvr = this.scriptTarget(),
         myself = this,
-        shiftClicked = this.world().currentKey === 16,
+        // shiftClicked = this.world().currentKey === 16,
         menu;
 
     function addOption(label, toggle, test, onHint, offHint) {
@@ -1084,16 +1086,11 @@ CustomCommandBlockMorph.prototype.userMenu = function () {
         } else {
             menu.addLine();
         }
+        /*
         if (shiftClicked) {
-            // menu.addItem("export definition...", 'exportBlockDefinition');
-            menu.addItem(
-                "duplicate block definition...",
-                'duplicateBlockDefinition',
-                null,
-                new Color(100, 0, 0)
-            );
+            menu.addItem("export definition...", 'exportBlockDefinition');
         }
-
+        */
         if (this.isTemplate) { // inside the palette
             if (this.isGlobal) {
                 menu.addItem(
@@ -1144,6 +1141,10 @@ CustomCommandBlockMorph.prototype.userMenu = function () {
                     );
                 }
             }
+            menu.addItem(
+                "duplicate block definition...",
+                'duplicateBlockDefinition'
+            );
         } else { // inside a script
             // if global or own method - let the user delete the definition
             if (this.isGlobal ||

@@ -32,7 +32,7 @@
 /*global modules, SnapSerializer, nop, hex_sha512, DialogBoxMorph, Color,
 normalizeCanvas*/
 
-modules.cloud = '2018-June-15';
+modules.cloud = '2018-October-04';
 
 // Global stuff
 
@@ -67,11 +67,13 @@ Cloud.prototype.determineCloudDomain = function () {
     // 2. The current page's domain
     var currentDomain = window.location.host, // host includes the port.
         metaTag = document.head.querySelector("[name='snap-cloud-domain']"),
-        cloudDomain = this.defaultDomain;
+        cloudDomain = this.defaultDomain,
+        domainMap = this.knownDomains;
 
     if (metaTag) { return metaTag.getAttribute('location'); }
 
-    Object.values(this.knownDomains).some(function (server) {
+    Object.keys(domainMap).some(function (name) {
+        var server = domainMap[name];
         if (Cloud.isMatchingDomain(currentDomain, server)) {
             cloudDomain = server;
             return true;
@@ -239,6 +241,10 @@ Cloud.prototype.withCredentialsRequest = function (
 
 Cloud.prototype.initSession = function (onSuccess) {
     var myself = this;
+    if (location.protocol === 'file:') {
+        // disabled for now (jens)
+        return;
+    }
     this.request(
         'POST',
         '/init',

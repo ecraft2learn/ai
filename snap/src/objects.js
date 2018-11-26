@@ -83,7 +83,7 @@ BlockEditorMorph, BlockDialogMorph, PrototypeHatBlockMorph, localize,
 TableMorph, TableFrameMorph, normalizeCanvas, BooleanSlotMorph, HandleMorph,
 AlignmentMorph, Process, XML_Element, VectorPaintEditorMorph*/
 
-modules.objects = '2018-July-06';
+modules.objects = '2018-November-12';
 
 var SpriteMorph;
 var StageMorph;
@@ -3534,9 +3534,14 @@ SpriteMorph.prototype.getHue = function () {
 SpriteMorph.prototype.setHue = function (num) {
     var hsv = this.color.hsv(),
         x = this.xPosition(),
-        y = this.yPosition();
+        y = this.yPosition(),
+        n = +num;
 
-    hsv[0] = Math.max(Math.min(+num || 0, 100), 0) / 100;
+    if (n < 0 || n > 100) { // wrap the hue
+        n = (n < 0 ? 100 : 0) + n % 100;
+    }
+    hsv[0] = n / 100;
+    // hsv[0] = Math.max(Math.min(+num || 0, 100), 0) / 100; // old code
     hsv[1] = 1; // we gotta fix this at some time
     this.color.set_hsv.apply(this.color, hsv);
     if (!this.costume) {
@@ -3560,7 +3565,7 @@ SpriteMorph.prototype.setBrightness = function (num) {
         y = this.yPosition();
 
     hsv[1] = 1; // we gotta fix this at some time
-    hsv[2] = Math.max(Math.min(+num || 0, 100), 0) / 100;
+    hsv[2] = Math.max(Math.min(+num || 0, 100), 0) / 100; // shade doesn't wrap
     this.color.set_hsv.apply(this.color, hsv);
     if (!this.costume) {
         this.drawNew();
@@ -3628,6 +3633,10 @@ SpriteMorph.prototype.doStamp = function () {
         isWarped = this.isWarped,
         originalAlpha = context.globalAlpha;
 
+    if (this.image.width < 1 || (this.image.height < 1)) {
+        // too small to draw
+        return;
+    }
     if (isWarped) {
         this.endWarp();
     }
@@ -4025,6 +4034,10 @@ SpriteMorph.prototype.applyGraphicsEffects = function (canvas) {
     }
 
     if (this.graphicsChanged()) {
+        if (!canvas.width || !canvas.height) {
+            // too small to get image data, abort
+            return canvas;
+        }
         ctx = canvas.getContext("2d");
         imagedata = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
@@ -5455,7 +5468,7 @@ SpriteMorph.prototype.setExemplar = function (another) {
     if (!this.isTemporary) {
         ide = this.parentThatIsA(IDE_Morph);
         if (ide) {
-            ide.flushBlocksCache('variables');
+            ide.flushBlocksCache();
             ide.refreshPalette();
         }
     }
@@ -6702,7 +6715,7 @@ StageMorph.prototype.step = function () {
     // handle keyboard events
     if (world.keyboardReceiver === null) {
         world.keyboardReceiver = this;
-        if (window === window.parent) { // but not if in an iframe
+        if (window === window.parent) { // but not if in an iframe (edited by Ken Kahn)
             world.worldCanvas.focus(); // addresses a Safari 11 bug
         }
     }

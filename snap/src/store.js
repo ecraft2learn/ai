@@ -61,7 +61,7 @@ normalizeCanvas, contains*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.store = '2018-July-09';
+modules.store = '2018-November-12';
 
 
 // XML_Serializer ///////////////////////////////////////////////////////
@@ -482,6 +482,7 @@ SnapSerializer.prototype.rawLoadProjectModel = function (xmlNode) {
                 sprite.setExemplar(exemplar);
             }
             sprite.inheritedAttributes = sprite.inheritanceInfo.delegated || [];
+            sprite.updatePropagationCache();
         }
         if (sprite.nestingInfo) { // only sprites may have nesting info
             anchor = myself.project.sprites[sprite.nestingInfo.anchor];
@@ -818,7 +819,14 @@ SnapSerializer.prototype.loadCostumes = function (object, model) {
     var costumes = model.childNamed('costumes'),
         costume;
     if (costumes) {
-        object.costumes = this.loadValue(costumes.require('list'));
+        object.costumes = this.loadValue(costumes.require(
+            'list',
+            function () {
+                console.log(object.name + ': missing required costumes list, ' +
+                    'improvising...');
+                return new XML_Element('list');
+            }
+        ));
         object.costumes.type = 'costume';
     }
     if (Object.prototype.hasOwnProperty.call(
@@ -843,7 +851,16 @@ SnapSerializer.prototype.loadSounds = function (object, model) {
     // private
     var sounds = model.childNamed('sounds');
     if (sounds) {
-        object.sounds = this.loadValue(sounds.require('list'));
+        // object.sounds = this.loadValue(sounds.require('list')); +++
+        object.sounds = this.loadValue(sounds.require(
+            'list',
+            function () {
+                console.log(object.name + ': missing required sounds list, ' +
+                    'improvising...');
+                return new XML_Element('list');
+            }
+        ));
+
         object.sounds.type = 'sound';
     }
 };
@@ -2022,9 +2039,10 @@ CustomBlockDefinition.prototype.toXML = function (serializer) {
                             ' readonly="true"' : '',
                     myself.declarations.get(decl)[1],
                     myself.declarations.get(decl)[2] ?
-                            '<options>' + myself.declarations.get(decl)[2] +
-                                '</options>'
-                                : ''
+                            serializer.format(
+                                '<options>@</options>',
+                                myself.declarations.get(decl)[2]
+                            ) : ''
                 );
             }, ''),
         this.body ? serializer.store(this.body.expression) : '',

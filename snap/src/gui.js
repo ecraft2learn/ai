@@ -75,7 +75,7 @@ isRetinaSupported, SliderMorph, Animation, BoxMorph, MediaRecorder*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.gui = '2018-July-13';
+modules.gui = '2018-November-21';
 
 // Declarations
 
@@ -229,7 +229,7 @@ IDE_Morph.prototype.init = function (isAutoFill) {
     this.projectName = '';
     this.projectNotes = '';
 
-    this.logoURL = this.resourceURL('snap_logo_sm.png');
+    this.logoURL = this.resourceURL('src', 'snap_logo_sm.png');
     this.logo = null;
     this.controlBar = null;
     this.categories = null;
@@ -530,7 +530,7 @@ IDE_Morph.prototype.openIn = function (world) {
     this.loadNewProject = false;
     }
 
-    if (this.userLanguage) {
+    if (this.userLanguage && this.userLanguage !== 'null') { // Ken Kahn added 'null' condition since localhost produces it 
         this.loadNewProject = true;
         this.setLanguage(this.userLanguage, interpretUrlAnchors);
     } else {
@@ -2002,7 +2002,7 @@ IDE_Morph.prototype.droppedBinary = function (anArrayBuffer, name) {
         ypr.id = 'ypr';
         ypr.onload = function () {loadYPR(anArrayBuffer, name); };
         document.head.appendChild(ypr);
-        ypr.src = 'ypr.js';
+        ypr.src = this.resourceURL('src', 'ypr.js');
     } else {
         loadYPR(anArrayBuffer, name);
     }
@@ -2269,11 +2269,7 @@ IDE_Morph.prototype.saveSetting = function (key, value) {
 
 IDE_Morph.prototype.getSetting = function (key) {
     if (this.hasLocalStorage()) {
-        let value = localStorage['-snap-setting-' + key];
-        if (value === 'null') {
-            return null; // not sure how this is happening only with localhost - Ken Kahn 
-        }
-        return value;
+        return localStorage['-snap-setting-' + key];
     }
     return null;
 };
@@ -2516,7 +2512,7 @@ IDE_Morph.prototype.snapMenu = function () {
         'Download source',
         function () {
             window.open(
-                'http://snap.berkeley.edu/snapsource/snap.zip',
+                'https://github.com/jmoenig/Snap/releases/latest',
                 'SnapSource'
             );
         }
@@ -2549,6 +2545,11 @@ IDE_Morph.prototype.cloudMenu = function () {
         world = this.world(),
         pos = this.controlBar.cloudButton.bottomLeft(),
         shiftClicked = (world.currentKey === 16);
+
+    if (location.protocol === 'file:' && !shiftClicked) {
+        this.showMessage('cloud unavailable without a web server.');
+        return;
+    }
 
     menu = new MenuMorph(this);
     if (shiftClicked) {
@@ -3125,36 +3126,7 @@ IDE_Morph.prototype.projectMenu = function () {
     menu.addLine();
     menu.addItem(
         'Import...',
-        function () {
-            var inp = document.createElement('input');
-            if (myself.filePicker) {
-                document.body.removeChild(myself.filePicker);
-                myself.filePicker = null;
-            }
-            inp.type = 'file';
-            inp.style.color = "transparent";
-            inp.style.backgroundColor = "transparent";
-            inp.style.border = "none";
-            inp.style.outline = "none";
-            inp.style.position = "absolute";
-            inp.style.top = "0px";
-            inp.style.left = "0px";
-            inp.style.width = "0px";
-            inp.style.height = "0px";
-            inp.style.display = "none";
-            inp.addEventListener(
-                "change",
-                function () {
-                    document.body.removeChild(inp);
-                    myself.filePicker = null;
-                    world.hand.processDrop(inp.files);
-                },
-                false
-            );
-            document.body.appendChild(inp);
-            myself.filePicker = inp;
-            inp.click();
-        },
+        'importLocalFile',
         'file menu import hint' // looks up the actual text in the translator
     );
 
@@ -3236,8 +3208,12 @@ IDE_Morph.prototype.projectMenu = function () {
     menu.addItem(
         'Import tools',
         function () {
+            if (location.protocol === 'file:') {
+                myself.importLocalFile();
+                return;
+            }
             myself.getURL(
-                myself.resourceURL('tools.xml'),
+                myself.resourceURL('libraries', 'tools.xml'),
                 function (txt) {
                     myself.droppedText(txt, 'tools');
                 }
@@ -3248,6 +3224,10 @@ IDE_Morph.prototype.projectMenu = function () {
     menu.addItem(
         'Libraries...',
         function() {
+            if (location.protocol === 'file:') {
+                myself.importLocalFile();
+                return;
+            }
             myself.getURL(
                 myself.resourceURL('libraries', 'LIBRARIES'),
                 function (txt) {
@@ -3262,6 +3242,10 @@ IDE_Morph.prototype.projectMenu = function () {
     menu.addItem(
         localize(graphicsName) + '...',
         function () {
+            if (location.protocol === 'file:') {
+                myself.importLocalFile();
+                return;
+            }
             myself.importMedia(graphicsName);
         },
         'Select a costume from the media library'
@@ -3269,6 +3253,10 @@ IDE_Morph.prototype.projectMenu = function () {
     menu.addItem(
         localize('Sounds') + '...',
         function () {
+            if (location.protocol === 'file:') {
+                myself.importLocalFile();
+                return;
+            }
             myself.importMedia('Sounds');
         },
         'Select a sound from the media library'
@@ -3340,6 +3328,40 @@ IDE_Morph.prototype.parseResourceFile = function (text) {
     });
 
     return items;
+};
+
+IDE_Morph.prototype.importLocalFile = function () {
+    var inp = document.createElement('input'),
+        myself = this,
+        world = this.world();
+
+    if (this.filePicker) {
+        document.body.removeChild(this.filePicker);
+        this.filePicker = null;
+    }
+    inp.type = 'file';
+    inp.style.color = "transparent";
+    inp.style.backgroundColor = "transparent";
+    inp.style.border = "none";
+    inp.style.outline = "none";
+    inp.style.position = "absolute";
+    inp.style.top = "0px";
+    inp.style.left = "0px";
+    inp.style.width = "0px";
+    inp.style.height = "0px";
+    inp.style.display = "none";
+    inp.addEventListener(
+        "change",
+        function () {
+            document.body.removeChild(inp);
+            myself.filePicker = null;
+            world.hand.processDrop(inp.files);
+        },
+        false
+    );
+    document.body.appendChild(inp);
+    this.filePicker = inp;
+    inp.click();
 };
 
 IDE_Morph.prototype.importMedia = function (folderName) {
@@ -3517,7 +3539,7 @@ IDE_Morph.prototype.aboutSnap = function () {
         module, btn1, btn2, btn3, btn4, licenseBtn, translatorsBtn,
         world = this.world();
 
-    aboutTxt = 'Snap! 4.2.1.2\nBuild Your Own Blocks\n\n'
+    aboutTxt = 'Snap! 4.2.2.8\nBuild Your Own Blocks\n\n'
         + 'Copyright \u24B8 2018 Jens M\u00F6nig and '
         + 'Brian Harvey\n'
         + 'jens@moenig.org, bh@cs.berkeley.edu\n\n'
@@ -3758,6 +3780,21 @@ IDE_Morph.prototype.newProject = function () {
 };
 
 IDE_Morph.prototype.save = function () {
+    var myself = this;
+
+    // temporary hack - only allow exporting projects to disk
+    // when running Snap! locally without a web server
+    if (location.protocol === 'file:') {
+        if (this.projectName) {
+            this.exportProject(myself.projectName, false);
+        } else {
+            this.prompt('Export Project As...', function (name) {
+                myself.exportProject(name, false);
+            }, null, 'exportProject');
+        }
+        return;
+    }
+
     if (this.source === 'examples') {
         this.source = 'local'; // cannot save to examples
     }
@@ -4939,10 +4976,30 @@ IDE_Morph.prototype.createNewProject = function () {
 };
 
 IDE_Morph.prototype.openProjectsBrowser = function () {
+    if (location.protocol === 'file:') {
+        // bypass the project import dialog and directly pop up
+        // the local file picker.
+        // this should not be necessary, we should be able
+        // to access the cloud even when running Snap! locally
+        // to be worked on.... (jens)
+        this.importLocalFile();
+        return;
+    }
     new ProjectDialogMorph(this, 'open').popUp();
 };
 
 IDE_Morph.prototype.saveProjectsBrowser = function () {
+    var myself = this;
+
+    // temporary hack - only allow exporting projects to disk
+    // when running Snap! locally without a web server
+    if (location.protocol === 'file:') {
+        this.prompt('Export Project As...', function (name) {
+            myself.exportProject(name, false);
+        }, null, 'exportProject');
+        return;
+    }
+
     if (this.source === 'examples') {
         this.source = 'local'; // cannot save to examples
     }
@@ -4971,7 +5028,7 @@ IDE_Morph.prototype.languageMenu = function () {
 
 IDE_Morph.prototype.setLanguage = function (lang, callback, noSave) {
     var translation = document.getElementById('language'),
-        src = this.resourceURL('lang-' + lang + '.js'),
+        src = this.resourceURL('locale', 'lang-' + lang + '.js'),
         myself = this;
     SnapTranslator.unload();
     if (translation) {
