@@ -416,6 +416,14 @@ navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia 
 // listen for requests for predictions
 
 const listen_for_messages = function (event) {
+    if (document.readyState !== 'complete') {
+        // too early to respond but at least the message isn't lost
+        window.addEventListener('load',
+                                () => {
+                                   listen_for_messages(event);
+                                });
+        return;
+    }
     let update_introduction = function (new_introduction) {
         let please_wait = document.getElementById("please-wait");
         please_wait.innerHTML = new_introduction;
