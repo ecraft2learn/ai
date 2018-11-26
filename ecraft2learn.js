@@ -959,8 +959,8 @@ window.ecraft2learn =
         };
         let time_stamp = Date.now();
         let costume_canvas = costume.contents;
-        request_of_support_window('Ready',
-                                  'style transfer',
+        request_of_support_window('style transfer',
+                                  'Ready',
                                   () => {
                                       return {style_transfer_request: {URL: costume_canvas.toDataURL(),
                                                                        style: style_to_folder_name[style.trim()],
@@ -1227,10 +1227,10 @@ window.ecraft2learn =
     const image_class_from_canvas = function(canvas, top_k, labels_callback, probabilities_callback) {
         // timestamp used to respond appropriately to multiple outstanding requests
         let time_stamp = Date.now();
-        request_of_support_window('Ready',
-                                  'image classifier',
+        request_of_support_window('image classifier',
+                                  'Ready',                                  
                                   () => {
-                                      return {classify: {URL: data_URL,
+                                      return {classify: {URL: canvas.toDataURL(),
                                                          top_k: top_k,
                                                          time_stamp: time_stamp}};
                                   },
