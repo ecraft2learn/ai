@@ -220,6 +220,7 @@ window.addEventListener(
 window.addEventListener(
      'DOMContentLoaded', 
      function () {
+         const path_to_ai_folder = window.location.href.substring(0, window.location.href.indexOf('/ai'));
          let elements = document.getElementsByClassName('snap-iframe');
          let snap_iframe = function(element) {
              let name = element.id;
@@ -232,7 +233,7 @@ window.addEventListener(
              let iframe     = document.createElement('iframe');
              let figcaption = document.createElement('figcaption');
              let img        = document.createElement('img');
-             img.src = "/ai/AI-teacher-guide-projects/" + name + ".png";
+             img.src = path_to_ai_folder + "/ai/AI-teacher-guide-projects/" + name + ".png";
              img.className = "image-of-iframe";
              let replace_with_iframe = function () {
                  // add a loading div message for a few seconds...
@@ -241,7 +242,7 @@ window.addEventListener(
                  loading.innerHTML = "<b>Loading. Please wait.</b>";
                  figure.insertBefore(loading, figcaption);
                  img.remove();
-                 iframe.src = "/ai/snap/snap.html";
+                 iframe.src = path_to_ai_folder + "/ai/snap/snap.html";
                  iframe.setAttribute('scrolling', 'no');
                  // remove loading message 1 second after Snap! loads
                  // since project loading takes time too
@@ -253,7 +254,7 @@ window.addEventListener(
                                              1000);
                                          });
                  if (full_screen) {
-                     project_folder = "/ai/projects/";
+                     project_folder = path_to_ai_folder + "/ai/projects/";
                      if (full_screen === 'true') {
                          iframe.setAttribute('full_screen', 'true');
                      }
@@ -266,7 +267,7 @@ window.addEventListener(
                      iframe.style = style;
                      figure.insertBefore(iframe, figcaption);
                  } else {
-                     project_folder = "/ai/AI-teacher-guide-projects/";
+                     project_folder = path_to_ai_folder + "/ai/AI-teacher-guide-projects/";
                      iframe.className = "iframe-clipped";
                      let iframe_style = element.getAttribute('iframe_style');
                      if (iframe_style) {

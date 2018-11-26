@@ -1,8 +1,10 @@
-// A file needed for the AI guide that loads Snap! projects into iframes
-// Written by Ken Kahn 
-// No rights reserved.
+ /**
+ * Implements functionality needed for the AI guide that loads Snap! projects into iframes
+ * Authors: Ken Kahn
+ * License: New BSD
+ */
 
-var world;
+let world;
 window.addEventListener('load', function () {
 	var world_canvas = document.getElementById('world');
 	var ide_morph = new IDE_Morph();

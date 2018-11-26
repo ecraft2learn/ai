@@ -12,7 +12,7 @@ function load_local_or_remote_scripts (local_URLs, remote_URLs) {
         script.charset = "UTF-8";
         document.head.appendChild(script);
     };
-    if (window.location.hostname === "localhost") {
+    if (window.location.hostname === "localhost" || window.location.hostname === "file") {
         local_URLs.forEach(load_URL);
     } else {
         remote_URLs.forEach(load_URL);

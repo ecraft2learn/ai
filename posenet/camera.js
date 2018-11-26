@@ -365,11 +365,9 @@ const respond_to_messages =
                        image_as_Array3D.dispose();
                  };
              load_image(image_url, compute_poses);
-//              window.removeEventListener("message", respond_to_messages);
         }
     };
 
-// tell Snap! this is loaded
 window.addEventListener('DOMContentLoaded', bindPage);
 
                             
