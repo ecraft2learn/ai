@@ -992,8 +992,9 @@ window.ecraft2learn =
     const get_image_features = function(costume, callback) {
         // uses mobilenet to compute a feature vector for the costume
         let time_stamp = Date.now();
-        request_of_support_window('MobileNet loaded',
-                                  'training using camera',
+        let costume_canvas = costume.contents;
+        request_of_support_window('training using camera',
+                                  'MobileNet loaded',
                                   () => {
                                       return {get_image_features: {URL: costume_canvas.toDataURL(),
                                                                    time_stamp: time_stamp}};
