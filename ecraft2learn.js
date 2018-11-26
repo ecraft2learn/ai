@@ -1222,6 +1222,13 @@ window.ecraft2learn =
                        };
     };
     const image_class = function (costume, top_k, labels_callback, probabilities_callback) {
+        if (!(costume instanceof Costume)) {
+            const error_message = "Input was not a costume but " + costume + " instead.";
+            inform("Error from 'Labels for costume'", error_message);
+            invoke_callback(labels_callback, error_message);
+            invoke_callback(probabilities_callback, error_message);
+            return;
+        }
         image_class_from_canvas(costume.contents, top_k, labels_callback, probabilities_callback);
     };
     const image_class_from_canvas = function(canvas, top_k, labels_callback, probabilities_callback) {
