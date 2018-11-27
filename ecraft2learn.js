@@ -945,7 +945,10 @@ window.ecraft2learn =
     const create_costume_with_style = function(style, costume, callback) {
         // adds a costume to the sprite by applying the style of the sprite's costume number
         // callback if provided will be called after this completes
-        // style can be any of the folloing
+        // style can be any of the following
+        if (not_a_costume(costume, 'create costume in style', callback)) {
+            return;
+        }
         let style_to_folder_name = {
             "Katsushika Hokusai's Wave": 'wave',
             "Francis Picabia's Udnie": 'udnie',
@@ -991,6 +994,9 @@ window.ecraft2learn =
     };
     const get_image_features = function(costume, callback) {
         // uses mobilenet to compute a feature vector for the costume
+        if (not_a_costume(costume, 'get costume features of', callback)) {
+            return;
+        }
         let time_stamp = Date.now();
         let costume_canvas = costume.contents;
         request_of_support_window('training using camera',
@@ -1221,12 +1227,17 @@ window.ecraft2learn =
                            when_loaded(image);
                        };
     };
-    const image_class = function (costume, top_k, labels_callback, probabilities_callback) {
+    const not_a_costume = (costume, block_name, callback_1, callback_2) => {
         if (!(costume instanceof Costume)) {
-            const error_message = "Input was not a costume but " + costume + " instead.";
-            inform("Error from 'Labels for costume'", error_message);
-            invoke_callback(labels_callback, error_message);
-            invoke_callback(probabilities_callback, error_message);
+            const error_message = "Input was not a costume but " + typeof costume + " instead.";
+            inform("Error from '" + block_name + "'", error_message);
+            invoke_callback(callback_1, error_message);
+            invoke_callback(callback_2, error_message);
+            return true;
+        }
+    };
+    const image_class = function (costume, top_k, labels_callback, probabilities_callback) {
+        if (not_a_costume(costume, 'Labels for costume', labels_callback, probabilities_callback)) {
             return;
         }
         image_class_from_canvas(costume.contents, top_k, labels_callback, probabilities_callback);
@@ -2020,11 +2031,14 @@ window.ecraft2learn =
 
   update_costume_from_video: function (costume_or_costume_number, sprite) {
       // costume_number is deprecated but kept for backwards compatibility
-      var costume = typeof costume_or_costume_number === 'object' ?
-                           costume_or_costume_number :
-                           costume_of_sprite(costume_or_costume_number, sprite);
-      var canvas = costume.contents;
-      var context = canvas.getContext('2d');
+      let costume = costume_or_costume_number instanceof Costume ?
+                        costume_or_costume_number :
+                        costume_of_sprite(costume_or_costume_number, sprite);
+      if (not_a_costume(costume, 'a costume block')) {
+          return;
+      }
+      let canvas = costume.contents;
+      let context = canvas.getContext('2d');
       context.drawImage(ecraft2learn.video, 0, 0, ecraft2learn.video.width, ecraft2learn.video.height);
       sprite.drawNew();
   },
@@ -2069,7 +2083,7 @@ window.ecraft2learn =
           invoke_callback(snap_callback, javascript_to_snap(response_as_javascript_object));
     };
     let costume;
-    if (typeof show_photo_or_costume === 'object') {
+    if (show_photo_or_costume instanceof Costume) {
         costume = show_photo_or_costume;
         canvas_for_analysis = costume.contents;
     } else {
@@ -2379,6 +2393,9 @@ window.ecraft2learn =
       let costume = typeof costume_or_costume_number === 'object' ?
                            costume_or_costume_number :
                            costume_of_sprite(costume_or_costume_number, sprite);
+      if (not_a_costume(costume, 'Analyse costume', callback)) {
+          return;
+      }
       record_callbacks(callback);
       costume_to_image(costume,
                        function (image) {
