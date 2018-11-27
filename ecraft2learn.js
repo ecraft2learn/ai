@@ -818,7 +818,7 @@ window.ecraft2learn =
           } else if (source === 'posenet') {
               URL = "/ai/posenet/index.html?translate=1";
           } else if (source === 'style transfer') {
-              URL = "/ai/style-transfer/" + index_file_name + ".html";
+              URL = "/ai/style-transfer/index.html";
           } else if (source === 'image classifier') {
               URL = "/ai/mobilenet/index.html";
           } else if (source === 'tensorflow.js') {
