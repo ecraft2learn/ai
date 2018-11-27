@@ -816,7 +816,7 @@ window.ecraft2learn =
           } else if (source === 'training using microphone') {
               URL = "/ai/microphone-train/" + index_file_name + ".html?translate=1";
           } else if (source === 'posenet') {
-              URL = "/ai/posenet/" + index_file_name + ".html?translate=1";
+              URL = "/ai/posenet/index.html?translate=1";
           } else if (source === 'style transfer') {
               URL = "/ai/style-transfer/" + index_file_name + ".html";
           } else if (source === 'image classifier') {

@@ -3,22 +3,7 @@
 
 <head>
     <title>PoseNet - Camera Feed Demo</title>
-<!--     <style>
-    .footer {
-        position: fixed;
-        left: 0;
-        bottom: 0;
-        width: 100%;
-        color: black;
-    }
-
-    .footer-text {
-        max-width: 600px;
-        text-align: center;
-        margin: auto;
-    }      
-    </style> -->
-    <link href="/ai/css/ai-teacher-guide.css" rel="stylesheet">
+    <link href="../css/ai-teacher-guide.css" rel="stylesheet">
 </head>
 
 <body>
@@ -47,15 +32,25 @@
                 <br>
                 <br> The <strong>output stride</strong> and <strong>image scale factor</strong> have the largest effects on accuracy/speed. A <i>higher</i> output stride results in lower accuracy but higher speed. A <i>higher</i> image scale factor results in higher accuracy but lower speed.
             </p>
-<!--         </div>
-    </div> -->
-    <script src="https://cdn.jsdelivr.net/npm/dat.gui"></script>
-    <script src="stats.min.js"></script>
-    <script src="https://unpkg.com/@tensorflow/tfjs"></script>
-    <script src="https://unpkg.com/@tensorflow-models/posenet"></script>
-    <script src="demo_util.js"></script>
-    <script src="camera.js"></script>
-    <script src="/ai/js/training-utilities.js"></script>
-    <script src="/ai/js/translate.js"></script>
+<script src="../js/load-scripts.js"></script>
+<script>
+load_local_or_remote_scripts(
+    ["stats.min.js",
+    "../js/tfjs.js",
+     "posenet.min.js",
+     "../js/dat.gui.js",
+     "demo_util.js",
+     "camera.js",
+     "../js/training-utilities.js",
+     "../js/translate.js"],
+    ["stats.min.js",
+     "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest",
+     "https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet",
+     "https://cdn.jsdelivr.net/npm/dat.gui",
+     "demo_util.js",
+     "camera.js",
+     "../js/training-utilities.js",
+     "../js/translate.js"]);
+</script>
 </body>
 </html>
