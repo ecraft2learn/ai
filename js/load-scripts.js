@@ -6,16 +6,24 @@
  */
 
 function load_local_or_remote_scripts (local_URLs, remote_URLs) {
-    const load_URL = (URL) => {
+    const load_URLs = () => {
+        if (scripts_remaining.length === 0) {
+            // listeners for DOMContentLoaded above may have not yet been created when they loaded
+            let event = document.createEvent('Event');
+            event.initEvent('DOMContentLoaded', true, true);
+            window.dispatchEvent(event);
+            return;
+        }
+        let next_URL = scripts_remaining.splice(0, 1)[0];
         const script = document.createElement('script');
-        script.src = URL;
+        script.onload = load_URLs;
+        script.src = next_URL;
         script.charset = "UTF-8";
         document.head.appendChild(script);
     };
-    if (window.location.hostname === "localhost" || window.location.hostname === "file") {
-        local_URLs.forEach(load_URL);
-    } else {
-        remote_URLs.forEach(load_URL);
-    }
+    let scripts_remaining = (window.location.hostname === "localhost" || window.location.protocol === "file") ?
+                            local_URLs :
+                            remote_URLs;
+    load_URLs();
 }
 

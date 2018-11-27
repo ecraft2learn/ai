@@ -809,7 +809,7 @@ window.ecraft2learn =
       } else {
           let index_file_name = window.location.hostname === "localhost" ? "index-local" : "index";
           if (source === 'training using camera') {
-              URL = "/ai/camera-train/" + index_file_name + ".html?translate=1";
+              URL = "/ai/camera-train/index.html?translate=1";
               if (together) {
                   URL += "&together=1";
               }                  
