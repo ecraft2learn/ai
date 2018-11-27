@@ -822,7 +822,7 @@ window.ecraft2learn =
           } else if (source === 'image classifier') {
               URL = "/ai/mobilenet/index.html";
           } else if (source === 'tensorflow.js') {
-              URL = "/ai/tensorflow/" + index_file_name + ".html";
+              URL = "/ai/tensorflow/index.html";
           }
           if (window.location.hostname !== "localhost") {
               URL = "https://ecraft2learn.github.io" + URL;

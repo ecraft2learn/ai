@@ -1,13 +1,28 @@
 <!doctype html>
 <html>
   <head>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"> </script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dat.gui"></script>
-<!--     uncomment the following to run tests -->
-<!--     <script src="test.js"></script> -->
-    <script src="tensorflow.js"></script>
-    <link href="/ai/css/ai-teacher-guide.css" rel="stylesheet">
+<script src="../js/load-scripts.js"></script>
+<script>
+// Add "test.js" to the following to run tests
+load_local_or_remote_scripts(
+    ["../js/tfjs.js",
+     "../js/tfjs-vis.js",
+     "../js/dat.gui.js",
+     "tensorflow.js",
+     "../js/training-utilities.js",
+     "../js/translate.js"],
+    ["https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest",
+     "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis",
+     "https://cdn.jsdelivr.net/npm/dat.gui",
+     "tensorflow.js",
+     "../js/training-utilities.js",
+     "../js/translate.js"],
+     () => {
+         // when all the scripts have loaded
+         create_return_to_snap_button(undefined, "return_to_snap");
+     });
+</script>
+    <link href="../css/ai-teacher-guide.css" rel="stylesheet">
 	<link href="/uui/help/oer-style.css" rel="stylesheet">
   </head>
 <body style="margin: 0;
@@ -32,10 +47,5 @@ At any time you can save your model to the local file system.
 Or load a previously saved model.
 </p>
 <div id="return_to_snap"></div>
-<script src="/ai/js/training-utilities.js"></script>
-<script src="/ai/js/translate.js"></script>
-<script>
-create_return_to_snap_button(undefined, "return_to_snap");
-</script>
 </body>
 </html>
