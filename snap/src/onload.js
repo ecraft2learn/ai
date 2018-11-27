@@ -51,7 +51,15 @@ window.addEventListener('load', function () {
 	world = new WorldMorph(world_canvas);
 //  world.worldCanvas.focus(); // not good for pages with iframes containing Snap! programs
 	ide_morph.openIn(world);
-	if (window.frameElement) { // if running in an iframe see if a local project_path is declared
+	if (window !== window.parent) { // if running in an iframe see if a local project_path is declared
+	    if (!window.frameElement) {
+	    	if (window.location.protocol !== 'https' && window.location.protocol !== 'http') {
+	    		alert("Cannot load project into Snap! since URL protocol is neither HTTPS nor HTTP.");
+	    	} else {
+				alert("Sorry something has gone wrong with loading projects into Snap! on this page.");
+	    	}
+	    	return;
+	    }
 		project_path = window.frameElement.getAttribute("project_path");
 		run_full_screen = window.frameElement.getAttribute("run_full_screen");
 		full_screen = run_full_screen || window.frameElement.getAttribute("full_screen");
