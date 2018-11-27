@@ -820,7 +820,7 @@ window.ecraft2learn =
           } else if (source === 'style transfer') {
               URL = "/ai/style-transfer/" + index_file_name + ".html";
           } else if (source === 'image classifier') {
-              URL = "/ai/mobilenet/" + index_file_name + ".html";
+              URL = "/ai/mobilenet/index.html";
           } else if (source === 'tensorflow.js') {
               URL = "/ai/tensorflow/" + index_file_name + ".html";
           }

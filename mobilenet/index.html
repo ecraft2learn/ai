@@ -3,11 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <title>MobileNet</title>
-    <!-- Load TensorFlow.js. This is required to use MobileNet. -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"> </script>
-    <!-- Load the MobileNet model. -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"> </script>
-    <script src="classify.js"></script>
+<script src="../js/load-scripts.js"></script>
+<script>
+load_local_or_remote_scripts(
+    ["../js/tfjs.js",
+     "mobilenet.js",
+     "classify.js"],
+    ["https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest",
+     "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet",
+     "classify.js"]);
+</script>
 </head>
 <body>
 You should never see this since is loaded into a "hidden" iframe
