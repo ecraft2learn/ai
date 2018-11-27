@@ -276,6 +276,8 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
         if (configuration.validationSplit) {
             // see https://github.com/tensorflow/tfjs/issues/927
             // hack until resolved - note there may be a memory leak here
+            // tests indicate that the memory loss is only for the first time this is run
+            // presumably the validation set is cached 
             model.fit(xs, ys, configuration)
                 .then((x) => {
                          tf.tidy(() => {
