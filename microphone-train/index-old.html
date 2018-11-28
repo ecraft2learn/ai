@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<!-- This file was copied and modified by Ken Kahn <toontalk@gmail.com> as part of the eCraft2Learn project 
+     Original at https://github.com/dreamdom/JsSpeechRecognizer/blob/master/JsSpeechRecognizer.js
+-->
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Speech Recognition Training</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../css/ai-teacher-guide.css">
+</head>
+
+<body>
+    <!-- Include the WebRTC adapter -->
+    <script src="adapter.js"></script>
+    <link rel="icon" type="image/png" href="../images/eCraft2Learn-Favicon.png" />
+    <script src="JsSpeechRecognizer.js"></script>
+    <script src="../js/training-utilities.js"></script>
+    <script src="train.js"></script>
+    <script src="../js/translate.js"></script>
+    <div id="introduction">
+        <ol style="margin-top:20px; margin-left:30px;">
+            <li>Train by holding down a <b>click to train</b> button, saying the word or phrase (or making a sound), and then releasing the button.</li>
+            <li>Train each word or phrase multiple times.</li>
+            <li>Test by pressing the <b>start testing</b> button and say a word or phrase already trained.</li>
+        </ol>
+    </div>
+    <p>
+    Don't worry, we aren't sending any audio recordings to a remote server.
+    All the machine learning is being done locally on device, and you can check out our source code on Github.
+    </p>
+
+
+</body>
+
+</html>

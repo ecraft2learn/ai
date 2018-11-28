@@ -1,9 +1,11 @@
-// A file that defines the behaviour of the audio training support window for the eCraft2Learn Snap! AI library
-// Written by Ken Kahn 
-// No rights reserved.
+ /**
+ * Defines the behaviour of the audio training support window for the eCraft2Learn Snap! AI library
+ * Authors: Ken Kahn
+ * License: New BSD
+ */
 
 ((function () {
-let new_introduction;
+let new_introduction; // HTML on page introducing things
 
 const initialise = async function (training_class_names) {
     let report_error = function (error_message) {
@@ -36,11 +38,10 @@ const initialise = async function (training_class_names) {
             }
             let recognizer = user_training ? user_recognizer : builtin_recognizer;
             recognise(recognizer,
-                      minimum_probability,
                       recognitions => {
                           window.parent.postMessage({confidences: recognitions}, "*");
                       });
-        } else if (event.data === 'stop') { // from clicking on stop sign
+        } else if (event.data === 'stop') { // from clicking on stop sign or running eCraft2Learn.stop_audio_recognition
             pending_recognitions = [];
             stop_recognising(true);
         } else if (event.data === 'stop_recognising') {
@@ -49,36 +50,26 @@ const initialise = async function (training_class_names) {
     };
     // these listeners need to be in the scope of initialise
     window.addEventListener("message", receive_messages, false);
-    let minimum_probability = .01; // to be displayed - not the same as probabilityThreshold which refers to the best result
     let pending_recognitions = [];
-    const recognise = async function (recognizer, minimum_probability, callback) {
+    const recognise = async function (recognizer, callback) {
         if (recognizer !== builtin_recognizer) {
             await add_samples_to_model();
         }
         if (currently_listening_recognizer) {
             // already listening
             pending_recognitions.push(async function () {
-                await recognise(recognizer, minimum_probability, callback);
-            })
+                await recognise(recognizer, callback);
+            });
             return;
         }
         currently_listening_recognizer = recognizer;
         recognizer
             .startStreaming(
                 recognition => {
-                    let scores = recognition.scores.slice().sort().reverse(); // slice() to not clobber it using 'sort'
+                    let scores = recognition.scores;
                     let labels = recognizer.wordLabels();
-                    let results = [];
-                    scores.forEach(function (score, index) {
-                        let original_index = recognition.scores.indexOf(score);
-                        if (original_index > 1 && score >= minimum_probability) {
-                            results.push([labels[original_index], (score*100).toFixed(0)]);
-                        }
-                    });
-//                     console.log(recognition.scores.indexOf(Math.max(...recognition.scores)));
-                    if (results.length > 0) {
-                        callback(results);
-                    }
+                    let results = labels.map((label, index) => [label, Math.round(scores[index]*100)]);
+                    callback(results.sort((x, y) => x[1] < y[1] ? 1 : -1));
                 },
                 {probabilityThreshold: 0.75,
                  invokeCallbackOnNoiseAndUnknown: false})
@@ -107,15 +98,15 @@ const initialise = async function (training_class_names) {
     let examples_collected = 0;
     let train_on = async function (class_index, info_text) {
         await stop_recognising(true);
-        await user_recognizer.collectExample(training_class_names[class_index])
+        user_recognizer.collectExample(training_class_names[class_index])
             .then(() => {
                 examples_collected++;
                 if (typeof info_text.count !== 'number') {
                     info_text.count = 1;
-                    info_text.innerHTML = " " + info_text.count + " example trained";
+                    info_text.innerHTML = "&nbsp;&nbsp;" + info_text.count + " example trained";
                 } else {
                      info_text.count++;
-                     info_text.innerHTML = " " + info_text.count + " examples trained";
+                     info_text.innerHTML = "&nbsp;&nbsp;" + info_text.count + " examples trained";
                 }                         
          });
     };
@@ -124,15 +115,17 @@ const initialise = async function (training_class_names) {
     };
     const create_test_button = function (training_class_names) {
         const button = document.createElement('button');
-        button.innerText = "Start testing";
+        const start_label = "Start testing";
+        const stop_label = "Stop testing";
+        button.innerText = start_label;
         button.className = "testing-button";
         const results_div = document.createElement('div');
         document.body.appendChild(button);
         document.body.appendChild(results_div);
-        let button_down = async function () {
+        const start = () => {
+            results_div.innerHTML = "<p>Start speaking.</p>";
             add_samples_to_model().then(() => {
                 recognise(user_recognizer,
-                          minimum_probability,
                           function (recognitions) {
                               results_div.innerHTML = "";
                               recognitions.forEach(function (label_and_score) {
@@ -141,31 +134,39 @@ const initialise = async function (training_class_names) {
                               });
                           });                
                 });
-            results_div.innerHTML = "<p>Release when finished speaking.</p>";
         };
-        let button_up = function () {
+        const stop = () => {
+            results_div.innerHTML = "<p>No longer listening.</p>";
+            pending_recognitions = [];
             stop_recognising();
         };
-        button.addEventListener('mousedown',  button_down);
-        button.addEventListener('touchstart', button_down);
-        button.addEventListener('mouseup',    button_up);
-        button.addEventListener('touchend',   button_up);
+        let toggle_recognition = () => {
+            if (button.innerText === start_label) {
+                start();
+                button.innerText = stop_label;
+            } else {
+                stop();
+                button.innerText = start_label;
+            }
+        };
+        button.addEventListener('click',    toggle_recognition);
+        button.addEventListener('touchend', toggle_recognition);
     };
     const add_samples_to_model = async function () {
         if (examples_collected === 0) {
             return;
         }
         examples_collected = 0;
-//         console.log(user_recognizer.countExamples());
-        window.parent.postMessage({show_message: "Training model with new examples"}, "*"); // probably hidden so this won't be seen
+        // probably hidden so the following won't be seen
+        window.parent.postMessage({show_message: "Training model with new examples"}, "*");
         user_recognizer
             .train({
                   epochs: 25,
-                  callback: {
-                    onEpochEnd: async (epoch, logs) => {
-                      console.log(`Epoch ${epochs}: loss=${logs.loss}, accuracy=${logs.acc}`);
-                    }
-                  }
+//                   callback: {
+//                     onEpochEnd: async (epoch, logs) => {
+//                       console.log(`Epoch ${epoch}: loss=${logs.loss}, accuracy=${logs.acc}`);
+//                     }
+//                   }
                 })
             .then(() => {
                     window.parent.postMessage({show_message: "Training finished",

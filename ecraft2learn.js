@@ -717,7 +717,7 @@ window.ecraft2learn =
     };
     let train = function (options) {
       // options can be
-      let source = options.source; // can be 'training using camera','training using microphone', or "posenet"
+      let source = options.source; // can be 'training using camera','training using microphone', "posenet", or more
       let buckets_as_snap_list = options.buckets_as_snap_list; // list of labels (as Snap! object)
       let add_to_previous_training = options.add_to_previous_training; // if false will throw away any current training
       let page_introduction = options.page_introduction; // optional HTML that will appear in place of the default on training page
@@ -807,25 +807,28 @@ window.ecraft2learn =
       if (together_url) {
           URL = together_url;
       } else {
-          let index_file_name = window.location.hostname === "localhost" ? "index-local" : "index";
           if (source === 'training using camera') {
-              URL = "/ai/camera-train/index.html?translate=1";
+              URL = "/camera-train/index.html?translate=1";
               if (together) {
                   URL += "&together=1";
               }                  
           } else if (source === 'training using microphone') {
-              URL = "/ai/microphone-train/" + index_file_name + ".html?translate=1";
+              URL = "/microphone-train/index.html?translate=1";
+          } else if (source === 'training using microphone (old version)') {
+              URL = "/microphone-train/index-old.html?translate=1";
           } else if (source === 'posenet') {
-              URL = "/ai/posenet/index.html?translate=1";
+              URL = "/posenet/index.html?translate=1";
           } else if (source === 'style transfer') {
-              URL = "/ai/style-transfer/index.html";
+              URL = "/style-transfer/index.html";
           } else if (source === 'image classifier') {
-              URL = "/ai/mobilenet/index.html";
+              URL = "/mobilenet/index.html";
           } else if (source === 'tensorflow.js') {
-              URL = "/ai/tensorflow/index.html";
+              URL = "/tensorflow/index.html";
           }
-          if (window.location.hostname !== "localhost") {
-              URL = "https://ecraft2learn.github.io" + URL;
+          if (window.location.hostname === "localhost" || window.location.protocol === 'file') {
+              URL = ".." + URL;
+          } else {
+              URL = "https://ecraft2learn.github.io/ai" + URL;
           }
       }
       if (iframe_in_new_tab) {
@@ -2358,8 +2361,17 @@ window.ecraft2learn =
              together: together,
              together_url: together_url});
   },
-  train_using_microphone: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback, training_name) {
+  tensorflow_train_using_microphone: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback, training_name) {
       train({source: 'training using microphone', 
+             buckets_as_snap_list: buckets_as_snap_list, 
+             add_to_previous_training: add_to_previous_training,
+             page_introduction: page_introduction,
+             callback: callback,
+             training_name: training_name});
+  },
+  train_using_microphone: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback, training_name) {
+      // old version kept for backwards compatibility and for tiny computers such as Raspberry Pi
+      train({source: 'training using microphone (old version)', 
              buckets_as_snap_list: buckets_as_snap_list, 
              add_to_previous_training: add_to_previous_training,
              page_introduction: page_introduction,
@@ -2445,6 +2457,11 @@ window.ecraft2learn =
       }
       window.addEventListener("message", receive_confidences);
   },
+  stop_audio_recognition: () => {
+      if (ecraft2learn.support_window['training using microphone']) {
+          ecraft2learn.support_window['training using microphone'].postMessage('stop', "*");
+      }  
+  },
   audio_confidences: function (callback, duration_in_seconds, version) {
       // deprecated version
       var receive_confidences = function (event) {
@@ -2454,7 +2471,7 @@ window.ecraft2learn =
            };
       };
       record_callbacks(callback);
-      if (!ecraft2learn.support_window['training using microphone']) {
+      if (!ecraft2learn.support_window['training using microphone (old version)']) {
           inform("Training request warning",
                  "Run the 'Train with audio buckets ...' command before using 'Audio label confidences'");
           return;
@@ -2463,7 +2480,7 @@ window.ecraft2learn =
           duration_in_seconds = 3; // 3 second default 
       }
       // convert from milliseconds to seconds
-      ecraft2learn.support_window['training using microphone'].postMessage({predict: duration_in_seconds*1000}, "*");
+      ecraft2learn.support_window['training using microphone (old version)'].postMessage({predict: duration_in_seconds*1000}, "*");
       window.addEventListener("message", receive_confidences);  
   },
   stop_audio_recognition: function () {

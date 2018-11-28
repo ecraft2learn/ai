@@ -1,38 +1,40 @@
 <!DOCTYPE html>
-<!-- This file was copied and modified by Ken Kahn <toontalk@gmail.com> as part of the eCraft2Learn project 
-     Original at https://github.com/dreamdom/JsSpeechRecognizer/blob/master/JsSpeechRecognizer.js
--->
-
-<html lang="en">
-
+<html>
 <head>
     <meta charset="utf-8">
     <title>Speech Recognition Training</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/ai/css/ai-teacher-guide.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="../css/ai-teacher-guide.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="../images/eCraft2Learn-Favicon.png" />
+    <script src="../js/load-scripts.js"></script>
+<script>
+load_local_or_remote_scripts(
+    ["../js/tfjs.js",
+     "../js/training-utilities.js",
+     "speech-commands.js",
+     "audio-train.js",
+     "../js/translate.js"],
+    ["https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest",
+     "../js/training-utilities.js",
+     "speech-commands.js",
+     "audio-train.js",
+     "../js/translate.js"]);
+</script>
 </head>
-
 <body>
-    <!-- Include the WebRTC adapter -->
-    <script src="adapter.js"></script>
-    <link rel="icon" type="image/png" href="/ai/images/eCraft2Learn-Favicon.png" />
-    <script src="JsSpeechRecognizer.js"></script>
-    <script src="/ai/js/training-utilities.js"></script>
-    <script src="train.js"></script>
-    <script src="/ai/js/translate.js"></script>
-    <div id="introduction">
-        <ol style="margin-top:20px; margin-left:30px;">
-            <li>Train by holding down a <b>click to train</b> button, saying the word or phrase (or making a sound), and then releasing the button.</li>
-            <li>Train each word or phrase multiple times.</li>
-            <li>Test by pressing the <b>start testing</b> button and say a word or phrase already trained.</li>
-        </ol>
-    </div>
-    <p>
-    Don't worry, we aren't sending any audio recordings to a remote server.
-    All the machine learning is being done locally on device, and you can check out our source code on Github.
-    </p>
-
-
+<p id="please-wait">Loading. Please wait.</p>
+<!-- Introduction is hidden until everything is loaded -->
+<div id="introduction" style="display:none">
+<ol style="margin-top:20px; margin-left:30px;">
+<li>Train by clicking a <b>click to train</b> button and then saying the word (or making a sound).</li>
+<li>Train each word or phrase multiple times.</li>
+<li>Test by pressing the <b>start testing</b> button and say a word already trained.</li>
+</ol>
+<p>
+Don't worry, we aren't sending any audio recordings to a remote server.
+All the machine learning is being done locally on device, and you can check out our source code on Github.
+</p>
+</div>
 </body>
-
 </html>
