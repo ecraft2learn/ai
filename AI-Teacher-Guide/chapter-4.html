@@ -344,6 +344,10 @@ Here you can create programs that respond to any sound.
 Also you can train it to recognise a few different words or phrases that works locally on your computer without sending
 any audio to a cloud server.
 This is useful in contexts without a reliable network connection or for increased privacy.
+Furthermore, the <span class="block-name">Audio label confidences</span> block has an option to use a 
+"Pre-trained model of 20 words" on your device.
+It is capable of recognising 'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
+'up', 'down', 'left', 'right', 'go', 'stop', 'yes', and 'no'.
 </p>
 <figure class = "snap-iframe"
         id = "train audio"
@@ -355,12 +359,15 @@ This is useful in contexts without a reliable network connection or for increase
 </figure>
 
 <p class="instructions">
-The <span class="block-name">Train with audio buckets...</span> block currently uses a simple learning algorithm.
-The plan is to replace it with a deep learning model.
+The <span class="block-name">Train with audio buckets...</span> block uses a Tensorflow.js deep learning model
+which without a GPU runs too slow to be useful.
+For running on small computers such as a Raspberry Pi there is also the similar
+<span class="block-name">Train (without Tensorflow) with audio buckets...</span> block and its accompanying
+<span class="block-name">Audio label confidences (without Tensorflow)</span> block.
 </p>
 <h4 class="sample-program-white">An Example Program using the Microphone and Machine Learning</h4>
 <p class="sample-program">
-An example using audio training is to tell a sprite to "go forward", "turn right", or "stop".
+An example using audio training is to tell a sprite to go "forward", turn "right", or "stop".
 Note that these labels are for us humans, you can for example make any sound or speak in another language
 and the program should work just fine.
 </p>
@@ -636,8 +643,8 @@ also has sample projects that can be adapted.
 <h4 class="guide-to-guide-white">Future directions for this chapter</h4>
 <p class="guide-to-guide">
 Several enhancements to this chapter are planned.
-These include support for other kinds of input such as text or numbers,
-better models for audio training, and more.
+These include support for other kinds of input such as text or numbers.
+Interfaces to other pre-trained models are planned.
 </p>
 
 <h4 class="resources-white" id="additional-resources">Additional resources</h4>
