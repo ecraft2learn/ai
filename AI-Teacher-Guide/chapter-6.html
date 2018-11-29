@@ -1,12 +1,12 @@
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 <title>Making deep machine learning neural nets</title>
-<link href="/ai/css/ai-teacher-guide.css" rel="stylesheet">
-<link href="/ai/css/oer-style.css" rel="stylesheet">
-<link rel="icon" type="image/png" href="/ai/images/eCraft2Learn-Favicon.png" />
-<script src="/ai/js/ai-guide.js"></script>
+<link href="../css/ai-teacher-guide.css" rel="stylesheet">
+<link href="../css/oer-style.css" rel="stylesheet">
+<link rel="icon" type="image/png" href="../images/eCraft2Learn-Favicon.png" />
+<script src="../js/ai-guide.js"></script>
 </head>
 <body>
-<script src="/ai/js/translate.js"></script>
+<script src="../js/translate.js"></script>
 <h2>A guide to building AI apps and artefacts</h2>
 <h3>Chapter 6 - Making deep machine learning neural nets</h3>
 <h4>Ken Kahn, University of Oxford</h4>
@@ -94,11 +94,29 @@ Alternatively here is a <a href="/ai/snap/snap.html?project=machine learning exe
 full-screen version of the Snap! project for creating, training, and testing models</a>.
 </p>
 <p class="instructions">
+You will notice that it is hard to train the model to compute square root estimates very well.
+There are full-featured versions of blocks for creating and training models that enable you to alter more parameters.
 We suggest you first experiment with what are called the <i>hyperparameters</i> such as
 the number and size of the layers, the optimizer, the learning rate, the loss function,
 the validation split, and the number of learning steps.
-Then see if you can make a model that computes a different function.
-E.g. conversion from Centigrade to Fahrenheit.
+With the right settings the following can create a good square root estimator.
+</p>
+<figure class = "snap-iframe"
+        id = "better machine learning exercise"
+        full_screen = "true"
+        edit_mode = "true"
+        stage_ratio = ".5"
+        container_style = "width: 1000px; height: 1000px" 
+        caption = "Create, train, and test a simple model using full-featured blocks. TRY IT!">
+</figure>
+<p class="instructions">
+Alternatively here is a <a href="/ai/snap/snap.html?project=better machine learning exercise&editMode" target="_blank">
+full-screen version of the Snap! project for creating, training, and testing models using full-featured blocks</a>.
+</p>
+<p class="instructions">
+By changing the input and output lists you can make a model that computes different functions.
+For example, you could train a model to convert from Centigrade to Fahrenheit.
+Try a few functions and see if some are easier to train than others.
 </p>
 <p class="instructions">
 The machine learning blocks are not restricted to learning how to map one input number to an output number.
