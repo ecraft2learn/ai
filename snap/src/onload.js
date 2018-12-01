@@ -36,6 +36,9 @@ window.addEventListener('load', function () {
 						   	   ide_morph.toggleAppMode(false);
 						   }
 						   ide_morph.showMessage(""); // remove message
+						   if (!show_palette && full_screen && edit_mode) {
+                               ide_morph.setPaletteWidth(0);
+                           }
 					   },
 					   1000);
 	};
@@ -64,6 +67,7 @@ window.addEventListener('load', function () {
 		run_full_screen = window.frameElement.getAttribute("run_full_screen");
 		full_screen = run_full_screen || window.frameElement.getAttribute("full_screen");
 		edit_mode = window.frameElement.getAttribute("edit_mode");
+		show_palette = window.frameElement.getAttribute("show_palette");
 		let stage_scale = window.frameElement.getAttribute("stage_ratio");
 		if (project_path) {
 			fetch_and_load(project_path);

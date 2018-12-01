@@ -34,7 +34,8 @@ Here is a very nice 5 minute video that introduces the big ideas behind machine 
         width="560" height="315"
         style="display: block; margin-left:auto; margin-right: auto;" 
         src="https://www.youtube.com/embed/_rdINNHLYaQ"
-        frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+</iframe>
 
 <p class="background-information">
 In this chapter we focus upon "supervised learning" which means that during training labels
@@ -83,7 +84,7 @@ When the training tab launches you'll see two buttons:
         id = "camera train"
         full_screen = "true"
         edit_mode = "true"
-        stage_ratio = ".6"
+        stage_ratio = "1"
         container_style = "width: 1000px; height: 550px;" 
         caption = "A block for training the system to recognise what the camera is showing. TRY IT">
 </figure>
@@ -190,7 +191,7 @@ You can experiment with these costume-based training blocks in the following.
         id = "black and white"
         full_screen = "true"
         edit_mode = "true"
-        stage_ratio = ".1"
+        stage_ratio = "1"
         container_style = "width: 1000px; height: 750px;"
         caption = "Blocks for using sprite costumes for training and classification. TRY IT!">
 </figure>
@@ -235,8 +236,8 @@ Note this will be slow to load but should run quickly thereafter.
         id = "mobilenet"
         full_screen = "true"
         edit_mode = "true"
-        stage_ratio = ".6"
-        container_style = "width: 1000px; height: 500px;"
+        stage_ratio = "1"
+        container_style = "width: 1000px; height: 525px;"
         caption = "Blocks for image recognition on device without cloud services. TRY IT">
 </figure>
 
@@ -348,13 +349,15 @@ Furthermore, the <span class="block-name">Audio label confidences</span> block h
 "Pre-trained model of 20 words" on your device.
 It is capable of recognising 'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
 'up', 'down', 'left', 'right', 'go', 'stop', 'yes', and 'no'.
+This relies upon the <a href="https://github.com/tensorflow/tfjs-models/tree/master/speech-commands" target="_blank">
+speech command recognizer</a> created by Google.
 </p>
 <figure class = "snap-iframe"
         id = "train audio"
         full_screen = "true"
         edit_mode = "true"
-        stage_ratio = ".1"
-        container_style = "width: 1000px; height: 750px;" 
+        stage_ratio = "1"
+        container_style = "width: 1000px; height: 450px;" 
         caption = "A block for training the system to recognise what the microphone is hearing. TRY IT">
 </figure>
 
@@ -405,6 +408,8 @@ They both can specify that one wants the confidence the system has that it has c
 (values between 0 and 100).
 Or that the location of the body part is desired which is reported as a list of the x and y coordinates.
 Depending upon the value of the flag the location is reported either in as values between 0 and 100 or as coordinates of the stage.
+Note that because Posenet displays the video in a mirror-like fashion left and right are from the camera's viewpoint
+not the person whose pose is being analysed.
 </p>
 <figure class = "snap-iframe"
         id = "pose"
@@ -446,8 +451,8 @@ The <span class="block-name">Create costume in style ...</span> block takes in a
         id = "style transfer exercise"
         full_screen = "true"
         edit_mode = "true"
-        stage_ratio = ".8"
-        container_style = "width: 1200px; height: 800px" 
+        stage_ratio = ".83"
+        container_style = "width: 1000px; height: 800px" 
         caption = "Click the block to take a photo and recreate it in the style you select. TRY IT!">
 </figure>
 <p class="instructions">
@@ -515,10 +520,12 @@ A very good short video explaining how style transfer works is here:
 <iframe class="background-information-white"
         width="560" 
         height="315"
+        style="display: block; margin-left:auto; margin-right: auto;" 
         src="https://www.youtube.com/embed/WHmp26bh0tI?rel=0"
         frameborder="0"
         allow="autoplay; encrypted-media"
-        allowfullscreen></iframe>
+        allowfullscreen>
+</iframe>
 
 <h4 class="project-ideas-white" id="project-ideas">Possible project ideas using machine learning</h4>
 <p class="project-ideas">

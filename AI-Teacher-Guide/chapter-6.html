@@ -85,8 +85,8 @@ to test how well the model has learned.
         id = "machine learning exercise"
         full_screen = "true"
         edit_mode = "true"
-        stage_ratio = ".5"
-        container_style = "width: 1000px; height: 900px" 
+        stage_ratio = ".6"
+        container_style = "width: 1000px; height: 910px" 
         caption = "Create, train, and test a simple model. TRY IT!">
 </figure>
 <p class="instructions">
@@ -105,8 +105,8 @@ With the right settings the following can create a good square root estimator.
         id = "better machine learning exercise"
         full_screen = "true"
         edit_mode = "true"
-        stage_ratio = ".5"
-        container_style = "width: 1000px; height: 850px" 
+        stage_ratio = ".6"
+        container_style = "width: 1000px; height: 900px" 
         caption = "Create, train, and test a simple model using full-featured blocks. TRY IT!">
 </figure>
 <p class="instructions">
@@ -125,39 +125,6 @@ A simple example is
 a model that estimates the distance a point is from the origin</a>.
 Given values for <i>x</i> and <i>y</i> it estimates the square root of the sum of the squares of each.
 </p>
-<p class="instructions">
-The <span class="block-name">Load neural net from URL</span> block is a way to add trained models to your projects.
-The model can be saved to the local file system using the
-<span class="block-name">open support panel tensorflow.js</span> block.
-And then the JSON and weights files need to be copied to a web server.
-Here is an example of loading a saved model.
-</p>
-<figure class = "snap-iframe"
-        id = "load neural net"
-        full_screen = "true"
-        edit_mode = "true"
-        stage_ratio = ".5"
-        container_style = "width: 1000px; height: 450px" 
-        caption = "Loading a neural net from the web">
-</figure>
-<p class="instructions">
-The <span class="block-name">Load ... data from URL</span> block can be used to load either
-training or validation data to then use for training.
-After running the <span class="block-name">Send ... data ...</span> block the data
-can be saved to the local file system using the
-<span class="block-name">open support panel tensorflow.js</span> block.
-And then the file needs to be copied to a web server.
-Note that one can save training data as validation data and vice versa.
-Here is an example of loading saved data.
-</p>
-<figure class = "snap-iframe"
-        id = "load training data"
-        full_screen = "true"
-        edit_mode = "true"
-        stage_ratio = ".25"
-        container_style = "width: 1000px; height: 1000px" 
-        caption = "Loading training or validation data from the web">
-</figure>
 <h3 class="how-it-works-white">A brief introduction to deep neural nets</h3>
 <p class="how-it-works">
 A deep neural net consists of an input layer, some number of hidden layers, and an output layer.
@@ -205,18 +172,27 @@ be either "training" or "validation".
 Training data is used in training both as data to process
 and a random sample is used to calculate how well the model is doing.
 validation data is only used to calculate the error or loss during training.
+Note that one can save training data as validation data.
 </p>
 <figure class = "snap-iframe"
-        id = "load models and data"
+        id = "load neural net"
         full_screen = "true"
         edit_mode = "true"
         stage_ratio = ".75"
-        container_style = "width: 1000px; height: 700px" 
-        caption = "Blocks for loading pre-trained models and data">
+        container_style = "width: 1000px; height: 450px" 
+        caption = "Loading a neural net from the web">
+</figure>
+<figure class = "snap-iframe"
+        id = "load training data"
+        full_screen = "true"
+        edit_mode = "true"
+        stage_ratio = ".6"
+        container_style = "width: 1000px; height: 1000px" 
+        caption = "Loading training or validation data from the web">
 </figure>
 <p class="instructions">
 Alternatively here is a <a href="/ai/snap/snap.html?project=load models and data&editMode" target="_blank">
-full-screen version of the Snap! project for loading pre-trained models</a>.
+full-screen version of a Snap! project for loading pre-trained models</a>.
 </p>
 <h3 id="tic-tac-toe" class="instructions-white">Learning to win at Tic Tac Toe</h3>
 <p class="background">

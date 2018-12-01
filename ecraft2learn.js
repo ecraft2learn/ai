@@ -97,7 +97,7 @@ window.ecraft2learn =
           if (!inside_snap()) {
               return;
           }
-          var ide = start;
+          let ide = start;
           while (ide && !(ide instanceof IDE_Morph)) {
               ide = ide.parent;
           }

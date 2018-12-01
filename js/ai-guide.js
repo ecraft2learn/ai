@@ -249,7 +249,7 @@ window.addEventListener(
                  iframe.addEventListener('load',    
                                          function () {
                                              setTimeout(function () {
-                                                loading.remove();
+                                                 loading.remove();
                                              },
                                              1000);
                                          });
