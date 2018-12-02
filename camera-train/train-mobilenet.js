@@ -37,7 +37,7 @@ const TOPK = 10;
 
 const TOGETHER_JS = window.location.search.indexOf('together') >= 0;
 
-let infoTexts = [];
+let info_texts = [];
 let training = -1;
 let classifier;
 let mobilenet_model;
@@ -168,7 +168,7 @@ async function animate() {
                          image_url:   image_url,
                          label_index: training});
     }
-    infoTexts[training].innerHTML = 
+    info_texts[training].innerHTML = 
         `&nbsp;&nbsp;&nbsp;${classifier.getClassExampleCount()[training]} examples`;
   }
       
@@ -182,13 +182,13 @@ async function animate() {
         for (let i=0; i<NUM_CLASSES; i++) {
             // Make the predicted class bold
             if (result.classIndex == i){
-              infoTexts[i].style.fontWeight = 'bold';
+              info_texts[i].style.fontWeight = 'bold';
             } else {
-              infoTexts[i].style.fontWeight = 'normal';
+              info_texts[i].style.fontWeight = 'normal';
             }
             // Update info text
             if (exampleCount[i] > 0){
-              infoTexts[i].innerHTML = 
+              info_texts[i].innerHTML = 
                 `&nbsp;&nbsp;&nbsp;${exampleCount[i]} <span class="notranslate" translate=no>examples</span> - ${Math.round(result.confidences[i]*100)}%`
             }
         }
@@ -252,20 +252,6 @@ const initialise_page = async function (incoming_training_class_names, source) {
   source.postMessage("Ready", "*");
 }
 
-const load_data_set_file = function (file) {
-    let reader = new FileReader();
-    reader.onloadend = function () {
-        let data_set = string_to_data_set(reader.result);
-        load_data_set(data_set,
-                      (tensor_data_set) => {
-                          classifier.setClassifierDataset(tensor_data_set);
-                          // this ignores data_set.labels - not clear what is best
-                          // user can re-label by loading a data set with different labels this way
-                      });
-    };
-    reader.readAsText(file);
-};
-
 // const receive_drop = function (event) {
 //   // following based on https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/File_drag_and_drop
 //   // Prevent default behavior (Prevent file from being opened)
@@ -298,20 +284,16 @@ function start() {
 //  Create training buttons and info texts 
     let train_on  = (i) => training = i;
     let train_off = (i) => training = -1;
-    infoTexts = create_training_buttons(training_class_names, train_on, train_off); 
+    info_texts = create_training_buttons(training_class_names, train_on, train_off); 
     create_save_training_button('camera',
                                 () => classifier.getClassifierDataset(),
                                 () => training_class_names);
     create_return_to_snap_button();
     let please_wait = document.getElementById("please-wait");
-    if (!please_wait.getAttribute("updated")) {
-        please_wait.innerHTML = "<p>Ready to start training. Just hold down one of the buttons when the desired image is front of the camera. " +
-                                "Do this until the system is sufficiently confident of the correct label when a new image is presented. " +
-                                "Then return to the Snap! tab.</p>" +
-                                "<p>Don't worry, we aren't sending any of your images to a remote server. " +
-                                "All the machine learning is being done " +
-                                "locally on device, and you can check out our source code on Github.</p>";
+    if (please_wait) {
+        please_wait.remove(); // remove it if not already removed
     }
+    document.getElementById("introduction").style.display = 'block'; // was hidden until everything is loaded
     timer = requestAnimationFrame(animate);
 }
 
@@ -349,9 +331,9 @@ const listen_for_messages = function (event) {
         return;
     }
     let update_introduction = function (new_introduction) {
-        let please_wait = document.getElementById("please-wait");
-        please_wait.innerHTML = new_introduction;
-        please_wait.setAttribute("updated", true);
+        let introduction = document.getElementById("introduction");
+        introduction.innerHTML = new_introduction;
+        introduction.setAttribute("updated", true);
     };                      
     if (typeof event.data.predict !== 'undefined') {
         let example_count = classifier.getClassExampleCount();
@@ -405,7 +387,7 @@ const listen_for_messages = function (event) {
         // update HTML of the page with custom introduction
         update_introduction(event.data.new_introduction);
     } else if (typeof event.data.training_data !== 'undefined') {
-        let data_set = string_to_data_set(event.data.training_data);
+        let data_set = string_to_data_set('camera', event.data.training_data);
         if (data_set) {
             if (data_set.labels) {
                 if (training_class_names) {
@@ -418,10 +400,7 @@ const listen_for_messages = function (event) {
                 let introduction = decodeURIComponent(data_set.html);
                 update_introduction(introduction);
             }
-            if (load_data_set(data_set,
-                              (tensor_data_set) => {
-                                  classifier.setClassifierDataset(tensor_data_set);
-                              })) {
+            if (load_data_set('camera', data_set, classifier.setClassifierDataset.bind(classifier))) {
                 // pass back training_class_names since Snap! doesn't know them
                 event.source.postMessage({data_set_loaded: training_class_names}, "*");
             }

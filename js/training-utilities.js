@@ -97,17 +97,26 @@ function create_save_training_button(source_name, tensors_getter, training_class
         // also needed to move tensors from GPU using dataSync
         let json = '{"saved_' + source_name + '_training":{';
         let keys = Object.keys(tensors);
+        const jsonify_tensor = (tensor) => {
+            let flat_array = tensor.dataSync();
+            let shape = tensor.shape;
+            json += '{"shape":' + JSON.stringify(shape) + ',' +
+                     '"data":' + JSON.stringify(Object.values(flat_array)) + '}';
+        };
         keys.forEach(function (key, index) {
             json += '"' + key + '":[';
-            let flat_array = tensors[key].dataSync();
-            let shape = tensors[key].shape;
-            let row_count = shape[0];
-            let row_width = shape[1];
-            for (let row = 0; row < row_count; row++) {
-                json += '[' + flat_array.slice(row*row_width, (row+1)*row_width) + ']';
-                if (row < row_count-1) { // not last one
-                    json += ',';
-                }
+            let tensor_or_array_of_tensors = tensors[key];
+            if (tensor_or_array_of_tensors instanceof Array) {
+                json += '[';
+                tensor_or_array_of_tensors.forEach((tensor, index) => {
+                    jsonify_tensor(tensor);
+                    if (index < tensor_or_array_of_tensors.length-1) { // except for last one
+                        json += ',';
+                    }
+                });
+                json += ']';
+            } else {
+                jsonify_tensor(tensor_or_array_of_tensors);
             }
             if (index === keys.length-1) {
                 json += ']'; // no comma on the last one
@@ -116,9 +125,9 @@ function create_save_training_button(source_name, tensors_getter, training_class
             }
         });
         json += '},';
-        let please_wait = document.getElementById("please-wait");
-        if (please_wait.getAttribute("updated")) {
-            json += '"html":"' + encodeURIComponent(please_wait.innerHTML) + '",';
+        let introduction = document.getElementById("introduction");
+        if (introduction.getAttribute("updated")) {
+            json += '"html":"' + encodeURIComponent(introduction.innerHTML) + '",';
         }
         json += '"labels":' + JSON.stringify(training_class_names_getter());
         json += '}';
@@ -134,8 +143,8 @@ function create_save_training_button(source_name, tensors_getter, training_class
     document.body.appendChild(save_training_button);
 }
 
-function string_to_data_set(data_set_string) {
-    const start = '{"saved_camera_training":';
+function string_to_data_set(source_name, data_set_string) {
+    const start = '{"saved_' + source_name + '_training":';
     if (data_set_string.substring(0, start.length) === start) {
         try {
             return JSON.parse(data_set_string);
@@ -147,11 +156,21 @@ function string_to_data_set(data_set_string) {
     }
 }
 
-function load_data_set(data_set, dataset_updater) {
+function load_data_set(source_name, data_set, dataset_updater) {
+    const restore_tensor = (shape_and_data) => tf.tensor(shape_and_data.data, shape_and_data.shape);
     try {
         let tensor_data_set = {};
-        Object.entries(data_set.saved_camera_training).forEach(function (entry) {
-            tensor_data_set[entry[0]] = tf.tensor2d(entry[1]);
+        Object.entries(data_set['saved_' + source_name + '_training']).forEach(function (entry) {
+            if (entry[1][0] instanceof Array) {
+                if (typeof entry[1][0][0] === 'number') {
+                   // is an array of numbers -- old format file
+                   tensor_data_set[entry[0]] = tf.tensor2d(entry[1]);
+                } else {
+                   tensor_data_set[entry[0]] = entry[1][0].map(restore_tensor);
+                }
+            } else {
+                tensor_data_set[entry[0]] = restore_tensor(entry[1][0]);
+            }
         });
         dataset_updater(tensor_data_set);
         return true;

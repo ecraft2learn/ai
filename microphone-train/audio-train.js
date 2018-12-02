@@ -1,11 +1,26 @@
  /**
  * Defines the behaviour of the audio training support window for the eCraft2Learn Snap! AI library
+ * Builds upon https://github.com/tensorflow/tfjs-models/tree/master/speech-commands
  * Authors: Ken Kahn
  * License: New BSD
  */
 
 ((function () {
 let new_introduction; // HTML on page introducing things
+let user_recognizer; // recognizer trained by user (as opposed to 20-word built in recognizer)
+let training_classes; // names of the classes
+let info_texts; // used to update information on each training button
+
+const get_or_create_user_recognizer = async () => {
+    if (user_recognizer) {
+        return user_recognizer;
+    }
+    const base_recognizer = SpeechCommands.create('BROWSER_FFT');
+    await base_recognizer.ensureModelLoaded();
+    base_recognizer.params().sampleRateHz = 48000;
+    user_recognizer = base_recognizer.createTransfer('user trained'); // cache it
+    return user_recognizer;
+};
 
 const initialise = async function (training_class_names) {
     let report_error = function (error_message) {
@@ -19,14 +34,11 @@ const initialise = async function (training_class_names) {
     const builtin_recognizer = SpeechCommands.create('BROWSER_FFT');
     await builtin_recognizer.ensureModelLoaded();
     builtin_recognizer.params().sampleRateHz = 48000;
-    let user_recognizer;
     if (training_class_names.length !== 0) {
-        training_class_names.push('_background_noise_');
-        const base_recognizer = SpeechCommands.create('BROWSER_FFT');
-        await base_recognizer.ensureModelLoaded();
-        base_recognizer.params().sampleRateHz = 48000;
-        user_recognizer = base_recognizer.createTransfer('user trained');
+//         training_class_names.push('_background_noise_');
+        get_or_create_user_recognizer();
     }
+    training_classes = training_class_names;
     let currently_listening_recognizer;
     const receive_messages = function (event) {
         if (typeof event.data.predict === 'boolean') {
@@ -123,6 +135,12 @@ const initialise = async function (training_class_names) {
         document.body.appendChild(button);
         document.body.appendChild(results_div);
         const start = () => {
+            if (Object.keys(user_recognizer.transferExamples).length !== training_class_names.length) {
+                results_div.innerHTML = "Training is missing. Only " + Object.keys(user_recognizer.transferExamples).length +
+                                        " words have been trained. Expected all " + training_class_names.length +
+                                        " words to be trained.";
+                return;
+            }
             results_div.innerHTML = "<p>Start speaking.</p>";
             add_samples_to_model().then(() => {
                 recognise(user_recognizer,
@@ -186,12 +204,16 @@ const initialise = async function (training_class_names) {
     Array.from(training_buttons_with_info).forEach(function (training_button_with_info) {
         training_button_with_info.remove();
     });
-    create_training_buttons(training_class_names, train_on, train_off);
+    info_texts = create_training_buttons(training_class_names, train_on, train_off);
     create_test_button(training_class_names);
+    create_save_training_button('microphone',
+                                () => user_recognizer.transferExamples,
+                                () => user_recognizer.wordLabels());
     create_return_to_snap_button();
     window.parent.postMessage({show_message: "Ready",
                                duration: 2},
                                "*");
+    window.parent.postMessage({data_set_loaded: training_classes}, "*");
     // see https://developers.google.com/web/updates/2017/09/autoplay-policy-changes#webaudio
 //     if (speech_recognizer.audioCtx) {
 //         document.querySelectorAll('button').forEach(function (button) {
@@ -220,7 +242,35 @@ window.addEventListener(
             let introduction = document.getElementById("introduction");
             introduction.innerHTML = event.data.new_introduction;
             introduction.setAttribute("updated", true);
-         }
+         } else if (typeof event.data.training_data !== 'undefined') {
+            let data_set = string_to_data_set('microphone', event.data.training_data);
+            if (data_set) {
+                if (data_set.html) {
+                    let introduction = decodeURIComponent(data_set.html);
+                    update_introduction(introduction);
+                }
+                load_data_set('microphone',
+                              data_set,
+                              async (tensor_data_set) => {
+                                  let recognizer = await get_or_create_user_recognizer();
+                                  recognizer.transferExamples = tensor_data_set;
+                                  recognizer.words = training_classes || Object.keys(tensor_data_set);
+                                  if (info_texts) {
+                                      recognizer.words.forEach((word, index) => {
+                                          if (tensor_data_set[word]) {
+                                              let count = tensor_data_set[word].length;
+                                              if (count > 0) {
+                                                  info_texts[index].innerHTML = "&nbsp;&nbsp;" + count + " examples trained";
+                                              }                                             
+                                          }
+                                      });
+                                  }
+                                  // pass back labels in case Snap! doesn't know them
+                                  event.source.postMessage({data_set_loaded: recognizer.words}, "*");
+                                  event.source.postMessage("Ready", "*");
+                                  });
+            }
+        }
     },
     false);
 

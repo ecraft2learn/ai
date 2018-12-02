@@ -584,23 +584,23 @@ window.ecraft2learn =
         document.getElementById("world").style.display = 'none';
         let input_container = document.createElement('div');
         let instructions = document.createElement('p');
-        instructions.innerHTML = "Click the file chooser and select a saved training file.";
+        instructions.innerHTML = "<b> Click the file chooser and select a saved training file.</b> It should be a JSON file.";
         input_container.appendChild(instructions);
         input_container.appendChild(input);
         document.body.appendChild(input_container);
     };
-    const load_camera_training_from_file = function (callback) {
+    const load_transfer_training_from_file = function (source_name, callback) {
         file_to_string(
             function (training_data_as_string) {
-                load_camera_training(training_data_as_string, callback);
+                load_transfer_training(source_name, training_data_as_string, callback);
             });
     };
-    const load_camera_training_from_URL = function(URL, user_callback) {
+    const load_transfer_training_from_URL = function(source_name, URL, user_callback) {
         let error_callback = function (message) {
             inform("Error reading " + URL, message);
         };
         let callback = function (training_data_as_string) {
-            load_camera_training(training_data_as_string, user_callback);
+            load_transfer_training(source_name, training_data_as_string, user_callback);
         }
         ecraft2learn.read_url(URL, callback, error_callback);
     };
@@ -687,14 +687,14 @@ window.ecraft2learn =
                    "You may find that the Raspberry Pi is too slow for machine learning to work well.");
         }       
     };
-    let load_camera_training = (training_data, callback) => {
+    let load_transfer_training = (source_name, training_data, callback) => {
         record_callbacks(callback);
         let source;
-        const camera_training_heading = '{"saved_camera_training":';
-        if (training_data.slice(0, camera_training_heading.length) === camera_training_heading) {
-            source = 'training using camera';
+        const training_heading = '{"saved_' + source_name + '_training":';
+        if (training_data.slice(0, training_heading.length) === training_heading) {
+            source = 'training using ' + source_name;
         } else {
-            inform("Error loading training", "Unrecognised saved training");
+            inform("Error loading " + source_name + " training", "Unrecognised saved training");
             return;
         }
         let new_window = !ecraft2learn.support_window[source] || ecraft2learn.support_window[source].closed;
@@ -727,6 +727,9 @@ window.ecraft2learn =
       let iframe_in_new_tab = options.iframe_in_new_tab; // if not true then iframe is either full size covering up Snap! or a single pixel
       let training_name = options.training_name; // used by audio training 
       let buckets = buckets_as_snap_list.contents;
+      if (source === 'training using microphone' && buckets.indexOf('_background_noise_') < 0) {
+          buckets.push('_background_noise_');
+      }
       let buckets_equal = function (buckets1, buckets2) {
           if (!buckets1 || !buckets2) {
               return false;
@@ -2629,11 +2632,25 @@ window.ecraft2learn =
   image_class: image_class,
   inform: inform,
   show_message: show_message,
-  load_camera_training_from_file: load_camera_training_from_file,
-  load_camera_training_from_URL: load_camera_training_from_URL,
+  load_camera_training_from_file: (callback) => {
+      load_transfer_training_from_file('camera', callback);
+  },
+  load_camera_training_from_URL: (URL, user_callback) => {
+      load_transfer_training_from_URL('camera', URL, user_callback);
+  },
+  load_microphone_training_from_file: (callback) => {
+      load_transfer_training_from_file('microphone', callback);
+  },
+  load_microphone_training_from_URL: (URL, user_callback) => {
+      load_transfer_training_from_URL('microphone', URL, user_callback);
+  },
   // following is for backwards compatibility (name change to avoid confusion with generic training data)
-  load_training_from_file: load_camera_training_from_file,
-  load_train9ing_from_URL: load_camera_training_from_URL,
+  load_training_from_file: (callback) => {
+      load_transfer_training_from_file('camera', callback);
+  },
+  load_training_from_URL: (URL, user_callback) => {
+      load_transfer_training_from_URL('camera', URL, user_callback);
+  },
   // some word embedding functionality
   dot_product: dot_product,
   cosine_similarity: cosine_similarity,

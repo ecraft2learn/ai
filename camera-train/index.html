@@ -28,7 +28,19 @@ load_local_or_remote_scripts(
 <p id="please-wait">
 Please wait for this page to load and to receive the labels of what is to be trained.
 </p>
-
+<!-- Introduction is hidden until everything is loaded -->
+<div id="introduction" style="display:none">
+<p>
+Ready to start training.
+Just hold down one of the buttons when the desired image is front of the camera.
+Do this until the system is sufficiently confident of the correct label when a new image is presented.
+Then return to the Snap! tab.
+</p>
+<p>
+Don't worry, we aren't sending any of your images to a remote server.
+All the machine learning is being done locally on device, and you can check out our source code on Github.
+</p>
+</div>
 <div id='main' style='display:none'>
     <video id="video" playsinline 
      width  = "300"
