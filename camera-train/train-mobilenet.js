@@ -252,94 +252,16 @@ const initialise_page = async function (incoming_training_class_names, source) {
   source.postMessage("Ready", "*");
 }
 
-const create_save_training_button = function (innerHTML) {
-    var save_training_button = document.createElement('button');
-    if (!innerHTML) {
-        innerHTML = "Save your training";
-    }
-    save_training_button.innerHTML = innerHTML;
-    save_training_button.className = "save-training-button";
-    save_training_button.title = "Clicking this will save the training you have done. " +
-                                 "To restore the training use a 'load training data ...' block.";
-    let save_training = function () {
-      // based upon https://stackoverflow.com/questions/19721439/download-json-object-as-a-file-from-browser
-        let tensors = classifier.getClassifierDataset();
-        // tried using JSON.stringify but arrays became "0":xxx, "1":xxx, ...
-        // also needed to move tensors from GPU using dataSync
-//         let arrays = {};
-//         Object.keys(tensors).forEach(function (key, index) {
-//             arrays[key] = tensors[key].dataSync(); // move from GPU to normal memory
-//         });
-        let json = '{"saved_camera_training":{';
-        let keys = Object.keys(tensors);
-        keys.forEach(function (key, index) {
-            json += '"' + key + '":[';
-            let flat_array = tensors[key].dataSync();
-            let shape = tensors[key].shape;
-            let row_count = shape[0];
-            let row_width = shape[1];
-            for (let row = 0; row < row_count; row++) {
-                json += '[' + flat_array.slice(row*row_width, (row+1)*row_width) + ']';
-                if (row < row_count-1) { // not last one
-                    json += ',';
-                }
-            }
-            if (index === keys.length-1) {
-                json += ']'; // no comma on the last one
-            } else {
-                json += '],';
-            }
-        });
-        json += '},';
-        let please_wait = document.getElementById("please-wait");
-        if (please_wait.getAttribute("updated")) {
-            json += '"html":"' + encodeURIComponent(please_wait.innerHTML) + '",';
-        }
-        json += '"labels":' + JSON.stringify(training_class_names);
-        json += '}';
-        let data_URL = "data:text/json;charset=utf-8," + encodeURIComponent(json);
-        let anchor = document.createElement('a');
-        anchor.setAttribute("href", data_URL);
-        anchor.setAttribute("download", "saved_training.json");
-        document.body.appendChild(anchor); // required for firefox -- still true???
-        anchor.click();
-        anchor.remove();
-    }
-    save_training_button.addEventListener('click', save_training);
-    document.body.appendChild(save_training_button);
-};
-
-const string_to_data_set = function (data_set_string) {
-    const start = '{"saved_camera_training":';
-    if (data_set_string.substring(0, start.length) === start) {
-        try {
-            return JSON.parse(data_set_string);
-        } catch (error) {
-            alert("Error parsing saved training file: " + error);
-        } 
-    } else {
-        alert("File not saved training.");
-    }
-};
-
-const load_data_set = function (data_set) {
-    try {
-        let tensor_data_set = {};
-        Object.entries(data_set.saved_camera_training).forEach(function (entry) {
-            tensor_data_set[entry[0]] = tf.tensor2d(entry[1]);
-        });
-        classifier.setClassifierDataset(tensor_data_set);
-        return true;
-    } catch (error) {
-        alert("Error loading saved training: " + error);
-    }
-};
-
 const load_data_set_file = function (file) {
     let reader = new FileReader();
     reader.onloadend = function () {
         let data_set = string_to_data_set(reader.result);
-        load_data_set(data_set);
+        load_data_set(data_set,
+                      (tensor_data_set) => {
+                          classifier.setClassifierDataset(tensor_data_set);
+                          // this ignores data_set.labels - not clear what is best
+                          // user can re-label by loading a data set with different labels this way
+                      });
     };
     reader.readAsText(file);
 };
@@ -377,7 +299,9 @@ function start() {
     let train_on  = (i) => training = i;
     let train_off = (i) => training = -1;
     infoTexts = create_training_buttons(training_class_names, train_on, train_off); 
-    create_save_training_button();
+    create_save_training_button('camera',
+                                () => classifier.getClassifierDataset(),
+                                () => training_class_names);
     create_return_to_snap_button();
     let please_wait = document.getElementById("please-wait");
     if (!please_wait.getAttribute("updated")) {
@@ -494,7 +418,10 @@ const listen_for_messages = function (event) {
                 let introduction = decodeURIComponent(data_set.html);
                 update_introduction(introduction);
             }
-            if (load_data_set(data_set)) {
+            if (load_data_set(data_set,
+                              (tensor_data_set) => {
+                                  classifier.setClassifierDataset(tensor_data_set);
+                              })) {
                 // pass back training_class_names since Snap! doesn't know them
                 event.source.postMessage({data_set_loaded: training_class_names}, "*");
             }

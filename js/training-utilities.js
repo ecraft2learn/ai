@@ -81,6 +81,85 @@ function create_return_to_snap_button(innerHTML, append_to_element_with_this_id)
     }
 }
 
+function create_save_training_button(source_name, tensors_getter, training_class_names_getter, innerHTML) {
+    let save_training_button = document.createElement('button');
+    if (!innerHTML) {
+        innerHTML = "Save your training";
+    }
+    save_training_button.innerHTML = innerHTML;
+    save_training_button.className = "save-training-button";
+    save_training_button.title = "Clicking this will save the training you have done. " +
+                                 "To restore the training use a 'load " + source_name + " training data ...' block.";
+    let save_training = function () {
+        // based upon https://stackoverflow.com/questions/19721439/download-json-object-as-a-file-from-browser
+        let tensors = tensors_getter();
+        // tried using JSON.stringify but arrays became "0":xxx, "1":xxx, ...
+        // also needed to move tensors from GPU using dataSync
+        let json = '{"saved_' + source_name + '_training":{';
+        let keys = Object.keys(tensors);
+        keys.forEach(function (key, index) {
+            json += '"' + key + '":[';
+            let flat_array = tensors[key].dataSync();
+            let shape = tensors[key].shape;
+            let row_count = shape[0];
+            let row_width = shape[1];
+            for (let row = 0; row < row_count; row++) {
+                json += '[' + flat_array.slice(row*row_width, (row+1)*row_width) + ']';
+                if (row < row_count-1) { // not last one
+                    json += ',';
+                }
+            }
+            if (index === keys.length-1) {
+                json += ']'; // no comma on the last one
+            } else {
+                json += '],';
+            }
+        });
+        json += '},';
+        let please_wait = document.getElementById("please-wait");
+        if (please_wait.getAttribute("updated")) {
+            json += '"html":"' + encodeURIComponent(please_wait.innerHTML) + '",';
+        }
+        json += '"labels":' + JSON.stringify(training_class_names_getter());
+        json += '}';
+        let data_URL = "data:text/json;charset=utf-8," + encodeURIComponent(json);
+        let anchor = document.createElement('a');
+        anchor.setAttribute("href", data_URL);
+        anchor.setAttribute("download", "saved_training.json");
+        document.body.appendChild(anchor); // required for firefox -- still true???
+        anchor.click();
+        anchor.remove();
+    }
+    save_training_button.addEventListener('click', save_training);
+    document.body.appendChild(save_training_button);
+}
+
+function string_to_data_set(data_set_string) {
+    const start = '{"saved_camera_training":';
+    if (data_set_string.substring(0, start.length) === start) {
+        try {
+            return JSON.parse(data_set_string);
+        } catch (error) {
+            alert("Error parsing saved training file: " + error);
+        } 
+    } else {
+        alert("File not saved training.");
+    }
+}
+
+function load_data_set(data_set, dataset_updater) {
+    try {
+        let tensor_data_set = {};
+        Object.entries(data_set.saved_camera_training).forEach(function (entry) {
+            tensor_data_set[entry[0]] = tf.tensor2d(entry[1]);
+        });
+        dataset_updater(tensor_data_set);
+        return true;
+    } catch (error) {
+        alert("Error loading saved training: " + error);
+    }
+}
+
 // tell Snap! this is loaded
 window.addEventListener('DOMContentLoaded', 
                         function (event) {

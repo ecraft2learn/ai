@@ -1,4 +1,6 @@
 // @tensorflow/tfjs-models Copyright 2018 Google
+// this file generated from the TypeScript file:
+// https://github.com/tensorflow/tfjs-models/blob/master/speech-commands/src/browser_fft_recognizer.ts
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@tensorflow/tfjs')) :
     typeof define === 'function' && define.amd ? define(['exports', '@tensorflow/tfjs'], factory) :
