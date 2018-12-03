@@ -7,22 +7,61 @@
 
 ((function () {
 let new_introduction; // HTML on page introducing things
+let builtin_recognizer; // recognises 20 words
 let user_recognizer; // recognizer trained by user (as opposed to 20-word built in recognizer)
 let training_classes; // names of the classes
 let info_texts; // used to update information on each training button
 
-const get_or_create_user_recognizer = async () => {
+const create_user_recognizer = async () => {
     if (user_recognizer) {
         return user_recognizer;
     }
-    const base_recognizer = SpeechCommands.create('BROWSER_FFT');
-    await base_recognizer.ensureModelLoaded();
-    base_recognizer.params().sampleRateHz = 48000;
-    user_recognizer = base_recognizer.createTransfer('user trained'); // cache it
+    builtin_recognizer = SpeechCommands.create('BROWSER_FFT');
+    await builtin_recognizer.ensureModelLoaded();
+    builtin_recognizer.params().sampleRateHz = 48000;
+    user_recognizer = builtin_recognizer.createTransfer('user trained'); // cache user's recognizer
     return user_recognizer;
 };
 
+const update_info_texts = (labels, tensor_data_set) => {
+    if (!info_texts || !tensor_data_set) {
+        return; // too early to update them
+    }
+    labels.forEach((word, index) => {
+         if (tensor_data_set[word]) {
+             let count = tensor_data_set[word].length;
+             if (count > 1) {
+                 info_texts[index].innerHTML = "&nbsp;&nbsp;" + count + " examples trained";
+             } else if (count === 1) {
+                 info_texts[index].innerHTML = "&nbsp;&nbsp;" + count + " example trained";
+             }                                    
+         }
+     });    
+};
+
+const train_user_recognizer = () => {
+    user_recognizer.train({epochs: 25,
+    //                   callback: {
+    //                     onEpochEnd: async (epoch, logs) => {
+    //                       console.log(`Epoch ${epoch}: loss=${logs.loss}, accuracy=${logs.acc}`);
+    //                     }
+    //                   }
+                            })
+                        .then(() => {
+                                window.parent.postMessage({show_message: "Training finished",
+                                                           duration: 2},
+                                                           "*");
+                            })
+                        .catch (error => {
+                             report_error(error.message);
+                        });
+};
+
 const initialise = async function (training_class_names) {
+    if (training_classes) {
+        // already initialised
+        return;
+    }
     let report_error = function (error_message) {
         if (window.parent.ecraft2learn.support_iframe_visible['training using microphone']) {
             alert(error_message);
@@ -31,189 +70,168 @@ const initialise = async function (training_class_names) {
         }
     }
     window.parent.postMessage({show_message: "Loading..."}, "*");
-    const builtin_recognizer = SpeechCommands.create('BROWSER_FFT');
-    await builtin_recognizer.ensureModelLoaded();
-    builtin_recognizer.params().sampleRateHz = 48000;
-    if (training_class_names.length !== 0) {
-//         training_class_names.push('_background_noise_');
-        get_or_create_user_recognizer();
-    }
-    training_classes = training_class_names;
-    let currently_listening_recognizer;
-    const receive_messages = function (event) {
-        if (typeof event.data.predict === 'boolean') {
-            // classification requested
-            let user_training = event.data.predict;
-            if (user_training && !user_recognizer) {
-                report_error("Cannot predict with user trained model before it is trained.");
-                return;
-            }
-            let recognizer = user_training ? user_recognizer : builtin_recognizer;
-            recognise(recognizer,
-                      recognitions => {
-                          window.parent.postMessage({confidences: recognitions}, "*");
-                      });
-        } else if (event.data === 'stop') { // from clicking on stop sign or running eCraft2Learn.stop_audio_recognition
-            pending_recognitions = [];
-            stop_recognising(true);
-        } else if (event.data === 'stop_recognising') {
-            stop_recognising(true); // just the current recognition - let the next one start 
+    create_user_recognizer().then(() => {
+        training_classes = training_class_names;
+        let currently_listening_recognizer;
+        const receive_messages = function (event) {
+            if (typeof event.data.predict === 'boolean') {
+                // classification requested
+                let user_training = event.data.predict;
+                if (user_training && !user_recognizer) {
+                    report_error("Cannot predict with user trained model before it is trained.");
+                    return;
+                }
+                let recognizer = user_training ? user_recognizer : builtin_recognizer;
+                recognise(recognizer,
+                          recognitions => {
+                              window.parent.postMessage({confidences: recognitions}, "*");
+                          });
+            } else if (event.data === 'stop') { // from clicking on stop sign or running eCraft2Learn.stop_audio_recognition
+                pending_recognitions = [];
+                stop_recognising(true);
+            } else if (event.data === 'stop_recognising') {
+                stop_recognising(true); // just the current recognition - let the next one start 
+            };
         };
-    };
-    // these listeners need to be in the scope of initialise
-    window.addEventListener("message", receive_messages, false);
-    let pending_recognitions = [];
-    const recognise = async function (recognizer, callback) {
-        if (recognizer !== builtin_recognizer) {
-            await add_samples_to_model();
-        }
-        if (currently_listening_recognizer) {
-            // already listening
-            pending_recognitions.push(async function () {
-                await recognise(recognizer, callback);
-            });
-            return;
-        }
-        currently_listening_recognizer = recognizer;
-        recognizer
-            .startStreaming(
-                recognition => {
-                    let scores = recognition.scores;
-                    let labels = recognizer.wordLabels();
-                    let results = labels.map((label, index) => [label, Math.round(scores[index]*100)]);
-                    callback(results.sort((x, y) => x[1] < y[1] ? 1 : -1));
-                },
-                {probabilityThreshold: 0.75,
-                 invokeCallbackOnNoiseAndUnknown: false})
-            .catch (error => {
-                 report_error(error.message);
-            });
-    };
-    const stop_recognising = function (clear_pending_recognitions) {
-        if (currently_listening_recognizer) {
-            currently_listening_recognizer.stopStreaming()
-                .then(() => {
-                    currently_listening_recognizer = undefined;
-                    if (pending_recognitions && pending_recognitions.length > 0) {
-                        (pending_recognitions.pop()());
-                    }
-                })
-                .catch(error => {
-                          console.log(error);
-                          currently_listening_recognizer = undefined;
-                       });  
-        }
-        if (clear_pending_recognitions) {
-            pending_recognitions = [];
-        }
-    };
-    let examples_collected = 0;
-    let train_on = async function (class_index, info_text) {
-        await stop_recognising(true);
-        user_recognizer.collectExample(training_class_names[class_index])
-            .then(() => {
-                examples_collected++;
-                if (typeof info_text.count !== 'number') {
-                    info_text.count = 1;
-                    info_text.innerHTML = "&nbsp;&nbsp;" + info_text.count + " example trained";
-                } else {
-                     info_text.count++;
-                     info_text.innerHTML = "&nbsp;&nbsp;" + info_text.count + " examples trained";
-                }                         
-         });
-    };
-    let train_off = function (class_index, info_text) {
-        // obsolete
-    };
-    const create_test_button = function (training_class_names) {
-        const button = document.createElement('button');
-        const start_label = "Start testing";
-        const stop_label = "Stop testing";
-        button.innerText = start_label;
-        button.className = "testing-button";
-        const results_div = document.createElement('div');
-        document.body.appendChild(button);
-        document.body.appendChild(results_div);
-        const start = () => {
-            if (Object.keys(user_recognizer.transferExamples).length !== training_class_names.length) {
-                results_div.innerHTML = "Training is missing. Only " + Object.keys(user_recognizer.transferExamples).length +
-                                        " words have been trained. Expected all " + training_class_names.length +
-                                        " words to be trained.";
+        // these listeners need to be in the scope of initialise
+        window.addEventListener("message", receive_messages, false);
+        let pending_recognitions = [];
+        const recognise = async function (recognizer, callback) {
+            if (currently_listening_recognizer) {
+                // already listening
+                pending_recognitions.push(async function () {
+                    await recognise(recognizer, callback);
+                });
                 return;
             }
-            results_div.innerHTML = "<p>Start speaking.</p>";
-            add_samples_to_model().then(() => {
-                recognise(user_recognizer,
-                          function (recognitions) {
-                              results_div.innerHTML = "";
-                              recognitions.forEach(function (label_and_score) {
-                                  results_div.innerHTML +=
-                                      label_and_score[0] + " " + label_and_score[1] + "% confidence score<br>";
-                              });
-                          });                
+            currently_listening_recognizer = recognizer;
+            recognizer
+                .startStreaming(
+                    recognition => {
+                        let scores = recognition.scores;
+                        let labels = recognizer.wordLabels();
+                        let results = labels.map((label, index) => [label, Math.round(scores[index]*100)]);
+                        callback(results.sort((x, y) => x[1] < y[1] ? 1 : -1));
+                    },
+                    {probabilityThreshold: 0.75,
+                     invokeCallbackOnNoiseAndUnknown: false})
+                .catch (error => {
+                     report_error(error.message);
                 });
         };
-        const stop = () => {
-            results_div.innerHTML = "<p>No longer listening.</p>";
-            pending_recognitions = [];
-            stop_recognising();
-        };
-        let toggle_recognition = () => {
-            if (button.innerText === start_label) {
-                start();
-                button.innerText = stop_label;
-            } else {
-                stop();
-                button.innerText = start_label;
+        const stop_recognising = function (clear_pending_recognitions) {
+            if (currently_listening_recognizer) {
+                currently_listening_recognizer.stopStreaming()
+                    .then(() => {
+                        currently_listening_recognizer = undefined;
+                        if (pending_recognitions && pending_recognitions.length > 0) {
+                            (pending_recognitions.pop()());
+                        }
+                    })
+                    .catch(error => {
+                              console.log(error);
+                              currently_listening_recognizer = undefined;
+                           });  
+            }
+            if (clear_pending_recognitions) {
+                pending_recognitions = [];
             }
         };
-        button.addEventListener('click',    toggle_recognition);
-        button.addEventListener('touchend', toggle_recognition);
-    };
-    const add_samples_to_model = async function () {
-        if (examples_collected === 0) {
-            return;
+        let examples_collected = 0;
+        let train_on = async function (class_index, info_text) {
+            await stop_recognising(true);
+            user_recognizer.collectExample(training_class_names[class_index])
+                .then(() => {
+                    examples_collected++;
+                    if (typeof info_text.count !== 'number') {
+                        info_text.count = 1;
+                        info_text.innerHTML = "&nbsp;&nbsp;" + info_text.count + " example trained";
+                    } else {
+                         info_text.count++;
+                         info_text.innerHTML = "&nbsp;&nbsp;" + info_text.count + " examples trained";
+                    }                         
+             });
+        };
+        let train_off = function (class_index, info_text) {
+            // obsolete
+        };
+        const create_test_button = function (training_class_names) {
+            const button = document.createElement('button');
+            const start_label = "Start testing";
+            const stop_label = "Stop testing";
+            button.innerText = start_label;
+            button.className = "testing-button";
+            const results_div = document.createElement('div');
+            document.body.appendChild(button);
+            document.body.appendChild(results_div);
+            const start = () => {
+                if (Object.keys(user_recognizer.transferExamples).length !== training_class_names.length) {
+                    results_div.innerHTML = "Training is missing. Only " + Object.keys(user_recognizer.transferExamples).length +
+                                            " words have been trained. Expected all " + training_class_names.length +
+                                            " words to be trained.";
+                    return;
+                }
+                results_div.innerHTML = "<p>Start speaking.</p>";
+                add_samples_to_model().then(() => {
+                    recognise(user_recognizer,
+                              function (recognitions) {
+                                  results_div.innerHTML = "";
+                                  recognitions.forEach(function (label_and_score) {
+                                      results_div.innerHTML +=
+                                          label_and_score[0] + " " + label_and_score[1] + "% confidence score<br>";
+                                  });
+                              });                
+                    });
+            };
+            const stop = () => {
+                results_div.innerHTML = "<p>No longer listening.</p>";
+                pending_recognitions = [];
+                stop_recognising();
+            };
+            let toggle_recognition = () => {
+                if (button.innerText === start_label) {
+                    start();
+                    button.innerText = stop_label;
+                } else {
+                    stop();
+                    button.innerText = start_label;
+                }
+            };
+            button.addEventListener('click',    toggle_recognition);
+            button.addEventListener('touchend', toggle_recognition);
+        };
+        const add_samples_to_model = async function () {
+            if (examples_collected === 0) {
+                return;
+            }
+            examples_collected = 0;
+            // probably hidden so the following won't be seen
+            window.parent.postMessage({show_message: "Training model with new examples"}, "*");
+            train_user_recognizer();
+        };
+        // remove any previously added buttons
+        let buttons = document.body.getElementsByTagName('button');
+        Array.from(buttons).forEach(function (button) {
+            button.remove();
+        });
+        let training_buttons_with_info = document.body.getElementsByClassName('training-button-and-info');
+        Array.from(training_buttons_with_info).forEach(function (training_button_with_info) {
+            training_button_with_info.remove();
+        });
+        info_texts = create_training_buttons(training_class_names, train_on, train_off);
+        if (user_recognizer) {
+            update_info_texts(training_class_names, user_recognizer.transferExamples);
         }
-        examples_collected = 0;
-        // probably hidden so the following won't be seen
-        window.parent.postMessage({show_message: "Training model with new examples"}, "*");
-        user_recognizer
-            .train({
-                  epochs: 25,
-//                   callback: {
-//                     onEpochEnd: async (epoch, logs) => {
-//                       console.log(`Epoch ${epoch}: loss=${logs.loss}, accuracy=${logs.acc}`);
-//                     }
-//                   }
-                })
-            .then(() => {
-                    window.parent.postMessage({show_message: "Training finished",
-                                               duration: 2},
-                                               "*");
-                })
-            .catch (error => {
-                 report_error(error.message);
+        create_test_button(training_class_names);
+        create_save_training_button('microphone',
+                                    () => user_recognizer.transferExamples,
+                                    () => user_recognizer.wordLabels());
+        create_return_to_snap_button();
+        window.parent.postMessage({show_message: "Ready",
+                                   duration: 2},
+                                   "*");
+        window.parent.postMessage({data_set_loaded: training_classes}, "*");            
             });
-    };
-    // remove any previously added buttons
-    let buttons = document.body.getElementsByTagName('button');
-    Array.from(buttons).forEach(function (button) {
-        button.remove();
-    });
-    let training_buttons_with_info = document.body.getElementsByClassName('training-button-and-info');
-    Array.from(training_buttons_with_info).forEach(function (training_button_with_info) {
-        training_button_with_info.remove();
-    });
-    info_texts = create_training_buttons(training_class_names, train_on, train_off);
-    create_test_button(training_class_names);
-    create_save_training_button('microphone',
-                                () => user_recognizer.transferExamples,
-                                () => user_recognizer.wordLabels());
-    create_return_to_snap_button();
-    window.parent.postMessage({show_message: "Ready",
-                               duration: 2},
-                               "*");
-    window.parent.postMessage({data_set_loaded: training_classes}, "*");
     // see https://developers.google.com/web/updates/2017/09/autoplay-policy-changes#webaudio
 //     if (speech_recognizer.audioCtx) {
 //         document.querySelectorAll('button').forEach(function (button) {
@@ -251,24 +269,20 @@ window.addEventListener(
                 }
                 load_data_set('microphone',
                               data_set,
-                              async (tensor_data_set) => {
-                                  let recognizer = await get_or_create_user_recognizer();
-                                  recognizer.transferExamples = tensor_data_set;
-                                  recognizer.words = training_classes || Object.keys(tensor_data_set);
-                                  if (info_texts) {
-                                      recognizer.words.forEach((word, index) => {
-                                          if (tensor_data_set[word]) {
-                                              let count = tensor_data_set[word].length;
-                                              if (count > 0) {
-                                                  info_texts[index].innerHTML = "&nbsp;&nbsp;" + count + " examples trained";
-                                              }                                             
-                                          }
+                              (tensor_data_set) => {
+                                  create_user_recognizer()
+                                      .then(async (recognizer) => {
+                                          recognizer.transferExamples = tensor_data_set;
+                                          let labels = training_classes || Object.keys(tensor_data_set);
+                                          recognizer.words = labels;
+                                          update_info_texts(labels, tensor_data_set);
+                                          // pass back labels in case Snap! doesn't know them
+                                          event.source.postMessage({data_set_loaded: labels}, "*");
+                                          train_user_recognizer();
+                                          event.source.postMessage("Ready", "*");
+                                          initialise(labels); // no-op if already initialised                                            
                                       });
-                                  }
-                                  // pass back labels in case Snap! doesn't know them
-                                  event.source.postMessage({data_set_loaded: recognizer.words}, "*");
-                                  event.source.postMessage("Ready", "*");
-                                  });
+                              });
             }
         }
     },
