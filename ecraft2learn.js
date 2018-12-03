@@ -589,11 +589,10 @@ window.ecraft2learn =
         input_container.appendChild(input);
         document.body.appendChild(input_container);
     };
-    const load_transfer_training_from_file = function (source_name, callback) {
-        file_to_string(
-            function (training_data_as_string) {
-                load_transfer_training(source_name, training_data_as_string, callback);
-            });
+    const load_transfer_training_from_file = (source_name, callback) => {
+        file_to_string((training_data_as_string) => {
+                           load_transfer_training(source_name, training_data_as_string, callback);
+                       });
     };
     const load_transfer_training_from_URL = function(source_name, URL, user_callback) {
         let error_callback = function (message) {
