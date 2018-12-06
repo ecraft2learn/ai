@@ -194,8 +194,53 @@ Note that one can save training data as validation data.
 Alternatively here is a <a href="/ai/snap/snap.html?project=load models and data&editMode" target="_blank">
 full-screen version of a Snap! project for loading pre-trained models</a>.
 </p>
+<h3 id="real-world-applications" class="instructions-white">Applying machine learning to real-world data</h3>
+<p class="background-information">
+Every day there is news of new applications of machine learning to problems.
+Sometimes it is for entertainment as when <a href="https://www.youtube.com/watch?v=Pc2aJxnmzh0" target="_blank">
+SnapChat filters add animations or distort people's faces></a>.
+Sometimes it saves lives as when
+<a href="https://www.blog.google/technology/ai/fighting-fire-machine-learning-two-students-use-tensorflow-predict-wildfires/" target="_blank">
+students used machine learning to predict wildfires</a>.
+Or to <a href="https://medium.com/datadriveninvestor/machine-learning-generated-artwork-auctions-off-for-432-500-c377be74146f" target="_blank">
+generate art that sells for a high price</a> or to
+<a href="https://cloud.google.com/blog/products/gcp/how-a-japanese-cucumber-farmer-is-using-deep-learning-and-tensorflow" target="_blank">
+help Japanese cucumber farmers sort their cucumbers</a>.
+Machine learning is increasingly used to help scientists, for example, to
+<a href="https://www.blog.google/technology/ai/hunting-planets-machine-learning/" target="_blank">find exoplanets</a>.
+</p>
+<p class="instructions">
+You can bring data into Snap! and use it to train your models.
+You can find available data by doing a web search but often even better is to use
+<a href="https://toolbox.google.com/datasetsearch" target="_blank">Google dataset search</a>.
+In the following we found two datasets to explore whether weather data can help predict incidence of influenza.
+For a collection of daily weather records for hundreds of places worldwide, some going back more than one hundred years,
+we used this <a href="https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/" target="_blank">weather data</a>
+(documented in the readme.txt file).
+And for the number of cases of flu each week across many countries we used
+<a href="http://apps.who.int/flumart/Default?ReportNo=16" target="_blank">Epi Data Surveillance Information</a>
+from the World Health Organisation.
+</p>
+<p class="instructions">
+An easy way to bring data into Snap! is by importing the contents of a TXT file into a variable.
+Create a variable and then right click on the variable's "watcher" and select <i>import</i>.
+</p>
+<figure class="instructions-white">
+<img src="images/importing-data.png" class="center">
+<figcaption>A convenient way to bring data into Snap!</figcaption>
+</figure>
+<p class="instructions">
+Bringing data into Snap! as text is only the first step.
+The Snap! <span class="block-name">split ... by</span> block can turn text into lists.
+The lists often need to be cleaned up and restructured.
+This is often called <a href="https://en.wikipedia.org/wiki/Data_wrangling" target="_blank">data wrangling</a>.
+</p>
+<p class="instructions">
+In this <a href="" target="_blank">Snap! project</a>
+data wrangling is performed on both weather and flu data.
+</p>
 <h3 id="tic-tac-toe" class="instructions-white">Learning to win at Tic Tac Toe</h3>
-<p class="background">
+<p class="background-information">
 <a href="https://en.wikipedia.org/wiki/Tic-tac-toe" target="_blank">Tic Tac Toe</a> (also known as Noughts and Crosses) is a simple game.
 A computer could have all <a href="https://www.jesperjuul.net/ludologist/2003/12/28/255168-ways-of-playing-tic-tac-toe/" target="_blank">
 255,168 games</a> in memory and play perfectly by searching its memory.
@@ -208,7 +253,7 @@ computer made of DNA</a>.
 <img src="images/tinkertoy-tic-tac-toe-X39.81.03.jpg" width="600" class="center">
 <figcaption>A wooden computer that plays a perfect game of Tic Tac Toe</figcaption>
 </figure>
-<p class="background non-essential">
+<p class="background-information non-essential">
 <a href="https://en.wikipedia.org/wiki/Donald_Knuth" target="_blank">Donald Knuth</a>,
 a world famous computer scientist, wrote a Tic Tac Toe learning program in 1958 when he was 20 years old.
 The computer had 10 kilobytes of memory (the laptop that I'm using to write this has more than one million times more memory).
@@ -218,7 +263,7 @@ In those days computers didn't have keyboards, displays, or mice.
 <img src="images/young-donald-knuth-ibm-650-1958.jpg" width="400" class="center">
 <figcaption>Donald Knuth at the computer he programmed a Tic Tac Toe learning program</figcaption>
 </figure>
-<p class="background non-essential">
+<p class="background-information non-essential">
 Here is a five-minute video where Donald Knuth tells stories of his Tic Tac Toe program:
 </p>
 <iframe class="background-information-white center"
