@@ -90,7 +90,7 @@ to test how well the model has learned.
         caption = "Create, train, and test a simple model. TRY IT!">
 </figure>
 <p class="instructions">
-Alternatively here is a <a href="/ai/snap/snap.html?project=machine learning exercise&editMode" target="_blank">
+Alternatively here is a <a href="../ai/snap/snap.html?project=machine learning exercise&editMode" target="_blank">
 full-screen version of the Snap! project for creating, training, and testing models</a>.
 </p>
 <p class="instructions">
@@ -110,7 +110,7 @@ With the right settings the following can create a good square root estimator.
         caption = "Create, train, and test a simple model using full-featured blocks. TRY IT!">
 </figure>
 <p class="instructions">
-Alternatively here is a <a href="/ai/snap/snap.html?project=better machine learning exercise&editMode" target="_blank">
+Alternatively here is a <a href="../ai/snap/snap.html?project=better machine learning exercise&editMode" target="_blank">
 full-screen version of the Snap! project for creating, training, and testing models using full-featured blocks</a>.
 </p>
 <p class="instructions">
@@ -121,7 +121,7 @@ Try a few functions and see if some are easier to train than others.
 <p class="instructions">
 The machine learning blocks are not restricted to learning how to map one input number to an output number.
 A simple example is
-<a href="/ai/snap/snap.html?project=predict distance&editMode" target="_blank">
+<a href="../ai/snap/snap.html?project=predict distance&editMode" target="_blank">
 a model that estimates the distance a point is from the origin</a>.
 Given values for <i>x</i> and <i>y</i> it estimates the square root of the sum of the squares of each.
 </p>
@@ -191,7 +191,7 @@ Note that one can save training data as validation data.
         caption = "Loading training or validation data from the web">
 </figure>
 <p class="instructions">
-Alternatively here is a <a href="/ai/snap/snap.html?project=load models and data&editMode" target="_blank">
+Alternatively here is a <a href="../ai/snap/snap.html?project=load models and data&editMode" target="_blank">
 full-screen version of a Snap! project for loading pre-trained models</a>.
 </p>
 <h3 id="real-world-applications" class="instructions-white">Applying machine learning to real-world data</h3>
@@ -236,8 +236,16 @@ The lists often need to be cleaned up and restructured.
 This is often called <a href="https://en.wikipedia.org/wiki/Data_wrangling" target="_blank">data wrangling</a>.
 </p>
 <p class="instructions">
-In this <a href="" target="_blank">Snap! project</a>
-data wrangling is performed on both weather and flu data.
+In this <a href="../ai/snap/snap.html?project=weather data&editMode" target="_blank">Snap! project</a>
+data wrangling is performed on both the weather and flu data.
+The idea is to have each element of the weather dataset to contain the weather for a week matched up with the flu data for the following week.
+The data has been regularised which in this case means that all measurements have been divided by the average value for that measurement.
+So a value such as 0.75 means that reading was 75% of the average value for that measurement that week of the year.
+</p>
+<p class="instructions">
+Another challenge is to work out how to evaluate how well a model does.
+Is it good enough if the model predicts better than chance given a week's weather data whether the next week's flu reports will be above ore below average?
+Or should we measure how far off the predictions are on test data from what the following week's flu occurences really were?
 </p>
 <h3 id="tic-tac-toe" class="instructions-white">Learning to win at Tic Tac Toe</h3>
 <p class="background-information">
@@ -278,7 +286,7 @@ Here is a five-minute video where Donald Knuth tells stories of his Tic Tac Toe 
 <h3 class="instructions-white">Training a neural net to play Tic Tac Toe</h3>
 <p class="instructions">
 Your challenge is to train a deep neural net to play well.
-You can start with this <a href="/ai/snap/snap.html?project=tic tac toe&editMode" target="_blank">Snap! program for playing Tic Tac Toe</a> and add scripts
+You can start with this <a href="../ai/snap/snap.html?project=tic tac toe&editMode" target="_blank">Snap! program for playing Tic Tac Toe</a> and add scripts
 for recording games, creating neural nets, using those games for training your nets, and finally using the 
 trained neural net models to play the game.
 This is quite challenging and only appropriate for those with a good deal of experience with Snap! and machine learning. 
@@ -294,7 +302,7 @@ You might want to try this on your own before reading this.
 </p>
 <span class="advanced-topic-body">
 <p class="instructions">
-This <a href="/ai/snap/snap.html?project=tic tac toe machine learning&editMode" target="_blank">Snap! program</a>
+This <a href="../ai/snap/snap.html?project=tic tac toe machine learning&editMode" target="_blank">Snap! program</a>
 has a variable called <i>Players</i> whose value is a list of two player types.
 A player type can be 'human', 'random', or the name of a model you created.
 Games are recorded and are the basis for training. 
@@ -368,7 +376,7 @@ One way to detect if a model benefits from additional training is to have an old
 </p>
 <p class="background-information">
 You can do all these experiments using the Snap! program but it takes several seconds to run a game.
-For running many large-scale experiments we provide this <a href="/ai/tic-tac-toe/" target="_blank">
+For running many large-scale experiments we provide this <a href="../ai/tic-tac-toe/" target="_blank">
 web page for Tic Tac Toe machine learning</a>.
 It can run thousands of games in a few seconds for evaluating models or generating lots of training data.
 Note that you can save a model created in Snap! and then load it into the Tic Tac Toe page and vice versa.
@@ -449,6 +457,6 @@ different uses of training, validation, and test data</a>.
 Return to 
 <a class="guide-link" href="chapter-5.html">the previous chapter on word embeddings</a>.
 </p>
-<script src="/ai/js/bottom-of-page.js"></script>
+<script src="../ai/js/bottom-of-page.js"></script>
 </body>
 </html>
