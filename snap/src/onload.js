@@ -16,7 +16,7 @@ window.addEventListener('load', function () {
 	let run_full_screen = true;
 	let edit_mode = false;
 	let project_path;
-	let show_palette;
+	let show_palette = true; // unless in an iframe where the default is to hide it for space reasons
 	const load_project_string = 
 		function (project_text) {
 			// timeout wasn't needed before Snap 4.1
