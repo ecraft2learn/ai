@@ -801,7 +801,6 @@ window.ecraft2learn =
       ecraft2learn.support_iframe[source].style.width  = "100%";
       ecraft2learn.support_iframe[source].style.height = "100%";
       ecraft2learn.support_window[source].postMessage('Show support iframe', '*');
-      ecraft2learn.support_iframe_visible[source] = true; 
   };
   const create_machine_learning_window = function (source, iframe_in_new_tab, together_url, together, one_pixel_iframe) {
       let URL, support_window;
@@ -862,7 +861,6 @@ window.ecraft2learn =
               iframe.allow = "camera";
           }
           ecraft2learn.support_iframe[source] = iframe;
-          ecraft2learn.support_iframe_visible[source] = true;
           support_window = iframe.contentWindow;
       }
       ecraft2learn.support_window[source] = support_window;
@@ -873,7 +871,6 @@ window.ecraft2learn =
                   if (typeof ecraft2learn.support_iframe[source] !== 'undefined') {
                       ecraft2learn.support_iframe[source].style.width  = "1px";
                       ecraft2learn.support_iframe[source].style.height = "1px";
-                      ecraft2learn.support_iframe_visible[source] = false;
                   }
               } else if (event.data === "Ready" && typeof ecraft2learn.support_window_is_ready !== 'undefined') {
                   ecraft2learn.support_window_is_ready[source] = true;             
@@ -2531,13 +2528,13 @@ window.ecraft2learn =
              ecraft2learn.support_window_is_ready[source] === true;
   },
   support_window_visible: function (source) {
-      if (!ecraft2learn.support_iframe_visible) {
+      if (!ecraft2learn.support_iframe[source]) {
           return false;
       }
       if (!source) {
           source = 'training using camera';
       }
-      return !!ecraft2learn.support_iframe_visible[source];
+      return ecraft2learn.support_iframe[source].style.width === "100%";
   },
   poses: function (callback) {
       var ask_for_poses = function (window_just_created) {
@@ -2784,7 +2781,6 @@ window.ecraft2learn =
       ecraft2learn.support_window_is_ready = {};
       ecraft2learn.support_iframe = {};
       ecraft2learn.training_buckets = {};
-      ecraft2learn.support_iframe_visible = {};
       stop_all_scripts();      
   },
   reload: function () {
@@ -2820,7 +2816,6 @@ window.ecraft2learn =
   support_window_is_ready: {},
   support_iframe: {},
   training_buckets: {},
-  support_iframe_visible: {},
   snap_project_opened: false,
 }} ());
 window.speechSynthesis.getVoices(); // to avoid a possible long wait while voices are loaded
