@@ -170,7 +170,7 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
         if (use_tfjs_vis &&
             (window.parent === window || // not an iframe
              !window.parent.ecraft2learn || // parent isn't ecraft2learn library
-             window.parent.ecraft2learn.support_iframe_visible["tensorflow.js"])) { // is visible
+             window.parent.ecraft2learn.support_window_visible("tensorflow.js"))) { // is visible
             callbacks = tfvis.show.fitCallbacks(container, metrics, {callbacks: ['onEpochEnd']});
             epoch_end_callback = callbacks.onEpochEnd;
         } else {

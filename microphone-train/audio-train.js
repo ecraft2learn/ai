@@ -64,7 +64,7 @@ const initialise = async function (training_class_names) {
     }
     let report_error = function (error_message) {
         try { // since window.parent.ecraft2learn may trigger a permission error
-            if (window.parent.ecraft2learn.support_iframe_visible['training using microphone']) {
+            if (window.parent.ecraft2learn.support_window_visible('training using microphone')) {
                 alert(error_message);
             } else {
                 window.parent.postMessage({error: error_message}, "*");
