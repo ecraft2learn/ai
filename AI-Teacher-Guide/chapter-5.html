@@ -1,12 +1,12 @@
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 <title>Using AI with words and sentences</title>
-<link href="/ai/css/ai-teacher-guide.css" rel="stylesheet">
-<link href="/ai/css/oer-style.css" rel="stylesheet">
-<link rel="icon" type="image/png" href="/ai/images/eCraft2Learn-Favicon.png" />
-<script src="/ai/js/ai-guide.js"></script>
+<link href="../css/ai-teacher-guide.css" rel="stylesheet">
+<link href="../css/oer-style.css" rel="stylesheet">
+<link rel="icon" type="image/png" href="../images/eCraft2Learn-Favicon.png" />
+<script src="../js/ai-guide.js"></script>
 </head>
 <body>
-<script src="/ai/js/translate.js"></script>
+<script src="../js/translate.js"></script>
 <h2>A guide to building AI apps and artefacts</h2>
 <h3>Chapter 5 - Using AI with words and sentences</h3>
 <h4>Ken Kahn, University of Oxford</h4>
@@ -151,24 +151,24 @@ We use a technique called
 <a href="https://en.wikipedia.org/wiki/T-distributed_stochastic_neighbor_embedding" target="_blank">t-SNE</a>.
 It can be understood as a physics simulation where all points in crowded areas repel each other and
 all points are attracted to those with a small distance away (in high-dimensional space).
-This <a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io/ai/word-embeddings/en/projector.json" target="_blank">
+This <a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io../word-embeddings/en/projector.json" target="_blank">
 data projector</a> displays all 20,000 English words in two or three dimensions using either t-SNE
 or PCA (<a href="https://en.wikipedia.org/wiki/Principal_component_analysis" target="_blank">principal component analysis</a>).
 You can also use the projector to see the word embeddings of these languages:
-<a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io/ai/word-embeddings/de/projector.json" target="_blank">German</a>,
-<a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io/ai/word-embeddings/el/projector.json" target="_blank">Greek</a>,
-<a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io/ai/word-embeddings/es/projector.json" target="_blank">Spanish</a>,
-<a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io/ai/word-embeddings/fr/projector.json" target="_blank">French</a>,
-<a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io/ai/word-embeddings/fi/projector.json" target="_blank">Finnish</a>,
-<a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io/ai/word-embeddings/hi/projector_v2.json" target="_blank">Hindi</a>,
-<a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io/ai/word-embeddings/id/projector.json" target="_blank">Indonesian</a>,
-<a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io/ai/word-embeddings/it/projector.json" target="_blank">Italian</a>,
-<a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io/ai/word-embeddings/ja/projector.json" target="_blank">Japanese</a>,
-<a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io/ai/word-embeddings/lt/projector.json" target="_blank">Lithuanian</a>,
-<a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io/ai/word-embeddings/pt/projector.json" target="_blank">Portuguese</a>,
-<a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io/ai/word-embeddings/si/projector.json" target="_blank">Sinhalese</a>,
-<a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io/ai/word-embeddings/sv/projector.json" target="_blank">Swedish</a>, and
-<a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io/ai/word-embeddings/zh/projector.json" target="_blank">Chinese</a>.
+<a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io../word-embeddings/de/projector.json" target="_blank">German</a>,
+<a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io../word-embeddings/el/projector.json" target="_blank">Greek</a>,
+<a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io../word-embeddings/es/projector.json" target="_blank">Spanish</a>,
+<a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io../word-embeddings/fr/projector.json" target="_blank">French</a>,
+<a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io../word-embeddings/fi/projector.json" target="_blank">Finnish</a>,
+<a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io../word-embeddings/hi/projector_v2.json" target="_blank">Hindi</a>,
+<a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io../word-embeddings/id/projector.json" target="_blank">Indonesian</a>,
+<a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io../word-embeddings/it/projector.json" target="_blank">Italian</a>,
+<a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io../word-embeddings/ja/projector.json" target="_blank">Japanese</a>,
+<a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io../word-embeddings/lt/projector.json" target="_blank">Lithuanian</a>,
+<a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io../word-embeddings/pt/projector.json" target="_blank">Portuguese</a>,
+<a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io../word-embeddings/si/projector.json" target="_blank">Sinhalese</a>,
+<a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io../word-embeddings/sv/projector.json" target="_blank">Swedish</a>, and
+<a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io../word-embeddings/zh/projector.json" target="_blank">Chinese</a>.
 </p>
 <p class="background-information">
 Note that it takes several hundred iterations of t-SNE before it settles down on a good mapping from 300 dimensions.
@@ -272,7 +272,7 @@ Another problem is that sometimes short phrases act like words.
 <h4 class="sample-program-white">A sample project using word embeddings for translation</h4>
 <p class="sample-program">
 Here is
-<a href="/ai/snap/snap.html?project=translate" target="_blank">a program that asks the user for two languages</a>,
+<a href="../snap/snap.html?project=translate" target="_blank">a program that asks the user for two languages</a>,
 obtains the feature vector of a random word from the first language,
 and then displays several of the words closest to that feature vector.
 It places the words in the <a href="https://distill.pub/2016/misread-tsne/" target="_blank">t-SNE</a>
@@ -421,6 +421,6 @@ Go to
 Return to 
 <a class="guide-link" href="chapter-4.html">the previous chapter on machine learning</a>.
 </p>
-<script src="/ai/js/bottom-of-page.js"></script>
+<script src="../js/bottom-of-page.js"></script>
 </body>
 </html>
