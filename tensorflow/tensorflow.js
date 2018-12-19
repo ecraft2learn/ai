@@ -55,7 +55,7 @@ const loss_functions =
      "Log Loss": "logLoss",
      "Mean Squared Error": "meanSquaredError",
      "Sigmoid Cross Entropy": "sigmoidCrossEntropy",
-     "Softmax Cross Entropy": "softmaxCrossEntropy"};
+     "Softmax Cross Entropy": "categoricalCrossentropy"};
 
 const loss_function_named = (name) => {
     return loss_functions[name] || name;
