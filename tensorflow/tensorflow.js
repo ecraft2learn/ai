@@ -91,14 +91,20 @@ const create_model = function (name, layers, optimizer_full_name, input_shape, o
     const model = tf.sequential({name: name});
     model.ready_for_training = false;
     tensorflow.add_to_models(model); // using tensorflow.add_to_models incase it has been extended
-    layers.forEach((size, index) => {
+    layers.forEach((configuration, index) => {
+        let parts = configuration.split(' ');
+        size = +parts[0];
+        let layer_activation = parts.length > 1 && parts[1];
         if (size > 0) {
             let configuration = {units: size,
                                  useBias: index !== layers.length-1}; // except for last layer
             if (index !== layers.length-1) {
                 // all but the last one has an activation function
                 configuration.activation = options.activation || 'relu';
-            }                   
+            }
+            if (layer_activation) { // if explicitly specified override default activation function
+                configuration.activation = layer_activation;
+            }                  
             if (index === 0) { // first one needs inputShape
                 configuration.inputShape = input_shape ||
                                            shape_of_data((get_data(name, 'training') || get_data(name, 'validation')).input[0]);    
@@ -109,15 +115,15 @@ const create_model = function (name, layers, optimizer_full_name, input_shape, o
     if (!optimizer) {
         optimizer = 'adam';
     }
-    let loss_function = loss_function_named((options.loss || 'meanSquaredError'));
+    let loss_function = loss_function_named((options.loss_function || 'meanSquaredError'));
     model.compile({loss: loss_function,
                    optimizer: optimizer,
                    metrics: ['accuracy']
                   });
     gui_state["Model"]["Layers"] = layers.toString();
     gui_state["Model"]["Optimization method"] = optimizer_full_name;
-    if (options.loss) {
-        gui_state["Model"]["Loss function"] = options.loss
+    if (options.loss_function) {
+        gui_state["Model"]["Loss function"] = options.loss_function;
     }
     model.ready_for_training = true;
     if (model.callback_when_ready_for_training) {
@@ -324,10 +330,56 @@ const predict = (model_name, inputs, success_callback, error_callback) => {
             input_tensor = tf.tensor2d(inputs); //, [inputs.length].concat(shape_of_data(inputs))); 
         }
         let prediction = model.predict(input_tensor);
-        success_callback(prediction.dataSync());
+        success_callback(reshape_array(prediction.dataSync(), model.outputShape));
     } catch (error) {
         error_callback(error.message);
     }
+};
+
+const reshape_array = function (deepFlatArray, sizes) {
+  // based upon https://github.com/kalimdorjs/kalimdorjs/commit/ab37d3d6b6c66cb68ab82b9fedf5fd1f9d8f5f68
+  // Initial validations
+  if (!(Array.isArray(deepFlatArray) || deepFlatArray instanceof Float32Array)) {
+    throw new TypeError('The input array must be an array!');
+  }
+
+  if (!Array.isArray(sizes)) {
+    throw new TypeError('The sizes must be an array!');
+  }
+
+  // If the reshaping is to single dimensional
+  if (sizes.length === 1 && deepFlatArray.length === sizes[0]) {
+    return deepFlatArray;
+  } else if (sizes.length === 2 && sizes[0] === null && sizes[1] === 1) {
+    // model.outputShape is [null, 1] if last layer size is 1
+    return deepFlatArray;
+  } else if (sizes.length === 1 && deepFlatArray.length !== sizes[0]) {
+    throw new TypeError(
+      `Target array shape [${
+        deepFlatArray.length
+      }] cannot be reshaped into ${sizes}`
+    );
+  }
+
+  // testing if there are enough elements for the requested shape
+  let tmpArray = deepFlatArray;
+  let tmpArray2;
+  // for each dimensions starting by the last one and ignoring the first one
+  for (let sizeIndex = sizes.length - 1; sizeIndex > 0; sizeIndex--) {
+    const size = sizes[sizeIndex];
+
+    tmpArray2 = [];
+
+    // aggregate the elements of the current tmpArray in elements of the requested size
+    const length = tmpArray.length / size;
+    for (let i = 0; i < length; i++) {
+      tmpArray2.push(tmpArray.slice(i * size, (i + 1) * size));
+    }
+    // set it as the new tmpArray for the next loop turn or for return
+    tmpArray = tmpArray2;
+  }
+
+  return tmpArray;
 };
 
 let report_error = function (error) {
