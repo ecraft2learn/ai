@@ -92,9 +92,14 @@ const create_model = function (name, layers, optimizer_full_name, input_shape, o
     model.ready_for_training = false;
     tensorflow.add_to_models(model); // using tensorflow.add_to_models incase it has been extended
     layers.forEach((configuration, index) => {
-        let parts = configuration.split(' ');
-        size = +parts[0];
-        let layer_activation = parts.length > 1 && parts[1];
+        let layer_activation;
+        if (typeof configuration === 'number') {
+            size = configuration;
+        } else {
+            let parts = configuration.split(' ');
+            size = +parts[0];
+            layer_activation = parts.length > 1 && parts[1];
+        }
         if (size > 0) {
             let configuration = {units: size,
                                  useBias: index !== layers.length-1}; // except for last layer
@@ -454,14 +459,35 @@ const create_model_with_parameters = function (surface_name) {
     let message;
     const create_model_with_current_settings = function () {
         let layers;
-        try {
-            layers = JSON.parse('[' + gui_state["Model"]["Layers"] + ']');
-            if (!layers.every((n) => n > 0 && n === Math.round(n))) {
-                alert("Layers should a list of positive whole numbers.");
-                return;
+        const quote_non_numeric_layers = (layers) => {
+            let first_alpha = layers.search(/[A-Za-z]/);
+            if (first_alpha < 0) {
+                return layers;
             }
+            let end_of_alpha = layers.substring(first_alpha).search(/[^A-Za-z]/);
+            if (end_of_alpha < 0) {
+                // end of layers
+                end_of_alpha = layers.length;
+            } else {
+                end_of_alpha += first_alpha;
+            }
+            let preceding_comma = layers.substring(0, first_alpha).lastIndexOf(',');
+            let start_of_preceding_number;
+            if (preceding_comma < 0) {
+                // preceding number is the first one
+                start_of_preceding_number = 0;
+            } else {
+                start_of_preceding_number = preceding_comma+1;
+            }
+            return layers.substring(0, start_of_preceding_number) +
+                   '"' + layers.substring(start_of_preceding_number, end_of_alpha) + '"' + 
+                   quote_non_numeric_layers(layers.substring(end_of_alpha));
+        };
+        try {
+            let json = quote_non_numeric_layers(gui_state["Model"]["Layers"]);
+            layers = JSON.parse('[' + json + ']');
         } catch (error) {
-            alert("Layers should a list of whole numbers separated by commas.");
+            alert("Layers should a list of whole numbers separated by commas or numbers followed by an activation function name.");
             return;
         }
         const name = name_input.value;
