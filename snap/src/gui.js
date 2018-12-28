@@ -2269,7 +2269,13 @@ IDE_Morph.prototype.saveSetting = function (key, value) {
 
 IDE_Morph.prototype.getSetting = function (key) {
     if (this.hasLocalStorage()) {
-        return localStorage['-snap-setting-' + key];
+        let value = localStorage['-snap-setting-' + key];
+        if (value === 'null') {
+            // switching between localhost and ecraft2learn.github.io/ai/snap somehow causes
+            // null to be recorded as 'null' - workaround by Ken Kahn
+            value = null;
+        }
+        return value;
     }
     return null;
 };
