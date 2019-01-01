@@ -1,0 +1,26 @@
+<html>
+<!-- from https://github.com/tensorflow/magenta-js/tree/master/image -->
+  <head>
+    <!-- Load @magenta/image -->
+    <script src="https://cdn.jsdelivr.net/npm/@magenta/image"></script>
+  </head>
+  <body>
+    <img id="content" height="256" src="content.jpg"/>
+    <img id="style" height="256" src="houses.jpg"/>
+    <canvas id="stylized" height="256"></canvas>
+      <script>
+        const model = new mi.ArbitraryStyleTransferNetwork();
+        const contentImg = document.getElementById('content');
+        const styleImg = document.getElementById('style');
+        const stylizedCanvas = document.getElementById('stylized');
+
+        function stylize() {
+          model.stylize(contentImg, styleImg).then((imageData) => {
+            stylizedCanvas.getContext('2d').putImageData(imageData, 0, 0);
+          });
+        }
+
+        model.initialize().then(stylize);
+      </script>
+  </body>
+</html>
