@@ -5,9 +5,11 @@
 <script>
 load_local_or_remote_scripts(
     ["../js/tfjs.js",
+     "../js/hyperparameters.min.js",
      "../js/tfjs-vis.js",
      "../js/dat.gui.js"],
     ["https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest",
+     "https://cdn.jsdelivr.net/npm/hyperparameters@latest/dist/hyperparameters.min.js",
      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis",
      "https://cdn.jsdelivr.net/npm/dat.gui"]);
 </script>
@@ -107,9 +109,14 @@ In this case the least negative choice is selected.
 <button disabled id="evaluate" class="support-window-button" >Evaluate the training</button>
 <p>
 You can save a trained model to the local file system to load at a later time.
-
 </p>
 <button id="save_and_load" class="support-window-button" >Saving and loading</button>
+<div id="optimise_hyperparameters">
+<p>
+Experimental!!! Search for optimal values for hyperparameters.
+</p>
+<button id="optimise" class="support-window-button">Optimise</button>
+</p>
 <h3>Things to try</h3>
 <p>
 Try different layer sizes for the model.

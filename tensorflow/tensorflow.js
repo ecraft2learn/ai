@@ -40,7 +40,7 @@ const optimization_methods =
      "Root Mean Squared Prop": "rmsprop"};
 
 const optimizer_named = (name, learning_rate) => {
-    if (name === 'Momentum') {
+    if (name === 'Momentum' || name === 'momentum') {
         return  tf.train.momentum((learning_rate || .001), .9);
     }
     return optimization_methods[name] || name;
@@ -48,7 +48,7 @@ const optimizer_named = (name, learning_rate) => {
 
 const loss_functions = 
     {"Absolute Distance": "absoluteDistance",
-     "Compute Weighted Loss": "computeWeigghtedLoss",
+     "Compute Weighted Loss": "computeWeightedLoss",
      "Cosine Distance": "cosineDistance",
      "Hinge Loss": "hingeLoss",
      "Huber Loss": "huberLoss",
@@ -212,6 +212,8 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
         }
         if (model.optimizer.learningRate && options.learning_rate) { 
             // only if optimizer has a learningRate property
+            // perhaps it would be better to create optimizers with the correct learning_rate
+            // e.g. tf.train.xxx(learning_rate)
             model.optimizer.learningRate = options.learning_rate;
             gui_state["Training"]['Learning rate'] = options.learning_rate;
         }
@@ -224,31 +226,12 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
         if (typeof options.shuffle === 'boolean') {
             gui_state["Training"]['Shuffle data'] = options.shuffle;
         }
-        // when following was inside of tidy I got an error about backend being undefined
-        const get_tensors = (kind) => {
-            let data = get_data(model.name, kind);
-            if (!data) {
-                return;
-            }
-            let tensors = [];
-            if (typeof data.input[0] === 'number') {
-                tensors.push(tf.tensor2d(data.input,  [data.input.length, 1]));
-            } else {
-                tensors.push(tf.tensor(data.input));
-            }
-            if (typeof data.output[0] === 'number') {
-                tensors.push(tf.tensor2d(data.output, [data.output.length, 1]));
-            } else {
-                tensors.push(tf.tensor(data.output));
-            }
-            return tensors;
-        }
-        let [xs, ys] = get_tensors('training');
+        let [xs, ys] = get_tensors(model.name, 'training');
         let configuration = {epochs: (options.epochs || 10),
                              shuffle: options.shuffle,
                              validationSplit: options.validation_split,
                              callbacks: callbacks};
-        let validation_tensor = get_tensors('validation'); // undefined if no validation data
+        let validation_tensor = get_tensors(model.name, 'validation'); // undefined if no validation data
         if (validation_tensor) {
             configuration.validationData = validation_tensor;
         }
@@ -305,6 +288,98 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
     } catch (error) {
         error_callback(error);
     }
+};
+
+const get_tensors = (model_name, kind) => {
+    let data = get_data(model_name, kind);
+    if (!data) {
+        return;
+    }
+    let tensors = [];
+    if (typeof data.input[0] === 'number') {
+        tensors.push(tf.tensor2d(data.input,  [data.input.length, 1]));
+    } else {
+        tensors.push(tf.tensor(data.input));
+    }
+    if (typeof data.output[0] === 'number') {
+        tensors.push(tf.tensor2d(data.output, [data.output.length, 1]));
+    } else {
+        tensors.push(tf.tensor(data.output));
+    }
+   return tensors;
+};
+
+const message = document.createElement('p');
+const install_settings_button = document.createElement('button');
+
+const optimise_hyperparameters_with_parameters = (surface_name) => {
+    const name_element = document.getElementById('name_element');
+    const model_name = name_element ? name_element.value : 'my-model';
+    const layers = get_layers();
+    let [xs, ys] = get_tensors(model_name, 'training');
+    const inverse_lookup = (value, table) => {
+        let key;
+        Object.entries(table).some((entry) => {
+            if (value === entry[1]) {
+                key = entry[0];
+                return true;
+            }
+        });
+        return key;
+    };
+    const display_trial = (parameters, element) => {
+        element.innerHTML += "Number of training iterations = " + parameters.epochs + "<br>";
+        element.innerHTML += "Optimization method = " + inverse_lookup(parameters.optimization_method, optimization_methods) + "<br>";
+        element.innerHTML += "Loss function = " + inverse_lookup(parameters.loss_function, loss_functions) + "<br>";
+    };
+    const install_settings = (parameters) => {
+        gui_state["Training"]["Number of iterations"] = parameters.epochs;
+        gui_state["Model"]["Optimization method"] = inverse_lookup(parameters.optimization_method, optimization_methods);
+        gui_state["Model"]["Loss function"] = inverse_lookup(parameters.loss_function, loss_functions);
+        parameters_gui.model.__controllers.forEach((controller) => {
+            controller.updateDisplay();
+        });
+        parameters_gui.training.__controllers.forEach((controller) => {
+            controller.updateDisplay();
+        });
+    };
+    let onExperimentBegin = () => {}; // nothing for now
+    let onExperimentEnd = (i, trial) => {
+        message.innerHTML = "Experiment " + i + ":<br>";
+        display_trial(trial.args, message);
+        message.innerHTML += "Loss = " + trial.result.loss;
+        document.getElementById('optimise').appendChild(message); // does nothing if already appended                              
+    };
+    optimise(model_name, layers, xs, ys, onExperimentBegin, onExperimentEnd)
+        .then((result) => {
+            install_settings_button.innerHTML = "Click to install settings:<br>";
+            display_trial(result.argmin, install_settings_button);
+            document.getElementById('optimise').appendChild(install_settings_button);
+            install_settings_button.addEventListener('click',
+                                                     () => {
+                                                         install_settings(result.argmin);
+                                                     });
+        });
+};
+
+const optimise = async (name, layers, xs, ys, onExperimentBegin, onExperimentEnd) => {
+    const create_and_train_model = async ({ optimization_method, loss_function, epochs }, { xs, ys }) => {
+        const model = create_model(name, layers, optimization_method, undefined, {loss: loss_function});
+        const h = await model.fit(xs, ys, {epochs}); // , callbacks: { onEpochEnd }
+        return {loss: h.history.loss[h.history.loss.length-1],
+                history: h.history,
+                status: hpjs.STATUS_OK};
+    };
+    const space = {
+        optimization_method: hpjs.choice(Object.values(optimization_methods)),
+        loss_function: hpjs.choice(Object.values(loss_functions)),
+        epochs: hpjs.quniform(10, 30, 10),
+    };
+    return await hpjs.fmin(create_and_train_model,
+                           space,
+                           hpjs.search.randomSearch,
+                           3,
+                           {xs, ys, callbacks: { onExperimentBegin, onExperimentEnd }});
 };
 
 let last_prediction;
@@ -451,6 +526,40 @@ const parameters_interface = function (interface_creator) {
 
 let create_model_with_current_settings_button;
 
+const get_layers = () => {
+  const quote_non_numeric_layers = (layers) => {
+      let first_alpha = layers.search(/[A-Za-z]/);
+      if (first_alpha < 0) {
+          return layers;
+      }
+      let end_of_alpha = layers.substring(first_alpha).search(/[^A-Za-z]/);
+      if (end_of_alpha < 0) {
+          // end of layers
+          end_of_alpha = layers.length;
+      } else {
+          end_of_alpha += first_alpha;
+      }
+      let preceding_comma = layers.substring(0, first_alpha).lastIndexOf(',');
+      let start_of_preceding_number;
+      if (preceding_comma < 0) {
+           // preceding number is the first one
+           start_of_preceding_number = 0;
+       } else {
+           start_of_preceding_number = preceding_comma+1;
+       }
+       return layers.substring(0, start_of_preceding_number) +
+              '"' + layers.substring(start_of_preceding_number, end_of_alpha) + '"' + 
+              quote_non_numeric_layers(layers.substring(end_of_alpha));
+       };
+  try {
+       let json = quote_non_numeric_layers(gui_state["Model"]["Layers"]);
+       return JSON.parse('[' + json + ']');
+  } catch (error) {
+       alert("Layers should a list of whole numbers separated by commas or numbers followed by an activation function name.");
+       return;
+  }
+};
+
 const create_model_with_parameters = function (surface_name) {
     const surface = tfvis.visor().surface({name: surface_name, tab: 'Model'});
     const draw_area = surface.drawArea;
@@ -458,38 +567,7 @@ const create_model_with_parameters = function (surface_name) {
     let name_input;
     let message;
     const create_model_with_current_settings = function () {
-        let layers;
-        const quote_non_numeric_layers = (layers) => {
-            let first_alpha = layers.search(/[A-Za-z]/);
-            if (first_alpha < 0) {
-                return layers;
-            }
-            let end_of_alpha = layers.substring(first_alpha).search(/[^A-Za-z]/);
-            if (end_of_alpha < 0) {
-                // end of layers
-                end_of_alpha = layers.length;
-            } else {
-                end_of_alpha += first_alpha;
-            }
-            let preceding_comma = layers.substring(0, first_alpha).lastIndexOf(',');
-            let start_of_preceding_number;
-            if (preceding_comma < 0) {
-                // preceding number is the first one
-                start_of_preceding_number = 0;
-            } else {
-                start_of_preceding_number = preceding_comma+1;
-            }
-            return layers.substring(0, start_of_preceding_number) +
-                   '"' + layers.substring(start_of_preceding_number, end_of_alpha) + '"' + 
-                   quote_non_numeric_layers(layers.substring(end_of_alpha));
-        };
-        try {
-            let json = quote_non_numeric_layers(gui_state["Model"]["Layers"]);
-            layers = JSON.parse('[' + json + ']');
-        } catch (error) {
-            alert("Layers should a list of whole numbers separated by commas or numbers followed by an activation function name.");
-            return;
-        }
+        let layers = get_layers();
         const name = name_input.value;
         const optimizer_full_name = gui_state["Model"]["Optimization method"];
         const loss_function_full_name = gui_state["Model"]["Loss function"];
@@ -1069,6 +1147,7 @@ return {get_model: get_model,
         create_model_with_parameters: create_model_with_parameters,
         create_training_parameters: create_training_parameters,
         train_with_parameters: train_with_parameters,
+        optimise_hyperparameters_with_parameters: optimise_hyperparameters_with_parameters,
         save_and_load: save_and_load,
         create_button: create_button,
         replace_button_results: replace_button_results};

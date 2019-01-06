@@ -14,6 +14,7 @@ const create_data_button = document.getElementById('create_data');
 const create_model_button = document.getElementById('create_model');
 const train_button = document.getElementById('train');
 const evaluate_button = document.getElementById('evaluate');
+const optimise_button = document.getElementById('optimise');
 const save_and_load_button = document.getElementById('save_and_load');
 
 const tensorflow_add_to_models = tensorflow.add_to_models;
@@ -507,17 +508,22 @@ const update_evaluation_model_choices = function () {
     });
 };
 
+const optimise_hyperparameters = () => {
+    tensorflow.optimise_hyperparameters_with_parameters('Tic Tac Toe');
+};
+
 create_data_button.addEventListener('click', create_data_with_parameters);
                                     
 create_model_button.addEventListener('click',
                                      () => {
-                                         const model = tensorflow.create_model_with_parameters('Tic Tac Toe');
+                                         tensorflow.create_model_with_parameters('Tic Tac Toe');
                                      });
 train_button.addEventListener('click',
                               () => {
                                   tensorflow.train_with_parameters('Tic Tac Toe');
                               });
 evaluate_button.addEventListener('click', evaluate_training);
+optimise_button.addEventListener('click', optimise_hyperparameters);
 save_and_load_button.addEventListener('click', 
                                       (event) => {
                                           tensorflow.save_and_load(event);
@@ -531,7 +537,10 @@ save_and_load_button.addEventListener('click',
                                           }
                                       });
 
-
+if (window.location.hostname !== 'localhost') {
+    // not ready for release
+    document.getElementById('optimise_hyperparameters').style.display = 'none';
+}
   
 }()));
 
