@@ -231,9 +231,9 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
                              shuffle: options.shuffle,
                              validationSplit: options.validation_split,
                              callbacks: callbacks};
-        let validation_tensor = get_tensors(model.name, 'validation'); // undefined if no validation data
-        if (validation_tensor) {
-            configuration.validationData = validation_tensor;
+        let validation_tensors = get_tensors(model.name, 'validation'); // undefined if no validation data
+        if (validation_tensors) {
+            configuration.validationData = validation_tensors;
         }
         const then_handler = (extra_info) => {
             let duration = Math.round((Date.now()-start)/1000); // seconds to 3 decimal places
@@ -251,9 +251,9 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
             }
             xs.dispose();
             ys.dispose();
-            if (validation_tensor && validation_tensor.length === 2) {
-                validation_tensor[0].dispose();
-                validation_tensor[1].dispose();
+            if (validation_tensors && validation_tensors.length === 2) {
+                validation_tensors[0].dispose();
+                validation_tensors[1].dispose();
             }
         };
         const error_handler = (error) => {
@@ -326,6 +326,7 @@ const optimise_hyperparameters_with_parameters = () => {
     const model_name = name_element ? name_element.value : 'my-model';
     const layers = get_layers();
     let [xs, ys] = get_tensors(model_name, 'training');
+    let validation_tensors = get_tensors(model_name, 'validation'); // undefined if no validation data
     const inverse_lookup = (value, table) => {
         let key;
         Object.entries(table).some((entry) => {
@@ -364,7 +365,7 @@ const optimise_hyperparameters_with_parameters = () => {
         }                            
     };
     optimise_hyperparameters_messages.innerHTML = "<b>Searching for good parameter values. Please wait.</b>";
-    optimise(model_name, layers, xs, ys, onExperimentBegin, onExperimentEnd)
+    optimise(model_name, layers, xs, ys, validation_tensors, onExperimentBegin, onExperimentEnd)
         .then((result) => {
             optimise_hyperparameters_messages.remove(); 
             const install_settings_button = document.createElement('button');
@@ -376,13 +377,23 @@ const optimise_hyperparameters_with_parameters = () => {
                                                      () => {
                                                          install_settings(result.argmin);
                                                      });
+            xs.dispose();
+            ys.dispose();
+            if (validation_tensors && validation_tensors.length === 2) {
+                validation_tensors[0].dispose();
+                validation_tensors[1].dispose();
+            }
         });
 };
 
-const optimise = async (name, layers, xs, ys, onExperimentBegin, onExperimentEnd) => {
+const optimise = async (model_name, layers, xs, ys, validation_tensors, onExperimentBegin, onExperimentEnd) => {
     const create_and_train_model = async ({ optimization_method, loss_function, epochs }, { xs, ys }) => {
-        const model = create_model(name, layers, optimization_method, undefined, {loss: loss_function});
-        const h = await model.fit(xs, ys, {epochs}); // , callbacks: { onEpochEnd }
+        const model = create_model(model_name, layers, optimization_method, undefined, {loss: loss_function});
+        const configuration = {epochs};
+        if (validation_tensors) {
+            configuration.validationData = validation_tensors;
+        }
+        const h = await model.fit(xs, ys, configuration); // , callbacks: { onEpochEnd }
         return {loss: h.history.loss[h.history.loss.length-1],
                 history: h.history,
                 status: hpjs.STATUS_OK};
