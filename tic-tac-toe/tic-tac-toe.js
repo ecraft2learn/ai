@@ -14,7 +14,7 @@ const create_data_button = document.getElementById('create_data');
 const create_model_button = document.getElementById('create_model');
 const train_button = document.getElementById('train');
 const evaluate_button = document.getElementById('evaluate');
-const optimise_button = document.getElementById('optimise');
+const optimize_button = document.getElementById('optimize');
 const save_and_load_button = document.getElementById('save_and_load');
 
 const tensorflow_add_to_models = tensorflow.add_to_models;
@@ -65,10 +65,12 @@ const create_parameters_interface = function () {
                   "Use for future training and save old games for validation",
                   "Don't add to dataset"]);
   update_evaluation_model_choices();
+  let optimize = tensorflow.create_hyperparameter_optimize_parameters(parameters_gui);
   return {input_data: input_data,
           model: model,
           training: training,
-          evaluation: evaluation};
+          evaluation: evaluation,
+          optimize: optimize};
 };
 
 let report_error = function (error) {
@@ -340,6 +342,7 @@ const create_data_interface = async function(button_label, number_of_games_funct
               tensorflow.set_data('all models', 'training', new_data);
           } // do nothing for Don't add to dataset
           train_button.disabled = false; // not really but it will behave sensibly if run too soon
+          optimize_button.disabled = false;
           create_model_button.disabled = false; // there is data so can move forward (though really only training needs data)
           message.style.font = "Courier"; // looks better with monospaced font
           let statistics = evaluation_data.statistics;
@@ -508,10 +511,6 @@ const update_evaluation_model_choices = function () {
     });
 };
 
-const optimise_hyperparameters = () => {
-    tensorflow.optimise_hyperparameters_with_parameters('Tic Tac Toe');
-};
-
 create_data_button.addEventListener('click', create_data_with_parameters);
                                     
 create_model_button.addEventListener('click',
@@ -523,7 +522,10 @@ train_button.addEventListener('click',
                                   tensorflow.train_with_parameters('Tic Tac Toe');
                               });
 evaluate_button.addEventListener('click', evaluate_training);
-optimise_button.addEventListener('click', optimise_hyperparameters);
+optimize_button.addEventListener('click',
+                                 () => {
+                                    tensorflow.create_hyperparamter_optimization_tab('Tic Tac Toe');
+                                 });
 save_and_load_button.addEventListener('click', 
                                       (event) => {
                                           tensorflow.save_and_load(event);
@@ -533,13 +535,14 @@ save_and_load_button.addEventListener('click',
                                               load_training_data.addEventListener('change',
                                                                                   () => {
                                                                                       create_model_button.disabled = false;
+                                                                                      optimize_button.disabled = false;
                                                                                   });
                                           }
                                       });
 
 if (window.location.hostname !== 'localhost') {
     // not ready for release
-    document.getElementById('optimise_hyperparameters').style.display = 'none';
+    document.getElementById('optimize_hyperparameters').style.display = 'none';
 }
   
 }()));

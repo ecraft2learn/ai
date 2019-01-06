@@ -53,9 +53,10 @@ const loss_functions =
      "Hinge Loss": "hingeLoss",
      "Huber Loss": "huberLoss",
      "Log Loss": "logLoss",
-     "Mean Squared Error": "meanSquaredError",
-     "Sigmoid Cross Entropy": "sigmoidCrossEntropy",
-     "Softmax Cross Entropy": "categoricalCrossentropy"};
+     "Mean Squared Error": "meanSquaredError"};
+     // following require more arguments
+//      "Sigmoid Cross Entropy": "sigmoidCrossEntropy",
+//      "Softmax Cross Entropy": "categoricalCrossentropy"
 
 const loss_function_named = (name) => {
     return loss_functions[name] || name;
@@ -309,19 +310,30 @@ const get_tensors = (model_name, kind) => {
    return tensors;
 };
 
-let optimise_hyperparameters_messages; // only need one even if called multiple times
+let optimize_hyperparameters_messages; // only need one even if called multiple times
 let lowest_loss; 
 
-const optimise_hyperparameters_with_parameters = () => {
-    const surface = tfvis.visor().surface({name: 'Tensorflow', tab: 'Optimise'});
+const create_hyperparamter_optimization_tab = () => {
+    const surface = tfvis.visor().surface({name: 'Tensorflow', tab: 'Optimize'});
     const draw_area = surface.drawArea;
-//     if (optimise_hyperparameters_messages) {
-//         tfvis.visor().setActiveTab('Optimise');
-//         return; // already set up 
-//     }
+    if (optimize_hyperparameters_messages) {
+        tfvis.visor().setActiveTab('Optimize');
+        return; // already set up 
+    }
+    optimize_hyperparameters_messages = document.createElement('p');
+    const optimize_hyperparameters_button = document.createElement('button');
+    optimize_hyperparameters_button.innerHTML = "Search for good parameters";
+    optimize_hyperparameters_button.className = "support-window-button";
+    optimize_hyperparameters_button.addEventListener('click', 
+                                                     () => {
+                                                         optimize_hyperparameters_with_parameters(draw_area);
+                                                     });
+    draw_area.appendChild(optimize_hyperparameters_button);
+};
+
+const optimize_hyperparameters_with_parameters = (draw_area) => {
+    draw_area.appendChild(optimize_hyperparameters_messages);
     lowest_loss = Number.MAX_VALUE;
-    optimise_hyperparameters_messages = document.createElement('p');
-    draw_area.appendChild(optimise_hyperparameters_messages);
     const name_element = document.getElementById('name_element');
     const model_name = name_element ? name_element.value : 'my-model';
     const layers = get_layers();
@@ -338,14 +350,32 @@ const optimise_hyperparameters_with_parameters = () => {
         return key;
     };
     const display_trial = (parameters, element) => {
-        element.innerHTML += "Number of training iterations = " + parameters.epochs + "<br>";
-        element.innerHTML += "Optimization method = " + inverse_lookup(parameters.optimization_method, optimization_methods) + "<br>";
-        element.innerHTML += "Loss function = " + inverse_lookup(parameters.loss_function, loss_functions) + "<br>";
+        if (parameters.epochs) {
+            element.innerHTML += "Number of training iterations = " + parameters.epochs + "<br>";
+        }
+        if (parameters.learning_rate) {
+            element.innerHTML += "Learning rate = " + parameters.learning_rate + "<br>";
+        }
+        if (parameters.optimization_method) {
+            element.innerHTML += "Optimization method = " + inverse_lookup(parameters.optimization_method, optimization_methods) + "<br>";
+        }
+        if (parameters.loss_function) {
+            element.innerHTML += "Loss function = " + inverse_lookup(parameters.loss_function, loss_functions) + "<br>";
+        }
     };
     const install_settings = (parameters) => {
-        gui_state["Training"]["Number of iterations"] = parameters.epochs;
-        gui_state["Model"]["Optimization method"] = inverse_lookup(parameters.optimization_method, optimization_methods);
-        gui_state["Model"]["Loss function"] = inverse_lookup(parameters.loss_function, loss_functions);
+        if (parameters.epochs) {
+            gui_state["Training"]["Number of iterations"] = parameters.epochs;
+        }
+        if (parameters.learning_rate) {
+            gui_state["Training"]["Learning rate"] = parameters.learning_rate;
+        } 
+        if (parameters.optimization_method) {
+            gui_state["Model"]["Optimization method"] = inverse_lookup(parameters.optimization_method, optimization_methods);
+        }
+        if (parameters.loss_function) {
+            gui_state["Model"]["Loss function"] = inverse_lookup(parameters.loss_function, loss_functions);
+        }       
         parameters_gui.model.__controllers.forEach((controller) => {
             controller.updateDisplay();
         });
@@ -355,19 +385,19 @@ const optimise_hyperparameters_with_parameters = () => {
     };
     let onExperimentBegin = () => {}; // nothing for now
     let onExperimentEnd = (i, trial) => {
-        optimise_hyperparameters_messages.innerHTML = "Experiment " + i + ":<br>";
-        display_trial(trial.args, optimise_hyperparameters_messages);
+        optimize_hyperparameters_messages.innerHTML = "Experiment " + i + ":<br>";
+        display_trial(trial.args, optimize_hyperparameters_messages);
         if (trial.result.loss < lowest_loss) {
-            optimise_hyperparameters_messages.innerHTML += "<b>Best loss so far = " + trial.result.loss + "</b>";
+            optimize_hyperparameters_messages.innerHTML += "<b>Best loss so far = " + trial.result.loss + "</b>";
             lowest_loss = trial.result.loss;
         } else {
-            optimise_hyperparameters_messages.innerHTML += "Loss = " + trial.result.loss;
+            optimize_hyperparameters_messages.innerHTML += "Loss = " + trial.result.loss;
         }                            
     };
-    optimise_hyperparameters_messages.innerHTML = "<b>Searching for good parameter values. Please wait.</b>";
-    optimise(model_name, layers, xs, ys, validation_tensors, onExperimentBegin, onExperimentEnd)
+    optimize_hyperparameters_messages.innerHTML = "<b>Searching for good parameter values. Please wait.</b>";
+    optimize(model_name, layers, xs, ys, validation_tensors, onExperimentBegin, onExperimentEnd)
         .then((result) => {
-            optimise_hyperparameters_messages.remove(); 
+            optimize_hyperparameters_messages.remove(); 
             const install_settings_button = document.createElement('button');
             install_settings_button.className = "support-window-button";
             draw_area.appendChild(install_settings_button);
@@ -386,9 +416,29 @@ const optimise_hyperparameters_with_parameters = () => {
         });
 };
 
-const optimise = async (model_name, layers, xs, ys, validation_tensors, onExperimentBegin, onExperimentEnd) => {
-    const create_and_train_model = async ({ optimization_method, loss_function, epochs }, { xs, ys }) => {
-        const model = create_model(model_name, layers, optimization_method, undefined, {loss: loss_function});
+const optimize = async (model_name, layers, xs, ys, validation_tensors, onExperimentBegin, onExperimentEnd) => {
+    const create_and_train_model = async ({optimization_method, loss_function, epochs, learning_rate}, { xs, ys }) => {
+        if (!optimization_method) {
+            optimization_method = gui_state["Model"]["Optimization method"];
+        }
+        if (!loss_function) {
+            loss_function = gui_state["Model"]["Loss function"];
+        }
+        if (!epochs) {
+            epochs = Math.round(gui_state["Training"]["Number of iterations"]);
+        }
+        if (!learning_rate) {
+            learning_rate = gui_state["Training"]["Learning rate"];
+        }
+        const model = create_model(model_name,
+                                   layers,
+                                   optimization_method,
+                                   undefined,
+                                   {loss: loss_function,
+                                    learning_rate: learning_rate});
+        if (model.optimizer.learningRate) { 
+            model.optimizer.learningRate = learning_rate;
+        }
         const configuration = {epochs};
         if (validation_tensors) {
             configuration.validationData = validation_tensors;
@@ -398,15 +448,32 @@ const optimise = async (model_name, layers, xs, ys, validation_tensors, onExperi
                 history: h.history,
                 status: hpjs.STATUS_OK};
     };
-    const space = {
-        optimization_method: hpjs.choice(Object.values(optimization_methods)),
-        loss_function: hpjs.choice(Object.values(loss_functions)),
-        epochs: hpjs.quniform(10, 30, 10),
-    };
+    const space = {};
+    if (gui_state["Optimize"]["Search for best Optimization method"]) {
+        space.optimization_method = hpjs.choice(Object.values(optimization_methods));
+    }
+    if (gui_state["Optimize"]["Search for best loss function"]) {
+        space.loss_function = hpjs.choice(Object.values(loss_functions));
+    }
+    if (gui_state["Optimize"]["Search for best number of training iterations"]) {
+        const current_epochs = Math.round(gui_state["Training"]["Number of iterations"]);
+        const minimum = Math.max(1, Math.round(current_epochs/2));
+        const maximum = current_epochs*2;
+        const number_of_choices = 5;
+        const increment = Math.max(1, Math.round((maximum-minimum)/number_of_choices)); 
+        space.epochs = hpjs.quniform(minimum, maximum, increment);
+    }
+    if (gui_state["Optimize"]["Search for best learning rate"]) {
+        const current_learning_rate =gui_state["Training"]["Learning rate"];
+        const current_learning_rate_log = Math.log(current_learning_rate);
+        const number_of_choices = 5;
+        space.learning_rate = hpjs.qloguniform(current_learning_rate_log-1, current_learning_rate_log+1, current_learning_rate/number_of_choices);
+    }
+//                 "Search for best number of layers": true,
     return await hpjs.fmin(create_and_train_model,
                            space,
                            hpjs.search.randomSearch,
-                           3,
+                           Math.round(gui_state["Optimize"]["Number of experiments"]),
                            {xs, ys, callbacks: { onExperimentBegin, onExperimentEnd }});
 };
 
@@ -512,7 +579,15 @@ const gui_state =
                 "Number of iterations": 100,
                 "Validation split": 0.1,
                 "Shuffle data": true},
-   "Predictions": {}
+   "Predictions": {},
+   "Optimize": {"Number of experiments": 10,
+                "Search for best Optimization method": true,
+                "Search for best loss function": true,
+                "Search for best number of training iterations": true,
+                "Search for best number of layers": true,
+                "Search for best learning rate": true
+                // could add more here
+                }
 };
 
 const create_parameters_interface = function () {
@@ -523,7 +598,8 @@ const create_parameters_interface = function () {
   settings_element.style.display = "block";
   parameters_gui.domElement.style.padding = "12px";
   return {model: create_model_parameters(parameters_gui),
-          training: create_training_parameters(parameters_gui)};
+          training: create_training_parameters(parameters_gui),
+          optimize: create_hyperparameter_optimize_parameters(parameters_gui)};
 };
 
 const create_model_parameters = (parameters_gui) => {
@@ -541,6 +617,17 @@ const create_training_parameters = (parameters_gui) => {
     training.add(gui_state["Training"], 'Validation split').min(0).max(.999);
     training.add(gui_state["Training"], 'Shuffle data', [true, false]);
     return training;
+};
+
+const create_hyperparameter_optimize_parameters = (parameters_gui) => {
+    const optimize = parameters_gui.addFolder("Optimize");
+    optimize.add(gui_state["Optimize"], 'Number of experiments').min(1).max(1000);
+    optimize.add(gui_state["Optimize"], 'Search for best Optimization method', [true, false]);
+    optimize.add(gui_state["Optimize"], 'Search for best loss function', [true, false]);
+    optimize.add(gui_state["Optimize"], 'Search for best number of training iterations', [true, false]);
+    optimize.add(gui_state["Optimize"], 'Search for best number of layers', [true, false]);
+    optimize.add(gui_state["Optimize"], 'Search for best learning rate', [true, false]);
+    return optimize;
 };
 
 let parameters_gui;
@@ -1174,8 +1261,9 @@ return {get_model: get_model,
         create_model_parameters: create_model_parameters,
         create_model_with_parameters: create_model_with_parameters,
         create_training_parameters: create_training_parameters,
+        create_hyperparameter_optimize_parameters: create_hyperparameter_optimize_parameters,
         train_with_parameters: train_with_parameters,
-        optimise_hyperparameters_with_parameters: optimise_hyperparameters_with_parameters,
+        create_hyperparamter_optimization_tab: create_hyperparamter_optimization_tab,
         save_and_load: save_and_load,
         create_button: create_button,
         replace_button_results: replace_button_results};
