@@ -309,10 +309,19 @@ const get_tensors = (model_name, kind) => {
    return tensors;
 };
 
-const message = document.createElement('p');
-const install_settings_button = document.createElement('button');
+let optimise_hyperparameters_messages; // only need one even if called multiple times
+let lowest_loss; 
 
-const optimise_hyperparameters_with_parameters = (surface_name) => {
+const optimise_hyperparameters_with_parameters = () => {
+    const surface = tfvis.visor().surface({name: 'Tensorflow', tab: 'Optimise'});
+    const draw_area = surface.drawArea;
+//     if (optimise_hyperparameters_messages) {
+//         tfvis.visor().setActiveTab('Optimise');
+//         return; // already set up 
+//     }
+    lowest_loss = Number.MAX_VALUE;
+    optimise_hyperparameters_messages = document.createElement('p');
+    draw_area.appendChild(optimise_hyperparameters_messages);
     const name_element = document.getElementById('name_element');
     const model_name = name_element ? name_element.value : 'my-model';
     const layers = get_layers();
@@ -345,16 +354,24 @@ const optimise_hyperparameters_with_parameters = (surface_name) => {
     };
     let onExperimentBegin = () => {}; // nothing for now
     let onExperimentEnd = (i, trial) => {
-        message.innerHTML = "Experiment " + i + ":<br>";
-        display_trial(trial.args, message);
-        message.innerHTML += "Loss = " + trial.result.loss;
-        document.getElementById('optimise').appendChild(message); // does nothing if already appended                              
+        optimise_hyperparameters_messages.innerHTML = "Experiment " + i + ":<br>";
+        display_trial(trial.args, optimise_hyperparameters_messages);
+        if (trial.result.loss < lowest_loss) {
+            optimise_hyperparameters_messages.innerHTML += "<b>Best loss so far = " + trial.result.loss + "</b>";
+            lowest_loss = trial.result.loss;
+        } else {
+            optimise_hyperparameters_messages.innerHTML += "Loss = " + trial.result.loss;
+        }                            
     };
+    optimise_hyperparameters_messages.innerHTML = "<b>Searching for good parameter values. Please wait.</b>";
     optimise(model_name, layers, xs, ys, onExperimentBegin, onExperimentEnd)
         .then((result) => {
-            install_settings_button.innerHTML = "Click to install settings:<br>";
+            optimise_hyperparameters_messages.remove(); 
+            const install_settings_button = document.createElement('button');
+            install_settings_button.className = "support-window-button";
+            draw_area.appendChild(install_settings_button);
+            install_settings_button.innerHTML = "Click to install best settings found (loss = " + lowest_loss + "):<br>";
             display_trial(result.argmin, install_settings_button);
-            document.getElementById('optimise').appendChild(install_settings_button);
             install_settings_button.addEventListener('click',
                                                      () => {
                                                          install_settings(result.argmin);
