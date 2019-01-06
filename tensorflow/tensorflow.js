@@ -336,7 +336,6 @@ const optimize_hyperparameters_with_parameters = (draw_area) => {
     lowest_loss = Number.MAX_VALUE;
     const name_element = document.getElementById('name_element');
     const model_name = name_element ? name_element.value : 'my-model';
-    const layers = get_layers();
     let [xs, ys] = get_tensors(model_name, 'training');
     let validation_tensors = get_tensors(model_name, 'validation'); // undefined if no validation data
     const inverse_lookup = (value, table) => {
@@ -350,6 +349,9 @@ const optimize_hyperparameters_with_parameters = (draw_area) => {
         return key;
     };
     const display_trial = (parameters, element) => {
+        if (parameters.layers) {
+            element.innerHTML += "Layers = " + parameters.layers + "<br>";
+        }
         if (parameters.epochs) {
             element.innerHTML += "Number of training iterations = " + parameters.epochs + "<br>";
         }
@@ -364,6 +366,9 @@ const optimize_hyperparameters_with_parameters = (draw_area) => {
         }
     };
     const install_settings = (parameters) => {
+        if (parameters.layers) {
+            gui_state["Model"]["Layers"] = parameters.layers.toString();
+        }
         if (parameters.epochs) {
             gui_state["Training"]["Number of iterations"] = parameters.epochs;
         }
@@ -395,7 +400,7 @@ const optimize_hyperparameters_with_parameters = (draw_area) => {
         }                            
     };
     optimize_hyperparameters_messages.innerHTML = "<b>Searching for good parameter values. Please wait.</b>";
-    optimize(model_name, layers, xs, ys, validation_tensors, onExperimentBegin, onExperimentEnd)
+    optimize(model_name, xs, ys, validation_tensors, onExperimentBegin, onExperimentEnd)
         .then((result) => {
             optimize_hyperparameters_messages.remove(); 
             const install_settings_button = document.createElement('button');
@@ -416,8 +421,11 @@ const optimize_hyperparameters_with_parameters = (draw_area) => {
         });
 };
 
-const optimize = async (model_name, layers, xs, ys, validation_tensors, onExperimentBegin, onExperimentEnd) => {
-    const create_and_train_model = async ({optimization_method, loss_function, epochs, learning_rate}, { xs, ys }) => {
+const optimize = async (model_name, xs, ys, validation_tensors, onExperimentBegin, onExperimentEnd) => {
+    const create_and_train_model = async ({layers, optimization_method, loss_function, epochs, learning_rate}, { xs, ys }) => {
+        if (!layers) {
+            layers = get_layers();
+        }
         if (!optimization_method) {
             optimization_method = gui_state["Model"]["Optimization method"];
         }
@@ -464,12 +472,37 @@ const optimize = async (model_name, layers, xs, ys, validation_tensors, onExperi
         space.epochs = hpjs.quniform(minimum, maximum, increment);
     }
     if (gui_state["Optimize"]["Search for best learning rate"]) {
-        const current_learning_rate =gui_state["Training"]["Learning rate"];
+        const current_learning_rate = gui_state["Training"]["Learning rate"];
         const current_learning_rate_log = Math.log(current_learning_rate);
         const number_of_choices = 5;
         space.learning_rate = hpjs.qloguniform(current_learning_rate_log-1, current_learning_rate_log+1, current_learning_rate/number_of_choices);
     }
-//                 "Search for best number of layers": true,
+    if (gui_state["Optimize"]["Search for best number of layers"]) {
+        const current_layers = get_layers();
+        const choices = [];
+        choices.push([current_layers[0]*2].concat(current_layers)); // add 2x first layer
+        choices.push([current_layers[0]].concat(current_layers)); // add 2x first layer
+        if (current_layers.length > 1) {
+            choices.push(current_layers.slice(1)); // all but first
+        }
+        choices.push(current_layers.map((size, index) => { // double all but last size
+            if (index < current_layers.length-1) {
+               // not the last one
+               return size*2;
+            } else {
+               return size;
+            }
+        }));
+        choices.push(current_layers.map((size, index) => { // double all but last size
+            if (index < current_layers.length-1) {
+               // not the last one
+               return Math.max(1,Math.round(size/2));
+            } else {
+               return size;
+            }
+        }));
+        space.layers = hpjs.choice(choices);
+    }
     return await hpjs.fmin(create_and_train_model,
                            space,
                            hpjs.search.randomSearch,
