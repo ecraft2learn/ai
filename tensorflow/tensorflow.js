@@ -312,6 +312,11 @@ const get_tensors = (model_name, kind) => {
 
 let optimize_hyperparameters_messages; // only need one even if called multiple times
 let lowest_loss; 
+let stop_on_next_experiment = false;
+let hyperparameter_searching = false;
+const optimize_hyperparameters_button = document.createElement('button');
+const search_button_label = "Search for good parameters using current settings";
+const stop_button_label = "Stop when next current experiment finishes";
 
 const create_hyperparamter_optimization_tab = () => {
     const surface = tfvis.visor().surface({name: 'Tensorflow', tab: 'Optimize'});
@@ -321,12 +326,17 @@ const create_hyperparamter_optimization_tab = () => {
         return; // already set up 
     }
     optimize_hyperparameters_messages = document.createElement('p');
-    const optimize_hyperparameters_button = document.createElement('button');
-    optimize_hyperparameters_button.innerHTML = "Search for good parameters using current settings";
+    optimize_hyperparameters_button.innerHTML = search_button_label;
     optimize_hyperparameters_button.className = "support-window-button";
     optimize_hyperparameters_button.addEventListener('click', 
                                                      () => {
-                                                         optimize_hyperparameters_with_parameters(draw_area);
+                                                         if (hyperparameter_searching) {
+                                                             stop_on_next_experiment = true;
+                                                         } else {
+                                                             hyperparameter_searching = true;
+                                                             optimize_hyperparameters_with_parameters(draw_area);
+                                                             optimize_hyperparameters_button.innerHTML = stop_button_label;
+                                                         }
                                                      });
     draw_area.appendChild(optimize_hyperparameters_button);
 };
@@ -388,7 +398,14 @@ const optimize_hyperparameters_with_parameters = (draw_area) => {
             controller.updateDisplay();
         });
     };
-    let onExperimentBegin = () => {}; // nothing for now
+    let onExperimentBegin = () => {
+        if (stop_on_next_experiment) {
+           stop_on_next_experiment = false;
+           hyperparameter_searching = false;
+           optimize_hyperparameters_button.innerHTML = search_button_label;
+           return true; // to stop the search
+        }
+    };
     let onExperimentEnd = (i, trial) => {
         optimize_hyperparameters_messages.innerHTML = "Experiment " + i + ":<br>";
         display_trial(trial.args, optimize_hyperparameters_messages);
@@ -451,10 +468,11 @@ const optimize = async (model_name, xs, ys, validation_tensors, onExperimentBegi
         if (validation_tensors) {
             configuration.validationData = validation_tensors;
         }
-        const h = await model.fit(xs, ys, configuration); // , callbacks: { onEpochEnd }
+        // following seems to involve a memory leak but tf.tidy can't be used here
+        const h = await model.fit(xs, ys, configuration);
         return {loss: h.history.loss[h.history.loss.length-1],
                 history: h.history,
-                status: hpjs.STATUS_OK};
+                status: hpjs.STATUS_OK};  
     };
     const space = {};
     if (to_boolean(gui_state["Optimize"]["Search for best Optimization method"])) {
