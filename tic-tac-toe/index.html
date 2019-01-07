@@ -39,58 +39,19 @@ You can choose how many games it will play in the settings panel that will appea
 </p>
 <button id="create_data" class="support-window-button" >Create initial data</button>
 <p>
-Now let's define how the computer will learn.
-The loss is a measure of the distance between the values the model predicts and the known correct values.
-You can choose among several
-<a href="https://medium.com/@risingdeveloper/visualization-of-some-loss-functions-for-deep-learning-with-tensorflow-9f60be9d09f9" target="_blank">
-loss functions</a> for computing this distance.
-</p>
-<p>
-You can also decide on the size of the layers of the neural net.
-The default numbers are 100, 50, 20, and 1.
-This means that that each of the nine inputs corresponding to the nine board positions are connected to 100 neurons.
-Each of those 100 neurons are then connected to a layer with 50 units which is connected to one with 20.
-Those 20 neurons are then combined to a single number which is the "score" for a board.
-Currently the only kind of connection between layers is "dense"
-which means each neuron of a layer is connected to each neuron of the next layer.
-More and wider layers up to a point should make the model more accurate but also slower
-and at some point may require too much memory (in the GPU).
-</p>
+<iframe src="../tensorflow/layers_help.html"
+        class=transparent_iframe
+        scrolling="no"
+        onload="this.style.height=this.contentDocument.body.scrollHeight +'px';"
+        width="800">
+</iframe>
 <button disabled id="create_model" class="support-window-button">Create a model</button>
-<p>
-Now let's train the computer using the games you just generated.
-You can set the number of iterations the training algorithm will take.
-Each iteration the program adjusts the weights of the neurons to reduce the loss.
-You can see the best number of iterations from the graph by selecting the point where it starts to level off.
-</p>
-<p>
-You can choose the learning rate which determines how much progress it can make on each training iteration.
-The learning rate determines how much it changes the weights of the neurons to reduce the "loss".
-Larger learning rates makes the training faster
-but may cause the error to increase by taking such a big step that passes over the optimal values.
-You can decide whether the data is shuffled on each step to eliminate the possibility that the model
-will be trained for input in a particular order.
-</p>
-<p>
-Recall that the purpose of training is to reduce the loss.
-Loss is a measure of the distance between the values the model predicts for training set inputs
-and training set output values.
-Many of the optimization methods used in training adjust internal parameters to improve the speed and accuracy of the training.
-However if they do this by relying upon only the training data they may learning neuron weights that work well
-only for the training data and not real or test data.
-This problem is called "overfitting" because the model fits only the training data well.
-To remedy this you can set the "validation split" so that some of the training data is used only for 
-adjusting the learning parameters.
-You can also load saved training data as a validation dataset.
-When validation data is available the training graphs will display
-loss and accuracy for both the training and the validation data (labelled 'val_loss' and 'val_acc').
-Accuracy is a measure of how often the model gave the correct answer.
-If the validation loss starts increasing (or validation accuracy decreasing)
-while your training loss is still decreasing (or training accuracy increasing),
-this is an indicator of overfitting.
-Read this <a href="https://towardsdatascience.com/train-validation-and-test-sets-72cb40cba9e7" target="_blank">
-article about training, validation, and test data</a> to learn more.
-</p>
+<iframe src="../tensorflow/training_help.html"
+        class=transparent_iframe
+        scrolling="no"
+        onload="this.style.height=this.contentDocument.body.scrollHeight +'px';"
+        width="800">
+</iframe>
 <button disabled id="train" class="support-window-button">Train the model</button>
 <p>
 How good is the computer at playing Tic Tac Toe now that you've trained it?
@@ -106,46 +67,18 @@ High scoring moves are more likely than others but all moves can occur.
 If no moves have a positive score then all are considered likely to lead to a loss.
 In this case the least negative choice is selected.
 </p>
-<button disabled id="evaluate" class="support-window-button" >Evaluate the training</button>
+<button disabled id="evaluate" class="support-window-button">Evaluate the training</button>
 <p>
 You can save a trained model to the local file system to load at a later time.
 </p>
-<button id="save_and_load" class="support-window-button" >Saving and loading</button>
-<div id="optimise_hyperparameters">
-<p>
-Instead of "manually" searching for optimal values for hyperparameters
-such the learning rate, optimization method, number of layers, etc. the search can be automated.
-The idea is to create, train, and evaluate the model with different hyperparameter values to find
-the one with the lowest error in its predictions.
-For optimization methods and loss functions it chooses randomly among the options.
-For the number of training iterations (sometimes called "epochs") it picks random numbers between
-one half and double the current setting.
-For number of layers it generates six variants of the current setting:
-</p> 
-<ol>
-<li>
-increase the size of each layer by at most a factor of 2 (except last one which is the output)
-</li>
-<li>
-decrease the size of each layer by at most a factor of 1/2 
-</li>
-<li>
-insert a new layer of the same size as the first layer
-</li>
-<li>
-insert a new layer up to double the size of the first layer
-</li>
-<li>
-remove the first layer (unless it is the only remaining hidden layer)
-</li>
-<li>
-keep the current list of layers
-</li>
-</ol> 
-<p>
-You can use the settings to control which hyperparameters are searched and how many searches to perform.
-</p>
-<button disabled id="optimize" class="support-window-button">Optimize hyperparameters</button>
+<button id="save_and_load" class="support-window-button">Saving and loading</button>
+<iframe src="../tensorflow/hyperparameters_search.html"
+        class=transparent_iframe
+        scrolling="no"
+        onload="this.style.height=this.contentDocument.body.scrollHeight +'px';"
+        width="800">
+</iframe>
+<button disabled id="optimize" class="support-window-button">Search for good parameter settings</button>
 </p>
 <h3>Things to try</h3>
 <p>

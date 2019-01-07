@@ -170,6 +170,10 @@ figcaption {
 .societal-impact {
   background-color: #c0f3db;
 }
+.transparent_iframe {
+  overflow:hidden;
+  border:none;
+}
 
 
 

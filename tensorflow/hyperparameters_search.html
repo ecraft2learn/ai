@@ -1,0 +1,50 @@
+<html>
+<head>
+<link href="../css/ai-teacher-guide.css" rel="stylesheet">
+<link href="../../uui/help/oer-style.css" rel="stylesheet">
+<style>
+p {
+  border-radius: 0px;
+  padding: 0px;
+}
+</style>
+<title>Searching for good values for hyperparameters</title>
+</head>
+<body style="margin: 0;
+             padding-left: 0px;
+             max-width: 800px;">
+             <p>
+Instead of "manually" searching for optimal values for hyperparameters
+such the learning rate, optimization method, number of layers, etc. the search can be automated.
+The idea is to create, train, and evaluate the model with different hyperparameter values to find
+the one with the lowest error in its predictions.
+For optimization methods and loss functions it chooses randomly among the options.
+For the number of training iterations (sometimes called "epochs") it picks random numbers between
+one half and double the current setting.
+For number of layers it generates six variants of the current setting:
+</p> 
+<ol>
+<li>
+increase the size of each layer by at most a factor of 2 (except last one which is the output)
+</li>
+<li>
+decrease the size of each layer by at most a factor of 1/2 
+</li>
+<li>
+insert a new layer of the same size as the first layer
+</li>
+<li>
+insert a new layer up to double the size of the first layer
+</li>
+<li>
+remove the first layer (unless it is the only remaining hidden layer)
+</li>
+<li>
+keep the current list of layers
+</li>
+</ol> 
+<p>
+You can use the settings to control which hyperparameters are searched and how many searches to perform.
+</p>
+</body>
+</html>

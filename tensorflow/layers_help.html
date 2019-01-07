@@ -1,0 +1,36 @@
+<html>
+<head>
+<link href="../css/ai-teacher-guide.css" rel="stylesheet">
+<link href="../../uui/help/oer-style.css" rel="stylesheet">
+<style>
+p {
+  border-radius: 0px;
+  padding: 0px;
+}
+</style>
+<title>How to design your model and loss function</title>
+</head>
+<body style="margin: 0;
+             padding-left: 0px;
+             max-width: 800px;">
+<p>
+You can decide on the size of the layers of the neural net.
+For example the layers can be set to "100, 50, 20, 1".
+This means that that each of the inputs are connected to 100 neurons.
+Each of those 100 neurons are then connected to a layer with 50 units which is connected to one with 20.
+Those 20 neurons are then combined to a single number which is the "prediction" on the model.
+Currently the only kind of connection between layers is "dense"
+which means each neuron of a layer is connected to each neuron of the next layer.
+More and wider layers up to a point should make the model more accurate but also slower
+and at some point may require too much memory (in the GPU).
+</p>
+<p>
+You can define how your model will learn.
+It will update the weights on its neurons to reduce the <i>loss</i>.
+The loss is a measure of the distance between the values the model predicts and the known correct values.
+You can choose among several
+<a href="https://medium.com/@risingdeveloper/visualization-of-some-loss-functions-for-deep-learning-with-tensorflow-9f60be9d09f9" target="_blank">
+loss functions</a> for computing this distance.
+</p>
+</body>
+</html>
