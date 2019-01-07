@@ -322,7 +322,7 @@ const create_hyperparamter_optimization_tab = () => {
     }
     optimize_hyperparameters_messages = document.createElement('p');
     const optimize_hyperparameters_button = document.createElement('button');
-    optimize_hyperparameters_button.innerHTML = "Search for good parameters";
+    optimize_hyperparameters_button.innerHTML = "Search for good parameters using current settings";
     optimize_hyperparameters_button.className = "support-window-button";
     optimize_hyperparameters_button.addEventListener('click', 
                                                      () => {
