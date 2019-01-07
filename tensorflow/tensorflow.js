@@ -480,23 +480,24 @@ const optimize = async (model_name, xs, ys, validation_tensors, onExperimentBegi
     if (to_boolean(gui_state["Optimize"]["Search for best number of layers"])) {
         const current_layers = get_layers();
         const choices = [];
-        choices.push([current_layers[0]*2].concat(current_layers)); // add 2x first layer
-        choices.push([current_layers[0]].concat(current_layers)); // add 2x first layer
-        if (current_layers.length > 1) {
+        choices.push(current_layers); // unchanged
+        choices.push([Math.round(current_layers[0]*(1+Math.random()))].concat(current_layers)); // add up to 2x first layer
+        choices.push([current_layers[0]].concat(current_layers)); // add copy of first layer
+        if (current_layers.length > 2) {
             choices.push(current_layers.slice(1)); // all but first
         }
-        choices.push(current_layers.map((size, index) => { // double all but last size
+        choices.push(current_layers.map((size, index) => { // increase by 1x to 2x all but size of last layer
             if (index < current_layers.length-1) {
                // not the last one
-               return size*2;
+               return size*(1+Math.random());
             } else {
                return size;
             }
         }));
-        choices.push(current_layers.map((size, index) => { // double all but last size
+        choices.push(current_layers.map((size, index) => { // decrease by .5x to 1x all but size of last layer
             if (index < current_layers.length-1) {
                // not the last one
-               return Math.max(1,Math.round(size/2));
+               return Math.max(1, Math.round(size/(1+Math.random())));
             } else {
                return size;
             }
