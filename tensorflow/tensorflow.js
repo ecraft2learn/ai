@@ -457,13 +457,13 @@ const optimize = async (model_name, xs, ys, validation_tensors, onExperimentBegi
                 status: hpjs.STATUS_OK};
     };
     const space = {};
-    if (gui_state["Optimize"]["Search for best Optimization method"]) {
+    if (to_boolean(gui_state["Optimize"]["Search for best Optimization method"])) {
         space.optimization_method = hpjs.choice(Object.values(optimization_methods));
     }
-    if (gui_state["Optimize"]["Search for best loss function"]) {
+    if (to_boolean(gui_state["Optimize"]["Search for best loss function"])) {
         space.loss_function = hpjs.choice(Object.values(loss_functions));
     }
-    if (gui_state["Optimize"]["Search for best number of training iterations"]) {
+    if (to_boolean(gui_state["Optimize"]["Search for best number of training iterations"])) {
         const current_epochs = Math.round(gui_state["Training"]["Number of iterations"]);
         const minimum = Math.max(1, Math.round(current_epochs/2));
         const maximum = current_epochs*2;
@@ -471,13 +471,13 @@ const optimize = async (model_name, xs, ys, validation_tensors, onExperimentBegi
         const increment = Math.max(1, Math.round((maximum-minimum)/number_of_choices)); 
         space.epochs = hpjs.quniform(minimum, maximum, increment);
     }
-    if (gui_state["Optimize"]["Search for best learning rate"]) {
+    if (to_boolean(gui_state["Optimize"]["Search for best learning rate"])) {
         const current_learning_rate = gui_state["Training"]["Learning rate"];
         const current_learning_rate_log = Math.log(current_learning_rate);
         const number_of_choices = 5;
         space.learning_rate = hpjs.qloguniform(current_learning_rate_log-1, current_learning_rate_log+1, current_learning_rate/number_of_choices);
     }
-    if (gui_state["Optimize"]["Search for best number of layers"]) {
+    if (to_boolean(gui_state["Optimize"]["Search for best number of layers"])) {
         const current_layers = get_layers();
         const choices = [];
         choices.push([current_layers[0]*2].concat(current_layers)); // add 2x first layer
@@ -808,7 +808,7 @@ const train_with_parameters = async function (surface_name) {
                           {epochs: Math.round(gui_state["Training"]["Number of iterations"]),
                            learning_rate: gui_state["Training"]["Learning rate"],
                            validation_split: gui_state["Training"]["Validation split"],
-                           shuffle: gui_state["Training"]["Shuffle data"],
+                           shuffle: to_boolean(gui_state["Training"]["Shuffle data"]),
                           },
                           true, // show progress using tfjs-vis 
                           success_callback,
@@ -1114,6 +1114,8 @@ const replace_button_results = function(element, child) {
     }
     element.appendChild(child);
 };
+
+const to_boolean = (x) => x === true || x === 'true';
 
 let create_model_button, save_and_load_model_button, train_button, evaluate_button;
 
