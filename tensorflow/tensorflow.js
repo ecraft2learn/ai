@@ -393,11 +393,12 @@ const optimize_hyperparameters_with_parameters = (draw_area) => {
         }
         if (parameters.loss_function) {
             gui_state["Model"]["Loss function"] = inverse_lookup(parameters.loss_function, loss_functions);
-        }       
-        parameters_gui.model.__controllers.forEach((controller) => {
+        }
+        let gui = parameters_interface(create_parameters_interface);
+        gui.model.__controllers.forEach((controller) => {
             controller.updateDisplay();
         });
-        parameters_gui.training.__controllers.forEach((controller) => {
+        gui.training.__controllers.forEach((controller) => {
             controller.updateDisplay();
         });
     };
@@ -420,8 +421,12 @@ const optimize_hyperparameters_with_parameters = (draw_area) => {
         }                            
     };
     optimize_hyperparameters_messages.innerHTML = "<b>Searching for good parameter values. Please wait.</b>";
-    optimize(model_name, xs, ys, validation_tensors, onExperimentBegin, onExperimentEnd)
+    optimize(model_name, xs, ys, validation_tensors, onExperimentBegin, onExperimentEnd, draw_area)
         .then((result) => {
+            if (!result) {
+                // error has been handled
+                return;
+            }
             optimize_hyperparameters_messages.remove(); 
             const install_settings_button = document.createElement('button');
             install_settings_button.className = "support-window-button";
@@ -438,10 +443,13 @@ const optimize_hyperparameters_with_parameters = (draw_area) => {
                 validation_tensors[0].dispose();
                 validation_tensors[1].dispose();
             }
+            optimize_hyperparameters_button.innerHTML = search_button_label;
+            hyperparameter_searching = false;
+            stop_on_next_experiment = false;
         });
 };
 
-const optimize = async (model_name, xs, ys, validation_tensors, onExperimentBegin, onExperimentEnd) => {
+const optimize = async (model_name, xs, ys, validation_tensors, onExperimentBegin, onExperimentEnd, draw_area) => {
     const create_and_train_model = async ({layers, optimization_method, loss_function, epochs, learning_rate}, { xs, ys }) => {
         if (!layers) {
             layers = get_layers();
@@ -525,11 +533,19 @@ const optimize = async (model_name, xs, ys, validation_tensors, onExperimentBegi
         }));
         space.layers = hpjs.choice(choices);
     }
-    return await hpjs.fmin(create_and_train_model,
-                           space,
-                           hpjs.search.randomSearch,
-                           Math.round(gui_state["Optimize"]["Number of experiments"]),
-                           {xs, ys, callbacks: { onExperimentBegin, onExperimentEnd }});
+    try {
+        return await hpjs.fmin(create_and_train_model,
+                               space,
+                               hpjs.search.randomSearch,
+                               Math.round(gui_state["Optimize"]["Number of experiments"]),
+                               {xs, ys, callbacks: { onExperimentBegin, onExperimentEnd }});
+    } catch (error) {
+        optimize_hyperparameters_messages.innerHTML = "Sorry but an error occured.<br>" + error.message;
+        draw_area.appendChild(optimize_hyperparameters_messages);
+        optimize_hyperparameters_button.innerHTML = search_button_label;
+        hyperparameter_searching = false;
+        stop_on_next_experiment = false;
+    }
 };
 
 let last_prediction;
