@@ -539,11 +539,6 @@ save_and_load_button.addEventListener('click',
                                                                                   });
                                           }
                                       });
-
-if (window.location.hostname !== 'localhost') {
-    // not ready for release
-    document.getElementById('optimize_hyperparameters').style.display = 'none';
-}
   
 }()));
 
