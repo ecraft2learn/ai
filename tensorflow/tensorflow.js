@@ -28,6 +28,10 @@ const set_data = (model_name, kind, value) => {
         data[model_name] = {};
     }
     data[model_name][kind] = value;
+    if (kind === 'training') {
+        optimize_hyperparameters_interface_button.disabled = false;
+        train_button.disabled = false;
+    }
 };
 
 const optimization_methods =
@@ -65,7 +69,6 @@ const loss_function_named = (name) => {
 const add_to_models = function (new_model) {
     models[new_model.name] = new_model;
     model = new_model; // is now the current model
-    train_button.disabled = false;
 };
 
 const shape_of_data = (data) => {
@@ -1136,13 +1139,14 @@ const replace_button_results = function(element, child) {
 
 const to_boolean = (x) => x === true || x === 'true';
 
-let create_model_button, save_and_load_model_button, train_button, evaluate_button;
+let create_model_button, save_and_load_model_button, train_button, optimize_hyperparameters_interface_button, evaluate_button;
 
 window.addEventListener('DOMContentLoaded',
                         () => {
                             create_model_button = document.getElementById('create_model');
                             save_and_load_model_button = document.getElementById('save_and_load');
                             train_button = document.getElementById('train');
+                            optimize_hyperparameters_interface_button = document.getElementById('optimize');
                             evaluate_button = document.getElementById('evaluate');
                             create_model_button.addEventListener('click', 
                                                                  () => {
@@ -1151,6 +1155,10 @@ window.addEventListener('DOMContentLoaded',
                             train_button.addEventListener('click',
                                                           () => {
                                                               train_with_parameters('Tensorflow');
+                                                          });
+                            optimize_hyperparameters_interface_button.addEventListener('click',
+                                                          () => {
+                                                              create_hyperparamter_optimization_tab();
                                                           });
                             evaluate_button.addEventListener('click', create_prediction_interface);
                             save_and_load_model_button.addEventListener('click', save_and_load);             
