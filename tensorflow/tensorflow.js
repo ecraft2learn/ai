@@ -342,6 +342,7 @@ const create_hyperparamter_optimization_tab = () => {
                                                          }
                                                      });
     draw_area.appendChild(optimize_hyperparameters_button);
+    parameters_interface(create_parameters_interface).optimize.open();
 };
 
 const optimize_hyperparameters_with_parameters = (draw_area) => {
