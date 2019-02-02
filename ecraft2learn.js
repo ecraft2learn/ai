@@ -1025,8 +1025,11 @@ window.ecraft2learn =
             if (message_filter) {
                 const receive_message = (event) => {
                     if (message_filter(event.data)) {
-                        message_receiver(event.data);
-                        window.removeEventListener('message', receive_message);
+                        if (!message_receiver(event.data)) {
+                            // most receivers are one-shot and should be removed
+                            // but if the receiver returns true it is kept
+                            window.removeEventListener('message', receive_message);
+                        }
                     }
                 };
                 window.addEventListener('message', receive_message);            
@@ -1217,6 +1220,37 @@ window.ecraft2learn =
                                       }
                                   });
     };
+    const optimize_hyperparameters = (model_name, number_of_experiments,
+                                      trial_end_callback, success_callback, error_callback) => {
+        record_callbacks(trial_end_callback, success_callback, error_callback);
+        const time_stamp = Date.now();
+        request_of_support_window('tensorflow.js',
+                                  'Loaded',
+                                  () => {
+                                      return {optimize_hyperparameters: true,
+                                              model_name: model_name,
+                                              number_of_experiments: number_of_experiments,
+                                              time_stamp: time_stamp};
+                                  },
+                                  (message) => {
+                                      return message.optimize_hyperparameters_time_stamp === time_stamp;
+                                  },
+                                  (message) => {
+                                      if (message.trial_optimize_hyperparameters) {
+                                          invoke_callback(trial_end_callback,
+                                                          javascript_to_snap(message.trial_optimize_hyperparameters),
+                                                          message.trial_number);
+                                          return true; // keep this message receiver for subsequent messages
+                                      } else if (message.final_optimize_hyperparameters) {
+                                          invoke_callback(success_callback, javascript_to_snap(message.final_optimize_hyperparameters));
+                                      } else if (error_callback) {
+                                          console.log(message.error_message);
+                                          invoke_callback(error_callback, javascript_to_snap(message.error_message));
+                                      } else {
+                                          inform("Error while optimizing hyperparameters", message.error_message);
+                                      }
+                                  });
+    }
     var image_url_of_costume = function (costume) {
         var canvas = costume.contents;
         return canvas.toDataURL('image/png');        
@@ -2624,6 +2658,7 @@ window.ecraft2learn =
   predictions_from_model: predictions_from_model,
   load_tensorflow_model_from_URL: load_tensorflow_model_from_URL,
   load_data_from_URL: load_data_from_URL,
+  optimize_hyperparameters: optimize_hyperparameters,
   display_support_window: open_support_window,
   image_class: image_class,
   inform: inform,

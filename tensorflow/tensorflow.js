@@ -125,7 +125,7 @@ const create_model = function (name, layers, optimizer_full_name, input_shape, o
         optimizer = 'adam';
     }
     let loss_function = loss_function_named((options.loss_function || 'meanSquaredError'));
-    model.compile({loss: loss_function,
+    model.compile({loss: typeof loss_function === 'string' ? tf.losses[loss_function] : loss_function,
                    optimizer: optimizer,
                    metrics: ['accuracy']
                   });
@@ -352,16 +352,6 @@ const optimize_hyperparameters_with_parameters = (draw_area) => {
     const model_name = name_element ? name_element.value : 'my-model';
     let [xs, ys] = get_tensors(model_name, 'training');
     let validation_tensors = get_tensors(model_name, 'validation'); // undefined if no validation data
-    const inverse_lookup = (value, table) => {
-        let key;
-        Object.entries(table).some((entry) => {
-            if (value === entry[1]) {
-                key = entry[0];
-                return true;
-            }
-        });
-        return key;
-    };
     const display_trial = (parameters, element) => {
         if (parameters.layers) {
             element.innerHTML += "Layers = " + parameters.layers + "<br>";
@@ -422,7 +412,15 @@ const optimize_hyperparameters_with_parameters = (draw_area) => {
         }                            
     };
     optimize_hyperparameters_messages.innerHTML = "<b>Searching for good parameter values. Please wait.</b>";
-    optimize(model_name, xs, ys, validation_tensors, onExperimentBegin, onExperimentEnd, draw_area)
+    const error_handler = (error) => {
+        optimize_hyperparameters_messages.innerHTML = "Sorry but an error occured.<br>" + error.message;
+        draw_area.appendChild(optimize_hyperparameters_messages);
+        optimize_hyperparameters_button.innerHTML = search_button_label;
+        hyperparameter_searching = false;
+        stop_on_next_experiment = false;
+    };
+    const number_of_experiments = Math.round(gui_state["Optimize"]["Number of experiments"]);
+    optimize(model_name, xs, ys, validation_tensors, number_of_experiments, onExperimentBegin, onExperimentEnd, error_handler)
         .then((result) => {
             if (!result) {
                 // error has been handled
@@ -450,7 +448,49 @@ const optimize_hyperparameters_with_parameters = (draw_area) => {
         });
 };
 
-const optimize = async (model_name, xs, ys, validation_tensors, onExperimentBegin, onExperimentEnd, draw_area) => {
+const inverse_lookup = (value, table) => {
+    // useful for converting from internal names for loss functions and optimizatin methods
+    // to user friendlier names
+    let key;
+    Object.entries(table).some((entry) => {
+        if (value === entry[1]) {
+            key = entry[0];
+            return true;
+        }
+    });
+    return key;
+};
+
+const optimize_hyperparameters = (model_name, number_of_experiments,
+                                  experiment_end_callback, success_callback, error_callback) => {
+   // this is meant to be called when messages are received from a client page (e.g. Snap!)
+   try {   
+       const [xs, ys] = get_tensors(model_name, 'training');
+       const validation_tensors = get_tensors(model_name, 'validation'); // undefined if no validation data
+//        tf.tidy(() => {
+           optimize(model_name, xs, ys, validation_tensors, number_of_experiments, undefined, experiment_end_callback, error_callback)
+              .then(success_callback);                   
+//        });
+   } catch (error) {
+       if (error_callback) {
+           let error_message;
+           // try to generate more helpful error messages
+           if (!get_model(model_name)) {
+               error_message = "No model named '" + model_name + "'";
+           } else if (!get_tensors(model_name, 'training')) {
+               error_message = "No training data sent to the model named '" + model_name + "'";
+           } else {
+               error_message = error.message;
+           }
+           error_callback(new Error(error_message));
+       } else {
+           console.error(error);
+       }
+       return;
+   }
+};
+
+const optimize = async (model_name, xs, ys, validation_tensors, number_of_experiments, onExperimentBegin, onExperimentEnd, error_callback) => {
     const create_and_train_model = async ({layers, optimization_method, loss_function, epochs, learning_rate}, { xs, ys }) => {
         if (!layers) {
             layers = get_layers();
@@ -538,14 +578,12 @@ const optimize = async (model_name, xs, ys, validation_tensors, onExperimentBegi
         return await hpjs.fmin(create_and_train_model,
                                space,
                                hpjs.search.randomSearch,
-                               Math.round(gui_state["Optimize"]["Number of experiments"]),
+                               number_of_experiments,
                                {xs, ys, callbacks: { onExperimentBegin, onExperimentEnd }});
     } catch (error) {
-        optimize_hyperparameters_messages.innerHTML = "Sorry but an error occured.<br>" + error.message;
-        draw_area.appendChild(optimize_hyperparameters_messages);
-        optimize_hyperparameters_button.innerHTML = search_button_label;
-        hyperparameter_searching = false;
-        stop_on_next_experiment = false;
+        if (error_callback) {
+            error_callback(error);
+        }
     }
 };
 
@@ -1321,6 +1359,31 @@ const receive_message =
                                                          error.message}, "*");
             };
             contents_of_URL(URL, success_callback, error_callback);
+        } else if (typeof message.optimize_hyperparameters !== 'undefined') {
+            let number_of_experiments = message.number_of_experiments;
+            let model_name = message.model_name || 'all models';
+            let time_stamp = message.time_stamp;
+            const success_callback = (result) => {
+                let best_parameters = result.argmin;
+                best_parameters.input_shape = shape_of_data((get_data(model_name, 'training') || get_data(model_name, 'validation')).input[0]);
+                best_parameters.optimization_method = inverse_lookup(best_parameters.optimization_method, optimization_methods);
+                best_parameters.loss_function = inverse_lookup(best_parameters.loss_function, loss_functions);
+                event.source.postMessage({optimize_hyperparameters_time_stamp: time_stamp,
+                                          final_optimize_hyperparameters: best_parameters});
+            };
+            const experiment_end_callback = (n, trial) => {
+                event.source.postMessage({optimize_hyperparameters_time_stamp: time_stamp,
+                                          trial_number: n,
+                                          trial_optimize_hyperparameters: trial.args,
+                                          trial_loss: trial.result.loss});
+            }
+            const error_callback = (error) => {
+                event.source.postMessage({optimize_hyperparameters_time_stamp: time_stamp,
+                                          error_message: "Error while optimizing hyperparameters. " + 
+                                                         error.message}, "*");
+            };
+            optimize_hyperparameters(model_name, number_of_experiments,
+                                     experiment_end_callback, success_callback, error_callback);
         }
 };
 
