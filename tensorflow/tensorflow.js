@@ -1369,18 +1369,21 @@ const receive_message =
                 best_parameters.optimization_method = inverse_lookup(best_parameters.optimization_method, optimization_methods);
                 best_parameters.loss_function = inverse_lookup(best_parameters.loss_function, loss_functions);
                 event.source.postMessage({optimize_hyperparameters_time_stamp: time_stamp,
-                                          final_optimize_hyperparameters: best_parameters});
+                                          final_optimize_hyperparameters: best_parameters},
+                                          "*");
             };
             const experiment_end_callback = (n, trial) => {
                 event.source.postMessage({optimize_hyperparameters_time_stamp: time_stamp,
                                           trial_number: n,
                                           trial_optimize_hyperparameters: trial.args,
-                                          trial_loss: trial.result.loss});
+                                          trial_loss: trial.result.loss},
+                                          "*");
             }
             const error_callback = (error) => {
                 event.source.postMessage({optimize_hyperparameters_time_stamp: time_stamp,
                                           error_message: "Error while optimizing hyperparameters. " + 
-                                                         error.message}, "*");
+                                                         error.message},
+                                          "*");
             };
             optimize_hyperparameters(model_name, number_of_experiments,
                                      experiment_end_callback, success_callback, error_callback);
@@ -1410,4 +1413,3 @@ return {get_model: get_model,
         create_button: create_button,
         replace_button_results: replace_button_results};
 }()));
-
