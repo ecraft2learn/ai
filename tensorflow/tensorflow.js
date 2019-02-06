@@ -94,7 +94,7 @@ const create_model = function (name, layers, optimizer_full_name, input_shape, o
     }
     const model = tf.sequential({name: name});
     model.ready_for_training = false;
-    tensorflow.add_to_models(model); // using tensorflow.add_to_models incase it has been extended
+    tensorflow.add_to_models(model); // using tensorflow.add_to_models in case it has been extended
     layers.forEach((configuration, index) => {
         let layer_activation;
         if (typeof configuration === 'number') {
@@ -461,14 +461,15 @@ const inverse_lookup = (value, table) => {
     return key;
 };
 
-const optimize_hyperparameters = (model_name, number_of_experiments,
+const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
                                   experiment_end_callback, success_callback, error_callback) => {
    // this is meant to be called when messages are received from a client page (e.g. Snap!)
    try {   
        const [xs, ys] = get_tensors(model_name, 'training');
        const validation_tensors = get_tensors(model_name, 'validation'); // undefined if no validation data
 //        tf.tidy(() => {
-           optimize(model_name, xs, ys, validation_tensors, number_of_experiments, undefined, experiment_end_callback, error_callback)
+           optimize(model_name, xs, ys, validation_tensors, number_of_experiments, epochs, 
+                    undefined, experiment_end_callback, error_callback)
               .then(success_callback);                   
 //        });
    } catch (error) {
@@ -490,7 +491,8 @@ const optimize_hyperparameters = (model_name, number_of_experiments,
    }
 };
 
-const optimize = async (model_name, xs, ys, validation_tensors, number_of_experiments, onExperimentBegin, onExperimentEnd, error_callback) => {
+const optimize = async (model_name, xs, ys, validation_tensors, number_of_experiments, epochs,
+                        onExperimentBegin, onExperimentEnd, error_callback) => {
     const create_and_train_model = async ({layers, optimization_method, loss_function, epochs, learning_rate}, { xs, ys }) => {
         if (!layers) {
             layers = get_layers();
@@ -520,11 +522,21 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
         if (validation_tensors) {
             configuration.validationData = validation_tensors;
         }
-        // following seems to involve a memory leak but tf.tidy can't be used here
-        const h = await model.fit(xs, ys, configuration);
-        return {loss: h.history.loss[h.history.loss.length-1],
-                history: h.history,
-                status: hpjs.STATUS_OK};  
+        return new Promise((resolve) => {
+            // to run tidy in this context need to create a new promise
+            tf.tidy(() => {
+                model.fit(xs, ys, configuration).then(
+                    (h) => {
+                        model.dispose();
+                        console.log(tf.memory()); // making sure this really does fix the tensor memory leak
+                        resolve({loss: h.history.loss[h.history.loss.length-1],
+                                 history: h.history,
+                                 status: hpjs.STATUS_OK});          
+                        },
+                    error_callback
+                );
+            });
+        }); 
     };
     const space = {};
     if (to_boolean(gui_state["Optimize"]["Search for best Optimization method"])) {
@@ -534,7 +546,7 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
         space.loss_function = hpjs.choice(Object.values(loss_functions));
     }
     if (to_boolean(gui_state["Optimize"]["Search for best number of training iterations"])) {
-        const current_epochs = Math.round(gui_state["Training"]["Number of iterations"]);
+        const current_epochs = epochs || Math.round(gui_state["Training"]["Number of iterations"]);
         const minimum = Math.max(1, Math.round(current_epochs/2));
         const maximum = current_epochs*2;
         const number_of_choices = 5;
@@ -1361,6 +1373,7 @@ const receive_message =
             contents_of_URL(URL, success_callback, error_callback);
         } else if (typeof message.optimize_hyperparameters !== 'undefined') {
             let number_of_experiments = message.number_of_experiments;
+            let epochs = message.epochs;
             let model_name = message.model_name || 'all models';
             let time_stamp = message.time_stamp;
             const success_callback = (result) => {
@@ -1385,7 +1398,7 @@ const receive_message =
                                                          error.message},
                                           "*");
             };
-            optimize_hyperparameters(model_name, number_of_experiments,
+            optimize_hyperparameters(model_name, number_of_experiments, epochs,
                                      experiment_end_callback, success_callback, error_callback);
         }
 };

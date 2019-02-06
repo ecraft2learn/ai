@@ -1220,7 +1220,7 @@ window.ecraft2learn =
                                       }
                                   });
     };
-    const optimize_hyperparameters = (model_name, number_of_experiments,
+    const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
                                       trial_end_callback, success_callback, error_callback) => {
         record_callbacks(trial_end_callback, success_callback, error_callback);
         const time_stamp = Date.now();
@@ -1230,6 +1230,7 @@ window.ecraft2learn =
                                       return {optimize_hyperparameters: true,
                                               model_name: model_name,
                                               number_of_experiments: number_of_experiments,
+                                              epochs: epochs,
                                               time_stamp: time_stamp};
                                   },
                                   (message) => {
