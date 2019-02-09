@@ -52,7 +52,7 @@ const optimizer_named = (name, learning_rate) => {
 
 const loss_functions = 
     {"Absolute Distance": "absoluteDistance",
-     "Compute Weighted Loss": "computeWeightedLoss",
+//     "Compute Weighted Loss": "computeWeightedLoss", // caused "Cannot compute gradient: gradient function not found for notEqual." errors
      "Cosine Distance": "cosineDistance",
      "Hinge Loss": "hingeLoss",
      "Huber Loss": "huberLoss",
@@ -266,6 +266,7 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
                 then_handler(error.message);
             } else {
                  error_callback(error);
+//                  model.summary();
             }
         };
         // Train the model using the data
