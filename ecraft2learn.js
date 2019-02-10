@@ -1222,6 +1222,9 @@ window.ecraft2learn =
     };
     const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
                                       trial_end_callback, success_callback, error_callback) => {
+        if (typeof epochs !== 'number') {
+            epochs = 0; // so it will use default in tensorflow.js support_window
+        }
         record_callbacks(trial_end_callback, success_callback, error_callback);
         const time_stamp = Date.now();
         request_of_support_window('tensorflow.js',
@@ -1238,6 +1241,7 @@ window.ecraft2learn =
                                   },
                                   (message) => {
                                       if (message.trial_optimize_hyperparameters) {
+                                          message.trial_optimize_hyperparameters.trial_number = message.trial_number;
                                           invoke_callback(trial_end_callback,
                                                           javascript_to_snap(message.trial_optimize_hyperparameters),
                                                           message.trial_number);
