@@ -118,17 +118,21 @@ const create_model = function (name, layers, optimizer_full_name, input_shape, o
                 configuration.inputShape = input_shape ||
                                            shape_of_data((get_data(name, 'training') || get_data(name, 'validation')).input[0]);    
             }
-            model.add(tf.layers.dense(configuration));
+            tf.tidy(() => {
+                model.add(tf.layers.dense(configuration));
+            });            
         }
     });
     if (!optimizer) {
         optimizer = 'adam';
     }
     let loss_function = loss_function_named((options.loss_function || 'meanSquaredError'));
-    model.compile({loss: typeof loss_function === 'string' ? tf.losses[loss_function] : loss_function,
-                   optimizer: optimizer,
-                   metrics: ['accuracy']
-                  });
+    tf.tidy(() => {
+        model.compile({loss: typeof loss_function === 'string' ? tf.losses[loss_function] : loss_function,
+                       optimizer: optimizer,
+                       metrics: ['accuracy']
+                      });
+    });
     gui_state["Model"]["Layers"] = layers.toString();
     gui_state["Model"]["Optimization method"] = optimizer_full_name;
     if (options.loss_function) {
@@ -1382,6 +1386,8 @@ const receive_message =
                 best_parameters.input_shape = shape_of_data((get_data(model_name, 'training') || get_data(model_name, 'validation')).input[0]);
                 best_parameters.optimization_method = inverse_lookup(best_parameters.optimization_method, optimization_methods);
                 best_parameters.loss_function = inverse_lookup(best_parameters.loss_function, loss_functions);
+                // So validation data is used when creating and training the model with the best parameters.
+                best_parameters.used_validation_data = !!get_data(model_name, 'validation');
                 event.source.postMessage({optimize_hyperparameters_time_stamp: time_stamp,
                                           final_optimize_hyperparameters: best_parameters},
                                           "*");
