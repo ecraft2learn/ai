@@ -483,6 +483,7 @@ const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
                error_message = "No training data sent to the model named '" + model_name + "'";
            } else {
                error_message = error.message;
+               console.log(tf.memory()); // in case is a GPU memory problem good know this
            }
            error_callback(new Error(error_message));
        } else {
@@ -572,7 +573,7 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
         choices.push(current_layers.map((size, index) => { // increase by 1x to 2x all but size of last layer
             if (index < current_layers.length-1) {
                // not the last one
-               return size*(1+Math.random());
+               return Math.round(size*(1+Math.random()));
             } else {
                return size;
             }
