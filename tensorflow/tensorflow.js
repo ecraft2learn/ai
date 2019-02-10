@@ -468,11 +468,9 @@ const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
    try {   
        const [xs, ys] = get_tensors(model_name, 'training');
        const validation_tensors = get_tensors(model_name, 'validation'); // undefined if no validation data
-//        tf.tidy(() => {
            optimize(model_name, xs, ys, validation_tensors, number_of_experiments, epochs, 
                     undefined, experiment_end_callback, error_callback)
               .then(success_callback);                   
-//        });
    } catch (error) {
        if (error_callback) {
            let error_message;
@@ -530,6 +528,7 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
                 model.fit(xs, ys, configuration).then(
                     (h) => {
                         model.dispose();
+                        tf.disposeVariables();
                         console.log(tf.memory()); // making sure this really does fix the tensor memory leak
                         resolve({loss: h.history.loss[h.history.loss.length-1],
                                  history: h.history,
@@ -1395,6 +1394,7 @@ const receive_message =
                                           "*");
             }
             const error_callback = (error) => {
+                console.log(tf.memory());
                 event.source.postMessage({optimize_hyperparameters_time_stamp: time_stamp,
                                           error_message: "Error while optimizing hyperparameters. " + 
                                                          error.message},
