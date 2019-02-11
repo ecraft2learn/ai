@@ -229,7 +229,7 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
             gui_state["Training"]['Number of iterations'] = options.epochs;
         }
         if (options.validation_split) {
-            gui_state["Training"]['Validation split'] = options.validation_split;
+            gui_state["Training"]['Validation split'] = +options.validation_split;
         }
         if (typeof options.shuffle === 'boolean') {
             gui_state["Training"]['Shuffle data'] = options.shuffle;
@@ -466,6 +466,8 @@ const inverse_lookup = (value, table) => {
     return key || value;
 };
 
+let previous_model;
+
 const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
                                   experiment_end_callback, success_callback, error_callback) => {
    // this is meant to be called when messages are received from a client page (e.g. Snap!)
@@ -474,7 +476,13 @@ const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
        const validation_tensors = get_tensors(model_name, 'validation'); // undefined if no validation data
            optimize(model_name, xs, ys, validation_tensors, number_of_experiments, epochs, 
                     undefined, experiment_end_callback, error_callback)
-              .then(success_callback);                   
+              .then((result) => {
+                  success_callback(result);
+                  if (previous_model) {
+                      previous_model.dispose();
+                      previous_model = undefined;
+                  }
+              });                   
    } catch (error) {
        if (error_callback) {
            let error_message;
@@ -531,7 +539,10 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
             tf.tidy(() => {
                 model.fit(xs, ys, configuration).then(
                     (h) => {
-                        model.dispose();
+                        if (previous_model) {
+                            previous_model.dispose();
+                        }
+                        previous_model = model;
                         tf.disposeVariables();
                         console.log(tf.memory()); // making sure this really does fix the tensor memory leak
                         resolve({loss: h.history.loss[h.history.loss.length-1],
