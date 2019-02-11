@@ -51,7 +51,7 @@ const optimizer_named = (name, learning_rate) => {
 };
 
 const loss_functions = 
-    {"Absolute Distance": "absoluteDistance",
+    {"Absolute Difference": "absoluteDifference",
 //     "Compute Weighted Loss": "computeWeightedLoss", // caused "Cannot compute gradient: gradient function not found for notEqual." errors
      "Cosine Distance": "cosineDistance",
      "Hinge Loss": "hingeLoss",
@@ -237,7 +237,7 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
         let [xs, ys] = get_tensors(model.name, 'training');
         let configuration = {epochs: (options.epochs || 10),
                              shuffle: options.shuffle,
-                             validationSplit: options.validation_split,
+                             validationSplit: +options.validation_split,
                              callbacks: callbacks};
         let validation_tensors = get_tensors(model.name, 'validation'); // undefined if no validation data
         if (validation_tensors) {
@@ -463,7 +463,7 @@ const inverse_lookup = (value, table) => {
             return true;
         }
     });
-    return key;
+    return key || value;
 };
 
 const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
@@ -1385,7 +1385,7 @@ const receive_message =
                 let best_parameters = result.argmin;
                 best_parameters.input_shape = shape_of_data((get_data(model_name, 'training') || get_data(model_name, 'validation')).input[0]);
                 best_parameters.optimization_method = inverse_lookup(best_parameters.optimization_method, optimization_methods);
-                best_parameters.loss_function = inverse_lookup(best_parameters.loss_function, loss_functions);
+                best_parameters.loss_function       = inverse_lookup(best_parameters.loss_function, loss_functions);
                 // So validation data is used when creating and training the model with the best parameters.
                 best_parameters.used_validation_data = !!get_data(model_name, 'validation');
                 event.source.postMessage({optimize_hyperparameters_time_stamp: time_stamp,
@@ -1393,9 +1393,12 @@ const receive_message =
                                           "*");
             };
             const experiment_end_callback = (n, trial) => {
+                let parameters = trial.args;
+                parameters.optimization_method = inverse_lookup(parameters.optimization_method, optimization_methods);
+                parameters.loss_function       = inverse_lookup(parameters.loss_function, loss_functions);
                 event.source.postMessage({optimize_hyperparameters_time_stamp: time_stamp,
                                           trial_number: n,
-                                          trial_optimize_hyperparameters: trial.args,
+                                          trial_optimize_hyperparameters: parameters,
                                           trial_loss: trial.result.loss},
                                           "*");
             }
