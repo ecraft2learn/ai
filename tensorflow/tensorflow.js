@@ -67,6 +67,16 @@ const loss_function_named = (name) => {
 };
 
 const add_to_models = function (new_model) {
+    if (models[new_model.name] && models[new_model.name] !== new_model && 
+        !models[new_model.name].disposed_previously) {
+        try {
+            tf.dispose(models[new_model.name]);
+            models[new_model.name].disposed_previously = true;
+        } catch (error) {
+            console.log("Unable to dispose of old version of model " + new_model.name);
+            console.error(error);
+        }
+    }
     models[new_model.name] = new_model;
     model = new_model; // is now the current model
 };
@@ -118,9 +128,9 @@ const create_model = function (name, layers, optimizer_full_name, input_shape, o
                 configuration.inputShape = input_shape ||
                                            shape_of_data((get_data(name, 'training') || get_data(name, 'validation')).input[0]);    
             }
-            tf.tidy(() => {
+//             tf.tidy(() => {
                 model.add(tf.layers.dense(configuration));
-            });            
+//             });      
         }
     });
     if (!optimizer) {
@@ -235,7 +245,7 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
             gui_state["Training"]['Shuffle data'] = options.shuffle;
         }
         let [xs, ys] = get_tensors(model.name, 'training');
-        let configuration = {epochs: (options.epochs || 10),
+        let configuration = {epochs: (+options.epochs || 10),
                              shuffle: options.shuffle,
                              validationSplit: +options.validation_split,
                              callbacks: callbacks};
@@ -478,9 +488,11 @@ const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
                     undefined, experiment_end_callback, error_callback)
               .then((result) => {
                   success_callback(result);
-                  if (previous_model) {
+                  if (previous_model && !previous_model.disposed_previously) {
                       previous_model.dispose();
+                      previous_model.disposed_previously = true;
                       previous_model = undefined;
+                      console.log(tf.memory(), "final", result);
                   }
               });                   
    } catch (error) {
@@ -539,12 +551,13 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
             tf.tidy(() => {
                 model.fit(xs, ys, configuration).then(
                     (h) => {
-                        if (previous_model) {
+                        if (previous_model && !previous_model.disposed_previously) {
                             previous_model.dispose();
+                            previous_model.disposed_previously = true;
                         }
                         previous_model = model;
                         tf.disposeVariables();
-                        console.log(tf.memory()); // making sure this really does fix the tensor memory leak
+                        console.log(tf.memory(), "experiment", {loss: h.history.loss[h.history.loss.length-1]}); // making sure this really does fix the tensor memory leak
                         resolve({loss: h.history.loss[h.history.loss.length-1],
                                  history: h.history,
                                  status: hpjs.STATUS_OK});          
