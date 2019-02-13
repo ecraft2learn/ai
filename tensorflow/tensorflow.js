@@ -53,8 +53,8 @@ const optimizer_named = (name, learning_rate) => {
 const loss_functions = 
     {"Absolute Difference": "absoluteDifference",
 //     "Compute Weighted Loss": "computeWeightedLoss", // caused "Cannot compute gradient: gradient function not found for notEqual." errors
-     "Cosine Distance": "cosineDistance",
-     "Hinge Loss": "hingeLoss",
+//      "Cosine Distance": "cosineDistance", // was causing crazy predictions
+//      "Hinge Loss": "hingeLoss", // appropriate for support vector machines
      "Huber Loss": "huberLoss",
      "Log Loss": "logLoss",
      "Mean Squared Error": "meanSquaredError"};
