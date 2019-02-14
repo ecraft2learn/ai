@@ -763,16 +763,17 @@ const create_model_parameters = (parameters_gui) => {
 
 const create_training_parameters = (parameters_gui) => {
     const training = parameters_gui.addFolder("Training");
-    training.add(gui_state["Training"], 'Number of iterations').min(1).max(1000);
-    training.add(gui_state["Training"], 'Learning rate').min(.00001).max(1);
-    training.add(gui_state["Training"], 'Validation split').min(0).max(.999);
+    // sliders weren't helping and sometimes caused mysterious errors
+    training.add(gui_state["Training"], 'Number of iterations'); //.min(1).max(1000);
+    training.add(gui_state["Training"], 'Learning rate'); //.min(.00001).max(1);
+    training.add(gui_state["Training"], 'Validation split'); //.min(0).max(.999);
     training.add(gui_state["Training"], 'Shuffle data', [true, false]);
     return training;
 };
 
 const create_hyperparameter_optimize_parameters = (parameters_gui) => {
     const optimize = parameters_gui.addFolder("Optimize");
-    optimize.add(gui_state["Optimize"], 'Number of experiments').min(1).max(1000);
+//     optimize.add(gui_state["Optimize"], 'Number of experiments').min(1).max(1000);
     optimize.add(gui_state["Optimize"], 'Search for best Optimization method', [true, false]);
     optimize.add(gui_state["Optimize"], 'Search for best loss function', [true, false]);
     optimize.add(gui_state["Optimize"], 'Search for best number of training iterations', [true, false]);
