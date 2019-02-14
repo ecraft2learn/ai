@@ -1009,7 +1009,7 @@ const create_prediction_interface = () => {
             draw_area.appendChild(create_message_element(error_message));
         }; 
         try {
-            let inputs = JSON.parse(input_input.value);
+            let inputs = +input_input.value || JSON.parse(input_input.value);
             if (typeof inputs === 'number') {
                 inputs = [inputs];
             }
