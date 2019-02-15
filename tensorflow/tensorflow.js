@@ -1301,7 +1301,14 @@ const receive_message =
                                          message.create_model.input_size,
                                          message.create_model.options);
                 tensorflow.add_to_models(model);
-                event.source.postMessage({model_created: message.create_model.name}, "*");
+                let description = [];
+                model.summary(50, // line length
+                              undefined,
+                              (line) => {
+                                  description.push(line);
+                              });
+                event.source.postMessage({model_created: message.create_model.name,
+                                          description: description}, "*");
             } catch (error) {
                 event.source.postMessage({create_model_failed: message.create_model.name,
                                           error_message: error.message}, "*");
