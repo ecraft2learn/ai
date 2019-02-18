@@ -1243,6 +1243,7 @@ window.ecraft2learn =
                                   (message) => {
                                       if (message.trial_optimize_hyperparameters) {
                                           message.trial_optimize_hyperparameters.trial_number = message.trial_number;
+                                          message.trial_optimize_hyperparameters.loss = message.trial_loss;
                                           invoke_callback(trial_end_callback,
                                                           javascript_to_snap(message.trial_optimize_hyperparameters),
                                                           message.trial_number);
