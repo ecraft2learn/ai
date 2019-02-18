@@ -55,7 +55,7 @@ const loss_functions =
 //     "Compute Weighted Loss": "computeWeightedLoss", // caused "Cannot compute gradient: gradient function not found for notEqual." errors
 //      "Cosine Distance": "cosineDistance", // was causing crazy predictions
 //      "Hinge Loss": "hingeLoss", // appropriate for support vector machines
-     "Huber Loss": "huberLoss",
+//      "Huber Loss": "huberLoss", // this caused training nonsense
      "Log Loss": "logLoss",
      "Mean Squared Error": "meanSquaredError"};
      // following require more arguments
@@ -557,8 +557,12 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
                         }
                         previous_model = model;
                         tf.disposeVariables();
-                        console.log(tf.memory(), "experiment", {loss: h.history.loss[h.history.loss.length-1]}); // making sure this really does fix the tensor memory leak
-                        resolve({loss: h.history.loss[h.history.loss.length-1],
+                        let loss = h.history.loss[h.history.loss.length-1];
+                        if (isNaN(loss)) {
+                            loss = Number.MAX_VALUE;
+                        }
+                        console.log(tf.memory(), "experiment", {loss: loss}); // making sure this really does fix the tensor memory leak
+                        resolve({loss: loss,
                                  history: h.history,
                                  status: hpjs.STATUS_OK});          
                         },
