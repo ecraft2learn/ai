@@ -1160,7 +1160,7 @@ const load_model = async function () {
       return;
   }
   try {
-      model = await tf.loadModel(tf.io.browserFiles([saved_model_element.files[0],
+      model = await tf.loadLayersModel(tf.io.browserFiles([saved_model_element.files[0],
                                                     saved_weights_element.files[0]]));
   } catch (error) {
       replace_button_results(load_model_button, create_message_element(error.message));
@@ -1372,7 +1372,7 @@ const receive_message =
                                               error_message: 'Error reading ' + URL + ' to load a neural net. ' +
                                                              error_message}, "*");
                 }
-                tf.loadModel(URL).then((model) => {
+                tf.loadLayersModel(URL).then((model) => {
                                            model.ready_for_prediction = true;
                                            // until https://github.com/tensorflow/tfjs/issues/885 is resolved need to update the name
                                            let name = URL.substring(URL.lastIndexOf('/')+1, URL.lastIndexOf('.'));

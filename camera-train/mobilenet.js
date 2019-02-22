@@ -1146,7 +1146,7 @@
                     switch (o.label) {
                     case 0:
                         return e = this,
-                        [4, a.loadModel(this.path)];
+                        [4, a.loadLayersModel(this.path)];
                     case 1:
                         return e.model = o.sent(),
                         this.endpoints = this.model.layers.map(function(e) {

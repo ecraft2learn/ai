@@ -443,7 +443,7 @@
                             return [4, this.ensureMetadataLoaded()];
                         case 1:
                             _a.sent();
-                            return [4, tf.loadModel(this.MODEL_URL_PREFIX + "/" + this.vocabulary + "/model.json")];
+                            return [4, tf.loadLayersModel(this.MODEL_URL_PREFIX + "/" + this.vocabulary + "/model.json")];
                         case 2:
                             model = _a.sent();
                             if (model.inputs.length !== 1) {

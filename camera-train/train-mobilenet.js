@@ -151,7 +151,7 @@ async function animate() {
       return;
   }
   // Get image data from video element
-  const image = tf.fromPixels(video);
+  const image = tf.browser.fromPixels(video);
   let logits;
 
   // Train class if one of the buttons is held down
@@ -354,7 +354,7 @@ const listen_for_messages = function (event) {
                    function (image) {
                        let canvas = create_canvas();
                        copy_video_to_canvas(image, canvas);
-                       let image_as_tensor = tf.fromPixels(canvas);
+                       let image_as_tensor = tf.browser.fromPixels(canvas);
                        logits = infer(image_as_tensor);
                        classifier.predictClass(logits, TOPK).then(
                            function (results) {
