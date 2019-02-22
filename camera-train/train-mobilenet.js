@@ -131,6 +131,9 @@ const add_image_to_training = function (image_url, label_index, post_to_tab) {
 // 'conv_preds' is the logits activation of MobileNet.
 
 const infer = (image) => {
+    if (!mobilenet_model) {
+        load_mobilenet();
+    }
     return mobilenet_model.infer(image, 'conv_preds');
 };
 
@@ -219,8 +222,8 @@ const set_class_names = function (class_names) {
 };
 
 const load_mobilenet = async function () {
-  classifier = knnClassifier.create();
-  mobilenet_model = await mobilenet.load(); 
+    classifier = knnClassifier.create();
+    mobilenet_model = await mobilenet.load(); 
 };
 
 /**
