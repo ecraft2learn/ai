@@ -885,7 +885,7 @@ window.ecraft2learn =
   };
   const open_posenet_window = function () {
       machine_learning_browser_warning();
-      return create_machine_learning_window('posenet');
+      return open_support_window('posenet');
   };
   const machine_learning_window_request = function (machine_learning_window, 
                                                     message_maker, 
