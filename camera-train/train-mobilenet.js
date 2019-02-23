@@ -348,7 +348,7 @@ const listen_for_messages = function (event) {
     };                      
     if (typeof event.data.predict !== 'undefined') {
         let example_count = classifier.getClassExampleCount();
-        if (example_count[0] === 0) {
+        if (!example_count[0]) { // includes undefined as well as 0
             event.source.postMessage({error: "Cannot make any predictions before training. " + 
                                              "Try this again after doing some training."},
                                       "*");
@@ -362,11 +362,14 @@ const listen_for_messages = function (event) {
                        let image_as_tensor = tf.browser.fromPixels(canvas);
                        logits = infer(image_as_tensor);
                        classifier.predictClass(logits, TOPK).then(
-                           function (results) {
+                           (results) => {
                                event.source.postMessage({confidences: Object.values(results.confidences)}, "*");
                                image_as_tensor.dispose();
                                logits.dispose();
-                   });
+                           },
+                           (error) => {
+                               event.source.postMessage({error: error.message}, "*");
+                           });
         });
     } else if (typeof event.data.train !== 'undefined') {
         let image_url = event.data.train;

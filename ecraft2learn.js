@@ -2443,8 +2443,8 @@ window.ecraft2learn =
           };
       };
       let costume = typeof costume_or_costume_number === 'object' ?
-                           costume_or_costume_number :
-                           costume_of_sprite(costume_or_costume_number, sprite);
+                    costume_or_costume_number :
+                    costume_of_sprite(costume_or_costume_number, sprite);
       if (not_a_costume(costume, 'Analyse costume', callback)) {
           return;
       }
