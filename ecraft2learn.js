@@ -294,17 +294,17 @@ window.ecraft2learn =
             height = image_or_video.height;
         }
         let canvas = document.createElement('canvas');
-        canvas.width  = width;
-        canvas.height = height;
-//         canvas.setAttribute('width',  width);
-//         canvas.setAttribute('height', height);
+        canvas.setAttribute('width',  width);
+        canvas.setAttribute('height', height);
+//         canvas.width  = width;
+//         canvas.height = height;
         let draw_image = function () {
             // is this still used? Only if camera is being used before it has been initialised?
-            canvas.getContext('2d').drawImage(image_or_video, 0, 0, width, height);
+            canvas.getContext('2d').drawImage(image_or_video, 0, 0); //, width, height);
             ecraft2learn.video.removeEventListener('waiting', draw_image);
         };
         ecraft2learn.video.addEventListener('waiting', draw_image);
-        canvas.getContext('2d').drawImage(image_or_video, 0, 0, width, height);
+        canvas.getContext('2d').drawImage(image_or_video, 0, 0); //, width, height);
         return canvas;
     };
     let get_mary_tts_voice = function (voice_number) { // official name
