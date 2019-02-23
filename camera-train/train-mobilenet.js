@@ -177,15 +177,11 @@ async function animate() {
       
    // If any examples have been added, run predict
    const exampleCount = classifier.getClassExampleCount();
-   let iframe_visible = false;
-   try {
-       iframe_visible = window.parent.ecraft2learn.support_window_visible("training using camera");
-   } catch (igore) {
-   }
-   if (exampleCount[0] > 0 && training === -1 && mobilenet_model && iframe_visible) {
+   if (exampleCount[0] > 0 && training === -1 && mobilenet_model) { 
         // only predict if not also training (important for slow computers (and Android phones))
         // checking that at least the first class has some examples is sufficent
         // don't do this if haven't yet loaded mobilenet_model
+        // note this shouldn't be running if stopped because returned to Snap!
         logits = infer(image);
         let result = await classifier.predictClass(logits, TOPK);
         for (let i=0; i<NUM_CLASSES; i++) {
