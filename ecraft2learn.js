@@ -2453,7 +2453,7 @@ window.ecraft2learn =
                        function (image) {
                            support_window_request("You need to train the system before using 'Image label confidences'.\n" +
                                                   "Run the 'Add costume ...' block before this.", 
-                                                  (image_URL) => {predict: image_URL},
+                                                  (image_URL) => {return {predict: image_URL}},
                                                   TRAINING_IMAGE_WIDTH,
                                                   TRAINING_IMAGE_HEIGHT,
                                                   image);

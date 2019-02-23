@@ -329,6 +329,10 @@ navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia 
 // listen for requests for predictions
 
 const listen_for_messages = function (event) {
+    if (typeof event.data === 'undefined') { // was sent an undefined message
+        console.log("received an undefined message");
+        return; // ignore it 
+    }
     if (document.readyState !== 'complete') {
         // too early to respond but at least the message isn't lost
         window.addEventListener('load',
