@@ -256,9 +256,11 @@ const initialise_page = async function (incoming_training_class_names, source) {
     info.style.display = 'block';
     throw e;
   }
-
   start();
-  source.postMessage("Ready", "*");
+  if (mobilenet_model) {
+      // fully initialised
+      source.postMessage("Ready", "*");
+  }
 }
 
 // const receive_drop = function (event) {
@@ -426,7 +428,11 @@ window.addEventListener('DOMContentLoaded',
                                 window.opener.postMessage("Loaded", "*");
                             }
                             await load_mobilenet();
-                            window.parent.postMessage("MobileNet loaded", "*");
+                            window.parent.postMessage('MobileNet loaded', "*");
+                            if (training_class_names) {
+                                // fully initialised 
+                                window.parent.postMessage('Ready', "*");
+                            }
                             // following used to use addEventListener but Snap!'s drop listener interfered
                             // ecraft2learn.support_iframe['training using camera']
 //                             window.parent.document.body.ondrop = receive_drop;
