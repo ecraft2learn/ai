@@ -2452,13 +2452,11 @@ window.ecraft2learn =
       costume_to_image(costume,
                        function (image) {
                            support_window_request("You need to train the system before using 'Image label confidences'.\n" +
-                                                   "Run the 'Add costume ...' block before this.", 
-                                                   function (image_URL) {
-                                                                 return {predict: image_URL};
-                                                   },
-                                                   TRAINING_IMAGE_WIDTH,
-                                                   TRAINING_IMAGE_HEIGHT,
-                                                   image);
+                                                  "Run the 'Add costume ...' block before this.", 
+                                                  (image_URL) => {predict: image_URL},
+                                                  TRAINING_IMAGE_WIDTH,
+                                                  TRAINING_IMAGE_HEIGHT,
+                                                  image);
                             window.addEventListener("message", receive_confidences);
                         });                            
   },
@@ -2832,7 +2830,7 @@ window.ecraft2learn =
       load_script(this_url);
   },
   send_to_arduino_bot: function (blocks, alternative_server) {
-      // loads support for compiling Snap4Arduino blocks to Arduino sketch using ArduinoBot
+      // loads support for compiling Snap4Arduino blocks to Arduino sketch using eCraft bot from evothings
       // and then loads it on the Arduino 
       // see https://github.com/ecraft2learn/arduinobot
       // alternative_server should be provided if the default raspberrypi.local isn't working
