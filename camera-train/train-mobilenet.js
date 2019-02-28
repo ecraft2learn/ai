@@ -122,7 +122,7 @@ const add_image_to_training = function (image_url, label_index, post_to_tab) {
                    classifier.addExample(logits, label_index);
                    logits.dispose();
                    if (post_to_tab) {
-                       let response = classifier.getClassExampleCount()[training];
+                       let response = classifier.getClassExampleCount()[label_index];
                        post_to_tab.postMessage({confirmation: response}, "*");
                    }         
     });
