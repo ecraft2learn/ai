@@ -407,6 +407,40 @@ But it is easiest to generate.
 A human playing another human is likely to produce very good data.
 One way to generate lots of good data is to create a Snap! script for an expert player and use records of its games for training.
 </p>
+<h3 class="instructions-white" id="hyperparameters">Automating the search for good "hyperparameters"</h3>
+<p class="background-information">
+It is hard to know what parameters to use to define a neural net model and its training.
+How many layers?
+How many neurons per layer?
+How many training steps?
+How large should each training step be?
+Which activation and loss functions to use?
+What is the best optimization method?
+</p>
+<p class="background-information">
+One can run lots of experiments to find better and better answers to these questions.
+The answers are called "hyperparameters" because they are not the weights/parameters of the neural net
+but instead control how those weights are determined.
+Recently researchers have begun to write programs that automate this search for good hyperparameters.
+This is often called AutoML, short for
+<a href="https://en.wikipedia.org/wiki/Automated_machine_learning" target="_blank">automated machine learning</a>.
+These programs can search for hyperparameters that make the best quality predictions or classifications
+or hyperparameters that are small and fast but still pretty accurate.
+</p>
+<p class="instructions">
+The <span class="block-name">Search for good neural net model parameters</span> block can be used to search
+for hyperparameters that minimize the "loss" (make better predictions).
+You can control how many experiments it should run.
+Explore the following to see how well a model can be trained to estimate the length of the hypotenuse of a triangle. 
+</p>
+<figure class = "snap-iframe"
+        id = "hyperparameter exercise"
+        full_screen = "true"
+        edit_mode = "true"
+        stage_ratio = ".2"
+        container_style = "width: 1000px; height: 900px" 
+        caption = "Search for good hyperparameters. TRY IT!">
+</figure>
 <h3 class="project-ideas-white" id="project-ideas">Possible project ideas using machine learning</h3>
 <p class="project-ideas">
 Here are some project ideas:
