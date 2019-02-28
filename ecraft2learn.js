@@ -278,33 +278,44 @@ window.ecraft2learn =
         }
         return x;       
     };
-    let add_photo_to_canvas = function (image_or_video, width, height) {
+    let add_photo_to_canvas = function (image_or_video, new_width, new_height) {
         // Capture a photo by fetching the current contents of the video
         // and drawing it into a canvas, then converting that to a PNG
         // format data URL. By drawing it on an offscreen canvas and then
         // drawing that to the screen, we can change its size and/or apply
         // other changes before drawing it.
+        let width, height;
         if (!image_or_video) {
             image_or_video = ecraft2learn.video;
         }
-        if (!width) {
+        if (new_width) {
+            width = new_width;
+        } else {
             width = image_or_video.width;
         }
-        if (!height) {
+        if (new_height) {
+            height = new_height;
+        } else {
             height = image_or_video.height;
         }
         let canvas = document.createElement('canvas');
         canvas.setAttribute('width',  width);
         canvas.setAttribute('height', height);
-//         canvas.width  = width;
-//         canvas.height = height;
+        const draw_on_canvas = () => {
+            //         drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+            if (new_width && new_height) {
+                canvas.getContext('2d').drawImage(image_or_video, 0, 0, image_or_video.width, image_or_video.height, 0, 0, new_width, new_height);
+            } else {
+                canvas.getContext('2d').drawImage(image_or_video, 0, 0);             
+            }
+        }
         let draw_image = function () {
             // is this still used? Only if camera is being used before it has been initialised?
-            canvas.getContext('2d').drawImage(image_or_video, 0, 0); //, width, height);
+            draw_on_canvas();
             ecraft2learn.video.removeEventListener('waiting', draw_image);
         };
         ecraft2learn.video.addEventListener('waiting', draw_image);
-        canvas.getContext('2d').drawImage(image_or_video, 0, 0); //, width, height);
+        draw_on_canvas();
         return canvas;
     };
     let get_mary_tts_voice = function (voice_number) { // official name
@@ -2068,7 +2079,10 @@ window.ecraft2learn =
   },
 
   costume_from_camera: function () {
-      let canvas = add_photo_to_canvas();
+      // scale the canvas by two since Snap! will divide by two due to its support for retinal displays
+      let canvas = add_photo_to_canvas(ecraft2learn.video,
+                                       2*ecraft2learn.video.width,
+                                       2*ecraft2learn.video.height);
       return create_costume(canvas);
   },
 
@@ -2130,7 +2144,10 @@ window.ecraft2learn =
         costume = show_photo_or_costume;
         canvas_for_analysis = costume.contents;
     } else {
-        let canvas = add_photo_to_canvas();
+        // scaled to address Snap!'s scaling due to supporting retinal displays
+        let canvas = add_photo_to_canvas(ecraft2learn.video,
+                                         2*ecraft2learn.video.width,
+                                         2*ecraft2learn.video.height);
         costume = create_costume(canvas);
         canvas_for_analysis = canvas;
     }
