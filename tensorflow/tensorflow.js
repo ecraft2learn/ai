@@ -1,6 +1,6 @@
 // Machine learning using Tensorflow.js as part of the eCraft2Learn Snap! library
 // Written by Ken Kahn 
-// No rights reserved.
+// License: New BSD
 
 window.tensorflow = 
 ((function () {
