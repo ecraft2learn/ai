@@ -74,13 +74,12 @@ const sentences_and_answers = () => {
         "Why is it important to make sure that the baby is not cold?",
         "Why would it be important to make sure that the baby is kept warm?",
         "Why is hypothermia dangerous for babies at birth?",
-        "Why is hypothermia an concern?",
+        "Why is hypothermia a concern?",
         "Why must we keep the baby warm?",
         "Should we keep the baby hot?"
     ]);
 
     answers.push("There is the risk of hypothermia because babies can lose a lot of heat. ");
-
 
     group_of_questions.push([ // 3
         "What areas should you dry?",
@@ -261,10 +260,25 @@ const sentences_and_answers = () => {
 
 };
 
+const respond_to_questions = async (question) => {
+    return embedding_model.embed([question]).then((embedding) => {
+        let best_answer;
+        let best_answer_distance = 1;
+        group_of_questions_mean_embeddings.forEach((group_mean, mean_number) => {
+            let distance = tf.metrics.cosineProximity(embedding.flatten(), group_mean).dataSync()[0];
+            if (distance < best_answer_distance) {
+                best_answer = mean_number;
+                best_answer_distance = distance;
+            }
+        });
+        return answers[best_answer];
+    });
+};
+
 const setup = () => {
     const do_when_group_of_questions_mean_embeddings_available = () => {
-        console.log(group_of_questions_mean_embeddings);
-        respond_to_questions();
+//         console.log(group_of_questions_mean_embeddings);
+//         test_all_questions();
     };
     const obtain_embeddings = (group_number) => {
         embedding_model.embed(group_of_questions[group_number]).then((embeddings) => {
@@ -284,14 +298,27 @@ const setup = () => {
             }
         });        
     };
-    const respond_to_questions = () => {
+    let wrong = [];
+    const test_all_questions = () => {
         group_of_questions.forEach((group, group_number) => {
             group.forEach((question, question_number) => {
                 embedding_model.embed([question]).then((embedding) => {
+                    let distances = [];
                     group_of_questions_mean_embeddings.forEach((group_mean, mean_number) => {
-                        let distance = tf.metrics.cosineProximity(embedding.flatten(), group_mean); 
-                        console.log(distance + " between " + group_number +":" + question_number + " and answer " + mean_number);                        
+                        let distance = tf.metrics.cosineProximity(embedding.flatten(), group_mean);
+                        distances.push([mean_number, distance.dataSync()[0]]);
                     });
+                    distances.sort((a, b) => a[1] - b[1]);
+                    if (group_number !== distances[0][0]) {
+                        wrong.push([question,
+                                    "bad answer: " + answers[distances[0][0]],
+                                    "good answer:" + answers[group_number],
+                                    group_number + ":" + question_number,
+                                    distances]);
+                    }
+                    if (group_number === 15) {
+                        console.log(wrong);
+                    }
                 });
             });
         });
@@ -308,5 +335,21 @@ const setup = () => {
 };
 
 setup();
+
+document.addEventListener('DOMContentLoaded',
+                          () => {
+                              let question_area = document.getElementById('question');
+                              let answer_area = document.getElementById('answer');
+                              question_area.addEventListener('keydown',
+                                                             (event) => {
+                                                                 if (event.keyCode == 13 || event.keyCode == 191) {
+                                                                     LIFE.respond_to_questions(question_area.value).then((answer) => {
+                                                                         answer_area.value = answer;
+                                                                     });                           
+                                                                 }
+                                                             });                              
+                            });
+
+return {respond_to_questions: respond_to_questions};
 
 })());
