@@ -346,6 +346,18 @@ const setup = () => {
     });
 };
 
+const add_sample_questions = () => {
+    const add_paragraph = (text) => {
+        const p = document.createElement('p');
+        p.innerHTML = text;
+        document.body.appendChild(p);
+    };
+    add_paragraph("<b><i>Here are some sample questions. Try paraphrasing them.</i></b>");
+    group_of_questions.forEach((group) => {
+        add_paragraph(group[0]);
+    });
+};
+
 setup();
 
 document.addEventListener(
@@ -409,7 +421,8 @@ document.addEventListener(
                     toggle_speech_recognition_label.innerHTML = turn_off_speech_recognition_label;
                     ecraft2learn.start_speech_recognition(recognition_callback, handle_recognition_error);                     
                 }
-            });                            
+            });
+        add_sample_questions();                           
      });
 
 return {respond_to_questions: respond_to_questions};
