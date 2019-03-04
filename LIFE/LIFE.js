@@ -260,7 +260,7 @@ const sentences_and_answers = () => {
 
 };
 
-const respond_to_questions = async (question) => {
+const respond_to_questions = async (question, distance_threshold) => {
     return embedding_model.embed([question]).then((embedding) => {
         let best_answer;
         let best_answer_distance = 1;
@@ -271,6 +271,9 @@ const respond_to_questions = async (question) => {
                 best_answer_distance = distance;
             }
         });
+        if (best_answer_distance > distance_threshold) {
+            return "Sorry, I don't have an answer.";
+        }
         return answers[best_answer];
     });
 };
@@ -315,10 +318,19 @@ const setup = () => {
                                     "good answer:" + answers[group_number],
                                     group_number + ":" + question_number,
                                     distances]);
+                        document.writeln(question + "<br>");
+                        document.writeln("bad answer: " + answers[distances[0][0]] + "<br>");
+                        document.writeln("good answer:" + answers[group_number] + "<br>");
+                        document.writeln(group_number + ":" + question_number + "<br>");
+                        distances.forEach((answer_id_and_distance) => {
+                            document.writeln("#" + answer_id_and_distance[0] + " = " + answer_id_and_distance[1] + "<br>");
+                        });
+                        document.writeln("<br>");
                     }
                     if (group_number === 15) {
                         console.log(wrong);
                     }
+//                     console.log(distances[0][1]); // just to see what best distances look like
                 });
             });
         });
@@ -336,19 +348,21 @@ const setup = () => {
 
 setup();
 
-document.addEventListener('DOMContentLoaded',
-                          () => {
-                              let question_area = document.getElementById('question');
-                              let answer_area = document.getElementById('answer');
-                              question_area.addEventListener('keydown',
-                                                             (event) => {
-                                                                 if (event.keyCode == 13 || event.keyCode == 191) {
-                                                                     LIFE.respond_to_questions(question_area.value).then((answer) => {
-                                                                         answer_area.value = answer;
-                                                                     });                           
-                                                                 }
-                                                             });                              
-                            });
+document.addEventListener(
+    'DOMContentLoaded',
+    () => {
+       let question_area = document.getElementById('question');
+       let answer_area = document.getElementById('answer');
+       question_area.addEventListener('keydown',
+                                      (event) => {
+                                          if (event.keyCode == 13 || event.keyCode == 191) { // ? or new line
+                                              LIFE.respond_to_questions(question_area.value, -0.6).then((answer) => {
+                                                  // reasonable matches must be less than -0.6 cosineProximity
+                                                  answer_area.innerHTML = "<b>" + answer + "</b>";
+                                              });                           
+                                          }
+                                      });                              
+     });
 
 return {respond_to_questions: respond_to_questions};
 

@@ -3,26 +3,22 @@
 <head>
 	<title>Intelligent support for LIFE game</title>
 	<meta charset='utf-8'>
-	<link href="../css/ai-teacher-guide.css" rel="stylesheet">
-<!-- 	<link href="/uui/help/oer-style.css" rel="stylesheet"> -->
+<!-- 	<link href="../css/ai-teacher-guide.css" rel="stylesheet"> -->
+	<link href="/uui/help/oer-style.css" rel="stylesheet">
 <!-- 	<link rel="icon" type="image/png" href="images/eCraft2Learn-Favicon.png" /> -->
 	<script src="../ecraft2learn.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script> 
-<!-- @1.0.0-alpha3 -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder"></script>
     <script src="LIFE.js"></script>
 </head>
 <body>
 <p>
-<!-- <textarea id="question" style="width: 80em;"> -->
-<input id="question" type="text" style="width: 80em;" x-webkit-speech >
+<input id="question" type="text" style="width: 80em;" >
 Enter your question followed by ?
 </input>
 </p>
-<p>
-<textarea id="answer" style="width: 80em;">
+<p id="answer">
 Your answer will appear here.
-</textarea>
 </p>
 </body>
 </html>
