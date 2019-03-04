@@ -515,7 +515,7 @@ window.ecraft2learn =
                                function () {
                                    invoke_callback(finished_callback, message); // entire message not just the segments
                                };
-                ecraft2learn.speak(segment, pitch, rate, voice_number, volume, language, callback)
+                ecraft2learn.speak(segment, pitch, rate, voice_number, volume, language, callback);
             });
             return;
         }
@@ -1730,9 +1730,13 @@ window.ecraft2learn =
                   }
               }
           };
-          var handle_result = function (event) {
-              var spoken = event.results[event.resultIndex][0].transcript; // first result
-              var final = event.results[event.resultIndex].isFinal;
+          let handle_result = function (event) {
+              let spoken = event.results[event.resultIndex][0].transcript; // first result
+              let final = event.results[event.resultIndex].isFinal;
+              if (final) {
+                  // unless callback turns it back on
+                  ecraft2learn.stop_speech_recognition();
+              }
               if (inside_snap()) {
                   // event breaks things for Snap! callbacks
                   invoke_callback(final ? final_spoken_callback : interim_spoken_callback, spoken);
@@ -1751,9 +1755,6 @@ window.ecraft2learn =
                   // if callback for confidence values isn't used then log the top confidence value
                   console.log("Confidence is " + event.results[event.resultIndex][0].confidence + " for " + spoken);
               }
-              if (final) {
-                  ecraft2learn.stop_speech_recognition();
-              }
           };
           var handle_all_results = function (event) {
               var results = [];
@@ -1771,12 +1772,12 @@ window.ecraft2learn =
               }
               invoke_callback(all_confidence_values_callback, javascript_to_snap(confidences));
           };
-          var handle_error = function (event) {
+          let handle_error = function (event) {
+              invoke_callback(error_callback, event.error);
               ecraft2learn.stop_speech_recognition();
               if (debugging) {
                   console.log("Recognition error: " + event.error);
               }
-              invoke_callback(error_callback, event.error);
           };
           var speech_recognition_stopped = false; // used to suspend listening when tab is hidden
           var speech_recognition;

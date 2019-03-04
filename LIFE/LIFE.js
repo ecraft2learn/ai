@@ -272,7 +272,7 @@ const respond_to_questions = async (question, distance_threshold) => {
             }
         });
         if (best_answer_distance > distance_threshold) {
-            return "Sorry, I don't have an answer.";
+            return; // no answer 
         }
         return answers[best_answer];
     });
@@ -351,17 +351,65 @@ setup();
 document.addEventListener(
     'DOMContentLoaded',
     () => {
-       let question_area = document.getElementById('question');
-       let answer_area = document.getElementById('answer');
-       question_area.addEventListener('keydown',
-                                      (event) => {
-                                          if (event.keyCode == 13 || event.keyCode == 191) { // ? or new line
-                                              LIFE.respond_to_questions(question_area.value, -0.6).then((answer) => {
-                                                  // reasonable matches must be less than -0.6 cosineProximity
-                                                  answer_area.innerHTML = "<b>" + answer + "</b>";
-                                              });                           
-                                          }
-                                      });                              
+        let question_area = document.getElementById('question');
+        let toggle_speech_recognition = document.getElementById('speech-recognition');
+        let speech_recognition_on = false;
+        const toggle_speech_recognition_label = document.createElement('span');
+        const turn_on_speech_recognition_label = "Start listening";
+        const turn_off_speech_recognition_label = "Stop listening";
+        toggle_speech_recognition_label.innerHTML = turn_on_speech_recognition_label;
+        toggle_speech_recognition.appendChild(toggle_speech_recognition_label);
+        let answer_area = document.getElementById('answer');
+        const respond_with_answer = (answer, question) => {
+            if (answer) {
+                answer_area.innerHTML = "<b>" + answer + "</b>";
+                if (speech_recognition_on) {
+                    ecraft2learn.speak(answer, undefined, undefined, 6);
+                }          
+            } else {
+                answer_area.innerHTML = "Sorry I can't answer <i>" + question + "</i>";
+            }   
+        };
+        const answer_question = (question) => {
+            LIFE.respond_to_questions(question, -0.55).then((answer) => {
+                // reasonable matches must be less than -0.55 cosineProximity
+                respond_with_answer(answer, question);
+            });
+        };
+        question_area.addEventListener('keydown',
+                                       (event) => {
+                                           if (event.keyCode == 13 || event.keyCode == 191) { // ? or new line
+                                               answer_question(question_area.value);
+                                           };
+                                       });
+        const recognition_callback = (text) => {
+            question_area.value = text;
+            answer_question(text);
+            // and start listening to the next question
+            ecraft2learn.start_speech_recognition(recognition_callback, handle_recognition_error);
+        };
+        const handle_recognition_error = (error) => {
+            if (error === "no-speech") {
+                // keep listening
+                ecraft2learn.start_speech_recognition(recognition_callback, handle_recognition_error);
+            } else {
+                toggle_speech_recognition_label.innerHTML = 
+                    "Type your questions because speech recognition causes this error: " 
+                    + error;
+            }
+        };
+        toggle_speech_recognition.addEventListener('click',
+            (event) => {
+                if (speech_recognition_on) {
+                    speech_recognition_on = false;
+                    toggle_speech_recognition_label.innerHTML = turn_on_speech_recognition_label;
+                    ecraft2learn.stop_speech_recognition();
+                } else {
+                    speech_recognition_on = true;
+                    toggle_speech_recognition_label.innerHTML = turn_off_speech_recognition_label;
+                    ecraft2learn.start_speech_recognition(recognition_callback, handle_recognition_error);                     
+                }
+            });                            
      });
 
 return {respond_to_questions: respond_to_questions};
