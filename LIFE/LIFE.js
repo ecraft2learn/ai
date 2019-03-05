@@ -358,7 +358,19 @@ const add_sample_questions = () => {
     });
 };
 
-setup();
+let last_reported_error;
+const record_error = (error) => {
+    if (last_reported_error !== error.message) {
+        add_paragraph(error.message);
+        last_reported_error = error.message;
+    }
+};
+
+try {
+    setup();
+} catch (error) {
+    record_error(error);
+}
 
 document.addEventListener(
     'DOMContentLoaded',
@@ -380,21 +392,15 @@ document.addEventListener(
                     ecraft2learn.speak(answer, undefined, undefined, Math.min(6, voices.length));
                 }          
             } else {
-                answer_area.innerHTML = "Sorry I can't answer <i>" + question + "</i>";
+                answer_area.innerHTML = "<b style='color:red;'>Sorry I can't answer <i>" + question + "</i></b>";
             }   
         };
-        let error_message_reported = false;
         const answer_question = (question) => {
             LIFE.respond_to_questions(question, -0.55).then((answer) => {
                 // reasonable matches must be less than -0.55 cosineProximity
                 respond_with_answer(answer, question);
             },
-            (error) => {
-                if (!error_message_reported) {
-                    add_paragraph(error.message);
-                    error_message_reported = true;
-                }
-            });
+            record_error);
         };
         question_area.addEventListener('keydown',
                                        (event) => {
