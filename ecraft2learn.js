@@ -549,7 +549,7 @@ window.ecraft2learn =
             utterance.rate = rate;
         }
         if (!voice_number && ecraft2learn.default_language) {
-            var voices = window.speechSynthesis.getVoices();
+            let voices = window.speechSynthesis.getVoices();
             voices.some(function (voice, index) {
                 if (voice.lang === ecraft2learn.default_language) {
                     voice_number = index+1; // 1-indexing

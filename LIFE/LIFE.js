@@ -45,7 +45,7 @@ const sentences_and_answers = () => {
     answers.push(
         "The baby can lose heat and so keeping the baby warm is one of the key things that we need to do " + 
         "with new-born resuscitation, for any babies who are born, " +
-        "and so the reason is to wrap them in a dry, warm towel, to actually keep them warm, so that they cannot lose heat.");
+        "and so the reason is to wrap them in a dry warm towel, to actually keep them warm, so that they cannot lose heat.");
 
     group_of_questions.push([ // 1
         "Why isn't one towel enough?",
@@ -92,7 +92,7 @@ const sentences_and_answers = () => {
     answers.push("You need to dry their legs, their hands, their stomach, and even their head. " +
                    "You need to dry the whole baby. " + 
                    "While drying see if the baby is breathing, is crying, or is pink. " +
-                   "And stiumlate the baby as you dry.");
+                   "And stimulate the baby as you dry.");
 
     group_of_questions.push([ // 4
         "What else are you doing as you are drying the baby?",
@@ -107,7 +107,7 @@ const sentences_and_answers = () => {
 
     answers.push("While drying see if the baby is breathing, is crying, or is pink. " + 
                    "Be sure to dry all areas. " +
-                   "And drying also stiumulates the baby.");
+                   "And drying also stimulates the baby.");
 
     group_of_questions.push([ // 5
         "Can I turn on the radiator instead?",
@@ -376,16 +376,24 @@ document.addEventListener(
             if (answer) {
                 answer_area.innerHTML = "<b>" + answer + "</b>";
                 if (speech_recognition_on) {
-                    ecraft2learn.speak(answer, undefined, undefined, 6);
+                    let voices = window.speechSynthesis.getVoices();
+                    ecraft2learn.speak(answer, undefined, undefined, Math.min(6, voices.length));
                 }          
             } else {
                 answer_area.innerHTML = "Sorry I can't answer <i>" + question + "</i>";
             }   
         };
+        let error_message_reported = false;
         const answer_question = (question) => {
             LIFE.respond_to_questions(question, -0.55).then((answer) => {
                 // reasonable matches must be less than -0.55 cosineProximity
                 respond_with_answer(answer, question);
+            },
+            (error) => {
+                if (!error_message_reported) {
+                    add_paragraph(error.message);
+                    error_message_reported = true;
+                }
             });
         };
         question_area.addEventListener('keydown',
