@@ -1564,6 +1564,93 @@ window.ecraft2learn =
         }
         return result;      
     };
+    const yahoo_weather = (place, element_name, units, callback, error_callback, key, secret) => {
+// Weather API sample javascript code
+// Requires: jQuery and crypto-js (v3.1.9)
+// 
+// Copyright 2019 Oath Inc. Licensed under the terms of the zLib license see https://opensource.org/licenses/Zlib for terms.
+
+// Edited by Ken Kahn to remove jQuery dependance and provide interface
+// based upon https://developer.yahoo.com/weather/documentation.html#oauth-javascript
+
+if (typeof CryptoJS === 'undefined') {
+    load_script("js/crypto-js.js",
+                () => {
+                    yahoo_weather(place, element_name, units, callback, error_callback, key, secret);
+                });
+    return;
+}
+
+var url = 'https://weather-ydn-yql.media.yahoo.com/forecastrss';
+var method = 'GET';
+var app_id = '6HuByg4m';
+var consumer_key = key;
+var consumer_secret = secret;
+var concat = '&';
+var query = {'location': place, 'format': 'json'};
+var oauth = {
+    'oauth_consumer_key': consumer_key,
+    'oauth_nonce': Math.random().toString(36).substring(2),
+    'oauth_signature_method': 'HMAC-SHA1',
+    'oauth_timestamp': parseInt(new Date().getTime() / 1000).toString(),
+    'oauth_version': '1.0'
+};
+
+var merged = {}; 
+// $.extend(merged, query, oauth);
+Object.assign(merged, query);
+Object.assign(merged, oauth);
+// Note the sorting here is required
+var merged_arr = Object.keys(merged).sort().map(function(k) {
+  return [k + '=' + encodeURIComponent(merged[k])];
+});
+var signature_base_str = method
+  + concat + encodeURIComponent(url)
+  + concat + encodeURIComponent(merged_arr.join(concat));
+
+var composite_key = encodeURIComponent(consumer_secret) + concat;
+var hash = CryptoJS.HmacSHA1(signature_base_str, composite_key);
+var signature = hash.toString(CryptoJS.enc.Base64);
+
+oauth['oauth_signature'] = signature;
+var auth_header = 'OAuth ' + Object.keys(oauth).map(function(k) {
+  return [k + '="' + oauth[k] + '"'];
+}).join(',');
+
+// following replaces $.ajax below
+let xhr = new XMLHttpRequest();
+let url_and_query = url + "?format=json&location=" + encodeURIComponent(place); // + "&u=" + units;
+xhr.open('GET', url_and_query);
+xhr.setRequestHeader('Authorization', auth_header);
+xhr.setRequestHeader('X-Yahoo-App-Id', app_id);
+xhr.onload = function() {
+    callback(JSON.parse(xhr.responseText));
+};
+xhr.onerror = function(error) {
+    error_callback(url + " error is " + error.message);
+};
+xhr.onloadend = function() {
+    if (xhr.status >= 400) {
+        error_callback(url + " replied " + xhr.statusText);
+    } else if (xhr.status === 0) {
+        error_callback(url + " failed to load.");
+    }
+};
+xhr.send();
+
+// $.ajax({
+//   url: url + '?' + $.param(query),
+//   headers: {
+//     'Authorization': auth_header,
+//     'X-Yahoo-App-Id': app_id 
+//   },
+//   method: 'GET',
+//   success: function(data){
+//     console.log(data);
+//   }
+// });
+
+}
     window.words_to_features  = {};
     window.words_to_locations = {};
     // see http://mary.dfki.de:59125/documentation.html for documentation of Mary TTS
@@ -2624,53 +2711,48 @@ window.ecraft2learn =
       };
       ask_for_poses();
   },
-  weather: function (place, element_name, units, callback, error_callback) {
+  weather: function (place, element_name, units, callback, error_callback, key, secret) {
       // element names documented at https://developer.yahoo.com/weather/documentation.html
       // units can be either 'metric' or 'imperial'
       place = place.trim();
       element_name = element_name.trim();
       units = units.trim();
-      let query_name = element_name; // except for those that are under 'item'
-      if (element_name === 'everything') {
-          element_name = '*';
-          query_name = '*';
-      } else if (element_name === 'latitude') {
-          element_name = 'lat';
-          query_name = 'item';
-      } else if (element_name === 'longitude') {
-          element_name = 'long';   
-          query_name = 'item';
-      } else if (element_name === 'forecast' || element_name === 'condition') {
-          query_name = 'item';
-      }
-//       if (!error_callback) {
-//           error_callback = function (error) {
-//               inform("Error from Yahoo! weather service", error);
-//           };
-//       };
       let units_code = units === 'metric' ? 'c' : 'f';
-      window.callback_for_yahoo = function (data) {
-          if (data.query.results) {
-              let channel = data.query.results.channel;
-              let response = query_name === 'item' ? 
-                             channel.item[element_name] : 
-                             (element_name === '*' ? channel : channel[element_name]);
-              if (response) {
-                  invoke_callback(callback, javascript_to_snap(response));
+      const yahoo_callback = function (response) {
+          if (response) {
+              let reply;
+              if (element_name === 'everything') {
+                  reply = response;
+              } else if (element_name === 'latitude') {
+                  reply = response.location.lat;
+              } else if (element_name === 'longitude') {
+                  reply = response.location.long;
+              } else if (element_name === 'forecast') {
+                  reply = response.forecasts;
+              } else if (element_name === 'condition') {
+                  reply = response.current_observation.condition;
+              } else if (element_name === 'wind') {
+                  reply = response.current_observation.wind;
+              } else if (element_name === 'atmosphere') {
+                  reply = response.current_observation.atmosphere;
+              } else if (element_name === 'location') {
+                  reply = response.location;
+              } else if (element_name === 'astronomy') {
+                  reply = response.current_observation.astronomy;
+              }
+              if (reply) {
+                  invoke_callback(callback, javascript_to_snap(reply));
               } else {
                   invoke_callback(error_callback, "Unable to extract " + element_name + " from response.");
               }                     
           } else {
               invoke_callback(error_callback, "No results returned for " + element_name + " of " + place);
           }
-      }
-      let URL = "https://query.yahooapis.com/v1/public/yql?q=select " +
-                query_name +
-                " from weather.forecast where u='" + units_code + "' and " +
-                "woeid in (select woeid from geo.places(1) where text='" +
-                place + 
-                "')&format=json&callback=callback_for_yahoo";      
-      load_script(URL, undefined, error_callback);
+      };
+      const yahoo_error_callback = (error) => {
+          invoke_callback(error_callback, error);
+      };
+      yahoo_weather(place, element_name, units_code, yahoo_callback, yahoo_error_callback, key, secret);
   },
   create_costume_with_style: create_costume_with_style,
   get_image_features: get_image_features,
