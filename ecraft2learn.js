@@ -394,7 +394,7 @@ window.ecraft2learn =
             invoke_callback(voices_callback);
         }
     };
-    var get_matching_voice = function (builtin_voices, name_parts) { 
+    var get_matching_voice = function (builtin_voices, name_parts, default_voice_number) { 
         var voices = builtin_voices ? 
                      window.speechSynthesis.getVoices().map(function (voice) { return voice.name.toLowerCase(); }) :
                      mary_tts_voices.map(function (voice) { return voice[1].toLowerCase(); });
@@ -451,9 +451,12 @@ window.ecraft2learn =
         if (voice_number >= 0) {
             return voice_number;
         }
-        inform("Unable to find a matching voice",
-               "This browser does not have a voice that matches " + name_parts.join("-"));
-        return 0; // interpreted as the default voice for the default_language
+        if (typeof default_voice_number === 'undefined') {
+            inform("Unable to find a matching voice",
+                   "This browser does not have a voice that matches " + name_parts.join("-"));
+            default_voice_number = 0;          
+        }
+        return default_voice_number; // interpreted as the default voice for the default_language
     };
     var voice_number_of_language_code = function (code, builtin_voices) {
         if (builtin_voices) {
@@ -2379,11 +2382,11 @@ xhr.send();
       }
       return "No voice numbered " + voice_number;
   },
-  get_voice_number_matching: function (name_parts) {
-      return get_matching_voice(true, name_parts);
+  get_voice_number_matching: function (name_parts, default_voice_number) {
+      return get_matching_voice(true, name_parts, default_voice_number);
   },
-  get_mary_tts_voice_number_matching: function (name_parts) {
-      return get_matching_voice(false, name_parts);
+  get_mary_tts_voice_number_matching: function (name_parts, default_voice_number) {
+      return get_matching_voice(false, name_parts, default_voice_number);
   },
   get_mary_tts_voice_name: function (voice_number) { // user friendly name
       return get_voice_from(voice_number, mary_tts_voices.map(function (voice) { return voice[1]; }));

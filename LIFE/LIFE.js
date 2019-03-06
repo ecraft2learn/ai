@@ -389,7 +389,8 @@ document.addEventListener(
                 answer_area.innerHTML = "<b>" + answer + "</b>";
                 if (speech_recognition_on) {
                     let voices = window.speechSynthesis.getVoices();
-                    ecraft2learn.speak(answer, undefined, undefined, Math.min(6, voices.length));
+                    ecraft2learn.speak(answer, undefined, undefined, 
+                                       ecraft2learn.get_voice_number_matching(["uk", "female"], 0));
                 }          
             } else {
                 answer_area.innerHTML = "<b style='color:red;'>Sorry I can't answer <i>" + question + "</i></b>";
