@@ -1587,7 +1587,9 @@ var app_id = '6HuByg4m';
 var consumer_key = key;
 var consumer_secret = secret;
 var concat = '&';
-var query = {'location': place, 'format': 'json'};
+var query = {'location': place,
+             'format': 'json',
+             'u': units};
 var oauth = {
     'oauth_consumer_key': consumer_key,
     'oauth_nonce': Math.random().toString(36).substring(2),
@@ -1619,7 +1621,7 @@ var auth_header = 'OAuth ' + Object.keys(oauth).map(function(k) {
 
 // following replaces $.ajax below
 let xhr = new XMLHttpRequest();
-let url_and_query = url + "?format=json&location=" + encodeURIComponent(place); // + "&u=" + units;
+let url_and_query = url + "?format=json&location=" + encodeURIComponent(place) + "&u=" + units;
 xhr.open('GET', url_and_query);
 xhr.setRequestHeader('Authorization', auth_header);
 xhr.setRequestHeader('X-Yahoo-App-Id', app_id);
