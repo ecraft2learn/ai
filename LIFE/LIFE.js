@@ -377,13 +377,15 @@ document.addEventListener(
     () => {
         let question_area = document.getElementById('question');
         let toggle_speech_recognition = document.getElementById('speech-recognition');
+        let sound_effect = document.getElementById('sound');
+        let answer_area = document.getElementById('answer');
         let speech_recognition_on = false;
+        let first_cant_answer = true;
         const toggle_speech_recognition_label = document.createElement('span');
         const turn_on_speech_recognition_label = "Start listening";
         const turn_off_speech_recognition_label = "Stop listening";
         toggle_speech_recognition_label.innerHTML = turn_on_speech_recognition_label;
         toggle_speech_recognition.appendChild(toggle_speech_recognition_label);
-        let answer_area = document.getElementById('answer');
         const respond_with_answer = (answer, question) => {
             if (answer) {
                 answer_area.innerHTML = "<b>" + answer + "</b>";
@@ -394,6 +396,22 @@ document.addEventListener(
                 }          
             } else {
                 answer_area.innerHTML = "<b style='color:red;'>Sorry I can't answer <i>" + question + "</i></b>";
+                if (speech_recognition_on) {
+                    if (first_cant_answer) {
+                        first_cant_answer = false;
+                        ecraft2learn.speak("Sorry I can't answer '" + question + "'. Next time I can't answer you will only hear the following sound.", 
+                                           undefined,
+                                           undefined, 
+                                           ecraft2learn.get_voice_number_matching(["uk", "female"], 0),
+                                           undefined,
+                                           undefined,
+                                           () => {
+                                               sound_effect.play(); 
+                                           });
+                    } else {
+                        sound_effect.play();
+                    }
+                }
             }   
         };
         const answer_question = (question) => {
