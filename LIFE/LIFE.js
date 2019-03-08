@@ -395,7 +395,7 @@ document.addEventListener(
                                        ecraft2learn.get_voice_number_matching(["uk", "female"], 0));
                 }          
             } else {
-                answer_area.innerHTML = "<b style='color:red;'>Sorry I can't answer <i>" + question + "</i></b>";
+                answer_area.innerHTML = "<b style='color:red;'>Sorry I can't answer <i>\"" + question + "\"</i></b>";
                 if (speech_recognition_on) {
                     if (first_cant_answer) {
                         first_cant_answer = false;
