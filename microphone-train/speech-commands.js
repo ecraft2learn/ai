@@ -187,7 +187,9 @@
                             return [4, getAudioMediaStream()];
                         case 1:
                             _a.stream = _b.sent();
-                            this.audioContext = new this.audioContextConstructor();
+                            // Ken Kahn added options to audio context to avoid warning about mismatched sampling rates
+                            // works in FireFox and will soon in Chrome (see https://bugs.chromium.org/p/chromium/issues/detail?id=432248)
+                            this.audioContext = new this.audioContextConstructor({sampleRate: this.sampleRateHz});
                             if (this.audioContext.sampleRate !== this.sampleRateHz) {
                                 console.warn("Mismatch in sampling rate: " +
                                     ("Expected: " + this.sampleRateHz + "; ") +
@@ -322,7 +324,7 @@
     var BrowserFftSpeechCommandRecognizer = (function () {
         function BrowserFftSpeechCommandRecognizer(vocabulary) {
             this.MODEL_URL_PREFIX = "https://storage.googleapis.com/tfjs-speech-commands-models/v" + version + "/browser_fft";
-            this.SAMPLE_RATE_HZ = 44100;
+            this.SAMPLE_RATE_HZ = 48000;
             this.FFT_SIZE = 1024;
             this.DEFAULT_SUPPRESSION_TIME_MILLIS = 1000;
             this.transferRecognizers = {};
