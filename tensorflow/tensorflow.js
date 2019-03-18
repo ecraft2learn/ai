@@ -137,12 +137,12 @@ const create_model = function (name, layers, optimizer_full_name, input_shape, o
         optimizer = 'adam';
     }
     let loss_function = loss_function_named((options.loss_function || 'meanSquaredError'));
-    tf.tidy(() => {
+//     tf.tidy(() => {
         model.compile({loss: typeof loss_function === 'string' ? tf.losses[loss_function] : loss_function,
                        optimizer: optimizer,
                        metrics: ['accuracy']
                       });
-    });
+//     });
     gui_state["Model"]["Layers"] = layers.toString();
     gui_state["Model"]["Optimization method"] = optimizer_full_name;
     if (options.loss_function) {
@@ -286,24 +286,24 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
         // Train the model using the data
         let start = Date.now();
         // do I really need tidy at all since I dispose of tensors explicitly
-        if (configuration.validationSplit) {
-            // see https://github.com/tensorflow/tfjs/issues/927
-            // hack until resolved - note there may be a memory leak here
-            // tests indicate that the memory loss is only for the first time this is run
-            // presumably the validation set is cached 
-            model.fit(xs, ys, configuration)
-                .then((x) => {
-                         tf.tidy(() => {
-                             then_handler(x);
-                         });
-                     },
-                     error_handler);
-        } else {
-            tf.tidy(() => {
+//         if (configuration.validationSplit) {
+//             // see https://github.com/tensorflow/tfjs/issues/927
+//             // hack until resolved - note there may be a memory leak here
+//             // tests indicate that the memory loss is only for the first time this is run
+//             // presumably the validation set is cached 
+//             model.fit(xs, ys, configuration)
+//                 .then((x) => {
+//                          tf.tidy(() => {
+//                              then_handler(x);
+//                          });
+//                      },
+//                      error_handler);
+//         } else {
+//             tf.tidy(() => {
                 model.fit(xs, ys, configuration)
                     .then(then_handler, error_handler);
-                });       
-        }
+//                 });       
+//         }
     } catch (error) {
         error_callback(error);
     }
@@ -548,7 +548,7 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
         }
         return new Promise((resolve) => {
             // to run tidy in this context need to create a new promise
-            tf.tidy(() => {
+//             tf.tidy(() => {
                 model.fit(xs, ys, configuration).then(
                     (h) => {
                         if (previous_model && !previous_model.disposed_previously) {
@@ -569,7 +569,7 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
                     error_callback
                 );
             });
-        }); 
+//         }); 
     };
     const space = {};
     if (to_boolean(gui_state["Optimize"]["Search for best Optimization method"])) {
