@@ -18,7 +18,7 @@
 // limitations under the License.
 
 const videoWidth = 300;
-const videoHeight = 250;
+const videoHeight = 300;
 
 const images = {
 "normal": [
@@ -203,7 +203,7 @@ const infer = (image) => {
     return mobilenet_model.infer(image, 'conv_preds');
 };
 
-async function animate() {
+// async function animate() {
   // Get image data from video element
 //   const image = tf.browser.fromPixels(video);
 //   let logits;
@@ -245,8 +245,8 @@ async function animate() {
 //        logits.dispose();
 //     }
 
-  requestAnimationFrame(animate);
-}
+//   requestAnimationFrame(animate);
+// }
 
 const load_mobilenet = async function () {
     classifier = knnClassifier.create();
@@ -255,7 +255,7 @@ const load_mobilenet = async function () {
 
 /**
  * Initialises by loading the knn model, finding and loading
- * available camera devices, and setting off the animate function.
+ * available camera devices, and ...
  */
 const initialise_page = async () => {
   // Setup the camera
@@ -278,9 +278,51 @@ const initialise_page = async () => {
   add_images(() => {
       document.getElementById('please-wait').hidden = true;
       document.getElementById('introduction').hidden = false;
+      document.getElementById('main').hidden = false;
+      rectangle_selection();
   });
-  start();
-}
+};
+
+const rectangle_selection = () => {
+    let rectangle = document.getElementById('selection-rectangle');
+    let video_rectangle = document.getElementById('video').getBoundingClientRect();
+    let start_x = 0;
+    let start_y = 0;
+    let end_x = 0;
+    let end_y = 0;
+    let video_left = video_rectangle.left;
+    let video_right = video_left+video_rectangle.width;
+    let video_top = video_rectangle.top;
+    let video_bottom = video_top+video_rectangle.height;
+    let update_selection = () => {
+        let left   = Math.max(Math.min(start_x, end_x, video_right),  video_left);
+        let right  = Math.min(Math.max(start_x, end_x, video_left),   video_right);
+        let top    = Math.max(Math.min(start_y, end_y, video_bottom), video_top);
+        let bottom = Math.min(Math.max(start_y, end_y, video_top),    video_bottom);
+        rectangle.style.left   = left + 'px';
+        rectangle.style.top    = top + 'px';
+        rectangle.style.width  = right - left + 'px';
+        rectangle.style.height = bottom - top + 'px';
+    };
+    onmousedown = (e) =>  {
+        rectangle.hidden = false;
+        start_x = e.clientX;
+        start_y = e.clientY;
+        update_selection();
+    };
+    onmousemove = (e) =>  {
+        if (!rectangle.hidden) {
+            end_x = e.clientX;
+            end_y = e.clientY;
+            update_selection();          
+        }
+    };
+    onmouseup = (e) =>  {
+update_selection(); // temporary
+        rectangle.hidden = true;
+        // and analyse...
+    };
+};
 
 // const receive_drop = function (event) {
 //   // following based on https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/File_drag_and_drop
@@ -306,10 +348,10 @@ const initialise_page = async () => {
   
 // };
 
-function start() {
-//  video.play(); // this caused an error on Android because it wasn't directly caused by a user action
-    timer = requestAnimationFrame(animate);
-}
+// function start() {
+// //  video.play(); // this caused an error on Android because it wasn't directly caused by a user action
+//     timer = requestAnimationFrame(animate);
+// }
   
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
                  
