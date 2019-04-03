@@ -17,8 +17,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const videoWidth = 300;
-const videoHeight = 300;
+const VIDEO_WIDTH  = 300;
+const VIDEO_HEIGHT = 250;
 
 const images = {
 "normal": [
@@ -111,16 +111,16 @@ async function setupCamera() {
   }
 
   const video = document.getElementById('video');
-  video.width = videoWidth;
-  video.height = videoHeight;
+  video.width  = VIDEO_WIDTH;
+  video.height = VIDEO_HEIGHT;
 
   const mobile = isMobile();
   const stream = await navigator.mediaDevices.getUserMedia({
     'audio': false,
     'video': {
       facingMode: 'user',
-      width: mobile ? undefined : videoWidth,
-      height: mobile ? undefined : videoHeight,
+      width: mobile ? undefined : VIDEO_WIDTH,
+      height: mobile ? undefined : VIDEO_HEIGHT,
     },
   });
   video.srcObject = stream;
@@ -132,22 +132,22 @@ async function setupCamera() {
   });
 }
 
-const create_canvas = function () {
-    let canvas = document.createElement('canvas');
-    canvas.width  = videoWidth;
-    canvas.height = videoHeight;
-    return canvas;
-};
+// const create_canvas = function () {
+//     let canvas = document.createElement('canvas');
+//     canvas.width  = VIDEO_WIDTH;
+//     canvas.height = VIDEO_HEIGHT;
+//     return canvas;
+// };
 
 const copy_video_to_canvas = function (video, canvas) {
-    canvas.getContext('2d').drawImage(video, 0, 0, videoWidth, videoHeight);
+    canvas.getContext('2d').drawImage(video, 0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
 };
 
 const load_image = function (image_url, callback) {
     let image = new Image();
     image.src = image_url;
-    image.width  = videoWidth;
-    image.height = videoHeight;
+    image.width  = VIDEO_WIDTH;
+    image.height = VIDEO_HEIGHT;
     image.onload = function () {
         callback(image);
     };
@@ -304,23 +304,45 @@ const rectangle_selection = () => {
         rectangle.style.width  = right - left + 'px';
         rectangle.style.height = bottom - top + 'px';
     };
-    onmousedown = (e) =>  {
+    onmousedown = (e) => {
         rectangle.hidden = false;
         start_x = e.clientX;
         start_y = e.clientY;
         update_selection();
     };
-    onmousemove = (e) =>  {
+    onmousemove = (e) => {
         if (!rectangle.hidden) {
             end_x = e.clientX;
             end_y = e.clientY;
             update_selection();          
         }
     };
-    onmouseup = (e) =>  {
-update_selection(); // temporary
-        rectangle.hidden = true;
-        // and analyse...
+    onmouseup = async (e) => {
+        const box = rectangle.getBoundingClientRect();
+        if (box.width > 0 && box.height > 0) {
+            let canvas = document.getElementById('canvas');
+            canvas.width  = VIDEO_WIDTH;
+            canvas.height = VIDEO_HEIGHT;
+            canvas.getContext('2d').drawImage(video, 
+                                              box.left-video_left,
+                                              box.top-video_top,
+                                              box.width,
+                                              box.height,
+                                              0,
+                                              0,
+                                              VIDEO_WIDTH,
+                                              VIDEO_HEIGHT);
+            const image = tf.browser.fromPixels(canvas);
+            const logits = infer(image);
+            const result = await classifier.predictClass(logits, TOPK);
+            let message = "";
+            class_names.forEach((name, index) => {
+                message += name + " = " + result.confidences[index] + "%; ";
+            });
+            document.getElementById('response').innerHTML = message;
+            console.log(result);          
+        }
+        rectangle.hidden = true; 
     };
 };
 

@@ -43,7 +43,7 @@ and you can check out our
 <div id='main' hidden>
     <video id="video" playsinline 
      width  = "300"
-     height = "300"
+     height = "250"
 <!--      reverse left and right -->
      style=" -moz-transform: scaleX(-1);
              -o-transform: scaleX(-1);
@@ -51,7 +51,12 @@ and you can check out our
              transform: scaleX(-1);
            ">
     </video>
-    <div id="selection-rectangle" style="border: 2px dotted yellow; position: absolute;"></div>
+    <canvas id="canvas"
+     width  = "300"
+     height = "250">
+    </canvas>
+    <p id="response"></p>
+    <div id="selection-rectangle" hidden style="border: 2px dotted yellow; position: absolute;"></div>
 </div>
 </body>
 </html>
