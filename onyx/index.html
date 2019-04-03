@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link href="../css/ai-teacher-guide.css" rel="stylesheet">
-    <link rel="icon" type="image/png" href="../images/eCraft2Learn-Favicon.png" />
-    <title>Machine learning from the camera</title>
+<!--     <link rel="icon" type="image/png" href="../images/eCraft2Learn-Favicon.png" /> -->
+    <title>Onyx project - analysing nails</title>
 <script src="../js/load-scripts.js"></script>
 <script>
 load_local_or_remote_scripts(
@@ -14,31 +14,30 @@ load_local_or_remote_scripts(
      "../js/mobilenet.js",
      "../js/knn-classifier.js",
      "../js/training-utilities.js",
-     "train-mobilenet.js",
+     "nails.js",
      "../js/translate.js"],
     ["https://cdn.jsdelivr.net/npm/@tensorflow/tfjs",
      "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet",
      "https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier",
      "../js/training-utilities.js",
-     "train-mobilenet.js",
+     "nails.js",
      "../js/translate.js"]);
 </script>
 </head>
 <body>
 <p id="please-wait">
-Please wait for this page to load and to receive the labels of what is to be trained.
+Please wait for this page to load.
 </p>
 <!-- Introduction is hidden until everything is loaded -->
-<div id="introduction" style="display:none">
+<div id="introduction" hidden>
 <p>
-Ready to start training.
-Just hold down one of the buttons when the desired image is front of the camera.
-Do this until the system is sufficiently confident of the correct label when a new image is presented.
-Then return to the Snap! tab.
+Ready ...
 </p>
 <p>
 Don't worry, we aren't sending any of your images to a remote server.
-All the machine learning is being done locally on device, and you can check out our source code on Github.
+All the machine learning is being done locally on device,
+and you can check out our
+<a href="https://github.com/ecraft2learn/ai/tree/master/onyx" target="_blank">source code</a> on Github.
 </p>
 </div>
 <div id='main' style='display:none'>
