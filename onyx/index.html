@@ -41,9 +41,14 @@ and you can check out our
 </p>
 </div>
 <div id='main' hidden>
+    <button id="toggle video" class="freeze-video" style="padding:20px;">
+    Freeze video
+    </button>
+    <br>
+    <br>
     <video id="video" playsinline 
-     width  = "300"
-     height = "250"
+     width  = "224"
+     height = "224"
 <!--      reverse left and right -->
      style=" -moz-transform: scaleX(-1);
              -o-transform: scaleX(-1);
@@ -51,9 +56,9 @@ and you can check out our
              transform: scaleX(-1);
            ">
     </video>
-    <canvas id="canvas"
-     width  = "300"
-     height = "250">
+    <canvas hidden id="canvas"
+     width  = "224"
+     height = "224">
     </canvas>
     <p id="response"></p>
     <div id="selection-rectangle" hidden style="border: 2px dotted yellow; position: absolute;"></div>

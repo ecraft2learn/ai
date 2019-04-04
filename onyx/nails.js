@@ -17,8 +17,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const VIDEO_WIDTH  = 300;
-const VIDEO_HEIGHT = 250;
+const VIDEO_WIDTH  = 224;
+const VIDEO_HEIGHT = 224;
 
 const images = {
 "normal": [
@@ -85,12 +85,12 @@ let class_names = Object.keys(images);
 // K value for KNN - experiment with different values
 const TOPK = 10;
 
-let info_texts = [];
-let training = -1;
+// let info_texts = [];
+// let training = -1;
 let classifier;
 let mobilenet_model;
 let video;
-let timer;
+let video_paused = false;
 
 function isAndroid() {
   return /Android/i.test(navigator.userAgent);
@@ -125,23 +125,27 @@ async function setupCamera() {
   });
   video.srcObject = stream;
 
+  const toggle_freeze_button = document.getElementById('toggle video');
+  toggle_freeze_button.addEventListener('click',
+      (event) => {
+          if (video_paused) {
+              video.play();
+              video_paused = false;
+              toggle_freeze_button.innerHTML = "Freeze video";
+              display_message("<b>Freeze the video before selecting the nail.</b>");
+          } else {
+              video.pause();
+              video_paused = true;
+              toggle_freeze_button.innerHTML = "Resume video";
+              display_message("<b>Use the mouse to select a rectangle containing the nail.</b>");        
+          }
+      });
   return new Promise((resolve) => {
     video.onloadedmetadata = () => {
       resolve(video);
     };
   });
 }
-
-// const create_canvas = function () {
-//     let canvas = document.createElement('canvas');
-//     canvas.width  = VIDEO_WIDTH;
-//     canvas.height = VIDEO_HEIGHT;
-//     return canvas;
-// };
-
-const copy_video_to_canvas = function (video, canvas) {
-    canvas.getContext('2d').drawImage(video, 0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
-};
 
 const load_image = function (image_url, callback) {
     let image = new Image();
@@ -152,15 +156,6 @@ const load_image = function (image_url, callback) {
         callback(image);
     };
 };
-
-// const image_url_to_features_vector = function (image_url, time_stamp, post_to_tab) {
-//     load_image(image_url,
-//                async function (image) {
-//                    logits = await infer(image);
-//                    post_to_tab.postMessage({image_features: classifier.normalizeVectorToUnitLength(logits).dataSync(),
-//                                             time_stamp: time_stamp});
-//                });
-// };
 
 const add_images = (when_finished) => {
     let label_index = 0;
@@ -283,6 +278,10 @@ const initialise_page = async () => {
   });
 };
 
+const display_message = (message) => {
+    document.getElementById('response').innerHTML = message;
+};
+            
 const rectangle_selection = () => {
     let rectangle = document.getElementById('selection-rectangle');
     let video_rectangle = document.getElementById('video').getBoundingClientRect();
@@ -295,6 +294,9 @@ const rectangle_selection = () => {
     let video_top = video_rectangle.top;
     let video_bottom = video_top+video_rectangle.height;
     let update_selection = () => {
+        if (!video_paused) {
+            return;
+        }
         let left   = Math.max(Math.min(start_x, end_x, video_right),  video_left);
         let right  = Math.min(Math.max(start_x, end_x, video_left),   video_right);
         let top    = Math.max(Math.min(start_y, end_y, video_bottom), video_top);
@@ -318,8 +320,12 @@ const rectangle_selection = () => {
         }
     };
     onmouseup = async (e) => {
+        if (!video_paused) {
+            return;
+        }
         const box = rectangle.getBoundingClientRect();
         if (box.width > 0 && box.height > 0) {
+            console.log(box.width, box.height);
             let canvas = document.getElementById('canvas');
             canvas.width  = VIDEO_WIDTH;
             canvas.height = VIDEO_HEIGHT;
@@ -339,7 +345,9 @@ const rectangle_selection = () => {
             class_names.forEach((name, index) => {
                 message += name + " = " + result.confidences[index] + "%; ";
             });
-            document.getElementById('response').innerHTML = message;
+            display_message(message);
+            rectangle.style.width  = "0px";
+            rectangle.style.height = "0px";
             console.log(result);          
         }
         rectangle.hidden = true; 
