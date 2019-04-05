@@ -17,6 +17,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+const RUN_EXPERIMENTS = true;
+
 const VIDEO_WIDTH  = 224;
 const VIDEO_HEIGHT = 224;
 
@@ -217,17 +219,17 @@ const load_image = function (image_url, callback) {
     };
 };
 
-const add_images = (when_finished) => {
-    let label_index = 0;
-    let label = class_names[label_index];
-    let image_index = 0;
+const add_images = (when_finished, just_one_class, only_class_index, except_image_index) => {
+    let class_index = just_one_class ? only_class_index : 0;
+    let label = class_names[class_index];
+    let image_index = -1; // incremented to 0 soon
     const next_image = () => {
-        let class_images = images[class_names[label_index]];
+        let class_images = images[class_names[class_index]];
         if (image_index === class_images.length-1) {
             // no more images for this class 
             image_index = 0;
-            label_index++;
-            if (label_index === class_names.length) {
+            class_index++;
+            if (class_index === class_names.length || (just_one_class && only_class_index)) {
                 // no more classes
                 when_finished();
                 return;
@@ -235,16 +237,72 @@ const add_images = (when_finished) => {
         } else {
             image_index++;
         }
-        add_image_to_training(class_images[image_index], label_index, next_image);
+        if (image_index !== except_image_index) {
+            add_image_to_training(class_images[image_index], class_index, next_image);
+        } else {
+            next_image();
+        }
     };
     next_image();
 };
 
-const add_image_to_training = (image_url, label_index, continuation) => {
+const predict_class = (image, callback) => {
+    return tf.tidy(() => {
+        const image_pixels = tf.browser.fromPixels(image);
+        const logits = infer(image_pixels);
+        classifier.predictClass(logits, TOPK).then((result) => {
+//             image_pixels.dispose();
+//             logits.dispose();
+            console.log(tf.memory());
+            callback(result);          
+        });
+    });
+};
+
+const run_experiments = (threshold) => {
+    let class_index = 0;
+    let image_index = -1; // incremented to 0 soon
+    const next_experiment = () => {
+        let class_images = images[class_names[class_index]];
+        if (image_index === class_images.length-1) {
+            // no more images for this class 
+            image_index = 0;
+            class_index++;
+            if (class_index === class_names.length) {
+                return;
+            }
+        } else {
+            image_index++;
+        }
+        const test_image = () => {
+            load_image(images[class_names[class_index]][image_index],
+                       async(image) => {
+                           predict_class(image, (result) => {
+                               if (result.confidences[class_index] < threshold) {
+                                   display_message("<img src='" + images[class_names[class_index]][image_index] + "' width=100 height=100></img>", true);
+                                   display_message(class_names[class_index] + "#" + image_index + " " + confidences(result), true); 
+                               }
+                               next_experiment();                          
+                           });
+                       });
+        };
+        const clear_just_one_class = false;
+        if (clear_just_one_class) {
+            classifier.clearClass(class_index); // remove elements from this class
+        } else {
+            classifier.dispose();
+            classifier = knnClassifier.create();
+        }
+        add_images(test_image, clear_just_one_class, class_index, image_index); // put back all one
+    };
+    next_experiment();
+};
+
+const add_image_to_training = (image_url, class_index, continuation) => {
     load_image(image_url,
                (image) => {
                    logits = infer(image);
-                   classifier.addExample(logits, label_index);
+                   classifier.addExample(logits, class_index);
                    logits.dispose();
                    continuation();     
     });
@@ -310,36 +368,50 @@ const load_mobilenet = async function () {
 
 /**
  * Initialises by loading the knn model, finding and loading
- * available camera devices, and ...
+ * available camera devices, loading the images, and initialising the interface
  */
 const initialise_page = async () => {
-  // Setup the camera
-  try {
-    video = await setupCamera();
-    video.play();
-  } catch (e) {
-    let info = document.getElementById('info');
-    if (!info) {
-        info = document.createElement('p');
-        info.id = 'info';
-        document.body.appendChild(info);
+    // Setup the camera
+    try {
+      video = await setupCamera();
+      video.play();
+    } catch (e) {
+      let info = document.getElementById('info');
+      if (!info) {
+          info = document.createElement('p');
+          info.id = 'info';
+          document.body.appendChild(info);
+      }
+      info.textContent = 'This browser does not support video capture, ' +
+                         'lacks permission to use the camera, '
+                         'or this device does not have a camera.';
+      info.style.display = 'block';
+      throw e;
     }
-    info.textContent = 'This browser does not support video capture, ' +
-                       'lacks permission to use the camera, '
-                       'or this device does not have a camera.';
-    info.style.display = 'block';
-    throw e;
-  }
-  add_images(() => {
-      document.getElementById('please-wait').hidden = true;
-      document.getElementById('introduction').hidden = false;
-      document.getElementById('main').hidden = false;
-      rectangle_selection();
-  });
+    add_images(() => {
+        document.getElementById('please-wait').hidden = true;
+        document.getElementById('introduction').hidden = false;
+        document.getElementById('main').hidden = false;
+        rectangle_selection();
+        if (RUN_EXPERIMENTS) {
+            run_experiments(.8); // report any matches less than 80% confident
+        }
+    });
 };
 
-const display_message = (message) => {
+const display_message = (message, append) => {
+    if (append) {
+        message = document.getElementById('response').innerHTML + "<br>" + message;
+    }
     document.getElementById('response').innerHTML = message;
+};
+
+const confidences = (result) => {
+    let message = "<b>Confidences: </b>";
+    class_names.forEach((name, index) => {
+        message += name + " = " + Math.round(100*result.confidences[index]) + "%; ";
+    });
+    return message;
 };
             
 const rectangle_selection = () => {
@@ -398,17 +470,14 @@ const rectangle_selection = () => {
                                               0,
                                               VIDEO_WIDTH,
                                               VIDEO_HEIGHT);
-            const image = tf.browser.fromPixels(canvas);
-            const logits = infer(image);
-            const result = await classifier.predictClass(logits, TOPK);
-            let message = "<b>Confidences: </b>";
-            class_names.forEach((name, index) => {
-                message += name + " = " + Math.round(100*result.confidences[index]) + "%; ";
+            predict_class(canvas, () => {
+                display_message(confidences(results));
+                console.log(result);
+                // reset rectangle
+                rectangle.style.width  = "0px";
+                rectangle.style.height = "0px";
             });
-            display_message(message);
-            rectangle.style.width  = "0px";
-            rectangle.style.height = "0px";
-            console.log(result);          
+          
         }
         rectangle.hidden = true; 
     };
@@ -438,11 +507,7 @@ const rectangle_selection = () => {
   
 // };
 
-// function start() {
-// //  video.play(); // this caused an error on Android because it wasn't directly caused by a user action
-//     timer = requestAnimationFrame(animate);
-// }
-  
+ 
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
                  
 //     if (typeof event.data.predict !== 'undefined') {
