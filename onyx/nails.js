@@ -17,7 +17,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const RUN_EXPERIMENTS = true;
+const RUN_EXPERIMENTS = false;
+
+const TOPK = 20; // number of nearest neighbours for KNN
+const THRESHOLD = .65; // only report matches less than this threshold
 
 const VIDEO_WIDTH  = 224;
 const VIDEO_HEIGHT = 224;
@@ -136,23 +139,47 @@ const images = {
 ],
 "other": [
 "images/other/architecture-1836070_960_720.jpg",
+"images/other/Bali 064.jpg",
+"images/other/Bali 102.jpg",
+"images/other/Bali 118.jpg",
+"images/other/brown.png",
 "images/other/cat-3336579_960_720.jpg",
+"images/other/Fingernail healthy Image_10.jpg",
+"images/other/Fingernail healthy Image_14.png",
+"images/other/Fingernail healthy Image_15.png",
+"images/other/Fingernail healthy Image_17.png",
+"images/other/Fingernail healthy Image_19.png",
+"images/other/Fingernail healthy Image_2.png",
+"images/other/Fingernail healthy Image_8.png",
+"images/other/Fingernail unhealthy Image_16.png",
+"images/other/Fingernail unhealthy Image_17.png",
+"images/other/Fingernail unhealthy Image_18.png",
+"images/other/Fingernail unhealthy Image_19.png",
+"images/other/Fingernail unhealthy Image_24.png",
+"images/other/Fingernail unhealthy Image_25.png",
+"images/other/Fingernail unhealthy Image_32.jpg",
+"images/other/Fingernail unhealthy Image_35.jpg",
+"images/other/Fingernail unhealthy Image_50.png",
+"images/other/grass.jpg",
+"images/other/hand_WIN_20190405_13_58_34_Pro.jpg",
+"images/other/hong kong.jpg",
 "images/other/person-822681_960_720.jpg",
-"images/other/tree-740901_960_720.jpg"
+"images/other/Slide22.PNG",
+"images/other/small IMG_1990.JPG",
+"images/other/snoopy.jpg",
+"images/other/snow.jpg",
+"images/other/tree-740901_960_720.jpg",
+"images/other/white.png",
 ]
 };
 
 let class_names = Object.keys(images);
-
-// K value for KNN - experiment with different values
-const TOPK = 10;
 
 // let info_texts = [];
 // let training = -1;
 let classifier;
 let mobilenet_model;
 let video;
-let video_paused = false;
 
 function isAndroid() {
   return /Android/i.test(navigator.userAgent);
@@ -190,16 +217,18 @@ async function setupCamera() {
   const toggle_freeze_button = document.getElementById('toggle video');
   toggle_freeze_button.addEventListener('click',
       (event) => {
-          if (video_paused) {
-              video.play();
-              video_paused = false;
-              toggle_freeze_button.innerHTML = "Freeze video";
-              display_message("<b>Freeze the video before selecting the nail.</b>");
-          } else {
+          if (!video.paused && !video.hidden) {
               video.pause();
-              video_paused = true;
               toggle_freeze_button.innerHTML = "Resume video";
               display_message("<b>Use the mouse to select a rectangle containing the nail.</b>");        
+          } else {
+              if (video.hidden) {
+                  video.hidden = false;
+                  document.getElementById('canvas').hidden = true;
+              }
+              video.play();
+              toggle_freeze_button.innerHTML = "Freeze video";
+              display_message("<b>Freeze the video before selecting the nail.</b>");
           }
       });
   return new Promise((resolve) => {
@@ -262,10 +291,18 @@ const predict_class = (image, callback) => {
 const run_experiments = (threshold) => {
     let class_index = 0;
     let image_index = -1; // incremented to 0 soon
+    let within_threshold_count = 0;
+    display_message("<b>Results with a threshold of " + threshold + 
+                    " and " + TOPK + " nearest neighbours.</b>");
     const next_experiment = () => {
         let class_images = images[class_names[class_index]];
         if (image_index === class_images.length-1) {
-            // no more images for this class 
+            // no more images for this class_index
+            display_message("<p>Number at or above threshold of " + threshold + 
+                            " = " + within_threshold_count + "/" + class_images.length + 
+                            " (" + Math.round(100*within_threshold_count/class_images.length) + "%)</p>",
+                            true);
+            within_threshold_count = 0;
             image_index = 0;
             class_index++;
             if (class_index === class_names.length) {
@@ -274,14 +311,27 @@ const run_experiments = (threshold) => {
         } else {
             image_index++;
         }
+        const maximum_confidence = (confidences) => {
+            return Math.max(...Object.values(confidences));
+        };
         const test_image = () => {
-            load_image(images[class_names[class_index]][image_index],
+            const class_name = class_names[class_index];
+            load_image(images[class_name][image_index],
                        async(image) => {
                            predict_class(image, (result) => {
-                               if (result.confidences[class_index] < threshold) {
-                                   display_message("<img src='" + images[class_names[class_index]][image_index] + "' width=100 height=100></img>", true);
-                                   display_message(class_names[class_index] + "#" + image_index + " " + confidences(result), true); 
+                               let confidence = result.confidences[class_index];
+                               display_message("<img src='" + images[class_name][image_index] + "' width=100 height=100></img>", true);
+                               let message = class_name + "#" + image_index + " " + confidences(result);
+                               if (confidence <= .5) {
+                                   if (class_name !== 'other' || // confidence too low so highlight this message
+                                       (class_name === 'other' && maximum_confidence(result.confidences) > .5)) {  
+                                       message = "<span style='color:red'>" + message + "</span>";
+                                   }                                       
                                }
+                               if (confidence >= threshold) {
+                                   within_threshold_count++;
+                               }
+                               display_message(message, true);
                                next_experiment();                          
                            });
                        });
@@ -393,8 +443,25 @@ const initialise_page = async () => {
         document.getElementById('introduction').hidden = false;
         document.getElementById('main').hidden = false;
         rectangle_selection();
+        document.addEventListener('drop',
+                                  (event) => {
+                                      receive_drop(event);
+                                      document.body.style.backgroundColor = 'white';
+                                  },
+                                  false);
+        document.addEventListener('dragenter', (event) => {
+             event.preventDefault();
+             document.body.style.backgroundColor = 'pink';
+        });
+        document.addEventListener('dragover', (event) => {
+             event.preventDefault();
+        });
+        document.addEventListener('dragexit', (event) => {
+             event.preventDefault();
+             document.body.style.backgroundColor = 'white';
+        });
         if (RUN_EXPERIMENTS) {
-            run_experiments(.8); // report any matches less than 80% confident
+            run_experiments(THRESHOLD); // report any matches with confidence less than this confidence
         }
     });
 };
@@ -426,7 +493,7 @@ const rectangle_selection = () => {
     let video_top = video_rectangle.top;
     let video_bottom = video_top+video_rectangle.height;
     let update_selection = () => {
-        if (!video_paused) {
+        if (!video.paused && !video.hidden) {
             return;
         }
         let left   = Math.max(Math.min(start_x, end_x, video_right),  video_left);
@@ -437,6 +504,12 @@ const rectangle_selection = () => {
         rectangle.style.top    = top + 'px';
         rectangle.style.width  = right - left + 'px';
         rectangle.style.height = bottom - top + 'px';
+    };
+    const create_canvas = function () {
+        let canvas = document.createElement('canvas');
+        canvas.width  = VIDEO_WIDTH;
+        canvas.height = VIDEO_HEIGHT;
+        return canvas;
     };
     onmousedown = (e) => {
         rectangle.hidden = false;
@@ -452,62 +525,75 @@ const rectangle_selection = () => {
         }
     };
     onmouseup = async (e) => {
-        if (!video_paused) {
+        if (!video.paused && !video.hidden) {
             return;
         }
         const box = rectangle.getBoundingClientRect();
         if (box.width > 0 && box.height > 0) {
             console.log(box.width, box.height);
-            let canvas = document.getElementById('canvas');
-            canvas.width  = VIDEO_WIDTH;
-            canvas.height = VIDEO_HEIGHT;
-            canvas.getContext('2d').drawImage(video, 
-                                              box.left-video_left,
-                                              box.top-video_top,
-                                              box.width,
-                                              box.height,
-                                              0,
-                                              0,
-                                              VIDEO_WIDTH,
-                                              VIDEO_HEIGHT);
-            predict_class(canvas, () => {
+            let temporaray_canvas = create_canvas();
+            const source = video.hidden ? document.getElementById('canvas') : video;
+            const context = temporaray_canvas.getContext('2d');
+            context.drawImage(source, 
+                              box.left-video_left,
+                              box.top-video_top,
+                              box.width,
+                              box.height,
+                              0,
+                              0,
+                              VIDEO_WIDTH,
+                              VIDEO_HEIGHT);
+            predict_class(temporaray_canvas, (results) => {
                 display_message(confidences(results));
-                console.log(result);
+                console.log(results);
                 // reset rectangle
                 rectangle.style.width  = "0px";
                 rectangle.style.height = "0px";
-            });
-          
+            });  
         }
         rectangle.hidden = true; 
     };
 };
 
-// const receive_drop = function (event) {
-//   // following based on https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/File_drag_and_drop
-//   // Prevent default behavior (Prevent file from being opened)
-//   event.preventDefault();
+const receive_drop = (event) => {
+    // following based on https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/File_drag_and_drop
+    // Prevent default behavior (Prevent file from being opened)
+    event.preventDefault();
+    let file;
+    if (event.dataTransfer.items) {
+        // Use DataTransferItemList interface to access the file(s)
+        for (let i = 0; i < event.dataTransfer.items.length; i++) {
+          // If dropped items aren't files, reject them
+          if (event.dataTransfer.items[i].kind === 'file') {
+            file = event.dataTransfer.items[i].getAsFile();
+            break;
+          }
+        }
+    } else {
+        // Use DataTransfer interface to access the file(s)
+        file = event.dataTransfer.files[0].name;
+    }
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+        const image = new Image();
+        image.onload = () => {
+            const canvas = document.getElementById('canvas');
+            canvas.getContext('2d').drawImage(image, 0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
+            canvas.hidden = false;
+            video.hidden = true;
+            predict_class(canvas, (results) => {
+                display_message(confidences(results));
+                console.log(results);
+                display_message("You can select a sub-region of your image.", true);
+                const video_button = document.getElementById('toggle video');
+                video_button.innerHTML = "Restore camera";
+            });
+        };
+        image.src = reader.result;
+    };  
+};
 
-//   let file;
-//   if (event.dataTransfer.items) {
-//       // Use DataTransferItemList interface to access the file(s)
-//       for (let i = 0; i < event.dataTransfer.items.length; i++) {
-//         // If dropped items aren't files, reject them
-//         if (event.dataTransfer.items[i].kind === 'file') {
-//           file = event.dataTransfer.items[i].getAsFile();
-//           break;
-//         }
-//       }
-//   } else {
-//       // Use DataTransfer interface to access the file(s)
-//       file = event.dataTransfer.files[0].name;
-//   }
-
-//   load_data_set_file(file); 
-  
-// };
-
- 
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
                  
 //     if (typeof event.data.predict !== 'undefined') {
