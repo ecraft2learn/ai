@@ -1,21 +1,5 @@
-// This file was originally copied and modified from the squeezenet KNN boiler plate example 
-// and then updated to use mobilenet and tensorflow.js based upon 
-// https://github.com/tensorflow/tfjs-models/tree/master/knn-classifier/demo
-// by Ken Kahn <toontalk@gmail.com> as part of the eCraft2Learn project
-
-// Copyright 2018 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// by Ken Kahn <toontalk@gmail.com> as part of the Onyx project at the University of Oxford
+// copyright not yet determined but will be some sort of open source
 
 const RUN_EXPERIMENTS = false;
 // if tsv is defined then collect all the logits of each image into a TSV string (tab-separated values)
@@ -23,9 +7,9 @@ let tsv = undefined;
 const CREATE_SPRITE_IMAGE = true;
 
 const TOPK = 20; // number of nearest neighbours for KNN
-const THRESHOLD = .65; // only report matches less than this threshold
+const THRESHOLD = .65; // report statistics for for fraction that matches with less than this threshold
 
-const VIDEO_WIDTH  = 224;
+const VIDEO_WIDTH  = 224; // this version of MobileNet expects 224x224 images
 const VIDEO_HEIGHT = 224;
 
 const images = {
@@ -128,7 +112,6 @@ const images = {
 "images/fungal-nails/Slide22-3b.png",
 "images/fungal-nails/Slide22-3c.png",
 "images/fungal-nails/Slide23.PNG",
-"images/fungal-nails/Slide24.PNG",
 "images/fungal-nails/Slide25a.png",
 "images/fungal-nails/Slide25b.png",
 "images/fungal-nails/Slide26.PNG",
@@ -244,9 +227,9 @@ async function setupCamera() {
 const load_image = function (image_url, callback) {
     let image = new Image();
     image.src = image_url;
-    image.width  = VIDEO_WIDTH;
-    image.height = VIDEO_HEIGHT;
-    image.onload = function () {
+//     image.width  = VIDEO_WIDTH;
+//     image.height = VIDEO_HEIGHT;
+    image.onload = () => {
         callback(image);
     };
 };
@@ -255,6 +238,10 @@ const add_images = (when_finished, just_one_class, only_class_index, except_imag
     let class_index = just_one_class ? only_class_index : 0;
     let label = class_names[class_index];
     let image_index = -1; // incremented to 0 soon
+    const image_sprite_canvas = CREATE_SPRITE_IMAGE && create_sprite_image_canvas();
+    if (image_sprite_canvas) {
+        document.body.appendChild(image_sprite_canvas);
+    }
     const next_image = () => {
         let class_images = images[class_names[class_index]];
         if (image_index === class_images.length-1) {
@@ -264,6 +251,9 @@ const add_images = (when_finished, just_one_class, only_class_index, except_imag
             if (class_index === class_names.length || (just_one_class && only_class_index)) {
                 // no more classes
                 when_finished();
+                if (image_sprite_canvas) {
+                    window.open(image_sprite_canvas.toDataURL());
+                }
                 return;
             }
         } else {
@@ -271,6 +261,9 @@ const add_images = (when_finished, just_one_class, only_class_index, except_imag
         }
         if (image_index !== except_image_index) {
             add_image_to_training(class_images[image_index], class_index, next_image);
+            if (image_sprite_canvas) {
+                add_image_to_sprite_image(class_images[image_index], image_sprite_canvas);
+            }
         } else {
             next_image();
         }
@@ -293,7 +286,7 @@ const add_image_to_training = (image_url, class_index, continuation) => {
     load_image(image_url,
                (image) => {
                    logits = infer(image);
-                   if (tsv !== undefined) {
+                   if (tsv) {
                        tsv += save_logits_as_tsv(logits);
                    }
                    classifier.addExample(logits, class_index);
@@ -454,19 +447,21 @@ const draw_maintaining_aspect_ratio = (source,
     // if source doesn't have the same aspect ratio as the destination then
     // draw it centered without changing the aspect ratio
     if (width_height_ratio > 1) {
+        const height_before_adjustment = destination_height;
         destination_height /= width_height_ratio;
-        destination_y = (VIDEO_HEIGHT-destination_height)/2;
+        destination_y = (height_before_adjustment-destination_height)/2;
     } else if (width_height_ratio < 1) {
+        const width_before_adjustment = destination_width;
         destination_width *= width_height_ratio;
-        destination_x = (VIDEO_WIDTH-destination_width)/2;
+        destination_x = (width_before_adjustment-destination_width)/2;
     }
     context.drawImage(source, 
                       source_x,
                       source_y,
                       source_width,
                       source_height,
-                      destination_x,
-                      destination_y,
+                      destination_x+x_offset,
+                      destination_y+y_offset,
                       destination_width,
                       destination_height);
 };
@@ -522,6 +517,7 @@ const rectangle_selection = () => {
         start_y = event.clientY+document.scrollingElement.scrollTop;
         update_selection();
     });
+    // adding listeners to video makes more sense but when tried only mousemove worked reliably
     document.body.addEventListener('mousemove', (event) => {
         if (!rectangle.hidden) {
             end_x = event.clientX+document.scrollingElement.scrollLeft;
@@ -725,6 +721,49 @@ const save_logits_as_tsv = (logits) => {
         tsv += weight + "\t";
     });
     return tsv + "\n";
+};
+
+const sprite_size = 64; // not sure what's good
+const sprite_image_width = 1024;
+let sprite_image_x = 0;
+let sprite_image_y = 0;
+
+const create_sprite_image_canvas = () => {
+    const canvas = document.createElement('canvas');
+    let number_of_images = 0;
+    Object.values(images).forEach((class_images) => {
+        number_of_images += class_images.length;
+    });
+    const images_per_row = sprite_image_width/sprite_size;
+    const number_of_rows = Math.ceil(number_of_images/images_per_row);
+    canvas.width  = sprite_image_width;
+    canvas.height = number_of_rows*sprite_size;
+    return canvas;
+};
+
+add_image_to_sprite_image = (image_url, sprite_image_canvas) => {
+    let x = sprite_image_x; // close over the current value
+    let y = sprite_image_y;
+    let image = new Image();
+    image.src = image_url;
+    image.onload = () => {
+        draw_maintaining_aspect_ratio(image,
+                                      sprite_image_canvas,
+                                      sprite_size,
+                                      sprite_size,
+                                      0,
+                                      0,
+                                      image.width,
+                                      image.height,
+                                      x,
+                                      y);
+    };
+    sprite_image_x += sprite_size;
+    if (sprite_image_x >= sprite_image_width) {
+        // new row
+        sprite_image_x = 0;
+        sprite_image_y += sprite_size;
+    }
 };
 
 window.addEventListener('DOMContentLoaded',
