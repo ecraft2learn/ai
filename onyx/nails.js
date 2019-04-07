@@ -3,8 +3,8 @@
 
 const RUN_EXPERIMENTS = false;
 // if tsv is defined then collect all the logits of each image into a TSV string (tab-separated values)
-let tsv = undefined;
-const CREATE_SPRITE_IMAGE = true;
+let tsv = "";
+const CREATE_SPRITE_IMAGE = false;
 
 const TOPK = 20; // number of nearest neighbours for KNN
 const THRESHOLD = .65; // report statistics for for fraction that matches with less than this threshold
@@ -252,7 +252,8 @@ const add_images = (when_finished, just_one_class, only_class_index, except_imag
                 // no more classes
                 when_finished();
                 if (image_sprite_canvas) {
-                    window.open(image_sprite_canvas.toDataURL());
+                    // can then save it 
+                    document.write(image_sprite_canvas.toDataURL());
                 }
                 return;
             }
@@ -286,8 +287,17 @@ const add_image_to_training = (image_url, class_index, continuation) => {
     load_image(image_url,
                (image) => {
                    logits = infer(image);
-                   if (tsv) {
-                       tsv += save_logits_as_tsv(logits);
+                   if (tsv !== undefined) {
+                       const embedding = logits.dataSync();
+                       if (tsv === "") {
+                           // need to add column headers
+                           tsv += "URL\t";
+                           embedding.forEach((datum, index) => {
+                               tsv += index + "\t";
+                           });
+                           tsv += "\n";
+                       }
+                       tsv += save_logits_as_tsv(image_url, logits);
                    }
                    classifier.addExample(logits, class_index);
                    logits.dispose();
@@ -376,7 +386,7 @@ const initialise_page = async () => {
       throw e;
     }
     add_images(() => {
-        if (tsv !== undefined) {
+        if (tsv) {
             const text_area = document.createElement('textarea');
             text_area.value = tsv;
             document.body.appendChild(text_area);
@@ -715,12 +725,13 @@ const run_experiments = (threshold) => {
     next_experiment();
 };
 
-const save_logits_as_tsv = (logits) => {
-    let tsv = "";
-    logits.dataSync().forEach((weight) => {
-        tsv += weight + "\t";
+const save_logits_as_tsv = (image_url, logits) => {
+    const embedding = logits.dataSync();
+    let tsv_row = image_url + "\t";
+    embedding.forEach((weight) => {
+        tsv_row += weight + "\t";
     });
-    return tsv + "\n";
+    return tsv_row + "\n";
 };
 
 const sprite_size = 64; // not sure what's good
