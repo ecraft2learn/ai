@@ -283,9 +283,7 @@ const predict_class = (image, callback) => {
         const image_pixels = tf.browser.fromPixels(image);
         const logits = infer(image_pixels);
         classifier.predictClass(logits, TOPK).then((result) => {
-//             image_pixels.dispose();
-//             logits.dispose();
-            console.log(tf.memory());
+//             console.log(tf.memory());
             callback(result);          
         });
     });
@@ -472,18 +470,30 @@ const draw_maintaining_aspect_ratio = (source,
                       destination_width,
                       destination_height);
 };
-            
+           
 const rectangle_selection = () => {
-    let rectangle = document.getElementById('selection-rectangle');
-    let video_rectangle = document.getElementById('video').getBoundingClientRect();
+    const rectangle = document.getElementById('selection-rectangle');
+//     const video = document.getElementById('video');
+    const video_rectangle = video.getBoundingClientRect();
     let start_x = 0;
     let start_y = 0;
     let end_x = 0;
     let end_y = 0;
-    let video_left = video_rectangle.left;
-    let video_right = video_left+video_rectangle.width;
-    let video_top = video_rectangle.top;
+    let video_left   = video_rectangle.left; // perhaps need to add scrollingElement offsets when using these?
+    let video_right  = video_left+video_rectangle.width;
+    let video_top    = video_rectangle.top;
     let video_bottom = video_top+video_rectangle.height;
+    const outside_image_region = (event) => {
+        if (video_left > event.screenX ||
+            video_top > event.screenY ||
+            video_right < event.clientX ||
+            video_bottom < event.clientY) {
+           // reset rectangle
+           rectangle.style.width  = "0px";
+           rectangle.style.height = "0px";
+           return true; // mouse is outside of image region
+        }
+    };
     let update_selection = () => {
         if (!video.paused && !video.hidden) {
             return;
@@ -503,34 +513,38 @@ const rectangle_selection = () => {
         canvas.height = VIDEO_HEIGHT;
         return canvas;
     };
-    onmousedown = (e) => {
+    document.body.addEventListener('mousedown', (event) => {
+        if (outside_image_region(event)) {
+            return;
+        }
         rectangle.hidden = false;
-        start_x = e.clientX+document.scrollingElement.scrollLeft;
-        start_y = e.clientY+document.scrollingElement.scrollTop;
+        start_x = event.clientX+document.scrollingElement.scrollLeft;
+        start_y = event.clientY+document.scrollingElement.scrollTop;
         update_selection();
-    };
-    onmousemove = (e) => {
+    });
+    document.body.addEventListener('mousemove', (event) => {
         if (!rectangle.hidden) {
-            end_x = e.clientX+document.scrollingElement.scrollLeft;
-            end_y = e.clientY+document.scrollingElement.scrollTop;
+            end_x = event.clientX+document.scrollingElement.scrollLeft;
+            end_y = event.clientY+document.scrollingElement.scrollTop;
             update_selection();          
         }
-    };
-    onmouseup = async (e) => {
+    });
+    document.body.addEventListener('mouseup', (event) => {
         if (!video.paused && !video.hidden) {
             return;
         }
         const box = rectangle.getBoundingClientRect();
+        const box_left = document.scrollingElement.scrollLeft+box.left;
+        const box_top  = document.scrollingElement.scrollTop+box.top;
         if (box.width > 0 && box.height > 0) {
-//             console.log(box.width, box.height);
             let temporaray_canvas = create_canvas();
             const source = video.hidden ? document.getElementById('canvas') : video;
             draw_maintaining_aspect_ratio(source,
                                           temporaray_canvas,
                                           VIDEO_WIDTH,
                                           VIDEO_HEIGHT,
-                                          document.scrollingElement.scrollLeft+box.left-video_left,
-                                          document.scrollingElement.scrollTop+box.top-video_top,
+                                          box_left-video_left,
+                                          box_top-video_top,
                                           box.width,
                                           box.height,
                                           0,
@@ -538,13 +552,10 @@ const rectangle_selection = () => {
             predict_class(temporaray_canvas, (results) => {
                 display_message(confidences(results));
                 console.log(results);
-                // reset rectangle
-                rectangle.style.width  = "0px";
-                rectangle.style.height = "0px";
             });  
         }
         rectangle.hidden = true; 
-    };
+    });
 };
 
 const receive_drop = (event) => {
