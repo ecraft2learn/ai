@@ -505,14 +505,14 @@ const rectangle_selection = () => {
     };
     onmousedown = (e) => {
         rectangle.hidden = false;
-        start_x = e.clientX;
-        start_y = e.clientY;
+        start_x = e.clientX+document.scrollingElement.scrollLeft;
+        start_y = e.clientY+document.scrollingElement.scrollTop;
         update_selection();
     };
     onmousemove = (e) => {
         if (!rectangle.hidden) {
-            end_x = e.clientX;
-            end_y = e.clientY;
+            end_x = e.clientX+document.scrollingElement.scrollLeft;
+            end_y = e.clientY+document.scrollingElement.scrollTop;
             update_selection();          
         }
     };
@@ -529,8 +529,8 @@ const rectangle_selection = () => {
                                           temporaray_canvas,
                                           VIDEO_WIDTH,
                                           VIDEO_HEIGHT,
-                                          box.left-video_left,
-                                          box.top-video_top,
+                                          document.scrollingElement.scrollLeft+box.left-video_left,
+                                          document.scrollingElement.scrollTop+box.top-video_top,
                                           box.width,
                                           box.height,
                                           0,
