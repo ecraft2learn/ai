@@ -18,6 +18,9 @@
 // limitations under the License.
 
 const RUN_EXPERIMENTS = false;
+// if tsv is defined then collect all the logits of each image into a TSV string (tab-separated values)
+let tsv = undefined;
+const CREATE_SPRITE_IMAGE = true;
 
 const TOPK = 20; // number of nearest neighbours for KNN
 const THRESHOLD = .65; // only report matches less than this threshold
@@ -288,70 +291,13 @@ const predict_class = (image, callback) => {
     });
 };
 
-const run_experiments = (threshold) => {
-    let class_index = 0;
-    let image_index = -1; // incremented to 0 soon
-    let within_threshold_count = 0;
-    display_message("<b>Results with a threshold of " + threshold + 
-                    " and " + TOPK + " nearest neighbours.</b>");
-    const next_experiment = () => {
-        let class_images = images[class_names[class_index]];
-        if (image_index === class_images.length-1) {
-            // no more images for this class_index
-            display_message("<p>Number at or above threshold of " + threshold + 
-                            " = " + within_threshold_count + "/" + class_images.length + 
-                            " (" + Math.round(100*within_threshold_count/class_images.length) + "%)</p>",
-                            true);
-            within_threshold_count = 0;
-            image_index = 0;
-            class_index++;
-            if (class_index === class_names.length) {
-                return;
-            }
-        } else {
-            image_index++;
-        }
-        const maximum_confidence = (confidences) => {
-            return Math.max(...Object.values(confidences));
-        };
-        const test_image = () => {
-            const class_name = class_names[class_index];
-            load_image(images[class_name][image_index],
-                       async(image) => {
-                           predict_class(image, (result) => {
-                               let confidence = result.confidences[class_index];
-                               display_message("<img src='" + images[class_name][image_index] + "' width=100 height=100></img>", true);
-                               let message = class_name + "#" + image_index + " " + confidences(result);
-                               if (confidence <= .5) {
-                                   if (class_name !== 'other' || // confidence too low so highlight this message
-                                       (class_name === 'other' && maximum_confidence(result.confidences) > .5)) {  
-                                       message = "<span style='color:red'>" + message + "</span>";
-                                   }                                       
-                               }
-                               if (confidence >= threshold) {
-                                   within_threshold_count++;
-                               }
-                               display_message(message, true);
-                               next_experiment();                          
-                           });
-                       });
-        };
-        const clear_just_one_class = false;
-        if (clear_just_one_class) {
-            classifier.clearClass(class_index); // remove elements from this class
-        } else {
-            classifier.dispose();
-            classifier = knnClassifier.create();
-        }
-        add_images(test_image, clear_just_one_class, class_index, image_index); // put back all one
-    };
-    next_experiment();
-};
-
 const add_image_to_training = (image_url, class_index, continuation) => {
     load_image(image_url,
                (image) => {
                    logits = infer(image);
+                   if (tsv !== undefined) {
+                       tsv += save_logits_as_tsv(logits);
+                   }
                    classifier.addExample(logits, class_index);
                    logits.dispose();
                    continuation();     
@@ -439,6 +385,12 @@ const initialise_page = async () => {
       throw e;
     }
     add_images(() => {
+        if (tsv !== undefined) {
+            const text_area = document.createElement('textarea');
+            text_area.value = tsv;
+            document.body.appendChild(text_area);
+            return;
+        }
         document.getElementById('please-wait').hidden = true;
         document.getElementById('introduction').hidden = false;
         document.getElementById('main').hidden = false;
@@ -479,6 +431,46 @@ const confidences = (result) => {
         message += name + " = " + Math.round(100*result.confidences[index]) + "%; ";
     });
     return message;
+};
+
+const draw_maintaining_aspect_ratio = (source,
+                                       canvas,
+                                       destination_width,
+                                       destination_height,
+                                       source_x,
+                                       source_y,
+                                       source_width,
+                                       source_height,
+                                       x_offset,
+                                       y_offset) => {
+    if (typeof x_offset !== 'number') {
+        x_offset = 0;
+    }
+    if (typeof y_offset !== 'number') {
+        y_offset = 0;
+    }
+    const context = canvas.getContext('2d');
+    let destination_x = 0;
+    let destination_y = 0;
+    const width_height_ratio = source_width/source_height;
+    // if source doesn't have the same aspect ratio as the destination then
+    // draw it centered without changing the aspect ratio
+    if (width_height_ratio > 1) {
+        destination_height /= width_height_ratio;
+        destination_y = (VIDEO_HEIGHT-destination_height)/2;
+    } else if (width_height_ratio < 1) {
+        destination_width *= width_height_ratio;
+        destination_x = (VIDEO_WIDTH-destination_width)/2;
+    }
+    context.drawImage(source, 
+                      source_x,
+                      source_y,
+                      source_width,
+                      source_height,
+                      destination_x,
+                      destination_y,
+                      destination_width,
+                      destination_height);
 };
             
 const rectangle_selection = () => {
@@ -530,19 +522,19 @@ const rectangle_selection = () => {
         }
         const box = rectangle.getBoundingClientRect();
         if (box.width > 0 && box.height > 0) {
-            console.log(box.width, box.height);
+//             console.log(box.width, box.height);
             let temporaray_canvas = create_canvas();
             const source = video.hidden ? document.getElementById('canvas') : video;
-            const context = temporaray_canvas.getContext('2d');
-            context.drawImage(source, 
-                              box.left-video_left,
-                              box.top-video_top,
-                              box.width,
-                              box.height,
-                              0,
-                              0,
-                              VIDEO_WIDTH,
-                              VIDEO_HEIGHT);
+            draw_maintaining_aspect_ratio(source,
+                                          temporaray_canvas,
+                                          VIDEO_WIDTH,
+                                          VIDEO_HEIGHT,
+                                          box.left-video_left,
+                                          box.top-video_top,
+                                          box.width,
+                                          box.height,
+                                          0,
+                                          0);
             predict_class(temporaray_canvas, (results) => {
                 display_message(confidences(results));
                 console.log(results);
@@ -655,6 +647,74 @@ navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia 
 //             }
 //         }
 //     }
+
+const run_experiments = (threshold) => {
+    let class_index = 0;
+    let image_index = -1; // incremented to 0 soon
+    let within_threshold_count = 0;
+    display_message("<b>Results with a threshold of " + threshold + 
+                    " and " + TOPK + " nearest neighbours.</b>");
+    const next_experiment = () => {
+        let class_images = images[class_names[class_index]];
+        if (image_index === class_images.length-1) {
+            // no more images for this class_index
+            display_message("<p>Number at or above threshold of " + threshold + 
+                            " = " + within_threshold_count + "/" + class_images.length + 
+                            " (" + Math.round(100*within_threshold_count/class_images.length) + "%)</p>",
+                            true);
+            within_threshold_count = 0;
+            image_index = 0;
+            class_index++;
+            if (class_index === class_names.length) {
+                return;
+            }
+        } else {
+            image_index++;
+        }
+        const maximum_confidence = (confidences) => {
+            return Math.max(...Object.values(confidences));
+        };
+        const test_image = () => {
+            const class_name = class_names[class_index];
+            load_image(images[class_name][image_index],
+                       async(image) => {
+                           predict_class(image, (result) => {
+                               let confidence = result.confidences[class_index];
+                               display_message("<img src='" + images[class_name][image_index] + "' width=100 height=100></img>", true);
+                               let message = class_name + "#" + image_index + " " + confidences(result);
+                               if (confidence <= .5) {
+                                   if (class_name !== 'other' || // confidence too low so highlight this message
+                                       (class_name === 'other' && maximum_confidence(result.confidences) > .5)) {  
+                                       message = "<span style='color:red'>" + message + "</span>";
+                                   }                                       
+                               }
+                               if (confidence >= threshold) {
+                                   within_threshold_count++;
+                               }
+                               display_message(message, true);
+                               next_experiment();                          
+                           });
+                       });
+        };
+        const clear_just_one_class = false;
+        if (clear_just_one_class) {
+            classifier.clearClass(class_index); // remove elements from this class
+        } else {
+            classifier.dispose();
+            classifier = knnClassifier.create();
+        }
+        add_images(test_image, clear_just_one_class, class_index, image_index); // put back all one
+    };
+    next_experiment();
+};
+
+const save_logits_as_tsv = (logits) => {
+    let tsv = "";
+    logits.dataSync().forEach((weight) => {
+        tsv += weight + "\t";
+    });
+    return tsv + "\n";
+};
 
 window.addEventListener('DOMContentLoaded',
                         function (event) {
