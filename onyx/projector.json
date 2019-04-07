@@ -7,7 +7,8 @@
         1000
       ],
 "tensorPath":      "https://ecraft2learn.github.io/ai/onyx/nails.tsv",
-"imagePath": "https://ecraft2learn.github.io/ai/onyx/nails.png",
- "singleImageDim": [64, 64]
-}]
+"metadataPath": 
+{"imagePath": "https://ecraft2learn.github.io/ai/onyx/nails.png",
+ "singleImageDim": [64, 64]}
+  ]
 }
