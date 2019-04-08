@@ -3,8 +3,8 @@
 
 const RUN_EXPERIMENTS = false;
 // if tensor_tsv is defined then collect all the logits of each image into a TSV string (tab-separated values)
-let tensor_tsv = "";
-let metadata_tsv = "";
+let tensor_tsv; // = "";
+let metadata_tsv; // = "";
 const CREATE_SPRITE_IMAGE = false;
 
 const TOPK = 20; // number of nearest neighbours for KNN
