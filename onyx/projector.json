@@ -5,6 +5,8 @@
  "tensorPath": "https://ecraft2learn.github.io/ai/onyx/nails.tsv",
  "metadataPath": "https://ecraft2learn.github.io/ai/onyx/labels.tsv",
  "sprite": {"imagePath": "https://ecraft2learn.github.io/ai/onyx/nails.png",
-            "singleImageDim": [64, 64]}}
+            "singleImageDim": [64, 64]},
+ "bookmarksPath": "https://ecraft2learn.github.io/ai/onyx/bookmark 1.txt"
+}
  ]
 }
