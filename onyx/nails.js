@@ -4,7 +4,7 @@
 const RUN_EXPERIMENTS = false;
 // if tsv is defined then collect all the logits of each image into a TSV string (tab-separated values)
 let tsv = "";
-const CREATE_SPRITE_IMAGE = false;
+const CREATE_SPRITE_IMAGE = true;
 
 const TOPK = 20; // number of nearest neighbours for KNN
 const THRESHOLD = .65; // report statistics for for fraction that matches with less than this threshold
@@ -735,7 +735,7 @@ const save_logits_as_tsv = (image_url, logits) => {
 };
 
 const sprite_size = 64; // not sure what's good
-const sprite_image_width = 1024;
+let sprite_image_width;
 let sprite_image_x = 0;
 let sprite_image_y = 0;
 
@@ -745,10 +745,12 @@ const create_sprite_image_canvas = () => {
     Object.values(images).forEach((class_images) => {
         number_of_images += class_images.length;
     });
-    const images_per_row = sprite_image_width/sprite_size;
-    const number_of_rows = Math.ceil(number_of_images/images_per_row);
+    const images_per_row = Math.ceil(Math.sqrt(number_of_images));
+//     const images_per_row = sprite_image_width/sprite_size;
+//     const number_of_rows = Math.ceil(number_of_images/images_per_row);
+    sprite_image_width = images_per_row*sprite_size;
     canvas.width  = sprite_image_width;
-    canvas.height = number_of_rows*sprite_size;
+    canvas.height = sprite_image_width;
     return canvas;
 };
 
