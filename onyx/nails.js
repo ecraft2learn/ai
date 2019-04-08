@@ -2,9 +2,10 @@
 // copyright not yet determined but will be some sort of open source
 
 const RUN_EXPERIMENTS = false;
-// if tsv is defined then collect all the logits of each image into a TSV string (tab-separated values)
-let tsv = "";
-const CREATE_SPRITE_IMAGE = true;
+// if tensor_tsv is defined then collect all the logits of each image into a TSV string (tab-separated values)
+let tensor_tsv = "";
+let metadata_tsv = "";
+const CREATE_SPRITE_IMAGE = false;
 
 const TOPK = 20; // number of nearest neighbours for KNN
 const THRESHOLD = .65; // report statistics for for fraction that matches with less than this threshold
@@ -261,7 +262,7 @@ const add_images = (when_finished, just_one_class, only_class_index, except_imag
             image_index++;
         }
         if (image_index !== except_image_index) {
-            add_image_to_training(class_images[image_index], class_index, next_image);
+            add_image_to_training(class_images[image_index], class_index, image_index, next_image);
             if (image_sprite_canvas) {
                 add_image_to_sprite_image(class_images[image_index], image_sprite_canvas);
             }
@@ -283,21 +284,26 @@ const predict_class = (image, callback) => {
     });
 };
 
-const add_image_to_training = (image_url, class_index, continuation) => {
+const add_image_to_training = (image_url, class_index, image_index, continuation) => {
     load_image(image_url,
                (image) => {
                    logits = infer(image);
-                   if (tsv !== undefined) {
-                       const embedding = logits.dataSync();
-                       if (tsv === "") {
-                           // need to add column headers
-                           tsv += "URL\t";
-                           embedding.forEach((datum, index) => {
-                               tsv += index + "\t";
-                           });
-                           tsv += "\n";
-                       }
-                       tsv += save_logits_as_tsv(image_url, logits);
+//                    if (tensor_tsv === "") {
+//                         tensor_tsv = "Class#id\t";
+//                         logits.dataSync().forEach((datum, index) => {
+//                             tensor_tsv += index + "\t";
+//                         });
+//                         tensor_tsv += "\n";
+//                    }
+                   if (metadata_tsv === "") {
+                       metadata_tsv = "Class\tImage ID\n";
+                   }
+                   if (tensor_tsv !== undefined) {
+                       tensor_tsv += class_names[class_index] + "#" + image_index + "\t";
+                       tensor_tsv += save_logits_as_tsv(logits);                       
+                   }
+                   if (metadata_tsv !== undefined) {
+                       metadata_tsv += class_names[class_index] + "\t" + class_names[class_index] + "#" + image_index + "\n";
                    }
                    classifier.addExample(logits, class_index);
                    logits.dispose();
@@ -386,9 +392,12 @@ const initialise_page = async () => {
       throw e;
     }
     add_images(() => {
-        if (tsv) {
-            const text_area = document.createElement('textarea');
-            text_area.value = tsv;
+        if (tensor_tsv) {
+            let text_area = document.createElement('textarea');
+            text_area.value = tensor_tsv;
+            document.body.appendChild(text_area);
+            text_area = document.createElement('textarea');
+            text_area.value = metadata_tsv;
             document.body.appendChild(text_area);
             return;
         }
@@ -725,9 +734,9 @@ const run_experiments = (threshold) => {
     next_experiment();
 };
 
-const save_logits_as_tsv = (image_url, logits) => {
+const save_logits_as_tsv = (logits) => {
     const embedding = logits.dataSync();
-    let tsv_row = image_url + "\t";
+    let tsv_row = "";
     embedding.forEach((weight) => {
         tsv_row += weight + "\t";
     });

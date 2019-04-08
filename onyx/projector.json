@@ -1,14 +1,10 @@
 {
 "embeddings": [
-{
-      "tensorName": "Nails",
-      "tensorShape": [
-        138,
-        1000
-      ],
-"tensorPath":      "https://ecraft2learn.github.io/ai/onyx/nails.tsv",
-"metadataPath": 
-{"imagePath": "https://ecraft2learn.github.io/ai/onyx/nails.png",
- "singleImageDim": [64, 64]}}
-  ]
+{"tensorName": "Nails",
+ "tensorShape": [138, 1000],
+ "tensorPath": "https://ecraft2learn.github.io/ai/onyx/nails.tsv",
+ "metadataPath": "https://ecraft2learn.github.io/ai/onyx/labels.tsv",
+ "image": {"imagePath": "https://ecraft2learn.github.io/ai/onyx/nails.png",
+           "singleImageDim": [64, 64]}}
+ ]
 }
