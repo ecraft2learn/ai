@@ -143,8 +143,6 @@ const images = {
 "images/other/Fingernail unhealthy Image_17.png",
 "images/other/Fingernail unhealthy Image_18.png",
 "images/other/Fingernail unhealthy Image_19.png",
-"images/other/Fingernail unhealthy Image_24.png",
-"images/other/Fingernail unhealthy Image_25.png",
 "images/other/Fingernail unhealthy Image_32.jpg",
 "images/other/Fingernail unhealthy Image_35.jpg",
 "images/other/Fingernail unhealthy Image_50.png",
@@ -366,7 +364,7 @@ const infer = (image) => {
 
 const load_mobilenet = async function () {
     classifier = knnClassifier.create();
-    mobilenet_model = await mobilenet.load(); 
+    mobilenet_model = await mobilenet.load(2);  // version 2
 };
 
 /**
@@ -426,7 +424,7 @@ const initialise_page = async () => {
             run_experiments(THRESHOLD); // report any matches with confidence less than this confidence
         }
         if (SAVE_TENSORS) {
-            save_tensors(lassifier.getClassifierDataset());
+            save_tensors(classifier.getClassifierDataset());
         }
     };
     if (window.saved_tensors) {
