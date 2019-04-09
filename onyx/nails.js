@@ -279,7 +279,6 @@ const predict_class = (image, callback) => {
         const image_pixels = tf.browser.fromPixels(image);
         const logits = infer(image_pixels);
         classifier.predictClass(logits, TOPK).then((result) => {
-//             console.log(tf.memory());
             callback(result);          
         });
     });
@@ -508,8 +507,8 @@ const rectangle_selection = () => {
     let video_top    = video_rectangle.top;
     let video_bottom = video_top+video_rectangle.height;
     const outside_image_region = (event) => {
-        if (video_left > event.screenX ||
-            video_top > event.screenY ||
+        if (video_left > event.clientX ||
+            video_top > event.clientY ||
             video_right < event.clientX ||
             video_bottom < event.clientY) {
            // reset rectangle
