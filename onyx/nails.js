@@ -218,17 +218,15 @@ async function setupCamera() {
           }
       });
   return new Promise((resolve) => {
-    video.onloadedmetadata = () => {
-      resolve(video);
-    };
+      video.onloadedmetadata = () => {
+          resolve(video);
+      };
   });
 }
 
 const load_image = function (image_url, callback) {
     let image = new Image();
     image.src = image_url;
-//     image.width  = VIDEO_WIDTH;
-//     image.height = VIDEO_HEIGHT;
     image.onload = () => {
         callback(image);
     };
@@ -286,13 +284,6 @@ const add_image_to_training = (image_url, class_index, image_index, continuation
     load_image(image_url,
                (image) => {
                    logits = infer(image);
-//                    if (tensor_tsv === "") {
-//                         tensor_tsv = "Class#id\t";
-//                         logits.dataSync().forEach((datum, index) => {
-//                             tensor_tsv += index + "\t";
-//                         });
-//                         tensor_tsv += "\n";
-//                    }
                    if (metadata_tsv === "") {
                        metadata_tsv = "Class\tImage ID\n";
                    }
@@ -316,51 +307,6 @@ const infer = (image) => {
     }
     return mobilenet_model.infer(image, 'conv_preds');
 };
-
-// async function animate() {
-  // Get image data from video element
-//   const image = tf.browser.fromPixels(video);
-//   let logits;
-
-//   // Train class if one of the buttons is held down
-//   if (training != -1) {
-//     logits = infer(image);
-//     // Add current image to classifier
-//     classifier.addExample(logits, training);
-//     info_texts[training].innerHTML = 
-//         `&nbsp;&nbsp;&nbsp;${classifier.getClassExampleCount()[training]} examples`;
-//   }
-      
-//    // If any examples have been added, run predict
-//    const exampleCount = classifier.getClassExampleCount();
-//    if (exampleCount[0] > 0 && training === -1 && mobilenet_model) { 
-//         // only predict if not also training (important for slow computers (and Android phones))
-//         // checking that at least the first class has some examples is sufficent
-//         // don't do this if haven't yet loaded mobilenet_model
-//         // note this shouldn't be running if stopped because returned to Snap!
-//         logits = infer(image);
-//         let result = await classifier.predictClass(logits, TOPK);
-//         for (let i=0; i < class_names.length; i++) {
-//             // Make the predicted class bold
-//             if (result.classIndex == i){
-//               info_texts[i].style.fontWeight = 'bold';
-//             } else {
-//               info_texts[i].style.fontWeight = 'normal';
-//             }
-//             // Update info text
-//             if (exampleCount[i] > 0){
-//               info_texts[i].innerHTML = 
-//                 `&nbsp;&nbsp;&nbsp;${exampleCount[i]} <span class="notranslate" translate=no>examples</span> - ${Math.round(result.confidences[i]*100)}%`
-//             }
-//         }
-//    }
-//    image.dispose();
-//    if (logits != null) {
-//        logits.dispose();
-//     }
-
-//   requestAnimationFrame(animate);
-// }
 
 const load_mobilenet = async function () {
     classifier = knnClassifier.create();
@@ -619,66 +565,6 @@ const receive_drop = (event) => {
 };
 
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-                 
-//     if (typeof event.data.predict !== 'undefined') {
-//         let example_count = classifier.getClassExampleCount();
-//         if (!example_count[0]) { // includes undefined as well as 0
-//             event.source.postMessage({error: "Cannot make any predictions before training. " + 
-//                                              "Try this again after doing some training."},
-//                                       "*");
-//             return;
-//         }
-//         let image_url = event.data.predict;
-//         load_image(image_url,
-//                    function (image) {
-//                        let canvas = create_canvas();
-//                        copy_video_to_canvas(image, canvas);
-//                        let image_as_tensor = tf.browser.fromPixels(canvas);
-//                        logits = infer(image_as_tensor);
-//                        classifier.predictClass(logits, TOPK).then(
-//                            (results) => {
-//                                event.source.postMessage({confidences: Object.values(results.confidences)}, "*");
-//                                image_as_tensor.dispose();
-//                                logits.dispose();
-//                            },
-//                            (error) => {
-//                                event.source.postMessage({error: error.message}, "*");
-//                            });
-//         });
-//     } else if (typeof event.data.train !== 'undefined') {
-//         let image_url = event.data.train;
-//         let label_index = class_names.indexOf(event.data.label);
-//         let response;
-//         if (label_index < 0) {
-//             response = "Error: " + event.data.label + " is not one of " + class_names;
-//             event.source.postMessage({confirmation: response}, "*");
-//         } else {
-//             add_image_to_training(image_url, label_index, event.source);
-//          }
-//     } else if (typeof event.data.get_image_features !== 'undefined') {
-//         image_url_to_features_vector(event.data.get_image_features.URL, 
-//                                      event.data.get_image_features.time_stamp,
-//                                      event.source); 
-//     } else if (typeof event.data.training_data !== 'undefined') {
-//         let data_set = string_to_data_set('camera', event.data.training_data);
-//         if (data_set) {
-//             if (data_set.labels) {
-//                 if (class_names) {
-//                     set_class_names(data_set.labels);
-//                 } else {
-//                     initialise_page(data_set.labels, event.source);
-//                 }
-//             }
-//             if (data_set.html) {
-//                 let introduction = decodeURIComponent(data_set.html);
-//                 update_introduction(introduction);
-//             }
-//             if (load_data_set('camera', data_set, classifier.setClassifierDataset.bind(classifier))) {
-//                 // pass back class_names since Snap! doesn't know them
-//                 event.source.postMessage({data_set_loaded: class_names}, "*");
-//             }
-//         }
-//     }
 
 const run_experiments = (threshold) => {
     let class_index = 0;
