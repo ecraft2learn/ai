@@ -8,10 +8,16 @@ load_local_or_remote_scripts(
      "../js/hyperparameters.min.js",
      "../js/tfjs-vis.js",
      "../js/dat.gui.js"],
-    ["https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest",
-     "https://cdn.jsdelivr.net/npm/hyperparameters@latest/dist/hyperparameters.min.js",
-     "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis",
-     "https://cdn.jsdelivr.net/npm/dat.gui"]);
+     // using the same locally cached version so nothing breaks when released versions are updated
+    ["../js/tfjs.js",
+     "../js/hyperparameters.min.js",
+     "../js/tfjs-vis.js",
+     "../js/dat.gui.js"
+//      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest",
+//      "https://cdn.jsdelivr.net/npm/hyperparameters@latest/dist/hyperparameters.min.js",
+//      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis",
+//      "https://cdn.jsdelivr.net/npm/dat.gui"
+     ]);
 </script>
 <script src="../tensorflow/tensorflow.js"></script>
 <link href="../css/ai-teacher-guide.css" rel="stylesheet">

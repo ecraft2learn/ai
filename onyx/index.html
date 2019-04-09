@@ -16,9 +16,13 @@ load_local_or_remote_scripts(
      "nails.js",
      "saved_tensors.js",
      "../js/translate.js"],
-    ["https://cdn.jsdelivr.net/npm/@tensorflow/tfjs",
-     "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet",
-     "https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier",
+     // using the same locally cached version so nothing breaks when released versions are updated
+    ["../js/tfjs.js",
+     "../js/mobilenet.js",
+     "../js/knn-classifier.js",
+//      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs",
+//      "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet",
+//      "https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier",
      "nails.js",
      "saved_tensors.js",
      "../js/translate.js"]);

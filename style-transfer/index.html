@@ -8,7 +8,9 @@
 load_local_or_remote_scripts(
     ["ml5.min.js",
      "style-transfer.js"],
-    ["https://unpkg.com/ml5@0.1.1/dist/ml5.min.js",
+    // using the same locally cached version so nothing breaks when released versions are updated
+    ["ml5.min.js",
+    // "https://unpkg.com/ml5@0.1.1/dist/ml5.min.js",
      "style-transfer.js"]);
 </script>
 </head>
