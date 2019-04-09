@@ -6,6 +6,7 @@ const RUN_EXPERIMENTS = false;
 let tensor_tsv; // = "";
 let metadata_tsv; // = "";
 const CREATE_SPRITE_IMAGE = false;
+const SAVE_TENSORS = false;
 
 const TOPK = 20; // number of nearest neighbours for KNN
 const THRESHOLD = .65; // report statistics for for fraction that matches with less than this threshold
@@ -391,7 +392,7 @@ const initialise_page = async () => {
       info.style.display = 'block';
       throw e;
     }
-    add_images(() => {
+    const start_up = () => {
         if (tensor_tsv) {
             let text_area = document.createElement('textarea');
             text_area.value = tensor_tsv;
@@ -425,7 +426,16 @@ const initialise_page = async () => {
         if (RUN_EXPERIMENTS) {
             run_experiments(THRESHOLD); // report any matches with confidence less than this confidence
         }
-    });
+        if (SAVE_TENSORS) {
+            save_tensors(lassifier.getClassifierDataset());
+        }
+    };
+    if (window.saved_tensors) {
+        load_data_set(window.saved_tensors);
+        start_up();
+    } else {
+        add_images(start_up);
+    }
 };
 
 const display_message = (message, append) => {
@@ -785,6 +795,65 @@ add_image_to_sprite_image = (image_url, sprite_image_canvas) => {
         // new row
         sprite_image_x = 0;
         sprite_image_y += sprite_size;
+    }
+};
+
+const save_tensors = (tensors) => {
+        // based upon https://stackoverflow.com/questions/19721439/download-json-object-as-a-file-from-browser
+        // tried using JSON.stringify but arrays became "0":xxx, "1":xxx, ...
+        // also needed to move tensors from GPU using dataSync
+        let json = '{"nails_tensors":{';
+        let keys = Object.keys(tensors);
+        const jsonify_tensor = (tensor) => {
+            let flat_array = tensor.dataSync();
+            let shape = tensor.shape;
+            json += '{"shape":' + JSON.stringify(shape) + ',' +
+                     '"data":' + JSON.stringify(Object.values(flat_array)) + '}';
+        };
+        keys.forEach(function (key, index) {
+            json += '"' + key + '":[';
+            let tensor_or_array_of_tensors = tensors[key];
+            if (tensor_or_array_of_tensors instanceof Array) {
+                json += '[';
+                tensor_or_array_of_tensors.forEach((tensor, index) => {
+                    jsonify_tensor(tensor);
+                    if (index < tensor_or_array_of_tensors.length-1) { // except for last one
+                        json += ',';
+                    }
+                });
+                json += ']';
+            } else {
+                jsonify_tensor(tensor_or_array_of_tensors);
+            }
+            if (index === keys.length-1) {
+                json += ']'; // no comma on the last one
+            } else {
+                json += '],';
+            }
+        });
+        json += '},';
+        json += '"labels":' + JSON.stringify(class_names);
+        json += '}';
+        let text_area = document.createElement('textarea');
+        text_area.value = json;
+        document.body.appendChild(text_area);
+};
+
+const load_data_set = (data_set) => {
+    const restore_tensor = (shape_and_data) => tf.tensor(shape_and_data.data, shape_and_data.shape);
+    try {
+        let tensor_data_set = {};
+        Object.entries(data_set['nails_tensors']).forEach(function (entry) {
+            if (entry[1][0] instanceof Array) {
+                tensor_data_set[entry[0]] = entry[1][0].map(restore_tensor);
+            } else {
+                tensor_data_set[entry[0]] = restore_tensor(entry[1][0]);
+            }
+        });
+        classifier.setClassifierDataset(tensor_data_set);
+        return true;
+    } catch (error) {
+        alert("Error loading saved training: " + error);
     }
 };
 
