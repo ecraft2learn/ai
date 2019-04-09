@@ -278,7 +278,7 @@ window.ecraft2learn =
         }
         return x;       
     };
-    let add_photo_to_canvas = function (image_or_video, new_width, new_height) {
+    let add_photo_to_canvas = function (image_or_video, new_width, new_height, mirrored) {
         // Capture a photo by fetching the current contents of the video
         // and drawing it into a canvas, then converting that to a PNG
         // format data URL. By drawing it on an offscreen canvas and then
@@ -302,6 +302,10 @@ window.ecraft2learn =
         canvas.setAttribute('width',  width);
         canvas.setAttribute('height', height);
         const draw_on_canvas = () => {
+            if (mirrored) {
+                canvas.getContext('2d').translate(width, 0);
+                canvas.getContext('2d').scale(-1, 1);
+            }
             //         drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
             if (new_width && new_height) {
                 canvas.getContext('2d').drawImage(image_or_video, 0, 0, image_or_video.width, image_or_video.height, 0, 0, new_width, new_height);
@@ -2171,11 +2175,12 @@ xhr.send();
       add_costume(create_costume(canvas), sprite);
   },
 
-  costume_from_camera: function () {
+  costume_from_camera: function (mirrored) {
       // scale the canvas by two since Snap! will divide by two due to its support for retinal displays
       let canvas = add_photo_to_canvas(ecraft2learn.video,
                                        2*ecraft2learn.video.width,
-                                       2*ecraft2learn.video.height);
+                                       2*ecraft2learn.video.height,
+                                       mirrored);
       return create_costume(canvas);
   },
 
@@ -3107,4 +3112,91 @@ ecraft2learn.language_defaults =
   arabic:      "ar-SA",
   chinese:     "zh-CN"
 };
+
+// this.videoFlipped = true;
+CamSnapshotDialogMorph.prototype.buildContents = function (myself, flipped) {
+    let stage = myself.parentThatIsA(StageMorph);
+
+	function noCameraSupport() {
+//         myself.disable();
+        ecraft2learn.inform(
+            'Camera not supported',
+            CamSnapshotDialogMorph.prototype.notSupportedMessage
+        );
+        if (myself.videoElement) {
+        	myself.videoElement.remove();
+        }
+//         myself.cancel();
+	}
+
+    myself.videoElement = document.createElement('video');
+    myself.videoElement.hidden = true;
+    myself.videoElement.width = stage.dimensions.x;
+    myself.videoElement.height = stage.dimensions.y;
+
+    document.body.appendChild(myself.videoElement);
+
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function (stream) {
+                myself.videoElement.srcObject = stream;
+                myself.videoElement.play().catch(noCameraSupport);
+                myself.videoElement.stream = stream;
+            })
+            .catch(noCameraSupport);
+    }
+
+    if (!myself.videoView)  {
+        myself.videoView = new Morph(); // a morph where we'll copy the video contents
+    }
+
+    myself.videoView.setExtent(stage.dimensions);
+    myself.videoView.image = newCanvas(stage.dimensions);
+
+    myself.videoView.drawOn = function (aCanvas) {
+        var context = aCanvas.getContext('2d'),
+            videoWidth = myself.videoElement.videoWidth,
+            videoHeight = myself.videoElement.videoHeight,
+            w = stage.dimensions.x,
+            h = stage.dimensions.y,
+            clippingWidth, clippingHeight;
+
+        if (!videoWidth) { return; }
+
+        context.save();
+//         if (myself.sprite.videoFlipped) {
+            // Flip the image so it looks like a mirror
+            context.translate(w, 0);
+            context.scale(-1, 1);
+//         }
+        if (videoWidth / w > videoHeight / h) {
+            // preserve height, crop width
+            clippingWidth = w * (videoHeight / h);
+            clippingHeight = videoHeight;
+        } else {
+            // preserve width, crop height
+            clippingWidth = videoWidth;
+            clippingHeight = h * (videoWidth / w);
+        }
+
+        context.drawImage(
+            myself.videoElement,
+            0,
+            0,
+            clippingWidth,
+            clippingHeight,
+            0, // myself.left() * (flipped ? -1 : 1),
+            0, // myself.top(),
+            w,
+            h
+            );
+
+        context.restore();
+    };
+
+//     this.videoView.step = function () {
+//         myself.changed();
+//     };
+};
+
 
