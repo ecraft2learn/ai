@@ -573,7 +573,6 @@ const rectangle_selection = () => {
                                           0);
             predict_class(temporaray_canvas, (results) => {
                 display_message(confidences(results));
-                console.log(results);
             });  
         }
         rectangle.hidden = true; 
