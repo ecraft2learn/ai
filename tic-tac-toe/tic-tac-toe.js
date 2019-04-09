@@ -45,11 +45,11 @@ const create_parameters_interface = function () {
   settings_element.style.display = "block";
   parameters_gui.domElement.style.padding = "12px";
   let input_data = parameters_gui.addFolder("Input data");
-  input_data.add(gui_state["Input data"], 'Random player versus random player games').min(1).max(10000);
+  input_data.add(gui_state["Input data"], 'Random player versus random player games');
   let model = tensorflow.create_model_parameters(parameters_gui);
   let training = tensorflow.create_training_parameters(parameters_gui);
   evaluation = parameters_gui.addFolder("Evaluation");
-  evaluation.add(gui_state["Evaluation"], "Number of games to play").min(1).max(100000);
+  evaluation.add(gui_state["Evaluation"], "Number of games to play");
   evaluation.add(gui_state["Evaluation"], "Player 1", ['Random player']);
   evaluation.add(gui_state["Evaluation"], "Player 2", ['Random player']); 
   evaluation.add(gui_state["Evaluation"],
