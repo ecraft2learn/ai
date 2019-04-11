@@ -337,12 +337,8 @@ const initialise_page = async () => {
     }
     const start_up = () => {
         if (tensor_tsv) {
-            let text_area = document.createElement('textarea');
-            text_area.value = tensor_tsv;
-            document.body.appendChild(text_area);
-            text_area = document.createElement('textarea');
-            text_area.value = metadata_tsv;
-            document.body.appendChild(text_area);
+            add_textarea(tensor_tsv);
+            add_textarea(metadata_tsv);
             return;
         }
         document.getElementById('please-wait').hidden = true;
@@ -567,6 +563,12 @@ const receive_drop = (event) => {
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
 const run_experiments = (threshold) => {
+    const csv = {"normal": "URL,ID,Normal,Fungal,Other\n", // headers for normal images
+                 "fungal infection": "URL,ID,Fungal,Normal,Other\n",
+                 "other":  "URL,ID,Other,Normal,Fungal\n"};
+    const csv_class_names = {"normal": ["normal", "fungal infection", "other"],
+                             "fungal infection": ["fungal infection", "normal", "other"],
+                             "other": ["other", "normal", "fungal infection"]};       
     let class_index = 0;
     let image_index = -1; // incremented to 0 soon
     let within_threshold_count = 0;
@@ -580,6 +582,7 @@ const run_experiments = (threshold) => {
                             " = " + within_threshold_count + "/" + class_images.length + 
                             " (" + Math.round(100*within_threshold_count/class_images.length) + "%)</p>",
                             true);
+            add_textarea(csv[class_names[class_index]]);
             within_threshold_count = 0;
             image_index = 0;
             class_index++;
@@ -610,6 +613,17 @@ const run_experiments = (threshold) => {
                                    within_threshold_count++;
                                }
                                display_message(message, true);
+                               csv[class_name] += "https://ecraft2learn.github.io/ai/onyx/" + images[class_name][image_index] + "," +
+                                                  image_index + ",";
+                               csv_class_names[class_name].forEach((name, index) => {
+                                   // this re-orders the results
+                                   const class_index = class_names.indexOf(name);
+                                   csv[class_name] += Math.round(100*result.confidences[class_index]);
+                                   if (index < class_names.length-1) {
+                                       csv[class_name] += ",";
+                                   }
+                               });
+                               csv[class_name] += "\n";
                                next_experiment();                          
                            });
                        });
@@ -680,6 +694,12 @@ add_image_to_sprite_image = (image_url, sprite_image_canvas) => {
     }
 };
 
+const add_textarea = (text) => {
+    const text_area = document.createElement('textarea');
+    text_area.value = text;
+    document.body.appendChild(text_area);
+};
+
 const save_tensors = (tensors) => {
         // based upon https://stackoverflow.com/questions/19721439/download-json-object-as-a-file-from-browser
         // tried using JSON.stringify but arrays became "0":xxx, "1":xxx, ...
@@ -716,9 +736,7 @@ const save_tensors = (tensors) => {
         json += '},';
         json += '"labels":' + JSON.stringify(class_names);
         json += '}';
-        let text_area = document.createElement('textarea');
-        text_area.value = json;
-        document.body.appendChild(text_area);
+        add_textarea(json);
 };
 
 const load_data_set = (data_set) => {
