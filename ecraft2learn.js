@@ -2198,7 +2198,7 @@ xhr.send();
   costume_from_camera_version_2: function (mirrored, callback) {
       if (!ecraft2learn.video) {
           // setup must be asynchronous since it may involve asking permission to use the camera
-          ecraft2learn.setup_camera(undefined, undefined, () => {
+          ecraft2learn.setup_camera(640, 480, () => {
               ecraft2learn.costume_from_camera_version_2(mirrored, callback);
           });
           return;
