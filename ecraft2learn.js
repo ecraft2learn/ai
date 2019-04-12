@@ -2120,14 +2120,14 @@ xhr.send();
       if (width) {
           width  = +width; // convert to number if string
       } else if (stage) {
-          width = stage.width();
+          width = Math.max(640, stage.width());
       } else {
           width = 640;
       }
       if (height) {
           height = +height;
       } else if (stage) {
-          height = stage.height();
+          height = Math.max(stage.height(), 480);
       } else {
           height = 480;
       }
@@ -2198,7 +2198,7 @@ xhr.send();
   costume_from_camera_version_2: function (mirrored, callback) {
       if (!ecraft2learn.video) {
           // setup must be asynchronous since it may involve asking permission to use the camera
-          ecraft2learn.setup_camera(640, 480, () => {
+          ecraft2learn.setup_camera(undefined, undefined, () => {
               ecraft2learn.costume_from_camera_version_2(mirrored, callback);
           });
           return;
