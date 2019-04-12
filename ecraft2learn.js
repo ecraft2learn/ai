@@ -2105,7 +2105,7 @@ xhr.send();
       return false;
   },
 
-  setup_camera: function (width, height, after_setup_callback) {
+  setup_camera: async (width, height, after_setup_callback) => {
       // sets up the camera for taking photos and sending them to an AI cloud service for recognition
       // causes some methods to be defined in this scope
       // supported service providers are currently 'Google', 'Microsoft', and IBM 'Watson' (or 'IBM Watson')
@@ -2135,12 +2135,14 @@ xhr.send();
       let video  = ecraft2learn.video  || document.createElement('video');
 //       let canvas = document.createElement('canvas');
       let callback = function(stream) {
+          video.addEventListener('loadedmetadata', (event) => {
+              invoke_callback(after_setup_callback);
+          });
           video.srcObject = stream;
           video.width  = width;
           video.height = height;
           video.play();
-          ecraft2learn.video = video;
-          invoke_callback(after_setup_callback);
+          ecraft2learn.video = video;   
       };
       const error_callback = function(error) {
           inform("Camera access error", error.message);
@@ -2154,16 +2156,19 @@ xhr.send();
 //       canvas.height = height;
       document.body.appendChild(video);
 //       document.body.appendChild(canvas);
-      if (navigator.mediaDevices) {
-          navigator.mediaDevices.getUserMedia(constraints)
-              .then(callback)
-              .catch(error_callback);
-      } else {
-          console.log("test this");
-          navigator.getMedia = (navigator.getUserMedia ||
-                                navigator.webkitGetUserMedia ||
-                                navigator.msGetUserMedia);
-          navigator.getMedia(constraints, callback, error_callback);
+      try {
+          if (navigator.mediaDevices) {
+              let stream = await navigator.mediaDevices.getUserMedia(constraints);
+              callback(stream);
+          } else {
+              // never occurs in Chrome at least
+              navigator.getMedia = (navigator.getUserMedia ||
+                                    navigator.webkitGetUserMedia ||
+                                    navigator.msGetUserMedia);
+              navigator.getMedia(constraints, callback, error_callback);
+          }
+      } catch (error) {
+          error_callback(error);
       }
       video.setAttribute('autoplay', '');
       video.setAttribute('playsinline', '');
@@ -2176,12 +2181,34 @@ xhr.send();
   },
 
   costume_from_camera: function (mirrored) {
+      // newer version of blocks will use costume_from_camera_version_2 instead
       // scale the canvas by two since Snap! will divide by two due to its support for retinal displays
+      if (!ecraft2learn.video) {
+          inform("Camera not setup",
+                 "Cannot use the camera without first using the 'Camera setup' block.");
+          return;
+      }
       let canvas = add_photo_to_canvas(ecraft2learn.video,
                                        2*ecraft2learn.video.width,
                                        2*ecraft2learn.video.height,
                                        mirrored);
       return create_costume(canvas);
+  },
+
+  costume_from_camera_version_2: function (mirrored, callback) {
+      if (!ecraft2learn.video) {
+          // setup must be asynchronous since it may involve asking permission to use the camera
+          ecraft2learn.setup_camera(undefined, undefined, () => {
+              ecraft2learn.costume_from_camera_version_2(mirrored, callback);
+          });
+          return;
+      }
+      // scale the canvas by two since Snap! will divide by two due to its support for retinal displays
+      let canvas = add_photo_to_canvas(ecraft2learn.video,
+                                       2*ecraft2learn.video.width,
+                                       2*ecraft2learn.video.height,
+                                       mirrored);
+      invoke_callback(callback, create_costume(canvas));
   },
 
   update_costume_from_video: function (costume_or_costume_number, sprite) {
