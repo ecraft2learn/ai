@@ -291,12 +291,12 @@ window.ecraft2learn =
         if (new_width) {
             width = new_width;
         } else {
-            width = image_or_video.width;
+            width = image_or_video.videoWidth || image_or_video.width;
         }
         if (new_height) {
             height = new_height;
         } else {
-            height = image_or_video.height;
+            height = image_or_video.videoHeight || image_or_video.height;
         }
         let canvas = document.createElement('canvas');
         canvas.setAttribute('width',  width);
@@ -308,7 +308,20 @@ window.ecraft2learn =
             }
             //         drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
             if (new_width && new_height) {
-                canvas.getContext('2d').drawImage(image_or_video, 0, 0, image_or_video.width, image_or_video.height, 0, 0, new_width, new_height);
+                let source_width = image_or_video.videoWidth || image_or_video.width;
+                let source_height = image_or_video.videoHeight || image_or_video.height;
+                if (source_width/source_height > new_width/new_height) {
+                    // too wide for the destination
+                    source_width *= (new_width/new_height)/(source_width/source_height);
+                } else if (source_width/source_height < new_width/new_height) {
+                    // too tall for the destination
+                    source_height *= (source_width/source_height)/(new_width/new_height);
+                }
+                canvas.getContext('2d').drawImage(image_or_video, 0, 0, 
+                                                  source_width, 
+                                                  source_height,
+                                                  0, 0,
+                                                  new_width, new_height);
             } else {
                 canvas.getContext('2d').drawImage(image_or_video, 0, 0);             
             }
@@ -2095,7 +2108,7 @@ xhr.send();
   },
 
   set_camera_dimensions: function (width, height) {
-      // is this still needed?
+      // this is deprecated but kept for backwards compatibility
       if (ecraft2learn.video && width && height) {
           let stage = world.children[0].stage;
           ecraft2learn.video.width  = Math.min(+width, stage.width());
@@ -2111,7 +2124,9 @@ xhr.send();
       // supported service providers are currently 'Google', 'Microsoft', and IBM 'Watson' (or 'IBM Watson')
       // after_setup_callback is optional and called once setup completes
       if (ecraft2learn.video &&
-           (width === 0 || (ecraft2learn.video.width === +width && ecraft2learn.video.height === +height))) {
+           (width === 0 || 
+            (ecraft2learn.video.videoWidth === +width && 
+             ecraft2learn.video.videoHeight === +height))) {
           // already initialised and not changing the dimensions
           invoke_callback(after_setup_callback);
           return;
@@ -2139,8 +2154,8 @@ xhr.send();
               invoke_callback(after_setup_callback);
           });
           video.srcObject = stream;
-          video.width  = width;
-          video.height = height;
+//           video.width  = width;
+//           video.height = height;
           video.play();
           ecraft2learn.video = video;   
       };
@@ -2204,9 +2219,10 @@ xhr.send();
           return;
       }
       // scale the canvas by two since Snap! will divide by two due to its support for retinal displays
+      let stage = world.children[0].stage;
       let canvas = add_photo_to_canvas(ecraft2learn.video,
-                                       2*ecraft2learn.video.width,
-                                       2*ecraft2learn.video.height,
+                                       2*stage.width(),
+                                       2*stage.height(),
                                        mirrored);
       invoke_callback(callback, create_costume(canvas));
   },
@@ -2221,7 +2237,7 @@ xhr.send();
       }
       let canvas = costume.contents;
       let context = canvas.getContext('2d');
-      context.drawImage(ecraft2learn.video, 0, 0, ecraft2learn.video.width, ecraft2learn.video.height);
+      context.drawImage(ecraft2learn.video, 0, 0, ecraft2learn.video.videoWidth, ecraft2learn.video.videoHeight);
       sprite.drawNew();
   },
 
@@ -2271,8 +2287,8 @@ xhr.send();
     } else {
         // scaled to address Snap!'s scaling due to supporting retinal displays
         let canvas = add_photo_to_canvas(ecraft2learn.video,
-                                         2*ecraft2learn.video.width,
-                                         2*ecraft2learn.video.height);
+                                         2*ecraft2learn.video.videoWidth,
+                                         2*ecraft2learn.video.videoHeight);
         costume = create_costume(canvas);
         canvas_for_analysis = canvas;
     }
