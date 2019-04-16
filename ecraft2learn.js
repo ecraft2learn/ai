@@ -2146,16 +2146,12 @@ xhr.send();
       } else {
           height = 480;
       }
-      // if video and canvas already exist this may change its dimensions
       let video  = ecraft2learn.video  || document.createElement('video');
-//       let canvas = document.createElement('canvas');
       let callback = function(stream) {
           video.addEventListener('loadedmetadata', (event) => {
               invoke_callback(after_setup_callback);
           });
           video.srcObject = stream;
-//           video.width  = width;
-//           video.height = height;
           video.play();
           ecraft2learn.video = video;   
       };

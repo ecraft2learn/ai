@@ -1374,6 +1374,7 @@ const receive_message =
                 }
                 tf.loadLayersModel(URL).then((model) => {
                                            model.ready_for_prediction = true;
+                                           model.ready_for_training = true;
                                            // until https://github.com/tensorflow/tfjs/issues/885 is resolved need to update the name
                                            let name = URL.substring(URL.lastIndexOf('/')+1, URL.lastIndexOf('.'));
                                            model.name = name;
