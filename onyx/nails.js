@@ -7,6 +7,7 @@ let tensor_tsv; // = "";
 let metadata_tsv; // = "";
 const CREATE_SPRITE_IMAGE = false;
 const SAVE_TENSORS = false;
+const class_names = ["normal", "splinter haemorrhage", "other"]; // "fungal infection"
 
 const TOPK = 20; // number of nearest neighbours for KNN
 const THRESHOLD = .65; // report statistics for for fraction that matches with less than this threshold
@@ -125,6 +126,50 @@ const images = {
 "images/fungal-nails/Slide8.PNG",
 "images/fungal-nails/Slide9.PNG"
 ],
+"splinter haemorrhage": [
+"images/splinter-haemorrhage/Fingernail unhealthy Image_1.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_10.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_11.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_12.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_13.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_14.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_15a.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_15b.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_15c.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_15d.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_15e.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_16a.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_16b.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_16c.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_17a.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_17b.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_17c.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_17d.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_17e.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_18a.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_18b.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_19a.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_19b.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_2.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_20a.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_20b.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_21a.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_21b.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_22.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_23.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_24.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_25.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_3.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_4a.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_4b.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_4c.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_4d.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_5.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_6.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_7.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_8a.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_8b.png",
+"images/splinter-haemorrhage/Fingernail unhealthy Image_9.png"],
 "other": [
 "images/other/architecture-1836070_960_720.jpg",
 "images/other/Bali 064.jpg",
@@ -159,10 +204,6 @@ const images = {
 ]
 };
 
-let class_names = Object.keys(images);
-
-// let info_texts = [];
-// let training = -1;
 let classifier;
 let mobilenet_model;
 let video;
