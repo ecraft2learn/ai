@@ -7,10 +7,20 @@ let tensor_tsv; // = "";
 let metadata_tsv; // = "";
 const CREATE_SPRITE_IMAGE = false;
 const SAVE_TENSORS = false;
-const class_names = ["normal", "splinter haemorrhage", "other"]; // "fungal infection"
+const class_names = ["normal",
+                     "splinter haemorrhage",
+                     "fungal infection",
+                     "other"]; 
+const csv = {"normal": "URL,ID,Normal,Splinter,Fungal,Other\n", // headers for normal images
+             "splinter haemorrhage": "URL,ID,Splinter,Fungal,Normal,Other\n",
+             "fungal infection": "URL,ID,Fungal,Splinter,Normal,Other\n",
+             "other":  "URL,ID,Other,Normal,Splinter,Fungal\n"};
+const csv_class_names = {"normal": ["normal", "fungal infection", "fungal infection", "other"],
+                         "splinter haemorrhage": ["splinter haemorrhage", "fungal infection", "normal", "other"],
+                         "fungal infection": ["fungal infection", "splinter haemorrhage", "normal", "other"],
+                         "other": ["other", "normal", "splinter haemorrhage", "fungal infection"]};   
 
-const TOPK = 20; // number of nearest neighbours for KNN
-const THRESHOLD = .65; // report statistics for for fraction that matches with less than this threshold
+const TOPK = 21; // number of nearest neighbours for KNN - 20 is good and 1 for self vote that will be ignored
 
 const VIDEO_WIDTH  = 224; // this version of MobileNet expects 224x224 images
 const VIDEO_HEIGHT = 224;
@@ -404,7 +414,7 @@ const initialise_page = async () => {
              document.body.style.backgroundColor = 'white';
         });
         if (RUN_EXPERIMENTS) {
-            run_experiments(THRESHOLD); // report any matches with confidence less than this confidence
+            run_experiments(); // report any matches with confidence less than this confidence
         }
         if (SAVE_TENSORS) {
             save_tensors(classifier.getClassifierDataset());
@@ -425,10 +435,40 @@ const display_message = (message, append) => {
     document.getElementById('response').innerHTML = message;
 };
 
-const confidences = (result) => {
+const remove_one_vote = (score, self_vote) => {
+    if (self_vote) {
+        // remove the vote for itself
+        score -= 1/TOPK;
+    }
+    score *= TOPK/(TOPK-1); // one fewer voters since ignoring self vote
+    return Math.round(100*score); // convert to percentage
+};
+
+const correct = (result, class_index) => {
+    const confidences = result.confidences;
+    let max_score = -1;
+    let max_score_indices = [];
+    for (let index = 0; index < class_names.length; index++) {
+        let score = confidences[index];
+        if (index === class_index) {
+            score -= 1/TOPK; // remove the self vote
+        }
+        if (score > max_score) {
+            max_score = score;
+            max_score_indices = [index];
+        } else if (score === max_score) {
+            max_score_indices.push(index);
+        }
+    }
+    // doesn't count as correct if tied for first place
+    return (max_score_indices.length === 1 && max_score_indices[0] === class_index);
+};
+
+const confidences = (result, correct_class_index) => {
     let message = "<b>Confidences: </b>";
-    class_names.forEach((name, index) => {
-        message += name + " = " + Math.round(100*result.confidences[index]) + "%; ";
+    class_names.forEach((name, class_index) => {
+        message += name + " = " + 
+                   remove_one_vote(result.confidences[class_index], correct_class_index === class_index) + "%; ";
     });
     return message;
 };
@@ -555,7 +595,7 @@ const rectangle_selection = () => {
                                           0,
                                           0);
             predict_class(temporaray_canvas, (results) => {
-                display_message(confidences(results));
+                display_message(confidences(results, -1));
             });  
         }
         rectangle.hidden = true; 
@@ -590,7 +630,7 @@ const receive_drop = (event) => {
             canvas.hidden = false;
             video.hidden = true;
             predict_class(canvas, (results) => {
-                display_message(confidences(results));
+                display_message(confidences(results, -1));
                 console.log(results);
                 display_message("You can select a sub-region of your image.", true);
                 const video_button = document.getElementById('toggle video');
@@ -603,28 +643,23 @@ const receive_drop = (event) => {
 
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
-const run_experiments = (threshold) => {
-    const csv = {"normal": "URL,ID,Normal,Fungal,Other\n", // headers for normal images
-                 "fungal infection": "URL,ID,Fungal,Normal,Other\n",
-                 "other":  "URL,ID,Other,Normal,Fungal\n"};
-    const csv_class_names = {"normal": ["normal", "fungal infection", "other"],
-                             "fungal infection": ["fungal infection", "normal", "other"],
-                             "other": ["other", "normal", "fungal infection"]};       
+const run_experiments = () => {   
     let class_index = 0;
     let image_index = -1; // incremented to 0 soon
-    let within_threshold_count = 0;
-    display_message("<b>Results with a threshold of " + threshold + 
-                    " and " + TOPK + " nearest neighbours.</b>");
+    let number_right = 0;
+    display_message("<p><b>Confidence scores for each possible classification. " + 
+                    "<span style=color:red>Red entries</span> are where the correct classification " +
+                    "was not the most confident answer.</b></p>");
     const next_experiment = () => {
         let class_images = images[class_names[class_index]];
         if (image_index === class_images.length-1) {
             // no more images for this class_index
-            display_message("<p>Number at or above threshold of " + threshold + 
-                            " = " + within_threshold_count + "/" + class_images.length + 
-                            " (" + Math.round(100*within_threshold_count/class_images.length) + "%)</p>",
+            display_message("<p>Number whose highest confidence score is the correct answer = " + 
+                            number_right + "/" + class_images.length + 
+                            " (" + Math.round(100*number_right/class_images.length) + "%)</p>",
                             true);
             add_textarea(csv[class_names[class_index]]);
-            within_threshold_count = 0;
+            number_right = 0;
             image_index = 0;
             class_index++;
             if (class_index === class_names.length) {
@@ -643,24 +678,22 @@ const run_experiments = (threshold) => {
                            predict_class(image, (result) => {
                                let confidence = result.confidences[class_index];
                                display_message("<img src='" + images[class_name][image_index] + "' width=100 height=100></img>", true);
-                               let message = class_name + "#" + image_index + " " + confidences(result);
-                               if (confidence <= .5) {
-                                   if (class_name !== 'other' || // confidence too low so highlight this message
-                                       (class_name === 'other' && maximum_confidence(result.confidences) > .5)) {  
-                                       message = "<span style='color:red'>" + message + "</span>";
-                                   }                                       
-                               }
-                               if (confidence >= threshold) {
-                                   within_threshold_count++;
+                               let message = class_name + "#" + image_index + " " + confidences(result, class_index);
+                               if (correct(result, class_index)) {
+                                   number_right++;
+                               } else {
+                                   // highlight wrong ones in red
+                                   message = "<span style='color:red'>" + message + "</span>";
                                }
                                display_message(message, true);
                                csv[class_name] += "https://ecraft2learn.github.io/ai/onyx/" + images[class_name][image_index] + "," +
                                                   image_index + ",";
                                csv_class_names[class_name].forEach((name, index) => {
                                    // this re-orders the results
-                                   const class_index = class_names.indexOf(name);
-                                   csv[class_name] += Math.round(100*result.confidences[class_index]);
+                                   csv[class_name] += remove_one_vote(result.confidences[class_index],
+                                                                      class_names.indexOf(name) === class_index);
                                    if (index < class_names.length-1) {
+                                       // no need to add comma to the last one
                                        csv[class_name] += ",";
                                    }
                                });
@@ -669,14 +702,15 @@ const run_experiments = (threshold) => {
                            });
                        });
         };
-        const clear_just_one_class = false;
-        if (clear_just_one_class) {
-            classifier.clearClass(class_index); // remove elements from this class
-        } else {
-            classifier.dispose();
-            classifier = knnClassifier.create();
-        }
-        add_images(test_image, clear_just_one_class, class_index, image_index); // put back all one
+        test_image();
+//         const clear_just_one_class = false;
+//         if (clear_just_one_class) {
+//             classifier.clearClass(class_index); // remove elements from this class
+//         } else {
+//             classifier.dispose();
+//             classifier = knnClassifier.create();
+//         }
+//         add_images(test_image, clear_just_one_class, class_index, image_index); // put back all one
     };
     next_experiment();
 };
