@@ -13,8 +13,8 @@ window.addEventListener('load', function () {
 		world.doOneCycle();
 	};
 	let full_screen = true;
-	let run_full_screen = true;
-	let edit_mode = false;
+	let run_full_screen = new URL(location.href).searchParams.get('noRun') !== "";
+	let edit_mode = new URL(location.href).searchParams.get('editMode') !== "";
 	let project_path;
 	let show_palette = true; // unless in an iframe where the default is to hide it for space reasons
 	const load_project_string = 
