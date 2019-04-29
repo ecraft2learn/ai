@@ -2200,8 +2200,8 @@ xhr.send();
           return;
       }
       let canvas = add_photo_to_canvas(ecraft2learn.video,
-                                       2*ecraft2learn.video.width,
-                                       2*ecraft2learn.video.height,
+                                       2*ecraft2learn.video.videoWidth,
+                                       2*ecraft2learn.video.videoHeight,
                                        mirrored);
       return create_costume(canvas);
   },
