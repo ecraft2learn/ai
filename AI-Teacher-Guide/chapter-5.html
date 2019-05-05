@@ -39,17 +39,18 @@ Authoring text (many sports and financial
 Determining the grammatical structure of a sentence.
 </li>
 <li>
-Translation between languages.
+Translating between languages.
 </li>
 </ol>
 
 <h4 class="background-information-white">Doing arithmetic with words and sentences</h4>
 <p class="background-information">
-While computers can deal with text as strings of characters a technique called
+While computers can deal with text as strings of characters, a technique called
 <a href="https://gist.github.com/aparrish/2f562e3737544cf29aaf1af30362f469" target="_blank">word embedding</a>
 works by converting words into a long list of numbers.
 These numbers can either be created by humans where a number has a meaning such as 'minimum size', 'maximum size' or 'average life expectancy'.
-Most AI programs instead use numbers created by machine learning (see <a href="chapter4.html">the previous chapter</a>).
+Most AI programs instead use numbers created by machine learning
+(see <a href="chapter4.html">the previous chapter</a> and <a href="chapter6.html">the next chapter</a>).
 The numbers are created by considering text with billions word (e.g. all Wikipedia pages in a given language).
 People don't understand what the numbers mean but similar words have similar numbers and unrelated words have very different numbers.
 Each number measures a 'feature' of the word but what feature is a mystery.
@@ -59,7 +60,7 @@ The word embeddings used in this chapter were created by <a href="https://fastte
 They trained their machine learning models on 157 different languages on all Wikipedia articles in each language.
 Even though that was about a billion words each that wasn't enough,
 so they also trained their models on tens of billions more words found by <a href="http://commoncrawl.org/" target="_blank">crawling the web</a>.
-They created tables for each language of at least a million words.
+They created tables for each language of at least a million different words.
 The blocks described here provide the 20,000 most common words for 15 languages.
 (Larger tables and more languages can be added. Send requests to toontalk@gmail.com.)
 </p>
@@ -75,7 +76,7 @@ The numbers were adjusted so all 20,000 words fit inside a 300-dimensional
 There are databases with word embeddings for one million words
 but loading and searching such a large data set would be very slow.
 The <span class='block-name'>features of</span> block is based upon the most frequently occurring 20,000 entries that 
-are lower case and contain only letters (no punctuation or digits).
+are lower case (no proper nouns) and contain only letters (no punctuation or digits).
 </p>
 <figure class = "snap-iframe"
         id = "features of"
@@ -267,7 +268,7 @@ For example, "rat" and "screen" end up being closer together than otherwise due 
 and "mouse" (the computer input device) being close to (computer) "screen".
 This is a problem researchers are working on.
 Another problem is that sometimes short phrases act like words.
-"Ice cream" for example has no word embedding while "sherbet" and "sorbet" do.
+"Ice cream", for example, has no word embedding while "sherbet" and "sorbet" do.
 </p>
 <h4 class="sample-program-white">A sample project using word embeddings for translation</h4>
 <p class="sample-program">
@@ -286,7 +287,7 @@ to the location of features of translations of the word 'dog'.
 <a href="https://arxiv.org/abs/1309.4168" target="_blank">Researchers</a>
 noticed that in most (all?) languages some words are close together.
 For example 'dog', 'dogs', puppy', and 'canine' are close.
-Words like 'wolf', 'cow', and 'mouse' are not as close to the words near 'dog'.
+Words like 'wolf', 'cow', and 'mouse' are close but not as close as those words.
 And all of these words are far from abstract words like 'truth' and 'logic'.
 So they discovered that it is possible to find a rotation that will cause many word embeddings
 in one language to cause translations of those words to be close.
@@ -313,13 +314,13 @@ Many other words become roughly aligned as a result.
 <p class="instructions">
 Using a similar technique to how vectors are generated for words we can also generate vectors for images.
 The <span class="block-name">get costume features of ...</span> block will pass
-a vector of 1000 numbers to the blocks provided.
+a vector of 1280 numbers to the blocks provided.
 This uses MobileNet to compute the numbers from the "top" of the neural net.
 </p>
 <figure class = "snap-iframe"
         id = "image embedding exercise"
         container_style = "width: 800px; height: 600px" 
-        caption = "A block for converting images into lists of 1000 numbers. TRY IT!">
+        caption = "A block for converting images into lists of 1280 numbers. TRY IT!">
 </figure>
 <p class="instructions">
 One can use image embeddings to determine which images are close to other images.
