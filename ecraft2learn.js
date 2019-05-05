@@ -1978,7 +1978,7 @@ xhr.send();
     },
 
     set_default_language: function (language) {
-        var matching_language_entry = language_entry(language);
+        let matching_language_entry = language_entry(language);
         if (!matching_language_entry) {
             inform("Unrecognised language",
                    "Unable to recognise which language is described by '" + language + "'.\n" +
@@ -1986,6 +1986,10 @@ xhr.send();
         } else if (ecraft2learn.default_language !== matching_language_entry[1]) {
             // default has been changed so notify user
             ecraft2learn.default_language = matching_language_entry[1];
+            if (ecraft2learn.default_language === "cmn-Hans-CN") {
+                // workaround for two conventions
+                ecraft2learn.default_language = "zh-CN";
+            }
             ecraft2learn.default_language_name = matching_language_entry[2];
             var mary_tts_voice_number = mary_tts_voice_number_with_language_code(matching_language_entry[1]);
             var message = "Speech recognition will expect " + ecraft2learn.default_language_name + " to be spoken.\n";
@@ -3149,7 +3153,7 @@ ecraft2learn.language_defaults =
   urdu:       "ur-PK",
   "العربية":  "ar-SA",
   arabic:      "ar-SA",
-  chinese:     "zh-CN"
+  chinese:     "cmn-Hans-CN" // "zh-CN"
 };
 
 // this.videoFlipped = true;
