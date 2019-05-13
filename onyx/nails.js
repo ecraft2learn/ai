@@ -1,7 +1,7 @@
 // by Ken Kahn <toontalk@gmail.com> as part of the Onyx project at the University of Oxford
 // copyright not yet determined but will be some sort of open source
 
-const RUN_EXPERIMENTS = false;
+const RUN_EXPERIMENTS = true;
 // if tensor_tsv is defined then collect all the logits of each image into a TSV string (tab-separated values)
 let tensor_tsv; // = "";
 let metadata_tsv; // = "";
@@ -10,15 +10,18 @@ const SAVE_TENSORS = false;
 const class_names = ["normal",
                      "splinter haemorrhage",
                      "fungal infection",
+                     "hands",
                      "other"]; 
-const csv = {"normal": "URL,ID,Normal,Splinter,Fungal,Other\n", // headers for normal images
-             "splinter haemorrhage": "URL,ID,Splinter,Fungal,Normal,Other\n",
-             "fungal infection": "URL,ID,Fungal,Splinter,Normal,Other\n",
-             "other":  "URL,ID,Other,Normal,Splinter,Fungal\n"};
-const csv_class_names = {"normal": ["normal", "fungal infection", "fungal infection", "other"],
-                         "splinter haemorrhage": ["splinter haemorrhage", "fungal infection", "normal", "other"],
-                         "fungal infection": ["fungal infection", "splinter haemorrhage", "normal", "other"],
-                         "other": ["other", "normal", "splinter haemorrhage", "fungal infection"]};   
+const csv = {"normal": "URL,ID,Normal,Splinter,Fungal,Hands,Other\n", // headers for normal images
+             "splinter haemorrhage": "URL,ID,Splinter,Fungal,Normal,Hands,Other\n",
+             "fungal infection": "URL,ID,Fungal,Splinter,Normal,Hands,Other\n",
+             "hands": "URL,ID,Hands,Other,Normal,Splinter,Fungal\n",
+             "other":  "URL,ID,Other,Hands,Normal,Splinter,Fungal\n"};
+const csv_class_names = {"normal": ["normal", "fungal infection", "fungal infection", "hands", "other"],
+                         "splinter haemorrhage": ["splinter haemorrhage", "fungal infection", "normal", "hands", "other"],
+                         "fungal infection": ["fungal infection", "splinter haemorrhage", "normal", "hands", "other"],
+                         "hands": ["hands", "other", "normal", "splinter haemorrhage", "fungal infection"],
+                         "other": ["other", "hands", "normal", "splinter haemorrhage", "fungal infection"]};   
 
 const TOPK = 21; // number of nearest neighbours for KNN - 20 is good and 1 for self vote that will be ignored
 
@@ -180,6 +183,23 @@ const images = {
 "images/splinter-haemorrhage/Fingernail unhealthy Image_8a.png",
 "images/splinter-haemorrhage/Fingernail unhealthy Image_8b.png",
 "images/splinter-haemorrhage/Fingernail unhealthy Image_9.png"],
+"hands": [
+"images/hands/Fingernail healthy Image_10.jpg",
+"images/hands/Fingernail healthy Image_14.png",
+"images/hands/Fingernail healthy Image_15.png",
+"images/hands/Fingernail healthy Image_17.png",
+"images/hands/Fingernail healthy Image_19.png",
+"images/hands/Fingernail healthy Image_2.png",
+"images/hands/Fingernail healthy Image_8.png",
+"images/hands/Fingernail unhealthy Image_16.png",
+"images/hands/Fingernail unhealthy Image_17.png",
+"images/hands/Fingernail unhealthy Image_18.png",
+"images/hands/Fingernail unhealthy Image_19.png",
+"images/hands/Fingernail unhealthy Image_32.jpg",
+"images/hands/Fingernail unhealthy Image_35.jpg",
+"images/hands/Fingernail unhealthy Image_50.png",
+"images/hands/Slide22.PNG",
+],
 "other": [
 "images/other/architecture-1836070_960_720.jpg",
 "images/other/Bali 064.jpg",
@@ -187,25 +207,10 @@ const images = {
 "images/other/Bali 118.jpg",
 "images/other/brown.png",
 "images/other/cat-3336579_960_720.jpg",
-"images/other/Fingernail healthy Image_10.jpg",
-"images/other/Fingernail healthy Image_14.png",
-"images/other/Fingernail healthy Image_15.png",
-"images/other/Fingernail healthy Image_17.png",
-"images/other/Fingernail healthy Image_19.png",
-"images/other/Fingernail healthy Image_2.png",
-"images/other/Fingernail healthy Image_8.png",
-"images/other/Fingernail unhealthy Image_16.png",
-"images/other/Fingernail unhealthy Image_17.png",
-"images/other/Fingernail unhealthy Image_18.png",
-"images/other/Fingernail unhealthy Image_19.png",
-"images/other/Fingernail unhealthy Image_32.jpg",
-"images/other/Fingernail unhealthy Image_35.jpg",
-"images/other/Fingernail unhealthy Image_50.png",
 "images/other/grass.jpg",
 "images/other/hand_WIN_20190405_13_58_34_Pro.jpg",
 "images/other/hong kong.jpg",
 "images/other/person-822681_960_720.jpg",
-"images/other/Slide22.PNG",
 "images/other/small IMG_1990.JPG",
 "images/other/snoopy.jpg",
 "images/other/snow.jpg",
