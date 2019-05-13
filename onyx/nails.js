@@ -693,10 +693,11 @@ const run_experiments = () => {
                                display_message(message, true);
                                csv[class_name] += "https://ecraft2learn.github.io/ai/onyx/" + images[class_name][image_index] + "," +
                                                   image_index + ",";
-                               csv_class_names[class_name].forEach((name, index) => {
+                               csv_class_names[class_name].forEach((name) => {
                                    // this re-orders the results
-                                   csv[class_name] += remove_one_vote(result.confidences[class_index],
-                                                                      class_names.indexOf(name) === class_index);
+                                   let index = class_names.indexOf(name);
+                                   csv[class_name] += remove_one_vote(result.confidences[index],
+                                                                      index === class_index);
                                    if (index < class_names.length-1) {
                                        // no need to add comma to the last one
                                        csv[class_name] += ",";
