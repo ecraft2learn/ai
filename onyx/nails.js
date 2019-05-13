@@ -3,8 +3,8 @@
 
 const RUN_EXPERIMENTS = false;
 // if tensor_tsv is defined then collect all the logits of each image into a TSV string (tab-separated values)
-let tensor_tsv = "";
-let metadata_tsv = "";
+let tensor_tsv; // = "";
+let metadata_tsv; // = "";
 const CREATE_SPRITE_IMAGE = false;
 const SAVE_TENSORS = false;
 const class_names = ["normal",
@@ -24,6 +24,10 @@ const csv_class_names = {"normal": ["normal", "fungal infection", "fungal infect
                          "other": ["other", "hands", "normal", "splinter haemorrhage", "fungal infection"]};   
 
 const TOPK = 21; // number of nearest neighbours for KNN - 20 is good and 1 for self vote that will be ignored
+
+const histogram_buckets = [];
+const bucket_count = 10;
+const histogram_image_size = 40;
 
 const VIDEO_WIDTH  = 224; // this version of MobileNet expects 224x224 images
 const VIDEO_HEIGHT = 224;
@@ -478,6 +482,72 @@ const confidences = (result, correct_class_index) => {
     return message;
 };
 
+const update_histogram = (result, correct_class_index, image_URL, title) => {
+    class_names.forEach((name, class_index) => {
+        const correct = correct_class_index === class_index;
+        const score = remove_one_vote(result.confidences[class_index], correct);
+        // score-1 so that 0-20 is 0; 25-40 is 1; ... 85-100 is 4
+        const bucket_index = Math.max(0, Math.floor((score-1)/(100/bucket_count)));
+        let bucket = histogram_buckets[bucket_index];
+        if (bucket === undefined) {
+            bucket = [];
+            histogram_buckets[bucket_index] = bucket;             
+        }
+        bucket.push({score: score,
+                     correct_class_index: correct_class_index,
+                     class_index: class_index,
+                     title: title,
+                     image_URL: image_URL});
+    });
+};
+
+const histogram_buckets_to_html = (histogram_buckets, image_size) => {
+    const margin = 10;
+    const bucket_increment = Math.floor(100/histogram_buckets.length);
+    let html = "<html><body>\n";
+    html += "<link href='../css/ai-teacher-guide.css' rel='stylesheet'>\n";
+    class_names.forEach((name, class_index) => {
+        html += "<p>Histogram of " + name + "</p>\n";
+        html += "<div class='histogram_container'>\n";
+        let max_correct_count = 0;
+        histogram_buckets.forEach((bucket) => {
+            let correct_count = 0;
+            bucket.forEach((score) => {
+                if (score.correct_class_index === class_index && score.class_index === class_index) {
+                    correct_count++;
+                }
+            });
+            if (correct_count > max_correct_count) {
+                max_correct_count = correct_count;
+            }
+        });
+        const buckets = histogram_buckets.map((bucket, bucket_index) => {
+            let top = max_correct_count*(image_size+margin);
+            bucket.forEach((score) => {
+                if (score.correct_class_index === class_index && score.class_index === class_index) {
+                    html += "<div class='histogram_image' title='" + score.title + "' "
+                            + "style='"
+                            + "left:" + (bucket_index*image_size+margin)  + "px;"
+                            + " top:" + top + "px'>\n"
+                            + "  <img src='" + score.image_URL + "' width=" + image_size + " height=" + image_size + "  >\n"
+                            + "</div>\n";
+                    top -= image_size+margin;
+                }
+           });
+        });
+        let x = 0;
+        histogram_buckets.forEach((bucket, bucket_index) => {
+            html += "<span class='x-axis-labels' style='left:" + (bucket_index*image_size+margin)
+                    + "px;top:" + (max_correct_count+1)*(image_size+margin) + "px'>\n" + x + "</span>";
+            x += bucket_increment;
+        });
+        html += "\n";
+        html += "</div>\n";
+   });
+   html += "</body></html>\n";
+   return html;
+};
+
 const draw_maintaining_aspect_ratio = (source,
                                        canvas,
                                        destination_width,
@@ -668,6 +738,7 @@ const run_experiments = () => {
             image_index = 0;
             class_index++;
             if (class_index === class_names.length) {
+                add_textarea(histogram_buckets_to_html(histogram_buckets, histogram_image_size));
                 return;
             }
         } else {
@@ -678,11 +749,17 @@ const run_experiments = () => {
         };
         const test_image = () => {
             const class_name = class_names[class_index];
-            load_image(images[class_name][image_index],
+            const image_URL = images[class_name][image_index];
+            const plain_text = (html) => {
+                const div = document.createElement('div');
+                div.innerHTML = html;
+                return div.innerText;
+            };
+            load_image(image_URL,
                        async(image) => {
                            predict_class(image, (result) => {
                                let confidence = result.confidences[class_index];
-                               display_message("<img src='" + images[class_name][image_index] + "' width=100 height=100></img>", true);
+                               display_message("<img src='" + image_URL + "' width=100 height=100></img>", true);
                                let message = class_name + "#" + image_index + " " + confidences(result, class_index);
                                if (correct(result, class_index)) {
                                    number_right++;
@@ -691,13 +768,15 @@ const run_experiments = () => {
                                    message = "<span style='color:red'>" + message + "</span>";
                                }
                                display_message(message, true);
+                               update_histogram(result, class_index, image_URL, plain_text(message));
                                csv[class_name] += "https://ecraft2learn.github.io/ai/onyx/" + images[class_name][image_index] + "," +
                                                   image_index + ",";
                                csv_class_names[class_name].forEach((name) => {
                                    // this re-orders the results
-                                   let index = class_names.indexOf(name);
-                                   csv[class_name] += remove_one_vote(result.confidences[index],
-                                                                      index === class_index);
+                                   const index = class_names.indexOf(name);
+                                   const correct = index === class_index;
+                                   const score = remove_one_vote(result.confidences[index], correct);
+                                   csv[class_name] += score;
                                    if (index < class_names.length-1) {
                                        // no need to add comma to the last one
                                        csv[class_name] += ",";
