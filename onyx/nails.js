@@ -1,10 +1,10 @@
 // by Ken Kahn <toontalk@gmail.com> as part of the Onyx project at the University of Oxford
 // copyright not yet determined but will be some sort of open source
 
-const RUN_EXPERIMENTS = true;
+const RUN_EXPERIMENTS = false;
 // if tensor_tsv is defined then collect all the logits of each image into a TSV string (tab-separated values)
-let tensor_tsv; // = "";
-let metadata_tsv; // = "";
+let tensor_tsv = "";
+let metadata_tsv = "";
 const CREATE_SPRITE_IMAGE = false;
 const SAVE_TENSORS = false;
 const class_names = ["normal",
@@ -782,42 +782,42 @@ const add_textarea = (text) => {
 };
 
 const save_tensors = (tensors) => {
-        // based upon https://stackoverflow.com/questions/19721439/download-json-object-as-a-file-from-browser
-        // tried using JSON.stringify but arrays became "0":xxx, "1":xxx, ...
-        // also needed to move tensors from GPU using dataSync
-        let json = '{"nails_tensors":{';
-        let keys = Object.keys(tensors);
-        const jsonify_tensor = (tensor) => {
-            let flat_array = tensor.dataSync();
-            let shape = tensor.shape;
-            json += '{"shape":' + JSON.stringify(shape) + ',' +
-                     '"data":' + JSON.stringify(Object.values(flat_array)) + '}';
-        };
-        keys.forEach(function (key, index) {
-            json += '"' + key + '":[';
-            let tensor_or_array_of_tensors = tensors[key];
-            if (tensor_or_array_of_tensors instanceof Array) {
-                json += '[';
-                tensor_or_array_of_tensors.forEach((tensor, index) => {
-                    jsonify_tensor(tensor);
-                    if (index < tensor_or_array_of_tensors.length-1) { // except for last one
-                        json += ',';
-                    }
-                });
-                json += ']';
-            } else {
-                jsonify_tensor(tensor_or_array_of_tensors);
-            }
-            if (index === keys.length-1) {
-                json += ']'; // no comma on the last one
-            } else {
-                json += '],';
-            }
-        });
-        json += '},';
-        json += '"labels":' + JSON.stringify(class_names);
-        json += '}';
-        add_textarea(json);
+    // based upon https://stackoverflow.com/questions/19721439/download-json-object-as-a-file-from-browser
+    // tried using JSON.stringify but arrays became "0":xxx, "1":xxx, ...
+    // also needed to move tensors from GPU using dataSync
+    let json = '{"nails_tensors":{';
+    let keys = Object.keys(tensors);
+    const jsonify_tensor = (tensor) => {
+        let flat_array = tensor.dataSync();
+        let shape = tensor.shape;
+        json += '{"shape":' + JSON.stringify(shape) + ',' +
+                '"data":' + JSON.stringify(Object.values(flat_array)) + '}';
+    };
+    keys.forEach(function (key, index) {
+        json += '"' + key + '":[';
+        let tensor_or_array_of_tensors = tensors[key];
+        if (tensor_or_array_of_tensors instanceof Array) {
+            json += '[';
+            tensor_or_array_of_tensors.forEach((tensor, index) => {
+                jsonify_tensor(tensor);
+                if (index < tensor_or_array_of_tensors.length-1) { // except for last one
+                    json += ',';
+                 }
+            });
+            json += ']';
+        } else {
+            jsonify_tensor(tensor_or_array_of_tensors);
+        }
+        if (index === keys.length-1) {
+            json += ']'; // no comma on the last one
+        } else {
+            json += '],';
+        }
+    });
+    json += '},';
+    json += '"labels":' + JSON.stringify(class_names);
+    json += '}';
+    add_textarea(json);
 };
 
 const load_data_set = (data_set) => {
