@@ -527,12 +527,13 @@ const histogram_buckets_to_html = (histogram_buckets, image_size) => {
             let top = max_correct_count*(image_size+margin);
             bucket.forEach((score) => {
                 if (score.correct_class_index === class_index && score.class_index === class_index) {
-                    html += "<div class='histogram_image' title='" + score.title + "' "
+                    html += "<a href='" + score.image_URL + "' target='_blank'>"
+                            + "<div class='histogram_image' title='" + score.title + "' "
                             + "style='"
                             + "left:" + (bucket_index*image_size+margin)  + "px;"
                             + " top:" + top + "px'>\n"
                             + "  <img src='" + score.image_URL + "' width=" + image_size + " height=" + image_size + "  >\n"
-                            + "</div>\n";
+                            + "</div></a>\n";
                     top -= image_size+margin;
                 }
            });
