@@ -508,7 +508,6 @@ const histogram_buckets_to_html = (histogram_buckets, image_size) => {
     html += "<link href='../css/ai-teacher-guide.css' rel='stylesheet'>\n";
     class_names.forEach((name, class_index) => {
         html += "<p>Histogram of " + name + "</p>\n";
-        html += "<div class='histogram_container'>\n";
         let max_correct_count = 0;
         histogram_buckets.forEach((bucket) => {
             let correct_count = 0;
@@ -521,6 +520,9 @@ const histogram_buckets_to_html = (histogram_buckets, image_size) => {
                 max_correct_count = correct_count;
             }
         });
+        html += "<div class='histogram_container' style='" 
+                + "height:" + (max_correct_count+2)*(image_size+margin)
+                + "px;'>\n";
         const buckets = histogram_buckets.map((bucket, bucket_index) => {
             let top = max_correct_count*(image_size+margin);
             bucket.forEach((score) => {
