@@ -523,14 +523,24 @@ const update_histogram = (result, correct_class_index, image_URL, title) => {
 };
 
 const update_confusion_matrix = (result, correct_class_index) => {
-
+    class_names.forEach((name, class_index) => {
+        const correct = correct_class_index === class_index;
+        const score = remove_one_vote(result.confidences[class_index], correct);
+        if (confusion_matrix[correct_class_index] === undefined) {
+            confusion_matrix[correct_class_index] = class_names.map(() => 0);
+        }
+        confusion_matrix[correct_class_index][class_index] += score;
+    });
 };
 
+const html_header = "<html><body>\n<link href='../css/ai-teacher-guide.css' rel='stylesheet'>\n";
+
 const histogram_buckets_to_html = (histogram_buckets, image_size) => {
-    const margin = 10;
+    const gap = 10;
+    const border_size = 4;
+    const delta = image_size+gap;
     const bucket_increment = Math.floor(100/histogram_buckets.length);
-    let html = "<html><body>\n";
-    html += "<link href='../css/ai-teacher-guide.css' rel='stylesheet'>\n";
+    let html = html_header;
     html += "<p>Border colours capture highest scoring wrong label: ";
     class_names.forEach((name, class_index) => {
         html += "<span style='color:" + class_colors[class_index] + ";'>" + name + "</span>" + "&nbsp;";
@@ -550,30 +560,30 @@ const histogram_buckets_to_html = (histogram_buckets, image_size) => {
                 max_correct_count = correct_count;
             }
         });
-        html += "<div class='histogram_container' style='" 
-                + "height:" + (max_correct_count+2)*(image_size+margin)
+        html += "<div class='grid_container' style='" 
+                + "height:" + (max_correct_count+1)*delta
                 + "px;'>\n";
         const buckets = histogram_buckets.map((bucket, bucket_index) => {
-            let top = max_correct_count*(image_size+margin);
+            let top = (max_correct_count-1)*delta;
             bucket.forEach((score) => {
                 if (score.correct_class_index === class_index && score.class_index === class_index) {
                     let color_of_highest_wrong_class = class_colors[score.highest_wrong_class_index];
                     html += "<a href='" + score.image_URL + "' target='_blank'>"
-                            + "<div class='histogram_image' title='" + score.title + "' "
+                            + "<div class='grid_element' title='" + score.title + "' "
                             + "style='"
-                            + "border: solid " + margin*.4 + "px " + color_of_highest_wrong_class + ";"
-                            + "left:" + (bucket_index*(image_size+margin))  + "px;"
+                            + "border: solid " + border_size + "px " + color_of_highest_wrong_class + ";"
+                            + "left:" + (bucket_index*delta)  + "px;"
                             + " top:" + top + "px'>\n"
                             + "  <img src='" + score.image_URL + "' width=" + image_size + " height=" + image_size + "  >\n"
                             + "</div></a>\n";
-                    top -= image_size+margin;
+                    top -= delta;
                 }
            });
         });
         let x = 0;
         histogram_buckets.forEach((bucket, bucket_index) => {
-            html += "<span class='x-axis-labels' style='left:" + (bucket_index*image_size+margin)
-                    + "px;top:" + (max_correct_count+1)*(image_size+margin) + "px'>\n" + x + "</span>";
+            html += "<span class='x-axis-label' style='left:" + (bucket_index*delta)
+                    + "px;top:" + max_correct_count*delta + "px'>" + x + "</span>\n";
             x += bucket_increment;
         });
         html += "\n";
@@ -581,6 +591,51 @@ const histogram_buckets_to_html = (histogram_buckets, image_size) => {
    });
    html += "</body></html>\n";
    return html;
+};
+
+const confusion_matrix_to_html = (confusion_matrix, element_size) => {
+    const gap = 5;
+    const sum = (row) => row.reduce((accumulator, currentValue) => accumulator + currentValue);
+    const normalise = (row) => {
+        let total = sum(row);
+        return row.map((n) => n/total);
+    };
+    const number_of_classes = class_names.length;
+    const delta = (element_size+gap);
+    let html = html_header;
+    html += "<p>This is a confusion matrix. " 
+            + "The darker the colour the higher the average score for the class of the column.</p>";
+    html += "<div class='grid_container' style='" 
+             + "width:"  + number_of_classes*delta + "px;"
+             + "height:" + number_of_classes*delta + "px;"
+             + "'>\n";
+    class_names.forEach((name, class_index) => {
+        html += "<span class='x-axis-label' title='Average predictions that it is " + name + "' " 
+                + "style='left:" + (class_index+1)*delta
+                + "px;top:0px;'>\n&nbsp;&nbsp;" + name.split(' ')[0] + "</span>";
+    });
+    let top = element_size/2; // room for the axis labels
+    confusion_matrix.forEach((row, class_index) => {
+        html += "<span class='y-axis-label' title='Tests with " + class_names[class_index] + " images' "
+                + "style='left:10px;"
+                + "top:" + (top+element_size/2) + "px;'>\n&nbsp;&nbsp;" + class_names[class_index].split(' ')[0] + "</span>";
+        const normalised_row = normalise(row);
+        let left = delta;
+        normalised_row.forEach((fraction) => {
+            html += "<div class='grid_element' title='" + Math.round(fraction*100) + "%' "
+                    + "style='background-color:hsl(0,100%," + Math.round((1-fraction)*100) + "%);"
+                    + "left:" + left + "px;"
+                    + "top:" + top + "px;"
+                    + "width:" + element_size + "px;"
+                    + "height:" + element_size + "px;"
+                    + "border:1px solid;"
+                    + "'></div>\n";
+            left += delta;
+        });
+        top += delta;
+    });
+    html += "</div></body></html>";
+    return html;
 };
 
 const draw_maintaining_aspect_ratio = (source,
@@ -774,6 +829,7 @@ const run_experiments = () => {
             class_index++;
             if (class_index === class_names.length) {
                 add_textarea(histogram_buckets_to_html(histogram_buckets, histogram_image_size));
+                add_textarea(confusion_matrix_to_html(confusion_matrix, 100));
                 return;
             }
         } else {
@@ -804,6 +860,7 @@ const run_experiments = () => {
                                }
                                display_message(message, true);
                                update_histogram(result, class_index, image_URL, plain_text(message));
+                               update_confusion_matrix(result, class_index);
                                csv[class_name] += "https://ecraft2learn.github.io/ai/onyx/" + images[class_name][image_index] + "," +
                                                   image_index + ",";
                                csv_class_names[class_name].forEach((name) => {

@@ -174,14 +174,17 @@ figcaption {
   overflow:hidden;
   border:none;
 }
-.histogram_container {
+.grid_container {
   position: relative;
   width: 700px;
   height: 1400px;
 }
-.histogram_image {
+.grid_element {
   position: absolute;
 }
-.x-axis-labels {
+.x-axis-label {
+  position: absolute;
+}
+.y-axis-label {
   position: absolute;
 }
