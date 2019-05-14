@@ -1,7 +1,7 @@
 // by Ken Kahn <toontalk@gmail.com> as part of the Onyx project at the University of Oxford
 // copyright not yet determined but will be some sort of open source
 
-const RUN_EXPERIMENTS = false;
+const RUN_EXPERIMENTS = true;
 // if tensor_tsv is defined then collect all the logits of each image into a TSV string (tab-separated values)
 let tensor_tsv; // = "";
 let metadata_tsv; // = "";
@@ -11,7 +11,13 @@ const class_names = ["normal",
                      "splinter haemorrhage",
                      "fungal infection",
                      "hands",
-                     "other"]; 
+                     "other"];
+const class_colors = ["green",
+                      "red",
+                      "brown",
+                      "orange",
+                      "blue",
+                      "white"]; // no class
 const csv = {"normal": "URL,ID,Normal,Splinter,Fungal,Hands,Other\n", // headers for normal images
              "splinter haemorrhage": "URL,ID,Splinter,Fungal,Normal,Hands,Other\n",
              "fungal infection": "URL,ID,Fungal,Splinter,Normal,Hands,Other\n",
@@ -28,6 +34,8 @@ const TOPK = 21; // number of nearest neighbours for KNN - 20 is good and 1 for 
 const histogram_buckets = [];
 const bucket_count = 10;
 const histogram_image_size = 40;
+
+const confusion_matrix = [];
 
 const VIDEO_WIDTH  = 224; // this version of MobileNet expects 224x224 images
 const VIDEO_HEIGHT = 224;
@@ -483,9 +491,21 @@ const confidences = (result, correct_class_index) => {
 };
 
 const update_histogram = (result, correct_class_index, image_URL, title) => {
+    const find_highest_wrong_class_index = (confidences, correct_class_index) => {
+        let highest_wrong_class_index = class_names.length; // if no wrong scores returns number of classes
+        let highest_wrong_score = 0;
+        for (let index = 0; index < class_names.length; index++) {
+            if (index !== correct_class_index && confidences[index] > highest_wrong_score) {
+                highest_wrong_class_index = index;
+                highest_wrong_score = confidences[index];
+            }
+        }
+        return highest_wrong_class_index;
+    };
     class_names.forEach((name, class_index) => {
         const correct = correct_class_index === class_index;
         const score = remove_one_vote(result.confidences[class_index], correct);
+        const highest_wrong_class_index = find_highest_wrong_class_index(result.confidences, correct_class_index);
         // score-1 so that 0-20 is 0; 25-40 is 1; ... 85-100 is 4
         const bucket_index = Math.max(0, Math.floor((score-1)/(100/bucket_count)));
         let bucket = histogram_buckets[bucket_index];
@@ -496,9 +516,14 @@ const update_histogram = (result, correct_class_index, image_URL, title) => {
         bucket.push({score: score,
                      correct_class_index: correct_class_index,
                      class_index: class_index,
+                     highest_wrong_class_index: highest_wrong_class_index,
                      title: title,
                      image_URL: image_URL});
     });
+};
+
+const update_confusion_matrix = (result, correct_class_index) => {
+
 };
 
 const histogram_buckets_to_html = (histogram_buckets, image_size) => {
@@ -506,6 +531,11 @@ const histogram_buckets_to_html = (histogram_buckets, image_size) => {
     const bucket_increment = Math.floor(100/histogram_buckets.length);
     let html = "<html><body>\n";
     html += "<link href='../css/ai-teacher-guide.css' rel='stylesheet'>\n";
+    html += "<p>Border colours capture highest scoring wrong label: ";
+    class_names.forEach((name, class_index) => {
+        html += "<span style='color:" + class_colors[class_index] + ";'>" + name + "</span>" + "&nbsp;";
+    });
+    html += "and no border if the correct class received a score of 100%.";
     class_names.forEach((name, class_index) => {
         html += "<p>Histogram of " + name + "</p>\n";
         let max_correct_count = 0;
@@ -527,10 +557,12 @@ const histogram_buckets_to_html = (histogram_buckets, image_size) => {
             let top = max_correct_count*(image_size+margin);
             bucket.forEach((score) => {
                 if (score.correct_class_index === class_index && score.class_index === class_index) {
+                    let color_of_highest_wrong_class = class_colors[score.highest_wrong_class_index];
                     html += "<a href='" + score.image_URL + "' target='_blank'>"
                             + "<div class='histogram_image' title='" + score.title + "' "
                             + "style='"
-                            + "left:" + (bucket_index*image_size+margin)  + "px;"
+                            + "border: solid " + margin*.4 + "px " + color_of_highest_wrong_class + ";"
+                            + "left:" + (bucket_index*(image_size+margin))  + "px;"
                             + " top:" + top + "px'>\n"
                             + "  <img src='" + score.image_URL + "' width=" + image_size + " height=" + image_size + "  >\n"
                             + "</div></a>\n";
