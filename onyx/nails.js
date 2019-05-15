@@ -437,7 +437,7 @@ const initialise_page = async () => {
             save_tensors(classifier.getClassifierDataset());
         }
     };
-    if (window.saved_tensors) {
+    if (window.saved_tensors && !CREATE_SPRITE_IMAGE && !SAVE_TENSORS) {
         load_data_set(window.saved_tensors);
         start_up();
     } else {
