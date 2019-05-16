@@ -7,20 +7,29 @@ let tensor_tsv; // = "";
 let metadata_tsv; // = "";
 const CREATE_SPRITE_IMAGE = false;
 const SAVE_TENSORS = false;
-const class_names = ["normal",
-                     "serious",
-                     "fungal",
-                     "trauma"];
-const class_colors = ["green",
-                      "red",
-                      "brown",
-                      "blue",
-                      "white"]; // no class
+const combine_non_serious = true;
+let class_names = ["normal",
+                   "serious",
+                   "fungal",
+                   "trauma"];
+let class_colors = ["green",
+                    "red",
+                    "brown",
+                    "blue",
+                    "white"]; // no class
+if (combine_non_serious) {
+    class_names = class_names.slice(0, class_names.length-2);
+    class_names.push("non-serious");
+    class_colors =["green",
+                    "red",
+                    "brown",
+//                  "blue",
+                    "white"]; // no class
+}
 let csv = {};
 let csv_class_names = {};
 const create_csv_settings = () => {
     class_names.forEach((name) => {
-        
         // this class name goes first
         let file_name = name + "-";
         csv[name] = "URL,ID," + name + ",";
@@ -252,6 +261,10 @@ const images = {
 "images/other/white.png",
 ]
 };
+
+if (combine_non_serious) {
+    images["non-serious"] = images["fungal"].concat(images["trauma"]);
+}
 
 let classifier;
 let mobilenet_model;
