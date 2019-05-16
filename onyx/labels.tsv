@@ -1,4 +1,3 @@
-Class	Image ID
 normal	normal#0
 normal	normal#1
 normal	normal#2
@@ -67,114 +66,95 @@ normal	normal#64
 normal	normal#65
 normal	normal#66
 normal	normal#67
-splinter haemorrhage	splinter haemorrhage#0
-splinter haemorrhage	splinter haemorrhage#1
-splinter haemorrhage	splinter haemorrhage#2
-splinter haemorrhage	splinter haemorrhage#3
-splinter haemorrhage	splinter haemorrhage#4
-splinter haemorrhage	splinter haemorrhage#5
-splinter haemorrhage	splinter haemorrhage#6
-splinter haemorrhage	splinter haemorrhage#7
-splinter haemorrhage	splinter haemorrhage#8
-splinter haemorrhage	splinter haemorrhage#9
-splinter haemorrhage	splinter haemorrhage#10
-splinter haemorrhage	splinter haemorrhage#11
-splinter haemorrhage	splinter haemorrhage#12
-splinter haemorrhage	splinter haemorrhage#13
-splinter haemorrhage	splinter haemorrhage#14
-splinter haemorrhage	splinter haemorrhage#15
-splinter haemorrhage	splinter haemorrhage#16
-splinter haemorrhage	splinter haemorrhage#17
-splinter haemorrhage	splinter haemorrhage#18
-splinter haemorrhage	splinter haemorrhage#19
-splinter haemorrhage	splinter haemorrhage#20
-splinter haemorrhage	splinter haemorrhage#21
-splinter haemorrhage	splinter haemorrhage#22
-splinter haemorrhage	splinter haemorrhage#23
-splinter haemorrhage	splinter haemorrhage#24
-splinter haemorrhage	splinter haemorrhage#25
-splinter haemorrhage	splinter haemorrhage#26
-splinter haemorrhage	splinter haemorrhage#27
-splinter haemorrhage	splinter haemorrhage#28
-splinter haemorrhage	splinter haemorrhage#29
-splinter haemorrhage	splinter haemorrhage#30
-splinter haemorrhage	splinter haemorrhage#31
-splinter haemorrhage	splinter haemorrhage#32
-splinter haemorrhage	splinter haemorrhage#33
-splinter haemorrhage	splinter haemorrhage#34
-splinter haemorrhage	splinter haemorrhage#35
-splinter haemorrhage	splinter haemorrhage#36
-splinter haemorrhage	splinter haemorrhage#37
-splinter haemorrhage	splinter haemorrhage#38
-splinter haemorrhage	splinter haemorrhage#39
-splinter haemorrhage	splinter haemorrhage#40
-splinter haemorrhage	splinter haemorrhage#41
-splinter haemorrhage	splinter haemorrhage#42
-fungal infection	fungal infection#0
-fungal infection	fungal infection#1
-fungal infection	fungal infection#2
-fungal infection	fungal infection#3
-fungal infection	fungal infection#4
-fungal infection	fungal infection#5
-fungal infection	fungal infection#6
-fungal infection	fungal infection#7
-fungal infection	fungal infection#8
-fungal infection	fungal infection#9
-fungal infection	fungal infection#10
-fungal infection	fungal infection#11
-fungal infection	fungal infection#12
-fungal infection	fungal infection#13
-fungal infection	fungal infection#14
-fungal infection	fungal infection#15
-fungal infection	fungal infection#16
-fungal infection	fungal infection#17
-fungal infection	fungal infection#18
-fungal infection	fungal infection#19
-fungal infection	fungal infection#20
-fungal infection	fungal infection#21
-fungal infection	fungal infection#22
-fungal infection	fungal infection#23
-fungal infection	fungal infection#24
-fungal infection	fungal infection#25
-fungal infection	fungal infection#26
-fungal infection	fungal infection#27
-fungal infection	fungal infection#28
-fungal infection	fungal infection#29
-fungal infection	fungal infection#30
-fungal infection	fungal infection#31
-fungal infection	fungal infection#32
-fungal infection	fungal infection#33
-fungal infection	fungal infection#34
-fungal infection	fungal infection#35
-fungal infection	fungal infection#36
-fungal infection	fungal infection#37
-hands	hands#0
-hands	hands#1
-hands	hands#2
-hands	hands#3
-hands	hands#4
-hands	hands#5
-hands	hands#6
-hands	hands#7
-hands	hands#8
-hands	hands#9
-hands	hands#10
-hands	hands#11
-hands	hands#12
-hands	hands#13
-hands	hands#14
-other	other#0
-other	other#1
-other	other#2
-other	other#3
-other	other#4
-other	other#5
-other	other#6
-other	other#7
-other	other#8
-other	other#9
-other	other#10
-other	other#11
-other	other#12
-other	other#13
-other	other#14
+serious	serious#0
+serious	serious#1
+serious	serious#2
+serious	serious#3
+serious	serious#4
+serious	serious#5
+serious	serious#6
+serious	serious#7
+serious	serious#8
+serious	serious#9
+serious	serious#10
+serious	serious#11
+serious	serious#12
+serious	serious#13
+serious	serious#14
+serious	serious#15
+serious	serious#16
+serious	serious#17
+serious	serious#18
+serious	serious#19
+serious	serious#20
+serious	serious#21
+serious	serious#22
+serious	serious#23
+serious	serious#24
+serious	serious#25
+serious	serious#26
+serious	serious#27
+serious	serious#28
+serious	serious#29
+serious	serious#30
+serious	serious#31
+serious	serious#32
+serious	serious#33
+serious	serious#34
+serious	serious#35
+serious	serious#36
+serious	serious#37
+serious	serious#38
+serious	serious#39
+serious	serious#40
+serious	serious#41
+serious	serious#42
+fungal	fungal#0
+fungal	fungal#1
+fungal	fungal#2
+fungal	fungal#3
+fungal	fungal#4
+fungal	fungal#5
+fungal	fungal#6
+fungal	fungal#7
+fungal	fungal#8
+fungal	fungal#9
+fungal	fungal#10
+fungal	fungal#11
+fungal	fungal#12
+fungal	fungal#13
+fungal	fungal#14
+fungal	fungal#15
+fungal	fungal#16
+fungal	fungal#17
+fungal	fungal#18
+fungal	fungal#19
+fungal	fungal#20
+fungal	fungal#21
+fungal	fungal#22
+fungal	fungal#23
+fungal	fungal#24
+fungal	fungal#25
+fungal	fungal#26
+fungal	fungal#27
+fungal	fungal#28
+fungal	fungal#29
+fungal	fungal#30
+fungal	fungal#31
+fungal	fungal#32
+fungal	fungal#33
+fungal	fungal#34
+fungal	fungal#35
+fungal	fungal#36
+fungal	fungal#37
+trauma	trauma#0
+trauma	trauma#1
+trauma	trauma#2
+trauma	trauma#3
+trauma	trauma#4
+trauma	trauma#5
+trauma	trauma#6
+trauma	trauma#7
+trauma	trauma#8
+trauma	trauma#9
+trauma	trauma#10
