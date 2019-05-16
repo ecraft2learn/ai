@@ -1,7 +1,7 @@
 // by Ken Kahn <toontalk@gmail.com> as part of the Onyx project at the University of Oxford
 // copyright not yet determined but will be some sort of open source
 
-const RUN_EXPERIMENTS = true;
+const RUN_EXPERIMENTS = false;
 // if tensor_tsv is defined then collect all the logits of each image into a TSV string (tab-separated values)
 let tensor_tsv; // = "";
 let metadata_tsv; // = "";
@@ -20,24 +20,27 @@ let csv = {};
 let csv_class_names = {};
 const create_csv_settings = () => {
     class_names.forEach((name) => {
-    // this class name goes first
-    csv[name] = "URL,ID," + name + ",";
-    csv_class_names[name] = [name];
-    class_names.forEach((other_name) => {
-        if (name !== other_name) {
-            csv[name] += other_name + ",";
-            csv_class_names[name].push(other_name);
-        }
-    });
-    csv[name] += "\n";
+        
+        // this class name goes first
+        let file_name = name + "-";
+        csv[name] = "URL,ID," + name + ",";
+        csv_class_names[name] = [name];
+        class_names.forEach((other_name, index) => {
+            if (name !== other_name) {
+                csv[name] += other_name +  ",";
+                file_name += other_name + "-";
+                csv_class_names[name].push(other_name);
+            }
+        });
+        csv[name] = file_name.slice(0, file_name.length-1) + ".csv\n" + csv[name].slice(0, csv.length-1) + "\n";
     });
 };  
 create_csv_settings();
 
-const TOPK = 11; // number of nearest neighbours for KNN - 10 is good and 1 for self vote that will be ignored
+const TOPK = 6; // number of nearest neighbours for KNN plus 1 for self vote that will be ignored
 
 const histogram_buckets = [];
-const bucket_count = 10;
+const bucket_count = 5;
 const histogram_image_size = 40;
 
 const confusion_matrix = [];
@@ -426,7 +429,6 @@ const initialise_page = async () => {
         if (tensor_tsv) {
             add_textarea(tensor_tsv);
             add_textarea(metadata_tsv);
-            return;
         }
         document.getElementById('please-wait').hidden = true;
         document.getElementById('introduction').hidden = false;
@@ -456,7 +458,7 @@ const initialise_page = async () => {
             save_tensors(classifier.getClassifierDataset());
         }
     };
-    if (window.saved_tensors && !CREATE_SPRITE_IMAGE && !SAVE_TENSORS) {
+    if (window.saved_tensors && !CREATE_SPRITE_IMAGE && !SAVE_TENSORS && !RUN_EXPERIMENTS) {
         load_data_set(window.saved_tensors);
         start_up();
     } else {
@@ -552,14 +554,14 @@ const update_confusion_matrix = (result, correct_class_index) => {
     });
 };
 
-const html_header = "<html><body>\n<link href='../css/ai-teacher-guide.css' rel='stylesheet'>\n";
+const html_header = "<html><body>\n<link href='../../css/ai-teacher-guide.css' rel='stylesheet'>\n";
 
 const histogram_buckets_to_html = (histogram_buckets, image_size) => {
     const gap = 10;
     const border_size = 4;
     const delta = image_size+gap;
     const bucket_increment = Math.floor(100/histogram_buckets.length);
-    let html = html_header;
+    let html = "histogram.html\n" + html_header;
     html += "<p>Border colours capture highest scoring wrong label: ";
     class_names.forEach((name, class_index) => {
         html += "<span style='color:" + class_colors[class_index] + ";'>" + name + "</span>" + "&nbsp;";
@@ -593,7 +595,7 @@ const histogram_buckets_to_html = (histogram_buckets, image_size) => {
                             + "border: solid " + border_size + "px " + color_of_highest_wrong_class + ";"
                             + "left:" + (bucket_index*delta)  + "px;"
                             + " top:" + top + "px'>\n"
-                            + "  <img src='" + score.image_URL + "' width=" + image_size + " height=" + image_size + "  >\n"
+                            + "  <img src='../" + score.image_URL + "' width=" + image_size + " height=" + image_size + "  >\n"
                             + "</div></a>\n";
                     top -= delta;
                 }
@@ -621,7 +623,7 @@ const confusion_matrix_to_html = (confusion_matrix, element_size) => {
     };
     const number_of_classes = class_names.length;
     const delta = (element_size+gap);
-    let html = html_header;
+    let html = "confusion.html\n" + html_header;
     html += "<p>This is a confusion matrix. " 
             + "The darker the colour the higher the average score for the class of the column.</p>";
     html += "<div class='grid_container' style='" 
