@@ -1,35 +1,40 @@
 // by Ken Kahn <toontalk@gmail.com> as part of the Onyx project at the University of Oxford
 // copyright not yet determined but will be some sort of open source
 
-const RUN_EXPERIMENTS = false;
+const RUN_EXPERIMENTS = true;
 // if tensor_tsv is defined then collect all the logits of each image into a TSV string (tab-separated values)
 let tensor_tsv; // = "";
 let metadata_tsv; // = "";
 const CREATE_SPRITE_IMAGE = false;
 const SAVE_TENSORS = false;
 const class_names = ["normal",
-                     "splinter haemorrhage",
-                     "fungal infection",
-                     "hands",
-                     "other"];
+                     "serious",
+                     "fungal",
+                     "trauma"];
 const class_colors = ["green",
                       "red",
                       "brown",
-                      "orange",
                       "blue",
                       "white"]; // no class
-const csv = {"normal": "URL,ID,Normal,Splinter,Fungal,Hands,Other\n", // headers for normal images
-             "splinter haemorrhage": "URL,ID,Splinter,Fungal,Normal,Hands,Other\n",
-             "fungal infection": "URL,ID,Fungal,Splinter,Normal,Hands,Other\n",
-             "hands": "URL,ID,Hands,Other,Normal,Splinter,Fungal\n",
-             "other":  "URL,ID,Other,Hands,Normal,Splinter,Fungal\n"};
-const csv_class_names = {"normal": ["normal", "fungal infection", "fungal infection", "hands", "other"],
-                         "splinter haemorrhage": ["splinter haemorrhage", "fungal infection", "normal", "hands", "other"],
-                         "fungal infection": ["fungal infection", "splinter haemorrhage", "normal", "hands", "other"],
-                         "hands": ["hands", "other", "normal", "splinter haemorrhage", "fungal infection"],
-                         "other": ["other", "hands", "normal", "splinter haemorrhage", "fungal infection"]};   
+let csv = {};
+let csv_class_names = {};
+const create_csv_settings = () => {
+    class_names.forEach((name) => {
+    // this class name goes first
+    csv[name] = "URL,ID," + name + ",";
+    csv_class_names[name] = [name];
+    class_names.forEach((other_name) => {
+        if (name !== other_name) {
+            csv[name] += other_name + ",";
+            csv_class_names[name].push(other_name);
+        }
+    });
+    csv[name] += "\n";
+    });
+};  
+create_csv_settings();
 
-const TOPK = 21; // number of nearest neighbours for KNN - 20 is good and 1 for self vote that will be ignored
+const TOPK = 11; // number of nearest neighbours for KNN - 10 is good and 1 for self vote that will be ignored
 
 const histogram_buckets = [];
 const bucket_count = 10;
@@ -111,7 +116,7 @@ const images = {
 "images/normal/Fingernail healthy Image_9c.png",
 "images/normal/Fingernail healthy Image_9d.png"
 ],
-"fungal infection": [
+"fungal": [
 "images/fungal-nails/nail-fungus-1a-600px.jpg",
 "images/fungal-nails/nail-fungus-1b-600px.jpg",
 "images/fungal-nails/nail-fungus-2-600px.jpg",
@@ -151,7 +156,21 @@ const images = {
 "images/fungal-nails/Slide8.PNG",
 "images/fungal-nails/Slide9.PNG"
 ],
-"splinter haemorrhage": [
+"trauma": [
+"images/trauma/nail trauma 1.png",
+// #2 was so insured that is wasn't usable
+"images/trauma/nail trauma 3.png",
+"images/trauma/nail trauma 4.png",
+"images/trauma/nail trauma 5.png",
+"images/trauma/nail trauma 6.png",
+"images/trauma/nail trauma 7.png",
+"images/trauma/nail trauma 8.png",
+"images/trauma/nail trauma 9.png",
+"images/trauma/nail trauma 10.png",
+"images/trauma/nail trauma 11.png",
+"images/trauma/nail trauma 12.png",
+],
+"serious": [
 "images/splinter-haemorrhage/Fingernail unhealthy Image_1.png",
 "images/splinter-haemorrhage/Fingernail unhealthy Image_10.png",
 "images/splinter-haemorrhage/Fingernail unhealthy Image_11.png",
