@@ -349,6 +349,8 @@ async function setupCamera() {
               display_message("<b>Freeze the video before selecting the nail.</b>");
           }
       });
+  const reset_response_button = document.getElementById('reset_response');
+  reset_response_button.addEventListener('click', reset_response);
   return new Promise((resolve) => {
       video.onloadedmetadata = () => {
           resolve(video);
@@ -513,6 +515,10 @@ const display_message = (message, append) => {
         message = document.getElementById('response').innerHTML + "<br>" + message;
     }
     document.getElementById('response').innerHTML = message;
+};
+
+const reset_response = () => {
+    document.getElementById('response').innerHTML = "";
 };
 
 const remove_one_vote = (score, self_vote, running_tests) => {
@@ -851,7 +857,8 @@ const rectangle_selection = () => {
                                           0,
                                           0);
             predict_class(temporaray_canvas, (results) => {
-                display_message(confidences(results, -1));
+                display_message("<img width=60 height=60 src='" + temporaray_canvas.toDataURL() + "'>", true);
+                display_message(confidences(results, -1), true);
             });  
         }
         rectangle.hidden = true; 
@@ -886,7 +893,7 @@ const receive_drop = (event) => {
             canvas.hidden = false;
             video.hidden = true;
             predict_class(canvas, (results) => {
-                display_message(confidences(results, -1));
+                display_message(confidences(results, -1), true);
                 console.log(results);
                 display_message("You can select a sub-region of your image.", true);
                 const video_button = document.getElementById('toggle video');
