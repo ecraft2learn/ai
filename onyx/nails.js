@@ -46,7 +46,8 @@ const create_csv_settings = () => {
 };  
 create_csv_settings();
 
-const TOPK = 6; // number of nearest neighbours for KNN plus 1 for self vote that will be ignored
+// number of nearest neighbours for KNN 
+let top_k = RUN_EXPERIMENTS ? 6 : 5;
 
 const histogram_buckets = [];
 const bucket_count = 5;
@@ -405,7 +406,7 @@ const predict_class = (image, callback) => {
     return tf.tidy(() => {
         const image_pixels = tf.browser.fromPixels(image);
         const logits = infer(image_pixels);
-        classifier.predictClass(logits, TOPK).then((result) => {
+        classifier.predictClass(logits, top_k).then((result) => {
             callback(result);          
         });
     });
@@ -514,23 +515,26 @@ const display_message = (message, append) => {
     document.getElementById('response').innerHTML = message;
 };
 
-const remove_one_vote = (score, self_vote) => {
-    if (self_vote) {
-        // remove the vote for itself
-        score -= 1/TOPK;
+const remove_one_vote = (score, self_vote, running_tests) => {
+    if (running_tests) {
+        if (self_vote) {
+            // remove the vote for itself
+            score -= 1/top_k;
+        }
+        score *= top_k/(top_k-1); // one fewer voters since ignoring self vote        
     }
-    score *= TOPK/(TOPK-1); // one fewer voters since ignoring self vote
     return Math.round(100*score); // convert to percentage
 };
 
 const correct = (result, class_index) => {
+    // only called if running tests
     const confidences = result.confidences;
     let max_score = -1;
     let max_score_indices = [];
     for (let index = 0; index < class_names.length; index++) {
         let score = confidences[index];
         if (index === class_index) {
-            score -= 1/TOPK; // remove the self vote
+            score -= 1/top_k; // remove the self vote
         }
         if (score > max_score) {
             max_score = score;
@@ -543,12 +547,37 @@ const correct = (result, class_index) => {
     return (max_score_indices.length === 1 && max_score_indices[0] === class_index);
 };
 
-const confidences = (result, correct_class_index) => {
+const confidences = (result, correct_class_index, running_tests) => {
     let message = "<b>Confidences: </b>";
+    let scores = [];
+//     let name_of_highest_scoring_class;
+//     let name_of_second_highest_scoring_class;
+//     let highest_score = 0;
+//     let second_highest_score = 0;
     class_names.forEach((name, class_index) => {
-        message += name + " = " + 
-                   remove_one_vote(result.confidences[class_index], correct_class_index === class_index) + "%; ";
+        let score = remove_one_vote(result.confidences[class_index], correct_class_index === class_index, running_tests);
+        message += name + " = " + score + "%; ";
+        scores.push({name: name,
+                     score: score});
     });
+    message += "<br>";
+    scores.sort((name_score_1, name_score_2) => {
+        return name_score_2.score-name_score_1.score;
+    });
+    if (scores[0].score < 55) {
+        message += "Not very sure whether the nail is OK or not. Sorry.";
+    } else {
+        if (scores[0].name === 'serious') {
+            message += "It is most likely that the nail indicates something serious and you should seek medical advise. (Confidence is "
+                       + scores[0].score + "%)";
+        } else if (scores[1].name === 'serious' && scores[1].score > 25) {
+            message += "While it is most likely the nail's condition is " + scores[0].name 
+                       + " (confidence is " + + scores[0].score + "%) "
+                       + " it might be serious " + " (confidence is " + scores[1].score + "%) ";
+        } else {
+            message += "The nail's condition is " + scores[0].name + " with confidence of " + scores[0].score + "%.";
+        }
+    }
     return message;
 };
 
@@ -566,7 +595,7 @@ const update_histogram = (result, correct_class_index, image_URL, title) => {
     };
     class_names.forEach((name, class_index) => {
         const correct = correct_class_index === class_index;
-        const score = remove_one_vote(result.confidences[class_index], correct);
+        const score = remove_one_vote(result.confidences[class_index], correct, true);
         const highest_wrong_class_index = find_highest_wrong_class_index(result.confidences, correct_class_index);
         // score-1 so that 0-20 is 0; 25-40 is 1; ... 85-100 is 4
         const bucket_index = Math.max(0, Math.floor((score-1)/(100/bucket_count)));
@@ -587,7 +616,7 @@ const update_histogram = (result, correct_class_index, image_URL, title) => {
 const update_confusion_matrix = (result, correct_class_index) => {
     class_names.forEach((name, class_index) => {
         const correct = correct_class_index === class_index;
-        const score = remove_one_vote(result.confidences[class_index], correct);
+        const score = remove_one_vote(result.confidences[class_index], correct, true);
         if (confusion_matrix[correct_class_index] === undefined) {
             confusion_matrix[correct_class_index] = class_names.map(() => 0);
         }
@@ -674,7 +703,7 @@ const confusion_matrix_to_html = (confusion_matrix, element_size) => {
     class_names.forEach((name, class_index) => {
         html += "<span class='x-axis-label' title='Average predictions that it is " + name + "' " 
                 + "style='left:" + (class_index+1)*delta
-                + "px;top:0px;'>\n&nbsp;&nbsp;" + name.split(' ')[0] + "</span>";
+                + "px;top:0px;'>\n" + name.split(' ')[0] + "</span>";
     });
     let top = element_size/2; // room for the axis labels
     confusion_matrix.forEach((row, class_index) => {
@@ -913,7 +942,7 @@ const run_experiments = () => {
                            predict_class(image, (result) => {
                                let confidence = result.confidences[class_index];
                                display_message("<img src='" + image_URL + "' width=100 height=100></img>", true);
-                               let message = class_name + "#" + image_index + " " + confidences(result, class_index);
+                               let message = class_name + "#" + image_index + " " + confidences(result, class_index, true);
                                if (correct(result, class_index)) {
                                    number_right++;
                                } else {
@@ -929,7 +958,7 @@ const run_experiments = () => {
                                    // this re-orders the results
                                    const index = class_names.indexOf(name);
                                    const correct = index === class_index;
-                                   const score = remove_one_vote(result.confidences[index], correct);
+                                   const score = remove_one_vote(result.confidences[index], correct, true);
                                    csv[class_name] += score;
                                    if (index < class_names.length-1) {
                                        // no need to add comma to the last one
