@@ -494,7 +494,7 @@ const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
                       previous_model.dispose();
                       previous_model.disposed_previously = true;
                       previous_model = undefined;
-                      console.log(tf.memory(), "final", result);
+//                       console.log(tf.memory(), "final", result);
                   }
               });                   
    } catch (error) {
@@ -561,7 +561,7 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
                         tf.disposeVariables();
                         let loss = h.history.loss[h.history.loss.length-1];
                         if (isNaN(loss)) {
-                            loss = h.history.loss[0]; // learning went "south" so use the first loss
+                            loss = Number.MAX_VALUE;
                         }
 //                         console.log(tf.memory(), "experiment", {loss: loss}); // making sure this really does fix the tensor memory leak
                         resolve({loss: loss,
