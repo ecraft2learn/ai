@@ -336,7 +336,7 @@ const optimize_hyperparameters_button = document.createElement('button');
 const search_button_label = "Search for good parameters using current settings";
 const stop_button_label = "Stop when next current experiment finishes";
 
-const create_hyperparamter_optimization_tab = () => {
+const create_hyperparamter_optimization_tab = (model) => {
     const surface = tfvis.visor().surface({name: 'Tensorflow', tab: 'Optimize'});
     const draw_area = surface.drawArea;
     if (optimize_hyperparameters_messages) {
@@ -352,7 +352,7 @@ const create_hyperparamter_optimization_tab = () => {
                                                              stop_on_next_experiment = true;
                                                          } else {
                                                              hyperparameter_searching = true;
-                                                             optimize_hyperparameters_with_parameters(draw_area);
+                                                             optimize_hyperparameters_with_parameters(draw_area, model);
                                                              optimize_hyperparameters_button.innerHTML = stop_button_label;
                                                          }
                                                      });
@@ -360,11 +360,11 @@ const create_hyperparamter_optimization_tab = () => {
     parameters_interface(create_parameters_interface).optimize.open();
 };
 
-const optimize_hyperparameters_with_parameters = (draw_area) => {
+const optimize_hyperparameters_with_parameters = (draw_area, model) => {
     draw_area.appendChild(optimize_hyperparameters_messages);
     lowest_loss = Number.MAX_VALUE;
     const name_element = document.getElementById('name_element');
-    const model_name = name_element ? name_element.value : 'my-model';
+    const model_name = name_element ? name_element.value : model ? model.name : 'my-model';
     let [xs, ys] = get_tensors(model_name, 'training');
     let validation_tensors = get_tensors(model_name, 'validation'); // undefined if no validation data
     const display_trial = (parameters, element) => {
@@ -450,6 +450,8 @@ const optimize_hyperparameters_with_parameters = (draw_area) => {
             install_settings_button.addEventListener('click',
                                                      () => {
                                                          install_settings(result.argmin);
+                                                         install_settings_button.innerHTML =
+                                                            "Settings installed. Re-create and re-train your model before testings it predictions.";
                                                      });
             xs.dispose();
             ys.dispose();
@@ -515,7 +517,7 @@ const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
    }
 };
 
-const optimize = async (model_name, xs, ys, validation_tensors, number_of_experiments, epochs,
+const optimize = async (model_name, xs, ys, validation_tensors, number_of_experiments, 
                         onExperimentBegin, onExperimentEnd, error_callback) => {
     const create_and_train_model = async ({layers, optimization_method, loss_function, epochs, learning_rate}, { xs, ys }) => {
         if (!layers) {
@@ -559,9 +561,9 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
                         tf.disposeVariables();
                         let loss = h.history.loss[h.history.loss.length-1];
                         if (isNaN(loss)) {
-                            loss = Number.MAX_VALUE;
+                            loss = h.history.loss[0]; // learning went "south" so use the first loss
                         }
-                        console.log(tf.memory(), "experiment", {loss: loss}); // making sure this really does fix the tensor memory leak
+//                         console.log(tf.memory(), "experiment", {loss: loss}); // making sure this really does fix the tensor memory leak
                         resolve({loss: loss,
                                  history: h.history,
                                  status: hpjs.STATUS_OK});          
@@ -579,7 +581,7 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
         space.loss_function = hpjs.choice(Object.values(loss_functions));
     }
     if (to_boolean(gui_state["Optimize"]["Search for best number of training iterations"])) {
-        const current_epochs = epochs || Math.round(gui_state["Training"]["Number of iterations"]);
+        const current_epochs = Math.round(gui_state["Training"]["Number of iterations"]); // epochs || 
         const minimum = Math.max(1, Math.round(current_epochs/2));
         const maximum = current_epochs*2;
         const number_of_choices = 5;
@@ -777,7 +779,7 @@ const create_training_parameters = (parameters_gui) => {
 
 const create_hyperparameter_optimize_parameters = (parameters_gui) => {
     const optimize = parameters_gui.addFolder("Optimize");
-//     optimize.add(gui_state["Optimize"], 'Number of experiments').min(1).max(1000);
+    optimize.add(gui_state["Optimize"], 'Number of experiments');
     optimize.add(gui_state["Optimize"], 'Search for best Optimization method', [true, false]);
     optimize.add(gui_state["Optimize"], 'Search for best loss function', [true, false]);
     optimize.add(gui_state["Optimize"], 'Search for best number of training iterations', [true, false]);
@@ -1259,7 +1261,7 @@ window.addEventListener('DOMContentLoaded',
                                                           });
                             optimize_hyperparameters_interface_button.addEventListener('click',
                                                           () => {
-                                                              create_hyperparamter_optimization_tab();
+                                                              create_hyperparamter_optimization_tab(model);
                                                           });
                             evaluate_button.addEventListener('click', create_prediction_interface);
                             save_and_load_model_button.addEventListener('click', save_and_load);             
