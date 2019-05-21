@@ -1862,7 +1862,8 @@ xhr.send();
                   handle_all_confidence_values(event);
               } else {
                   // if callback for confidence values isn't used then log the top confidence value
-                  console.log("Confidence is " + event.results[event.resultIndex][0].confidence + " for " + spoken);
+                  console.log("Confidence is " + Math.round(1000*event.results[event.resultIndex][0].confidence)/1000
+                              + " for '" + spoken + "'.");
               }
           };
           var handle_all_results = function (event) {
@@ -2965,6 +2966,58 @@ xhr.send();
       report_progress(best_word, best_distance, words_considered, 'final');
       return best_word;
   },
+  closest_and_farthest_word: function (close_target_features, far_target_features, exceptions, distance_measure, language) {
+      // finds words with the best score which is computed based on closeness to and furtherness to far_target_features
+      // distance_measure is either Euclidean distance or Cosine similarity 
+      // some researchers use cosine similarity and others Euclidean distance
+      // see https://en.wikipedia.org/wiki/Cosine_similarity
+      language = extract_language_code(language);
+      if (typeof words_to_features[language] !== 'object') {
+          console.error("closest_word called before word embeddings loaded.")
+          return;
+      }
+      if (typeof exceptions !== 'object') {
+          exceptions = [];
+      } else if (!(exceptions instanceof Array)) {
+          exceptions = exceptions.asArray();
+      }
+      if (!(close_target_features instanceof Array)) {
+          close_target_features = close_target_features.asArray();
+      }
+      if (!(far_target_features instanceof Array)) {
+          far_target_features = far_target_features.asArray();
+      }
+      if (close_target_features.length === 0) {
+          return "Can't find words close to the empty vector.\nProbably due to requesting the features of an unknown word.";
+      }
+      if (far_target_features.length === 0) {
+          return "Can't find words far from the empty vector.\nProbably due to requesting the features of an unknown word.";
+      }
+      let use_distance = distance_measure === 'Euclidean distance';
+      let words_considered = 0;
+      let best_word, score;
+      let best_score = Number.MAX_VALUE;
+      const close_target_magnitude = magnitude(close_target_features);
+      const far_target_magnitude = magnitude(far_target_features);
+      Object.keys(words_to_features[language]).forEach(function (word) {
+          if (exceptions.indexOf(word) < 0) {
+              let candidate_features = words_to_features[language][word];
+              words_considered++;
+              let close_distance = use_distance ? distance_squared(close_target_features, candidate_features) :
+                                                  // subtract 1 since closest cosine similarity is 1
+                                                  1-cosine_similarity(far_target_features, candidate_features, close_target_magnitude); 
+              let far_distance   = use_distance ? distance_squared(far_target_features, candidate_features) :
+                                                  // subtract 1 since closest cosine similarity is 1
+                                                  1-cosine_similarity(far_target_features, candidate_features, far_target_magnitude);
+              let score = close_distance-far_distance;
+              if (score < best_score) {
+                  best_word = word;
+                  best_score = score;
+              }
+          }
+      });
+      return best_word;
+  },
   initialise_all: function () {
       Object.values(ecraft2learn.support_window).forEach(function (support_window) {
           support_window.close();
@@ -3157,6 +3210,7 @@ ecraft2learn.language_defaults =
 };
 
 // this.videoFlipped = true;
+if (typeof CamSnapshotDialogMorph !== 'undefined') {
 CamSnapshotDialogMorph.prototype.buildContents = function (myself, flipped) {
     let stage = myself.parentThatIsA(StageMorph);
 
@@ -3236,6 +3290,7 @@ CamSnapshotDialogMorph.prototype.buildContents = function (myself, flipped) {
 
         context.restore();
     };
+}
 
 //     this.videoView.step = function () {
 //         myself.changed();
