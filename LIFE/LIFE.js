@@ -260,19 +260,35 @@ const sentences_and_answers = () => {
 
 };
 
+const precision = (x, n) => Math.round(x*Math.pow(10, n))/Math.pow(10, n);
+
 const respond_to_questions = async (question, distance_threshold) => {
     return embedding_model.embed([question]).then((embedding) => {
         let best_answer;
         let best_answer_distance = 1;
+        let second_best_answer;
+        let second_best_answer_distance;
         group_of_questions_mean_embeddings.forEach((group_mean, mean_number) => {
             let distance = tf.metrics.cosineProximity(embedding.flatten(), group_mean).dataSync()[0];
             if (distance < best_answer_distance) {
+                if (best_answer) {
+                    second_best_answer = best_answer;
+                    second_best_answer_distance = best_answer_distance;
+                }
                 best_answer = mean_number;
                 best_answer_distance = distance;
             }
         });
         if (best_answer_distance > distance_threshold) {
+            console.log("No question close enough. Closest question is " + precision(1+best_answer_distance, 3) 
+                        + " units away. It is '" + group_of_questions[best_answer][0] + "'");
             return; // no answer 
+        }
+        console.log("Closest question is " + precision(1+best_answer_distance, 3) 
+                    + " units away. It is '" + group_of_questions[best_answer][0] + "'");
+        if (second_best_answer) {
+            console.log("The second closest question is " + precision(1+second_best_answer_distance, 3) 
+                        + " units away. It is '" + group_of_questions[second_best_answer][0] + "'");
         }
         return answers[best_answer];
     });
@@ -346,12 +362,13 @@ const setup = () => {
     });
 };
 
-const add_sample_questions = () => {
-    const add_paragraph = (text) => {
-        const p = document.createElement('p');
-        p.innerHTML = text;
-        document.body.appendChild(p);
-    };
+const add_paragraph = (text) => {
+    const p = document.createElement('p');
+    p.innerHTML = text;
+    document.body.appendChild(p);
+};
+    
+const add_sample_questions = () => {  
     add_paragraph("<b><i>Here are some sample questions. Try paraphrasing them.</i></b>");
     group_of_questions.forEach((group) => {
         add_paragraph(group[0]);
