@@ -1480,7 +1480,7 @@ window.ecraft2learn =
             alert(message);
         }
     };
-    var inform = function(title, message, callback, ok_to_repeat) {
+    const inform = (title, message, callback, ok_to_repeat) => {
         if (!ok_to_repeat) {
             let title_and_message = title + "::::" + message;
             if (history_of_informs.indexOf(title_and_message) >= 0) {
@@ -1787,6 +1787,10 @@ xhr.send();
           // grammar -- see https://www.w3.org/TR/jsgf/ for JSGF format
           // if the browser has no support for speech recognition then the Microsoft Speech API is used (API key required)
           if (typeof SpeechRecognition === 'undefined' && typeof webkitSpeechRecognition === 'undefined') {
+              if (!inside_snap()) {
+                  alert("This browser does not support speech recognition. Use Chrome or type in your questions instead.");
+                  return;
+              }
               // no support from this browser so try using the Microsoft Speech API
               inform("This browser does not support speech recognition",
                      "You could use Chrome or you can use Microsoft's speech recognition service.\n" +
@@ -1799,6 +1803,7 @@ xhr.send();
           if (window.speechSynthesis.speaking || ecraft2learn.speaking_ongoing || ecraft2learn.speech_recognition) { 
               // don't listen while speaking or while listening is still in progress
               // added ecraft2learn.speaking_ongoing since window.speechSynthesis.speaking wasn't sufficient on some systems
+              // in particular when an external speaker is involved
               if (debugging) {
                   console.log("Delaying start due to " + (window.speechSynthesis.speaking ? "speaking" : "listen in progress"));
               }
