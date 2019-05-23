@@ -5,7 +5,7 @@ const RUN_EXPERIMENTS = true;
 // if tensor_tsv is defined then collect all the logits of each image into a TSV string (tab-separated values)
 // let tensor_tsv; = "";
 // let metadata_tsv = "";
-const CREATE_SPRITE_IMAGE = true;
+const CREATE_SPRITE_IMAGE = false;
 const SAVE_TENSORS = false;
 const combine_non_serious = true;
 let class_names = ["normal",
@@ -404,7 +404,7 @@ const add_images = (when_finished, just_one_class, only_class_index, except_imag
                 when_finished();
                 if (image_sprite_canvas) {
                     // can then save it 
-                    document.write(image_sprite_canvas.toDataURL());
+                    add_textarea(image_sprite_canvas.toDataURL() + "");
                 }
                 return;
             }
@@ -955,7 +955,7 @@ const run_experiments = () => {
                                 + "true negatives = " + true_negatives + "<br>"
                                 + "false positives = " + false_positives + "<br>"
                                 + "false negatives = " + false_negatives + "<br>"
-                                + "not confident of any answer = " + not_confident_answers  + "<br>",
+                                + "not confident of any answer = " + not_confident_answers + "<br>"
                                 + "total = " + total + "<br>",
                                 true);
                 const number_precision = (x, n) => Math.round(x*Math.pow(10, n))/Math.pow(10, n);
