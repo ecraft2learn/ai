@@ -1,11 +1,11 @@
 // by Ken Kahn <toontalk@gmail.com> as part of the Onyx project at the University of Oxford
 // copyright not yet determined but will be some sort of open source
 
-const RUN_EXPERIMENTS = false;
+const RUN_EXPERIMENTS = true;
 // if tensor_tsv is defined then collect all the logits of each image into a TSV string (tab-separated values)
-let tensor_tsv; // = "";
-let metadata_tsv; // = "";
-const CREATE_SPRITE_IMAGE = false;
+// let tensor_tsv; = "";
+// let metadata_tsv = "";
+const CREATE_SPRITE_IMAGE = true;
 const SAVE_TENSORS = false;
 const combine_non_serious = true;
 let class_names = ["normal",
@@ -46,12 +46,20 @@ const create_csv_settings = () => {
 };  
 create_csv_settings();
 
-// number of nearest neighbours for KNN 
+// number of nearest neighbours for KNN - one extra for experiments since we remove self-votes
 let top_k = RUN_EXPERIMENTS ? 6 : 5;
 
 const histogram_buckets = [];
 const bucket_count = 5;
 const histogram_image_size = 40;
+
+const minimum_confidence = 60;
+
+let false_negatives = 0;
+let false_positives = 0;
+let true_negatives = 0;
+let true_positives = 0;
+let not_confident_answers = 0; // less than minimum_confidence for top answer
 
 const confusion_matrix = [];
 
@@ -128,7 +136,7 @@ const images = {
 "images/normal/Fingernail healthy Image_9b.png",
 "images/normal/Fingernail healthy Image_9c.png",
 "images/normal/Fingernail healthy Image_9d.png",
-"images/normal/Karen IMG_1621-a.jpg",
+"images/normal/Karen IMG_1621-b.jpg",
 ],
 "fungal": [
 "images/fungal-nails/nail-fungus-1a-600px.jpg",
@@ -254,8 +262,8 @@ const images = {
 "images/Nail Images from Library book/Onychomatricomas.jpg",
 "images/Nail Images from Library book/Onychoschizia 2a.jpg",
 "images/Nail Images from Library book/Onychoschizia 2b.jpg",
-"images/Nail Images from Library book/Onychoschizia-a.JPG",
-"images/Nail Images from Library book/Onychoschizia-b.JPG",
+"images/Nail Images from Library book/Onychoschizia-a.jpg",
+"images/Nail Images from Library book/Onychoschizia-b.jpg",
 "images/Nail Images from Library book/secondary pseudomonas infection in onycholysis-a.jpg",
 "images/Nail Images from Library book/secondary pseudomonas infection in onycholysis-b.jpg",
 "images/Nail Images from Library book/squamous cell carcinoma 2.jpg",
@@ -429,14 +437,14 @@ const add_image_to_training = (image_url, class_index, image_index, continuation
     load_image(image_url,
                (image) => {
                    logits = infer(image);
-                   if (metadata_tsv === "") {
+                   if (typeof metadata_tsv !== 'undefined' && metadata_tsv === "") {
                        metadata_tsv = "Class\tImage ID\n";
                    }
-                   if (tensor_tsv !== undefined) {
+                   if (typeof tensor_tsv !== 'undefined') {
                        tensor_tsv += class_names[class_index] + "#" + image_index + "\t";
                        tensor_tsv += save_logits_as_tsv(logits);                       
                    }
-                   if (metadata_tsv !== undefined) {
+                   if (typeof metadata_tsv !== 'undefined') {
                        metadata_tsv += class_names[class_index] + "\t" + class_names[class_index] + "#" + image_index + "\n";
                    }
                    classifier.addExample(logits, class_index);
@@ -481,7 +489,7 @@ const initialise_page = async () => {
       throw e;
     }
     const start_up = () => {
-        if (tensor_tsv) {
+        if (typeof tensor_tsv === 'string') {
             add_textarea(tensor_tsv);
             add_textarea(metadata_tsv);
         }
@@ -564,6 +572,8 @@ const correct = (result, class_index) => {
     return (max_score_indices.length === 1 && max_score_indices[0] === class_index);
 };
 
+const not_confident_message = "Not very sure whether the nail is OK or not. Sorry.";
+
 const confidences = (result, correct_class_index, running_tests) => {
     let message = "<b>Confidences: </b>";
     let scores = [];
@@ -581,18 +591,21 @@ const confidences = (result, correct_class_index, running_tests) => {
     scores.sort((name_score_1, name_score_2) => {
         return name_score_2.score-name_score_1.score;
     });
-    if (scores[0].score < 55) {
-        message += "Not very sure whether the nail is OK or not. Sorry.";
+    if (scores[0].score < minimum_confidence) {
+        message += not_confident_message;
     } else {
         if (scores[0].name === 'serious') {
-            message += "It is most likely that the nail indicates something serious and you should seek medical advise. (Confidence is "
+            message += "It is most likely that the nail indicates something serious and you should seek medical advise. (Confidence score is "
                        + scores[0].score + "%)";
-        } else if (scores[1].name === 'serious' && scores[1].score > 25) {
-            message += "While it is most likely the nail's condition is " + scores[0].name 
-                       + " (confidence is " + + scores[0].score + "%) "
-                       + " it might be serious " + " (confidence is " + scores[1].score + "%) ";
+        } else if (scores[1].name === 'serious' && scores[1].score >= 20) {
+            message += "It might be serious " + " (confidence score is " + scores[1].score + "%) ";
         } else {
-            message += "The nail's condition is " + scores[0].name + " with confidence of " + scores[0].score + "%.";
+            message += "The nail's condition is " + scores[0].name + " with confidence score of " + scores[0].score + "%.";
+            if (scores[1].name === 'serious' && scores[1].score > 0) {
+                message += " The confidence score for it being serious is " + scores[1].score + "%.";
+            } else if (scores[1].score > 0) {
+                message += " Otherwise it is " + scores[1].name + " with confidence score of " + scores[1].score + "%.";
+            }
         }
     }
     return message;
@@ -937,6 +950,24 @@ const run_experiments = () => {
             image_index = 0;
             class_index++;
             if (class_index === class_names.length) {
+                let total = true_positives+true_negatives+false_positives+false_negatives+not_confident_answers;
+                display_message("true positives = " + true_positives + "<br>"
+                                + "true negatives = " + true_negatives + "<br>"
+                                + "false positives = " + false_positives + "<br>"
+                                + "false negatives = " + false_negatives + "<br>"
+                                + "not confident of any answer = " + not_confident_answers  + "<br>",
+                                + "total = " + total + "<br>",
+                                true);
+                const number_precision = (x, n) => Math.round(x*Math.pow(10, n))/Math.pow(10, n);
+                let sensitivity = number_precision(true_positives/(true_positives+false_negatives), 4);
+                let specificity = number_precision(true_negatives/(true_negatives+false_positives), 4);
+                let precision = number_precision(true_positives/(true_positives+false_positives), 4);
+                let recall = number_precision(true_positives/(true_positives+false_negatives), 4);
+                display_message("sensitivity = " + sensitivity + "<br>"
+                                + "specificity = " + specificity + "<br>"
+                                + "precision = " + precision + "<br>"
+                                + "recall = " + recall + "<br>",
+                                true);
                 add_textarea(histogram_buckets_to_html(histogram_buckets, histogram_image_size));
                 add_textarea(confusion_matrix_to_html(confusion_matrix, 100));
                 return;
@@ -960,12 +991,31 @@ const run_experiments = () => {
                            predict_class(image, (result) => {
                                let confidence = result.confidences[class_index];
                                display_message("<img src='" + image_URL + "' width=100 height=100></img>", true);
-                               let message = class_name + "#" + image_index + " " + confidences(result, class_index, true);
-                               if (correct(result, class_index)) {
+                               let confidence_message = confidences(result, class_index, true);
+                               let message = class_name + "#" + image_index + " " + confidence_message;
+                               let correct_prediction = correct(result, class_index);
+                               if (correct_prediction) {
                                    number_right++;
                                } else {
                                    // highlight wrong ones in red
                                    message = "<span style='color:red'>" + message + "</span>";
+                               }
+                               if (combine_non_serious) {
+                                   if (confidence_message.indexOf(not_confident_message) >= 0) {
+                                       not_confident_answers++;
+                                   } else if (class_index === 1) {// serious is index 1
+                                       if (correct_prediction) {
+                                           true_positives++;
+                                       } else {
+                                           false_negatives++;
+                                       }
+                                   } else {
+                                       if (correct_prediction) {
+                                           true_negatives++;
+                                       } else {
+                                           false_positives++;
+                                       }
+                                   }
                                }
                                display_message(message, true);
                                update_histogram(result, class_index, image_URL, plain_text(message));
@@ -1097,7 +1147,7 @@ const save_tensors = (tensors) => {
     json += '},';
     json += '"labels":' + JSON.stringify(class_names);
     json += '}';
-    add_textarea(json);
+    add_textarea("window.saved_tensors = " + json);
 };
 
 const load_data_set = (data_set) => {

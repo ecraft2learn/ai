@@ -67,6 +67,7 @@ normal	normal#64
 normal	normal#65
 normal	normal#66
 normal	normal#67
+normal	normal#68
 serious	serious#0
 serious	serious#1
 serious	serious#2
@@ -137,6 +138,12 @@ serious	serious#66
 serious	serious#67
 serious	serious#68
 serious	serious#69
+serious	serious#70
+serious	serious#71
+serious	serious#72
+serious	serious#73
+serious	serious#74
+serious	serious#75
 non-serious	non-serious#0
 non-serious	non-serious#1
 non-serious	non-serious#2
@@ -186,3 +193,7 @@ non-serious	non-serious#45
 non-serious	non-serious#46
 non-serious	non-serious#47
 non-serious	non-serious#48
+non-serious	non-serious#49
+non-serious	non-serious#50
+non-serious	non-serious#51
+non-serious	non-serious#52
