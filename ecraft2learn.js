@@ -8,8 +8,8 @@
 window.ecraft2learn =
   (function () {
       let this_url = document.querySelector('script[src*="ecraft2learn.js"]').src; // the URL where this library lives
-      let load_script = function (url, when_loaded, if_error) {
-          var script = document.createElement("script");
+      let load_script = (url, when_loaded, if_error) => {
+          const script = document.createElement("script");
           script.type = "text/javascript";
           if (url.indexOf("//") < 0) {
               // is relative to this_url
@@ -18,12 +18,13 @@ window.ecraft2learn =
           }
           script.src = url;
           if (when_loaded) {
-              script.addEventListener('load', when_loaded);
+              script.onload = when_loaded;
           }
           if (if_error) {
-              script.addEventListener('error', if_error);
+              script.onerror = if_error;
           }
           document.head.appendChild(script);
+          return script;
       };
       const inside_snap = function () {
           // this library can be used directly in JavaScript or with other JavaScript-based languages
@@ -2850,9 +2851,19 @@ xhr.send();
   dot_product: dot_product,
   cosine_similarity: cosine_similarity,
   euclidean_distance: (x, y) => Math.sqrt(distance_squared(x, y)),
-  word_embeddings_ready: function (language, callback, word_embeddings_url) {
+  word_embeddings_ready: (language, callback, word_embeddings_url) => {
       let word_locations_url;
       language = extract_language_code(language);
+      if (words_to_features[language] instanceof HTMLScriptElement) {
+          // another call to this function is waiting for the load 
+          // add this callback to the script's onload
+          let script_onload = words_to_features[language].onload;
+          words_to_features[language].onload = () => {
+              script_onload();
+              invoke_callback(callback, "loaded");
+          }
+          return;
+      }
       if (typeof words_to_features[language] === 'object') {
           invoke_callback(callback, "loaded");
           return;
@@ -2863,22 +2874,22 @@ xhr.send();
               word_locations_url  = "word-embeddings/" + language + "/word-locations.js";
           }
           show_message("Loading words ...");
-          let error_handler = function (event) {
+          let error_handler = (event) => {
                                   show_message("Error while loading '" + word_embeddings_url + "'.\nTry another language.");
                                   invoke_callback(callback, "error");
                               }
-          let load_word_embeddings = function () {
-              load_script(word_embeddings_url,
-                          function () {
-                              show_message("");
-                              invoke_callback(callback, "loaded");
-                          },
-                          error_handler);           
+          let load_word_locations = () => {
+              const finished_callback = () => {
+                  show_message("");
+                  invoke_callback(callback, "loaded");
+              };
+              if (word_locations_url) {
+                  load_script(word_locations_url, finished_callback, error_handler);
+              } else {
+                  finished_callback();
+              }     
           };
-          if (word_locations_url) {
-              load_script(word_locations_url, load_word_embeddings, error_handler);
-          }
-          
+          words_to_features[language] = load_script(word_embeddings_url, load_word_locations, error_handler);
       }
   },
   word_to_location: function (word, language) {
