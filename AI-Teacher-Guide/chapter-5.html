@@ -268,6 +268,17 @@ Run some experiments below to explore this question.
         container_style = "width: 850px; height: 450px" 
         caption = "Bias in word analogy solutions. See if you can find more.">
 </figure>
+<p class="societal-impact">
+A paper called <a href="https://science.sciencemag.org/content/356/6334/183" target="_blank">
+Semantics derived automatically from language corpora contain human-like biases</a>
+proposed a way to measure word biases.
+The idea is to use the average distance two words have to two sets of "attribute" words.
+To explore gender bias, for example, the attribute word lists can be "male, man, boy" and "female, woman, girl".
+The difference of the average distances provides a score that can be used to compare words.
+In <a href="../snap/snap.html?project=draw%20word%bias&editMode&noRun" target="_blank">
+this implementation of the scoring reporter</a> one can see that "mathematics" has a higher "maleness" score than "art".
+And "art" has a higher "pleasantness" score than "mathematics".
+</p>
 
 <h4 class="how-it-works-white">How does this work?</h4>
 <p class="how-it-works">
