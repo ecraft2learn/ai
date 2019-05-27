@@ -8,6 +8,7 @@ const RUN_EXPERIMENTS = false;
 const CREATE_SPRITE_IMAGE = false;
 const SAVE_TENSORS = false;
 const combine_non_serious = true;
+const normal_versus_fungal_only = false;
 let class_names = ["normal",
                    "serious",
                    "fungal",
@@ -25,6 +26,9 @@ if (combine_non_serious) {
                     "brown",
 //                  "blue",
                     "white"]; // no class
+} else if (normal_versus_fungal_only) {
+    class_names = ["normal", "fungal"];
+    class_colors = ["green", "red", "white"];
 }
 let csv = {};
 let csv_class_names = {};
@@ -1000,10 +1004,11 @@ const run_experiments = () => {
                                    // highlight wrong ones in red
                                    message = "<span style='color:red'>" + message + "</span>";
                                }
-                               if (combine_non_serious) {
-                                   if (confidence_message.indexOf(not_confident_message) >= 0) {
-                                       not_confident_answers++;
-                                   } else if (class_index === 1) {// serious is index 1
+                               if (confidence_message.indexOf(not_confident_message) >= 0) {
+                                   not_confident_answers++;
+                               } else if (combine_non_serious || normal_versus_fungal_only) {
+                                   let positive_index = 1; // serious and fungal happen to both be index 1
+                                   if (class_index === positive_index) { 
                                        if (correct_prediction) {
                                            true_positives++;
                                        } else {
