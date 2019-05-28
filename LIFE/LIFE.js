@@ -262,8 +262,8 @@ const sentences_and_answers = () => {
 
 const precision = (x, n) => Math.round(x*Math.pow(10, n))/Math.pow(10, n);
 
-const respond_to_questions = async (question, distance_threshold) => {
-    return embedding_model.embed([question]).then((embedding) => {
+const respond_to_question = async (the_question, distance_threshold) => {
+    return embedding_model.embed([the_question]).then((embedding) => {
         let best_answer;
         let best_answer_distance = 1;
         let second_best_answer;
@@ -432,7 +432,7 @@ document.addEventListener(
             }   
         };
         const answer_question = (question) => {
-            LIFE.respond_to_questions(question, -0.55).then((answer) => {
+            LIFE.respond_to_question(question, -0.55).then((answer) => {
                 // reasonable matches must be less than -0.55 cosineProximity
                 respond_with_answer(answer, question);
             },
@@ -475,6 +475,6 @@ document.addEventListener(
         add_sample_questions();                           
      });
 
-return {respond_to_questions: respond_to_questions};
+return {respond_to_question: respond_to_question};
 
 })());
