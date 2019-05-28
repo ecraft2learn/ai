@@ -268,6 +268,7 @@ const respond_to_question = async (the_question, distance_threshold) => {
         let best_answer_distance = 1;
         let second_best_answer;
         let second_best_answer_distance;
+        embedding.print(true /* verbose */);
         group_of_questions_mean_embeddings.forEach((group_mean, mean_number) => {
             let distance = tf.metrics.cosineProximity(embedding.flatten(), group_mean).dataSync()[0];
             if (distance < best_answer_distance) {
