@@ -1,6 +1,28 @@
 // by Ken Kahn <toontalk@gmail.com> as part of the Onyx project at the University of Oxford
 // copyright not yet determined but will be some sort of open source
 
+const is_android = () => {
+  return /Android/i.test(navigator.userAgent);
+};
+
+const is_ios = () => {
+  return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+};
+
+const is_chrome = () => {
+  return /Chrome/i.test(navigator.userAgent);
+};
+
+if (is_chrome() && is_ios()) {
+    const p = document.createElement('p');
+    p.innerHTML = "<big>On iPhones and iPads this app only works in the Safari browser.</big>";
+    document.body.insertBefore(p, document.body.firstChild)
+}
+
+const is_mobile = () => {
+  return is_android() || is_ios();
+};
+
 const RUN_EXPERIMENTS = false;
 // if tensor_tsv is defined then collect all the logits of each image into a TSV string (tab-separated values)
 // let tensor_tsv; = "";
@@ -321,26 +343,6 @@ if (combine_non_serious) {
 let classifier;
 let mobilenet_model;
 let video;
-
-const is_android = () => {
-  return /Android/i.test(navigator.userAgent);
-};
-
-const is_ios = () => {
-  return /iPhone|iPad|iPod/i.test(navigator.userAgent);
-};
-
-const is_chrome = () => {
-  return /Chrome/i.test(navigator.userAgent);
-};
-
-if (is_ios() && is_chrome()) {
-    document.write("On iPhones and iPads this only works in the Safari browser.");
-}
-
-const is_mobile = () => {
-  return is_android() || is_ios();
-};
 
 const create_canvas = function () {
     let canvas = document.createElement('canvas');
