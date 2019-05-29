@@ -20,7 +20,7 @@ let class_colors = ["green",
                     "white"]; // no class
 if (combine_non_serious) {
     class_names = class_names.slice(0, class_names.length-2);
-    class_names.push("abnormal but second opinion not warranted");
+    class_names.push("abnormal");
     class_colors =["green",
                     "red",
                     "brown",
@@ -315,7 +315,7 @@ const images = {
 };
 
 if (combine_non_serious) {
-    images["abnormal but second opinion not warranted"] = images["fungal"].concat(images["trauma"]);
+    images["abnormal"] = images["fungal"].concat(images["trauma"]);
 }
 
 let classifier;
@@ -332,6 +332,27 @@ const is_ios = () => {
 
 const is_mobile = () => {
   return is_android() || is_ios();
+};
+
+const create_canvas = function () {
+    let canvas = document.createElement('canvas');
+    canvas.width  = VIDEO_WIDTH;
+    canvas.height = VIDEO_HEIGHT;
+    return canvas;
+};
+
+const analyse_camera_image = () => {
+    const temporaray_canvas = create_canvas();
+    const context = temporaray_canvas.getContext('2d');
+    context.drawImage(video, 0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
+    display_results(temporaray_canvas);
+};
+
+const display_results = (canvas) => {
+    predict_class(canvas, (results) => {
+        display_message("<img width=60 height=60 src='" + canvas.toDataURL() + "'>", true);
+        display_message(confidences(results, -1), true);
+    });
 };
 
 async function setupCamera() {
@@ -354,26 +375,34 @@ async function setupCamera() {
     },
   });
   video.srcObject = stream;
-
-  const toggle_freeze_button = document.getElementById('toggle video');
-  toggle_freeze_button.addEventListener('click',
-      (event) => {
-          if (!video.paused && !video.hidden) {
-              video.pause();
-              toggle_freeze_button.innerHTML = "Resume video";
-              display_message("<b>Use the mouse to select a rectangle containing the nail.</b>");        
-          } else {
-              if (video.hidden) {
-                  video.hidden = false;
-                  document.getElementById('canvas').hidden = true;
-              }
-              video.play();
-              toggle_freeze_button.innerHTML = "Freeze video";
-              display_message("<b>Freeze the video before selecting the nail.</b>");
+  const toggle_click= () => {
+      if (!video.paused && !video.hidden) {
+          video.pause();
+          toggle_freeze_button.innerHTML = "Resume video";
+          display_message("<b>Use the mouse to select a rectangle containing the nail.</b>");        
+      } else {
+          if (video.hidden) {
+              video.hidden = false;
+              document.getElementById('canvas').hidden = true;
           }
-      });
+          video.play();
+          toggle_freeze_button.innerHTML = "Freeze video";
+          display_message("<b>Freeze the video before selecting the nail.</b>");
+      }
+  };
+  const toggle_freeze_button = document.getElementById('toggle video');
+  if (is_mobile()) {
+      toggle_freeze_button.innerHTML = "Analyse";
+      toggle_freeze_button.addEventListener('click', analyse_camera_image);
+  } else {
+      toggle_freeze_button.addEventListener('click', toggle_click);  
+  }
   const reset_response_button = document.getElementById('reset_response');
-  reset_response_button.addEventListener('click', reset_response);
+  if (is_mobile()) {
+      reset_response_button.remove();
+  } else {
+      reset_response_button.addEventListener('click', reset_response);
+  }
   return new Promise((resolve) => {
       video.onloadedmetadata = () => {
           resolve(video);
@@ -807,17 +836,16 @@ const draw_maintaining_aspect_ratio = (source,
            
 const rectangle_selection = () => {
     const rectangle = document.getElementById('selection-rectangle');
-//     const video = document.getElementById('video');
-    const video_rectangle = video.getBoundingClientRect();
     let start_x = 0;
     let start_y = 0;
     let end_x = 0;
     let end_y = 0;
-    let video_left   = video_rectangle.left; // perhaps need to add scrollingElement offsets when using these?
-    let video_right  = video_left+video_rectangle.width;
-    let video_top    = video_rectangle.top;
-    let video_bottom = video_top+video_rectangle.height;
     const outside_image_region = (event) => {
+        const video_rectangle = video.getBoundingClientRect();
+        let video_left   = video_rectangle.left+window.scrollX; 
+        let video_right  = video_left+video_rectangle.width+window.scrollX;
+        let video_top    = video_rectangle.top;
+        let video_bottom = video_top+video_rectangle.height;
         if (video_left > event.clientX ||
             video_top > event.clientY ||
             video_right < event.clientX ||
@@ -832,6 +860,11 @@ const rectangle_selection = () => {
         if (!video.paused && !video.hidden) {
             return;
         }
+        const video_rectangle = video.getBoundingClientRect();
+        let video_left   = video_rectangle.left+window.scrollX; 
+        let video_right  = video_left+video_rectangle.width;
+        let video_top    = video_rectangle.top+window.scrollY;
+        let video_bottom = video_top+video_rectangle.height;
         let left   = Math.max(Math.min(start_x, end_x, video_right),  video_left);
         let right  = Math.min(Math.max(start_x, end_x, video_left),   video_right);
         let top    = Math.max(Math.min(start_y, end_y, video_bottom), video_top);
@@ -841,26 +874,20 @@ const rectangle_selection = () => {
         rectangle.style.width  = right - left + 'px';
         rectangle.style.height = bottom - top + 'px';
     };
-    const create_canvas = function () {
-        let canvas = document.createElement('canvas');
-        canvas.width  = VIDEO_WIDTH;
-        canvas.height = VIDEO_HEIGHT;
-        return canvas;
-    };
     document.body.addEventListener('mousedown', (event) => {
         if (outside_image_region(event)) {
             return;
         }
         rectangle.hidden = false;
-        start_x = event.clientX+document.scrollingElement.scrollLeft;
-        start_y = event.clientY+document.scrollingElement.scrollTop;
+        start_x = event.clientX+window.scrollX;
+        start_y = event.clientY+window.scrollY;
         update_selection();
     });
     // adding listeners to video makes more sense but when tried only mousemove worked reliably
     document.body.addEventListener('mousemove', (event) => {
         if (!rectangle.hidden) {
-            end_x = event.clientX+document.scrollingElement.scrollLeft;
-            end_y = event.clientY+document.scrollingElement.scrollTop;
+            end_x = event.clientX+window.scrollX;
+            end_y = event.clientY+window.scrollY;
             update_selection();          
         }
     });
@@ -869,9 +896,14 @@ const rectangle_selection = () => {
             return;
         }
         const box = rectangle.getBoundingClientRect();
-        const box_left = document.scrollingElement.scrollLeft+box.left;
-        const box_top  = document.scrollingElement.scrollTop+box.top;
+        const box_left = window.scrollX+box.left;
+        const box_top  = window.scrollY+box.top;
         if (box.width > 0 && box.height > 0) {
+            const video_rectangle = video.getBoundingClientRect();
+            let video_left   = video_rectangle.left+window.scrollX; 
+            let video_right  = video_left+video_rectangle.width+window.scrollX;
+            let video_top    = video_rectangle.top+window.scrollY;
+            let video_bottom = video_top+video_rectangle.height+window.scrollY;
             let temporaray_canvas = create_canvas();
             const source = video.hidden ? document.getElementById('canvas') : video;
             draw_maintaining_aspect_ratio(source,
@@ -884,10 +916,7 @@ const rectangle_selection = () => {
                                           box.height,
                                           0,
                                           0);
-            predict_class(temporaray_canvas, (results) => {
-                display_message("<img width=60 height=60 src='" + temporaray_canvas.toDataURL() + "'>", true);
-                display_message(confidences(results, -1), true);
-            });  
+            display_results(temporaray_canvas);
         }
         rectangle.hidden = true; 
     });

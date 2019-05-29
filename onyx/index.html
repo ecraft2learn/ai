@@ -45,27 +45,27 @@ and you can check out our
 </p>
 </div>
 <div id='main' hidden>
-    <button id="toggle video" class="freeze-video" style="padding:20px;">
+    <div id="response"></div>
+    <button id="toggle video" class="freeze-video" style="padding:12px;">
     Freeze video
     </button>
-    <br>
-    <br>
+    <div style="padding-top: 12px;">
     <video id="video" playsinline 
      width  = "224"
      height = "224"
 <!--      reverse left and right -->
-     style=" -moz-transform: scaleX(-1);
-             -o-transform: scaleX(-1);
-             -webkit-transform: scaleX(-1);
-             transform: scaleX(-1);
+     style="-moz-transform: scaleX(-1);
+            -o-transform: scaleX(-1);
+            -webkit-transform: scaleX(-1);
+            transform: scaleX(-1);
            ">
     </video>
+    </div>
     <canvas hidden id="canvas"
      width  = "224"
      height = "224">
     </canvas>
-    <p id="response"></p>
-    <button id="reset_response"  class="reset-response" style="padding:20px;">Reset log</button>
+    <button id="reset_response"  class="reset-response" >Reset log</button>
     <div id="selection-rectangle" hidden style="border: 2px dotted yellow; position: absolute;"></div>
 </div>
 </body>
