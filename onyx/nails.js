@@ -330,6 +330,14 @@ const is_ios = () => {
   return /iPhone|iPad|iPod/i.test(navigator.userAgent);
 };
 
+const is_chrome = () => {
+  return /Chrome/i.test(navigator.userAgent);
+};
+
+if (is_ios() && is_chrome()) {
+    document.write("On iPhones and iPads this only works in the Safari browser.");
+}
+
 const is_mobile = () => {
   return is_android() || is_ios();
 };
@@ -353,7 +361,7 @@ const display_results = (canvas) => {
         const data_url = canvas.toDataURL();
         const id = hex_md5(data_url);
         const result_description = confidences(results, -1);
-        const data = "Please email the following to toontalk@gmail.com\n"
+        const data = "Please email the following to toontalk@gmail.com\n\n"
                      + result_description
                      + "\nimage id = " + id
                      + "\ndata = " + logits;
