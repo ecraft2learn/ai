@@ -349,9 +349,22 @@ const analyse_camera_image = () => {
 };
 
 const display_results = (canvas) => {
-    predict_class(canvas, (results) => {
-        display_message("<img width=60 height=60 src='" + canvas.toDataURL() + "'>", true);
-        display_message(confidences(results, -1), true);
+    predict_class(canvas, (results, logits) => {
+        const data_url = canvas.toDataURL();
+        const id = hex_md5(data_url);
+        const result_description = confidences(results, -1);
+        const data = "Please email the following to toontalk@gmail.com\n"
+                     + result_description
+                     + "\nimage id = " + id
+                     + "\ndata = " + logits;
+        display_message("<img id='" + id + "' width=60 height=60 src='" + data_url + "'>", true);
+//         display_message("<a href='mailto:toontalk@gmail.com?subject=Onyx image issue&body=Please paste data here.' target='_blank'><img width=60 height=60 src='" + data_url + "'></a>", true);
+        display_message(result_description, true);
+        const image_element = document.getElementById(id);
+        const display_data = () => {
+            add_textarea(data);
+        };
+        image_element.addEventListener('click', display_data);           
     });
 };
 
@@ -460,8 +473,9 @@ const predict_class = (image, callback) => {
     return tf.tidy(() => {
         const image_pixels = tf.browser.fromPixels(image);
         const logits = infer(image_pixels);
+        const logits_data = logits.dataSync()
         classifier.predictClass(logits, top_k).then((result) => {
-            callback(result);          
+            callback(result, logits_data);          
         });
     });
 };
@@ -1141,6 +1155,7 @@ add_image_to_sprite_image = (image_url, sprite_image_canvas) => {
 
 const add_textarea = (text) => {
     const text_area = document.createElement('textarea');
+    text_area.style = "width: 400px; height: 400px";
     text_area.value = text;
     document.body.appendChild(text_area);
 };
