@@ -599,7 +599,7 @@ const confidences = (result, correct_class_index, running_tests) => {
         message += not_confident_message;
     } else {
         if (scores[0].name === 'serious') {
-            message += "It is most likely that the nail indicates something serious and you should seek medical advise. (Confidence score is "
+            message += "It is most likely that the nail indicates something serious and you should seek medical advice. (Confidence score is "
                        + scores[0].score + "%)";
         } else if (scores[1].name === 'serious' && scores[1].score >= 20) {
             message += "It might be serious " + " (confidence score is " + scores[1].score + "%) ";
