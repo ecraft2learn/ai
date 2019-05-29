@@ -10,7 +10,7 @@ const SAVE_TENSORS = false;
 const combine_non_serious = true;
 const normal_versus_fungal_only = false;
 let class_names = ["normal",
-                   "serious",
+                   "warrants second opinion",
                    "fungal",
                    "trauma"];
 let class_colors = ["green",
@@ -20,7 +20,7 @@ let class_colors = ["green",
                     "white"]; // no class
 if (combine_non_serious) {
     class_names = class_names.slice(0, class_names.length-2);
-    class_names.push("non-serious");
+    class_names.push("abnormal but second opinion not warranted");
     class_colors =["green",
                     "red",
                     "brown",
@@ -200,7 +200,7 @@ const images = {
 "images/Nail Images from Library book/minor trauma nail 2 habit tic deformity.jpg",
 "images/trauma/Karen IMG_1621-a.jpg",
 ],
-"serious": [
+"warrants second opinion": [
 "images/splinter-haemorrhage/Fingernail unhealthy Image_1.png",
 "images/splinter-haemorrhage/Fingernail unhealthy Image_10.png",
 "images/splinter-haemorrhage/Fingernail unhealthy Image_11.png",
@@ -315,24 +315,24 @@ const images = {
 };
 
 if (combine_non_serious) {
-    images["non-serious"] = images["fungal"].concat(images["trauma"]);
+    images["abnormal but second opinion not warranted"] = images["fungal"].concat(images["trauma"]);
 }
 
 let classifier;
 let mobilenet_model;
 let video;
 
-function isAndroid() {
+const is_android = () => {
   return /Android/i.test(navigator.userAgent);
-}
+};
 
-function isiOS() {
+const is_ios = () => {
   return /iPhone|iPad|iPod/i.test(navigator.userAgent);
-}
+};
 
-function isMobile() {
-  return isAndroid() || isiOS();
-}
+const is_mobile = () => {
+  return is_android() || is_ios();
+};
 
 async function setupCamera() {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -344,11 +344,11 @@ async function setupCamera() {
   video.width  = VIDEO_WIDTH;
   video.height = VIDEO_HEIGHT;
 
-  const mobile = isMobile();
+  const mobile = is_mobile();
   const stream = await navigator.mediaDevices.getUserMedia({
     'audio': false,
     'video': {
-      facingMode: 'user',
+      facingMode: mobile ? 'environment' : 'user',
       width: mobile ? undefined : VIDEO_WIDTH,
       height: mobile ? undefined : VIDEO_HEIGHT,
     },
@@ -598,15 +598,15 @@ const confidences = (result, correct_class_index, running_tests) => {
     if (scores[0].score < minimum_confidence) {
         message += not_confident_message;
     } else {
-        if (scores[0].name === 'serious') {
-            message += "It is most likely that the nail indicates something serious and you should seek medical advice. (Confidence score is "
+        if (scores[0].name === "warrants second opinion") {
+            message += "It is most likely that the nail indicates something that warrants a second opinion and you should seek medical advice. (Confidence score is "
                        + scores[0].score + "%)";
-        } else if (scores[1].name === 'serious' && scores[1].score >= 20) {
-            message += "It might be serious " + " (confidence score is " + scores[1].score + "%) ";
+        } else if (scores[1].name === "warrants second opinion" && scores[1].score >= 20) {
+            message += "It might be warrant a second opinion " + " (confidence score is " + scores[1].score + "%) ";
         } else {
             message += "The nail's condition is " + scores[0].name + " with confidence score of " + scores[0].score + "%.";
-            if (scores[1].name === 'serious' && scores[1].score > 0) {
-                message += " The confidence score for it being serious is " + scores[1].score + "%.";
+            if (scores[1].name === "warrants second opinion" && scores[1].score > 0) {
+                message += " The confidence score for it being warranting a second opinion is " + scores[1].score + "%.";
             } else if (scores[1].score > 0) {
                 message += " Otherwise it is " + scores[1].name + " with confidence score of " + scores[1].score + "%.";
             }
