@@ -1984,6 +1984,17 @@ xhr.send();
           window.addEventListener("message", process_messages);
     },
 
+    get_default_lanugage: () => ecraft2learn.default_language || navigator.language,
+
+    // see https://github.com/jmoenig/Snap/issues/2400
+    get_default_language_snap_format: () => {
+        if (["ca-VA", "ja-HIRA", "pt-BR", "zh-CN", "zh-TW"].indexOf(ecraft2learn.get_default_lanugage()) >= 0) {
+            return ecraft2learn.get_default_lanugage().replace('-', '_');
+        } else {
+            return ecraft2learn.get_default_lanugage().slice(0, 2);
+        }
+    },
+
     set_default_language: function (language) {
         let matching_language_entry = language_entry(language);
         if (!matching_language_entry) {
