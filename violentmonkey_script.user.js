@@ -1,7 +1,8 @@
 // ==UserScript==
 // @name ADD IME TO SNAP
 // @namespace Violentmonkey Scripts
-// @match https://snap.berkeley.edu/snapsource/dev/snap.html
+// @match https://snap.berkeley.edu/*
+// @match https://ecraft2learn.github.io/ai/*
 // @grant none
 // ==/UserScript==
 
