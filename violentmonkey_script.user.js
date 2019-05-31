@@ -3,6 +3,7 @@
 // @namespace Violentmonkey Scripts
 // @match https://snap.berkeley.edu/*
 // @match https://ecraft2learn.github.io/ai/*
+// @match localhost:8080/ai/*
 // @grant none
 // ==/UserScript==
 
