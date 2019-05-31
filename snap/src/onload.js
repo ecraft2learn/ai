@@ -26,6 +26,10 @@ window.addEventListener('load', function () {
 				return;
 			}
 			setTimeout(function () {
+				           const parameters = new URLSearchParams(window.location.hash);
+				           if (parameters.get('locale')) {
+				           	   ide_morph.setLanguage(parameters.get('locale'));
+				           }
 						   ide_morph.rawOpenProjectString(project_text);
 						   if (full_screen) {
 							   ide_morph.toggleAppMode(true);
