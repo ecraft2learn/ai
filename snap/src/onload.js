@@ -26,9 +26,10 @@ window.addEventListener('load', function () {
 				return;
 			}
 			setTimeout(function () {
-				           const parameters = new URLSearchParams(window.location.hash);
+				           const parameters = new URLSearchParams(window.parent.location.hash);
 				           if (parameters.get('locale')) {
-				           	   ide_morph.setLanguage(parameters.get('locale'));
+				           	   // Snap uses _ instead of - in two part language code names
+				           	   ide_morph.setLanguage(parameters.get('locale').replace('-', '_'));
 				           }
 						   ide_morph.rawOpenProjectString(project_text);
 						   if (full_screen) {
