@@ -540,8 +540,8 @@ const initialise_page = async () => {
           info.id = 'info';
           document.body.appendChild(info);
       }
-      info.textContent = 'This browser does not support video capture, ' +
-                         'lacks permission to use the camera, '
+      info.textContent = 'This browser either does not support video capture, ' +
+                         'lacks permission to use the camera, ' +
                          'or this device does not have a camera.';
       info.style.display = 'block';
       throw e;
