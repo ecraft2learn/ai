@@ -23,13 +23,14 @@ const is_mobile = () => {
   return is_android() || is_ios();
 };
 
+const use_korean_images = false;
 const RUN_EXPERIMENTS = false;
 // if tensor_tsv is defined then collect all the logits of each image into a TSV string (tab-separated values)
 // let tensor_tsv; = "";
 // let metadata_tsv = "";
 const CREATE_SPRITE_IMAGE = false;
 const SAVE_TENSORS = false;
-const combine_non_serious = true;
+const combine_non_serious = false;
 const normal_versus_fungal_only = false;
 let class_names = ["normal",
                    "warrants second opinion",
@@ -81,18 +82,12 @@ const histogram_image_size = 40;
 
 const minimum_confidence = 60;
 
-let false_negatives = 0;
-let false_positives = 0;
-let true_negatives = 0;
-let true_positives = 0;
-let not_confident_answers = 0; // less than minimum_confidence for top answer
-
 const confusion_matrix = [];
 
 const VIDEO_WIDTH  = 224; // this version of MobileNet expects 224x224 images
 const VIDEO_HEIGHT = 224;
 
-const images = {
+const old_images = {
 "normal": [
 "images/normal/Fingernail healthy Image_1a.jpg",
 "images/normal/Fingernail healthy Image_1b.jpg",
@@ -336,16 +331,38 @@ const images = {
 ]
 };
 
+const korean_images = {
+    "normal": [{count: 100, 
+               file_name: "images/korean/L_NAIL_5nail_5nail2010_1_normalnail.png"}],
+    "fungal": 
+            [{count: 157, 
+             file_name: "L_NAIL_5nail_5nail2004_2_onychomycosis.png"}],
+};
+
+const images = use_korean_images ? korean_images : old_images;
+
 if (combine_non_serious) {
     images["abnormal"] = images["fungal"].concat(images["trauma"]);
 }
+
+const number_of_images = {};
+class_names.forEach((class_name) => {
+    number_of_images[class_name] = 0;
+    images[class_name].forEach((image_or_images) => {
+        if (typeof image_or_images === 'string') {
+            number_of_images[class_name]++;
+        } else {
+            number_of_images[class_name] += image_or_images.count;
+        }
+    });
+});
 
 let classifier;
 let mobilenet_model;
 let video;
 
 const create_canvas = function () {
-    let canvas = document.createElement('canvas');
+    const canvas = document.createElement('canvas');
     canvas.width  = VIDEO_WIDTH;
     canvas.height = VIDEO_HEIGHT;
     return canvas;
@@ -444,40 +461,41 @@ const load_image = function (image_url, callback) {
 
 const add_images = (when_finished, just_one_class, only_class_index, except_image_index) => {
     let class_index = just_one_class ? only_class_index : 0;
-    let label = class_names[class_index];
     let image_index = -1; // incremented to 0 soon
     const image_sprite_canvas = CREATE_SPRITE_IMAGE && create_sprite_image_canvas();
     if (image_sprite_canvas) {
         document.body.appendChild(image_sprite_canvas);
     }
-    const next_image = () => {
-        let class_images = images[class_names[class_index]];
-        if (image_index === class_images.length-1) {
-            // no more images for this class 
-            image_index = 0;
-            class_index++;
-            if (class_index === class_names.length || (just_one_class && only_class_index)) {
-                // no more classes
-                when_finished();
-                if (image_sprite_canvas) {
-                    // can then save it 
-                    add_textarea(image_sprite_canvas.toDataURL() + "");
-                }
-                return;
-            }
-        } else {
-            image_index++;
-        }
-        if (image_index !== except_image_index) {
-            add_image_to_training(class_images[image_index], class_index, image_index, next_image);
-            if (image_sprite_canvas) {
-                add_image_to_sprite_image(class_images[image_index], image_sprite_canvas);
-            }
-        } else {
-            next_image();
+    const [next_image, reset_next_image] = create_next_image_generator();
+    const when_all_finished = () => {
+        when_finished();
+        if (image_sprite_canvas) {
+            // can then save it 
+            add_textarea(image_sprite_canvas.toDataURL() + "");
         }
     };
-    next_image();
+    const image_callback = (image_or_canvas, class_index, image_index) => {
+        if (image_index !== except_image_index) {
+            const logits = infer(image_or_canvas);
+            if (typeof metadata_tsv !== 'undefined' && metadata_tsv === "") {
+                metadata_tsv = "Class\tImage ID\n";
+            }
+            if (typeof tensor_tsv !== 'undefined') {
+                tensor_tsv += class_names[class_index] + "#" + image_index + "\t";
+                tensor_tsv += save_logits_as_tsv(logits);                       
+            }
+            if (typeof metadata_tsv !== 'undefined') {
+                metadata_tsv += class_names[class_index] + "\t" + class_names[class_index] + "#" + image_index + "\n";
+            }
+            classifier.addExample(logits, class_index);
+            logits.dispose();
+        }   
+        if (image_sprite_canvas) {
+            add_image_to_sprite_image(class_images[image_index], image_sprite_canvas);
+        }
+        next_image(image_callback, undefined, when_all_finished)
+    };
+    next_image(image_callback, undefined, when_all_finished);
 };
 
 const predict_class = (image, callback) => {
@@ -488,26 +506,6 @@ const predict_class = (image, callback) => {
         classifier.predictClass(logits, top_k).then((result) => {
             callback(result, logits_data);          
         });
-    });
-};
-
-const add_image_to_training = (image_url, class_index, image_index, continuation) => {
-    load_image(image_url,
-               (image) => {
-                   logits = infer(image);
-                   if (typeof metadata_tsv !== 'undefined' && metadata_tsv === "") {
-                       metadata_tsv = "Class\tImage ID\n";
-                   }
-                   if (typeof tensor_tsv !== 'undefined') {
-                       tensor_tsv += class_names[class_index] + "#" + image_index + "\t";
-                       tensor_tsv += save_logits_as_tsv(logits);                       
-                   }
-                   if (typeof metadata_tsv !== 'undefined') {
-                       metadata_tsv += class_names[class_index] + "\t" + class_names[class_index] + "#" + image_index + "\n";
-                   }
-                   classifier.addExample(logits, class_index);
-                   logits.dispose();
-                   continuation();     
     });
 };
 
@@ -988,124 +986,228 @@ const receive_drop = (event) => {
 
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
-const run_experiments = () => {   
-    let class_index = 0;
-    let image_index = -1; // incremented to 0 soon
+const create_next_image_generator = () => {   
+    let class_index;
+    let image_index;
+    let image_count;;
+    let multi_nail_image; // image that has multiple nails on it
+    let multi_nail_description; // object with at least file_name and count attributes
+    let nails_remaining_in_multi_nail;
+    const reset_next_image = () => {
+        class_index = 0;
+        image_index = -1; // incremented to 0 soon - this is the index into the list of image file_names or multi-images
+        image_count = 0;
+        nails_remaining_in_multi_nail = 0;     
+    };
+    reset_next_image();
+    const multi_nail_image_delta_x = () => {
+        return multi_nail_description.delta_x || 112; // 112 is used in the Korean images
+    };
+    const multi_nail_image_delta_y = () => {
+        return multi_nail_description.delta_y || 128; // 128 is used in the Korean images
+    };
+    const multi_nail_image_start_x = () => {
+        return multi_nail_description.start_x || 16; 
+    };
+    const multi_nail_image_start_y = () => {
+        return multi_nail_description.start_y || 52; 
+    };
+    const multi_nail_image_box = () => {
+        const width = multi_nail_image.width;
+        const images_per_row = Math.floor((width-multi_nail_image_start_x())/multi_nail_image_delta_x());
+        const row_number = Math.floor(nails_remaining_in_multi_nail/images_per_row);
+        const column_number = nails_remaining_in_multi_nail-(row_number*images_per_row);
+        return {x: multi_nail_image_start_x()+column_number*multi_nail_image_delta_x(),
+                y: multi_nail_image_start_y()+row_number*multi_nail_image_delta_y(),
+                width: multi_nail_image_delta_x(),
+                height: multi_nail_image_delta_y()};
+    };
+    const next_image = (image_callback, when_class_finished, when_all_finished) => {
+        const class_name = class_names[class_index];
+        if (image_count === number_of_images[class_name]-1) {
+            // no more images for this class_index
+            if (when_class_finished) {
+                when_class_finished(class_index);
+            }
+            image_index = 0;
+            image_count = 0;
+            class_index++;
+            if (class_index === class_names.length) { // no more classes 
+                if (when_all_finished) {
+                    when_all_finished()
+                };
+                return;
+            }
+        } else {
+            image_count++;
+            if (nails_remaining_in_multi_nail > 0) {
+                nails_remaining_in_multi_nail--;
+            } else {
+                image_index++;
+            }
+        }
+        const maximum_confidence = (confidences) => {
+            return Math.max(...Object.values(confidences));
+        };
+        const canvas_of_next_nail_in_multi_nail_image = () => {
+            const canvas = document.createElement('canvas');
+            const box = multi_nail_image_box();
+            canvas.width = VIDEO_WIDTH;
+            canvas.height = VIDEO_HEIGHT;
+            draw_maintaining_aspect_ratio(multi_nail_image,
+                                          canvas,
+                                          VIDEO_WIDTH,
+                                          VIDEO_HEIGHT,
+                                          box.x,
+                                          box.y,
+                                          box.width,
+                                          box.height);
+            return canvas;
+        };
+        const load_or_extract_image = () => {
+            if (multi_nail_image) {
+                image_callback(canvas_of_next_nail_in_multi_nail_image(), class_index, image_index, image_count);
+                return;
+            }
+            const class_name = class_names[class_index];
+            const image_or_images_description = images[class_name][image_index];
+            if (typeof image_or_images_description !== 'string') {
+                load_image(image_or_images_description.file_name,
+                           (image) => {
+                               multi_nail_image = image;
+                               multi_nail_description = image_or_images_description;
+                               nails_remaining_in_multi_nail = image_or_images_description.count;
+                               load_or_extract_image();
+                           });
+                return;
+            }
+            load_image(image_or_images_description, 
+                       (image) => {
+                           image_callback(image, class_index, image_index, image_count);
+                       });
+        };
+        load_or_extract_image();
+    };
+    return [next_image, reset_next_image];
+};
+
+const run_experiments = () => {
+    let false_negatives = 0;
+    let false_positives = 0;
+    let true_negatives = 0;
+    let true_positives = 0;
+    let not_confident_answers = 0; // less than minimum_confidence for top answer 
+    const [next_image, reset_next_image] = create_next_image_generator();
+    reset_next_image();
     let number_right = 0;
     display_message("<p><b>Confidence scores for each possible classification. " + 
                     "<span style=color:red>Red entries</span> are where the correct classification " +
                     "was not the most confident answer.</b></p>");
     const next_experiment = () => {
-        let class_images = images[class_names[class_index]];
-        if (image_index === class_images.length-1) {
-            // no more images for this class_index
+        const class_finished = (class_index) => {
+            let total = true_positives+true_negatives+false_positives+false_negatives+not_confident_answers;
             display_message("<p>Number whose highest confidence score is the correct answer = " + 
-                            number_right + "/" + class_images.length + 
-                            " (" + Math.round(100*number_right/class_images.length) + "%)</p>",
+                            number_right + "/" + total + 
+                            " (" + Math.round(100*number_right/total) + "%)</p>",
                             true);
             add_textarea(csv[class_names[class_index]]);
             number_right = 0;
-            image_index = 0;
-            class_index++;
-            if (class_index === class_names.length) {
-                let total = true_positives+true_negatives+false_positives+false_negatives+not_confident_answers;
-                display_message("true positives = " + true_positives + "<br>"
-                                + "true negatives = " + true_negatives + "<br>"
-                                + "false positives = " + false_positives + "<br>"
-                                + "false negatives = " + false_negatives + "<br>"
-                                + "not confident of any answer = " + not_confident_answers + "<br>"
-                                + "total = " + total + "<br>",
-                                true);
-                const number_precision = (x, n) => Math.round(x*Math.pow(10, n))/Math.pow(10, n);
-                let sensitivity = number_precision(true_positives/(true_positives+false_negatives), 4);
-                let specificity = number_precision(true_negatives/(true_negatives+false_positives), 4);
-                let precision = number_precision(true_positives/(true_positives+false_positives), 4);
-                let recall = number_precision(true_positives/(true_positives+false_negatives), 4);
-                display_message("sensitivity = " + sensitivity + "<br>"
-                                + "specificity = " + specificity + "<br>"
-                                + "precision = " + precision + "<br>"
-                                + "recall = " + recall + "<br>",
-                                true);
-                add_textarea(histogram_buckets_to_html(histogram_buckets, histogram_image_size));
-                add_textarea(confusion_matrix_to_html(confusion_matrix, 100));
-                return;
-            }
-        } else {
-            image_index++;
-        }
+        };
+        const all_classes_finished = () => {
+            let total = true_positives+true_negatives+false_positives+false_negatives+not_confident_answers;
+            display_message("true positives = " + true_positives + "<br>"
+                            + "true negatives = " + true_negatives + "<br>"
+                            + "false positives = " + false_positives + "<br>"
+                            + "false negatives = " + false_negatives + "<br>"
+                            + "not confident of any answer = " + not_confident_answers + "<br>"
+                            + "total = " + total + "<br>",
+                            true);
+            const number_precision = (x, n) => Math.round(x*Math.pow(10, n))/Math.pow(10, n);
+            let sensitivity = number_precision(true_positives/(true_positives+false_negatives), 4);
+            let specificity = number_precision(true_negatives/(true_negatives+false_positives), 4);
+            let precision = number_precision(true_positives/(true_positives+false_positives), 4);
+            let recall = number_precision(true_positives/(true_positives+false_negatives), 4);
+            display_message("sensitivity = " + sensitivity + "<br>"
+                            + "specificity = " + specificity + "<br>"
+                            + "precision = " + precision + "<br>"
+                            + "recall = " + recall + "<br>",
+                            true);
+            add_textarea(histogram_buckets_to_html(histogram_buckets, histogram_image_size));
+            add_textarea(confusion_matrix_to_html(confusion_matrix, 100));
+        };
         const maximum_confidence = (confidences) => {
             return Math.max(...Object.values(confidences));
         };
-        const test_image = () => {
-            const class_name = class_names[class_index];
-            const image_URL = images[class_name][image_index];
-            const plain_text = (html) => {
-                const div = document.createElement('div');
-                div.innerHTML = html;
-                return div.innerText;
-            };
-            load_image(image_URL,
-                       async(image) => {
-                           predict_class(image, (result) => {
-                               let confidence = result.confidences[class_index];
-                               display_message("<img src='" + image_URL + "' width=100 height=100></img>", true);
-                               let confidence_message = confidences(result, class_index, true);
-                               let message = class_name + "#" + image_index + " " + confidence_message;
-                               let correct_prediction = correct(result, class_index);
-                               if (correct_prediction) {
-                                   number_right++;
-                               } else {
-                                   // highlight wrong ones in red
-                                   message = "<span style='color:red'>" + message + "</span>";
-                               }
-                               if (confidence_message.indexOf(not_confident_message) >= 0) {
-                                   not_confident_answers++;
-                               } else if (combine_non_serious || normal_versus_fungal_only) {
-                                   let positive_index = 1; // serious and fungal happen to both be index 1
-                                   if (class_index === positive_index) { 
-                                       if (correct_prediction) {
-                                           true_positives++;
-                                       } else {
-                                           false_negatives++;
-                                       }
-                                   } else {
-                                       if (correct_prediction) {
-                                           true_negatives++;
-                                       } else {
-                                           false_positives++;
-                                       }
-                                   }
-                               }
-                               display_message(message, true);
-                               update_histogram(result, class_index, image_URL, plain_text(message));
-                               update_confusion_matrix(result, class_index);
-                               csv[class_name] += "https://ecraft2learn.github.io/ai/onyx/" + images[class_name][image_index] + "," +
-                                                  image_index + ",";
-                               csv_class_names[class_name].forEach((name) => {
-                                   // this re-orders the results
-                                   const index = class_names.indexOf(name);
-                                   const correct = index === class_index;
-                                   const score = remove_one_vote(result.confidences[index], correct, true);
-                                   csv[class_name] += score;
-                                   if (index < class_names.length-1) {
-                                       // no need to add comma to the last one
-                                       csv[class_name] += ",";
-                                   }
-                               });
-                               csv[class_name] += "\n";
-                               next_experiment();                          
-                           });
-                       });
+        const plain_text = (html) => {
+            const div = document.createElement('div');
+            div.innerHTML = html;
+            return div.innerText;
         };
-        test_image();
-//         const clear_just_one_class = false;
-//         if (clear_just_one_class) {
-//             classifier.clearClass(class_index); // remove elements from this class
-//         } else {
-//             classifier.dispose();
-//             classifier = knnClassifier.create();
-//         }
-//         add_images(test_image, clear_just_one_class, class_index, image_index); // put back all one
+        const get_url = (image_or_canvas) => {
+            if (image_or_canvas instanceof HTMLCanvasElement) {
+                return image_or_canvas.toDataURL();
+            } else {
+                return image_or_canvas.src;
+            }
+        };
+        const process_prediction = (result, image_or_canvas, class_index, image_index, image_count) => {
+            let confidence = result.confidences[class_index];
+            const image_url = get_url(image_or_canvas);
+            display_message("<img src='" + image_url + "' width=100 height=100></img>", true);
+            let confidence_message = confidences(result, class_index, true);
+            const class_name = class_names[class_index];
+            let message = class_name + "#" + image_count + " " + confidence_message;
+            let correct_prediction = correct(result, class_index);
+            if (correct_prediction) {
+                number_right++;
+            } else {
+                // highlight wrong ones in red
+                message = "<span style='color:red'>" + message + "</span>";
+            }
+            if (confidence_message.indexOf(not_confident_message) >= 0) {
+                not_confident_answers++;
+            } else if (combine_non_serious || normal_versus_fungal_only) {
+                let positive_index = 1; // serious and fungal happen to both be index 1
+                if (class_index === positive_index) { 
+                    if (correct_prediction) {
+                        true_positives++;
+                    } else {
+                        false_negatives++;
+                    }
+                } else {
+                    if (correct_prediction) {
+                       true_negatives++;
+                    } else {
+                        false_positives++;
+                    }
+                }
+            }
+            display_message(message, true);
+            update_histogram(result, class_index, image_url, plain_text(message));
+            update_confusion_matrix(result, class_index);
+            csv[class_name] += "https://ecraft2learn.github.io/ai/onyx/" + images[class_name][image_index] + "," +
+                                image_count + ",";
+            csv_class_names[class_name].forEach((name) => {
+                // this re-orders the results
+                const index = class_names.indexOf(name);
+                const correct = index === class_index;
+                const score = remove_one_vote(result.confidences[index], correct, true);
+                csv[class_name] += score;
+                if (index < class_names.length-1) {
+                    // no need to add comma to the last one
+                    csv[class_name] += ",";
+                }
+            });
+            csv[class_name] += "\n";
+            next_experiment();                          
+        };
+        const image_callback = (image_or_canvas, class_index, image_index, image_count) => {
+            predict_class(image_or_canvas, 
+                          (result) => {
+                              process_prediction(result, image_or_canvas, class_index, image_index, image_count);
+                          });
+        };
+        next_image(image_callback, class_finished, all_classes_finished);
     };
     next_experiment();
 };
@@ -1126,36 +1228,28 @@ let sprite_image_y = 0;
 
 const create_sprite_image_canvas = () => {
     const canvas = document.createElement('canvas');
-    let number_of_images = 0;
-    Object.values(images).forEach((class_images) => {
-        number_of_images += class_images.length;
-    });
-    const images_per_row = Math.ceil(Math.sqrt(number_of_images));
-//     const images_per_row = sprite_image_width/sprite_size;
-//     const number_of_rows = Math.ceil(number_of_images/images_per_row);
+    let total_number_of_images = 
+        Object.values(number_of_images).reduce((accumulator, currentValue) => accumulator + currentValue);
+    const images_per_row = Math.ceil(Math.sqrt(total_number_of_images));
     sprite_image_width = images_per_row*sprite_size;
     canvas.width  = sprite_image_width;
     canvas.height = sprite_image_width;
     return canvas;
 };
 
-add_image_to_sprite_image = (image_url, sprite_image_canvas) => {
+const add_image_to_sprite_image = (image_or_canvas, sprite_image_canvas) => {
     let x = sprite_image_x; // close over the current value
     let y = sprite_image_y;
-    let image = new Image();
-    image.src = image_url;
-    image.onload = () => {
-        draw_maintaining_aspect_ratio(image,
-                                      sprite_image_canvas,
-                                      sprite_size,
-                                      sprite_size,
-                                      0,
-                                      0,
-                                      image.width,
-                                      image.height,
-                                      x,
-                                      y);
-    };
+    draw_maintaining_aspect_ratio(image_or_canvas,
+                                  sprite_image_canvas,
+                                  sprite_size,
+                                  sprite_size,
+                                  0,
+                                  0,
+                                  image.width,
+                                  image.height,
+                                  x,
+                                  y);
     sprite_image_x += sprite_size;
     if (sprite_image_x >= sprite_image_width) {
         // new row
