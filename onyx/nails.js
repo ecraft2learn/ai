@@ -25,13 +25,16 @@ const is_mobile = () => {
 
 const use_korean_images = false;
 const RUN_EXPERIMENTS = false;
+let xs; //  = [];
+let ys; // = [];
 // if tensor_tsv is defined then collect all the logits of each image into a TSV string (tab-separated values)
 // let tensor_tsv; = "";
 // let metadata_tsv = "";
 const CREATE_SPRITE_IMAGE = false;
 const SAVE_TENSORS = false;
-const combine_non_serious = false;
+const combine_non_serious = true;
 const normal_versus_fungal_only = false;
+// should the following be generated from the images object?
 let class_names = ["normal",
                    "warrants second opinion",
                    "fungal",
@@ -332,11 +335,14 @@ const old_images = {
 };
 
 const korean_images = {
-    "normal": [{count: 100, 
-               file_name: "images/korean/L_NAIL_5nail_5nail2010_1_normalnail.png"}],
-    "fungal": 
-            [{count: 157, 
-             file_name: "L_NAIL_5nail_5nail2004_2_onychomycosis.png"}],
+    "normal": [{count: 10, 
+                file_name: "images/korean/L_NAIL_5nail_5nail2010_1_normalnail.png",
+                start_x: 16,
+                start_y: 48}],
+    "fungal": [{count: 10, 
+                file_name: "images/korean/L_NAIL_5nail_5nail2004_2_onychomycosis.png",
+                start_x: 16,
+                start_y: 48}],
 };
 
 const images = use_korean_images ? korean_images : old_images;
@@ -473,6 +479,26 @@ const add_images = (when_finished, just_one_class, only_class_index, except_imag
             // can then save it 
             add_textarea(image_sprite_canvas.toDataURL() + "");
         }
+        if (xs instanceof Array) {
+            const model_callback = (model) => {
+                const prediction = model.predict(tf.tensor(xs));
+                prediction.print();
+            }
+            train_model(xs,
+                        ys, 
+                        {hidden_layer_size: 100,
+                         learning_rate: 0.0001,
+                         batch_size_fraction: 0.4, 
+                         epochs: 20},
+                        model_callback);
+        }
+    };
+    const one_shot = (index, n) => {
+        let vector = [];
+        for (i = 0; i < n; i++) {
+            vector.push(i === index ? 1 : 0);
+        }
+        return vector;
     };
     const image_callback = (image_or_canvas, class_index, image_index) => {
         if (image_index !== except_image_index) {
@@ -488,6 +514,10 @@ const add_images = (when_finished, just_one_class, only_class_index, except_imag
                 metadata_tsv += class_names[class_index] + "\t" + class_names[class_index] + "#" + image_index + "\n";
             }
             classifier.addExample(logits, class_index);
+            if (xs instanceof Array) {
+                xs.push(logits.dataSync());
+                ys.push(one_shot(class_index, class_names.length));
+            }
             logits.dispose();
         }   
         if (image_sprite_canvas) {
@@ -1000,17 +1030,23 @@ const create_next_image_generator = () => {
         nails_remaining_in_multi_nail = 0;     
     };
     reset_next_image();
+    const multi_nail_image_width = () => {
+        return multi_nail_description.width || 100; // 100x100 is used in the Korean images
+    };
+    const multi_nail_image_height = () => {
+        return multi_nail_description.height || 100; // 100x100 is used in the Korean images
+    };
     const multi_nail_image_delta_x = () => {
-        return multi_nail_description.delta_x || 112; // 112 is used in the Korean images
+        return multi_nail_description.delta_x || 112; 
     };
     const multi_nail_image_delta_y = () => {
-        return multi_nail_description.delta_y || 128; // 128 is used in the Korean images
+        return multi_nail_description.delta_y || 128; 
     };
     const multi_nail_image_start_x = () => {
         return multi_nail_description.start_x || 16; 
     };
     const multi_nail_image_start_y = () => {
-        return multi_nail_description.start_y || 52; 
+        return multi_nail_description.start_y || 48; 
     };
     const multi_nail_image_box = () => {
         const width = multi_nail_image.width;
@@ -1019,8 +1055,8 @@ const create_next_image_generator = () => {
         const column_number = nails_remaining_in_multi_nail-(row_number*images_per_row);
         return {x: multi_nail_image_start_x()+column_number*multi_nail_image_delta_x(),
                 y: multi_nail_image_start_y()+row_number*multi_nail_image_delta_y(),
-                width: multi_nail_image_delta_x(),
-                height: multi_nail_image_delta_y()};
+                width: multi_nail_image_width(),
+                height: multi_nail_image_height()};
     };
     const next_image = (image_callback, when_class_finished, when_all_finished) => {
         const class_name = class_names[class_index];
@@ -1031,6 +1067,7 @@ const create_next_image_generator = () => {
             }
             image_index = 0;
             image_count = 0;
+            multi_nail_image = undefined;
             class_index++;
             if (class_index === class_names.length) { // no more classes 
                 if (when_all_finished) {
@@ -1098,23 +1135,23 @@ const run_experiments = () => {
     let true_positives = 0;
     let not_confident_answers = 0; // less than minimum_confidence for top answer 
     const [next_image, reset_next_image] = create_next_image_generator();
-    reset_next_image();
     let number_right = 0;
     display_message("<p><b>Confidence scores for each possible classification. " + 
                     "<span style=color:red>Red entries</span> are where the correct classification " +
                     "was not the most confident answer.</b></p>");
     const next_experiment = () => {
         const class_finished = (class_index) => {
-            let total = true_positives+true_negatives+false_positives+false_negatives+not_confident_answers;
+            const class_name = class_names[class_index];
+            const total = number_of_images[class_name];
             display_message("<p>Number whose highest confidence score is the correct answer = " + 
                             number_right + "/" + total + 
                             " (" + Math.round(100*number_right/total) + "%)</p>",
                             true);
-            add_textarea(csv[class_names[class_index]]);
+            add_textarea(csv[class_name]);
             number_right = 0;
         };
         const all_classes_finished = () => {
-            let total = true_positives+true_negatives+false_positives+false_negatives+not_confident_answers;
+            const total = true_positives+true_negatives+false_positives+false_negatives+not_confident_answers;
             display_message("true positives = " + true_positives + "<br>"
                             + "true negatives = " + true_negatives + "<br>"
                             + "false positives = " + false_positives + "<br>"
