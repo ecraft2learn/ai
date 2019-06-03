@@ -18,7 +18,7 @@
 // Based on https://github.com/tensorflow/tfjs-examples/blob/master/webcam-transfer-learning/index.js
 
 const train_model = (xs_array, ys_array, model_name, options, callback) => {
-  const {hidden_layer_size, learning_rate, batch_size_fraction, epochs} = options;
+  const {hidden_layer_sizes, learning_rate, batch_size_fraction, epochs} = options;
 
   let model;
   const input_size = xs_array[0].length;
@@ -32,27 +32,22 @@ const train_model = (xs_array, ys_array, model_name, options, callback) => {
   // Creates a 2-layer fully connected model. By creating a separate model,
   // rather than adding layers to the mobilenet model, we "freeze" the weights
   // of the mobilenet model, and only train weights from the new model.
-  model = tf.sequential({
-    layers: [
-      // Layer 1.
-      tf.layers.dense({
-        inputShape: input_size,
-        units: hidden_layer_size,
-        activation: 'relu',
-        kernelInitializer: 'varianceScaling',
-        useBias: true
-      }),
-      // Layer 2. The number of units of the last layer should correspond
-      // to the number of classes we want to predict.
-      tf.layers.dense({
-        units: number_of_classes,
-        kernelInitializer: 'varianceScaling',
-        useBias: false,
-        activation: 'softmax'
-      })
-    ]
+  model = tf.sequential({name: model_name});
+  hidden_layer_sizes.forEach((size, index) => {
+       model.add(tf.layers.dense({inputShape: index === 0 ? input_size : undefined,
+                                  units: size,
+                                  activation: 'relu',
+                                  kernelInitializer: index === 0 ? 'varianceScaling' : undefined,
+                                  useBias: true
+                                 }));
   });
-
+  // last layer. The number of units of the last layer should correspond
+  // to the number of classes we want to predict.
+  model.add(tf.layers.dense({units: number_of_classes,
+                             kernelInitializer: 'varianceScaling',
+                             useBias: false,
+                             activation: 'softmax'
+                            }));
   // Creates the optimizers which drives training of the model.
   const optimizer = tf.train.adam(learning_rate);
   // We use categoricalCrossentropy which is the loss function we use for
@@ -77,7 +72,7 @@ const train_model = (xs_array, ys_array, model_name, options, callback) => {
     epochs: epochs,
     callbacks: {
       onBatchEnd: async (batch, logs) => {
-        // could monitor things here
+        console.log(batch, logs);
       }
     }
   }).then(() => {
@@ -86,6 +81,7 @@ const train_model = (xs_array, ys_array, model_name, options, callback) => {
      };
      const button = document.createElement('button');
      button.innerHTML = "Save model";
+     button.className = "save-training-button";
      button.addEventListener('click', save_model);
      document.body.appendChild(button);
      callback(model);
