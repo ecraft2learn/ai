@@ -17,7 +17,7 @@
 
 // Based on https://github.com/tensorflow/tfjs-examples/blob/master/webcam-transfer-learning/index.js
 
-const train_model = (xs_array, ys_array, options, callback) => {
+const train_model = (xs_array, ys_array, model_name, options, callback) => {
   const {hidden_layer_size, learning_rate, batch_size_fraction, epochs} = options;
 
   let model;
@@ -81,9 +81,15 @@ const train_model = (xs_array, ys_array, options, callback) => {
       }
     }
   }).then(() => {
+     const save_model = async () => {
+        return await model.save('downloads://' + model_name);
+     };
+     const button = document.createElement('button');
+     button.innerHTML = "Save model";
+     button.addEventListener('click', save_model);
+     document.body.appendChild(button);
      callback(model);
   });
-
 
 };
 
