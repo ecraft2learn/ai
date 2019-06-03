@@ -1163,7 +1163,7 @@ const load_model = async function () {
   }
   try {
       model = await tf.loadLayersModel(tf.io.browserFiles([saved_model_element.files[0],
-                                                    saved_weights_element.files[0]]));
+                                                           saved_weights_element.files[0]]));
   } catch (error) {
       replace_button_results(load_model_button, create_message_element(error.message));
       return;
