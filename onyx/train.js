@@ -17,8 +17,8 @@
 
 // Based on https://github.com/tensorflow/tfjs-examples/blob/master/webcam-transfer-learning/index.js
 
-const train_model = (xs_array, ys_array, model_name, options, callback) => {
-  const {hidden_layer_sizes, learning_rate, batch_size_fraction, epochs} = options;
+const train_model = (xs_array, ys_array, options, callback) => {
+  const {model_name, hidden_layer_sizes, learning_rate, batch_size_fraction, epochs} = options;
 
   let model;
   const input_size = xs_array[0].length;
