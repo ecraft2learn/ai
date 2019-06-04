@@ -70,6 +70,7 @@ const train_model = (xs_array, ys_array, options, callback) => {
   model.fit(xs, ys, {
     batchSize,
     epochs: epochs,
+    validationSplit: .2,
     callbacks: {
       onBatchEnd: async (batch, logs) => {
         console.log(batch, logs);
