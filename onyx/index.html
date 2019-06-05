@@ -9,11 +9,18 @@
     <title>Onyx project - classifying nails</title>
 <script src="../js/load-scripts.js"></script>
 <script>
+// choices are diagnose, create model, experiment, ...
+const option = 'diagnose';
+const use_knn = true;
+// korean.js originals.js originals-normal-fungal.js or originals-normal-serious-non-serious.js
+const image_js = "originals-normal-serious-non-serious.js";
+const projector_data = false;
+
 load_local_or_remote_scripts(
     ["../js/tfjs.js",
      "../js/mobilenet.js",
      "../js/knn-classifier.js",
-     "originals-normal-serious-non-serious.js", // or korean.js originals.js originals-normal-fungal.js originals-normal-serious-non-serious.js
+     image_js,
      "nails.js",
      "saved_tensors_normal_serious_non_serious.js",
      "md5-min.js",
@@ -26,7 +33,7 @@ load_local_or_remote_scripts(
 //      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs",
 //      "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet",
 //      "https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier",
-     "originals-normal-serious-non-serious.js",
+     image_js,
      "nails.js",
      "saved_tensors_normal_serious_non_serious.js",
      "md5-min.js",

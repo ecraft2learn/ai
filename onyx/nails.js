@@ -1,19 +1,14 @@
 // by Ken Kahn <toontalk@gmail.com> as part of the Onyx project at the University of Oxford
 // copyright not yet determined but will be some sort of open source
 
-// choices are diagnose, create model, experiment, ...
-const option = 'diagnose';
-const use_knn = true;
-const projector_data = false;
-
 const RUN_EXPERIMENTS = option === 'experiment';
 let xs = option === 'create model' ? [] : undefined;
 let ys = option === 'create model' ? [] : undefined;
-let load_model_named = option !== 'create model' && !use_knn ? "normal-fungal-67-632-1000" : undefined;
+let load_model_named = option !== 'create model' && !use_knn ? "normal-fungal-melanonychia-onycholysis-800" : undefined;
 let loaded_model;
 
 const training_options =
-    {model_name: "normal-fungal-300x2-1000",
+    {model_name: "normal-fungal-melanonychia-onycholysis-800",
      hidden_layer_sizes: [1000],
      learning_rate: 0.0001,
      batch_size_fraction: 0.2, 
@@ -96,14 +91,45 @@ const create_csv_settings = () => {
 };  
 create_csv_settings();
 
+const multi_nail_image_width = (multi_nail_description) => {
+    return multi_nail_description.image_width || 100; // 100x100 is used in the Korean images
+};
+const multi_nail_image_height = (multi_nail_description) => {
+    return multi_nail_description.image_height || 100; // 100x100 is used in the Korean images
+};
+const multi_nail_image_delta_x = (multi_nail_description) => {
+    return multi_nail_description.delta_x || 112; 
+};
+const multi_nail_image_delta_y = (multi_nail_description) => {
+    return multi_nail_description.delta_y || 128; 
+};
+const multi_nail_image_start_x = (multi_nail_description) => {
+    return multi_nail_description.start_x || 16; 
+};
+const multi_nail_image_start_y = (multi_nail_description) => {
+    return multi_nail_description.start_y || 48; 
+};
+const number_of_images_in_multi_nail_file = (multi_nail_description) => {
+    const {width, height} = multi_nail_description.dimensions;
+    const images_per_row = Math.floor((width-multi_nail_image_start_x(multi_nail_description))
+                                      /multi_nail_image_delta_x(multi_nail_description));
+    const number_of_rows = Math.floor((height-multi_nail_image_start_y(multi_nail_description))
+                                      /multi_nail_image_delta_y(multi_nail_description));
+    // subtract 1 since don't know how many blank images there are in the bottom row
+    return images_per_row*(number_of_rows-1);        
+};
+
 const number_of_images = {};
+
 class_names.forEach((class_name) => {
     number_of_images[class_name] = 0;
     images[class_name].forEach((image_or_images) => {
         if (typeof image_or_images === 'string') {
             number_of_images[class_name]++;
-        } else {
+        } else if (image_or_images.count)  {
             number_of_images[class_name] += image_or_images.count;
+        } else {
+            number_of_images[class_name] += number_of_images_in_multi_nail_file(image_or_images);
         }
     });
 });
@@ -274,7 +300,9 @@ const add_images = (when_finished, just_one_class, only_class_index, except_imag
             if (typeof metadata_tsv !== 'undefined') {
                 metadata_tsv += class_names[class_index] + "\t" + class_names[class_index] + "#" + image_index + "\n";
             }
-            classifier.addExample(logits, class_index);
+            if (use_knn) {
+                classifier.addExample(logits, class_index);
+            }
             if (xs instanceof Array) {
                 xs.push(logits.dataSync());
                 ys.push(one_shot(class_index, class_names.length));
@@ -313,7 +341,9 @@ const infer = (image) => {
 };
 
 const load_mobilenet = async function () {
-    classifier = knnClassifier.create();
+    if (use_knn) {
+        classifier = knnClassifier.create();
+    }
     mobilenet_model = await mobilenet.load(2);  // version 2
 };
 
@@ -412,12 +442,11 @@ const remove_one_vote = (score, self_vote, running_tests) => {
 
 const correct = (result, class_index) => {
     // only called if running tests
-    const confidences = result.confidences;
     let max_score = -1;
     let max_score_indices = [];
     for (let index = 0; index < class_names.length; index++) {
-        let score = confidences[index];
-        if (index === class_index) {
+        let score = use_knn ? result.confidences[index] : result[index];
+        if (index === class_index && use_knn) {
             score -= 1/top_k; // remove the self vote
         }
         if (score > max_score) {
@@ -476,21 +505,23 @@ const confidences = (result, correct_class_index, running_tests) => {
 };
 
 const update_histogram = (result, correct_class_index, image_URL, title) => {
-    const find_highest_wrong_class_index = (confidences, correct_class_index) => {
+    const find_highest_wrong_class_index = (result, correct_class_index) => {
         let highest_wrong_class_index = class_names.length; // if no wrong scores returns number of classes
         let highest_wrong_score = 0;
         for (let index = 0; index < class_names.length; index++) {
-            if (index !== correct_class_index && confidences[index] > highest_wrong_score) {
+            const confidence = use_knn ? result.confidences[index] : result[index]
+            if (index !== correct_class_index && confidence > highest_wrong_score) {
                 highest_wrong_class_index = index;
-                highest_wrong_score = confidences[index];
+                highest_wrong_score = confidence;
             }
         }
         return highest_wrong_class_index;
     };
     class_names.forEach((name, class_index) => {
         const correct = correct_class_index === class_index;
-        const score = remove_one_vote(result.confidences[class_index], correct, true);
-        const highest_wrong_class_index = find_highest_wrong_class_index(result.confidences, correct_class_index);
+        const score = use_knn ? remove_one_vote(result.confidences[class_index], correct, true) : 
+                                Math.round(100*result[class_index]);
+        const highest_wrong_class_index = find_highest_wrong_class_index(result, correct_class_index);
         // score-1 so that 0-20 is 0; 25-40 is 1; ... 85-100 is 4
         const bucket_index = Math.max(0, Math.floor((score-1)/(100/bucket_count)));
         let bucket = histogram_buckets[bucket_index];
@@ -510,7 +541,8 @@ const update_histogram = (result, correct_class_index, image_URL, title) => {
 const update_confusion_matrix = (result, correct_class_index) => {
     class_names.forEach((name, class_index) => {
         const correct = correct_class_index === class_index;
-        const score = remove_one_vote(result.confidences[class_index], correct, true);
+        const score = use_knn ? remove_one_vote(result.confidences[class_index], correct, true) :
+                                Math.round(result[class_index]*100);
         if (confusion_matrix[correct_class_index] === undefined) {
             confusion_matrix[correct_class_index] = class_names.map(() => 0);
         }
@@ -808,33 +840,15 @@ const create_next_image_generator = () => {
         nails_remaining_in_multi_nail = 0;     
     };
     reset_next_image();
-    const multi_nail_image_width = () => {
-        return multi_nail_description.width || 100; // 100x100 is used in the Korean images
-    };
-    const multi_nail_image_height = () => {
-        return multi_nail_description.height || 100; // 100x100 is used in the Korean images
-    };
-    const multi_nail_image_delta_x = () => {
-        return multi_nail_description.delta_x || 112; 
-    };
-    const multi_nail_image_delta_y = () => {
-        return multi_nail_description.delta_y || 128; 
-    };
-    const multi_nail_image_start_x = () => {
-        return multi_nail_description.start_x || 16; 
-    };
-    const multi_nail_image_start_y = () => {
-        return multi_nail_description.start_y || 48; 
-    };
     const multi_nail_image_box = () => {
         const width = multi_nail_image.width;
-        const images_per_row = Math.floor((width-multi_nail_image_start_x())/multi_nail_image_delta_x());
+        const images_per_row = Math.floor((width-multi_nail_image_start_x(multi_nail_image))/multi_nail_image_delta_x(multi_nail_image));
         const row_number = Math.floor(nails_remaining_in_multi_nail/images_per_row);
         const column_number = nails_remaining_in_multi_nail-(row_number*images_per_row);
-        return {x: multi_nail_image_start_x()+column_number*multi_nail_image_delta_x(),
-                y: multi_nail_image_start_y()+row_number*multi_nail_image_delta_y(),
-                width: multi_nail_image_width(),
-                height: multi_nail_image_height()};
+        return {x: multi_nail_image_start_x(multi_nail_image)+column_number*multi_nail_image_delta_x(multi_nail_image),
+                y: multi_nail_image_start_y(multi_nail_image)+row_number*multi_nail_image_delta_y(multi_nail_image),
+                width: multi_nail_image_width(multi_nail_image),
+                height: multi_nail_image_height(multi_nail_image)};
     };
     const next_image = (image_callback, when_class_finished, when_all_finished) => {
         const class_name = class_names[class_index];
@@ -891,7 +905,8 @@ const create_next_image_generator = () => {
                            (image) => {
                                multi_nail_image = image;
                                multi_nail_description = image_or_images_description;
-                               nails_remaining_in_multi_nail = image_or_images_description.count;
+                               nails_remaining_in_multi_nail = 
+                                   number_of_images_in_multi_nail_file(image_or_images_description);
                                load_or_extract_image();
                            });
                 return;
@@ -986,7 +1001,7 @@ const run_experiments = () => {
             return div.innerText;
         };
         const process_prediction = (result, image_or_canvas, class_index, image_index, image_count) => {
-            let confidence = result.confidences[class_index];
+//             let confidence = result.confidences[class_index];
             const image_url = get_url_from_image_or_canvas(image_or_canvas);
             display_message("<img src='" + image_url + "' width=100 height=100></img>", true);
             let confidence_message = confidences(result, class_index, true);
@@ -1001,7 +1016,9 @@ const run_experiments = () => {
             }
             if (confidence_message.indexOf(not_confident_message) >= 0) {
                 not_confident_answers++;
-            } else if (combine_non_serious || normal_versus_fungal_only) {
+            } else if (class_names[0] === 'normal' &&
+                       (class_names[1] === 'fungal' || class_names[1] === 'non-serious') &&
+                       (class_names.length === 2 || class_names[2] === 'warrants second opinion')) {
                 let positive_index = 1; // serious and fungal happen to both be index 1
                 if (class_index === positive_index) { 
                     if (correct_prediction) {
@@ -1026,7 +1043,8 @@ const run_experiments = () => {
                 // this re-orders the results
                 const index = class_names.indexOf(name);
                 const correct = index === class_index;
-                const score = remove_one_vote(result.confidences[index], correct, true);
+                const score = use_knn ? remove_one_vote(result.confidences[index], correct, true) :
+                                        Math.round(result[index]*100);
                 csv[class_name] += score;
                 if (index < class_names.length-1) {
                     // no need to add comma to the last one
