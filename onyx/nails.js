@@ -7,13 +7,6 @@ let ys = option === 'create model' ? [] : undefined;
 let load_model_named = option !== 'create model' && !use_knn ? "normal-fungal-melanonychia-onycholysis-800" : undefined;
 let loaded_model;
 
-const training_options =
-    {model_name: "normal-fungal-melanonychia-onycholysis-800",
-     hidden_layer_sizes: [1000],
-     learning_rate: 0.0001,
-     batch_size_fraction: 0.2, 
-     epochs: 500};
-
 // if tensor_tsv is defined then collect all the logits of each image into a TSV string (tab-separated values)
 let tensor_tsv   = projector_data ? "" : undefined;
 let metadata_tsv = projector_data ? "" : undefined;
