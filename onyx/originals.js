@@ -1,4 +1,4 @@
-const old_images = {
+const images = {
 "normal": [
 "images/normal/Fingernail healthy Image_1a.jpg",
 "images/normal/Fingernail healthy Image_1b.jpg",

@@ -4,7 +4,7 @@
 const RUN_EXPERIMENTS = option === 'experiment';
 let xs = option === 'create model' ? [] : undefined;
 let ys = option === 'create model' ? [] : undefined;
-let load_model_named = option !== 'create model' && !use_knn ? "normal-fungal-melanonychia-onycholysis-800" : undefined;
+let load_model_named = option !== 'create model' && !use_knn ? model_name : undefined;
 let loaded_model;
 
 // if tensor_tsv is defined then collect all the logits of each image into a TSV string (tab-separated values)
@@ -395,8 +395,7 @@ const initialise_page = async () => {
                     run_new_experiments();
                 }
             });
-        }
-        if (RUN_EXPERIMENTS) {
+        } else if (RUN_EXPERIMENTS) {
             run_experiments(); // report any matches with confidence less than this confidence
         }
         if (SAVE_TENSORS) {
