@@ -255,10 +255,6 @@ const add_images = (when_finished, just_one_class, only_class_index, except_imag
         }
         if (xs instanceof Array) {
             const model_callback = (model) => {
-                if (!xs) {
-                    console.log(model); // testing
-                    return;
-                }
                 xs.forEach((logits, index) => {
                     const prediction_tensor = model.predict(tf.tensor([logits]));
                     const class_index = ys[index].indexOf(1);
@@ -402,7 +398,7 @@ const initialise_page = async () => {
             save_tensors(classifier.getClassifierDataset());
         }
     };
-    if (window.saved_tensors && !CREATE_SPRITE_IMAGE && !SAVE_TENSORS && !RUN_EXPERIMENTS  && typeof xs === 'undefined') {
+    if (window.saved_tensors && use_knn && !CREATE_SPRITE_IMAGE && !SAVE_TENSORS && !RUN_EXPERIMENTS && typeof xs === 'undefined') {
         load_data_set(window.saved_tensors);
         start_up();
     } else {
@@ -915,25 +911,29 @@ const create_next_image_generator = () => {
 
 const run_new_experiments = () => {
     const [next_image, reset_next_image] = create_next_image_generator();
-    let confidences = [];
+    let confidences = {};
+    class_names.forEach((class_name) => {
+        confidences[class_name] = [];
+    });
     const when_finished = () => {
+        report_final_statistics();
         class_names.forEach((class_name, index) => {
-            confidences.sort((x, y) => x[0]-y[0]).forEach((confidence_and_message) => {
+            confidences[class_name].sort((x, y) => x[0]-y[0]).forEach((confidence_and_message) => {
                 display_message(confidence_and_message[1], true);
             });
             add_textarea(csv[class_name]);
         });
-                
     };
     const next = (image, class_index, image_index, image_count) => {
         const logits = infer(image);
         const prediction_tensor = loaded_model.predict([logits]);
         const prediction = prediction_tensor.dataSync();
         const confidence = prediction[class_index];
-        let message = "<img src='" + get_url_from_image_or_canvas(image) + "' width=100 height=100></img>" 
-                      + class_names[class_index] + "#" + image_index + " (" + image_count + ") = " + number_precision(confidence, 4);
-        confidences.push([confidence, message]);
+        let message = process_prediction(prediction, image, class_index, image_index, image_count);
+//         let message = "<img src='" + get_url_from_image_or_canvas(image) + "' width=100 height=100></img>" 
+//                       + class_names[class_index] + "#" + image_index + " (" + image_count + ") = " + number_precision(confidence, 4);
         const class_name = class_names[class_index];
+        confidences[class_name].push([confidence, message]);
         csv[class_name] += "https://ecraft2learn.github.io/ai/onyx/" + images[class_name][image_index] + "," +
                             image_count + "," + confidence + "\n";
         next_image(next, undefined, when_finished);
@@ -941,14 +941,99 @@ const run_new_experiments = () => {
     next_image(next);
 };
 
+let false_negatives = 0;
+let false_positives = 0;
+let true_negatives = 0;
+let true_positives = 0;
+let number_right = 0;
+let not_confident_answers = 0; // less than minimum_confidence for top answer 
+
+const process_prediction = (result, image_or_canvas, class_index, image_index, image_count) => {
+    const image_url = get_url_from_image_or_canvas(image_or_canvas);
+    message = "<img src='" + image_url + "' width=100 height=100></img>";
+    let confidence_message = confidences(result, class_index, true);
+    const class_name = class_names[class_index];
+    message += class_name + "#" + image_count + " " + confidence_message;
+    let correct_prediction = correct(result, class_index);
+    if (correct_prediction) {
+        number_right++;
+    } else {
+        // highlight wrong ones in red
+        message = "<span style='color:red'>" + message + "</span>";
+    }
+    if (confidence_message.indexOf(not_confident_message) >= 0) {
+        not_confident_answers++;
+    } else if (class_names[0] === 'normal' &&
+               (class_names[1] === 'fungal' || class_names[1] === 'non-serious') &&
+               (class_names.length === 2 || class_names[2] === 'warrants second opinion')) {
+        let positive_index = 1; // serious and fungal happen to both be index 1
+        if (class_index === positive_index) { 
+            if (correct_prediction) {
+                true_positives++;
+            } else {
+                false_negatives++;
+            }
+        } else {
+            if (correct_prediction) {
+               true_negatives++;
+            } else {
+                false_positives++;
+            }
+        }
+    }
+    update_histogram(result, class_index, image_url, plain_text(message));
+    update_confusion_matrix(result, class_index);
+    csv[class_name] += "https://ecraft2learn.github.io/ai/onyx/" + images[class_name][image_index] + "," +
+                        image_count + ",";
+    csv_class_names[class_name].forEach((name) => {
+        // this re-orders the results
+        const index = class_names.indexOf(name);
+        const correct = index === class_index;
+        const score = use_knn ? remove_one_vote(result.confidences[index], correct, true) :
+                                Math.round(result[index]*100);
+        csv[class_name] += score;
+        if (index < class_names.length-1) {
+            // no need to add comma to the last one
+            csv[class_name] += ",";
+        }
+    });
+    csv[class_name] += "\n";
+    return message;
+};
+
+const maximum_confidence = (confidences) => {
+    return Math.max(...Object.values(confidences));
+};
+const plain_text = (html) => {
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    return div.innerText;
+};
+
+const report_final_statistics = () => {
+    const total = true_positives+true_negatives+false_positives+false_negatives+not_confident_answers;
+    display_message("true positives = " + true_positives + "<br>"
+                    + "true negatives = " + true_negatives + "<br>"
+                    + "false positives = " + false_positives + "<br>"
+                    + "false negatives = " + false_negatives + "<br>"
+                    + "not confident of any answer = " + not_confident_answers + "<br>"
+                    + "total = " + total + "<br>",
+                    true);
+    let sensitivity = number_precision(true_positives/(true_positives+false_negatives), 4);
+    let specificity = number_precision(true_negatives/(true_negatives+false_positives), 4);
+    let precision = number_precision(true_positives/(true_positives+false_positives), 4);
+    let recall = number_precision(true_positives/(true_positives+false_negatives), 4);
+    display_message("sensitivity = " + sensitivity + "<br>"
+                    + "specificity = " + specificity + "<br>"
+                    + "precision = " + precision + "<br>"
+                    + "recall = " + recall + "<br>",
+                    true);
+    add_textarea(histogram_buckets_to_html(histogram_buckets, histogram_image_size));
+    add_textarea(confusion_matrix_to_html(confusion_matrix, 100));
+};
+
 const run_experiments = () => {
-    let false_negatives = 0;
-    let false_positives = 0;
-    let true_negatives = 0;
-    let true_positives = 0;
-    let not_confident_answers = 0; // less than minimum_confidence for top answer 
     const [next_image, reset_next_image] = create_next_image_generator();
-    let number_right = 0;
     display_message("<p><b>Confidence scores for each possible classification. " + 
                     "<span style=color:red>Red entries</span> are where the correct classification " +
                     "was not the most confident answer.</b></p>");
@@ -963,96 +1048,14 @@ const run_experiments = () => {
             add_textarea(csv[class_name]);
             number_right = 0;
         };
-        const all_classes_finished = () => {
-            const total = true_positives+true_negatives+false_positives+false_negatives+not_confident_answers;
-            display_message("true positives = " + true_positives + "<br>"
-                            + "true negatives = " + true_negatives + "<br>"
-                            + "false positives = " + false_positives + "<br>"
-                            + "false negatives = " + false_negatives + "<br>"
-                            + "not confident of any answer = " + not_confident_answers + "<br>"
-                            + "total = " + total + "<br>",
-                            true);
-            let sensitivity = number_precision(true_positives/(true_positives+false_negatives), 4);
-            let specificity = number_precision(true_negatives/(true_negatives+false_positives), 4);
-            let precision = number_precision(true_positives/(true_positives+false_positives), 4);
-            let recall = number_precision(true_positives/(true_positives+false_negatives), 4);
-            display_message("sensitivity = " + sensitivity + "<br>"
-                            + "specificity = " + specificity + "<br>"
-                            + "precision = " + precision + "<br>"
-                            + "recall = " + recall + "<br>",
-                            true);
-            add_textarea(histogram_buckets_to_html(histogram_buckets, histogram_image_size));
-            add_textarea(confusion_matrix_to_html(confusion_matrix, 100));
-        };
-        const maximum_confidence = (confidences) => {
-            return Math.max(...Object.values(confidences));
-        };
-        const plain_text = (html) => {
-            const div = document.createElement('div');
-            div.innerHTML = html;
-            return div.innerText;
-        };
-        const process_prediction = (result, image_or_canvas, class_index, image_index, image_count) => {
-//             let confidence = result.confidences[class_index];
-            const image_url = get_url_from_image_or_canvas(image_or_canvas);
-            display_message("<img src='" + image_url + "' width=100 height=100></img>", true);
-            let confidence_message = confidences(result, class_index, true);
-            const class_name = class_names[class_index];
-            let message = class_name + "#" + image_count + " " + confidence_message;
-            let correct_prediction = correct(result, class_index);
-            if (correct_prediction) {
-                number_right++;
-            } else {
-                // highlight wrong ones in red
-                message = "<span style='color:red'>" + message + "</span>";
-            }
-            if (confidence_message.indexOf(not_confident_message) >= 0) {
-                not_confident_answers++;
-            } else if (class_names[0] === 'normal' &&
-                       (class_names[1] === 'fungal' || class_names[1] === 'non-serious') &&
-                       (class_names.length === 2 || class_names[2] === 'warrants second opinion')) {
-                let positive_index = 1; // serious and fungal happen to both be index 1
-                if (class_index === positive_index) { 
-                    if (correct_prediction) {
-                        true_positives++;
-                    } else {
-                        false_negatives++;
-                    }
-                } else {
-                    if (correct_prediction) {
-                       true_negatives++;
-                    } else {
-                        false_positives++;
-                    }
-                }
-            }
-            display_message(message, true);
-            update_histogram(result, class_index, image_url, plain_text(message));
-            update_confusion_matrix(result, class_index);
-            csv[class_name] += "https://ecraft2learn.github.io/ai/onyx/" + images[class_name][image_index] + "," +
-                                image_count + ",";
-            csv_class_names[class_name].forEach((name) => {
-                // this re-orders the results
-                const index = class_names.indexOf(name);
-                const correct = index === class_index;
-                const score = use_knn ? remove_one_vote(result.confidences[index], correct, true) :
-                                        Math.round(result[index]*100);
-                csv[class_name] += score;
-                if (index < class_names.length-1) {
-                    // no need to add comma to the last one
-                    csv[class_name] += ",";
-                }
-            });
-            csv[class_name] += "\n";
-            next_experiment();                          
-        };
         const image_callback = (image_or_canvas, class_index, image_index, image_count) => {
             make_prediction(image_or_canvas, 
                             (result) => {
-                                process_prediction(result, image_or_canvas, class_index, image_index, image_count);
+                                display_message(process_prediction(result, image_or_canvas, class_index, image_index, image_count), true);
+                                next_experiment(); 
                             });
         };
-        next_image(image_callback, class_finished, all_classes_finished);
+        next_image(image_callback, class_finished, report_final_statistics);
     };
     next_experiment();
 };
