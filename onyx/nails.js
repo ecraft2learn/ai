@@ -260,7 +260,7 @@ const add_images = (when_finished, just_one_class, only_class_index, except_imag
                     const class_index = ys[index].indexOf(1);
                     const class_name = class_names[class_index];
                     const confidence = prediction_tensor.dataSync()[class_index];
-                    console.log(index, confidence, class_name, confidence < .9 ? "problem?" : "");
+                    console.log(index, confidence, class_name, confidence < .6 ? "problem?" : "");
                 });
             };
             train_model(xs,
@@ -579,7 +579,7 @@ const histogram_buckets_to_html = (histogram_buckets, image_size) => {
                             + "border: solid " + border_size + "px " + color_of_highest_wrong_class + ";"
                             + "left:" + (bucket_index*delta)  + "px;"
                             + " top:" + top + "px'>\n"
-                            + "  <img src='../" + score.image_URL + "' width=" + image_size + " height=" + image_size + "  >\n"
+                            + "  <img src='" + score.image_URL + "' width=" + image_size + " height=" + image_size + "  >\n"
                             + "</div></a>\n";
                     top -= delta;
                 }
@@ -966,7 +966,7 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
     } else if (class_names[0] === 'normal' &&
                (class_names[1] === 'fungal' || class_names[1] === 'non-serious') &&
                (class_names.length === 2 || class_names[2] === 'warrants second opinion')) {
-        let positive_index = 1; // serious and fungal happen to both be index 1
+        let positive_index = class_names[1] === 'fungal' ? 1 : 2;
         if (class_index === positive_index) { 
             if (correct_prediction) {
                 true_positives++;
@@ -975,7 +975,7 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
             }
         } else {
             if (correct_prediction) {
-               true_negatives++;
+                true_negatives++;
             } else {
                 false_positives++;
             }
