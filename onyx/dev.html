@@ -12,9 +12,12 @@
 // choices are diagnose, create model, experiment, ...
 const option = 'experiment';
 const use_knn = false;
-// korean.js korean-small.js originals.js originals-normal-fungal.js or originals-normal-serious-non-serious.js
-const image_js = "korean-tests-small.js";
-const model_name = "normal-fungal-serious";
+// korean.js korean-small.js korean-tests.js korean-tests-small.js 
+// originals.js originals-normal-fungal.js or originals-normal-serious-non-serious.js
+const images_js = ["korean-small.js",
+                   "korean-tests-small.js",
+                  ];
+const model_name = "normal-fungal-serious-combined-big-50-epochs";
 const projector_data = false;
 
 const training_options =
@@ -24,11 +27,27 @@ const training_options =
      batch_size_fraction: 0.2, 
      epochs: 50};
 
+let images;
+
+const add_to_dataset = (additional_images) => {
+    if (!images) {
+        images = additional_images;
+    } else {
+        Object.keys(additional_images).forEach((key) => {
+            if (images[key]) {
+                images[key] = images[key].concat(additional_images[key]);
+            } else {
+                images[key] = additional_images[key];
+            }
+        });
+    }
+};
+
 load_local_or_remote_scripts(
     ["../js/tfjs.js",
      "../js/mobilenet.js",
      "../js/knn-classifier.js",
-     image_js,
+     ...images_js,
      "nails.js",
      "saved_tensors_normal_serious_non_serious.js",
      "md5-min.js",
@@ -41,7 +60,7 @@ load_local_or_remote_scripts(
 //      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs",
 //      "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet",
 //      "https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier",
-     image_js,
+     ...images_js,
      "nails.js",
      "saved_tensors_normal_serious_non_serious.js",
      "md5-min.js",

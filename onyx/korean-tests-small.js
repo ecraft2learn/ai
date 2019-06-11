@@ -1,4 +1,4 @@
-const images = {
+add_to_dataset ({
     "normal": [
 "images/korean/normalnail/semisuper_1067_216_345_400_530_jof-01-00030-g005-1024.jpg",
 "images/korean/normalnail/semisuper_1081_233_609_558_934_026167HB.jpg",
@@ -51,7 +51,7 @@ const images = {
 "images/korean/normalnail/semisuper_kor_528_283_662_511_890_15259034_262275177520481_6097810218274521088_n.jpg",
 "images/korean/normalnail/semisuper_kor_682_232_13_476_257_20161107000326585.jpg",
     ],
-    "fungal": [
+    "non-serious": [
 "images/korean/onychomycosis/semisuper_1073_577_475_767_665_twenty-nail-syndrome-of-childhood-2.jpg",
 "images/korean/onychomycosis/semisuper_1226_212_325_410_502_ijdvl_2007_73_6_425_37067_1.jpg",
 "images/korean/onychomycosis/semisuper_1362_198_110_452_364_Onycholysis-18.jpg",
@@ -161,4 +161,4 @@ const images = {
 "images/korean/naildystrophy/semisuper_21_1109_1024_1526_1442_onychomycosis-extreme-case.jpg",
 "images/korean/naildystrophy/semisuper_224_1035_515_1404_883_036258HB.jpg",
     ],
-};
+});

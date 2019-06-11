@@ -1,4 +1,4 @@
-const images = {
+add_to_dataset ({
     "normal": [
         {file_name: "images/korean/L_NAIL_5nail_5nail2010_1_normalnail.png",
          count: 50,
@@ -9,7 +9,7 @@ const images = {
          dimensions: {width: 2260,
                       height: 9156}}
               ],
-    "fungal": [
+    "non-serious": [
                {file_name: "images/korean/L_NAIL_5nail_5nail2004_2_onychomycosis.png",
                count: 50,
                 dimensions: {width: 2260,
@@ -28,4 +28,4 @@ const images = {
          count: 50,
          dimensions: {width: 2260,
                       height: 1860}}],
-};
+});

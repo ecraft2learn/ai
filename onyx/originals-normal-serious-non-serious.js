@@ -1,5 +1,5 @@
-const images = {
-"normal": [
+add_to_dataset(
+{"normal": [
 "images/normal/Fingernail healthy Image_1a.jpg",
 "images/normal/Fingernail healthy Image_1b.jpg",
 "images/normal/Fingernail healthy Image_1c.jpg",
@@ -111,7 +111,7 @@ const images = {
 "images/fungal-nails/Slide9.PNG",
 
 "images/trauma/nail trauma 1.png",
-// #2 was so insured that is wasn't usable
+// #2 was so injured that is wasn't usable
 "images/trauma/nail trauma 3.png",
 "images/trauma/nail trauma 4.png",
 "images/trauma/nail trauma 5.png",
@@ -205,5 +205,4 @@ const images = {
 "images/Nail Images from Library book/subungual exostosis of toe.jpg",
 "images/Nail Images from Library book/subungual squamous cell carcinoma in situ.jpg"
 ],
-
-};
+});
