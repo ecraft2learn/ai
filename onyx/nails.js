@@ -159,13 +159,14 @@ const display_results = (canvas) => {
                      + "\ndata = " + logits;
         const message = response_element("<img id='" + id + "' width=60 height=60 src='" + data_url + "'>"
                                          + result_description)
-//         display_message("<a href='mailto:toontalk@gmail.com?subject=Onyx image issue&body=Please paste data here.' target='_blank'><img width=60 height=60 src='" + data_url + "'></a>", true);
         display_message(message, true);
         const image_element = document.getElementById(id);
         const display_data = (event) => {
-//             add_textarea(data);
-               navigator.clipboard.writeText(data);
-               alert("Clipboard has data for this image. Please send it to toontalk@gmail.com");
+            navigator.clipboard.writeText(data);
+            alert("Clipboard has data for this image. Please send it to toontalk@gmail.com");
+            const email_link = document.createElement('div');
+            email_link.innerHTML = "<a href='mailto:toontalk@gmail.com?subject=Onyx image issue&body=Please paste data here.' target='_blank'>Click to send email.</a>";
+            event.currentTarget.parentNode.appendChild(email_link);
         };
         image_element.addEventListener('click', display_data);           
     });
