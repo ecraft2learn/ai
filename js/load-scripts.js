@@ -29,4 +29,3 @@ function load_local_or_remote_scripts (local_URLs, remote_URLs, callback) {
                             remote_URLs;
     load_URLs();
 }
-

@@ -106,6 +106,29 @@ figcaption {
 .save-training-button, .save-validation-button, .support-window-button {
   display: block;
 }
+.random-image-button {
+  padding: 12px;
+  cursor: pointer;
+}
+.prediction-response {
+  border: 1px solid rgb(244, 139, 139);
+  border-radius: 4px;
+  margin: 6px;
+}
+.close-button {
+/* 	based upon http://jsfiddle.net/adzFe/14/ */
+  cursor: pointer;
+  color: white;
+  border: 1px solid #AEAEAE;
+  border-radius: 20px;
+  background: #605F61;
+  font-size: 26px;
+  font-weight: bold;
+  display: inline-block;
+  line-height: 0px;
+  padding: 11px 4px;
+  margin-left: 6px;
+}
 .advanced-topic {
   cursor: pointer;
   color: #316d37;

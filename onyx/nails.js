@@ -14,6 +14,8 @@ const CREATE_SPRITE_IMAGE = projector_data;
 
 const SAVE_TENSORS = false; // if KNN
 
+const number_of_random_images = 4;
+
 const is_android = () => {
   return /Android/i.test(navigator.userAgent);
 };
@@ -210,17 +212,74 @@ async function setupCamera() {
   } else {
       toggle_freeze_button.addEventListener('click', toggle_click);  
   }
-  const reset_response_button = document.getElementById('reset_response');
-  if (is_mobile()) {
-      reset_response_button.remove();
-  } else {
-      reset_response_button.addEventListener('click', reset_response);
-  }
+//   const reset_response_button = document.getElementById('reset_response');
+//   if (is_mobile()) {
+//       reset_response_button.remove();
+//   } else {
+//       reset_response_button.addEventListener('click', reset_response);
+//   }
+  add_random_images(); // perhaps only if mobile?
   return new Promise((resolve) => {
       video.onloadedmetadata = () => {
           resolve(video);
       };
   });
+}
+
+const random_integer = (n) =>
+    // returns an integer between 0 and n-1
+    Math.floor(Math.random()*n);
+
+const random_element = (array) =>
+    array[random_integer(array.length)];
+
+const add_image_or_canvas = (parent, image_or_canvas, class_name, image_to_replace) => {
+    // if image_to_replace is defined then image_or_canvas replaces it
+    // otherwise image_or_canvas is added to parent element 
+    const padding = 12;
+    const image_dimension = Math.floor(document.body.offsetWidth/number_of_random_images)-2*padding;
+    image_or_canvas.classList.add('random-image-button');
+    image_or_canvas.width = image_dimension;
+    image_or_canvas.height = image_dimension;
+    const analyse_image = (event) => {
+        const analyse_image_and_replace_self =
+            (result) => {
+                const class_index = class_names.indexOf(class_name);
+                display_message(process_prediction(result, image_or_canvas, class_index), true);
+                add_random_image(null, image_or_canvas); // replaces self with new random image                      
+        };
+        make_prediction(image_or_canvas, analyse_image_and_replace_self);
+    };
+    image_or_canvas.addEventListener('click', analyse_image);
+    image_or_canvas.addEventListener('touchstart', analyse_image);
+    if (image_to_replace) {
+        image_to_replace.parentNode.replaceChild(image_or_canvas, image_to_replace);
+    } else {
+        parent.appendChild(image_or_canvas);
+    }
+};
+
+const add_random_images = (image_to_replace) => {
+    for (let i = 0; i < number_of_random_images; i++) {
+        add_random_image(document.getElementById('random-images'), image_to_replace);
+    }
+};
+
+const add_random_image = (parent, image_to_replace) => {
+    const class_name = random_element(class_names);
+        const image_description = random_element(images[class_name]);
+        if (typeof image_description === 'string') {
+            const image = document.createElement('img');
+            image.src = image_description;
+            add_image_or_canvas(parent, image, class_name, image_to_replace);
+        } else {
+            load_image(image_description.file_name,
+                       (multi_nail_image) => {
+                           const box = multi_nail_image_box(image_description);
+                           const canvas = canvas_of_multi_nail_image(multi_nail_image, box);                                                                     
+                           add_image_or_canvas(parent, canvas, class_name, image_to_replace);
+                       });                 
+        }
 }
 
 const load_image = function (image_url, callback) {
@@ -401,14 +460,26 @@ const initialise_page = async () => {
     if (window.saved_tensors && use_knn && !CREATE_SPRITE_IMAGE && !SAVE_TENSORS && !RUN_EXPERIMENTS && typeof xs === 'undefined') {
         load_data_set(window.saved_tensors);
         start_up();
-    } else {
+    } else if (RUN_EXPERIMENTS) {
         add_images(start_up);
+    } else {
+        start_up();
     }
 };
 
+function remove_parent_element (event) {
+    event.currentTarget.parentNode.remove();
+}
+
 const display_message = (message, append) => {
-    if (append) {
-        message = document.getElementById('response').innerHTML + "<br>" + message;
+    if (append && !is_mobile()) {
+        let after = "";
+        if (message.indexOf("class='prediction-response'") >= 0) {
+            after = "";
+        } else {
+            after = "<br>";
+        }
+        message = document.getElementById('response').innerHTML + after + message;
     }
     document.getElementById('response').innerHTML = message;
 };
@@ -812,6 +883,37 @@ const receive_drop = (event) => {
     };  
 };
 
+const canvas_of_multi_nail_image = (multi_nail_image, box) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = VIDEO_WIDTH;
+    canvas.height = VIDEO_HEIGHT;
+    draw_maintaining_aspect_ratio(multi_nail_image,
+                                  canvas,
+                                  VIDEO_WIDTH,
+                                  VIDEO_HEIGHT,
+                                  box.x,
+                                  box.y,
+                                  box.width,
+                                  box.height);
+    return canvas;
+};
+
+const multi_nail_image_box = (image_description, image_index) => {
+    const width = image_description.width;
+    const images_per_row = Math.floor((width-multi_nail_image_start_x(image_description))
+                                      /multi_nail_image_delta_x(image_description));
+    if (typeof image_index === 'undefined') {
+        // pick a random one
+        image_index = random_integer(number_of_images_in_multi_nail_file(image_description));
+    }
+    const row_number = Math.floor(image_index/images_per_row);
+    const column_number = image_index-(row_number*images_per_row);
+    return {x: multi_nail_image_start_x(image_description)+column_number*multi_nail_image_delta_x(image_description),
+            y: multi_nail_image_start_y(image_description)+row_number*multi_nail_image_delta_y(image_description),
+            width: multi_nail_image_width(image_description),
+            height: multi_nail_image_height(image_description)};
+};
+
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
 const create_next_image_generator = () => {   
@@ -825,19 +927,9 @@ const create_next_image_generator = () => {
         class_index = 0;
         image_index = -1; // incremented to 0 soon - this is the index into the list of image file_names or multi-images
         image_count = 0;
-        nails_remaining_in_multi_nail = 0;     
+        nails_remaining_in_multi_nail = 0;
     };
     reset_next_image();
-    const multi_nail_image_box = () => {
-        const width = multi_nail_image.width;
-        const images_per_row = Math.floor((width-multi_nail_image_start_x(multi_nail_image))/multi_nail_image_delta_x(multi_nail_image));
-        const row_number = Math.floor(nails_remaining_in_multi_nail/images_per_row);
-        const column_number = nails_remaining_in_multi_nail-(row_number*images_per_row);
-        return {x: multi_nail_image_start_x(multi_nail_image)+column_number*multi_nail_image_delta_x(multi_nail_image),
-                y: multi_nail_image_start_y(multi_nail_image)+row_number*multi_nail_image_delta_y(multi_nail_image),
-                width: multi_nail_image_width(multi_nail_image),
-                height: multi_nail_image_height(multi_nail_image)};
-    };
     const next_image = (image_callback, when_class_finished, when_all_finished) => {
         const class_name = class_names[class_index];
         if (image_count === number_of_images[class_name]-1) {
@@ -866,28 +958,17 @@ const create_next_image_generator = () => {
         const maximum_confidence = (confidences) => {
             return Math.max(...Object.values(confidences));
         };
-        const canvas_of_next_nail_in_multi_nail_image = () => {
-            const canvas = document.createElement('canvas');
-            const box = multi_nail_image_box();
-            canvas.width = VIDEO_WIDTH;
-            canvas.height = VIDEO_HEIGHT;
-            draw_maintaining_aspect_ratio(multi_nail_image,
-                                          canvas,
-                                          VIDEO_WIDTH,
-                                          VIDEO_HEIGHT,
-                                          box.x,
-                                          box.y,
-                                          box.width,
-                                          box.height);
-            return canvas;
-        };
+        const canvas_of_next_nail_in_multi_nail_image = (images_description) => 
+            canvas_of_multi_nail_image(multi_nail_image,
+                                       multi_nail_image_box(images_description, nails_remaining_in_multi_nail));
         const load_or_extract_image = () => {
-            if (multi_nail_image) {
-                image_callback(canvas_of_next_nail_in_multi_nail_image(), class_index, image_index, image_count);
-                return;
-            }
             const class_name = class_names[class_index];
             const image_or_images_description = images[class_name][image_index];
+            if (multi_nail_image) {
+                image_callback(canvas_of_next_nail_in_multi_nail_image(image_or_images_description),
+                               class_index, image_index, image_count);
+                return;
+            }
             if (typeof image_or_images_description !== 'string') {
                 load_image(image_or_images_description.file_name,
                            (image) => {
@@ -953,7 +1034,13 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
     message = "<img src='" + image_url + "' width=100 height=100></img>";
     let confidence_message = confidences(result, class_index, true);
     const class_name = class_names[class_index];
-    message += class_name + "#" + image_count + " " + confidence_message;
+    message += "&nbsp;" + class_name;
+    if (typeof image_count !== 'undefined') {
+        message += "#" + image_count;
+    } else {
+        message += " according to experts<br>";
+    }
+    message += " " + confidence_message;
     let correct_prediction = correct(result, class_index);
     if (correct_prediction) {
         number_right++;
@@ -998,7 +1085,8 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
         }
     });
     csv[class_name] += "\n";
-    return message;
+    return "<div class='prediction-response'>" + message
+            + "<button class='close-button' onclick='remove_parent_element(event)'>&times;</button></div>";
 };
 
 const maximum_confidence = (confidences) => {
