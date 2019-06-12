@@ -157,9 +157,10 @@ const display_results = (canvas) => {
         const data = result_description
                      + "\nimage id = " + id
                      + "\ndata = " + logits;
-        display_message("<img id='" + id + "' width=60 height=60 src='" + data_url + "'>", true);
+        const message = response_element("<img id='" + id + "' width=60 height=60 src='" + data_url + "'>"
+                                         + result_description)
 //         display_message("<a href='mailto:toontalk@gmail.com?subject=Onyx image issue&body=Please paste data here.' target='_blank'><img width=60 height=60 src='" + data_url + "'></a>", true);
-        display_message(result_description, true);
+        display_message(message, true);
         const image_element = document.getElementById(id);
         const display_data = (event) => {
 //             add_textarea(data);
@@ -1090,9 +1091,13 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
         }
     });
     csv[class_name] += "\n";
-    return "<div class='prediction-response'>" + message
-            + "<button class='close-button' onclick='remove_parent_element(event)'>&times;</button></div>";
+    return response_element(message);
 };
+
+const response_element = (message) =>
+    "<div class='prediction-response'>"
+    + message
+    + "<button class='close-button' onclick='remove_parent_element(event)'>&times;</button></div>";
 
 const maximum_confidence = (confidences) => {
     return Math.max(...Object.values(confidences));
