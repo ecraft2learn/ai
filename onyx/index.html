@@ -12,22 +12,42 @@
 // choices are diagnose, create model, experiment, ...
 const option = 'diagnose';
 const use_knn = true;
-// korean.js originals.js originals-normal-fungal.js or originals-normal-serious-non-serious.js
-const image_js = "originals-normal-serious-non-serious.js";
+// korean.js korean-small.js korean-tests.js korean-tests-small.js 
+// originals.js originals-normal-fungal.js or originals-normal-serious-non-serious.js
+const images_js = ["korean-small.js",
+                   "korean-tests-small.js",
+                  ];
+const model_name = "normal-fungal-serious-combined-big-50-epochs";
 const projector_data = false;
 
 const training_options =
-    {model_name: "normal-fungal-melanonychia-onycholysis-800",
+    {model_name: model_name,
      hidden_layer_sizes: [100],
      learning_rate: 0.0001,
      batch_size_fraction: 0.2, 
      epochs: 50};
 
+let images;
+
+const add_to_dataset = (additional_images) => {
+    if (!images) {
+        images = additional_images;
+    } else {
+        Object.keys(additional_images).forEach((key) => {
+            if (images[key]) {
+                images[key] = images[key].concat(additional_images[key]);
+            } else {
+                images[key] = additional_images[key];
+            }
+        });
+    }
+};
+
 load_local_or_remote_scripts(
     ["../js/tfjs.js",
      "../js/mobilenet.js",
      "../js/knn-classifier.js",
-     image_js,
+     ...images_js,
      "nails.js",
      "saved_tensors_normal_serious_non_serious.js",
      "md5-min.js",
@@ -40,7 +60,7 @@ load_local_or_remote_scripts(
 //      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs",
 //      "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet",
 //      "https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier",
-     image_js,
+     ...images_js,
      "nails.js",
      "saved_tensors_normal_serious_non_serious.js",
      "md5-min.js",
@@ -57,19 +77,15 @@ Please wait for this page to load.
 <p>
 Ready now. An introduction and instructions will go here.
 </p>
-<p>
-Don't worry, we aren't sending any of your images to a remote server.
-All the machine learning is being done locally on device,
-and you can check out our
-<a href="https://github.com/ecraft2learn/ai/tree/master/onyx" target="_blank">source code</a> on Github.
-</p>
 </div>
 <div id='main' hidden>
+<!--     <button id="reset_response" class="reset-response" >Reset log</button> -->
     <div id="response"></div>
     <button id="toggle video" class="freeze-video" style="padding:12px;">
     Freeze video
     </button>
     <div style="padding-top: 12px;">
+    <div id="before-video-element"></div>
     <video id="video" playsinline 
      width  = "224"
      height = "224"
@@ -85,7 +101,8 @@ and you can check out our
      width  = "224"
      height = "224">
     </canvas>
-    <button id="reset_response"  class="reset-response" >Reset log</button>
+    <p>Click on any of the following random images</p>
+    <div id="random-images"></div>
     <div id="selection-rectangle" hidden style="border: 2px dotted yellow; position: absolute;"></div>
 </div>
 <p>
@@ -97,6 +114,13 @@ other medical condition with your physician or other a professional healthcare p
 You must not rely on the information on this website as an alternative to medical advice from your doctor
 or other professional healthcare provider.
 If you have any specific questions about any medical matter, you should consult your doctor or other professional healthcare provider.
+</p>
+<p>
+No images are sent to a remote server if you use your device's camera.
+All the machine learning is being done locally on your device.
+The 
+<a href="https://github.com/ecraft2learn/ai/tree/master/onyx" target="_blank">source code</a>
+for this app is available for inspection.
 </p>
 </body>
 </html>

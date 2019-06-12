@@ -194,7 +194,8 @@ async function setupCamera() {
       if (!video.paused && !video.hidden) {
           video.pause();
           toggle_freeze_button.innerHTML = "Resume video";
-          display_message("<b>Use the mouse to select a rectangle containing the nail.</b>");        
+          document.getElementById('before-video-element').innerHTML =
+              "<b>Use the mouse to select a rectangle containing a nail.</b>";        
       } else {
           if (video.hidden) {
               video.hidden = false;
@@ -202,7 +203,8 @@ async function setupCamera() {
           }
           video.play();
           toggle_freeze_button.innerHTML = "Freeze video";
-          display_message("<b>Freeze the video before selecting the nail.</b>");
+          document.getElementById('before-video-element').innerHTML =
+              "<b>Freeze the video before selecting a nail.</b>";
       }
   };
   const toggle_freeze_button = document.getElementById('toggle video');
@@ -907,7 +909,7 @@ const multi_nail_image_box = (image_description, image_index) => {
     if (typeof image_index === 'undefined') {
         // pick a random one
         image_index = random_integer(number_of_images_in_multi_nail_file(image_description));
-        console.log(image_description, image_index);
+//         console.log(image_description, image_index);
     }
     const row_number = Math.floor(image_index/images_per_row);
     const column_number = image_index-(row_number*images_per_row);
