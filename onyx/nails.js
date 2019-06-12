@@ -239,8 +239,10 @@ const add_image_or_canvas = (parent, image_or_canvas, class_name, image_to_repla
     const padding = 12;
     const image_dimension = Math.floor(document.body.offsetWidth/number_of_random_images)-2*padding;
     image_or_canvas.classList.add('random-image-button');
-    image_or_canvas.width = image_dimension;
-    image_or_canvas.height = image_dimension;
+    if (!image_or_canvas.width) {
+        image_or_canvas.width = image_dimension;
+        image_or_canvas.height = image_dimension;        
+    }
     const analyse_image = (event) => {
         const analyse_image_and_replace_self =
             (result) => {
@@ -899,12 +901,13 @@ const canvas_of_multi_nail_image = (multi_nail_image, box) => {
 };
 
 const multi_nail_image_box = (image_description, image_index) => {
-    const width = image_description.width;
+    const width = image_description.dimensions.width;
     const images_per_row = Math.floor((width-multi_nail_image_start_x(image_description))
                                       /multi_nail_image_delta_x(image_description));
     if (typeof image_index === 'undefined') {
         // pick a random one
         image_index = random_integer(number_of_images_in_multi_nail_file(image_description));
+        console.log(image_description, image_index);
     }
     const row_number = Math.floor(image_index/images_per_row);
     const column_number = image_index-(row_number*images_per_row);
