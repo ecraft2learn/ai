@@ -15,6 +15,8 @@ const CREATE_SPRITE_IMAGE = projector_data;
 const SAVE_TENSORS = false; // if KNN
 
 const number_of_random_images = 4;
+const random_image_padding = 12;
+const image_dimension = Math.floor(document.body.offsetWidth/number_of_random_images)-2*random_image_padding;
 
 const is_android = () => {
   return /Android/i.test(navigator.userAgent);
@@ -240,8 +242,6 @@ const random_element = (array) =>
 const add_image_or_canvas = (parent, image_or_canvas, class_name, image_to_replace) => {
     // if image_to_replace is defined then image_or_canvas replaces it
     // otherwise image_or_canvas is added to parent element 
-    const padding = 12;
-    const image_dimension = Math.floor(document.body.offsetWidth/number_of_random_images)-2*padding;
     image_or_canvas.classList.add('random-image-button');
     if (!image_or_canvas.width) {
         image_or_canvas.width = image_dimension;
@@ -891,12 +891,12 @@ const receive_drop = (event) => {
 
 const canvas_of_multi_nail_image = (multi_nail_image, box) => {
     const canvas = document.createElement('canvas');
-    canvas.width = VIDEO_WIDTH;
-    canvas.height = VIDEO_HEIGHT;
+    canvas.width = image_dimension;
+    canvas.height = image_dimension;
     draw_maintaining_aspect_ratio(multi_nail_image,
                                   canvas,
-                                  VIDEO_WIDTH,
-                                  VIDEO_HEIGHT,
+                                  image_dimension,
+                                  image_dimension,
                                   box.x,
                                   box.y,
                                   box.width,
