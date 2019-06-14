@@ -17,14 +17,14 @@ add_to_dataset ({
                {file_name: "images/korean/L_NAIL_5nail_5nail2006_onychomycosis_onychomycosis.png",
                 count: 50,
                 dimensions: {width: 2260,
-                             height: 1732}}
+                             height: 1732}},
+        {file_name: "images/korean/L_NAIL_5nailA2_lesion_naildystrophy_onycholysis.png",
+         count: 50,
+         dimensions: {width: 2260,
+                      height: 1860}}
               ],
     "warrants second opinion": [
         {file_name: "images/korean/L_NAIL_5nailA2_lesion_melanonychia3_melanonychia.png",
-         count: 50,
-         dimensions: {width: 2260,
-                      height: 1860}},
-        {file_name: "images/korean/L_NAIL_5nailA2_lesion_naildystrophy_onycholysis.png",
          count: 50,
          dimensions: {width: 2260,
                       height: 1860}}],
