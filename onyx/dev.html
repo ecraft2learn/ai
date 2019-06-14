@@ -10,7 +10,12 @@
 <script src="../js/load-scripts.js"></script>
 <script>
 // choices are diagnose, create model, experiment, ...
-const option = 'create model';
+let option = 'diagnose';
+if (window.location.hash.indexOf('train') >= 0) {
+    option = 'create model';
+} else if (window.location.hash.indexOf('experiment') >= 0) {
+    opton = 'experiment';
+}
 const use_knn = false;
 // korean.js korean-small.js korean-tests.js korean-tests-small.js 
 // originals.js originals-normal-fungal.js or originals-normal-serious-non-serious.js
@@ -22,7 +27,7 @@ const projector_data = false;
 
 const training_options =
     {model_name: model_name,
-     hidden_layer_sizes: [100],
+     hidden_layer_sizes: [50000],
      learning_rate: 0.0001,
      batch_size_fraction: 0.2,
      drop_out_rate: 0.5, 
