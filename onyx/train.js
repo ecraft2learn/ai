@@ -18,18 +18,37 @@
 // Based on https://github.com/tensorflow/tfjs-examples/blob/master/webcam-transfer-learning/index.js
 
 const train_model = (xs_array, ys_array, options, callback) => {
-  const {model_name, hidden_layer_sizes, learning_rate, batch_size_fraction, epochs} = options;
+    const {model_name, hidden_layer_sizes, learning_rate, batch_size_fraction, epochs, drop_out_rate} = options;
 
-  let model;
-  const input_size = xs_array[0].length;
-  const number_of_classes = ys_array[0].length;
+    let model;
+    const input_size = xs_array[0].length;
+    const number_of_classes = ys_array[0].length;
 
-  const xs = tf.tensor(xs_array);
-  const ys = tf.tensor(ys_array);
+    const xs = tf.tensor(xs_array);
+    const ys = tf.tensor(ys_array);
+
+    const surface = tfvis && tfvis.visor().surface({name: model_name, tab: 'Training'});
+    // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
+    let epoch_history = [];
+    const metrics = ['loss', 'val_loss', 'acc', 'val_acc'];
+    const container = {name: 'Loss and accuracy',
+                       tab: 'Training',
+                       styles: { height: '600px' }};
+    let callbacks = tfvis ? tfvis.show.fitCallbacks(container, metrics, {callbacks: ['onEpochEnd']})
+                                       : {};
+    if (tfvis) {
+        const epoch_end_callback = callbacks.onEpochEnd;
+        callbacks.onEpochEnd = (epoch, history) => {
+            if (epoch_end_callback) {
+                epoch_end_callback(epoch, history);
+            }
+            epoch_history.push(history);
+        };      
+    }
 /**
  * Sets up and trains the classifier.
  */
-  // Creates a 2-layer fully connected model. By creating a separate model,
+  // Creates a fully connected model. By creating a separate model,
   // rather than adding layers to the mobilenet model, we "freeze" the weights
   // of the mobilenet model, and only train weights from the new model.
   model = tf.sequential({name: model_name});
@@ -40,6 +59,9 @@ const train_model = (xs_array, ys_array, options, callback) => {
                                   kernelInitializer: index === 0 ? 'varianceScaling' : undefined,
                                   useBias: true
                                  }));
+       if (drop_out_rate > 0) {
+           model.add(tf.layers.dropout(drop_out_rate));
+       }
   });
   // last layer. The number of units of the last layer should correspond
   // to the number of classes we want to predict.
@@ -67,27 +89,28 @@ const train_model = (xs_array, ys_array, options, callback) => {
   }
 
   // Train the model! Model.fit() will shuffle xs & ys so we don't have to.
+  callbacks.onBatchEnd = (batch, logs) => {
+      console.log(batch, logs);
+  };
   model.fit(xs, ys, {
     batchSize,
     epochs: epochs,
     validationSplit: .2,
-    callbacks: {
-      onBatchEnd: async (batch, logs) => {
-        console.log(batch, logs);
-      }
-    }
-  }).then(() => {
-     const save_model = async () => {
-        return await model.save('downloads://' + model_name);
-     };
-     const button = document.createElement('button');
-     button.innerHTML = "Save model";
-     button.className = "save-training-button";
-     button.addEventListener('click', save_model);
-     document.body.appendChild(button);
-     callback(model);
+    shuffle: true,
+    callbacks: callbacks}).then(() => {
+       const save_model = async () => {
+          return await model.save('downloads://' + model_name);
+       };
+       const button = document.createElement('button');
+       button.innerHTML = "Save model";
+       button.className = "save-training-button";
+       button.addEventListener('click', save_model);
+       document.body.appendChild(button);
+       callback(model);
   });
 
 };
+
+
 
 

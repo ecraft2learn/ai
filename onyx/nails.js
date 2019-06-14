@@ -107,6 +107,9 @@ const multi_nail_image_start_y = (multi_nail_description) => {
     return multi_nail_description.start_y || 48; 
 };
 const number_of_images_in_multi_nail_file = (multi_nail_description) => {
+    if (multi_nail_description.count > 0) {
+        return multi_nail_description.count;
+    }
     const {width, height} = multi_nail_description.dimensions;
     const images_per_row = Math.floor((width-multi_nail_image_start_x(multi_nail_description))
                                       /multi_nail_image_delta_x(multi_nail_description));
@@ -124,6 +127,12 @@ class_names.forEach((class_name) => {
         if (typeof image_or_images === 'string') {
             number_of_images[class_name]++;
         } else if (image_or_images.count)  {
+            const total_available = number_of_images_in_multi_nail_file(image_or_images);
+            if (image_or_images.count > total_available) {
+                console.log("Count of " + image_or_images.count + " is greater than " + total_available
+                            + " for " + image_or_images.file_name);
+                image_or_images.count = total_available;
+            }
             number_of_images[class_name] += image_or_images.count;
         } else {
             number_of_images[class_name] += number_of_images_in_multi_nail_file(image_or_images);
@@ -286,7 +295,7 @@ const add_random_image = (parent, image_to_replace) => {
                            add_image_or_canvas(parent, canvas, class_name, image_to_replace);
                        });                 
         }
-}
+};
 
 const load_image = function (image_url, callback) {
     let image = new Image();
@@ -466,7 +475,7 @@ const initialise_page = async () => {
     if (window.saved_tensors && use_knn && !CREATE_SPRITE_IMAGE && !SAVE_TENSORS && !RUN_EXPERIMENTS && typeof xs === 'undefined') {
         load_data_set(window.saved_tensors);
         start_up();
-    } else if (RUN_EXPERIMENTS) {
+    } else if (option !== 'diagnose') {
         add_images(start_up);
     } else {
         start_up();
@@ -939,7 +948,8 @@ const create_next_image_generator = () => {
     reset_next_image();
     const next_image = (image_callback, when_class_finished, when_all_finished) => {
         const class_name = class_names[class_index];
-        if (image_count === number_of_images[class_name]-1) {
+        if (image_count === number_of_images[class_name]-1) { 
+//             (nails_remaining_in_multi_nail === 0 && image_index === images[class_name].length-1)) {
             // no more images for this class_index
             if (when_class_finished) {
                 when_class_finished(class_index);
@@ -960,6 +970,7 @@ const create_next_image_generator = () => {
                 nails_remaining_in_multi_nail--;
             } else {
                 image_index++;
+                multi_nail_image = undefined;
             }
         }
         const maximum_confidence = (confidences) => {
@@ -971,12 +982,13 @@ const create_next_image_generator = () => {
         const load_or_extract_image = () => {
             const class_name = class_names[class_index];
             const image_or_images_description = images[class_name][image_index];
-            if (multi_nail_image) {
-                image_callback(canvas_of_next_nail_in_multi_nail_image(image_or_images_description),
-                               class_index, image_index, image_count);
-                return;
-            }
             if (typeof image_or_images_description !== 'string') {
+                if (multi_nail_image) {
+                    // no need to load it again
+                    image_callback(canvas_of_next_nail_in_multi_nail_image(image_or_images_description),
+                                   class_index, image_index, image_count);
+                    return;
+                }
                 load_image(image_or_images_description.file_name,
                            (image) => {
                                multi_nail_image = image;
