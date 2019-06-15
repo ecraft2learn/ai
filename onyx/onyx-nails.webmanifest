@@ -1,0 +1,16 @@
+{
+    "name": "Onyx nail analyser - University of Oxford",
+    "short_name": "onyx-nail",
+    "description": "An app that when presented with an image of a finger or toe nail produces probabilities that it is normal, abnormal but not serious, or warrants a second opinion",
+    "icons": [
+        {
+            "src": "icons/icon-32.png",
+            "sizes": "32x32",
+            "type": "image/png"
+        },
+    ],
+    "start_url": "/ai/onyx/dev.html",
+    "display": "fullscreen",
+    "theme_color": "#B12A34",
+    "background_color": "#B12A34"
+}
