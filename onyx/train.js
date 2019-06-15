@@ -17,15 +17,16 @@
 
 // Based on https://github.com/tensorflow/tfjs-examples/blob/master/webcam-transfer-learning/index.js
 
-const train_model = (xs_array, ys_array, options, callback) => {
+const train_model = (xs_array, ys_array, xs_test_array, ys_test_array, options, callback) => {
     const {model_name, hidden_layer_sizes, learning_rate, batch_size_fraction, epochs, drop_out_rate} = options;
 
     let model;
     const input_size = xs_array[0].length;
     const number_of_classes = ys_array[0].length;
-
     const xs = tf.tensor(xs_array);
     const ys = tf.tensor(ys_array);
+    const xs_test = tf.tensor(xs_test_array);
+    const ys_test = tf.tensor(ys_test_array);
 
     const surface = tfvis && tfvis.visor().surface({name: model_name, tab: 'Training'});
     // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
@@ -95,7 +96,8 @@ const train_model = (xs_array, ys_array, options, callback) => {
   model.fit(xs, ys, {
     batchSize,
     epochs: epochs,
-    validationSplit: .2,
+//     validationSplit: .2,
+    validationData: [xs_test, ys_test],
     shuffle: true,
     callbacks: callbacks}).then(() => {
        const save_model = async () => {

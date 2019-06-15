@@ -9,20 +9,15 @@
     <title>Onyx project - classifying nails</title>
 <script src="../js/load-scripts.js"></script>
 <script>
-// choices are diagnose, create model, experiment, ...
-let option = 'diagnose';
-if (window.location.hash.indexOf('train') >= 0) {
-    option = 'create model';
-} else if (window.location.hash.indexOf('experiment') >= 0) {
-    opton = 'experiment';
-}
+
 const use_knn = false;
 // korean.js korean-small.js korean-tests.js korean-tests-small.js 
 // originals.js originals-normal-fungal.js or originals-normal-serious-non-serious.js
 const images_js = ["korean.js",
                    "korean-tests.js",
                   ];
-const model_name = "normal-fungal-serious-10000-20-epochs";
+const model_name = "normal-fungal-serious-10000-every-5-epochs";
+const every_nth_for_testing = 5;
 const projector_data = false;
 
 const training_options =
@@ -31,7 +26,15 @@ const training_options =
      learning_rate: 0.0001,
      batch_size_fraction: 0.2,
      drop_out_rate: 0.5, 
-     epochs: 20};
+     epochs: 50};
+
+// choices are diagnose, create model, experiment, ...
+let option = 'diagnose';
+if (window.location.hash.indexOf('train') >= 0) {
+    option = 'create model';
+} else if (window.location.hash.indexOf('experiment') >= 0) {
+    option = 'experiment';
+}
 
 let images;
 
