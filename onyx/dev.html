@@ -22,16 +22,16 @@ const use_knn = false;
 const images_js = ["korean.js",
                    "korean-tests.js",
                   ];
-const model_name = "normal-fungal-serious-combined-big-50-epochs";
+const model_name = "normal-fungal-serious-10000-20-epochs";
 const projector_data = false;
 
 const training_options =
     {model_name: model_name,
-     hidden_layer_sizes: [50000],
+     hidden_layer_sizes: [10000],
      learning_rate: 0.0001,
      batch_size_fraction: 0.2,
      drop_out_rate: 0.5, 
-     epochs: 50};
+     epochs: 20};
 
 let images;
 
