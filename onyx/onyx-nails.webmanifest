@@ -7,7 +7,7 @@
             "src": "icons/icon-32.png",
             "sizes": "32x32",
             "type": "image/png"
-        },
+        }
     ],
     "start_url": "/ai/onyx/dev.html",
     "display": "fullscreen",
