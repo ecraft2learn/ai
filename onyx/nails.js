@@ -485,7 +485,7 @@ const initialise_page = async () => {
             save_tensors(classifier.getClassifierDataset());
         }
     };
-    if (window.saved_tensors && use_knn && !CREATE_SPRITE_IMAGE && !SAVE_TENSORS && !option === 'experiment' && typeof xs === 'undefined') {
+    if (window.saved_tensors && use_knn && !CREATE_SPRITE_IMAGE && !SAVE_TENSORS && option !== 'experiment' && typeof xs === 'undefined') {
         load_data_set(window.saved_tensors);
         start_up();
     } else if (option === 'create model' || 
