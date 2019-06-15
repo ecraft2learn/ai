@@ -2172,7 +2172,7 @@ add_to_dataset({
 "images/korean/naildystrophy/semisuper_729_410_296_1032_918_036246HB.jpg",
 "images/korean/naildystrophy/semisuper_72_300_326_506_532_onychomycosis-pictures.jpg",
 "images/korean/naildystrophy/semisuper_734_2472_1484_3017_2029_8422240929_8b1a88f608_o.jpg",
-"images/korean/naildystrophy/semisuper_735_913_793_2126_2006_Beau's_lines.jpg",
+"images/korean/naildystrophy/semisuper_735_913_793_2126_2006_Beaus_lines.jpg",
 "images/korean/naildystrophy/semisuper_736_336_15_618_290_psoriasis (1).jpg",
 "images/korean/naildystrophy/semisuper_737_181_250_439_508_psoriasis (1).jpg",
 "images/korean/naildystrophy/semisuper_738_11_261_227_508_psoriasis (1).jpg",
