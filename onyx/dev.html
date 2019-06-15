@@ -10,23 +10,27 @@
 <script src="../js/load-scripts.js"></script>
 <script>
 
+if('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js');
+};
+
 const use_knn = false;
 // korean.js korean-small.js korean-tests.js korean-tests-small.js 
 // originals.js originals-normal-fungal.js or originals-normal-serious-non-serious.js
 const images_js = ["korean.js",
                    "korean-tests.js",
                   ];
-const model_name = "normal-fungal-serious-10000-every-5-epochs";
+const model_name = "normal-fungal-serious-1000-every-5";
 const every_nth_for_testing = 5;
 const projector_data = false;
 
 const training_options =
     {model_name: model_name,
-     hidden_layer_sizes: [10000],
+     hidden_layer_sizes: [1000],
      learning_rate: 0.0001,
      batch_size_fraction: 0.2,
      drop_out_rate: 0.5, 
-     epochs: 50};
+     epochs: 75};
 
 // choices are diagnose, create model, experiment, ...
 let option = 'diagnose';
@@ -62,7 +66,8 @@ load_local_or_remote_scripts(
 //      "saved_tensors_normal_serious_non_serious.js",
      "md5-min.js",
      "train.js",
-     "../js/translate.js"],
+//      "../js/translate.js"
+     ],
      // using the same locally cached version so nothing breaks when released versions are updated
     ["../js/tfjs.js",
      "../js/mobilenet.js",
