@@ -71,7 +71,7 @@ const train_model = (xs_array, ys_array, options, callback) => {
                              activation: 'softmax'
                             }));
   // Creates the optimizers which drives training of the model.
-  const optimizer = tf.train.adam(learning_rate);
+  const optimizer = tf.train.rmsprop(learning_rate);
   // We use categoricalCrossentropy which is the loss function we use for
   // categorical classification which measures the error between our predicted
   // probability distribution over classes (probability that an input is of each
@@ -106,7 +106,9 @@ const train_model = (xs_array, ys_array, options, callback) => {
        button.className = "save-training-button";
        button.addEventListener('click', save_model);
        document.body.appendChild(button);
-       callback(model);
+       if (callback) {
+           callback(model);
+       }
   });
 
 };
