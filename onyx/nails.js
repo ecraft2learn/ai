@@ -328,19 +328,19 @@ const add_images = (when_finished, just_one_class, only_class_index, except_imag
             add_textarea(image_sprite_canvas.toDataURL() + "");
         }
         if (xs instanceof Array) {
-            const model_callback = (model) => {
-                xs.forEach((logits, index) => {
-                    const prediction_tensor = model.predict(tf.tensor([logits]));
-                    const class_index = ys[index].indexOf(1);
-                    const class_name = class_names[class_index];
-                    const confidence = prediction_tensor.dataSync()[class_index];
-                    console.log(index, confidence, class_name, confidence < .6 ? "problem?" : "");
-                });
-            };
+//             const model_callback = (model) => {
+//                 xs.forEach((logits, index) => {
+//                     const prediction_tensor = model.predict(tf.tensor([logits]));
+//                     const class_index = ys[index].indexOf(1);
+//                     const class_name = class_names[class_index];
+//                     const confidence = prediction_tensor.dataSync()[class_index];
+//                     console.log(index, confidence, class_name, confidence < .6 ? "problem?" : "");
+//                 });
+//             };
             train_model(xs,
                         ys,
-                        training_options,
-                        model_callback);
+                        training_options);
+//                         model_callback);
         }
     };
     const one_shot = (index, n) => {
