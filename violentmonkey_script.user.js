@@ -337,8 +337,11 @@ WorldMorph.prototype.edit = function (aStringOrTextMorph) {
     this.lastEditedText = aStringOrTextMorph;
 };
 
-// recreate the world (modified from the inline javascript file of snap.html)
-world = new WorldMorph(document.getElementById('world'));
-world.worldCanvas.focus();
-new IDE_Morph().openIn(world);
-loop();
+// following not needed when used within modified Snap! (and it causes errors)
+// document.addEventListener('DOMContentLoaded', () => {
+//     // recreate the world (modified from the inline javascript file of snap.html)
+//     world = new WorldMorph(document.getElementById('world'));
+//     world.worldCanvas.focus();
+//     new IDE_Morph().openIn(world);
+//     loop();   
+// });
