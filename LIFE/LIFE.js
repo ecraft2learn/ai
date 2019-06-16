@@ -2302,18 +2302,23 @@ document.addEventListener(
                     + error;
             }
         };
-        toggle_speech_recognition.addEventListener('click',
-            (event) => {
-                if (speech_recognition_on) {
-                    speech_recognition_on = false;
-                    toggle_speech_recognition_label.innerHTML = turn_on_speech_recognition_label;
-                    ecraft2learn.stop_speech_recognition();
-                } else {
-                    speech_recognition_on = true;
-                    toggle_speech_recognition_label.innerHTML = turn_off_speech_recognition_label;
-                    ecraft2learn.start_speech_recognition(recognition_callback, handle_recognition_error);                     
-                }
-            });
+        const toggle_speech = (event) => {
+            if (speech_recognition_on) {
+                speech_recognition_on = false;
+                toggle_speech_recognition_label.innerHTML = turn_on_speech_recognition_label;
+                ecraft2learn.stop_speech_recognition();
+            } else {
+                speech_recognition_on = true;
+                toggle_speech_recognition_label.innerHTML = turn_off_speech_recognition_label;
+                ecraft2learn.start_speech_recognition(recognition_callback, handle_recognition_error);                     
+            }
+        };
+        toggle_speech_recognition.addEventListener('click', toggle_speech);
+        // following would be nice but can't use speech without user action
+        // see https://www.chromestatus.com/feature/5687444770914304
+//         if (is_mobile()) {
+//             toggle_speech(); // start with it enabled
+//         }
         add_sample_questions();                           
      });
 

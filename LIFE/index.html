@@ -4,12 +4,22 @@
 	<title>Intelligent support for LIFE game</title>
 	<meta charset='utf-8'>
 	<link href="../css/ai-teacher-guide.css" rel="stylesheet">
-	<link href="/uui/help/oer-style.css" rel="stylesheet">
-<!-- 	<link rel="icon" type="image/png" href="https://secure.gravatar.com/blavatar/b460751662404adf2f6a88f489a5c305?s=16" /> -->
+	<link rel="icon" type="image/png" href="icons/icon-32.png" />
 	<script src="../ecraft2learn.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script> 
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder"></script>
+	<script src="../js/tfjs.js"></script> 
+    <script src="encoder/universal-sentence-encoder.js"></script>
+    <script src="../js/user-agent.js"></script>
     <script src="LIFE.js"></script>
+<script>
+if ('serviceWorker' in navigator && window.location.hostname !== 'localhost') {
+    navigator.serviceWorker.register('service-worker.js');
+}
+</script>
+<style>
+p {
+    width: auto;
+}
+</style>
 </head>
 <body>
 <p>
