@@ -292,7 +292,8 @@ const add_random_image = (parent, image_to_replace) => {
             load_image(image_description.file_name,
                        (multi_nail_image) => {
                            const box = multi_nail_image_box(image_description);
-                           const canvas = canvas_of_multi_nail_image(multi_nail_image, box);                                                                     
+                           const canvas = canvas_of_multi_nail_image(multi_nail_image, box);
+                           canvas.title = image_description.file_name + "#" + box.image_index;                                                                   
                            add_image_or_canvas(parent, canvas, class_name, image_to_replace);
                        });                 
         }
@@ -934,14 +935,14 @@ const multi_nail_image_box = (image_description, image_index) => {
     if (typeof image_index === 'undefined') {
         // pick a random one
         image_index = random_integer(number_of_images_in_multi_nail_file(image_description));
-//         console.log(image_description, image_index);
     }
     const row_number = Math.floor(image_index/images_per_row);
     const column_number = image_index-(row_number*images_per_row);
     return {x: multi_nail_image_start_x(image_description)+column_number*multi_nail_image_delta_x(image_description),
             y: multi_nail_image_start_y(image_description)+row_number*multi_nail_image_delta_y(image_description),
             width: multi_nail_image_width(image_description),
-            height: multi_nail_image_height(image_description)};
+            height: multi_nail_image_height(image_description),
+            image_index: image_index};
 };
 
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
