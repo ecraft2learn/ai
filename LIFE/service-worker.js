@@ -2,7 +2,7 @@
 // caches files locally
 // based upon https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Offline_Service_workers
 
-const cache_name = "life-support-v3";
+const cache_name = "life-support-v4";
 
 const files_to_cache = [
 "/ai/LIFE/index.html",
