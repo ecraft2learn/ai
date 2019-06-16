@@ -30,7 +30,7 @@ const files_to_cache = [
 "/ai/onyx/images/korean/L_NAIL_5nail_nail2005_2_melanonychia.png",
 "/ai/onyx/models/normal-fungal-serious-1000-every-5.json",
 "/ai/onyx/models/normal-fungal-serious-1000-every-5.weights.bin",
-
+"/ai/onyx/icons/icon-32.png",
 ];
 
 self.addEventListener('install', function(e) {
@@ -54,6 +54,18 @@ self.addEventListener('fetch', function(e) {
           return response;
         });
       });
+    })
+  );
+});
+
+self.addEventListener('activate', function(e) {
+  e.waitUntil(
+    caches.keys().then(function(keyList) {
+          return Promise.all(keyList.map(function(key) {
+        if(cache_name.indexOf(key) === -1) {
+          return caches.delete(key);
+        }
+      }));
     })
   );
 });
