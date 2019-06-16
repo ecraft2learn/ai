@@ -2,7 +2,7 @@
 // caches files locally
 // based upon https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Offline_Service_workers
 
-const cache_name = "onyx-nail-v1";
+const cache_name = "onyx-nail-v2";
 
 const files_to_cache = [
 "/ai/onyx/dev.html",
@@ -13,7 +13,6 @@ const files_to_cache = [
 "/ai/js/mobilenet.js",
 "/ai/js/knn-classifier.js",
 "/ai/onyx/korean.js",
-"/ai/onyx/korean-test.js",
 "/ai/onyx/nails.js",
 "/ai/onyx/md5-min.js",
 "/ai/onyx/train.js",
