@@ -13,6 +13,7 @@ const files_to_cache = [
 "/ai/js/mobilenet.js",
 "/ai/js/knn-classifier.js",
 "/ai/onyx/korean.js",
+"/ai/onyx/korean-test.js",
 "/ai/onyx/nails.js",
 "/ai/onyx/md5-min.js",
 "/ai/onyx/train.js",
@@ -31,6 +32,7 @@ const files_to_cache = [
 "/ai/onyx/models/normal-fungal-serious-1000-every-5.json",
 "/ai/onyx/models/normal-fungal-serious-1000-every-5.weights.bin",
 "/ai/onyx/icons/icon-32.png",
+"/ai/onyx/onyx-nails.webmanifest",
 ];
 
 self.addEventListener('install', function(e) {
