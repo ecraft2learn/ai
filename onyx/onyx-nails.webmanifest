@@ -4,22 +4,22 @@
     "description": "When presented with an image of a finger or toe nail produces probabilities that it is normal, abnormal but not serious, or warrants a second opinion.",
     "icons": [
         {
-            "src": "/ai/onyxicons/icon-32.png",
+            "src": "/ai/onyx/icons/icon-32.png",
             "sizes": "32x32",
             "type": "image/png"
         },
         {
-            "src": "/ai/onyxicons/icon-64.png",
+            "src": "/ai/onyx/icons/icon-64.png",
             "sizes": "64x64",
             "type": "image/png"
         },
         {
-            "src": "/ai/onyxicons/icon-128.png",
+            "src": "/ai/onyx/icons/icon-128.png",
             "sizes": "128x128",
             "type": "image/png"
         },
         {
-            "src": "/ai/onyxicons/icon-256.png",
+            "src": "/ai/onyx/icons/icon-256.png",
             "sizes": "256x256",
             "type": "image/png"
         }
