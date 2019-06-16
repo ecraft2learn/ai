@@ -4,28 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="icon" type="image/png" href="./icons/icon-32.png" />
+    <link rel="manifest" href="/ai/onyx/onyx-nails.webmanifest">
     <link href="../css/ai-teacher-guide.css" rel="stylesheet">
-<!--     <link rel="icon" type="image/png" href="../images/eCraft2Learn-Favicon.png" /> -->
     <title>Onyx project - classifying nails</title>
 <script src="../js/load-scripts.js"></script>
 <script>
-// choices are diagnose, create model, experiment, ...
-const option = 'diagnose';
+
+if ('serviceWorker' in navigator && window.location.hostname !== 'localhost') {
+    navigator.serviceWorker.register('service-worker.js');
+}
+
 const use_knn = true;
+
+// choices are diagnose, create model, experiment, ...
+let option = 'diagnose';
+if (window.location.hash.indexOf('train') >= 0) {
+    option = 'create model';
+} else if (window.location.hash.indexOf('experiment') >= 0) {
+    option = 'experiment';
+}
+
 // korean.js korean-small.js korean-tests.js korean-tests-small.js 
 // originals.js originals-normal-fungal.js or originals-normal-serious-non-serious.js
-const images_js = ["korean-small.js",
-                   "korean-tests-small.js",
-                  ];
-const model_name = "normal-fungal-serious-combined-big-50-epochs";
+const images_js = ["korean-small.js", "korean-tests-small.js"];
+
+const model_name = "normal-fungal-serious-1000-every-5";
+const every_nth_for_testing = 5;
 const projector_data = false;
 
 const training_options =
     {model_name: model_name,
-     hidden_layer_sizes: [100],
+     hidden_layer_sizes: [1000],
      learning_rate: 0.0001,
-     batch_size_fraction: 0.2, 
-     epochs: 50};
+     batch_size_fraction: 0.2,
+     drop_out_rate: 0.5, 
+     epochs: 75};
 
 let images;
 
@@ -45,9 +59,11 @@ const add_to_dataset = (additional_images) => {
 
 load_local_or_remote_scripts(
     ["../js/tfjs.js",
+     "../js/tfjs-vis.js",
      "../js/mobilenet.js",
      "../js/knn-classifier.js",
      ...images_js,
+     "../js/user-agent.js",
      "nails.js",
      "saved_tensors_normal_serious_non_serious.js",
      "md5-min.js",
@@ -62,6 +78,7 @@ load_local_or_remote_scripts(
 //      "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet",
 //      "https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier",
      ...images_js,
+     "../js/user-agent.js",
      "nails.js",
      "saved_tensors_normal_serious_non_serious.js",
      "md5-min.js",
@@ -81,7 +98,6 @@ Ready now. An introduction and instructions will go here.
 </p>
 </div>
 <div id='main' hidden>
-<!--     <button id="reset_response" class="reset-response" >Reset log</button> -->
     <div id="response"></div>
     <button id="toggle video" class="freeze-video" style="padding:12px;">
     Freeze video

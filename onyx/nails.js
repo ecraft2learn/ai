@@ -19,27 +19,11 @@ const number_of_random_images = 4;
 const random_image_padding = 12;
 const image_dimension = Math.floor(document.body.offsetWidth/number_of_random_images)-2*random_image_padding;
 
-const is_android = () => {
-  return /Android/i.test(navigator.userAgent);
-};
-
-const is_ios = () => {
-  return /iPhone|iPad|iPod/i.test(navigator.userAgent);
-};
-
-const is_chrome = () => {
-  return /Chrome/i.test(navigator.userAgent);
-};
-
 if (is_chrome() && is_ios()) {
     const p = document.createElement('p');
     p.innerHTML = "<big>On iPhones and iPads this app only works in the Safari browser.</big>";
     document.body.insertBefore(p, document.body.firstChild)
 }
-
-const is_mobile = () => {
-  return is_android() || is_ios();
-};
 
 // number of nearest neighbours for KNN - one extra for experiments since we remove self-votes
 let top_k = option === 'experiment' ? 6 : 5;

@@ -13,6 +13,7 @@ const files_to_cache = [
 "/ai/js/mobilenet.js",
 "/ai/js/knn-classifier.js",
 "/ai/onyx/korean.js",
+"/ai/js/user-agent.js",
 "/ai/onyx/nails.js",
 "/ai/onyx/md5-min.js",
 "/ai/onyx/train.js",
