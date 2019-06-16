@@ -30,7 +30,7 @@
         }
     ],
     "start_url": "/ai/LIFE/index.html",
-    "display": "fullscreen",
+    "display": "standalone",
     "theme_color": "#B12A34",
     "background_color": "#B12A34"
 }
