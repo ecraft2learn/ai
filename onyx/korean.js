@@ -21,7 +21,7 @@ add_to_dataset ({
                {file_name: "images/korean/L_NAIL_5nail_5nail2005_2_onychomycosis.png",
                 count: 180,
                 dimensions: {width: 2260,
-                             height: 1732}},         
+                             height: 1342}},    
                 ],
     "warrants second opinion": [
         {file_name: "images/korean/L_NAIL_5nailA2_lesion_melanonychia3_melanonychia.png",
@@ -31,7 +31,7 @@ add_to_dataset ({
         {file_name: "images/korean/L_NAIL_5nail_nail2005_2_melanonychia.png",
          count: 250,
          dimensions: {width: 2260,
-                      height: 1860}},
+                      height: 1220}},
         ],
 });
 
