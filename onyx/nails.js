@@ -261,7 +261,8 @@ const add_image_or_canvas = (parent, image_or_canvas, class_name, image_to_repla
         const analyse_image_and_replace_self =
             (result) => {
                 const class_index = class_names.indexOf(class_name);
-                display_message(process_prediction(result, image_or_canvas, class_index), true);
+                let message = process_prediction(result, image_or_canvas, class_index);
+                display_message(message, true);
                 add_random_image(null, image_or_canvas); // replaces self with new random image                      
         };
         make_prediction(image_or_canvas, analyse_image_and_replace_self);
@@ -584,9 +585,9 @@ const confidences = (result, correct_class_index, running_tests) => {
         } else {
             message += "The nail's condition is " + scores[0].name + " with confidence score of " + scores[0].score + "%.";
             if (scores[1].name === "warrants second opinion" && scores[1].score > 0) {
-                message += " The confidence score for it being warranting a second opinion is " + scores[1].score + "%.";
+                message += "<br>The confidence score for it warranting a second opinion is " + scores[1].score + "%.";
             } else if (scores[1].score > 0) {
-                message += " Otherwise it is " + scores[1].name + " with confidence score of " + scores[1].score + "%.";
+                message += "<br>Otherwise it is " + scores[1].name + " with confidence score of " + scores[1].score + "%.";
             }
         }
     }
@@ -1080,6 +1081,15 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
         message += " according to experts<br>";
     }
     message += " " + confidence_message;
+    if (image_or_canvas.title) {
+        message += "<br>"
+                   + "<a href='"
+                   + image_or_canvas.title
+                   + "' target='_blank'>"
+                   + "Source: "
+                   + image_or_canvas.title
+                   + "</a>";
+    }
     let correct_prediction = correct(result, class_index);
     if (correct_prediction) {
         number_right++;

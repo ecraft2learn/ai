@@ -1,7 +1,7 @@
 {
     "name": "Onyx Nail Analyser - University of Oxford",
     "short_name": "Nail Analyser",
-    "description": "When presented with an image of a finger or toe nail produces probabilities that it is normal, abnormal but not serious, or warrants a second opinion",
+    "description": "When presented with an image of a finger or toe nail produces probabilities that it is normal, abnormal but not serious, or warrants a second opinion.",
     "icons": [
         {
             "src": "/ai/onyxicons/icon-32.png",
