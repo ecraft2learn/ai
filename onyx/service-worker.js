@@ -17,7 +17,6 @@ const files_to_cache = [
 "/ai/onyx/md5-min.js",
 "/ai/onyx/train.js",
 "/ai/js/mobilenet_v2_100_224/classification/2/model.json?tfjs-format=file",
-"/favicon.ico",
 "/ai/js/mobilenet_v2_100_224/classification/2/group1-shard1of4?tfjs-format=file",
 "/ai/js/mobilenet_v2_100_224/classification/2/group1-shard2of4?tfjs-format=file",
 "/ai/js/mobilenet_v2_100_224/classification/2/group1-shard3of4?tfjs-format=file",
