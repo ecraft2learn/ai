@@ -2274,15 +2274,16 @@ document.addEventListener(
             }   
         };
         const answer_question = (question) => {
+        	answer_area.innerHTML = "Please wait...";
             LIFE.respond_to_question(question, -0.55).then((answer) => {
                 // reasonable matches must be less than -0.55 cosineProximity
                 respond_with_answer(answer, question);
             },
             record_error);
         };
-        question_area.addEventListener('keydown',
+        question_area.addEventListener('keypress',
                                        (event) => {
-                                           if (event.keyCode == 13 || event.keyCode == 191) { // ? or new line
+                                           if (event.keyCode === 13 || event.keyCode === 63) { // ? or new line
                                                answer_question(question_area.value);
                                            };
                                        });
