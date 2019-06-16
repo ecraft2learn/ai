@@ -268,20 +268,21 @@ const add_random_images = (image_to_replace) => {
 
 const add_random_image = (parent, image_to_replace) => {
     const class_name = random_element(class_names);
-        const image_description = random_element(images[class_name]);
-        if (typeof image_description === 'string') {
-            const image = document.createElement('img');
-            image.src = image_description;
-            add_image_or_canvas(parent, image, class_name, image_to_replace);
-        } else {
-            load_image(image_description.file_name,
-                       (multi_nail_image) => {
-                           const box = multi_nail_image_box(image_description);
-                           const canvas = canvas_of_multi_nail_image(multi_nail_image, box);
-                           canvas.title = image_description.file_name + "#" + box.image_index;                                                                   
-                           add_image_or_canvas(parent, canvas, class_name, image_to_replace);
-                       });                 
-        }
+    const image_description = random_element(images[class_name]);
+    if (typeof image_description === 'string') {
+        const image = document.createElement('img');
+        image.src = image_description;
+        image.title = image_description;
+        add_image_or_canvas(parent, image, class_name, image_to_replace);
+    } else {
+        load_image(image_description.file_name,
+                   (multi_nail_image) => {
+                       const box = multi_nail_image_box(image_description);
+                       const canvas = canvas_of_multi_nail_image(multi_nail_image, box);
+                       canvas.title = image_description.file_name + "#" + box.image_index;                                                                   
+                       add_image_or_canvas(parent, canvas, class_name, image_to_replace);
+                   });                 
+    }
 };
 
 const load_image = function (image_url, callback) {
@@ -1066,12 +1067,11 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
     }
     message += " " + confidence_message;
     if (image_or_canvas.title) {
-        message += "<br>"
+        message += "&nbsp;"
                    + "<a href='"
                    + image_or_canvas.title
                    + "' target='_blank'>"
-                   + "Source: "
-                   + image_or_canvas.title
+                   + "image source"
                    + "</a>";
     }
     let correct_prediction = correct(result, class_index);
