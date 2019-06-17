@@ -104,6 +104,8 @@ const number_of_images_in_multi_nail_file = (multi_nail_description) => {
     return images_per_row*(number_of_rows-1);        
 };
 
+const images_fitting_in = (height) => 20*(((height-68)/128)-1);
+
 const number_of_images = {};
 
 class_names.forEach((class_name) => {
