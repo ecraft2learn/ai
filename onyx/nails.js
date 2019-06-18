@@ -92,16 +92,17 @@ const multi_nail_image_start_y = (multi_nail_description) => {
     return multi_nail_description.start_y || 48; 
 };
 const number_of_images_in_multi_nail_file = (multi_nail_description) => {
-    if (multi_nail_description.count > 0) {
-        return multi_nail_description.count;
-    }
     const {width, height} = multi_nail_description.dimensions;
     const images_per_row = Math.floor((width-multi_nail_image_start_x(multi_nail_description))
                                       /multi_nail_image_delta_x(multi_nail_description));
     const number_of_rows = Math.floor((height-multi_nail_image_start_y(multi_nail_description))
                                       /multi_nail_image_delta_y(multi_nail_description));
     // subtract 1 since don't know how many blank images there are in the bottom row
-    return images_per_row*(number_of_rows-1);        
+    const number_of_images = images_per_row*(number_of_rows-1);
+    if (multi_nail_description.count > 0) {
+        return Math.min(number_of_images, multi_nail_description.count);
+    }
+    return number_of_images;    
 };
 
 const images_fitting_in = (height) => 20*(((height-68)/128)-1);
@@ -1036,10 +1037,14 @@ const run_new_experiments = () => {
             const prediction_tensor = loaded_model.predict([logits]);
             const prediction = prediction_tensor.dataSync();
             const confidence = prediction[class_index];
+            const class_name = class_names[class_index];
+            const image_description = images[class_name][image_index];
+            image.title = typeof image_description === 'string' ?
+                          image_description :
+                          image_description.file_name + "#" + image_count;
             let message = process_prediction(prediction, image, class_index, image_index, image_count);
     //         let message = "<img src='" + get_url_from_image_or_canvas(image) + "' width=100 height=100></img>" 
     //                       + class_names[class_index] + "#" + image_index + " (" + image_count + ") = " + number_precision(confidence, 4);
-            const class_name = class_names[class_index];
             confidences[class_name].push([confidence, message]);
             csv[class_name] += "https://ecraft2learn.github.io/ai/onyx/" + images[class_name][image_index] + "," +
                                 image_count + "," + confidence + "\n";
