@@ -11,7 +11,7 @@
 <script src="../js/load-scripts.js"></script>
 <script>
 
-if ('serviceWorker' in navigator && window.location.hostname !== 'localhost') {
+if ('serviceWorker' in navigator) { // && window.location.hostname !== 'localhost') {
     navigator.serviceWorker.register('service-worker.js');
 }
 
@@ -32,7 +32,7 @@ if (option !== 'diagnose') {
     // including this for the PWA means all the files are needed too
     images_js.push("korean-tests.js");
 }
-const model_name = "normal-fungal-serious-1000-every-5";
+const model_name = "normal-fungal-serious-1000-every-5-A2";
 const every_nth_for_testing = 5;
 const projector_data = false;
 
