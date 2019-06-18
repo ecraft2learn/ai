@@ -982,7 +982,6 @@ add_to_dataset({
 "images/korean/onychomycosis/semisuper_kor_825_381_36_650_305_th_225025385771C502136899.jpg",
 "images/korean/onychomycosis/semisuper_kor_885_100_265_302_467_U1422432694.jpg",
 "images/korean/onychomycosis/semisuper_kor_922_500_468_1601_1569_DSC01393.jpg",
-"images/korean/onychomycosis/semisuper_kor_923_343_91_561_308_16464507_1243975015712056_4973975954478071808_n.jpg",
 "images/korean/onychomycosis/semisuper_kor_924_393_130_596_332_th_237F384957EDCC3C2BAB04.jpg",
 "images/korean/onychomycosis/semisuper_kor_930_398_135_732_458_12.jpg",
 "images/korean/onychomycosis/semisuper_kor_931_19_34_370_385_12.jpg",
