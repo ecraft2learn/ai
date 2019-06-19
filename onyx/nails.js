@@ -955,7 +955,6 @@ const create_next_image_generator = () => {
     const next_image = (image_callback, when_class_finished, when_all_finished) => {
         const class_name = class_names[class_index];
         if (image_count >= number_of_images[class_name]-1) { 
-//             (nails_remaining_in_multi_nail === 0 && image_index === images[class_name].length-1)) {
             // no more images for this class_index
             if (when_class_finished) {
                 when_class_finished(class_index);
@@ -966,12 +965,12 @@ const create_next_image_generator = () => {
             class_index++;
             if (class_index === class_names.length) { // no more classes 
                 if (when_all_finished) {
-                    when_all_finished()
+                    when_all_finished();
                 };
                 return;
+//             } else {
+//                 next_image(image_callback, when_class_finished, when_all_finished);
             }
-            next_image(image_callback, when_class_finished, when_all_finished);
-            return;
         } else {
             image_count++;
             if (nails_remaining_in_multi_nail > 0) {
