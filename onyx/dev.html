@@ -64,7 +64,7 @@ load_local_or_remote_scripts(
     ["../js/tfjs.js",
      "../js/tfjs-vis.js",
      "../js/mobilenet.js",
-     "../js/knn-classifier.js",
+//      "../js/knn-classifier.js",
      ...images_js,
      "../js/user-agent.js",
      "nails.js",
@@ -76,7 +76,7 @@ load_local_or_remote_scripts(
      // using the same locally cached version so nothing breaks when released versions are updated
     ["../js/tfjs.js",
      "../js/mobilenet.js",
-     "../js/knn-classifier.js",
+//      "../js/knn-classifier.js",
 //      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs",
 //      "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet",
 //      "https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier",
@@ -91,13 +91,10 @@ load_local_or_remote_scripts(
 </script>
 </head>
 <body>
-<p id="please-wait">
-Please wait for this page to load.
-</p>
 <!-- Introduction is hidden until everything is loaded -->
 <div id="introduction" hidden>
 <p>
-Ready now. An introduction and instructions will go here.
+Tap one of the photos of a nail or use the camera.
 </p>
 </div>
 <div id='main' hidden>
@@ -122,10 +119,10 @@ Ready now. An introduction and instructions will go here.
      width  = "224"
      height = "224">
     </canvas>
-    <p>Click on any of the following random images</p>
     <div id="random-images"></div>
     <div id="selection-rectangle" hidden style="border: 2px dotted yellow; position: absolute;"></div>
 </div>
+<div id="user-agreement">
 <p>
 This website contains general information about nail conditions and is used for training purposes only.
 The information is not medical advice and should not be treated as such.
@@ -143,5 +140,13 @@ The
 <a href="https://github.com/ecraft2learn/ai/tree/master/onyx" target="_blank">source code</a>
 for this app is available for inspection.
 </p>
+<p id="please-wait">
+Please wait for this page to load.
+</p>
+    <div id='agreement' hidden>
+      <input type="checkbox" id="agreement-checkbox" name="agreement">
+      <label for="agreement">Check to indicate you understand the disclaimer.</label>
+    </div>
+</div>
 </body>
 </html>

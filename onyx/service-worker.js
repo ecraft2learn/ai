@@ -11,7 +11,6 @@ const files_to_cache = [
 "/ai/js/tfjs.js",
 "/ai/js/tfjs-vis.js",
 "/ai/js/mobilenet.js",
-"/ai/js/knn-classifier.js",
 "/ai/onyx/korean.js",
 "/ai/js/user-agent.js",
 "/ai/onyx/nails.js",

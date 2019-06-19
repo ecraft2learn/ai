@@ -171,7 +171,7 @@ const display_results = (canvas) => {
     });
 };
 
-async function setupCamera() {
+const setup_camera = (callback) => {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     throw new Error(
         'Browser API navigator.mediaDevices.getUserMedia not available');
@@ -182,52 +182,45 @@ async function setupCamera() {
   video.height = VIDEO_HEIGHT;
 
   const mobile = is_mobile();
-  const stream = await navigator.mediaDevices.getUserMedia({
+  navigator.mediaDevices.getUserMedia({
     'audio': false,
     'video': {
       facingMode: mobile ? 'environment' : 'user',
       width: mobile ? undefined : VIDEO_WIDTH,
       height: mobile ? undefined : VIDEO_HEIGHT,
     },
-  });
-  video.srcObject = stream;
-  const toggle_click= () => {
-      if (!video.paused && !video.hidden) {
-          video.pause();
-          toggle_freeze_button.innerHTML = "Resume video";
-          document.getElementById('before-video-element').innerHTML =
-              "<b>Use the mouse to select a rectangle containing a nail.</b>";        
-      } else {
-          if (video.hidden) {
-              video.hidden = false;
-              document.getElementById('canvas').hidden = true;
+  }).then((stream) => {
+      video.srcObject = stream;
+      const toggle_click= () => {
+          if (!video.paused && !video.hidden) {
+              video.pause();
+              toggle_freeze_button.innerHTML = "Resume video";
+              document.getElementById('before-video-element').innerHTML =
+                  "<b>Use the mouse to select a rectangle containing a nail.</b>";        
+          } else {
+              if (video.hidden) {
+                  video.hidden = false;
+                  document.getElementById('canvas').hidden = true;
+              }
+              video.play();
+              toggle_freeze_button.innerHTML = "Freeze video";
+              document.getElementById('before-video-element').innerHTML =
+                  "<b>Freeze the video before selecting a nail.</b>";
           }
-          video.play();
-          toggle_freeze_button.innerHTML = "Freeze video";
-          document.getElementById('before-video-element').innerHTML =
-              "<b>Freeze the video before selecting a nail.</b>";
+      };
+      const toggle_freeze_button = document.getElementById('toggle video');
+      if (is_mobile()) {
+          toggle_freeze_button.innerHTML = "Analyse";
+          toggle_freeze_button.addEventListener('click', analyse_camera_image);
+      } else {
+          toggle_freeze_button.addEventListener('click', toggle_click);  
       }
-  };
-  const toggle_freeze_button = document.getElementById('toggle video');
-  if (is_mobile()) {
-      toggle_freeze_button.innerHTML = "Analyse";
-      toggle_freeze_button.addEventListener('click', analyse_camera_image);
-  } else {
-      toggle_freeze_button.addEventListener('click', toggle_click);  
-  }
-//   const reset_response_button = document.getElementById('reset_response');
-//   if (is_mobile()) {
-//       reset_response_button.remove();
-//   } else {
-//       reset_response_button.addEventListener('click', reset_response);
-//   }
-  add_random_images(); // perhaps only if mobile?
-  return new Promise((resolve) => {
+      add_random_images(); // perhaps only if mobile?
       video.onloadedmetadata = () => {
-          resolve(video);
+          callback(video);
       };
   });
-}
+};
 
 const random_integer = (n) =>
     // returns an integer between 0 and n-1
@@ -404,48 +397,55 @@ const make_prediction = (image, callback) => {
 // 'conv_preds' is the logits activation of MobileNet.
 const infer = (image) => {
     if (!mobilenet_model) {
-        load_mobilenet();
+        return load_mobilenet(() => infer(image)); 
     }
     return mobilenet_model.infer(image, 'conv_preds');
 };
 
-const load_mobilenet = async function () {
+const load_mobilenet = (callback) => {
     if (use_knn) {
         classifier = knnClassifier.create();
     }
-    mobilenet_model = await mobilenet.load(2);  // version 2
+    mobilenet.load(2).then((model) => { // version 2
+        mobilenet_model = model;
+        return callback();
+    });  
 };
 
-/**
- * Initialises by loading the knn model, finding and loading
- * available camera devices, loading the images, and initialising the interface
- */
-const initialise_page = async () => {
-    // Setup the camera
-    try {
-      video = await setupCamera();
-      video.play();
-    } catch (e) {
-      let info = document.getElementById('info');
-      if (!info) {
-          info = document.createElement('p');
-          info.id = 'info';
-          document.body.appendChild(info);
-      }
-      info.textContent = 'This browser either does not support video capture, ' +
-                         'lacks permission to use the camera, ' +
-                         'or this device does not have a camera.';
-      info.style.display = 'block';
-      throw e;
-    }
-    const start_up = () => {
+const initialise_page = () => {
+    setup_camera(
+        (camera) => {
+          video = camera;
+          video.play();
+          if (window.saved_tensors && use_knn && !CREATE_SPRITE_IMAGE && !SAVE_TENSORS && option !== 'experiment' && typeof xs === 'undefined') {
+              load_data_set(window.saved_tensors);
+              start_up();
+          } else if (option === 'create model' || 
+                     (use_knn && option !== 'diagnose')) {
+              add_images(start_up);
+          } else {
+              start_up();
+          }
+        },
+        (e) => {
+          let info = document.getElementById('info');
+          if (!info) {
+              info = document.createElement('p');
+              info.id = 'info';
+              document.body.appendChild(info);
+          }
+          info.textContent = 'This browser either does not support video capture, ' +
+                             'lacks permission to use the camera, ' +
+                             'or this device does not have a camera.';
+          info.style.display = 'block';
+          throw e;          
+        });
+};
+const start_up = () => {
         if (typeof tensor_tsv === 'string') {
             add_textarea(tensor_tsv);
             add_textarea(metadata_tsv);
         }
-        document.getElementById('please-wait').hidden = true;
-        document.getElementById('introduction').hidden = false;
-        document.getElementById('main').hidden = false;
         rectangle_selection();
         document.addEventListener('drop',
                                   (event) => {
@@ -454,17 +454,17 @@ const initialise_page = async () => {
                                   },
                                   false);
         document.addEventListener('dragenter', (event) => {
-             event.preventDefault();
-             document.body.style.backgroundColor = 'pink';
+            event.preventDefault();
+            document.body.style.backgroundColor = 'pink';
         });
         document.addEventListener('dragover', (event) => {
-             event.preventDefault();
+            event.preventDefault();
         });
         document.addEventListener('dragexit', (event) => {
-             event.preventDefault();
-             document.body.style.backgroundColor = 'white';
+            event.preventDefault();
+            document.body.style.backgroundColor = 'white';
         });
-        if (load_model_named) {
+        if (load_model_named) { // check that not training?
             tf.loadLayersModel("models/" + load_model_named + ".json").then((model) => {
                 loaded_model = model;
                 if (option === 'experiment') {
@@ -477,17 +477,8 @@ const initialise_page = async () => {
         if (SAVE_TENSORS) {
             save_tensors(classifier.getClassifierDataset());
         }
-    };
-    if (window.saved_tensors && use_knn && !CREATE_SPRITE_IMAGE && !SAVE_TENSORS && option !== 'experiment' && typeof xs === 'undefined') {
-        load_data_set(window.saved_tensors);
-        start_up();
-    } else if (option === 'create model' || 
-               (use_knn && option !== 'diagnose')) {
-        add_images(start_up);
-    } else {
-        start_up();
-    }
 };
+
 
 function remove_parent_element (event) {
     event.currentTarget.parentNode.remove();
@@ -1309,8 +1300,30 @@ const load_data_set = (data_set) => {
     }
 };
 
+const agreement_checkbox = document.getElementById('agreement-checkbox');
+// let interface_ready = false;
+const show_interface = () => {
+//     if (agreement_checkbox.checked) {
+        document.getElementById('introduction').hidden = false;
+        document.getElementById('main').hidden = false;        
+//     }                       
+};
+const on_click = () => {
+    document.getElementById('user-agreement').remove();
+//     if (interface_ready) {
+        show_interface();
+//     } else {
+//         document.getElementById('please-wait').hidden = true;
+//     }
+};
+agreement_checkbox.addEventListener('click', on_click);
+
 window.addEventListener('DOMContentLoaded',
-                        function (event) {
-                            load_mobilenet().then(initialise_page);
+                        (event) => {
+                            load_mobilenet(() => {
+//                                 interface_ready = true;
+                                initialise_page();
+                                document.getElementById('agreement').hidden = false;                           
+                            });
                         },
                         false);
