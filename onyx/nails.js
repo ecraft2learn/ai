@@ -29,7 +29,7 @@ if (is_chrome() && is_ios()) {
 let top_k = option === 'experiment' ? 6 : 5;
 
 const histogram_buckets = [];
-const bucket_count = 5;
+const bucket_count = 20;
 const histogram_image_size = 40;
 
 const minimum_confidence = 60;
@@ -272,6 +272,9 @@ const add_random_images = (image_to_replace) => {
 const add_random_image = (parent, image_to_replace) => {
     const class_name = random_element(class_names);
     const image_description = random_element(images[class_name]);
+    if (!image_description) {
+        return; // e.g. for this test this class is empty
+    }
     if (typeof image_description === 'string') {
         const image = document.createElement('img');
         image.src = image_description;
@@ -568,13 +571,13 @@ const confidences = (result, correct_class_index, running_tests) => {
         if (scores[0].name === "warrants second opinion") {
             message += "It is most likely that the nail indicates something that warrants a second opinion and you should seek medical advice. (Confidence score is "
                        + scores[0].score + "%)";
-        } else if (scores[1].name === "warrants second opinion" && scores[1].score >= 20) {
+        } else if (scores.length > 1 && scores[1].name === "warrants second opinion" && scores[1].score >= 20) {
             message += "It might be warrant a second opinion " + " (confidence score is " + scores[1].score + "%) ";
         } else {
             message += "The nail's condition is " + scores[0].name + " with confidence score of " + scores[0].score + "%.";
-            if (scores[1].name === "warrants second opinion" && scores[1].score > 0) {
+            if (scores.length > 1 && scores[1].name === "warrants second opinion" && scores[1].score > 0) {
                 message += "<br>The confidence score for it warranting a second opinion is " + scores[1].score + "%.";
-            } else if (scores[1].score > 0) {
+            } else if (scores.length > 1 && scores[1].score > 0) {
                 message += "<br>Otherwise it is " + scores[1].name + " with confidence score of " + scores[1].score + "%.";
             }
         }
@@ -892,7 +895,6 @@ const receive_drop = (event) => {
             video.hidden = true;
             make_prediction(canvas, (results) => {
                 display_message(confidences(results, -1), true);
-                console.log(results);
                 display_message("You can select a sub-region of your image.", true);
                 const video_button = document.getElementById('toggle video');
                 video_button.innerHTML = "Restore camera";
@@ -952,7 +954,7 @@ const create_next_image_generator = () => {
     reset_next_image();
     const next_image = (image_callback, when_class_finished, when_all_finished) => {
         const class_name = class_names[class_index];
-        if (image_count === number_of_images[class_name]-1) { 
+        if (image_count >= number_of_images[class_name]-1) { 
 //             (nails_remaining_in_multi_nail === 0 && image_index === images[class_name].length-1)) {
             // no more images for this class_index
             if (when_class_finished) {
@@ -968,6 +970,8 @@ const create_next_image_generator = () => {
                 };
                 return;
             }
+            next_image(image_callback, when_class_finished, when_all_finished);
+            return;
         } else {
             image_count++;
             if (nails_remaining_in_multi_nail > 0) {
@@ -986,6 +990,10 @@ const create_next_image_generator = () => {
         const load_or_extract_image = () => {
             const class_name = class_names[class_index];
             const image_or_images_description = images[class_name][image_index];
+            if (!image_or_images_description) {
+                // no images for this class since testing other things
+                return;
+            }
             if (typeof image_or_images_description !== 'string') {
                 if (multi_nail_image) {
                     // no need to load it again
