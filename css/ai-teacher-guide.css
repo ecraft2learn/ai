@@ -211,3 +211,7 @@ figcaption {
 .y-axis-label {
   position: absolute;
 }
+.agreement-checkbox {
+ font-size: x-large;
+ color: darkred;
+}

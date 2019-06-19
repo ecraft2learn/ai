@@ -1312,7 +1312,8 @@ window.addEventListener('DOMContentLoaded',
                             load_mobilenet(() => {
                                 initialise_page();
                                 if (option === 'diagnose') {
-                                    document.getElementById('agreement').hidden = false; 
+                                    document.getElementById('agreement').hidden = false;
+                                    document.getElementById('please-wait').hidden = true;                                    
                                 } else { // no need for agreement when training or experimenting
                                     on_click();
                                 }                          
