@@ -1300,30 +1300,22 @@ const load_data_set = (data_set) => {
     }
 };
 
-const agreement_checkbox = document.getElementById('agreement-checkbox');
-// let interface_ready = false;
-const show_interface = () => {
-//     if (agreement_checkbox.checked) {
-        document.getElementById('introduction').hidden = false;
-        document.getElementById('main').hidden = false;        
-//     }                       
-};
 const on_click = () => {
     document.getElementById('user-agreement').remove();
-//     if (interface_ready) {
-        show_interface();
-//     } else {
-//         document.getElementById('please-wait').hidden = true;
-//     }
+    document.getElementById('introduction').hidden = false;
+    document.getElementById('main').hidden = false;
 };
-agreement_checkbox.addEventListener('click', on_click);
+document.getElementById('agreement-checkbox').addEventListener('click', on_click);
 
 window.addEventListener('DOMContentLoaded',
                         (event) => {
                             load_mobilenet(() => {
-//                                 interface_ready = true;
                                 initialise_page();
-                                document.getElementById('agreement').hidden = false;                           
+                                if (option === 'diagnose') {
+                                    document.getElementById('agreement').hidden = false; 
+                                } else { // no need for agreement when training or experimenting
+                                    on_click();
+                                }                          
                             });
                         },
                         false);
