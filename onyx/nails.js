@@ -18,6 +18,11 @@ const SAVE_TENSORS = false; // if KNN
 const VIDEO_WIDTH  = 224; // this version of MobileNet expects 224x224 images
 const VIDEO_HEIGHT = 224;
 
+const old_serious_name = "warrants second opinion";
+const new_serious_name = "check with a GP";
+const better_name = (name) =>
+    name === old_serious_name ? new_serious_name : name;
+
 const number_of_random_images = 4;
 const random_image_padding = 4;
 const image_dimension = Math.floor(document.body.offsetWidth/number_of_random_images)
@@ -158,6 +163,7 @@ const display_results = (canvas) => {
                      + "\nimage id = " + id
                      + "\ndata = " + logits;
         const message = response_element("<img id='" + id + "' width=60 height=60 src='" + data_url + "'>"
+                                         + "<br>"
                                          + result_description)
         display_message(message, true);
         const image_element = document.getElementById(id);
@@ -546,7 +552,7 @@ const correct = (result, class_index) => {
 const not_confident_message = "Not very sure whether the nail is OK or not. Sorry.";
 
 const confidences = (result, correct_class_index, running_tests) => {
-    let message = "<b>Confidences: </b>";
+    let message = "<b>Analysis by this app: </b>";
     let scores = [];
 //     let name_of_highest_scoring_class;
 //     let name_of_second_highest_scoring_class;
@@ -559,7 +565,7 @@ const confidences = (result, correct_class_index, running_tests) => {
         } else {
             score = Math.round(result[class_index]*100)
         }
-        message += name + " = " + score + "%; ";
+        message += better_name(name) + " = " + score + "%; ";
         scores.push({name: name,
                      score: score});
     });
@@ -570,15 +576,15 @@ const confidences = (result, correct_class_index, running_tests) => {
     if (scores[0].score < minimum_confidence) {
         message += not_confident_message;
     } else {
-        if (scores[0].name === "warrants second opinion") {
+        if (scores[0].name === old_serious_name) {
             message += "It is most likely that the nail indicates something that warrants a second opinion and you should seek medical advice. (Confidence score is "
                        + scores[0].score + "%)";
-        } else if (scores.length > 1 && scores[1].name === "warrants second opinion" && scores[1].score >= 20) {
-            message += "It might be warrant a second opinion " + " (confidence score is " + scores[1].score + "%) ";
+        } else if (scores.length > 1 && scores[1].name === old_serious_name && scores[1].score >= 20) {
+            message += "Perhaps a GP should be consulted " + " (confidence score is " + scores[1].score + "%) ";
         } else {
             message += "The nail's condition is " + scores[0].name + " with confidence score of " + scores[0].score + "%.";
-            if (scores.length > 1 && scores[1].name === "warrants second opinion" && scores[1].score > 0) {
-                message += "<br>The confidence score for it warranting a second opinion is " + scores[1].score + "%.";
+            if (scores.length > 1 && scores[1].name === old_serious_name && scores[1].score > 0) {
+                message += "<br>The confidence score for consulting a GP is " + scores[1].score + "%.";
             } else if (scores.length > 1 && scores[1].score > 0) {
                 message += "<br>Otherwise it is " + scores[1].name + " with confidence score of " + scores[1].score + "%.";
             }
@@ -1075,13 +1081,19 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
     message = "<img src='" + image_url + "' width=100 height=100></img>";
     let confidence_message = confidences(result, class_index, true);
     const class_name = class_names[class_index];
-    message += "&nbsp;" + class_name;
     if (typeof image_count !== 'undefined') {
-        message += "#" + image_count;
+        message += "&nbsp;" + better_name(class_name) + "#" + image_count;
     } else {
-        message += " according to experts<br>";
+        message += "&nbsp;According to experts ";
+        if (class_name === old_serious_name) {
+            message += "this is a condition that should be seen by a doctor.";
+        } else if (class_name === 'non-serious') {
+            message += "this is abnormal but not serious.";
+        } else if (class_name === 'normal') {
+            message += "this is normal.";
+        }
     }
-    message += " " + confidence_message;
+    message += "<br>" + confidence_message;
     if (image_or_canvas.title) {
         message += "&nbsp;"
                    + "<a href='"
@@ -1101,7 +1113,7 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
         not_confident_answers++;
     } else if (class_names[0] === 'normal' &&
                (class_names[1] === 'fungal' || class_names[1] === 'non-serious') &&
-               (class_names.length === 2 || class_names[2] === 'warrants second opinion')) {
+               (class_names.length === 2 || class_names[2] === old_serious_name)) {
         let positive_index = class_names[1] === 'fungal' ? 1 : 2;
         if (class_index === positive_index) { 
             if (correct_prediction) {
