@@ -1325,7 +1325,10 @@ const load_data_set = (data_set) => {
 
 const on_click = () => {
     document.getElementById('user-agreement').remove();
-    document.getElementById('introduction').hidden = false;
+    document.getElementById('introduction').innerHTML = 
+        is_mobile() ?
+        "<p>Tap one of the photos of a nail or the video image.</p>" :
+        "<p>Tap one of the photos of a nail or use the camera.</p>";
     document.getElementById('main').hidden = false;
 };
 document.getElementById('agreement').addEventListener('click', on_click);
