@@ -107,7 +107,7 @@ figcaption {
   display: block;
 }
 .random-image-button {
-  padding: 12px;
+  padding-left: 4px;
   cursor: pointer;
 }
 .prediction-response {

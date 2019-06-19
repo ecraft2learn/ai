@@ -15,9 +15,13 @@ const CREATE_SPRITE_IMAGE = projector_data;
 
 const SAVE_TENSORS = false; // if KNN
 
+const VIDEO_WIDTH  = 224; // this version of MobileNet expects 224x224 images
+const VIDEO_HEIGHT = 224;
+
 const number_of_random_images = 4;
-const random_image_padding = 12;
-const image_dimension = Math.floor(document.body.offsetWidth/number_of_random_images)-2*random_image_padding;
+const random_image_padding = 4;
+const image_dimension = Math.floor(document.body.offsetWidth/number_of_random_images)
+                        -2*random_image_padding;
 
 if (is_chrome() && is_ios()) {
     const p = document.createElement('p');
@@ -35,9 +39,6 @@ const histogram_image_size = 40;
 const minimum_confidence = 60;
 
 const confusion_matrix = [];
-
-const VIDEO_WIDTH  = 224; // this version of MobileNet expects 224x224 images
-const VIDEO_HEIGHT = 224;
 
 const class_names = Object.keys(images);
 
@@ -210,15 +211,14 @@ const setup_camera = (callback) => {
       };
       const toggle_freeze_button = document.getElementById('toggle video');
       if (is_mobile()) {
-          toggle_freeze_button.innerHTML = "Analyse";
-          toggle_freeze_button.addEventListener('click', analyse_camera_image);
+          toggle_freeze_button.remove();
+          video.addEventListener('click', analyse_camera_image);
       } else {
           toggle_freeze_button.addEventListener('click', toggle_click);  
       }
-      add_random_images(); // perhaps only if mobile?
       video.onloadedmetadata = () => {
           callback(video);
-      };
+      };          
   });
 };
 
@@ -229,7 +229,7 @@ const random_integer = (n) =>
 const random_element = (array) =>
     array[random_integer(array.length)];
 
-const add_image_or_canvas = (parent, image_or_canvas, class_name, image_to_replace) => {
+const add_image_or_canvas = (parent, image_or_canvas, class_name, image_to_replace, callback) => {
     // if image_to_replace is defined then image_or_canvas replaces it
     // otherwise image_or_canvas is added to parent element 
     image_or_canvas.classList.add('random-image-button');
@@ -254,15 +254,26 @@ const add_image_or_canvas = (parent, image_or_canvas, class_name, image_to_repla
     } else {
         parent.appendChild(image_or_canvas);
     }
-};
-
-const add_random_images = (image_to_replace) => {
-    for (let i = 0; i < number_of_random_images; i++) {
-        add_random_image(document.getElementById('random-images'), image_to_replace);
+    if (callback) {
+        callback();
     }
 };
 
-const add_random_image = (parent, image_to_replace) => {
+const add_random_images = (callback) => {
+    let count = 0;
+    const after_image_added = () => {
+        count++;
+        if (count === number_of_random_images-1) {
+            // last one
+            add_random_image(document.getElementById('random-images'), undefined, callback);
+        } else {
+            add_random_image(document.getElementById('random-images'), undefined, after_image_added);
+        }
+    }
+    add_random_image(document.getElementById('random-images'), undefined, after_image_added);
+};
+
+const add_random_image = (parent, image_to_replace, callback) => {
     const class_name = random_element(class_names);
     const image_description = random_element(images[class_name]);
     if (!image_description) {
@@ -272,14 +283,14 @@ const add_random_image = (parent, image_to_replace) => {
         const image = document.createElement('img');
         image.src = image_description;
         image.title = image_description;
-        add_image_or_canvas(parent, image, class_name, image_to_replace);
+        add_image_or_canvas(parent, image, class_name, image_to_replace, callback);
     } else {
         load_image(image_description.file_name,
                    (multi_nail_image) => {
                        const box = multi_nail_image_box(image_description);
                        const canvas = canvas_of_multi_nail_image(multi_nail_image, box);
                        canvas.title = image_description.file_name + "#" + box.image_index;                                                                   
-                       add_image_or_canvas(parent, canvas, class_name, image_to_replace);
+                       add_image_or_canvas(parent, canvas, class_name, image_to_replace, callback);
                    });                 
     }
 };
@@ -1305,18 +1316,20 @@ const on_click = () => {
     document.getElementById('introduction').hidden = false;
     document.getElementById('main').hidden = false;
 };
-document.getElementById('agreement-checkbox').addEventListener('click', on_click);
+document.getElementById('agreement').addEventListener('click', on_click);
 
 window.addEventListener('DOMContentLoaded',
                         (event) => {
                             load_mobilenet(() => {
                                 initialise_page();
-                                if (option === 'diagnose') {
-                                    document.getElementById('agreement').hidden = false;
-                                    document.getElementById('please-wait').hidden = true;                                    
-                                } else { // no need for agreement when training or experimenting
-                                    on_click();
-                                }                          
+                                add_random_images(() => {
+                                    if (option === 'diagnose') {
+                                        document.getElementById('agreement').hidden = false;
+                                        document.getElementById('please-wait').hidden = true;                                    
+                                    } else { // no need for agreement when training or experimenting
+                                        on_click();
+                                    }
+                                });                      
                             });
                         },
                         false);
