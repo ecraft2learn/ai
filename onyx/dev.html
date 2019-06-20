@@ -27,11 +27,13 @@ if (window.location.hash.indexOf('train') >= 0) {
 
 // korean.js korean-small.js korean-tests.js korean-tests-small.js 
 // originals.js originals-normal-fungal.js or originals-normal-serious-non-serious.js
-const images_js = ["korean.js"];
-if (option !== 'diagnose') {
-    // including this for the PWA means all the files are needed too
-    images_js.push("korean-tests.js");
+let images_js;
+if (option === 'diagnose') {
+    images_js = ["korean-tests.js"];
+} else {
+    images_js = ["korean.js", "korean-tests.js"];
 }
+
 const model_name = "normal-fungal-serious-1000-every-5-A2";
 const every_nth_for_testing = 5;
 const projector_data = false;
