@@ -54,10 +54,10 @@ window.assignments = {
 // snap.html?assignment=id
 window.requireAssignment = false;
 // Allows the user to change their assignment by clicking on project title
-window.allowChangeAssignment = true;
+// window.allowChangeAssignment = true;
 
 // If true, users are required to login before they can use the system
-window.requireLogin = true;
+window.requireLogin = false;
 
 // Specify to override the default Snap cloud URL
 // window.snapCloudURL = 'https://snap.apps.miosoft.com/SnapCloud';

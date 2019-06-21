@@ -6,7 +6,7 @@ const parameters = new URLSearchParams(window.location.hash.slice(1));
 const source = parameters.has('logging') ?
                "../isnap/snap-logging.html" :
                "snap-no-logging.html";
-document.location.replace(source + window.location.hash);
+document.location.replace(source + window.location.search + window.location.hash);
 </script>
 </head>
 </html>
