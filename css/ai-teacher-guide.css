@@ -100,8 +100,8 @@ figcaption {
  background-color: buttonface;
 }
 .button:disabled, button[disabled] {
-    color: #a8a881;
-    background-color: #ece8e4;
+  color: #a8a881;
+  background-color: #ece8e4;
 }
 .save-training-button, .save-validation-button, .support-window-button {
   display: block;
