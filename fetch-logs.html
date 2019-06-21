@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link href="css/ai-teacher-guide.css" rel="stylesheet">
+<title>Fetching and resetting Snap! logs</title>
+<script type="text/javascript">
+const fetch_logs = () => {
+    let last_log_counter = localStorage.getItem('log counter');
+    if (!last_log_counter) {
+        return "[]";
+    }
+    let logs = "";
+    for (let i = 1; i < last_log_counter; i++) {
+         logs += localStorage.getItem(i) + ",";
+    }
+    return "[" + logs.slice(0, logs.length-1) + "]"; // remove last comma
+};
+const copy_logs_to_clipboard = () => {
+    navigator.clipboard.writeText(fetch_logs());
+};
+const reset_logs = () => {
+    if (confirm("Are you sure you want to delete the Snap! logs stored in this browser?")) {
+        localStorage.clear();
+    }
+};
+
+window.addEventListener('DOMContentLoaded', () => {
+    const fetch_logs_button = document.createElement('button');
+    fetch_logs_button.innerHTML = "Click to copy current logs to the clipboard";
+    fetch_logs_button.addEventListener('click', copy_logs_to_clipboard);
+    fetch_logs_button.classList.add('generic-button');
+    document.body.appendChild(fetch_logs_button);
+
+    const clear_logs_button = document.createElement('button');
+    clear_logs_button.innerHTML = "Click to permanently remove the logs from this browser";
+    clear_logs_button.addEventListener('click', reset_logs);
+    clear_logs_button.classList.add('generic-button');
+    document.body.appendChild(clear_logs_button);
+});
+
+</script>
+</head>
+</html>

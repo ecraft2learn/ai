@@ -75,6 +75,7 @@ const local_storage_logger = (item) => {
 };
 
 const fetch_logs = () => {
+    // here for testing and debugging
     let last_log_counter = localStorage.getItem('log counter');
     if (!last_log_counter) {
         return "[]";
