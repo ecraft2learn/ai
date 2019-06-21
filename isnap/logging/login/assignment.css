@@ -1,0 +1,487 @@
+
+			.hidden {
+				display: none;
+			}
+			.hint {
+				color: #888;
+				font-style: italic;
+			}
+			#display-id {
+				font-weight: bold;
+			}
+			display-id-loggedIN{
+			    font-weight: bold;
+			}
+			body{
+			    margin: 0px;
+				padding: 0px;
+				font-family: 'Open Sans', sans-serif;
+				/* -webkit-font-smoothing: antialiased; */
+				background: url(loginBackground.png);
+			}
+			#flex-Parent{
+			    display: -webkit-box;
+                display: -webkit-flex;
+			    display: -ms-flexbox;
+			    display: flex;
+				-webkit-box-align: center;
+                -webkit-align-items: center;
+				    -ms-flex-align: center;
+				        align-items: center;
+				-webkit-box-pack: center;
+				    -ms-flex-pack: center;
+				        justify-content: center;
+				-webkit-justify-content: center;
+				-webkit-box-orient: vertical;
+				-webkit-box-direction: normal;
+                -webkit-flex-direction: column;
+				    -ms-flex-direction: column;
+				        flex-direction: column;
+			}
+			#blackBar{
+			    width: 100%;
+				background-color: #000000;
+				height: 30px;
+				margin: 0px;
+				display: -webkit-box;
+                display: -webkit-flex;
+				display: -ms-flexbox;
+				display: flex;
+				-webkit-box-pack: justify;
+				    -ms-flex-pack: justify;
+				        justify-content: space-between;
+				-webkit-justify-content: space-between;
+				-webkit-box-align: center;
+                -webkit-align-items: center;
+				    -ms-flex-align: center;
+				        align-items: center;
+
+			}
+			#blackBar img{
+			    width: 190px;
+				height: auto;
+			}
+			#courseName{
+			    color: white;
+				font-weight: 700;
+				font-size: 13px;
+				margin-right: 25px;
+			}
+			#theBox{
+			    display: -webkit-box;
+                display: -webkit-flex;
+			    display: -ms-flexbox;
+			    display: flex;
+				-webkit-box-orient: vertical;
+				-webkit-box-direction: normal;
+                -webkit-flex-direction: column;
+				    -ms-flex-direction: column;
+				        flex-direction: column;
+				-webkit-box-pack: center;
+				    -ms-flex-pack: center;
+				        justify-content: center;
+				-webkit-justify-content: center;
+				-webkit-box-align: center;
+                -webkit-align-items: center;
+				    -ms-flex-align: center;
+				        align-items: center;
+				position: fixed;
+				text-align: center;
+				top: 0;
+				right: 0;
+				left: 0;
+				bottom: 0;
+				width: 100%;
+				height: 100%;
+				min-height: 600px;
+			}
+			#theBorder{
+			    box-shadow: 0px 0px 100px rgba(0,0,0,0.3);
+				display: -webkit-box;
+                display: -webkit-flex;
+				display: -ms-flexbox;
+				display: flex;
+				-webkit-box-orient: vertical;
+				-webkit-box-direction: normal;
+                -webkit-flex-direction: column;
+				    -ms-flex-direction: column;
+				        flex-direction: column;
+				background-color: rgb(247, 247, 247);
+				padding-top: 0px;
+				padding-bottom: 15px;
+				border-radius: 6px;
+				border: 7px solid rgb(255, 201, 62);
+				-webkit-box-pack: center;
+				    -ms-flex-pack: center;
+				        justify-content: center;
+				-webkit-justify-content: center;
+				-webkit-box-align: center;
+                -webkit-align-items: center;
+				    -ms-flex-align: center;
+				        align-items: center;
+			}
+			#form-flex-Parent{
+			    width: 555px;
+				display: -webkit-box;
+                display: -webkit-flex;
+				display: -ms-flexbox;
+				display: flex;
+				-webkit-box-orient: vertical;
+				-webkit-box-direction: normal;
+                -webkit-flex-direction: column;
+				    -ms-flex-direction: column;
+				        flex-direction: column;
+				-webkit-box-pack: center;
+				    -ms-flex-pack: center;
+				-webkit-justify-content: center;
+				        justify-content: center;
+				-webkit-box-align: center;
+                -webkit-align-items: center;
+				    -ms-flex-align: center;
+				        align-items: center;
+			}
+			#snapLogo{
+			    display: -webkit-box;
+                display: -webkit-flex;
+			    display: -ms-flexbox;
+			    display: flex;
+				-webkit-box-orient: vertical;
+				-webkit-box-direction: normal;
+                -webkit-flex-direction: column;
+				    -ms-flex-direction: column;
+				        flex-direction: column;
+				-webkit-box-pack: center;
+				    -ms-flex-pack: center;
+				-webkit-justify-content: center;
+				        justify-content: center;
+				-webkit-box-align: center;
+                -webkit-align-items: center;
+				    -ms-flex-align: center;
+				        align-items: center;
+				margin-top: -15px;
+				margin-bottom: 15px;
+			}
+			#snapLogo img{
+			 max-width: 32%;
+				border-radius: 5px;
+
+			}
+			h1{
+			    margin: 0px;
+				color: #8F56E3;
+				font-size: 1.8em;
+			}
+			#unityID-hint{
+			 font-weight: 200;
+				font-size: 13px;
+				color: #656565;
+				margin-bottom: 20px;
+			}
+			#input-id{
+			    padding-top: 5px;
+				padding-bottom: 5px;
+				padding-left: 20px;
+				margin-bottom: 20px;
+				border-radius: 3px;
+				min-width: 100px;
+				max-width: 325px;
+				width: 100%;
+				height: 40px;
+				font-size: 22px;
+				outline: none;
+				border: 2px solid rgb(143,86,227);
+				background: url(userIcon.png) no-repeat right 10px center;
+				background-color: rgb(255,255,255);
+				background-size: 45px 45px;
+			}
+			#sign-in-Button{
+			    padding-top: 12px;
+				padding-bottom: 12px;
+				width: 350px;
+				font-size: 16px;
+				font-weight: 600;
+				letter-spacing: 1px;
+				text-decoration: none;
+				background: #4A6BD6;
+				border-radius: 3px;
+				color: white;
+				outline: none;
+			}
+			#sign-in-Button:hover{
+			 box-shadow: 0px 0px 0px 1px #4A6BD6 outset, 0px 0px 0px 1.5px white outset;
+				cursor: pointer;
+             -webkit-font-smoothing: antialiased;
+			}
+			#needsCookiesEnabled{
+			 margin-bottom: 30px;
+				padding: 14px;
+				background: rgb(255,246,191);
+				max-width: 450px;
+				font-size: 17px;
+				text-align: justify;
+				-webkit-transition: all 300ms ease-in-out 1s;
+				transition: all 300ms ease-in-out 1s;
+			}
+			.fa-exclamation-circle{
+			 margin-right: 12px;
+			}
+			.hidden{
+			 display: none;
+			}
+			.getFlex{
+			    display: -webkit-box;
+       display: -webkit-flex;
+			    display: -ms-flexbox;
+			    display: flex;
+			}
+			#confirm-new{
+			 height: 0px;
+				opacity: 0;
+				-webkit-transition: height 0.2s;
+				transition: height 0.2s;
+				visibility: hidden;
+				padding-left: 4em;
+				padding-right: 4em;
+				max-width: 390px;
+			}
+			#confirm-new ul {
+				text-align: left;
+				margin-top: 0.2em;
+				margin-bottom: 0.2em
+			}
+
+			#confirm-new ul li:first-child{
+			    margin-bottom: 5px;
+				margin-right: 7px;
+			}
+			.getFrames{
+			    -webkit-animation-name: myframes;
+			            animation-name: myframes;
+				-webkit-animation-duration: 0.3s;
+				        animation-duration: 0.3s;
+				-webkit-animation-timing-function: ease-in-out;
+				        animation-timing-function: ease-in-out;
+				-webkit-animation-delay: 0s;
+				        animation-delay: 0s;
+				-webkit-animation-iteration-count: 1;
+				        animation-iteration-count: 1;
+				-webkit-animation-direction: normal;
+				        animation-direction: normal;
+				-webkit-animation-fill-mode: forwards;
+				        animation-fill-mode: forwards;
+				-webkit-animation-play-state: running;
+				        animation-play-state: running;
+			}
+			.getFrames2{
+			    -webkit-animation-name: myframes2;
+			            animation-name: myframes2;
+				-webkit-animation-duration: 0.3s;
+				        animation-duration: 0.3s;
+				-webkit-animation-timing-function: ease-in-out;
+				        animation-timing-function: ease-in-out;
+				-webkit-animation-delay: 0s;
+				        animation-delay: 0s;
+				-webkit-animation-iteration-count: 1;
+				        animation-iteration-count: 1;
+				-webkit-animation-direction: normal;
+				        animation-direction: normal;
+				-webkit-animation-fill-mode: normal;
+				        animation-fill-mode: normal;
+				-webkit-animation-play-state: running;
+				        animation-play-state: running;
+			}
+			@-webkit-keyframes myframes{
+			    0%{ opacity: 0; height: 0; visibility: hidden}
+				50%{opacity: 0}
+				100%{opacity: 1; height: 130px; visibility: visible}
+			}
+			@keyframes myframes{
+			    0%{ opacity: 0; height: 0; visibility: hidden}
+				50%{opacity: 0}
+				100%{opacity: 1; height: 130px; visibility: visible}
+			}
+			@-webkit-keyframes myframes2{
+			    0%{opacity: 1; height: 130px; visibility: visible}
+				20%{opacity: 0}
+				100%{opacity: 0; height: 0px; visibility: hidden}
+			}
+			@keyframes myframes2{
+			    0%{opacity: 1; height: 130px; visibility: visible}
+				20%{opacity: 0}
+				100%{opacity: 0; height: 0px; visibility: hidden}
+			}
+			#confirm-new p{
+			    margin-top: 0px;
+				margin-bottom: 15px;
+				text-align: justify;
+				font-size: 16px;
+				line-height: 21px;
+				box-sizing: border-box;
+                max-width: 365px;
+                padding-left: 25px;
+			}
+			#confirm-new input{
+			    margin-top: 16px;
+				margin-bottom: 16px;
+			}
+			#assignment{
+			    padding-top: 7px;
+				padding-bottom: 7px;
+				padding-left: 25px;
+				padding-right: 15px;
+				margin-bottom: 15px;
+				margin-top: 15px;
+				border-radius: 3px;
+				min-width: 100px;
+				max-width: 350px;
+				width: 100%;
+				height: 50px;
+				outline: none;
+				border: 2px solid rgb(143, 86, 227);
+				background-color: rgb(255, 255, 255);
+				background-size: 45px;
+				font-size: 16px;
+			}
+			#assignmentGObutton{
+			    padding-top: 10px;
+				padding-bottom: 10px;
+				margin-bottom: 0px;
+				width: 350px;
+				font-size: 20px;
+				font-weight: 600;
+				letter-spacing: 1px;
+				text-decoration: none;
+				background: rgb(98, 194, 19);
+				border-radius: 3px;
+				-webkit-transition: all 300ms;
+				transition: all 300ms;
+				color: white;
+				outline: none;
+			}
+			#assignmentGObutton:hover{
+			 box-shadow: 0px 0px 0px 1px #4A6BD6 outset, 0px 0px 0px 1.5px white outset;
+				cursor: pointer;
+			}
+			.belt-container{
+			 overflow: hidden;
+			}
+			.belt-container .belt{
+			    width: 200%;
+				display: -webkit-box;
+                display: -webkit-flex;
+				display: -ms-flexbox;
+				display: flex;
+				-webkit-transition: -webkit-transform 0.2s ease-in-out;
+				transition: -webkit-transform 0.2s ease-in-out;
+				transition: transform 0.2s ease-in-out;
+				transition: transform 0.2s ease-in-out, -webkit-transform 0.2s ease-in-out;
+			}
+			.belt-container .state{
+			    width: 50%;
+				display: -webkit-box;
+                display: -webkit-flex;
+				display: -ms-flexbox;
+				display: flex;
+			    -webkit-box-align: center;
+                -webkit-align-items: center;
+			        -ms-flex-align: center;
+			            align-items: center;
+				-webkit-box-pack: center;
+				    -ms-flex-pack: center;
+				        justify-content: center;
+				-webkit-justify-content: center;
+				-webkit-box-orient: vertical;
+				-webkit-box-direction: normal;
+                -webkit-flex-direction: column;
+				    -ms-flex-direction: column;
+				        flex-direction: column;
+			}
+			.belt-container .state-1{
+			    -webkit-transition: -webkit-transform 0.2s ease-in-out;
+			    transition: -webkit-transform 0.2s ease-in-out;
+			    transition: transform 0.2s ease-in-out;
+			    transition: transform 0.2s ease-in-out, -webkit-transform 0.2s ease-in-out;
+				-webkit-transform-origin: center right;
+				        transform-origin: center right;
+			}
+			.state-1 h1{
+				font-size: 28px;
+			}
+			.belt-container .state-2{
+			    z-index: 2;
+			    -webkit-transition: all 200ms ease-in-out;
+			    transition: all 200ms ease-in-out;
+			    margin-top: 5px;
+			}
+			.belt-container.is-transitioned .belt{
+			    -webkit-transform: translateX(-50%);
+			            transform: translateX(-50%);
+			}
+			.container{
+			    width: 390px;
+				margin: 0px;
+				padding: 0px;
+			}
+			.newUserContainer{
+			    display: -webkit-box;
+                display: -webkit-flex;
+			    display: -ms-flexbox;
+			    display: flex;
+				-webkit-box-pack: center;
+				    -ms-flex-pack: center;
+				        justify-content: center;
+				-webkit-justify-content: center;
+				-webkit-box-align: center;
+                -webkit-align-items: center;
+				    -ms-flex-align: center;
+				        align-items: center;
+			}
+			.newUserContainer span{
+			    padding-left: 4px;
+                -webkit-font-smoothing: antialiased;
+			}
+			#logout{
+				visibility: hidden;
+				-webkit-box-pack: justify;
+				    -ms-flex-pack: justify;
+				        justify-content: space-between;
+				-webkit-justify-content: space-between;
+				-webkit-box-align: center;
+                -webkit-align-items: center;
+				    -ms-flex-align: center;
+				        align-items: center;
+				text-align: center;
+				width: 100%;
+				font-size: 14px;
+			}
+			#back-arrow{
+			    padding-left: 20px;
+				color: black;
+				text-decoration: none;
+			}
+			#back-arrow a{
+				color: black;
+				text-decoration: none;
+			}
+			#display-id-loggedIN{
+				display: hidden;
+				width: 100%;
+				-webkit-box-align: center;
+				    -ms-flex-align: center;
+				        align-items: center;
+				-ms-flex-item-align: center;
+				    -ms-grid-row-align: center;
+				    align-self: center;
+				font-weight: bold;
+                -webkit-font-smoothing: antialiased;
+			}
+			#signed-in-as{
+			    margin-bottom: 12px;
+			}
+
+	        #form-assignment h1{
+	            margin-bottom: 0px;
+		        margin-top: 0px;
+		        font-size: 28px;
+	        }
+

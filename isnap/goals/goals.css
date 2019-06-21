@@ -1,0 +1,346 @@
+/* remove all predefined margin and padding */
+* {
+   padding: 0px;
+   margin: 0px;
+}
+
+/*  */
+html{
+   height: 100%;
+   width: 100%;
+}
+
+/*  set minimum width to body, change font, background of webpage color, disable scrolling */
+body{
+   min-width: 775px;
+   font-family:  "Open Sans", sans-serif;
+   height: 100%;
+   width: 100%;
+}
+
+/*The whole NAV bar container */
+#theNavBarContainer, #theNavBar{
+	background: rgb(13,41,55);
+    height: 40px;
+}
+
+/* theNavBar*/
+#theNavBar{
+	display: flex;
+	border: 1px solid #9A9A9A;
+}
+
+/* set width for left side of nav bar, and background color*/
+#beginning, #instructions{
+   display: flex;
+   display: -webkit-box;
+   display: -webkit-flex;
+   display: -ms- flexbox;
+   align-items: center;
+   justify-content: center;
+   border-right: 2px solid #9A9A9A;
+   background: rgb(13, 41, 55);
+   background-image: url(blackTiles.png);
+}
+
+#beginning {
+   width: 12.5%;
+   min-width: 130px;
+   max-width: 900px;
+}
+
+#instructions {
+   width: 7.5%;
+   min-width: 90px;
+   font-weight: bold;
+   font-size: 12px;
+   text-align: right;
+   color: #E4E1E2;
+   border-right: none;
+   padding: 5px;
+   transition: all 600ms;
+}
+
+#instructions.highlight {
+    color: #FAB700;    
+}
+
+/*  */
+#middle{
+   display: flex;
+   width: 72.5%; 
+   background: rgb(13,41,55);
+   background-image: url(blackTiles.png);
+}
+
+#end{
+   display: flex;
+   align-items: center;
+   width: 15%;
+   background: rgb(13,41,55);
+   background-image: url(blackTiles.png);
+}
+
+/* the assignment text on the left side of the screen*/
+#assignmentChosen{
+   color: #E4E1E2;
+   padding: 5px;
+}
+
+/* the top bar on the left side of the screen */
+#titleOfAssignment{
+   display: flex;
+   justify-content: center;
+   font-size: 12px;
+}
+
+/* start of button styling //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+
+/* the parent that holds the buttons*/ 
+.theButtons{
+   margin-left: 2px;
+   display: flex;
+   width: 100%;
+   justify-content: center;
+   align-items: center;
+}
+
+/* the div element for the 4 buttons*/
+.aButton{
+   width: 100%;
+   height: 100%;
+   max-width: 300px;
+   margin-right: 3px;
+}
+
+/* when an objective is chosen, the class - for the div elements - for the 4 buttons changes to widthAdjust - 0nly difference is the max width is excluded*/
+.widthAdjust{
+   width: 100%;
+   height: 100%;
+   margin-right: 3px;
+}
+
+/* the input in the div elements for the buttons */
+.theInput{
+   font-size: 13px;
+   background: #E4E1E2;
+   border: 2px solid #d1d1d1; 
+   width: 100%;
+   color: rgb(13, 41, 55);
+   padding: 3px;
+   border-radius: 4px;
+   outline: none;
+   height: 30px;
+   transition: background-color 600ms;
+}
+
+/* when an objective is chosen, the class for THE INPUT of the div elements for the 4 buttons changes to aButtonAlternative*/
+.aButtonAlternative{
+   font-size: 14px;
+   background: #E4E1E2;
+   color: black;
+   height: 33px;
+   width: 100%;
+   padding: 3px;
+   margin: 0px;
+   border: none;
+   outline: none;
+   margin-left: 5px;
+   margin-right: 5px;
+}
+
+/* when you hover on the buttons*/
+.theInput:hover{
+   border: 2px solid #d1d1d1;
+   color: white;
+   background: rgb(13,41,55);
+   cursor: pointer;
+   box-shadow: 0px 0px 0px 2px white, 0px 0px 0px 4px black;
+}
+
+#button5:hover, #button6:hover{
+   cursor: pointer;
+   box-shadow: 0px 0px 0px 2px white, 0px 0px 0px 4px black;
+   color: white;
+}
+
+#button5{
+   font-size: 19px;
+   width: 45px;
+   background-color:  #FAB700;
+   padding-left: 4px;
+   padding-right: 4px;
+   margin-right: 3px;
+   margin-left: 7px;
+   height: 33px;
+   color: white;
+   border-color: #d1d1d1;
+   transition: all 600ms;
+}
+
+#button6{
+   width: 45px;
+   font-size: 19px;
+   background-color: rgb(150,174,58);
+   padding-left: 4px;
+   padding-right: 4px;
+   height: 33px;
+   color: white;
+   margin-right: 2px;
+   border-color: #d2d6d5 ;
+   transition: all 600ms;
+   
+}
+/* end of button styling ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+
+/* start of progress bar styling /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+/* white section background of bar AKA the progress bar*/
+#bar{
+   margin-right: 5px;
+   width: 100%;
+   height: 10px;
+   background: #eee;
+   padding: 2px;
+   border-radius: 3px; 
+   border: 2px solid #E4E1E2;
+   box-shadow: inset 0px 1px 3px rgba(0,0,0,.2);
+   border-color: black;
+}
+
+/* green fil for bar */
+.bar-fill{
+   max-width: 900px;
+   -webkit-box-sizing: border-box;
+   -moz-box-sizing: border-box;
+   box-sizing: border-box;
+   height: 10px;
+   display: block;
+   background: rgb(150,174,58);
+   width: 1%;
+   border-radius: 3px;
+   -webkit-transition: width 0.7s ease;
+   transition: width 0.8s ease;
+}
+
+/* parent to the progress bar and child of leftHalfOfNavBar*/
+#progressBarRow{
+   width: 100%;
+   display: flex;
+   justify-content: space-between;
+   margin-left: 5px;
+   align-items: center;
+   padding-bottom: 2px;
+}
+
+/* the icon */
+.progressRowItem:nth-child(2){
+   width: 10%;
+   margin-right: 5px;
+}
+/* end of progress bar styling /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+
+
+/* icons*/
+.button{
+   color: #E4E1E2;
+}
+
+.button:hover{
+   cursor:  pointer;
+   color: white;
+}
+
+#snap{
+   height: 100%;
+   width: 100%;
+}
+
+#Congratulations {
+   color: rgb(150,174,58);
+   display: none;
+   font-size: 14px;
+}
+
+#Congratulations a {
+    color: inherit;
+}
+
+/* start of modal dialog box styling ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+.modalDialog {
+   position: fixed;
+   top: 0;
+   right: 0;
+   bottom: 0;
+   left: 0;
+   background: rgba(0,0,0,0.8);
+   z-index: 99999;
+   opacity: 0;
+   -webkit-transition: opacity 400ms ease-in;
+   -moz-transition: opacity 400ms ease-in;
+   transition: opacity 400ms ease-in;
+   pointer-events: none;
+}
+
+.showing {
+   opacity: 1;
+   pointer-events: auto;
+}
+
+.modalDialog > div {
+   width: 700px;
+   position: relative;
+   margin: 10% auto;
+   padding: 5px 20px 13px 20px;
+   border-radius: 10px;
+   background: #fff;
+}
+
+.close{
+   background: #606061;
+   color: #FFFFFF;
+   line-height: 25px;
+   position: absolute;
+   right: -12px;
+   text-align: center;
+   top: -10px;
+   width: 24px;
+   text-decoration: none;
+   font-weight: bold;
+   -webkit-border-radius: 12px;
+   -moz-border-radius: 12px;
+   border-radius: 12px;
+   -moz-box-shadow:  1px 1px 3px #000;
+   -webkit-box-shadow: 1px 1px 3px #000;
+   box-shadow: 1px 1px 3px #000;
+}
+
+.close:hover{ background: #FAB700; cursor: pointer;}
+
+th{
+   text-align: left;
+}
+
+td{
+   font-weight: normal;
+   font-size: 13px;
+   padding-top: .5em;
+}
+
+.progressCheck{
+   text-align: center;
+}
+/* end of modal dialog box styling ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+
+.highlight {
+    background-color: #FAB700;
+}
+
+#button6.highlight {
+    background-color: white;
+    color: rgb(150,174,58);
+}
+
+canvas {
+  outline: none;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0); /* mobile webkit */
+}

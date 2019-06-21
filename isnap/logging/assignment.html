@@ -1,0 +1,206 @@
+<!doctype html>
+
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Select an assignment</title>
+        <link rel="stylesheet" type="text/css" href="login/assignment.css">
+		<link rel="stylesheet" type="text/css" href="login/css/font-awesome.min.css">
+	</head>
+
+	<body>
+		<div id="flex-Parent">
+		    <div id="blackBar"><div><img id="headerLogo"></div> <div><span id="courseName"> </span></div></div>
+			<div id="theBox">
+				<div id="needsCookiesEnabled" class="hidden"><i class="fa fa-exclamation-circle fa-2x" aria-hidden="true"></i><span>We are having trouble logging you in. <b>Please inform your TA</b>, then continue selecting an assignment.</span></div>
+				<div id="theBorder">
+					<div id="logout" class="getFlex"> <div id="back-arrow"><a href="#" onclick="logout()"><i class="fa fa-long-arrow-left fa-3x" aria-hidden="true"></i></a></div></div>
+				    <div id="snapLogo"><img src="login/SnapLogo.png"></img></div>
+				    <div class="container">
+						<div class="belt-container">
+							<div class="belt">
+							    <div class="state state-1">
+									<div>
+										<h1>Sign in with your Unity ID</h1>
+										<div id="unityID-hint"> ( This is the part of your email before @ncsu )</div>
+									</div>
+									<div id="form-id">
+										<form id="form-flex-Parent">
+											<input id="input-id" name="id" placeholder="Enter your Unity ID" required pattern="[A-Za-z0-9_]+" autofocus>
+											<div id="confirm-new">
+												<p class="alert">
+													This is the first time we've seen a user with the ID <span id="display-id"></span>.
+												</p>
+												<ul>
+													<li>If you're a new user, please check the box below and hit next.</li>
+													<li>If not, please re-enter your ID and try again.</li>
+												</ul>
+												<div class="newUserContainer"><input id="input-new" type="checkbox" name="new" value="true"> <span>I'm a new user</span></div>
+											</div>
+											<div><input type="submit" id="sign-in-Button" value="Next"></input></div>
+										</form>
+									</div>
+								</div>
+								<div class="state state-2">
+									<div>
+										<div id="signed-in-as">Signed in as <span id="display-id-loggedIN"></span></div>
+										<h1>Choose Your Assignment</h1>
+										<form id="form-assignment" action="../snap.html" method="get">
+											<div><select id="assignment" name="assignment" disabled></select></div>
+											<div><button id="assignmentGObutton" type="submit" disabled>GO</button></div>
+										</form>
+									</div>
+								</div>
+							</div>
+						</div>
+				    </div>
+				</div>
+			</div>
+		</div>
+
+        <script type="text/javascript" src="../isnap/lib/jquery-3.1.1.min.js"></script>
+		<script type="text/javascript" src="../isnap/util.js?v=2.4.9"></script>
+		<script type="text/javascript" src="config.js?v=2.4.9"></script>
+		<script type="text/javascript" src="../isnap/lib/jquery.cookie.js"></script>
+
+		<script type="text/javascript">
+			var ID_COOKIE = 'snapIDHash', COOKIE_PATH = '/';
+
+			var preselectedAssignment = getSearchParameters()['assignment'];
+
+			var assignments = window.assignments;
+			var select = document.getElementById("assignment");
+			for (var key in assignments) {
+				if (assignments.hasOwnProperty(key)) {
+					if (key == "test" || key == "view") continue;
+					var assignment = assignments[key];
+					var option = document.createElement("option");
+					option.text = assignment.name || assignment;
+					if (assignment.hint) {
+						option.text += ' (' + assignment.hint + ')';
+					}
+					option.value = key;
+					if (key === preselectedAssignment) {
+						option.selected = true;
+					}
+					select.add(option);
+				}
+			}
+
+
+			// Set the logo and description from the config file
+			var headerLogo = document.getElementById("headerLogo");
+			var headerDescription = document.getElementById("courseName");
+			headerLogo.onerror = function(){
+				this.style.display = "none";
+			}
+			// Get the navbar config from the config file
+			if (window.loginHeader) {
+				if (window.loginHeader.logo) {
+					headerLogo.src = window.loginHeader.logo;
+				}
+				if (window.loginHeader.description) {
+					headerDescription.innerHTML =
+						window.loginHeader.description;
+				}
+			}
+
+			if (!navigator.cookieEnabled) {
+				// TODO: handle cookies not available!
+				// There's no other way to pass this information from one page
+				// to another, so we'll need them enabled. Again, maybe
+				// have an emergency option to disable
+			}
+
+
+			function setUserID(id) {
+				if (!id) return;
+				window.userID = id;
+				$.cookie(ID_COOKIE, id, { path: COOKIE_PATH });
+				if($('#confirm-new').hasClass("getFrames")){
+					    $('#confirm-new').removeClass('getFrames');
+				        $('#confirm-new').addClass('getFrames2');
+				}
+				$("#confirm-new").css("margin-bottom", "0px");
+				$('.belt-container').addClass('is-transitioned');
+				$('#logout').css('visibility', 'visible');
+				$('#input-id,#sign-in-Button').prop('disabled', true);
+				$('#assignment,#assignmentGObutton').prop('disabled', false);
+				// $('#assignment').focus();
+			}
+
+			function skipLogIn(warn){
+			    setUserID('none');
+				$('#signed-in-as').addClass('hidden');
+				if(warn){
+					$('#needsCookiesEnabled').removeClass('hidden');
+					$('#needsCookiesEnabled').addClass('getFlex');
+				}
+			}
+
+			function logout() {
+				$.removeCookie(ID_COOKIE, { path: COOKIE_PATH });
+				$('.belt-container').removeClass('is-transitioned');
+				$('#logout').css('visibility', 'hidden');
+				$("#confirm-new").css("margin-bottom", "0px");
+				$('#input-new').prop('checked', false);
+				$('#input-id,#sign-in-Button').prop('disabled', false);
+				$('#assignment,#assignmentGObutton').prop('disabled', true);
+				$('#input-id').focus();
+			}
+
+			if (!String.prototype.trim) {
+				String.prototype.trim = function () {
+					return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g,
+						'');
+				};
+			}
+
+			function tryLogin() {
+				// Get the id and ensure it has a value
+				var id = $('#input-id').val().trim();
+				if (id.length === 0) return;
+
+				// Defocus the login input so Chrome will hide autocomplete
+				$('#input-id').blur();
+
+				$('#display-id').html(id);
+				$.post('login/login.php', {
+					'id': id,
+					'new': $('#input-new').prop('checked'),
+				}, function(data, status) {
+					var response;
+					try {
+						response = JSON.parse(data);
+					} catch(e) {
+					    skipLogIn(true);
+						return;
+					}
+					if (response.newUser) {
+						$('#confirm-new').removeClass('getFrames2');
+						$('#confirm-new').addClass('getFrames');
+						$("#confirm-new").css("margin-bottom", "45px");
+						return;
+					}
+					$('#display-id-loggedIN').html(id);
+					setUserID(response.userID);
+				}).fail(function() {
+					skipLogIn(true);
+				});
+				return false;
+			}
+
+			$('#form-flex-Parent').submit(tryLogin);
+			$('#form-assignment')[0].action += document.location.hash;
+
+			if (!window.requireLogin) {
+				$('#back-arrow').css('visibility', 'hidden');
+				$('.belt, .state').css('transition', 'none');
+				skipLogIn(false);
+			} else {
+				// Always start logged out
+				$.removeCookie(ID_COOKIE, { path: COOKIE_PATH });
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,19 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+    "editor.tabSize": 4,
+    "files.trimTrailingWhitespace": true,
+    "editor.rulers": [
+        80
+    ],
+    "search.exclude": {
+        "lang-*.js": true,
+        "*.min.js": true,
+        "*.min.css": true,
+        "history.txt": true,
+        "Examples/*": true,
+        "Backgrounds": true,
+        "help": true,
+        ".vscode/*": true,
+        ".eslintrc.json": true
+    }
+}
