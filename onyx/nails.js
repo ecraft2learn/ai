@@ -157,16 +157,17 @@ const analyse_camera_image = () => {
 const display_results = (canvas) => {
     make_prediction(canvas, (results, logits) => {
         const data_url = canvas.toDataURL();
-        const id = hex_md5(data_url);
+//         const id = hex_md5(data_url);
         const result_description = confidences(results, -1);
         const data = result_description
-                     + "\nimage id = " + id
+//                      + "\nimage id = " + id
                      + "\ndata = " + logits;
-        const message = response_element("<img id='" + id + "' width=60 height=60 src='" + data_url + "'>"
-                                         + "<br>"
-                                         + result_description)
-        display_message(message, true);
-        const image_element = document.getElementById(id);
+        const message = response_element(result_description);
+        const camera_image_element = document.getElementById('camera-image');
+        camera_image_element.src = data_url;
+        camera_image_element.hidden = false;
+        display_message(message, 'camera-response', true);
+//         const image_element = document.getElementById(id);
         const display_data = (event) => {
             navigator.clipboard.writeText(data);
             alert("Clipboard has data for this image. Please send it to toontalk@gmail.com");
@@ -174,7 +175,8 @@ const display_results = (canvas) => {
             email_link.innerHTML = "<a href='mailto:toontalk@gmail.com?subject=Onyx image issue&body=Please paste data here.' target='_blank'>Click to send email.</a>";
             event.currentTarget.parentNode.appendChild(email_link);
         };
-        image_element.addEventListener('click', display_data);           
+//         image_element.addEventListener('click', display_data); 
+        document.getElementById('camera-image').onclick = display_data;          
     });
 };
 
@@ -217,8 +219,8 @@ const setup_camera = (callback) => {
       };
       const toggle_freeze_button = document.getElementById('toggle video');
       if (is_mobile()) {
-          toggle_freeze_button.remove();
-          video.addEventListener('click', analyse_camera_image);
+          toggle_freeze_button.innerHTML = "Click to take photo";
+          toggle_freeze_button.addEventListener('click', analyse_camera_image);
       } else {
           toggle_freeze_button.addEventListener('click', toggle_click);  
       }
@@ -244,11 +246,17 @@ const add_image_or_canvas = (parent, image_or_canvas, class_name, image_to_repla
         image_or_canvas.height = image_dimension;        
     }
     const analyse_image = (event) => {
+        if (is_mobile()) {
+            display_message("Analysing...", 'random-image-response');
+        }
         const analyse_image_and_replace_self =
             (result) => {
                 const class_index = class_names.indexOf(class_name);
+                const image_element = document.getElementById('random-image-chosen');
+                image_element.src = get_url_from_image_or_canvas(image_or_canvas);
+                image_element.hidden = false;
                 let message = process_prediction(result, image_or_canvas, class_index);
-                display_message(message, true);
+                display_message(message, 'random-image-response', true);
                 add_random_image(null, image_or_canvas); // replaces self with new random image                      
         };
         make_prediction(image_or_canvas, analyse_image_and_replace_self);
@@ -457,11 +465,29 @@ const initialise_page = () => {
           throw e;          
         });
 };
+const go_to_camera_interface = () => {
+    document.getElementById('camera-interface').hidden = false;
+    document.getElementById('tutorial-interface').hidden = true;
+};
+const go_to_tutorial_interface = () => {
+    document.getElementById('camera-interface').hidden = true;
+    document.getElementById('tutorial-interface').hidden = false;
+};
 const start_up = () => {
-        if (typeof tensor_tsv === 'string') {
-            add_textarea(tensor_tsv);
-            add_textarea(metadata_tsv);
-        }
+    const use_photo = "Or take a picture of a finger or toe nail on a screen or in a photograph. ";
+    const instructions = is_mobile() ?
+                         "Take a picture of your fingernail using your device by clicking the button below. "
+                         + use_photo
+                         + "Make sure only one nail is visible in each photo." :
+                         "Take a picture by clicking the button below. "
+                         + use_photo 
+                         + "Then you will be able to select a nail in the image.";
+    document.getElementById('camera-instructions').innerHTML = instructions;
+    if (typeof tensor_tsv === 'string') {
+        add_textarea(tensor_tsv);
+        add_textarea(metadata_tsv);
+    }
+    if (!is_mobile()) {
         rectangle_selection();
         document.addEventListener('drop',
                                   (event) => {
@@ -480,19 +506,22 @@ const start_up = () => {
             event.preventDefault();
             document.body.style.backgroundColor = 'white';
         });
-        if (load_model_named) { // check that not training?
-            tf.loadLayersModel("models/" + load_model_named + ".json").then((model) => {
-                loaded_model = model;
-                if (option === 'experiment') {
-                    run_new_experiments();
-                }
-            });
-        } else if (option === 'experiment') {
-            run_experiments(); // report any matches with confidence less than this confidence
-        }
-        if (SAVE_TENSORS) {
-            save_tensors(classifier.getClassifierDataset());
-        }
+    }
+    if (load_model_named) { // check that not training?
+        tf.loadLayersModel("models/" + load_model_named + ".json").then((model) => {
+            loaded_model = model;
+            if (option === 'experiment') {
+                run_new_experiments();
+            }
+        });
+    } else if (option === 'experiment') {
+        run_experiments(); // report any matches with confidence less than this confidence
+    }
+    if (SAVE_TENSORS) {
+        save_tensors(classifier.getClassifierDataset());
+    }
+    document.getElementById('go-to-camera').addEventListener('click', go_to_camera_interface);
+    document.getElementById('go-to-tutorial').addEventListener('click', go_to_tutorial_interface);
 };
 
 
@@ -500,7 +529,7 @@ function remove_parent_element (event) {
     event.currentTarget.parentNode.remove();
 }
 
-const display_message = (message, append) => {
+const display_message = (message, element_id, append) => {
     if (append && !is_mobile()) {
         let after = "";
         if (message.indexOf("class='prediction-response'") >= 0) {
@@ -508,13 +537,13 @@ const display_message = (message, append) => {
         } else {
             after = "<br>";
         }
-        message = document.getElementById('response').innerHTML + after + message;
+        message = document.getElementById(element_id).innerHTML + after + message;
     }
-    document.getElementById('response').innerHTML = message;
+    document.getElementById(element_id).innerHTML = message;
 };
 
 const reset_response = () => {
-    document.getElementById('response').innerHTML = "";
+    document.getElementById('camera-response').innerHTML = "";
 };
 
 const remove_one_vote = (score, self_vote, running_tests) => {
@@ -679,7 +708,7 @@ const histogram_buckets_to_html = (histogram_buckets, image_size) => {
                             + "border: solid " + border_size + "px " + color_of_highest_wrong_class + ";"
                             + "left:" + (bucket_index*delta)  + "px;"
                             + " top:" + top + "px'>\n"
-                            + "  <img src='" + score.image_URL + "' width=" + image_size + " height=" + image_size + "  >\n"
+                            + " <img src='" + score.image_URL + "' width=" + image_size + " height=" + image_size + "  >\n"
                             + "</div></a>\n";
                     top -= delta;
                 }
@@ -901,8 +930,8 @@ const receive_drop = (event) => {
             canvas.hidden = false;
             video.hidden = true;
             make_prediction(canvas, (results) => {
-                display_message(confidences(results, -1), true);
-                display_message("You can select a sub-region of your image.", true);
+                display_message(confidences(results, -1), 'camera-response', true);
+                display_message("You can select a sub-region of your image.", 'camera-response', true);
                 const video_button = document.getElementById('toggle video');
                 video_button.innerHTML = "Restore camera";
             });
@@ -1038,7 +1067,7 @@ const run_new_experiments = () => {
         report_final_statistics();
         class_names.forEach((class_name, index) => {
             confidences[class_name].sort((x, y) => x[0]-y[0]).forEach((confidence_and_message) => {
-                display_message(confidence_and_message[1], true);
+                display_message(confidence_and_message[1], 'main', true);
             });
             add_textarea(csv[class_name]);
         });
@@ -1076,14 +1105,15 @@ let number_right = 0;
 let not_confident_answers = 0; // less than minimum_confidence for top answer 
 
 const process_prediction = (result, image_or_canvas, class_index, image_index, image_count) => {
-    const image_url = get_url_from_image_or_canvas(image_or_canvas);
-    message = "<img src='" + image_url + "' width=100 height=100></img>";
+    let message = option === 'diagnose' && is_mobile() ?
+                  "" :
+                  "<img src='" + get_url_from_image_or_canvas(image_or_canvas) + "' width=100 height=100></img><br>";
     let confidence_message = confidences(result, class_index, true);
     const class_name = class_names[class_index];
     if (typeof image_count !== 'undefined') {
         message += "&nbsp;" + better_name(class_name) + "#" + image_count;
     } else {
-        message += "&nbsp;According to experts ";
+        message += "According to experts ";
         if (class_name === old_serious_name) {
             message += "this is a condition that should be seen by a doctor.";
         } else if (class_name === 'non-serious') {
@@ -1093,7 +1123,7 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
         }
     }
     message += "<br>" + confidence_message;
-    if (image_or_canvas.title) {
+    if (image_or_canvas.title && window.location.hash.indexOf('debug') >= 0) {
         message += "&nbsp;"
                    + "<a href='"
                    + image_or_canvas.title
@@ -1128,30 +1158,33 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
             }
         }
     }
-    update_histogram(result, class_index, image_url, plain_text(message));
-    update_confusion_matrix(result, class_index);
-    csv[class_name] += "https://ecraft2learn.github.io/ai/onyx/" + images[class_name][image_index] + "," +
-                        image_count + ",";
-    csv_class_names[class_name].forEach((name) => {
-        // this re-orders the results
-        const index = class_names.indexOf(name);
-        const correct = index === class_index;
-        const score = use_knn ? remove_one_vote(result.confidences[index], correct, true) :
-                                Math.round(result[index]*100);
-        csv[class_name] += score;
-        if (index < class_names.length-1) {
-            // no need to add comma to the last one
-            csv[class_name] += ",";
-        }
-    });
-    csv[class_name] += "\n";
+    if (option === 'experiment') {
+        update_histogram(result, class_index, image_url, plain_text(message));
+        update_confusion_matrix(result, class_index);
+        csv[class_name] += "https://ecraft2learn.github.io/ai/onyx/" + images[class_name][image_index] + "," +
+                            image_count + ",";
+        csv_class_names[class_name].forEach((name) => {
+            // this re-orders the results
+            const index = class_names.indexOf(name);
+            const correct = index === class_index;
+            const score = use_knn ? remove_one_vote(result.confidences[index], correct, true) :
+                                    Math.round(result[index]*100);
+            csv[class_name] += score;
+            if (index < class_names.length-1) {
+                // no need to add comma to the last one
+                csv[class_name] += ",";
+            }
+        });
+        csv[class_name] += "\n";        
+    }
     return response_element(message);
 };
 
 const response_element = (message) =>
-    "<div class='prediction-response'>"
+    (is_mobile() ? "" : "<div class='prediction-response'>")
     + message
-    + "<button class='close-button' onclick='remove_parent_element(event)'>&times;</button></div>";
+    + (is_mobile() ? "" : "<button class='close-button' onclick='remove_parent_element(event)'>&times;</button>")
+    + "</div>";
 
 const maximum_confidence = (confidences) => {
     return Math.max(...Object.values(confidences));
@@ -1170,6 +1203,7 @@ const report_final_statistics = () => {
                     + "false negatives = " + false_negatives + "<br>"
                     + "not confident of any answer = " + not_confident_answers + "<br>"
                     + "total = " + total + "<br>",
+                    'main',
                     true);
     let sensitivity = number_precision(true_positives/(true_positives+false_negatives), 4);
     let specificity = number_precision(true_negatives/(true_negatives+false_positives), 4);
@@ -1179,6 +1213,7 @@ const report_final_statistics = () => {
                     + "specificity = " + specificity + "<br>"
                     + "precision = " + precision + "<br>"
                     + "recall = " + recall + "<br>",
+                    'main',
                     true);
     add_textarea(histogram_buckets_to_html(histogram_buckets, histogram_image_size));
     add_textarea(confusion_matrix_to_html(confusion_matrix, 100));
@@ -1188,7 +1223,8 @@ const run_experiments = () => {
     const [next_image, reset_next_image] = create_next_image_generator();
     display_message("<p><b>Confidence scores for each possible classification. " + 
                     "<span style=color:red>Red entries</span> are where the correct classification " +
-                    "was not the most confident answer.</b></p>");
+                    "was not the most confident answer.</b></p>",
+                    'main');
     const next_experiment = () => {
         const class_finished = (class_index) => {
             const class_name = class_names[class_index];
@@ -1196,6 +1232,7 @@ const run_experiments = () => {
             display_message("<p>Number whose highest confidence score is the correct answer = " + 
                             number_right + "/" + total + 
                             " (" + Math.round(100*number_right/total) + "%)</p>",
+                            'main',
                             true);
             add_textarea(csv[class_name]);
             number_right = 0;
@@ -1203,7 +1240,9 @@ const run_experiments = () => {
         const image_callback = (image_or_canvas, class_index, image_index, image_count) => {
             make_prediction(image_or_canvas, 
                             (result) => {
-                                display_message(process_prediction(result, image_or_canvas, class_index, image_index, image_count), true);
+                                display_message(process_prediction(result, image_or_canvas, class_index, image_index, image_count),
+                                                'main',
+                                                true);
                                 next_experiment(); 
                             });
         };
@@ -1324,10 +1363,11 @@ const load_data_set = (data_set) => {
 
 const on_click = () => {
     document.getElementById('user-agreement').remove();
-    document.getElementById('introduction').innerHTML = 
-        is_mobile() ?
-        "<p>Tap one of the photos of a nail or the video image.</p>" :
-        "<p>Tap one of the photos of a nail or use the camera.</p>";
+//     document.getElementById('introduction').innerText = 
+//         is_mobile() ?
+//         "Tap one of the photos of a nail or the video image." :
+//         "Tap one of the photos of a nail or use the camera.";
+    document.getElementById('camera-interface').hidden = true;
     document.getElementById('main').hidden = false;
 };
 

@@ -1,159 +1,150 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="icon" type="image/png" href="./icons/icon-32.png" />
-    <link rel="manifest" href="/ai/onyx/onyx-nails.webmanifest">
-    <link href="../css/ai-teacher-guide.css" rel="stylesheet">
-    <title>Onyx project - classifying nails</title>
-<script src="../js/load-scripts.js"></script>
-<script>
-
-if ('serviceWorker' in navigator && window.location.hostname !== 'localhost') {
-    navigator.serviceWorker.register('service-worker.js');
-}
-
-const use_knn = false; // deprecated - old way this used to work 
-
-// choices are diagnose, create model, experiment
-let option = 'diagnose';
-if (window.location.hash.indexOf('train') >= 0) {
-    option = 'create model';
-} else if (window.location.hash.indexOf('experiment') >= 0) {
-    option = 'experiment';
-}
-
-// korean.js korean-small.js korean-tests.js korean-tests-small.js 
-// originals.js originals-normal-fungal.js or originals-normal-serious-non-serious.js
-let images_js;
-if (option === 'diagnose') {
-    // 166 random images from each class
-    images_js = ["korean-tests-166-each.js"]; 
-} else {
-    // both Korean training thumbnails and their test images
-    images_js = ["korean.js", "korean-tests.js"];
-}
-
-const model_name = "normal-fungal-serious-1000-every-5-A2";
-const every_nth_for_testing = 5; // 20% set aside for testing/evaluation
-const projector_data = false; // whether we want to generate files to visualising the data
-
-const training_options =
-    {model_name: model_name,
-     hidden_layer_sizes: [1000],
-     learning_rate: 0.0001,
-     batch_size_fraction: 0.2,
-     drop_out_rate: 0.5, 
-     epochs: 75};
-
-let images;
-
-const add_to_dataset = (additional_images) => {
-    if (!images) {
-        images = additional_images;
-    } else {
-        Object.keys(additional_images).forEach((key) => {
-            if (images[key]) {
-                images[key] = images[key].concat(additional_images[key]);
-            } else {
-                images[key] = additional_images[key];
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <link rel="icon" type="image/png" href="./icons/icon-32.png"/>
+        <link rel="manifest" href="/ai/onyx/onyx-nails.webmanifest">
+        <link href="../css/ai-teacher-guide.css" rel="stylesheet">
+        <title>Onyx project - classifying nails</title>
+        <script src="../js/load-scripts.js"></script>
+        <script>
+            if ('serviceWorker'in navigator && window.location.hostname !== 'localhost') {
+                navigator.serviceWorker.register('service-worker.js');
             }
-        });
-    }
-};
 
-load_local_or_remote_scripts(
-    ["../js/tfjs.js",
-     "../js/tfjs-vis.js",
-     "../js/mobilenet.js",
-//      "../js/knn-classifier.js",
-     ...images_js,
-     "../js/user-agent.js",
-     "nails.js",
-//      "saved_tensors_normal_serious_non_serious.js",
-     "md5-min.js",
-     "train.js",
-//      "../js/translate.js"
-     ],
-     // using the same locally cached version so nothing breaks when released versions are updated
-    ["../js/tfjs.js",
-     "../js/mobilenet.js",
-//      "../js/knn-classifier.js",
-//      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs",
-//      "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet",
-//      "https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier",
-     ...images_js,
-     "../js/user-agent.js",
-     "nails.js",
-//      "saved_tensors_normal_serious_non_serious.js",
-     "md5-min.js",
-     "train.js",
-//      "../js/translate.js"
-     ]);
-</script>
-</head>
-<body>
-<!-- Introduction is hidden until everything is loaded -->
-<div id="introduction">
-</div>
-<div id='main' hidden>
-    <div id="response"></div>
-    <button id="toggle video" class="freeze-video" style="padding:12px;">
-    Freeze video
-    </button>
-    <div style="padding-top: 12px;">
-    <div id="before-video-element"></div>
-    <video id="video" playsinline 
-     width  = "224"
-     height = "224"
-<!--      reverse left and right -->
-     style="-moz-transform: scaleX(-1);
-            -o-transform: scaleX(-1);
-            -webkit-transform: scaleX(-1);
-            transform: scaleX(-1);
-           ">
-    </video>
+            const use_knn = false; // deprecated - old way this used to work 
+
+            // choices are diagnose, create model, experiment
+            let option = 'diagnose';
+            if (window.location.hash.indexOf('train') >= 0) {
+                option = 'create model';
+            } else if (window.location.hash.indexOf('experiment') >= 0) {
+                option = 'experiment';
+            }
+
+            // korean.js korean-small.js korean-tests.js korean-tests-small.js 
+            // originals.js originals-normal-fungal.js or originals-normal-serious-non-serious.js
+            let images_js;
+            if (option === 'diagnose') {
+                // 166 random images from each class
+                images_js = ["korean-tests-166-each.js"];
+            } else {
+                // both Korean training thumbnails and their test images
+                images_js = ["korean.js", "korean-tests.js"];
+            }
+
+            const model_name = "normal-fungal-serious-1000-every-5-A2";
+            const every_nth_for_testing = 5;
+            // 20% set aside for testing/evaluation
+            const projector_data = false;
+            // whether we want to generate files to visualising the data
+
+            const training_options = {
+                model_name: model_name,
+                hidden_layer_sizes: [1000],
+                learning_rate: 0.0001,
+                batch_size_fraction: 0.2,
+                drop_out_rate: 0.5,
+                epochs: 75
+            };
+
+            let images;
+
+            const add_to_dataset = (additional_images)=>{
+                if (!images) {
+                    images = additional_images;
+                } else {
+                    Object.keys(additional_images).forEach((key)=>{
+                        if (images[key]) {
+                            images[key] = images[key].concat(additional_images[key]);
+                        } else {
+                            images[key] = additional_images[key];
+                        }
+                    }
+                    );
+                }
+            };
+
+            load_local_or_remote_scripts(["../js/tfjs.js", "../js/tfjs-vis.js", "../js/mobilenet.js", //      "../js/knn-classifier.js",
+            ...images_js, "../js/user-agent.js", "nails.js", //      "saved_tensors_normal_serious_non_serious.js",
+            "md5-min.js", "train.js", //      "../js/translate.js"
+            ], // using the same locally cached version so nothing breaks when released versions are updated
+            ["../js/tfjs.js", "../js/mobilenet.js", //      "../js/knn-classifier.js",
+            //      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs",
+            //      "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet",
+            //      "https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier",
+            ...images_js, "../js/user-agent.js", "nails.js", //      "saved_tensors_normal_serious_non_serious.js",
+            "md5-min.js", "train.js", //      "../js/translate.js"
+            ]);
+        </script>
+    </head>
+    <body>
+        <div id='main' hidden>
+            <div id="camera-interface" style="text-align: center">
+                <canvas hidden id="canvas" width="224" height="224"></canvas>
+                <div style="text-align: center">
+                    <h2>Check Your Nail Health</h2>
+                    <div id="camera-instructions" class="in-box"></div>
+                </div>
+                <button id="toggle video" class="freeze-video" style="padding:12px;">Freeze video</button>
+                <div style="padding-top: 12px;">
+                    <div id="before-video-element"></div>
+                    <video id="video" playsinline width="224" height="224"
+                     <!--      reverse left and right -->
+                     style="-moz-transform: scaleX(-1);
+                            -o-transform: scaleX(-1);
+                            -webkit-transform: scaleX(-1);
+                            transform: scaleX(-1);
+                           ">
+                    </video>
+                </div>
+                <img id="camera-image" width=128 height=128 hidden></img>
+                <div id="random-image-response-box" class="in-box">
+                    <div id='camera-response' class="response-text"></div>
+                </div>
+                <div id="selection-rectangle" hidden style="border: 2px dotted yellow; position: absolute;"></div>
+                <button id="go-to-tutorial" class="generic-button">Back to Tutorial</button>
+             </div>
+            <div id="tutorial-interface">
+                <h2 style="text-align: center">Tutorial</h2>
+                <div id="random-images"></div>
+                <!-- Introduction is hidden until everything is loaded -->
+                <div style="text-align: center">
+                    <div id="introduction" class="in-box">Click on a nail to find out how healthy it is. </div>
+                    <img id="random-image-chosen" width=128 height=128 hidden></img>
+                    <div id="random-image-response-box" class="in-box">
+                        <div id="random-image-response" class="response-text"></div>
+                    </div>
+                    <button id="go-to-camera" class="generic-button">Take your own nail photos &rarr;</button>
+                </div>
+            </div>
     </div>
-    <canvas hidden id="canvas"
-     width  = "224"
-     height = "224">
-    </canvas>
-    <div id="random-images"></div>
-    <p>Visit <a href="http://www.education.ox.ac.uk/" target="_blank">the Onyx home page</a>
-    learn more about this project and app.
+    <div id="user-agreement" style="text-align: center;">
+        <img src="icons\icon-64.png" width=64 height=64></img>
+        <h2>The Onyx Project</h2>
+        <div class="in-box">
+            <p class="agreement-text">This website contains general information about nail conditions and is used for training purposes only.
+    The information is not medical advice and should not be treated as such.
+    You are strongly encouraged to confirm any information obtained from or through this App with your physician or
+    another professional healthcare provider and to review all information regarding any nail or
+    other medical condition with your physician or other a professional healthcare provider.
+    You must not rely on the information on this website as an alternative to medical advice from your doctor
+    or other professional healthcare provider.
+    If you have any specific questions about any medical matter,
+    you should consult your doctor or other professional healthcare provider.
     </p>
-    <div id="selection-rectangle" hidden style="border: 2px dotted yellow; position: absolute;"></div>
-</div>
-<div id="user-agreement" style="text-align: center;">
-<img src="icons\icon-64.png" width=64 height=64></img>
-<h2>
-The Onyx Project
-</h2>
-<div style="border: solid 1px;border-radius: 8px;margin: 4px;">
-<p style="text-align: left;font-size: .8em;">
-This website contains general information about nail conditions and is used for training purposes only.
-The information is not medical advice and should not be treated as such.
-You are strongly encouraged to confirm any information obtained from or through this App with your physician or
-another professional healthcare provider and to review all information regarding any nail or
-other medical condition with your physician or other a professional healthcare provider.
-You must not rely on the information on this website as an alternative to medical advice from your doctor
-or other professional healthcare provider.
-If you have any specific questions about any medical matter,
-you should consult your doctor or other professional healthcare provider.
-</p>
-<p style="text-align: left;font-size: .8em;">
-No images are sent to a remote server if you use your device's camera.
-All the machine learning is being done locally on your device.
-The 
-<a href="https://github.com/ecraft2learn/ai/tree/master/onyx" target="_blank">source code</a>
-for this app is available for inspection.
-</p>
-</div>
-<p id="please-wait" style="font-size: x-large;color: darkred">
-Please wait for this page to load.
-</p>
-</div>
-</body>
-</html>
+            <p class="agreement-text">
+                No images are sent to a remote server if you use your device's camera.
+    All the machine learning is being done locally on your device.
+    The 
+    <a href="https://github.com/ecraft2learn/ai/tree/master/onyx" target="_blank">source code</a>
+                for this app is available for inspection.
+    Visit <a href="http://www.education.ox.ac.uk/" target="_blank">the Onyx home page</a>
+                to learn more about this project and app.
+            </p>
+        </div>
+        <p id="please-wait" style="font-size: x-large;color: darkred">Please wait for this page to load.</p>
+    </div>
+</body></html>

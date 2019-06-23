@@ -215,3 +215,13 @@ figcaption {
  font-size: x-large;
  color: darkred;
 }
+.in-box {
+  border: solid 1px;
+  border-radius: 8px;
+  margin: 4px;
+}
+.agreement-text, .response-text {
+   text-align: left;
+/*    text can be made larger if shorted */
+   font-size: .8em;
+}
