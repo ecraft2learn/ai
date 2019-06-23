@@ -158,10 +158,14 @@ const display_results = (canvas) => {
     make_prediction(canvas, (results, logits) => {
         const data_url = canvas.toDataURL();
 //         const id = hex_md5(data_url);
-        const result_description = confidences(results, -1);
+        let result_description = confidences(results, -1);
         const data = result_description
 //                      + "\nimage id = " + id
                      + "\ndata = " + logits;
+        if (!is_mobile()) {
+            result_description = "<img src='" + data_url + "' width=128 height=128></img><br>" 
+                                 + result_description;
+        }
         const message = response_element(result_description);
         const camera_image_element = document.getElementById('camera-image');
         camera_image_element.src = data_url;
