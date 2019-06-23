@@ -254,7 +254,6 @@ const add_image_or_canvas = (parent, image_or_canvas, class_name, image_to_repla
         make_prediction(image_or_canvas, analyse_image_and_replace_self);
     };
     image_or_canvas.addEventListener('click', analyse_image);
-    image_or_canvas.addEventListener('touchstart', analyse_image);
     if (image_to_replace) {
         image_to_replace.parentNode.replaceChild(image_or_canvas, image_to_replace);
     } else {
