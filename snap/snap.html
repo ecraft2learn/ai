@@ -1,12 +1,6 @@
 <!DOCTYPE html>
 <html>
 	<head>
-	<script>
-const parameters = new URLSearchParams(window.location.hash.slice(1));
-const source = parameters.has('logging') ?
-               "../isnap/snap-logging.html" :
-               "snap-no-logging.html";
-document.location.replace(source + window.location.search + window.location.hash);
-</script>
-</head>
+	<script type="text/javascript" src="snap_or_isnap.js"></script>
+    </head>
 </html>
