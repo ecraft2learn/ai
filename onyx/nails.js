@@ -1330,7 +1330,6 @@ const on_click = () => {
         "<p>Tap one of the photos of a nail or use the camera.</p>";
     document.getElementById('main').hidden = false;
 };
-document.getElementById('agreement').addEventListener('click', on_click);
 
 window.addEventListener('DOMContentLoaded',
                         (event) => {
@@ -1338,7 +1337,11 @@ window.addEventListener('DOMContentLoaded',
                                 initialise_page();
                                 add_random_images(() => {
                                     if (option === 'diagnose') {
-                                        document.getElementById('agreement').hidden = false;
+                                        const agreement_button = document.createElement('button');
+                                        agreement_button.innerHTML = "Accept";
+                                        agreement_button.className = 'generic-button';
+                                        agreement_button.addEventListener('click', on_click);
+                                        document.getElementById('user-agreement').appendChild(agreement_button);
                                         document.getElementById('please-wait').hidden = true;                                    
                                     } else { // no need for agreement when training or experimenting
                                         on_click();
