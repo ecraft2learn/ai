@@ -1109,9 +1109,10 @@ let number_right = 0;
 let not_confident_answers = 0; // less than minimum_confidence for top answer 
 
 const process_prediction = (result, image_or_canvas, class_index, image_index, image_count) => {
+    const image_url = get_url_from_image_or_canvas(image_or_canvas);
     let message = option === 'diagnose' && is_mobile() ?
                   "" :
-                  "<img src='" + get_url_from_image_or_canvas(image_or_canvas) + "' width=100 height=100></img><br>";
+                  "<img src='" + image_url + "' width=100 height=100></img><br>";
     let confidence_message = confidences(result, class_index, true);
     const class_name = class_names[class_index];
     if (typeof image_count !== 'undefined') {
