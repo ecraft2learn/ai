@@ -154,13 +154,15 @@ const analyse_camera_image = () => {
     display_results(temporary_canvas);
 };
 
+let email_link_added = false;
+
 const display_results = (canvas) => {
     make_prediction(canvas, (results, logits) => {
         const data_url = canvas.toDataURL();
-//         const id = hex_md5(data_url);
+        const id = hex_md5(data_url);
         let result_description = confidences(results, -1);
         const data = result_description
-//                      + "\nimage id = " + id
+                     + "\nimage id = " + id
                      + "\ndata = " + logits;
         if (!is_mobile()) {
             result_description = "<img src='" + data_url + "' width=128 height=128></img><br>" 
@@ -171,15 +173,17 @@ const display_results = (canvas) => {
         camera_image_element.src = data_url;
         camera_image_element.hidden = false;
         display_message(message, 'camera-response', true);
-//         const image_element = document.getElementById(id);
         const display_data = (event) => {
             navigator.clipboard.writeText(data);
             alert("Clipboard has data for this image. Please send it to toontalk@gmail.com");
-            const email_link = document.createElement('div');
-            email_link.innerHTML = "<a href='mailto:toontalk@gmail.com?subject=Onyx image issue&body=Please paste data here.' target='_blank'>Click to send email.</a>";
-            event.currentTarget.parentNode.appendChild(email_link);
+            if (!email_link_added) {
+                const email_link = document.createElement('div');
+                email_link.innerHTML = 
+                    "<a href='mailto:toontalk@gmail.com?subject=Onyx image issue&body=Please paste data here.' target='_blank'>Click to send email.</a>";
+                camera_image_element.parentElement.insertBefore(email_link, camera_image_element);
+                email_link_added = true;             
+            }
         };
-//         image_element.addEventListener('click', display_data); 
         document.getElementById('camera-image').onclick = display_data;          
     });
 };
