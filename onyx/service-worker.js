@@ -2,7 +2,7 @@
 // caches files locally
 // based upon https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Offline_Service_workers
 
-const cache_name = "onyx-nail-v16";
+const cache_name = "onyx-nail-v17";
 
 const files_to_cache = [
 "/ai/onyx/dev.html",
@@ -1152,7 +1152,6 @@ const files_to_cache = [
 "images/korean/melanonychia/semisuper_jpn_187_77_64_374_361_05.jpg",
 "images/korean/melanonychia/semisuper_jpn_197_135_88_529_491_img0051.jpg",
 "images/korean/melanonychia/semisuper_jpn_257_266_137_586_458_DSCF6207.jpg",
-"images/korean/melanonychia/semisuper_jpn_269_93_103_325_335_nail_b2_photo01.jpg",
 "images/korean/melanonychia/semisuper_jpn_273_135_88_529_491_img0051.jpg",
 "images/korean/melanonychia/semisuper_jpn_312_36_72_489_525_img0125.jpg",
 "images/korean/melanonychia/semisuper_jpn_313_108_239_417_534_img0125.jpg",
@@ -1168,7 +1167,7 @@ const files_to_cache = [
 "images/korean/melanonychia/semisuper_kor_582_292_138_474_320_th_2721D13F53FDB9C030C78A.jpg",
 "images/korean/melanonychia/semisuper_kor_721_17_37_303_360_20160215195012476.jpg",
 "images/korean/melanonychia/semisuper_kor_801_65_190_310_435_th_273B244851FA360222B299.jpg",
-"images/korean/melanonychia/semisuper_kor_812_219_10_409_200_th_266C1A35581913C61152DF.jpg",
+"images/korean/melanonychia/semisuper_jpn_269_93_103_325_335_nail_b2_photo01.jpg",
 "images/korean/melanonychia/semisuper_kor_814_162_48_387_274_b0f85815bea64b1bcfa8972b32157cca.jpg",
 "images/korean/melanonychia/semisuper_kor_816_286_11_489_222_1388845213-13.jpg",
 "images/korean/melanonychia/semisuper_kor_841_17_37_303_360_20160215195012476.jpg",
