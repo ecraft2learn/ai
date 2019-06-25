@@ -496,7 +496,6 @@ add_to_dataset({
 "images/korean/melanonychia/semisuper_kor_582_292_138_474_320_th_2721D13F53FDB9C030C78A.jpg",
 "images/korean/melanonychia/semisuper_kor_721_17_37_303_360_20160215195012476.jpg",
 "images/korean/melanonychia/semisuper_kor_801_65_190_310_435_th_273B244851FA360222B299.jpg",
-"images/korean/melanonychia/semisuper_kor_812_219_10_409_200_th_266C1A35581913C61152DF.jpg",
 "images/korean/melanonychia/semisuper_kor_814_162_48_387_274_b0f85815bea64b1bcfa8972b32157cca.jpg",
 "images/korean/melanonychia/semisuper_kor_816_286_11_489_222_1388845213-13.jpg",
 "images/korean/melanonychia/semisuper_kor_841_17_37_303_360_20160215195012476.jpg",
