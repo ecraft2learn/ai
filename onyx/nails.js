@@ -232,7 +232,10 @@ const setup_camera = (callback) => {
           toggle_freeze_button.addEventListener('click', toggle_click);  
       }
       video.onloadedmetadata = () => {
-          if (video.videoWidth && !is_mobile()) {
+          if (is_mobile()) {
+              video.width = 128;
+              video.height = 128;
+          } else if (video.videoWidth) {
               // in Chrome videoWidth is 0 but without this FireFox can't map the selection rectangle properly
               video.width = video.videoWidth;
               video.height = video.videoHeight;
