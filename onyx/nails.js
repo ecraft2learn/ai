@@ -190,14 +190,11 @@ const display_results = (canvas) => {
 
 const setup_camera = (callback) => {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    throw new Error(
-        'Browser API navigator.mediaDevices.getUserMedia not available');
+      throw new Error('Browser API navigator.mediaDevices.getUserMedia not available');
   }
-
   const video = document.getElementById('video');
   video.width  = VIDEO_WIDTH;
   video.height = VIDEO_HEIGHT;
-
   const mobile = is_mobile();
   navigator.mediaDevices.getUserMedia({
     'audio': false,
@@ -240,7 +237,11 @@ const setup_camera = (callback) => {
           }
           callback(video);
       };          
-  });
+     },
+     (error) => {
+         unable_to_access_camera(error);
+         callback();
+     });
 };
 
 const random_integer = (n) =>
@@ -450,42 +451,54 @@ const load_mobilenet = (callback) => {
 };
 
 const initialise_page = () => {
-    setup_camera(
-        (camera) => {
-          video = camera;
-          video.play();
-          if (window.saved_tensors && use_knn && !CREATE_SPRITE_IMAGE && !SAVE_TENSORS && option !== 'experiment' && typeof xs === 'undefined') {
-              load_data_set(window.saved_tensors);
-              start_up();
-          } else if (option === 'create model' || 
-                     (use_knn && option !== 'diagnose')) {
-              add_images(start_up);
-          } else {
-              start_up();
-          }
-        },
-        (e) => {
-          let info = document.getElementById('info');
-          if (!info) {
-              info = document.createElement('p');
-              info.id = 'info';
-              document.body.appendChild(info);
-          }
-          info.textContent = 'This browser either does not support video capture, ' +
-                             'lacks permission to use the camera, ' +
-                             'or this device does not have a camera.';
-          info.style.display = 'block';
-          throw e;          
-        });
+  try {
+      setup_camera(
+          (camera) => {
+              if (!camera) {
+                  start_up();
+                  return;
+              }
+              video = camera;
+              video.play();
+              if (window.saved_tensors && use_knn && !CREATE_SPRITE_IMAGE && !SAVE_TENSORS && option !== 'experiment' && typeof xs === 'undefined') {
+                  load_data_set(window.saved_tensors);
+                  start_up();
+              } else if (option === 'create model' || 
+                         (use_knn && option !== 'diagnose')) {
+                  add_images(start_up);
+              } else {
+                  start_up();
+              }
+            },
+         (error) => {
+             unable_to_access_camera(error);       
+         });
+   } catch (error) {
+        unable_to_access_camera(error);
+   };
 };
+
+const unable_to_access_camera = (error) => {
+    let info = document.getElementById('info');
+    info.innerHTML = "<p style='font-size: x-large;'>"
+                     + "Failed to access the camera. You can still click on random images. "
+                     + error.message
+                     + "</p>";
+//                       'This browser either does not support video capture, ' +
+//                       'lacks permission to use the camera, ' +
+//                       'or this device does not have a camera.';
+};
+
 const go_to_camera_interface = () => {
     document.getElementById('camera-interface').hidden = false;
     document.getElementById('tutorial-interface').hidden = true;
 };
+
 const go_to_tutorial_interface = () => {
     document.getElementById('camera-interface').hidden = true;
     document.getElementById('tutorial-interface').hidden = false;
 };
+
 const start_up = () => {
     const use_photo = "Or take a picture of a finger or toe nail on a screen or in a photograph. ";
     const instructions = is_mobile() ?
@@ -495,7 +508,8 @@ const start_up = () => {
                          "Take a picture by clicking the button below. "
                          + use_photo 
                          + "Then you will be able to select a nail in the image.";
-    document.getElementById('camera-instructions').innerHTML = instructions;
+    document.getElementById('camera-instructions').innerHTML = 
+        video ? instructions : "Camera not available";
     if (typeof tensor_tsv === 'string') {
         add_textarea(tensor_tsv);
         add_textarea(metadata_tsv);
@@ -871,7 +885,8 @@ const rectangle_selection = () => {
         rectangle.style.height = bottom - top + 'px';
     };
     document.body.addEventListener('mousedown', (event) => {
-        if (outside_image_region(event)) {
+        if ((!video && canvas.hidden) ||
+            outside_image_region(event)) {
             return;
         }
         rectangle.hidden = false;
@@ -888,7 +903,8 @@ const rectangle_selection = () => {
         }
     });
     document.body.addEventListener('mouseup', (event) => {
-        if (!video.paused && !video.hidden) {
+        if ((!video && canvas.hidden) ||
+            (!video.paused && !video.hidden)) {
             return;
         }
         const box = rectangle.getBoundingClientRect();
@@ -1376,10 +1392,6 @@ const load_data_set = (data_set) => {
 
 const on_click = () => {
     document.getElementById('user-agreement').remove();
-//     document.getElementById('introduction').innerText = 
-//         is_mobile() ?
-//         "Tap one of the photos of a nail or the video image." :
-//         "Tap one of the photos of a nail or use the camera.";
     document.getElementById('camera-interface').hidden = true;
     document.getElementById('main').hidden = false;
 };
