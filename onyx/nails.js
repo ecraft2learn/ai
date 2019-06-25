@@ -152,6 +152,8 @@ const analyse_camera_image = () => {
     const context = temporary_canvas.getContext('2d');
     context.drawImage(video, 0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
     display_results(temporary_canvas);
+    // move camera instructions to the end to make room
+    document.getElementById('main').appendChild(document.getElementById('camera-instructions'));
 };
 
 let email_link_added = false;
@@ -230,7 +232,7 @@ const setup_camera = (callback) => {
           toggle_freeze_button.addEventListener('click', toggle_click);  
       }
       video.onloadedmetadata = () => {
-          if (video.videoWidth) {
+          if (video.videoWidth && !is_mobile()) {
               // in Chrome videoWidth is 0 but without this FireFox can't map the selection rectangle properly
               video.width = video.videoWidth;
               video.height = video.videoHeight;
