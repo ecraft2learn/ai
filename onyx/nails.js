@@ -229,6 +229,11 @@ const setup_camera = (callback) => {
           toggle_freeze_button.addEventListener('click', toggle_click);  
       }
       video.onloadedmetadata = () => {
+          if (video.videoWidth) {
+              // in Chrome videoWidth is 0 but without this FireFox can't map the selection rectangle properly
+              video.width = video.videoWidth;
+              video.height = video.videoHeight;
+          }
           callback(video);
       };          
   });
@@ -817,6 +822,17 @@ const draw_maintaining_aspect_ratio = (source,
                       destination_width,
                       destination_height);
 };
+
+const get_source_box = () => {
+    const source = video.hidden ? document.getElementById('canvas') : video;
+    const source_rectangle = source.getBoundingClientRect();
+    const left = source_rectangle.left+window.scrollX;
+    const top = source_rectangle.top+window.scrollY;
+    return {left: left, 
+            right: left+source_rectangle.width+window.scrollX,
+            top: top,
+            bottom: top+source_rectangle.height};
+};
            
 const rectangle_selection = () => {
     const rectangle = document.getElementById('selection-rectangle');
@@ -825,15 +841,11 @@ const rectangle_selection = () => {
     let end_x = 0;
     let end_y = 0;
     const outside_image_region = (event) => {
-        const video_rectangle = video.getBoundingClientRect();
-        let video_left   = video_rectangle.left+window.scrollX; 
-        let video_right  = video_left+video_rectangle.width+window.scrollX;
-        let video_top    = video_rectangle.top;
-        let video_bottom = video_top+video_rectangle.height;
-        if (video_left > event.clientX ||
-            video_top > event.clientY ||
-            video_right < event.clientX ||
-            video_bottom < event.clientY) {
+        const source_box = get_source_box();
+        if (source_box.left > event.clientX ||
+            source_box.top > event.clientY ||
+            source_box.right < event.clientX ||
+            source_box.bottom < event.clientY) {
            // reset rectangle
            rectangle.style.width  = "0px";
            rectangle.style.height = "0px";
@@ -844,15 +856,11 @@ const rectangle_selection = () => {
         if (!video.paused && !video.hidden) {
             return;
         }
-        const video_rectangle = video.getBoundingClientRect();
-        let video_left   = video_rectangle.left+window.scrollX; 
-        let video_right  = video_left+video_rectangle.width;
-        let video_top    = video_rectangle.top+window.scrollY;
-        let video_bottom = video_top+video_rectangle.height;
-        let left   = Math.max(Math.min(start_x, end_x, video_right),  video_left);
-        let right  = Math.min(Math.max(start_x, end_x, video_left),   video_right);
-        let top    = Math.max(Math.min(start_y, end_y, video_bottom), video_top);
-        let bottom = Math.min(Math.max(start_y, end_y, video_top),    video_bottom);
+        const source_box = get_source_box();
+        let left   = Math.max(Math.min(start_x, end_x, source_box.right),  source_box.left);
+        let right  = Math.min(Math.max(start_x, end_x, source_box.left),   source_box.right);
+        let top    = Math.max(Math.min(start_y, end_y, source_box.bottom), source_box.top);
+        let bottom = Math.min(Math.max(start_y, end_y, source_box.top),    source_box.bottom);
         rectangle.style.left   = left + 'px';
         rectangle.style.top    = top + 'px';
         rectangle.style.width  = right - left + 'px';
@@ -883,19 +891,15 @@ const rectangle_selection = () => {
         const box_left = window.scrollX+box.left;
         const box_top  = window.scrollY+box.top;
         if (box.width > 0 && box.height > 0) {
-            const video_rectangle = video.getBoundingClientRect();
-            let video_left   = video_rectangle.left+window.scrollX; 
-            let video_right  = video_left+video_rectangle.width+window.scrollX;
-            let video_top    = video_rectangle.top+window.scrollY;
-            let video_bottom = video_top+video_rectangle.height+window.scrollY;
+            const source_box = get_source_box();
             let temporary_canvas = create_canvas();
             const source = video.hidden ? document.getElementById('canvas') : video;
             draw_maintaining_aspect_ratio(source,
                                           temporary_canvas,
-                                          VIDEO_WIDTH,
-                                          VIDEO_HEIGHT,
-                                          box_left-video_left,
-                                          box_top-video_top,
+                                          source.width,
+                                          source.height,
+                                          box_left-source_box.left,
+                                          box_top-source_box.top,
                                           box.width,
                                           box.height,
                                           0,

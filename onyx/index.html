@@ -83,49 +83,49 @@
     <body>
         <div id='main' hidden>
             <div id="camera-interface" style="text-align: center">
-                <canvas hidden id="canvas" width="224" height="224"></canvas>
                 <div style="text-align: center">
                     <h2>Check Your Nail Health</h2>
                     <div id="camera-instructions" class="in-box"></div>
                 </div>
                 <button id="toggle video" class="freeze-video" style="padding:12px;">Freeze video</button>
                 <div style="padding-top: 12px;">
-                    <div id="before-video-element"></div>
-                    <video id="video" playsinline width="224" height="224"
-                     <!--      reverse left and right -->
-                     style="-moz-transform: scaleX(-1);
-                            -o-transform: scaleX(-1);
-                            -webkit-transform: scaleX(-1);
-                            transform: scaleX(-1);
-                           ">
-                    </video>
-                </div>
-                <img id="camera-image" width=128 height=128 hidden></img>
-                <div id="random-image-response-box" class="in-box">
-                    <div id='camera-response' class="response-text"></div>
-                </div>
-                <div id="selection-rectangle" hidden style="border: 2px dotted yellow; position: absolute;"></div>
-                <button id="go-to-tutorial" class="generic-button">Back to Tutorial</button>
-             </div>
-            <div id="tutorial-interface">
-                <h2 style="text-align: center">Tutorial</h2>
-                <div id="random-images"></div>
-                <!-- Introduction is hidden until everything is loaded -->
-                <div style="text-align: center">
-                    <div id="introduction" class="in-box">Click on a nail to find out how healthy it is. </div>
-                    <img id="random-image-chosen" width=128 height=128 hidden></img>
-                    <div id="random-image-response-box" class="in-box">
-                        <div id="random-image-response" class="response-text"></div>
-                    </div>
-                    <button id="go-to-camera" class="generic-button">Take your own nail photos &rarr;</button>
-                </div>
+                <div id="before-video-element"></div>
+                <canvas hidden id="canvas" width="224" height="224"></canvas>
+                <video id="video" playsinline width="224" height="224"
+                    <!--      reverse left and right -->
+                       style="-moz-transform: scaleX(-1);
+                              -o-transform: scaleX(-1);
+                              -webkit-transform: scaleX(-1);
+                              transform: scaleX(-1);"
+                    >
+                </video>
             </div>
+            <img id="camera-image" width=128 height=128 hidden></img>
+            <div id="random-image-response-box" class="in-box">
+                <div id='camera-response' class="response-text"></div>
+            </div>
+            <div id="selection-rectangle" hidden style="border: 2px dotted yellow; position: absolute;"></div>
+            <button id="go-to-tutorial" class="generic-button">Back to Tutorial</button>
+        </div>
+        <div id="tutorial-interface">
+            <h2 style="text-align: center">Tutorial</h2>
+            <div id="random-images"></div>
+            <!-- Introduction is hidden until everything is loaded -->
+            <div style="text-align: center">
+                <div id="introduction" class="in-box">Click on a nail to find out how healthy it is. </div>
+                <img id="random-image-chosen" width=128 height=128 hidden></img>
+                <div id="random-image-response-box" class="in-box">
+                    <div id="random-image-response" class="response-text"></div>
+                </div>
+                <button id="go-to-camera" class="generic-button">Take your own nail photos &rarr;</button>
+            </div>
+        </div>
     </div>
     <div id="user-agreement" style="text-align: center;">
         <img src="icons\icon-64.png" width=64 height=64></img>
         <h2>The Onyx Project</h2>
         <div class="in-box">
-            <p class="agreement-text">This website contains general information about nail conditions and is used for training purposes only.
+        <p class="agreement-text">This website contains general information about nail conditions and is used for training purposes only.
     The information is not medical advice and should not be treated as such.
     You are strongly encouraged to confirm any information obtained from or through this App with your physician or
     another professional healthcare provider and to review all information regarding any nail or
@@ -134,8 +134,8 @@
     or other professional healthcare provider.
     If you have any specific questions about any medical matter,
     you should consult your doctor or other professional healthcare provider.
-    </p>
-            <p class="agreement-text">
+        </p>
+        <p class="agreement-text">
                 No images are sent to a remote server if you use your device's camera.
     All the machine learning is being done locally on your device.
     The 
@@ -143,8 +143,9 @@
                 for this app is available for inspection.
     Visit <a href="http://www.education.ox.ac.uk/" target="_blank">the Onyx home page</a>
                 to learn more about this project and app.
-            </p>
-        </div>
-        <p id="please-wait" style="font-size: x-large;color: darkred">Please wait for this app to load.</p>
+        </p>
     </div>
-</body></html>
+    <p id="please-wait" style="font-size: x-large;color: darkred">Please wait for this app to load.</p>
+ </div>
+</body>
+</html>
