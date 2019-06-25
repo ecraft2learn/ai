@@ -546,7 +546,7 @@ const display_message = (message, element_id, append) => {
         } else {
             after = "<br>";
         }
-        message = document.getElementById(element_id).innerHTML + after + message;
+        message = message + after + document.getElementById(element_id).innerHTML;
     }
     document.getElementById(element_id).innerHTML = message;
 };
@@ -829,7 +829,7 @@ const get_source_box = () => {
     const left = source_rectangle.left+window.scrollX;
     const top = source_rectangle.top+window.scrollY;
     return {left: left, 
-            right: left+source_rectangle.width+window.scrollX,
+            right: left+source_rectangle.width,
             top: top,
             bottom: top+source_rectangle.height};
 };
