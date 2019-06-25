@@ -846,10 +846,10 @@ const rectangle_selection = () => {
     let end_y = 0;
     const outside_image_region = (event) => {
         const source_box = get_source_box();
-        if (source_box.left > event.clientX ||
-            source_box.top > event.clientY ||
-            source_box.right < event.clientX ||
-            source_box.bottom < event.clientY) {
+        if (source_box.left > event.clientX+window.scrollX ||
+            source_box.top > event.clientY+window.scrollY ||
+            source_box.right < event.clientX+window.scrollX ||
+            source_box.bottom < event.clientY+window.scrollY) {
            // reset rectangle
            rectangle.style.width  = "0px";
            rectangle.style.height = "0px";
