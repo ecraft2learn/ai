@@ -129,16 +129,19 @@ And see what word is the closest to somewhere between two words other than the h
 
 <h4 class="instructions-white">Using word embeddings to solve word analogy problems</h4>
 <p class="instructions">
-One of the most surprising thing about word embeddings is that with the right formula one solve word analogy problems.
-For example "man is to woman as father is to what?" can be expressed as "father+(woman-man)=x".
+One of the most surprising thing about word embeddings is that with the right formula
+one can solve word analogy problems.
+For example "man is to woman as king is to what?" can be expressed as "king+(woman-man)=x".
 </p>
 <figure class = "snap-iframe"
         id = "word analogy"
-        container_style = "width: 850px; height: 350px" 
+        container_style = "width: 850px; height: 650px" 
         caption = "Solving word analogy problems. TRY IT! Then find other analogies that work.">
 </figure>
 <p class="instructions">
-This works for grammatical analogies as well.
+Note that "king is to man as woman is to what?" can be expressed as "woman+(king-man)=x".
+And "king+(woman-man)=x" amd "woman+(king-man)=x" are equivalent yet they solve different word analogy problems!
+This use of word embeddings works for grammatical analogies as well.
 Try solving "slow is to slower as fast is to what?".
 You might need to add 'fast' as an exception.
 </p>
@@ -282,7 +285,7 @@ And "art" has a higher "pleasantness" score than "mathematics".
 
 <h4 class="how-it-works-white">How does this work?</h4>
 <p class="how-it-works">
-While we don't really know what the numbers mean they must be encoding lots of things about words such as
+While we don't really know what the numbers mean, they must be encoding lots of things about words such as
 gender, grammatical category, family relationships, and hundreds more things.
 But the numbers aren't perfect.
 See if you can create some examples where the results are not good.
@@ -437,6 +440,8 @@ This <a href="https://developers.googleblog.com/2018/04/text-embedding-models-co
 Google blog about biases in word embeddings</a> is very good and clear.
 In Google's <a href="https://cloud.google.com/blog/products/ai-machine-learning/steering-the-right-course-for-ai" target="_blank">
 Steering the right course for AI</a> discusses bias along with other societal issues including interpretivity, jobs, and doing good.
+<a href="https://arxiv.org/abs/1905.09866" target="_blank">Fair is Better than Sensational:
+Man is to Doctor as Woman is to Doctor</a> discusses biases in word embeddings in depth.
 <a href="https://distill.pub/2016/misread-tsne/" target="_blank">How to Use t-SNE Effectively</a>
 is a clear interactive description of how t-SNE works.
 <a href="https://arxiv.org/abs/1309.4168" target="_blank">Exploiting Similarities among Languages for Machine Translation</a>
