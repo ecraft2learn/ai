@@ -1,10 +1,13 @@
 // by Ken Kahn <toontalk@gmail.com> as part of the Onyx project at the University of Oxford
 // copyright not yet determined but will be some sort of open source
+'use strict';
 
 let xs = option === 'create model' ? [] : undefined;
 let ys = option === 'create model' ? [] : undefined;
 let xs_test = option === 'create model' || option === 'experiment' ? [] : undefined;
 let ys_test = option === 'create model' || option === 'experiment' ? [] : undefined;
+let xs_validation = option === 'create model' ? [] : undefined;
+let ys_validation = option === 'create model' ? [] : undefined;
 let load_model_named = option !== 'create model' && !use_knn ? model_name : undefined;
 let loaded_model;
 
@@ -370,6 +373,8 @@ const add_images = (when_finished, just_one_class, only_class_index, except_imag
 //             };
             train_model(xs,
                         ys,
+                        xs_validation,
+                        ys_validation,
                         xs_test,
                         ys_test,
                         training_options);
@@ -378,7 +383,7 @@ const add_images = (when_finished, just_one_class, only_class_index, except_imag
     };
     const one_shot = (index, n) => {
         let vector = [];
-        for (i = 0; i < n; i++) {
+        for (let i = 0; i < n; i++) {
             vector.push(i === index ? 1 : 0);
         }
         return vector;
@@ -400,16 +405,20 @@ const add_images = (when_finished, just_one_class, only_class_index, except_imag
             if (use_knn) {
                 classifier.addExample(logits, class_index);
             }
-            if (xs instanceof Array) {
+            if (xs instanceof Array) { // need this for training or testing
                 const x = logits.dataSync();
                 const y = one_shot(class_index, class_names.length);
-                if (typeof every_nth_for_testing === 'number' &&
-                    image_counter%every_nth_for_testing === 0) {
-                    xs_test.push(x);
-                    ys_test.push(y); 
-                } else {
-                    xs.push(x);
-                    ys.push(y);                       
+                if (typeof every_nth_for_testing === 'number') {
+                    if (image_counter%every_nth_for_testing === 0 && option === 'create model') {
+                        xs_validation.push(x);
+                        ys_validation.push(y);
+                    } else if (image_counter%every_nth_for_testing === 1) {
+                        xs_test.push(x);
+                        ys_test.push(y);
+                    } else {
+                        xs.push(x);
+                        ys.push(y);                       
+                    }
                 }
             }
             logits.dispose();
@@ -1108,7 +1117,7 @@ const run_new_experiments = () => {
     const next = (image, class_index, image_index, image_count) => {
         image_counter++;
         if (typeof every_nth_for_testing !== 'number' ||
-            image_counter%every_nth_for_testing === 0) {
+            image_counter%every_nth_for_testing === 1) {
             const logits = infer(image);
             const prediction_tensor = loaded_model.predict([logits]);
             const prediction = prediction_tensor.dataSync();
@@ -1231,14 +1240,6 @@ const plain_text = (html) => {
 
 const report_final_statistics = () => {
     const total = true_positives+true_negatives+false_positives+false_negatives+not_confident_answers;
-    display_message("true positives = " + true_positives + "<br>"
-                    + "true negatives = " + true_negatives + "<br>"
-                    + "false positives = " + false_positives + "<br>"
-                    + "false negatives = " + false_negatives + "<br>"
-                    + "not confident of any answer = " + not_confident_answers + "<br>"
-                    + "total = " + total + "<br>",
-                    'main',
-                    true);
     let sensitivity = number_precision(true_positives/(true_positives+false_negatives), 4);
     let specificity = number_precision(true_negatives/(true_negatives+false_positives), 4);
     let precision = number_precision(true_positives/(true_positives+false_positives), 4);
@@ -1247,6 +1248,14 @@ const report_final_statistics = () => {
                     + "specificity = " + specificity + "<br>"
                     + "precision = " + precision + "<br>"
                     + "recall = " + recall + "<br>",
+                    'main',
+                    true);
+    display_message("true positives = " + true_positives + "<br>"
+                    + "true negatives = " + true_negatives + "<br>"
+                    + "false positives = " + false_positives + "<br>"
+                    + "false negatives = " + false_negatives + "<br>"
+                    + "not confident of any answer = " + not_confident_answers + "<br>"
+                    + "total = " + total + "<br>",
                     'main',
                     true);
     add_textarea(histogram_buckets_to_html(histogram_buckets, histogram_image_size));
@@ -1405,18 +1414,18 @@ window.addEventListener('DOMContentLoaded',
                         (event) => {
                             load_mobilenet(() => {
                                 initialise_page();
-                                add_random_images(() => {
-                                    if (option === 'diagnose') {
+                                if (option === 'diagnose') {
+                                    add_random_images(() => {
                                         const agreement_button = document.createElement('button');
                                         agreement_button.innerHTML = "Accept";
                                         agreement_button.className = 'generic-button';
                                         agreement_button.addEventListener('click', on_click);
                                         document.getElementById('user-agreement').appendChild(agreement_button);
                                         document.getElementById('please-wait').hidden = true;                                    
-                                    } else { // no need for agreement when training or experimenting
-                                        on_click();
-                                    }
-                                });                      
+                                    });
+                                } else { // no need for agreement when training or experimenting
+                                    on_click();
+                                };                      
                             });
                         },
                         false);

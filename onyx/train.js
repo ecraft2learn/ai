@@ -17,14 +17,17 @@
 
 // Based on https://github.com/tensorflow/tfjs-examples/blob/master/webcam-transfer-learning/index.js
 
-const train_model = (xs_array, ys_array, xs_test_array, ys_test_array, options, callback) => {
-    const {model_name, hidden_layer_sizes, learning_rate, batch_size_fraction, epochs, drop_out_rate} = options;
+"use strict"
 
+const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array, options, callback) => {
+    const {model_name, hidden_layer_sizes, batch_size_fraction, epochs, drop_out_rate, optimizer} = options;
     let model;
     const input_size = xs_array[0].length;
     const number_of_classes = ys_array[0].length;
     const xs = tf.tensor(xs_array);
     const ys = tf.tensor(ys_array);
+    const xs_validation = tf.tensor(xs_validation_array);
+    const ys_validation = tf.tensor(ys_validation_array);
     const xs_test = tf.tensor(xs_test_array);
     const ys_test = tf.tensor(ys_test_array);
 
@@ -37,6 +40,10 @@ const train_model = (xs_array, ys_array, xs_test_array, ys_test_array, options, 
                        styles: { height: '600px' }};
     let callbacks = tfvis ? tfvis.show.fitCallbacks(container, metrics, {callbacks: ['onEpochEnd']})
                                        : {};
+    let data_loss;
+    let validation_loss;
+    let data_accuracy;
+    let validation_accuracy;
     if (tfvis) {
         const epoch_end_callback = callbacks.onEpochEnd;
         callbacks.onEpochEnd = (epoch, history) => {
@@ -44,6 +51,11 @@ const train_model = (xs_array, ys_array, xs_test_array, ys_test_array, options, 
                 epoch_end_callback(epoch, history);
             }
             epoch_history.push(history);
+            data_loss = history.loss;
+            validation_loss = history.val_loss;
+            data_accuracy = history.acc;
+            validation_accuracy = history.val_acc;
+//             console.log(batch, logs);
         };      
     }
 /**
@@ -67,17 +79,17 @@ const train_model = (xs_array, ys_array, xs_test_array, ys_test_array, options, 
   // last layer. The number of units of the last layer should correspond
   // to the number of classes we want to predict.
   model.add(tf.layers.dense({units: number_of_classes,
-                             kernelInitializer: 'varianceScaling',
+                             kernelInitializer: 'varianceScaling', // 'leCunNormal',
                              useBias: false,
                              activation: 'softmax'
                             }));
-  // Creates the optimizers which drives training of the model.
-  const optimizer = tf.train.rmsprop(learning_rate);
   // We use categoricalCrossentropy which is the loss function we use for
   // categorical classification which measures the error between our predicted
   // probability distribution over classes (probability that an input is of each
   // class), versus the label (100% probability in the true class)>
-  model.compile({optimizer: optimizer, loss: 'categoricalCrossentropy'});
+  model.compile({optimizer: optimizer(),
+                 loss: 'categoricalCrossentropy',
+                 metrics: ['accuracy']});
 
   // We parameterize batch size as a fraction of the entire dataset because the
   // number of examples that are collected depends on how many examples the user
@@ -90,14 +102,11 @@ const train_model = (xs_array, ys_array, xs_test_array, ys_test_array, options, 
   }
 
   // Train the model! Model.fit() will shuffle xs & ys so we don't have to.
-  callbacks.onBatchEnd = (batch, logs) => {
-      console.log(batch, logs);
-  };
   model.fit(xs, ys, {
     batchSize,
     epochs: epochs,
 //     validationSplit: .2,
-    validationData: [xs_test, ys_test],
+    validationData: [xs_validation, ys_validation],
     shuffle: true,
     callbacks: callbacks}).then(() => {
        const save_model = async () => {
@@ -108,6 +117,15 @@ const train_model = (xs_array, ys_array, xs_test_array, ys_test_array, options, 
        button.className = "save-training-button";
        button.addEventListener('click', save_model);
        document.body.appendChild(button);
+       const test_loss = model.evaluate(xs_test, ys_test);
+       const test_loss_message = document.createElement('p');
+       test_loss_message.innerHTML = "Data loss = " + data_loss
+                                     + "; Validation loss = " + validation_loss
+                                     + "; Data accuracy = " + data_accuracy
+                                     + "; Validation accuracy = " + validation_accuracy
+                                     + "; Test loss = " + test_loss[0].dataSync()[0]
+                                     + "; Test accuracy = " + test_loss[1].dataSync()[0];
+       document.body.appendChild(test_loss_message);
        if (callback) {
            callback(model);
        }

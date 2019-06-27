@@ -1,5 +1,7 @@
 // if student is in the URL hash (after the #) then teacher elements are hidden
 // otherwise student elements are hidden
+'use strict';
+
 window.addEventListener(
      'DOMContentLoaded',
      function () {
