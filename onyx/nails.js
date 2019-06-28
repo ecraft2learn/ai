@@ -40,6 +40,7 @@ if (is_chrome() && is_ios()) {
 // number of nearest neighbours for KNN - one extra for experiments since we remove self-votes
 let top_k = option === 'experiment' ? 6 : 5;
 
+const long_experimental_results = false;
 const histogram_buckets = [];
 const bucket_count = 20;
 const histogram_image_size = 40;
@@ -156,7 +157,7 @@ const analyse_camera_image = () => {
     context.drawImage(video, 0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
     display_results(temporary_canvas);
     // move camera instructions to the end to make room
-    document.getElementById('main').appendChild(document.getElementById('camera-instructions'));
+    document.getElementById('camera-interface').appendChild(document.getElementById('camera-instructions'));
 };
 
 let email_link_added = false;
@@ -413,7 +414,7 @@ const add_images = (when_finished, just_one_class, only_class_index, except_imag
                     if (image_counter%every_nth_for_testing === 0 && option === 'create model') {
                         xs_validation.push(x);
                         ys_validation.push(y);
-                    } else if (image_counter%every_nth_for_testing === 1) {
+                    } else if (image_counter%every_nth_for_testing === 1) { 
                         xs_test.push(x);
                         ys_test.push(y);
                     } else {
@@ -568,10 +569,14 @@ const start_up = () => {
 
 
 function remove_parent_element (event) {
+    // used in onclick in HTML so using function to ensure it is global
     event.currentTarget.parentNode.remove();
 }
 
 const display_message = (message, element_id, append) => {
+    if (message === "") {
+        return;
+    }
     if (append && !is_mobile()) {
         let after = "";
         if (message.indexOf("class='prediction-response'") >= 0) {
@@ -676,25 +681,27 @@ const update_histogram = (result, correct_class_index, image_URL, title) => {
         }
         return highest_wrong_class_index;
     };
-    class_names.forEach((name, class_index) => {
-        const correct = correct_class_index === class_index;
-        const score = use_knn ? remove_one_vote(result.confidences[class_index], correct, true) : 
-                                Math.round(100*result[class_index]);
-        const highest_wrong_class_index = find_highest_wrong_class_index(result, correct_class_index);
-        // score-1 so that 0-20 is 0; 25-40 is 1; ... 85-100 is 4
-        const bucket_index = Math.max(0, Math.floor((score-1)/(100/bucket_count)));
-        let bucket = histogram_buckets[bucket_index];
-        if (bucket === undefined) {
-            bucket = [];
-            histogram_buckets[bucket_index] = bucket;             
-        }
-        bucket.push({score: score,
-                     correct_class_index: correct_class_index,
-                     class_index: class_index,
-                     highest_wrong_class_index: highest_wrong_class_index,
-                     title: title,
-                     image_URL: image_URL});
-    });
+    if (long_experimental_results) {
+        class_names.forEach((name, class_index) => {
+            const correct = correct_class_index === class_index;
+            const score = use_knn ? remove_one_vote(result.confidences[class_index], correct, true) : 
+                                    Math.round(100*result[class_index]);
+            const highest_wrong_class_index = find_highest_wrong_class_index(result, correct_class_index);
+            // score-1 so that 0-20 is 0; 25-40 is 1; ... 85-100 is 4
+            const bucket_index = Math.max(0, Math.floor((score-1)/(100/bucket_count)));
+            let bucket = histogram_buckets[bucket_index];
+            if (bucket === undefined) {
+                bucket = [];
+                histogram_buckets[bucket_index] = bucket;             
+            }
+            bucket.push({score: score,
+                         correct_class_index: correct_class_index,
+                         class_index: class_index,
+                         highest_wrong_class_index: highest_wrong_class_index,
+                         title: title,
+                         image_URL: image_URL});
+        });        
+    }
 };
 
 const update_confusion_matrix = (result, correct_class_index) => {
@@ -1108,12 +1115,14 @@ const run_new_experiments = () => {
     });
     const when_finished = () => {
         report_final_statistics();
-        class_names.forEach((class_name, index) => {
-            confidences[class_name].sort((x, y) => x[0]-y[0]).forEach((confidence_and_message) => {
-                display_message(confidence_and_message[1], 'main', true);
-            });
-            add_textarea(csv[class_name]);
-        });
+        if (long_experimental_results) {
+            class_names.forEach((class_name, index) => {
+                confidences[class_name].sort((x, y) => x[0]-y[0]).forEach((confidence_and_message) => {
+                    display_message(confidence_and_message[1], 'main', true);
+                });
+                add_textarea(csv[class_name]);
+            });         
+        }
     };
     const next = (image, class_index, image_index, image_count) => {
         image_counter++;
@@ -1132,8 +1141,11 @@ const run_new_experiments = () => {
     //         let message = "<img src='" + get_url_from_image_or_canvas(image) + "' width=100 height=100></img>" 
     //                       + class_names[class_index] + "#" + image_index + " (" + image_count + ") = " + number_precision(confidence, 4);
             confidences[class_name].push([confidence, message]);
-            csv[class_name] += "https://ecraft2learn.github.io/ai/onyx/" + images[class_name][image_index] + "," +
-                                image_count + "," + confidence + "\n";
+            if (long_experimental_results) {
+                csv[class_name] += "https://ecraft2learn.github.io/ai/onyx/"
+                                   + images[class_name][image_index] + ","
+                                   + image_count + "," + confidence + "\n";                
+            }
         }
         next_image(next, undefined, when_finished);
     };
@@ -1178,6 +1190,9 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
     let correct_prediction = correct(result, class_index);
     if (correct_prediction) {
         number_right++;
+        if (!long_experimental_results && option === 'experiment') {
+            message = ""; // if not long results only display the problem cases
+        }
     } else {
         // highlight wrong ones in red
         message = "<span style='color:red'>" + message + "</span>";
@@ -1203,32 +1218,38 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
         }
     }
     if (option === 'experiment') {
-        update_histogram(result, class_index, image_url, plain_text(message));
-        update_confusion_matrix(result, class_index);
-        csv[class_name] += "https://ecraft2learn.github.io/ai/onyx/" + images[class_name][image_index] + "," +
-                            image_count + ",";
-        csv_class_names[class_name].forEach((name) => {
-            // this re-orders the results
-            const index = class_names.indexOf(name);
-            const correct = index === class_index;
-            const score = use_knn ? remove_one_vote(result.confidences[index], correct, true) :
-                                    Math.round(result[index]*100);
-            csv[class_name] += score;
-            if (index < class_names.length-1) {
-                // no need to add comma to the last one
-                csv[class_name] += ",";
-            }
-        });
-        csv[class_name] += "\n";        
+        if (long_experimental_results) {
+            update_histogram(result, class_index, image_url, plain_text(message));
+            update_confusion_matrix(result, class_index);
+            csv[class_name] += "https://ecraft2learn.github.io/ai/onyx/" + images[class_name][image_index] + "," +
+                                image_count + ",";
+            csv_class_names[class_name].forEach((name) => {
+                // this re-orders the results
+                const index = class_names.indexOf(name);
+                const correct = index === class_index;
+                const score = use_knn ? remove_one_vote(result.confidences[index], correct, true) :
+                                        Math.round(result[index]*100);
+                csv[class_name] += score;
+                if (index < class_names.length-1) {
+                    // no need to add comma to the last one
+                    csv[class_name] += ",";
+                }
+            });
+            csv[class_name] += "\n";
+        }        
     }
     return response_element(message);
 };
 
-const response_element = (message) =>
-    (is_mobile() ? "" : "<div class='prediction-response'>")
-    + message
-    + (is_mobile() ? "" : "<button class='close-button' onclick='remove_parent_element(event)'>&times;</button>")
-    + "</div>";
+const response_element = (message) => {
+    if (is_mobile() || message === "") {
+        return message;
+    }
+    return "<div class='prediction-response'>"
+           + message
+           + "&nbsp;<button class='close-button' onclick='remove_parent_element(event)'>&times;</button></div>";
+
+};
 
 const maximum_confidence = (confidences) => {
     return Math.max(...Object.values(confidences));
@@ -1259,8 +1280,10 @@ const report_final_statistics = () => {
                     + "total = " + total + "<br>",
                     'main',
                     true);
-    add_textarea(histogram_buckets_to_html(histogram_buckets, histogram_image_size));
-    add_textarea(confusion_matrix_to_html(confusion_matrix, 100));
+    if (long_experimental_results) {
+        add_textarea(histogram_buckets_to_html(histogram_buckets, histogram_image_size));
+        add_textarea(confusion_matrix_to_html(confusion_matrix, 100));        
+    }
 };
 
 const run_experiments = () => {
