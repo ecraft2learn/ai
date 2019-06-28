@@ -2,7 +2,7 @@
 // caches files locally
 // based upon https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Offline_Service_workers
 
-const cache_name = "onyx-nail-v18";
+const cache_name = "onyx-nail-v19";
 
 const files_to_cache = [
 "/ai/onyx/dev.html",
@@ -29,8 +29,8 @@ const files_to_cache = [
 // "/ai/onyx/images/korean/L_NAIL_5nail_5nail2005_2_onychomycosis.png",
 // "/ai/onyx/images/korean/L_NAIL_5nailA2_lesion_melanonychia3_melanonychia.png",
 // "/ai/onyx/images/korean/L_NAIL_5nail_nail2005_2_melanonychia.png",
-"/ai/onyx/models/normal-fungal-serious-1000-every-5-A2.json",
-"/ai/onyx/models/normal-fungal-serious-1000-every-5-A2.weights.bin",
+"/ai/onyx/models/normal-fungal-serious-320-150-epochs-all-varianceScaling-no-originals.json",
+"/ai/onyx/models/normal-fungal-serious-320-150-epochs-all-varianceScaling-no-originals.weights.bin",
 "/ai/onyx/icons/icon-32.png",
 "/ai/onyx/onyx-nails.webmanifest",
 
