@@ -526,7 +526,7 @@ const start_up = () => {
                          + "Then you will be able to select a nail in the image.";
     document.getElementById('camera-instructions').innerHTML = 
         video ? instructions : "Camera not available";
-    if (typeof tensor_tsv === 'string') {
+    if (typeof tensor_tsv === 'string' && long_experimental_results) {
         add_textarea(tensor_tsv);
         add_textarea(metadata_tsv);
     }
@@ -1114,15 +1114,16 @@ const run_new_experiments = () => {
         confidences[class_name] = [];
     });
     const when_finished = () => {
+        class_names.forEach((class_name, index) => {
+            confidences[class_name].sort((x, y) => x[0]-y[0]).forEach((confidence_and_message) => {
+                display_message(confidence_and_message[1], 'main', true);
+            });
+            if (long_experimental_results) {
+                add_textarea(csv[class_name]);                
+            }
+        });
         report_final_statistics();
-        if (long_experimental_results) {
-            class_names.forEach((class_name, index) => {
-                confidences[class_name].sort((x, y) => x[0]-y[0]).forEach((confidence_and_message) => {
-                    display_message(confidence_and_message[1], 'main', true);
-                });
-                add_textarea(csv[class_name]);
-            });         
-        }
+        display_message("<h2>" + load_model_named + "</h2>");      
     };
     const next = (image, class_index, image_index, image_count) => {
         image_counter++;
