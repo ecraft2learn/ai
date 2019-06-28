@@ -19,11 +19,44 @@
 
 "use strict"
 
+
+const compute_confusion_matrix = (predictions, truth, n) => {
+    // predictions and truth flattened 
+    let matrix = [];
+    const row = () => {
+        let row = [];
+        for (let i = 0; i < n; i++) {
+            row.push(0);
+        }
+        return row;
+    };
+    const index_of_max = (list) => {
+        let max_index = 0;
+        let max = list[0];
+        list.forEach((element, index) => {
+            if (element > max) {
+                max_index = index;
+                max = element;
+            }
+        });
+        return max_index;
+    };
+    for (let i = 0; i < n; i++) {
+        matrix.push(row());
+    }
+    for (let i = 0; i < predictions.length; i += 3) {
+        const prediction_value = index_of_max(predictions.slice(i,i+3));
+        const truth_value = index_of_max(truth.slice(i,i+3));
+        matrix[truth_value][prediction_value]++;
+    }
+    return matrix;
+};
+
 const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array, options, callback) => {
-    const {model_name, hidden_layer_sizes, batch_size_fraction, epochs, drop_out_rate, optimizer} = options;
+    const {model_name, class_names, hidden_layer_sizes, batch_size, epochs, drop_out_rate, optimizer} = options;
     let model;
     const input_size = xs_array[0].length;
-    const number_of_classes = ys_array[0].length;
+    const number_of_classes = class_names.length;
     const xs = tf.tensor(xs_array);
     const ys = tf.tensor(ys_array);
     const xs_validation = tf.tensor(xs_validation_array);
@@ -38,8 +71,10 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
     const container = {name: 'Loss and accuracy',
                        tab: 'Training',
                        styles: { height: '600px' }};
-    let callbacks = tfvis ? tfvis.show.fitCallbacks(container, metrics, {callbacks: ['onEpochEnd']})
-                                       : {};
+    const ftfvis_options = {callbacks: ['onEpochEnd'],
+                            yAxisDomain: [.3, .5],
+                            height: 300};
+    let callbacks = tfvis ? tfvis.show.fitCallbacks(container, metrics, ftfvis_options) : {};
     let data_loss;
     let validation_loss;
     let data_accuracy;
@@ -91,19 +126,9 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
                  loss: 'categoricalCrossentropy',
                  metrics: ['accuracy']});
 
-  // We parameterize batch size as a fraction of the entire dataset because the
-  // number of examples that are collected depends on how many examples the user
-  // collects. This allows us to have a flexible batch size.
-  const batchSize =
-      Math.floor(input_size * batch_size_fraction);
-  if (!(batchSize > 0)) {
-    throw new Error(
-        `Batch size is 0 or NaN. Please choose a non-zero fraction.`);
-  }
-
   // Train the model! Model.fit() will shuffle xs & ys so we don't have to.
   model.fit(xs, ys, {
-    batchSize,
+    batch_size,
     epochs: epochs,
 //     validationSplit: .2,
     validationData: [xs_validation, ys_validation],
@@ -129,6 +154,13 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
        if (callback) {
            callback(model);
        }
+       const predictions = model.predict(xs_test, ys_test);
+       const matrix = compute_confusion_matrix(predictions.dataSync(), ys_test.dataSync(), number_of_classes);
+       const surface = {name: 'Confusion Matrix',
+                        tab: 'Charts'};
+       tfvis.render.confusionMatrix(surface,
+                                    {values: matrix,
+                                     tickLabels: class_names});
   });
 
 };

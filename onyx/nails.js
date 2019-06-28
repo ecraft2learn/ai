@@ -371,6 +371,7 @@ const add_images = (when_finished, just_one_class, only_class_index, except_imag
 //                     console.log(index, confidence, class_name, confidence < .6 ? "problem?" : "");
 //                 });
 //             };
+            training_options.class_names = class_names; // for displaying confusion matrix
             train_model(xs,
                         ys,
                         xs_validation,
