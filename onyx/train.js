@@ -52,8 +52,19 @@ const compute_confusion_matrix = (predictions, truth, n) => {
     return matrix;
 };
 
+const combine_normal_and_non_serious = (matrix_3x3) => {
+    const serious = 2;
+    const matrix_2x2 = [[0, 0], [0, 0]];
+    matrix_2x2[0][0] = matrix_3x3[0][0]+matrix_3x3[0][1]+matrix_3x3[1][0]+matrix_3x3[1][1];
+    matrix_2x2[0][1] = matrix_3x3[0][2]+matrix_3x3[1][2];
+    matrix_2x2[1][0] = matrix_3x3[2][0]+matrix_3x3[2][1];
+    matrix_2x2[1][1] = matrix_3x3[2][2];
+    return matrix_2x2;
+};
+
 const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array, options, callback) => {
-    const {model_name, class_names, hidden_layer_sizes, batch_size, epochs, drop_out_rate, optimizer} = options;
+    const {model_name, class_names, hidden_layer_sizes, batch_size, epochs, drop_out_rate, optimizer, layer_initializer} 
+          = options;
     let model;
     const input_size = xs_array[0].length;
     const number_of_classes = class_names.length;
@@ -104,7 +115,7 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
        model.add(tf.layers.dense({inputShape: index === 0 ? input_size : undefined,
                                   units: size,
                                   activation: 'relu',
-                                  kernelInitializer: index === 0 ? 'varianceScaling' : undefined,
+                                  kernelInitializer: layer_initializer(index),
                                   useBias: true
                                  }));
        if (drop_out_rate > 0) {
@@ -114,7 +125,7 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
   // last layer. The number of units of the last layer should correspond
   // to the number of classes we want to predict.
   model.add(tf.layers.dense({units: number_of_classes,
-                             kernelInitializer: 'varianceScaling', // 'leCunNormal',
+                             kernelInitializer: layer_initializer(hidden_layer_sizes.length),
                              useBias: false,
                              activation: 'softmax'
                             }));
@@ -145,22 +156,26 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
        const test_loss = model.evaluate(xs_test, ys_test);
        const test_loss_message = document.createElement('p');
        test_loss_message.innerHTML = "Data loss = " + data_loss
-                                     + "; Validation loss = " + validation_loss
-                                     + "; Data accuracy = " + data_accuracy
-                                     + "; Validation accuracy = " + validation_accuracy
-                                     + "; Test loss = " + test_loss[0].dataSync()[0]
-                                     + "; Test accuracy = " + test_loss[1].dataSync()[0];
+                                     + "<br>Validation loss = " + validation_loss
+                                     + "<br>Test loss = " + test_loss[0].dataSync()[0]
+                                     + "<br>Data accuracy = " + data_accuracy
+                                     + "<br>Validation accuracy = " + validation_accuracy
+                                     + "<br>Test accuracy = " + test_loss[1].dataSync()[0];
        document.body.appendChild(test_loss_message);
        if (callback) {
            callback(model);
        }
        const predictions = model.predict(xs_test, ys_test);
        const matrix = compute_confusion_matrix(predictions.dataSync(), ys_test.dataSync(), number_of_classes);
-       const surface = {name: 'Confusion Matrix',
-                        tab: 'Charts'};
-       tfvis.render.confusionMatrix(surface,
+       tfvis.render.confusionMatrix({name: 'Confusion Matrix All',
+                                     tab: 'Charts'},
                                     {values: matrix,
                                      tickLabels: class_names});
+       tfvis.render.confusionMatrix({name: 'Confusion Matrix GP or not',
+                                     tab: 'Charts'},
+                                    {values: combine_normal_and_non_serious(matrix),
+                                     tickLabels: ['ok', 'serious']});
+                                     
   });
 
 };
