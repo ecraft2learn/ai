@@ -586,7 +586,7 @@ const display_message = (message, element_id, append) => {
         }
         message = message + after + document.getElementById(element_id).innerHTML;
     }
-    document.getElementById(element_id).innerHTML = message;
+    document.getElementById(element_id || 'main').innerHTML = message;
 };
 
 const reset_response = () => {
@@ -1123,7 +1123,7 @@ const run_new_experiments = () => {
             }
         });
         report_final_statistics();
-        display_message("<h2>" + load_model_named + "</h2>");      
+        display_message("<h2>" + load_model_named + "</h2>", 'main', true);      
     };
     const next = (image, class_index, image_index, image_count) => {
         image_counter++;

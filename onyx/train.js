@@ -175,7 +175,6 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
                                      tab: 'Charts'},
                                     {values: combine_normal_and_non_serious(matrix),
                                      tickLabels: ['ok', 'serious']});
-                                     
   });
 
 };
