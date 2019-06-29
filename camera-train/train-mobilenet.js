@@ -110,7 +110,8 @@ const image_url_to_features_vector = function (image_url, time_stamp, post_to_ta
                async function (image) {
                    logits = await infer(image);
                    post_to_tab.postMessage({image_features: classifier.normalizeVectorToUnitLength(logits).dataSync(),
-                                            time_stamp: time_stamp});
+                                            time_stamp: time_stamp},
+                                           '*');
                });
 };
 
