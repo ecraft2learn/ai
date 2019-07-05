@@ -166,15 +166,15 @@ const display_results = (canvas) => {
     make_prediction(canvas, (results, logits) => {
         const data_url = canvas.toDataURL();
         const id = hex_md5(data_url);
-        let result_description = confidences(results, -1);
+        let result_description = process_prediction(results, canvas);
         const data = result_description
                      + "\nimage id = " + id
                      + "\ndata = " + logits;
-        if (!is_mobile()) {
-            result_description = "<img src='" + data_url + "' width=128 height=128></img><br>" 
-                                 + result_description;
-        }
-        const message = response_element(result_description);
+//         if (!is_mobile()) {
+//             result_description = "<img src='" + data_url + "' width=128 height=128></img><br>" 
+//                                  + result_description;
+//         }
+        const message = result_description; // response_element(result_description);
         const camera_image_element = document.getElementById('camera-image');
         camera_image_element.src = data_url;
         camera_image_element.hidden = false;
@@ -568,10 +568,10 @@ const start_up = () => {
 };
 
 
-function remove_parent_element (event) {
-    // used in onclick in HTML so using function to ensure it is global
-    event.currentTarget.parentNode.remove();
-}
+const remove_parent_element = (event) => {
+    // used in onclick in HTML 
+    event.currentTarget.closest('.prediction-response').remove();
+};
 
 const display_message = (message, element_id, append) => {
     if (message === "") {
@@ -593,8 +593,8 @@ const reset_response = () => {
     document.getElementById('camera-response').innerHTML = "";
 };
 
-const remove_one_vote = (score, self_vote, running_tests) => {
-    if (running_tests) {
+const remove_one_vote = (score, self_vote) => {
+    if (option === 'experiment') {
         if (self_vote) {
             // remove the vote for itself
             score -= 1/top_k;
@@ -624,11 +624,13 @@ const correct = (result, class_index) => {
     return (max_score_indices.length === 1 && max_score_indices[0] === class_index);
 };
 
-const not_confident_message = "Not very sure whether the nail is OK or not. Sorry.";
+const not_confident_message = "The app is not very sure whether the nail is OK or not. Sorry.";
 
-const confidences = (result, correct_class_index, running_tests) => {
-    let message = "<b>Analysis by this app: </b>";
+const confidences = (result, full_description, correct_class_index) => {
+    let message = "Analysis by this app indicates ";
     let scores = [];
+    let scores_message = "";
+    let traffic_light_class; // either "green_light", "amber_light", or "red_light"
 //     let name_of_highest_scoring_class;
 //     let name_of_second_highest_scoring_class;
 //     let highest_score = 0;
@@ -636,36 +638,60 @@ const confidences = (result, correct_class_index, running_tests) => {
     class_names.forEach((name, class_index) => {
         let score;
         if (use_knn) {
-            score = remove_one_vote(result.confidences[class_index], correct_class_index === class_index, running_tests);
+            score = remove_one_vote(result.confidences[class_index], correct_class_index === class_index);
         } else {
             score = Math.round(result[class_index]*100)
         }
-        message += better_name(name) + " = " + score + "%; ";
+        if (full_description) {
+            scores_message += better_name(name) + " = " + score + "%; ";
+        }
         scores.push({name: name,
                      score: score});
     });
-    message += "<br>";
+//     if (full_description) {
+//         message += "<br>";
+//     }
     scores.sort((name_score_1, name_score_2) => {
         return name_score_2.score-name_score_1.score;
     });
+    if (scores[0].name === old_serious_name) {
+        traffic_light_class = 'red-light';
+    } else if (scores[0].name === 'non-serious') {
+        traffic_light_class = 'amber-light';
+    } else {
+        traffic_light_class = 'green-light';
+    }
     if (scores[0].score < minimum_confidence) {
-        message += not_confident_message;
+        message = not_confident_message;
     } else {
         if (scores[0].name === old_serious_name) {
-            message += "It is most likely that the nail indicates something that warrants a second opinion and you should seek medical advice. (Confidence score is "
-                       + scores[0].score + "%)";
+            message += "it is most likely this warrants a second opinion and you should seek medical advice.";
+            if (full_description) {
+                message + " (Confidence score is " + scores[0].score + "%)";
+            }
         } else if (scores.length > 1 && scores[1].name === old_serious_name && scores[1].score >= 20) {
-            message += "Perhaps a GP should be consulted " + " (confidence score is " + scores[1].score + "%) ";
+            message += "that perhaps a GP should be consulted.";
+            if (full_description) {
+                message + " (Confidence score is " + scores[1].score + "%)";
+            }
         } else {
-            message += "The nail's condition is " + scores[0].name + " with confidence score of " + scores[0].score + "%.";
-            if (scores.length > 1 && scores[1].name === old_serious_name && scores[1].score > 0) {
-                message += "<br>The confidence score for consulting a GP is " + scores[1].score + "%.";
-            } else if (scores.length > 1 && scores[1].score > 0) {
-                message += "<br>Otherwise it is " + scores[1].name + " with confidence score of " + scores[1].score + "%.";
+            message += "the nail's condition is " + scores[0].name;
+            if (full_description) {
+                message += " with confidence score of " + scores[0].score + "%. ";
+                if (scores.length > 1 && scores[1].name === old_serious_name && scores[1].score > 0) {
+                    message += "The confidence score for consulting a GP is " + scores[1].score + "%.";
+                } else if (scores.length > 1 && scores[1].score > 0) {
+                    message += "Otherwise it is " + scores[1].name + " with confidence score of " + scores[1].score + "%.";
+                }
+            } else {
+                message += ".";
             }
         }
     }
-    return message;
+    if (full_description) {
+        message = scores_message + "<br>" + message;
+    }
+    return "<span class=" + traffic_light_class + ">" + message + "</span>";
 };
 
 const update_histogram = (result, correct_class_index, image_URL, title) => {
@@ -684,7 +710,7 @@ const update_histogram = (result, correct_class_index, image_URL, title) => {
     if (long_experimental_results) {
         class_names.forEach((name, class_index) => {
             const correct = correct_class_index === class_index;
-            const score = use_knn ? remove_one_vote(result.confidences[class_index], correct, true) : 
+            const score = use_knn ? remove_one_vote(result.confidences[class_index], correct) : 
                                     Math.round(100*result[class_index]);
             const highest_wrong_class_index = find_highest_wrong_class_index(result, correct_class_index);
             // score-1 so that 0-20 is 0; 25-40 is 1; ... 85-100 is 4
@@ -707,7 +733,7 @@ const update_histogram = (result, correct_class_index, image_URL, title) => {
 const update_confusion_matrix = (result, correct_class_index) => {
     class_names.forEach((name, class_index) => {
         const correct = correct_class_index === class_index;
-        const score = use_knn ? remove_one_vote(result.confidences[class_index], correct, true) :
+        const score = use_knn ? remove_one_vote(result.confidences[class_index], correct) :
                                 Math.round(result[class_index]*100);
         if (confusion_matrix[correct_class_index] === undefined) {
             confusion_matrix[correct_class_index] = class_names.map(() => 0);
@@ -980,7 +1006,7 @@ const receive_drop = (event) => {
             canvas.hidden = false;
             video.hidden = true;
             make_prediction(canvas, (results) => {
-                display_message(confidences(results, -1), 'camera-response', true);
+                display_message(process_prediction(results, canvas), 'camera-response', true);
                 display_message("You can select a sub-region of your image.", 'camera-response', true);
                 const video_button = document.getElementById('toggle video');
                 video_button.innerHTML = "Restore camera";
@@ -1162,24 +1188,30 @@ let not_confident_answers = 0; // less than minimum_confidence for top answer
 
 const process_prediction = (result, image_or_canvas, class_index, image_index, image_count) => {
     const image_url = get_url_from_image_or_canvas(image_or_canvas);
-    let message = option === 'diagnose' && is_mobile() ?
-                  "" :
-                  "<img src='" + image_url + "' width=100 height=100></img><br>";
-    let confidence_message = confidences(result, class_index, true);
+    const table_of_image_and_response = !(option === 'diagnose' && is_mobile());
+    let message = "";
+    if (table_of_image_and_response) {
+        message = "<table><tr><td><img src='" + image_url + "' width=128 height=128></img></td><td style='padding: 8px;'>";
+    }
+    let full_confidence_message = confidences(result, true, class_index);
+    let short_confidence_message = confidences(result, false, class_index);
     const class_name = class_names[class_index];
-    if (typeof image_count !== 'undefined') {
+    if (typeof image_count !== 'undefined') { // or would option === 'experiment' be clearer
         message += "&nbsp;" + better_name(class_name) + "#" + image_count;
-    } else {
-        message += "According to experts ";
+    } else if (class_name) {
+        message += "According to experts this is ";
         if (class_name === old_serious_name) {
-            message += "this is a condition that should be seen by a doctor.";
+            message += "a condition that should be seen by a doctor. ";
         } else if (class_name === 'non-serious') {
-            message += "this is abnormal but not serious.";
+            message += "abnormal but not serious. ";
         } else if (class_name === 'normal') {
-            message += "this is normal.";
+            message += "normal. ";
         }
     }
-    message += "<br>" + confidence_message;
+    window.full_popup_message = full_confidence_message;
+    message += "<span class='clickable' onclick='popup_full_message(event)'>"
+               + short_confidence_message
+               + "</span>";
     if (image_or_canvas.title && window.location.hash.indexOf('debug') >= 0) {
         message += "&nbsp;"
                    + "<a href='"
@@ -1195,10 +1227,12 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
             message = ""; // if not long results only display the problem cases
         }
     } else {
-        // highlight wrong ones in red
-        message = "<span style='color:red'>" + message + "</span>";
+        if (long_experimental_results) {
+            // highlight wrong ones in red
+            message = "<span style='color:red'>" + message + "</span>";            
+        }     
     }
-    if (confidence_message.indexOf(not_confident_message) >= 0) {
+    if (full_confidence_message.indexOf(not_confident_message) >= 0) {
         not_confident_answers++;
     } else if (class_names[0] === 'normal' &&
                (class_names[1] === 'fungal' || class_names[1] === 'non-serious') &&
@@ -1228,7 +1262,7 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
                 // this re-orders the results
                 const index = class_names.indexOf(name);
                 const correct = index === class_index;
-                const score = use_knn ? remove_one_vote(result.confidences[index], correct, true) :
+                const score = use_knn ? remove_one_vote(result.confidences[index], correct) :
                                         Math.round(result[index]*100);
                 csv[class_name] += score;
                 if (index < class_names.length-1) {
@@ -1239,7 +1273,23 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
             csv[class_name] += "\n";
         }        
     }
-    return response_element(message);
+    message = response_element(message);
+    if (table_of_image_and_response) {
+        message += "</tr></table>";
+    }
+    return message;
+};
+
+const popup_full_message = (event) => {
+    event.stopPropagation();
+    const full_response_element = document.getElementById('full-response');
+    full_response_element.hidden = false;
+    full_response_element.innerHTML = window.full_popup_message;
+    const hide_on_any_click = () => {
+        full_response_element.hidden = true;
+        window.removeEventListener('click', hide_on_any_click);
+    }
+    window.addEventListener('click', hide_on_any_click);
 };
 
 const response_element = (message) => {
@@ -1444,7 +1494,7 @@ const update_page = () => {
         + "<p class='agreement-text'>The <a href='https://github.com/ecraft2learn/ai/tree/master/onyx' target='_blank'>source code</a> "
         + "for this app is available for inspection. Visit the <a href='http://www.education.ox.ac.uk/' target='_blank'>Onyx home page</a> "
         + "to learn more about this project and app.</p>"
-}
+};
 
 window.addEventListener('DOMContentLoaded',
                         (event) => {

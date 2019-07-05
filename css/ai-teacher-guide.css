@@ -111,24 +111,13 @@ figcaption {
   cursor: pointer;
 }
 .prediction-response {
-  border: 1px solid rgb(244, 139, 139);
+  border: 1px solid rgb(99, 119, 232);
   border-radius: 4px;
-  margin: 6px;
+  margin: auto;
+  /* width:  fit-content; */
 }
 .close-button {
-/* 	based upon http://jsfiddle.net/adzFe/14/ */
-  cursor: pointer;
-  color: white;
-  border: 1px solid #AEAEAE;
-  border-radius: 20px;
-  background: #605F61;
-  font-size: 26px;
-  font-weight: bold;
-  display: inline-block;
-  line-height: 0px;
-  padding: 11px 4px;
-  margin-left: 6px;
-}
+/* 	based upon http://jsfiddle.net/adzFe/14/ */cursor: pointer;color: white;border: 1px solid #AEAEAE;border-radius: 20px;background: #605F61;font-size: 26px;font-weight: bold;display: inline-block;line-height: 0px;padding: 11px 4px;margin-left: 6px;position: relative;top: -70px;left: 97%;}
 .advanced-topic {
   cursor: pointer;
   color: #316d37;
@@ -216,11 +205,55 @@ figcaption {
  color: darkred;
 }
 .in-box {
+  /* border: solid 1px; */
+  /* border-radius: 8px; */
+  margin: auto;
+  /* text-align: center; */
+  /* width: fit-content; */
+}
+.has-border {
   border: solid 1px;
   border-radius: 8px;
-  margin: 4px;
 }
 .agreement-text, .response-text {
    text-align: left;
    font-size: 1em;
+}
+.clickable {
+  cursor: pointer;
+}
+.red-light {
+  background-color: #a70606;
+  display: block;
+  color: white;
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 5px 3px 5px black;
+}
+.amber-light {
+  background-color: #d6b862;
+  display: block;
+  color: white;
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 5px 3px 5px black;
+  width:  fit-content;
+}
+.green-light {
+  background-color: #386838;
+  display: block;
+  color: white;
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 5px 3px 5px black;
+}
+.full-response {
+  position: absolute;
+  left: 15%;
+  top: 30%;
+  width: 70%;
+  padding: 10px;
+  border-radius: 8px;
+  background-color: white;
+  border: solid 1px;
 }
