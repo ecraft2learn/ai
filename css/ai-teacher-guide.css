@@ -222,6 +222,5 @@ figcaption {
 }
 .agreement-text, .response-text {
    text-align: left;
-/*    text can be made larger if shorted */
-   font-size: .8em;
+   font-size: 1em;
 }

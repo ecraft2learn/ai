@@ -1435,8 +1435,20 @@ const on_click = () => {
     document.getElementById('main').hidden = false;
 };
 
+const update_page = () => {
+    document.getElementById('agreement').innerHTML =
+        "<p class='agreement-text'>The Onyx app contains general information about nail conditions and does not constitute medical advice. "
+        + "If you have any specific questions about any medical matter, you should consult your doctor or other professional healthcare provider.</p>" 
+        + "<p class='agreement-text'>Images taken through this app are processed locally on your device. "
+        + "Images will neither be processed nor stored remotely.</p>"
+        + "<p class='agreement-text'>The <a href='https://github.com/ecraft2learn/ai/tree/master/onyx' target='_blank'>source code</a> "
+        + "for this app is available for inspection. Visit the <a href='http://www.education.ox.ac.uk/' target='_blank'>Onyx home page</a> "
+        + "to learn more about this project and app.</p>"
+}
+
 window.addEventListener('DOMContentLoaded',
                         (event) => {
+                            update_page();
                             load_mobilenet(() => {
                                 initialise_page();
                                 if (option === 'diagnose') {
