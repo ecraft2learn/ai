@@ -32,24 +32,26 @@
                 images_js = ["korean-tests-166-each.js"];
             } else {
                 // both Korean training thumbnails and their test images
-                images_js = ["korean.js", "korean-tests.js"];
+                images_js = ["korean.js", "korean-tests.js"]; //, "originals-normal-serious-non-serious.js"];  
             }
 
             const model_name = 
-                "normal-fungal-serious-320-150-epochs-all-varianceScaling-no-originals"
-            //"normal-fungal-serious-1000-every-5-A2";
+                "normal-fungal-serious-320-150-epochs-all-varianceScaling-no-originals";
             const every_nth_for_testing = 5;
-            // 20% set aside for testing/evaluation
+            // 20% set aside for testing and evaluation each
             const projector_data = false;
             // whether we want to generate files to visualising the data
 
             const training_options = {
                 model_name: model_name,
-                hidden_layer_sizes: [1000],
-                learning_rate: 0.0001,
-                batch_size_fraction: 0.2,
+                hidden_layer_sizes: [320],
+//                 learning_rate: 0.00001,
+//                 batch_size_fraction: 0.2,
+                batch_size: 256,
                 drop_out_rate: 0.5,
-                epochs: 75
+                epochs: 150,
+                optimizer: () => tf.train.rmsprop(0.00001),
+                layer_initializer: (index) => 'varianceScaling',
             };
 
             let images;
@@ -98,7 +100,7 @@
             </div>
             <img id="camera-image" width=128 height=128 hidden />
             <div id="random-image-response-box" class="in-box">
-                <div id='camera-response' class="response-text"></div>
+            <div id='camera-response' class="response-text"></div>
             </div>
             <div id="selection-rectangle" hidden style="border: 2px dotted yellow; position: absolute;"></div>
             <button id="go-to-tutorial" class="generic-button">Back to Tutorial</button>
@@ -120,28 +122,13 @@
     <div id="user-agreement" style="text-align: center;">
         <img src="icons\icon-64.png" width=64 height=64></img>
         <h2>The Onyx Project</h2>
-        <div class="in-box">
-        <p class="agreement-text">This website contains general information about nail conditions and is used for training purposes only.
-    The information is not medical advice and should not be treated as such.
-    You are strongly encouraged to confirm any information obtained from or through this App with your physician or
-    another professional healthcare provider and to review all information regarding any nail or
-    other medical condition with your physician or other a professional healthcare provider.
-    You must not rely on the information on this website as an alternative to medical advice from your doctor
-    or other professional healthcare provider.
-    If you have any specific questions about any medical matter,
-    you should consult your doctor or other professional healthcare provider.
-        </p>
-        <p class="agreement-text">
-                No images are sent to a remote server if you use your device's camera.
-    All the machine learning is being done locally on your device.
-    The 
-    <a href="https://github.com/ecraft2learn/ai/tree/master/onyx" target="_blank">source code</a>
-                for this app is available for inspection.
-    Visit <a href="http://www.education.ox.ac.uk/" target="_blank">the Onyx home page</a>
-                to learn more about this project and app.
-        </p>
+        <div class="in-box has-border" id="agreement">
+            <p class="agreement-text">Loading. Please wait.</p>
+        </div>
     </div>
     <p id="please-wait" style="font-size: x-large;color: darkred">Please wait for this app to load.</p>
+    <div id="full-response" class="response-text full-response" hidden>
+    </div>
  </div>
 </body>
 </html>
