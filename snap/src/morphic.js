@@ -8,7 +8,7 @@
     written by Jens Mönig
     jens@moenig.org
 
-    Copyright (C) 2018 by Jens Mönig
+    Copyright (C) 2019 by Jens Mönig
 
     This file is part of Snap!.
 
@@ -176,7 +176,7 @@
     - Safari for Windows (deprecated)
     - safari for Mac
     - Safari for iOS (mobile)
-    - IE for Windows
+    - IE for Windows (partial support)
     - Edge for Windows
     - Opera for Windows
     - Opera for Mac
@@ -259,14 +259,16 @@
     <!DOCTYPE html>
     <html>
         <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
             <title>Morphic!</title>
             <script type="text/javascript" src="morphic.js"></script>
             <script type="text/javascript">
                 var world;
 
                 window.onload = function () {
-                    world = new WorldMorph(
-                        document.getElementById('world'));
+                    world = new WorldMorph(document.getElementById('world'));
+                    world.worldCanvas.focus();
+                    world.isDevMode = true;
                     loop();
                 };
 
@@ -276,15 +278,14 @@
                 }
             </script>
         </head>
-        <body>
-            <canvas id="world" tabindex="1" width="800" height="600">
-                <p>Your browser doesn't support canvas.</p>
-            </canvas>
+        <body style="margin: 0;">
+            <canvas id="world" tabindex="1" width="800" height="600"
+                style="position: absolute;" />
         </body>
     </html>
 
     if you use ScrollFrames or otherwise plan to support mouse wheel
-    scrolling events, you might also add the following inline-CSS
+    scrolling events, make sure to add the following inline-CSS
     attribute to the Canvas element:
 
         style="position: absolute;"
@@ -305,12 +306,14 @@
     <!DOCTYPE html>
     <html>
         <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
             <title>Morphic!</title>
             <script type="text/javascript" src="morphic.js"></script>
             <script type="text/javascript">
                 var world1, world2;
 
                 window.onload = function () {
+                    disableRetinaSupport();
                     world1 = new WorldMorph(
                         document.getElementById('world1'), false);
                     world2 = new WorldMorph(
@@ -327,13 +330,9 @@
         </head>
         <body>
             <p>first world:</p>
-            <canvas id="world1" tabindex="1" width="600" height="400">
-                <p>Your browser doesn't support canvas.</p>
-            </canvas>
+            <canvas id="world1" tabindex="1" width="600" height="400" />
             <p>second world:</p>
-            <canvas id="world2" tabindex="2" width="400" height="600">
-                <p>Your browser doesn't support canvas.</p>
-            </canvas>
+            <canvas id="world2" tabindex="2" width="400" height="600" />
         </body>
     </html>
 
@@ -353,6 +352,7 @@
     <!DOCTYPE html>
     <html>
         <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
             <title>touch me!</title>
             <script type="text/javascript" src="morphic.js"></script>
             <script type="text/javascript">
@@ -363,8 +363,9 @@
 
                     worldCanvas = document.getElementById('world');
                     world = new WorldMorph(worldCanvas);
+                    world.worldCanvas.focus();
                     world.isDevMode = false;
-                    world.color = new Color();
+                    world.setColor(new Color());
 
                     w = 100;
                     h = 100;
@@ -393,10 +394,9 @@
                 }
             </script>
         </head>
-        <body bgcolor='black'>
-            <canvas id="world" width="800" height="600">
-                <p>Your browser doesn't support canvas.</p>
-            </canvas>
+        <body bgcolor='black' style="margin: 0;">
+            <canvas id="world" width="800" height="600"
+                style="position: absolute;" />
         </body>
     </html>
 
@@ -654,7 +654,7 @@
     Those are dispatched as
 
         droppedAudio(anAudio, name)
-        droppedText(aString, name)
+        droppedText(aString, name, type)
 
     events to interested Morphs at the mouse pointer.
 
@@ -1141,8 +1141,7 @@
     editor for Windows, later switched to Apple's Dashcode and later
     still to Apple's Xcode. I've also come to depend on both Douglas
     Crockford's JSLint and later the JSHint project, as well as on
-    Mozilla's Firebug and Google's Chrome to get
-    it right.
+    Mozilla's Firebug and Google's Chrome to get it right.
 
 
     IX. contributors
@@ -1161,9 +1160,9 @@
 
 // Global settings /////////////////////////////////////////////////////
 
-/*global window, HTMLCanvasElement, FileReader, Audio, FileList*/
+/*global window, HTMLCanvasElement, FileReader, Audio, FileList, Map*/
 
-var morphicVersion = '2018-March-19';
+var morphicVersion = '2019-May-21';
 var modules = {}; // keep track of additional loaded modules
 var useBlurredShadows = getBlurredShadowSupport(); // check for Chrome-bug
 
@@ -1947,12 +1946,13 @@ Color.prototype.copy = function () {
 
 // Color comparison:
 
-Color.prototype.eq = function (aColor) {
+Color.prototype.eq = function (aColor, observeAlpha) {
     // ==
     return aColor &&
         this.r === aColor.r &&
         this.g === aColor.g &&
-        this.b === aColor.b;
+        this.b === aColor.b &&
+        (observeAlpha ? this.a === aColor.a : true);
 };
 
 // Color conversion (hsv):
@@ -2034,6 +2034,80 @@ Color.prototype.set_hsv = function (h, s, v) {
     this.g *= 255;
     this.b *= 255;
 
+};
+
+// Color conversion (hsl):
+
+Color.prototype.hsl = function () {
+    // ignore alpha
+    var rr = this.r / 255,
+        gg = this.g / 255,
+        bb = this.b / 255,
+        max = Math.max(rr, gg, bb), min = Math.min(rr, gg, bb),
+        h,
+        s,
+        l = (max + min) / 2,
+        d;
+    if (max === min) { // achromatic
+        h = 0;
+        s = 0;
+    } else {
+        d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+        case rr:
+            h = (gg - bb) / d + (gg < bb ? 6 : 0);
+            break;
+        case gg:
+            h = (bb - rr) / d + 2;
+            break;
+        case bb:
+            h = (rr - gg) / d + 4;
+            break;
+        }
+        h /= 6;
+    }
+    return [h, s, l];
+};
+
+Color.prototype.set_hsl = function (h, s, l) {
+    // ignore alpha, h, s and l are to be within [0, 1]
+    var q, p;
+
+    function hue2rgb(p, q, t) {
+        if (t < 0) {
+            t += 1;
+        }
+        if (t > 1) {
+            t -= 1;
+        }
+        if (t < 1/6) {
+            return p + (q - p) * 6 * t;
+        }
+        if (t < 1/2) {
+            return q;
+        }
+        if (t < 2/3) {
+            return p + (q - p) * (2/3 - t) * 6;
+        }
+        return p;
+    }
+
+    if (s == 0) { // achromatic
+        this.r = l;
+        this.g = l;
+        this.b = l;
+    } else {
+        q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        p = 2 * l - q;
+        this.r = hue2rgb(p, q, h + 1/3);
+        this.g = hue2rgb(p, q, h);
+        this.b = hue2rgb(p, q, h - 1/3);
+    }
+
+    this.r *= 255;
+    this.g *= 255;
+    this.b *= 255;
 };
 
 // Color mixing:
@@ -2771,34 +2845,24 @@ Node.prototype.siblings = function () {
     });
 };
 
-Node.prototype.parentThatIsA = function (constructor) {
+Node.prototype.parentThatIsA = function () {
     // including myself
-    if (this instanceof constructor) {
-        return this;
+    // Note: you can pass in multiple constructors to test for
+    var i;
+    for (i = 0; i < arguments.length; i += 1) {
+        if (this instanceof arguments[i]) {
+            return this;
+        }
     }
     if (!this.parent) {
         return null;
     }
-    return this.parent.parentThatIsA(constructor);
+    return this.parentThatIsA.apply(this.parent, arguments);
 };
 
 Node.prototype.parentThatIsAnyOf = function (constructors) {
-    // including myself
-    var yup = false,
-        myself = this;
-    constructors.forEach(function (each) {
-        if (myself.constructor === each) {
-            yup = true;
-            return;
-        }
-    });
-    if (yup) {
-        return this;
-    }
-    if (!this.parent) {
-        return null;
-    }
-    return this.parent.parentThatIsAnyOf(constructors);
+    // deprecated, use parentThatIsA instead
+    return this.parentThatIsA.apply(this, constructors);
 };
 
 // Morphs //////////////////////////////////////////////////////////////
@@ -5309,10 +5373,7 @@ CursorMorph.prototype.initializeClipboardHandler = function () {
     document.body.appendChild(this.clipboardHandler);
 
     this.clipboardHandler.value = this.target.selection();
-    if (window === window.parent) {
-        // if Snap! is in an iframe this causes an unpleasant jump -- edit by Ken Kahn
-        this.clipboardHandler.focus();
-    }
+    this.clipboardHandler.focus();
     this.clipboardHandler.select();
 
     this.clipboardHandler.addEventListener(
@@ -5766,6 +5827,8 @@ CursorMorph.prototype.inspectKeyEvent = function (event) {
             event.charCode.toString() +
             '\nkeyCode: ' +
             event.keyCode.toString() +
+            '\nkey: ' +
+            event.key.toString() +
             '\nshiftKey: ' +
             event.shiftKey.toString() +
             '\naltKey: ' +
@@ -11425,6 +11488,7 @@ HandMorph.prototype.processDrop = function (event) {
         droppedImage(canvas, name)
         droppedSVG(image, name)
         droppedAudio(audio, name)
+        droppedText(text, name, type)
 
     events to interested Morphs at the mouse pointer
 */
@@ -11495,7 +11559,7 @@ HandMorph.prototype.processDrop = function (event) {
             target = target.parent;
         }
         frd.onloadend = function (e) {
-            target.droppedText(e.target.result, aFile.name);
+            target.droppedText(e.target.result, aFile.name, aFile.type);
         };
         frd.readAsText(aFile);
     }
@@ -11546,6 +11610,9 @@ HandMorph.prototype.processDrop = function (event) {
     if (files.length > 0) {
         for (i = 0; i < files.length; i += 1) {
             file = files[i];
+            suffix = file.name.slice(
+                file.name.lastIndexOf('.') + 1
+            ).toLowerCase();
             if (file.type.indexOf("svg") !== -1
                     && !MorphicPreferences.rasterizeSVGs) {
                 readSVG(file);
@@ -11553,7 +11620,10 @@ HandMorph.prototype.processDrop = function (event) {
                 readImage(file);
             } else if (file.type.indexOf("audio") === 0) {
                 readAudio(file);
-            } else if (file.type.indexOf("text") === 0) {
+            } else if ((file.type.indexOf("text") === 0) ||
+                    contains(['txt', 'csv', 'json'], suffix)) {
+                    // check the file-extension because Windows
+                    // doesn't specify CSVs to be text/csv, sigh
                 readText(file);
             } else { // assume it's meant to be binary
                 readBinary(file);
@@ -11806,7 +11876,7 @@ WorldMorph.prototype.getGlobalPixelColor = function (point) {
     return new Color(dta[0], dta[1], dta[2]);
 */
 
-    var clr = this.hand.morphAtPointer().getPixelColor(this.hand.position());
+    var clr = this.topMorphAt(point).getPixelColor(point);
     // IMPORTANT:
     // all callers of getGlobalPixelColor should make provisions for retina
     // display support, which gets null-pixels interlaced with non-null ones:
@@ -11906,10 +11976,7 @@ WorldMorph.prototype.initEventListeners = function () {
         "mousedown",
         function (event) {
             event.preventDefault();
-            if (window === window.parent) {
-                // don't do this if inside an iframe
-                canvas.focus();
-            }
+            canvas.focus();
             myself.hand.processMouseDown(event);
         },
         false
@@ -12523,9 +12590,7 @@ WorldMorph.prototype.stopEditing = function () {
         this.virtualKeyboard = null;
     }
     this.lastEditedText = null;
-    if (window === window.parent) { // not in an iframe
-        this.worldCanvas.focus();
-    }
+    this.worldCanvas.focus();
 };
 
 WorldMorph.prototype.toggleBlurredShadows = function () {

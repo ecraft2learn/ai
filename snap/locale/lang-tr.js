@@ -1,27 +1,27 @@
 /*
 
-	lang-de.js
+    lang-de.js
 
-	German translation for SNAP!
+    German translation for SNAP!
 
-	written by Jens Mönig
+    written by Jens Mönig
 
-	Copyright (C) 2012 by Jens Mönig
+    Copyright (C) 2018 by Jens Mönig
 
-	This file is part of Snap!.
+    This file is part of Snap!.
 
-	Snap! is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Affero General Public License as
-	published by the Free Software Foundation, either version 3 of
-	the License, or (at your option) any later version.
+    Snap! is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of
+    the License, or (at your option) any later version.
 
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU Affero General Public License for more details.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
 
-	You should have received a copy of the GNU Affero General Public License
-	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 
@@ -181,16 +181,16 @@ SnapTranslator.dict.tr = {
     'language_name':
         'Türkçe', // the name as it should appear in the language menu (Dil menüsünde görünmesi gereken isim)
     'language_translator':
-        'Hakan Atas, www.3drobolab.com', // your name for the Translators tab (Çevirenlerin isimleri)
+        'Hakan Atas - www.3drobolab.com, Turgut Güneysu', // your name for the Translators tab (Çevirenlerin isimleri)
     'translator_e-mail':
-        'hakanatas@gmail.com, mustafaipekbayrak@gmail.com', // optional (Mail adresleri)
+        'hakanatas@gmail.com, tguneysu@msn.com, mustafaipekbayrak@gmail.com', // optional (Mail adresleri)
     'last_changed':
-        '2018-01-22', // this, too, will appear in the Translators tab (Son güncelleme tarihi)
+        '2019-01-22', // this, too, will appear in the Translators tab (Son güncelleme tarihi)
 
     // GUI
     // control bar:
     'untitled':
-        'adsız',
+        'kaydedilmemiş',
     'development mode':
         'geliştirici modu',
 
@@ -225,33 +225,41 @@ SnapTranslator.dict.tr = {
         'Betikler',
     'Costumes':
         'Kostümler',
+    'Backgrounds':
+        'Arka Planlar',
     'Sounds':
         'Sesler',
 
     // names:
     'Sprite':
-        'Karakter',
+        'Kukla',
     'Stage':
         'Sahne',
 
     // rotation styles:
     'don\'t rotate':
-        'dönebilir',
-    'can rotate':
         'dönemez',
+    'can rotate':
+        'dönebilir',
     'only face left/right':
-        'sadece sağa/sola dönebilir',
+        'sadece sağa/sola bakabilir',
 
     // new sprite button:
     'add a new sprite':
-        'yeni bir karakter ekle',
+        'yeni bir kukla ekle',
+    'add a new Turtle sprite':
+        'yeni bir kaplumbağa kukla ekle',
+    'paint a new sprite':
+        'yeni bir kukla resmi yap',
+    'take a camera snapshot and\nimport it as a new sprite':
+        'bir kamera görüntüsü al ve \nonu yeni bir kukla olarak ekle',
 
     // tab help
     'costumes tab help':
-        'kostüm sekmesi yardımı',
+        'bilgisayarınızdan bir resmi\nburaya sürükleyerek içeri aktarın',
+
     'import a sound from your computer\nby dragging it into here':
-        'bilgisayarınızdan bir sesi\n'
-            + 'buraya sürükleyerek içeri aktarın',
+        'bilgisayarınızdan bir sesi\nburaya sürükleyerek içeri aktarın',
 
     // primitive blocks:
 
@@ -287,7 +295,8 @@ SnapTranslator.dict.tr = {
 
     // motion:
     'Stage selected:\nno motion primitives':
-        'Seçili sahne:\nhareket temelleri yok',
+        'Seçili sahne:\nhareket temel blokları yok',
+
     'move %n steps':
         '%n adım git',
     'turn %clockwise %n degrees':
@@ -297,21 +306,21 @@ SnapTranslator.dict.tr = {
     'point in direction %dir':
         '%dir yönüne dön',
     'point towards %dst':
-        '%dst e doğru dön',
+        '%dst  doğru dön',
     'go to x: %n y: %n':
         'x: %n y: %n git',
     'go to %dst':
         '%dst git',
     'glide %n secs to x: %n y: %n':
-        '%n saniyede x: %n y: %n noktasına git',
+        '%n saniyede x: %n y: %n noktasına kay',
     'change x by %n':
         'x\'i %n değiştir',
     'set x to %n':
-        'x\'i %n ayarla',
+        'x\'i %n yap',
     'change y by %n':
         'y\'i %n değiştir',
     'set y to %n':
-        'y\'i %n olarak ayarla',
+        'y\'i %n yap',
     'if on edge, bounce':
         'kenardaysan sek',
     'x position':
@@ -319,21 +328,21 @@ SnapTranslator.dict.tr = {
     'y position':
         'y-pozisyonu',
     'direction':
-        'doğrultu',
+        'yön',
 
     // looks:
     'switch to costume %cst':
-        'kostümü %cst olarak değiştir',
+        'kostümü %cst yap',
     'next costume':
         'sonraki kostüm',
     'costume #':
-        'kostüm no:',
+        'kostüm #',
     'say %s for %n secs':
-        '%s saniye %n söyle',
+        '%s de %n saniye',
     'say %s':
-        '%s söyle',
+        '%s de',
     'think %s for %n secs':
-        '%s saniye %n diye düşün',
+        '%s diye düşün %n saniye',
     'think %s':
         '%s diye düşün',
     'Hello!':
@@ -347,7 +356,7 @@ SnapTranslator.dict.tr = {
     'clear graphic effects':
         'görsel etkileri temizle',
     'change size by %n':
-        'büyüklüğünü %n değiştir',
+        'büyüklüğü %n değiştir',
     'set size to %n %':
         'büyüklüğü % %n yap',
     'size':
@@ -358,11 +367,17 @@ SnapTranslator.dict.tr = {
         'gizle',
     'go to front':
         'öne git',
+    'go to %layer layer':
+        'katman %layer git',
+    'front':
+        'öne',
+    'back':
+        'arkaya',
     'go back %n layers':
-        '%n katman alta in',
+        '%n katman arkaya git',
 
     'development mode \ndebugging primitives:':
-        'geliştirici modu \nhata ayıklama temelleri',
+        'geliştirici modu\nhata ayıklama temel blokları',
     'console log %mult%s':
         'log dosyasına yaz %mult%s',
     'alert %mult%s':
@@ -377,14 +392,27 @@ SnapTranslator.dict.tr = {
         'tüm sesleri durdur',
     'rest for %n beats':
         '%n vuruş sus',
-    'play note %n for %n beats':
-        '%n notasını %n vuruş çal',
+    'play note %note for %n beats':
+        '%note notasını %n vuruş çal',
+    'set instrument to %inst':
+        'enstrümanı %inst yap',
     'change tempo by %n':
         'tempoyu %n değiştir',
     'set tempo to %n bpm':
         'tempoyu %n yap',
     'tempo':
         'tempo',
+
+    // "instruments", i.e. wave forms
+    '(1) sine':
+        '(1) Sinus',
+    '(2) square':
+        '(2) Kare',
+    '(3) sawtooth':
+        '(3) Testere',
+    '(4) triangle':
+        '(4) Üçgen',
+
 
     // pen:
     'clear':
@@ -399,26 +427,46 @@ SnapTranslator.dict.tr = {
         'kalemin rengini %n değiştir',
     'set pen color to %n':
         'kalemin rengini %n yap',
-    'change pen shade by %n':
-        'kalemin tonunu %n değiştir',
-    'set pen shade to %n':
-        'kalemin tonunu %n yap',
+    'change pen %hsva by %n':
+        'Kalemin %hsva  %n değiştir',
+    'set pen %hsva to %n':
+        'Kalemin %hsva  %n yap',
     'change pen size by %n':
         'kalemin kalınlığını %n değiştir',
     'set pen size to %n':
         'kalemin kalınlığını %n yap',
     'stamp':
-        'damga',
+        'damgala',
+    'fill':
+        'doldur',
+
+
 
     // control:
     'when %greenflag clicked':
         '%greenflag tıklanınca',
     'when %keyHat key pressed':
         '%keyHat tuşu basılınca',
-    'when I am clicked':
-        'bu kukla tıklanınca',
-   'when I am %interaction':
-    'kukla %interaction zaman',
+    'when I am %interaction':
+        'kukla %interaction zaman',
+    'clicked':
+        'tıklandığı',
+    'pressed':
+        'basıldığı',
+    'dropped':
+        'bırakıldığı',
+    'mouse-entered':
+        'fare geldiği',
+    'mouse-departed':
+        'fare gittiği',
+    'scrolled-down':
+        'aşağı kaydırıldığı',
+    'scrolled-up':
+        'yukarı kaydırıldığı',
+    'stopped':
+        'durdurulduğu',
+    'when %b':
+        '%b olunca',
     'when I receive %msgHat':
         '%msgHat haberi gelince',
     'broadcast %msg':
@@ -438,29 +486,29 @@ SnapTranslator.dict.tr = {
     'forever %c':
         'sürekli %c',
     'repeat %n %c':
-        '%n kere tekrarla %c',
+        'tekrarla %n kere %c',
     'repeat until %b %c':
-        '%b olana kadar tekrarla %c',
+        'tekrarla %b olana kadar %c',
     'if %b %c':
         'eğer %b %c',
     'if %b %c else %c':
         'eğer %b %c değilse %c',
     'report %s':
-        'rapor %s',
+        'bildir %s',
     'stop %stopChoices':
         'durdur %stopChoices',
     'all':
         'tümü',
     'this script':
-        'bu script',
+        'bu betik',
     'this block':
         'bu blok',
     'stop %stopOthersChoices':
         'durdur %stopOthersChoices',
     'all but this script':
-        'bu hariç diğerleri',
+        'bu betik hariç diğerleri',
     'other scripts in sprite':
-        'bu karakter içindeki diğer betikler',
+        'bu kukla içindeki diğer betikler',
     'pause all %pause':
         'tümünü beklet %pause',
     'run %cmdRing %inputs':
@@ -470,27 +518,33 @@ SnapTranslator.dict.tr = {
     'call %repRing %inputs':
         'çağır %repRing %inputs',
     'run %cmdRing w/continuation':
-        'çalıştır %cmdRing w/sürekli',
+        'çalıştır %cmdRing (arta kalanlı)',
     'call %cmdRing w/continuation':
-        'çağır %cmdRing w/sürekli',
+        'çağır %cmdRing (arta kalanlı)',
     'warp %c':
-        'çarpıtmak %c',
+        'Turbo %c',
     'when I start as a clone':
-        'Klon olarak başlatığında',
+        'Klon olarak başladığımda',
     'create a clone of %cln':
         '%cln klonunu oluştur',
+    'a new clone of %cln':
+        '%cln in yeni bir klonu',
     'myself':
         'kendim',
     'delete this clone':
         'bu klonu sil',
+    'tell %spr to %cmdRing %inputs':
+        'söyle %spr bunu yapsın %cmdRing  %inputs',
+    'ask %spr for %repRing %inputs':
+        'sor %spr bunun cevabı %repRing %inputs',
 
     // sensing:
     'touching %col ?':
-        '%col a değiyor mu?',
+        '%col değiyor mu?',
     'touching %clr ?':
         '%clr rengine değiyor mu?',
     'color %clr is touching %clr ?':
-        '%clr rengi %clr rengine değdi mi?',
+        '%clr rengi %clr rengine değiyor mu?',
     'ask %s and wait':
         '%s sor ve bekle',
     'what\'s your name?':
@@ -502,28 +556,55 @@ SnapTranslator.dict.tr = {
     'mouse y':
         'Fare y-konumu',
     'mouse down?':
-        'fareye basılı mı?',
+        'fare basılı mı?',
     'key %key pressed?':
         '%key tuşu basılı mı?',
-    'distance to %dst':
-        '%dst a mesafe',
+    '%rel to %dst':
+        '%rel buna: %dst',
+    'distance':
+        'mesafe',
+//    '%asp at %loc' :
+//        '%asp bei %loc',
+    'sprites' :
+        'kuklalar',
     'reset timer':
         'zamanlayıcıyı sıfırla',
     'timer':
         'zamanlayıcı',
+    
     '%att of %spr':
-        '%spr nun %att ',
+        '%att bunun: %spr',
+    'my %get':
+        'benim %get',
     'http:// %s':
         'http:// %s',
     'turbo mode?':
-        'Turbomod?',
+        'turbo mod?',
     'set turbo mode to %b':
         'turbo modu %b yap',
+    'current %dates':
+        'şu anki %dates',
+    'year':
+        'yıl',
+    'month':
+        'ay',
+    'date':
+        'gün',
+    'day of week':
+        'haftanın günü',
+    'hour':
+        'saat',
+    'minute':
+        'dakika',
+    'second':
+        'saniye',
+    'time in milliseconds':
+        'milisaniye',
 
     'filtered for %clr':
         '%clr için filtrele',
     'stack size':
-        'yığın büyüklüğü',
+        'yığıt boyutu',
     'frames':
         'çerçeveler',
 
@@ -533,9 +614,9 @@ SnapTranslator.dict.tr = {
     'round %n':
         '%n yuvarla',
     '%fun of %n':
-        '%fun un %n si',
+        '%fun bunun: %n',
     'pick random %n to %n':
-        '%n ile %n arasında rastgele bir sayı seç',
+        '%n ile %n arasında rastgele sayı',
     '%b and %b':
         '%b ve %b',
     '%b or %b':
@@ -549,24 +630,27 @@ SnapTranslator.dict.tr = {
     'join %words':
         '%words birleştir',
     'split %s by %delim':
-        'parçala ayır %s , %delim e gore',
+        '%s ayır %delim e göre',
     'hello':
         'merhaba',
     'world':
         'dünya',
     'letter %idx of %s':
-        '%idx in harfleri %s',
+        '%idx harfi bunun: %s',
     'length of %s':
         '%s in uzunluğu',
     'unicode of %s':
-        '%s in unicode hali',
+        '%s harfinin unicode değeri',
     'unicode %n as letter':
-        'unicode %n in harf hali',
+        '%n unicode değerinin harfi',
     'is %s a %typ ?':
         '%s bir %typ mi?',
     'is %s identical to %s ?':
         '%s ile %s aynı mı?',
-
+    'JavaScript function ( %mult%s ) { %code }':
+        'JavaScript fonksiyonu ( %mult%s ) { %code }',
+    'compile %repRing':
+        'derle %repRing',
     'type of %s':
         '%s un tipi',
 
@@ -576,7 +660,9 @@ SnapTranslator.dict.tr = {
     'Variable name':
         'Değişken adı',
     'Script variable name':
-        'Script değişken adı',
+        'Betik değişken adı',
+    'inherit %shd':
+        'kalıt al: %shd',
     'Delete a variable':
         'Değişkeni sil',
 
@@ -589,15 +675,15 @@ SnapTranslator.dict.tr = {
     'hide variable %var':
         '%var değişkenini gizle',
     'script variables %scriptVars':
-        '%scriptVars script değişkenleri',
+        'betik değişkenleri: %scriptVars',
 
     // lists:
     'list %exp':
-        'Liste %exp',
+        'liste %exp',
     '%s in front of %l':
-        '%s nin %l önündeki',
+        '%s i %l en öne koy',
     'item %idx of %l':
-        'item %idx of %l',
+        'öğe %idx  %l listesinin',
     'all but first of %l':
         '%l in ilk elemanı hariç tümü',
     'length of %l':
@@ -609,11 +695,11 @@ SnapTranslator.dict.tr = {
     'add %s to %l':
         '%s i %l ye ekle',
     'delete %ida of %l':
-        'sil %ida nın %l',
+        'sil %ida öğesini %l listesinin',
     'insert %s at %idx of %l':
-        'ekle %s %idx indeksine %l listesinin',
+        'ekle %s %idx öğesine %l listesinin',
     'replace item %idx of %l with %s':
-        'yer değiştir %idx %l listesinin %s ile',
+        'değiştir %idx öğesini %l listesinin %s ile',
 
     // other
     'Make a block':
@@ -624,19 +710,19 @@ SnapTranslator.dict.tr = {
     'About...':
         'Snap Hakkında!...',
     'Reference manual':
-        'El kitapçığı',
+        'Başvuru kitabı',
     'Snap! website':
         'Snap! web sitesi',
     'Download source':
-        'Indirilebilir kaynak',
+        'Kaynak kodu indir',
     'Switch back to user mode':
         'Kullanıcı moduna geri dön',
     'disable deep-Morphic\ncontext menus\nand show user-friendly ones':
-        'verl\u00e4sst Morphic',
+        'Morfik içerik menüsünü\nkapat\nve kullanımı kolay olanları göster',
     'Switch to dev mode':
         'geliştirici moduna dön',
     'enable Morphic\ncontext menus\nand inspectors,\nnot user-friendly!':
-        'etkinleştir Morfik\niçerik menüsü\nve gözlemleme\nkullanıcı dostu değil ',
+        'Morfik içerik menüsü\nve gözlemleme etkinleştir\nkullanımı kolay değil',
 
     // project menu
     'Project notes...':
@@ -647,46 +733,126 @@ SnapTranslator.dict.tr = {
         'Aç...',
     'Save':
         'Kaydet',
+    'Save to disk':
+        'Diske kaydet',
+    'store this project\nin the downloads folder\n(in supporting browsers)':
+        'bu projeyi indirilenler\nklasörüne kaydet \n(destekleyen tarayıcılarda)',
     'Save As...':
         'Farklı kaydet...',
     'Import...':
         'İçeri aktar...',
     'file menu import hint':
-        'dosya menü içeri aktar ipucu',
+        'Bilgisayarınızdaki bir projeyi, kütüphaneyi,\nblokları, kostümleri veya sesleri\nSNAP! a yükleyin',
     'Export project as plain text...':
-        'Düz metin olarak projeyi dışarı aktar...',
+        'Projeyi düz metin olarak dışarı aktar...',
     'Export project...':
         'Projeyi dışarı aktar...',
+    'save project data as XML\nto your downloads folder':
+        'proje verilerini indirme klasörünüze \nXML olarak kaydedin',
     'show project data as XML\nin a new browser window':
-        'Yeni bir pencerede\nproje verilerini XML olarak göster',
+        'Proje verilerini XML olarak\nyeni bir pencerede göster',
     'Export blocks...':
         'Blokları dışarı aktar...',
     'show global custom block definitions as XML\nin a new browser window':
-        'blok tanımlarını XML dosyası olarak\nyeni bir pencerede göster',
+        'global özel blok tanımlarını\nXML olarak indirme klasörünüze kaydedin',
+    'Unused blocks...':
+          'kullanılmayan bloklar...',
+    'find unused global custom blocks\nand remove their definitions':
+        'kullanılmayan global özel blokları bulun\nve tanımlarını kaldırın',
+    'Remove unused blocks':
+        'kullanılmayan blokları kaldırın',
+    'there are currently no unused\nglobal custom blocks in this project':
+        'şu anda bu projede\nkullanılmamış özel blok yok',
+    'unused block(s) removed':
+        'kullanılmayan bloklar kaldırıldı',
+    'Export summary...':
+        'Dışarı aktarım özeti...',
+    'open a new browser browser window\n with a summary of this project':
+        'bu projenin bir özetini içeren\nverileri indirme klasörünüze \nXML olarak kaydedin',
+    'Contents':
+        'İçerikler',
+    'Kind of':
+        'Tipi',
+    'Part of':
+        'Parçası',
+    'Parts':
+        'Parçalar',
+    'Blocks':
+        'Bloklar',
+    'For all Sprites':
+        'Tüm kuklalar için',
     'Import tools':
-        'Araçları içeri aktar',
+        'TOOLS ktp içeri aktar',
     'load the official library of\npowerful blocks':
-        'güçlü blokların\nresmi kütüphanesini yükletin',
+        'güçlü blokların resmi\nkütüphanesini yükletin',
     'Libraries...':
         'Kütüphaneler...',
+    'Select categories of additional blocks to add to this project.':
+        'Bu projeye eklemek için ek blok kategorileri seçin.',
+    'Select a costume from the media library':
+        'Medya kütüphanesinden bir kostüm seçin',
+    'Select a sound from the media library':
+        'Medya kütüphanesinden bir ses seçin',
+
+    //Libraries
     'Import library':
         'Kütüphaneyi içeri aktar',
-
+    'Loading':
+        'Yükleniyor',
+    'Imported':
+        'İçeri aktarıldı',
+    'Iteration, composition':
+        'Yineleme, kompozisyon',
+    'List utilities':
+        'liste yardımcı programları',
+    'Variadic reporters':
+        'Çok girdili bildirenler',
+    'Web services access (https)':
+        'Web servislerine ulaşım (https)',
+    'Multi-branched conditional (switch)':
+        'Çok dallı koşullu (switch)',
+    'LEAP Motion controller':
+        'LEAP Motion denetleyicisi',
+    'Words, sentences':
+        'kelimelerö cümleler',
+    'Catch errors in a script':
+        'Betikteki hataları bul',
+    'Set RGB or HSV pen color':
+        'Kalem rengini RGB veya HSV olarak ayarla',
+    'Text to speech':
+        'Metinden konuşmaya',
+    'Provide 100 selected colors':
+        '100 seçili renk sağlayın',
+    'Infinite precision integers, exact rationals, complex':
+        'Sonsuz hassasiyetli tam sayılar, kesin rasyonlar, karışık sayılar',
+    'Provide getters and setters for all GUI-controlled global settings':
+        'GUI kontrollü tüm global ayarlar için alıcılar ve ayarlayıcılar sağlayın',
+    'Allow multi-line text input to a block':
+        'Bloklara çok satırlı metin girişi sağla',
+    'create variables in program':
+        'Betiklerde değişken yarat',
     // cloud menu
     'Login...':
         'Giriş yap...',
     'Signup...':
         'Kayıt ol...',
-
+    'Logout':
+        'Çıkış yap',
+    'Change Password...':
+        'Şifre değiştir...',
+    'Reset Password...':
+        'Şifre yenile...',
+    'Resend Verification Email...':
+        'Doğrulama e-postasını tekrar gönder...',
     // settings menu
     'Language...':
         'Dil...',
     'Zoom blocks...':
-        'Yaklaşma blokları...',
+        'Blokları büyült...',
     'Stage size...':
-        'Sahne büyüklüğü...',
+        'Sahne boyutu...',
     'Stage size':
-        'Sahne büyüküğü',
+        'Sahne boyutu',
     'Stage width':
         'Sahne genişliği',
     'Stage height':
@@ -694,39 +860,43 @@ SnapTranslator.dict.tr = {
     'Default':
         'Varsayılan',
     'Blurred shadows':
-        'Bulanış gölgeler',
+        'Bulanmış gölgeler',
     'uncheck to use solid drop\nshadows and highlights':
-        'katı gölge ve ışıkları kullanmak için seçimi kaldırın',
+        'katı gölge ve parlaklık kullanmak\niçin seçimi kaldırın',
     'check to use blurred drop\nshadows and highlights':
-        'gölge ve ışıkları bulanık hale getirmek için\nseçim yapın',
+        'gölge ve parlaklıkları bulanık\nhale getirmek için seçim yapın',
     'Zebra coloring':
         'çizgili boyama',
     'check to enable alternating\ncolors for nested blocks':
-        'iç içe bloklarda değişmeli renkler için\ntik atın',
+        'iç içe bloklarda değişmeli\nrenkler için seçim yapın',
     'uncheck to disable alternating\ncolors for nested block':
-        'iç içe bloklarda değişmeli renkleri\n kaldırmak için seçimi kaldırın',
+        'iç içe bloklarda değişmeli renkleri\nkaldırmak için seçimi kaldırın',
     'Dynamic input labels':
         'Dinamik girdi etiketleri',
     'uncheck to disable dynamic\nlabels for variadic inputs':
-        'farklı girdiler için dinamik etkiletlemeyi\nkaldırmak için seçimi kaldırın',
+        'farklı girdiler için dinamik etiketlemeyi\nkaldırmak için seçimi kaldırın',
     'check to enable dynamic\nlabels for variadic inputs':
-        'farklı girdiler için dinamik etkiletlemeyi\netkinleştirmek için seçimi kaldırın',
+        'farklı girdiler için dinamik etiketlemeyi\netkinleştirmek için seçim yapın',
     'Prefer empty slot drops':
-        'Boş slotları tercih et',
+        'Boş yer tutucuları atmayı tercih et',
     'settings menu prefer empty slots hint':
-        'boş slotlar için menü ayarları',
+        'boş yer tutucuları için menü ayarları',
     'uncheck to allow dropped\nreporters to kick out others':
-        'uncheck to allow dropped\nreporters to kick out others',
+        'kullanılmayan bildirenlerin başkalarını atmaları için işareti kaldır',
+    'check to turn on\n visible stepping (slow)':
+        'görünür adım adım yürütüm\niçin seçin (yavaş)',
+    'uncheck to turn off\nvisible stepping':
+        'görünür adım adım yürütümü\nkapatmak için işareti kaldır',
     'Long form input dialog':
         'girdi dialogları için uzun form',
     'Plain prototype labels':
-        'Düz protatip etkiletleri',
+        'Sade prototip etiketleri',
     'uncheck to always show (+) symbols\nin block prototype labels':
         'prototip etiketinde (+) sembolünün\ngörünmesi için seçimi kaldırın',
     'check to hide (+) symbols\nin block prototype labels':
-        'prototip etiketinde (+) sembolünün\ngizlenmesi için seçin',
+        'prototip etiketinde (+) sembolünün\ngizlenmesi için seçim yapın',
     'check to always show slot\ntypes in the input dialog':
-        'girdi dialoglarında\ntipinin görünmesi için seçin',
+        'girdi dialoglarında girdi tipinin \ngörünmesi için seçim yapın',
     'uncheck to use the input\ndialog in short form':
         'girdi dialoglarını kısa form\nolarak kullanmak için seçimi kaldırın',
     'Virtual keyboard':
@@ -734,57 +904,84 @@ SnapTranslator.dict.tr = {
     'uncheck to disable\nvirtual keyboard support\nfor mobile devices':
         'mobil araçlar için\nsanal klavye desteğini\nkaldırmak için seçimi kaldırın',
     'check to enable\nvirtual keyboard support\nfor mobile devices':
-        'mobil araçlar için\nsanal klavye desteğini\naktifleştirmek için seçin',
+        'mobil araçlar için\nsanal klavye desteğini\naktifleştirmek için seçim yapın',
     'Input sliders':
         'Girdi sürgüleri',
     'uncheck to disable\ninput sliders for\nentry fields':
         'girdi alanlarındanki girdi sürgülerini etkisizleştirmek için seçimi kaldırın',
     'check to enable\ninput sliders for\nentry fields':
-        'girdi alanlarındanki girdi sürgülerini etkisizleştirmek için seçin',
+        'girdi alanlarındanki girdi sürgülerini \naktifleştirmek için seçim yapın',
+    'Retina display support':
+        'Retina ekran desteği',
+    'uncheck for lower resolution,\nsaves computing resources':
+        'düşük çözünürlük için işareti kaldırın,\nbilgi işlem kaynaklarını korur',
+    'check for higher resolution,\nuses more computing resources':
+        'daha yüksek çözünürlük için kontrol edin\ndaha fazla bilgi işlem kaynağını kullanır',
+    'Codification support':
+        'Kodlama desteği',
     'Clicking sound':
-        'Sesi tıklayın',
+        'Tıklama sesi',
     'uncheck to turn\nblock clicking\nsound off':
-        'sesi kapatmak için\nseçimi kaldırın',
+        'blok tıklama sesini \nkapatmak için seçimi kaldırın',
     'check to turn\nblock clicking\nsound on':
-        'sesi açmak için\nseçim yapın',
+        'blok tıklama sesini \naçmak için seçim yapın',
     'Animations':
         'Animasyonlar',
     'uncheck to disable\nIDE animations':
-        'animasyonları etkisezliştirmek için\nseçimi kaldırın',
+        'IDE animasyonları etkisizliştirmek için\nseçimi kaldırın',
     'Turbo mode':
         'Turbo Mod',
     'check to prioritize\nscript execution':
-        'Betikleme çalışmasına öncelik\nvermek için seçim yapın',
+        'Betik çalışmasına öncelik\nvermek için seçim yapın',
     'uncheck to run scripts\nat normal speed':
-        'betiklemelerin normal hızla çalışması\niçin seçimi kaldırın',
+        'betiklerin normal hızla çalışması\niçin seçimi kaldırın',
     'check to enable\nIDE animations':
         'IDE animasyonlarını\naktifleştirmek için seçim yapın',
+    'Flat design':
+        'Sade tasarım',
+    'check for alternative\nGUI design':
+        'alternatif GUI tasarımı için seçin',
+    'uncheck for default\nGUI design':
+        'varsayılan GUI tasarımı için seçimi kaldırın',
+    'Nested auto-wrapping':
+        'İç içe automatik kaydırma',
+    'Keyboard Editing':
+        'Klavyeyle düzenleme',
+    'Table support':
+        'Tablo desteği',
+    'Table lines':
+        'Tablo çizgileri',
+    'Visible stepping':
+        'Adım adım yürütüm',
     'Thread safe scripts':
-        'Güvenli betik parçacığı',
+        'Olay yinelemeyi yoksay',
     'uncheck to allow\nscript reentrance':
-        'betiklemeye tekrar girişe\nizin vermek için seçimi kaldırın',
+        'betiğe tekrar girişe\nizin vermek için seçimi kaldırın',
     'check to disallow\nscript reentrance':
-        'vbetiklemeye tekrar girişe\nizin vermemek için seçimi kaldırın',
+        'betiğe tekrar girişe\nizin vermemek için seçim yapın',
     'Prefer smooth animations':
-        'Pürüzsüz animayonu tercih et',
+        'Pürüzsüz animasyonu tercih et',
     'uncheck for greater speed\nat variable frame rates':
-        'çerçevelerin daha hızlanması\niçin seçimi kaldırın',
+        'Değişken kare hızlarında \ndaha yüksek hız için işareti kaldırın',
     'check for smooth, predictable\nanimations across computers':
         'bilgisayarlar arası düz,tahmin edilebilir\nanimasyonlar için seçim yapın',
     'Flat line ends':
         'Düz çizgi bitimleri',
     'check for flat ends of lines':
-        'düz biten bitim çizgileri\niçin seçin',
+        'düz biten çizgiler\niçin seçin',
     'uncheck for round ends of lines':
-        'yumuşak köşeli bitim çizgileri\niçin seçimi kaldırın',
-
+        'yuvarlak biten çizgiler\niçin seçimi kaldırın',
+    'Ternary Boolean slots':
+        'Üçlü Boole yer tutucuları',
+    'Inheritance support':
+        'Kalıtım desteği',
     // inputs
     'with inputs':
         'girdi ile',
     'input names:':
         'girdi isimleri:',
     'Input Names:':
-        'girdi isimleri:',
+        'Girdi isimleri:',
     'input list:':
         'girdi listesi:',
 
@@ -793,10 +990,12 @@ SnapTranslator.dict.tr = {
         'yardım',
 
     // palette:
+    'find blocks':
+        'blokları bul',
     'hide primitives':
-        'primitifleri gizle',
+        'temel blokları gizle',
     'show primitives':
-        'primitifleri göster',
+        'temel blokları göster',
 
     // blocks:
     'help...':
@@ -814,53 +1013,84 @@ SnapTranslator.dict.tr = {
     'script pic...':
         'betik resmi...',
     'open a new window\nwith a picture of this script':
-        'bu betiğin resmini\n yeni bir pencerede açın',
+        'bu betiğin resmini\nyeni bir pencerede açın',
     'ringify':
-        'ringify',
+        'ringify - veri yap',
     'unringify':
-        'unringify',
-
+        'unringify - veri yapma',
+    'transient':
+        'geçici',
+    'uncheck to save contents\nin the project':
+        'içeriğin projede kaydedilmesi\niçin işareti kaldırın',
+    'check to prevent contents\nfrom being saved':
+        'içeriğin projede\nkaydedilmemesi için seçin',
+    'new line':
+        'yeni satır',
     // custom blocks:
     'delete block definition...':
         'blok tanımlarını sil...',
+    'duplicate block definition...':
+        'çifte blok tanımı...',
     'edit...':
         'düzenle...',
 
     // sprites:
     'edit':
-        'düzenle',
+        'kalıcı klon ol',
+    'clone':
+        'klon yap',
     'move':
         'hareket et',
+    'pivot':
+        'dönme noktası',
+    'edit the costume\'s\nrotation center':
+        'kostümün dönme\nmerkezini düzenle',
+    'rotate':
+        'Dön',
     'detach from':
-        'parçayı ayır',
+        'kukladan ayır: ',
     'detach all parts':
         'tüm parçaları ayır',
     'export...':
-        'dşıarı aktar...',
-
+        'dışarı aktar...',
+    'parent...':
+        'üst öğe...',
+    'current parent':
+        'şimdiki üst öğe',
+    'release':
+        'geçici klon ol',
+    'make temporary and\nhide in the sprite corral':
+        'geçici yap ve kukla alanında gizle',
     // stage:
     'show all':
         'hepsini göster',
     'pic...':
         'resimler...',
     'open a new window\nwith a picture of the stage':
-        'sahnenin bir resmi ile\n yeni bir pence aç',
-
+        'sahnenin resmini\n yeni bir pencerede aç',
+    'turn all pen trails and stamps\ninto a new background for the stage':
+        'tüm kalem izlerini ve damgaları sahne için yeni bir arka plana dönüştür',
+    'turn all pen trails and stamps\ninto a new costume for the\ncurrently selected sprite':
+        'tüm kalem izlerini ve damgaları şimdiki kukla için yeni bir kostüme dönüştür',
     // scripting area
     'clean up':
         'temizle',
     'arrange scripts\nvertically':
-        'scriptleri dikey olarak düzenle',
+        'betikleri dikey olarak düzenle',
     'add comment':
         'yorum ekle',
     'undrop':
-        'bırak',
+        'Geri al',
     'undo the last\nblock drop\nin this pane':
-        'levhaya bıraktığın\n son bloğu geri al',
+        'alana bıraktığın\n son bloğu geri al',
+    'redrop':
+        'yine bırak',
+    'use the keyboard\nto enter blocks':
+        'blokları klavyeden gir',
     'scripts pic...':
-        'script resimleri...',
+        'betik resimleri...',
     'open a new window\nwith a picture of all scripts':
-        'tüm scriptleri bir resim ile\n yeni bir pencerede aç',
+        'tüm betiklerin resmini\nyeni bir pencerede aç',
     'make a block...':
         'bir blok oluştur...',
 
@@ -874,15 +1104,29 @@ SnapTranslator.dict.tr = {
 
     // sounds
     'Play sound':
-        'Sesi oynat',
+        'Sesi çal',
     'Stop sound':
         'Sesi durdur',
     'Stop':
         'Durdur',
     'Play':
-        'Oyna',
+        'Çal',
     'rename sound':
         'sesi yeniden adlandır',
+
+    // lists and tables
+    'list view...':
+        'liste görünümü...',
+    'table view...':
+        'tablo görünümü...',
+    'Table view':
+        'Tablo görünümü',
+    'open in dialog...':
+        'yeni pencerede aç',
+    'reset columns':
+        'sütunları sıfırla',
+    'items':
+        'öğeler',
 
     // dialogs
     // buttons
@@ -903,19 +1147,19 @@ SnapTranslator.dict.tr = {
 
     // zoom blocks
     'Zoom blocks':
-        'Yakınlaştırma blokları',
+        'Blokları büyült',
     'build':
-        'inşaa et',
+        'Kendi',
     'your own':
-        'kendinizin',
+        'bloklarını',
     'blocks':
-        'blokları',
+        'oluştur',
     'normal (1x)':
         'normal (1x)',
     'demo (1.2x)':
-        'Demo (1.2x)',
+        'demo (1.2x)',
     'presentation (1.4x)':
-        'Sunum (1.4x)',
+        'sunum (1.4x)',
     'big (2x)':
         'büyük (2x)',
     'huge (4x)':
@@ -927,9 +1171,11 @@ SnapTranslator.dict.tr = {
 
     // Project Manager
     'Untitled':
-        'Adsız',
+        'Kayıtlanmamış',
     'Open Project':
         'Projec aç',
+    'Open':
+        'Aç',
     '(empty)':
         '(boş)',
     'Saved!':
@@ -940,14 +1186,98 @@ SnapTranslator.dict.tr = {
         'Silmek istediğinize emin misiniz?',
     'rename...':
         'yeniden adlandır...',
-
+    'Examples':
+        'Örnekler',
+    'Share':
+        'Paylaş',
+    'Updating\nproject list...':
+        'Proje listesi güncelleniyor...',
+    'Recover':
+        'Kurtar',
+    'Today':
+        'Bugün',
+    'Yesterday':
+        'Dün',
     // costume editor
     'Costume Editor':
-        'Kostüm editörü',
+        'Kostüm Editörü',
+    'Paint Editor':
+        'Resim Editörü',
     'click or drag crosshairs to move the rotation center':
-        'dönme merkezini hareket ettirmek için referans noktasına tıklayın ya da sürükleyin',
+        'dönme merkezini ayarlamak için resmi tıklayın veya artı ikonunu sürükleyin',
+    'undo':
+        'geri al',
+    'Vector':
+        'Vektör',
+    'Paintbrush tool\n(free draw)':
+        'Fırça (serbest çizme)',
+    'Stroked Rectangle\n(Shift: square)':
+        'Konturlu Dikdörtgen (Shift: kare)',
+    'Stroked Ellipse\n(Shift: circle)':
+        'Konturlu Elips\n(Shift: daire)',
+    'Eraser tool':
+        'Silgi',
+    'Set the rotation center':
+        'Dönme noktasını ayarla',
+    'Line tool\n(Shift: vertical/horizontal)':
+        'Çizgi\n(Shift: yatay/dikey)',
+    'Filled Rectangle\n(Shift: square)':
+        'dolu Dikdörtgen\n(Shift: kare)',
+    'Filled Ellipse\n(Shift: circle)':
+        'dolu Elips\n(Shift: daire)',
+    'Fill a region':
+        'alanı seçilmiş renkle doldur',
+    'Pipette tool\n(pick a color anywhere)':
+        'Pipet (herhangi bir yere tıklayıp oradaki rengi seçin)',
+    'Brush size':
+        'Fırça boyutu',
+    'Constrain proportions of shapes?\n(you can also hold shift)':
+        'Şekillerin oranlarını sınırlama\n(Shift-Tuşu da yapar)',
+    'grow':
+        'büyült',
+    'shrink':
+        'ufalt',
+    'flip ↔':
+        'yatay çevir ↔',
+    'flip ↕':
+        'dikey çevir ↕',
 
-    // project notes
+    'Vector Paint Editor':
+        'Vektör Resim Editörü',
+    'Rectangle\n(shift: square)':
+        'Dikdörtgen (Shift: kare)',
+    'Ellipse\n(shift: circle)':
+        'Elips\n(Shift: daire)',
+    'Selection tool':
+        'Seçme Aracı',
+    'Line tool\n(shift: constrain to 45º)':
+        'Çizgi\n(Shift: 45° dereceli ayarlar)',
+    'Closed brush\n(free draw)':
+        'Kontoru kapanan dolu şekil\n(serbest çizme)',
+    'Paint a shape\n(shift: secondary color)':
+        'alanı seçilmiş 1ci renkle doldur\n(Shift: 2ci renk)',
+    'Pipette tool\n(pick a color from anywhere\nshift: secondary color)':
+        'Pipet\nherhangi bir yere tıklayıp oradaki\nrengi seçin (Shift: 2ci renk)',
+    'grow':
+        'büyült',
+    'shrink':
+        'küçült',
+    'flip \u2194':
+        'yatay çevir \u2194',
+    'flip \u2195':
+        'dikey çevir \u2195',
+    'Primary color      Secondary color':
+        '1ci Renk               2ci Renk',
+    'Top':
+        'Üst',
+    'Bottom':
+        'Alt',
+    'Up':
+        'Yukarı',
+    'Down':
+        'Aşağı',
+
+   // project notes
     'Project Notes':
         'Proje Notları',
 
@@ -960,14 +1290,15 @@ SnapTranslator.dict.tr = {
     // save project
     'Save Project As...':
         'Projeyi farklı kaydet...',
-
+    'Save Project':
+        'Projeyi kaydet',
     // export blocks
     'Export blocks':
         'Blokları dışarı aktar',
     'Import blocks':
         'Blokları içeri aktar',
     'this project doesn\'t have any\ncustom global blocks yet':
-        'bu proje henüz herhangi bir global blok içermiyor',
+        'bu proje henüz herhangi bir özel genel blok içermiyor',
     'select':
         'seç',
     'none':
@@ -975,9 +1306,16 @@ SnapTranslator.dict.tr = {
 
     // variable dialog
     'for all sprites':
-        'tüm karakterler için',
+        'tüm kuklalar için',
     'for this sprite only':
-        'sadece bu karakter için',
+        'sadece bu kukla için',
+    // variables refactoring
+    'rename only\nthis reporter':
+        'yalnız bu bildirenin adını değiştir',
+    'rename all...':
+        'tümünün adını değiştir...',
+    'rename all blocks that\naccess this variable':
+        'bu bloğu kullanan tüm blokların adını değiştir',
 
     // block dialog
     'Change block':
@@ -985,28 +1323,29 @@ SnapTranslator.dict.tr = {
     'Command':
         'Komut',
     'Reporter':
-        'Fonksiyon',
+        'Bildiren',
     'Predicate':
-        'Beyan etme',
+        'Karşılaştırma',
 
     // block editor
     'Block Editor':
         'Blok Editörü',
+    'Method Editor':
+        'Metod Editörü',
     'Apply':
         'Uygula',
 
     // block deletion dialog
     'Delete Custom Block':
-        'Bloğu Sil',
+        'Özel Blok Tanımlarını Sil',
     'block deletion dialog text':
-        'BSoll dieser Block mit allen seinen Exemplare\n' +
-            'wirklich gel\u00f6scht werden?',
+        'Blok tanımları hakikaten silinsin mi?',
 
     // input dialog
     'Create input name':
-        'Girdi oluştur',
+        'Girdi adı oluştur',
     'Edit input name':
-        'Girdiyi düzenle',
+        'Girdi adını düzenle',
     'Edit label fragment':
         'Etiketi düzenle',
     'Title text':
@@ -1016,7 +1355,7 @@ SnapTranslator.dict.tr = {
     'Delete':
         'Sil',
     'Object':
-        'Obje',
+        'Nesne',
     'Number':
         'Sayı',
     'Text':
@@ -1028,9 +1367,9 @@ SnapTranslator.dict.tr = {
     'Boolean (T/F)':
         'Mantıksal (D/Y)',
     'Command\n(inline)':
-        'Komut',
+        'Komut\n(satıriçi)',
     'Command\n(C-shape)':
-        'Komut\n(C-Şenlinde)',
+        'Komut\n(C-şeklinde)',
     'Any\n(unevaluated)':
         'Herhangi\n(değerlendirilmemiş)',
     'Boolean\n(unevaluated)':
@@ -1052,7 +1391,7 @@ SnapTranslator.dict.tr = {
     'License...':
         'Lisans...',
     'Modules...':
-        'Komponenten...',
+        'Modüller...',
     'Credits...':
         'Katkıda bulunanlar...',
     'Translators...':
@@ -1070,7 +1409,7 @@ SnapTranslator.dict.tr = {
     'normal':
         'normal',
     'large':
-        'geniş',
+        'büyük',
     'slider':
         'sürgü',
     'slider min...':
@@ -1081,17 +1420,20 @@ SnapTranslator.dict.tr = {
         'içeri aktar...',
     'Slider minimum value':
         'Sürgünün en düşük değeri',
-	'Slider maximum value':
+    'Slider maximum value':
         'Sürgünün en yüksek değeri',
 
     // list watchers
     'length: ':
         'uzunluk: ',
 
-    // coments
+    // comments
     'add comment here...':
-        '.. buraya yorum ekle',
-
+        '... buraya yorum ekle',
+    'comment pic...':
+        'Yorum resmi',
+    'open a new window\nwith a picture of this comment':
+        'Bu yorumun resmini içeren\nyeni bir pencere aç',
     // drow downs
     // directions
     '(90) right':
@@ -1102,30 +1444,66 @@ SnapTranslator.dict.tr = {
         '(0) yukarı',
     '(180) down':
         '(180) aşağı',
+    'random':
+        'rasgele',
+     'random position':
+        'rasgele konuma',
 
     // collision detection
     'mouse-pointer':
-        'Fare-İşaretçisi',
-    'corner':
-        'kenar',
+        'fare-imlecine',
+    'edge':
+        'kenara',
     'pen trails':
-        'Malspuren',
+        'kalem izlerine',
+    'center':
+        'orta noktaya',
 
     // costumes
     'Turtle':
         'Kaplumbağa',
     'Empty':
         'Boş',
+    'Paint a new costume':
+        'Yeni bir kostüm yap',
+    'Import a new costume from your webcam':
+        'Web kamerasından yeni bir kostüm aktar',
+    'Please make sure your web browser is up to date\nand your camera is properly configured. \n\nSome browsers also require you to access Snap!\nthrough HTTPS to use the camera.\n\nPlase replace the "http://" part of the address\nin your browser by "https://" and try again.':
+        'Lütfen web tarayıcınızın güncel olduğundan ve\nkameranızın uygun şekilde yapılandırıldığından\nemin olun. Bazı tarayıcılar ayrıca Snap! Kamerayı\nkullanmak için HTTPS öngörürler. Lütfen tarayıcınızın\nadresinin "http: //" bölümünü "https: //" ile\ndeğiştirin ve tekrar deneyin.',
+    'Camera':
+        'Kamera',
+
+    // sounds
+    'Record a new sound':
+        'Yeni bir ses kaydedin',
+
+
 
     // graphical effects
+    'color':
+        'renk',
+    'hue':
+        'Renk tonu',
+    'fisheye':
+        'balık gözü',
+    'whirl':
+        'fırıldat',
+    'pixelate':
+        'pikselle',
+    'mosaic':
+        'mosayik',
+    'saturation':
+        'doygunluk',
     'brightness':
         'parlaklık',
+    'transparency':
+        'şeffaflık',
     'ghost':
-        'hayalet',
+        'şeffaflık',
     'negative':
         'negatif',
     'comic':
-        'komik',
+        'Moire-hareli',
     'confetti':
         'konfeti',
 
@@ -1137,9 +1515,11 @@ SnapTranslator.dict.tr = {
     'down arrow':
         'aşağı ok',
     'right arrow':
-        'sol ok',
-    'left arrow':
         'sağ ok',
+    'left arrow':
+        'sol ok',
+    'any key':
+        'herhangi bir tuş',
     'a':
         'a',
     'b':
@@ -1219,11 +1599,13 @@ SnapTranslator.dict.tr = {
 
     // math functions
     'abs':
-        'MutlakDeğer',
+        'mutlakdeğer',
+    'ceiling':
+        'yukarı yuvarla',
     'floor':
-        'alt değer',
+        'aşağı yuvarla',
     'sqrt':
-        'Karekök',
+        'karekök',
     'sin':
         'sin',
     'cos':
@@ -1241,17 +1623,20 @@ SnapTranslator.dict.tr = {
     'e^':
         'e^',
 
+    // Boolean expressions keyboard entry
+    'not':
+        'değil',
     // delimiters
     'letter':
         'harf',
     'whitespace':
-        'alfabe dışı',
+        'harf olmayan',
     'line':
-        'çizgi',
+        'satır',
     'tab':
         'sekme',
     'cr':
-        'karakter',
+        'satır başı',
 
     // data types
     'number':
@@ -1259,161 +1644,70 @@ SnapTranslator.dict.tr = {
     'text':
         'metin',
     'Boolean':
-        'mantıksal',
+        'Mantıksal',
     'list':
-        'Liste',
+        'liste',
     'command':
         'komut',
     'reporter':
-        'fonksiyonlar',
+        'bildiren',
     'predicate':
-        'ön ek',
-
+        'karşılaştırma',
+    'sprite':
+        'kukla',
     // list indices
     'last':
         'son',
     'any':
         'herhangi',
 
-    // miscellaneous
-    'find blocks...':
-        'blokları bul...',
-    'hide primitives':
-        'temelleri sakla',
-    'show primitives':
-        'temelleri göster',
-    'Login...':
-        'Bağlan...',
-    'Signup...':
-        'Giriş Yap...',
-    'Reset Password...':
-        'Şifre Değiştir...',
-    'show all':
-        'tümünü göster',
-    'pic...':
-        'görüntü...',
-    'open a new window\nwith a picture of the stage':
-        'yeni pencere aç\nyeni bölüm ile',
-    'scripts pic...':
-        'görüntü betikleri...',
-    'open a new window\nwith a picture of all scripts':
-        'yeni pencere aç\ntüm görüntü betikleri ile',
-    'Stage size...':
-        'Bölüm Boyutu...',
-    'Zoom blocks...':
-        'Blokları yakınlaştır...',
+    // attributes
+    'my':
+        'benim',
+    'neighbors':
+        'yakınımdakiler',
+    'self':
+        'kendim',
+    'other sprites':
+        'öteki kuklalar',
+    'parts':
+        'parçalarım',
+    'anchor':
+        'bağlı olduğum',
+    'parent':
+        'üst öğem',
+    'children':
+        'alt öğem',
+    'clones':
+        'klonlarım',
+    'other clones':
+        'öteki klonlar',
+    'dangling?':
+        'serbest dönebilmem?',
+    'rotation x':
+        'dönme x',
+    'rotation y':
+        'dönme y',
+    'center x':
+        'merkez x',
+    'center y':
+        'merkez y',
+    'name':
+        'adım',
+    'stage':
+        'sahnem',
+    'costumes':
+        'kostümlerim',
+    'sounds':
+        'seslerim',
+    'scripts':
+        'betiklerim',
 
-    'Plain prototype labels':
-        'Düz prototip isimleri',
-    'uncheck to always show (+) symbols\nin block prototype labels':
-        'daima göster (+) sembollerini kapat\nblok prototip isimleri içinde',
-    'check to hide (+) symbols\nin block prototype labels':
-        'gizle (+) sembollerini işaretle\nblok prototip isimleri içinde',
-
-    'check for flat ends of lines':
-        'çizgilerin düz sonları için işaretle',
-    'uncheck for round ends of lines':
-        'çizgilerin yuvarlatılmış sonları için işareti kaldır',
-    'Flat line ends':
-        'Fiz çizgi sonları',
-
-    'Codification support':
-        'Kodlaştırma desteği',
-    'uncheck to disable\nblock to text mapping features':
-        'etkisizleştirmeyi kaldır\nbloktan metine haritalandırma özellikleri',
-    'check for block\nto text mapping features':
-        'blok için kontrol et\nmetine dönüştürme özellikleri ',
-
-    'Inheritance support':
-        'Miras Desteği',
-
-    'current %dates':
-        'mevcut %dates',
-    'year':
-        'yıl',
-    'month':
-        'ay',
-    'date':
-        'tarih',
-    'hour':
-        'saat',
-    'minute':
-        'dakika',
-    'second':
-        'saniye',
-    'time in milliseconds':
-        'milisaniye zaman',
-    'day of week':
-        'haftanın günü',
-
-    'brightness':
-        'parlaklık',
-    'transparence':
-        'transparant',
-    'negative':
-        'negatif',
-    'comic':
-        'dergi',
-
-    'clicked':
-        'tıklandığı',
-    'pressed':
-        'basıldığı',
-    'dropped':
-        'hareket ettiği',
-    'mouse-entered':
-        'fare geldiği',
-    'mouse-departed':
-        'fare gittiği',
-    'when %b':
-        '%b olduğunda',
-
-    'JavaScript function ( %mult%s ) { %code }':
-        'fonction JavaScript ( %mult%s ) { %code }',
-
-
-    // Copy / Paste
-    'Press CTRL+C one more time to effectively copy to clipboard.':
-        'CTRL+C tuşuna bir kez daha basarak panoya kopyala',
-    'Press CTRL+V one more time to effectively paste from clipboard.':
-        'CTRL+V tuşuna bir kez daha basarak tabloya yapıştır',
-    'Press CTRL+X one more time to effectively cut to clipboard.':
-        'CTRL+X tuşuna bir kezdaha basarak panodan kes',
-
-    // Paint.js
-    'undo':
-        'geri',
-    'Paintbrush tool\n(free draw)':
-        'fırça\n(serbest çizim)',
-    'Stroked Rectangle\n(shift: square)':
-        'dikdörtgen\n(shift: kare)',
-    'Stroked Ellipse\n(shift: circle)':
-        'ekips\n(shift : cercle)',
-    'Eraser tool':
-        'silgi',
-    'Set the rotation center':
-        'döndürme merkezini ayarla',
-    'Line tool\n(shift: vertical/horizontal)':
-        'çizgi çizme\n(shift: yatay/dikey)',
-    'Filled Rectangle\n(shift: square)':
-        'içi dolu dikdörtgen\n(shift: kare)',
-    'Filled Ellipse\n(shift: circle)':
-        'içi dolu elips\n(shift: daire)',
-    'Fill a region':
-        'bölgenin içini doldur',
-    'Pipette tool\n(pick a color anywhere)':
-        'pipet\n(herhangibir yerden renk seç)',
-    'grow':
-        'büyüt',
-    'shrink':
-        'küçült',
-    'flip \u2194':
-        'ayna görüntüsü \u2194',
-    'flip \u2195':
-        'ayna görüntüsü \u2195',
-    'Brush size':
-        'fırça boyutu',
-    'Constrain proportions of shapes?\n(you can also hold shift)':
-        'şekil bölümleri içerir mi?\n(shift tuşuna basabilirsiniz)'
-
+    // inheritance
+    'inherited':
+        'kalıtsal',
+    'check to inherit\nfrom':
+        'kalıt almak için seçin',
+    'uncheck to\ndisinherit':
+        'kalıt almamak için\nişareti kaldırın'
 };

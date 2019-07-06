@@ -7,7 +7,7 @@
     written by Jens Mönig and Brian Harvey
     jens@moenig.org, bh@cs.berkeley.edu
 
-    Copyright (C) 2018 by Jens Mönig and Brian Harvey
+    Copyright (C) 2019 by Jens Mönig and Brian Harvey
 
     This file is part of Snap!.
 
@@ -58,11 +58,11 @@
 
 /*global modules, BoxMorph, HandleMorph, PushButtonMorph, SyntaxElementMorph,
 Color, Point, WatcherMorph, StringMorph, SpriteMorph, ScrollFrameMorph,
-CellMorph, ArrowMorph, MenuMorph, snapEquals, Morph, isNil, localize,
+CellMorph, ArrowMorph, MenuMorph, snapEquals, Morph, isNil, localize, isString,
 MorphicPreferences, TableDialogMorph, SpriteBubbleMorph, SpeechBubbleMorph,
-TableFrameMorph, TableMorph, Variable, isSnapObject*/
+TableFrameMorph, TableMorph, Variable, isSnapObject, Costume*/
 
-modules.lists = '2018-March-08';
+modules.lists = '2019-June-04';
 
 var List;
 var ListWatcherMorph;
@@ -80,26 +80,30 @@ var ListWatcherMorph;
 
     setters (linked):
     -----------------
-    cons                - answer a new list with the given item in front
-    cdr                    - answer all but the first element
+    cons                    - answer a new list with the given item in front
+    cdr                     - answer all but the first element
 
     setters (arrayed):
     ------------------
-    add(element, index)    - insert the element before the given slot,
-    put(element, index)    - overwrite the element at the given slot
-    remove(index)        - remove the given slot, shortening the list
-    clear()                - remove all elements
+    add(element, index)     - insert the element before the given slot,
+    put(element, index)     - overwrite the element at the given slot
+    remove(index)           - remove the given slot, shortening the list
+    clear()                 - remove all elements
 
     getters (all hybrid):
     ---------------------
-    length()            - number of slots
-    at(index)            - element present in specified slot
-    contains(element)    - <bool>
+    length()                - number of slots
+    at(index)               - element present in specified slot
+    contains(element)       - <bool>
+    isEmpty(element)        - <bool>
 
     conversion:
     -----------
-    asArray()            - answer me as JavaScript array
-    asText()            - answer my elements (recursively) concatenated
+    asArray()               - answer me as JavaScript array, convert to arrayed
+    itemsArray()            - answer a JavaScript array shallow copy of myself
+    asText()                - answer my elements (recursively) concatenated
+    asCSV()                 - answer a csv-formatted String of myself
+    asJSON()                - answer a json-formatted String of myself
 */
 
 // List instance creation:
@@ -115,7 +119,7 @@ function List(array) {
 
 // List global preferences
 
-List.prototype.enableTables = false; // default, to not confuse NYC teachers
+List.prototype.enableTables = true;
 
 // List printing
 
@@ -242,6 +246,13 @@ List.prototype.contains = function (element) {
     });
 };
 
+List.prototype.isEmpty = function () {
+    if (this.isLinked) {
+        return isNil(this.first);
+    }
+    return !this.contents.length;
+};
+
 // List table (2D) accessing (for table morph widget):
 
 List.prototype.isTable = function () {
@@ -303,14 +314,20 @@ List.prototype.columnNames = function () {
     return [];
 };
 
-List.prototype.version = function (startRow, rows) {
+List.prototype.version = function (startRow, rows, startCol, cols) {
     var l = Math.min(startRow + rows, this.length()),
         v = this.lastChanged,
         r,
         i;
     for (i = startRow; i <= l; i += 1) {
         r = this.at(i);
-        v = Math.max(v, r.lastChanged ? r.lastChanged : 0);
+        if (r instanceof Costume) {
+            v = Math.max(v, r.version);
+        } else if (r instanceof List) {
+            v = Math.max(v, r.version(startCol, cols));
+        } else {
+            v = Math.max(v, r.lastChanged ? r.lastChanged : 0);
+        }
     }
     return v;
 };
@@ -388,7 +405,7 @@ List.prototype.becomeLinked = function () {
         stop = this.length();
         for (i = 0; i < stop; i += 1) {
             tail.first = this.contents[i];
-            if (i < (stop - 1)) {
+            if (i < stop) {
                 tail.rest = new List();
                 tail.isLinked = true;
                 tail = tail.rest;
@@ -397,6 +414,92 @@ List.prototype.becomeLinked = function () {
         this.contents = [];
         this.isLinked = true;
     }
+};
+
+List.prototype.asCSV = function () {
+    // RFC 4180
+    // Caution, no error catching!
+    // this method assumes that the list.canBeCSV()
+
+    var items = this.itemsArray(),
+        rows = [];
+    
+    function encodeCell(atomicValue) {
+        var string = atomicValue.toString(),
+            cell;
+        if (string.indexOf('\"') ===  -1 &&
+                (string.indexOf('\n') === -1) &&
+                (string.indexOf('\,') === -1)) {
+            return string;
+        }
+        cell = ['\"'];
+        string.split('').forEach(function (letter) {
+            cell.push(letter);
+            if (letter === '\"') {
+                cell.push(letter);
+            }
+        });
+        cell.push('\"');
+        return cell.join('');
+    }
+
+    if (items.some(function (any) {return any instanceof List; })) {
+        // 2-dimensional table
+        items.forEach(function (item) {
+            if (item instanceof List) {
+                rows.push(item.itemsArray().map(encodeCell).join(','));
+            } else {
+                rows.push(encodeCell(item));
+            }
+        });
+        return rows.join('\n');
+    }
+    // single row
+    return items.map(encodeCell).join(',');
+};
+
+List.prototype.asJSON = function (guessObjects) {
+    // Caution, no error catching!
+    // this method assumes that the list.canBeJSON()
+
+    function objectify(list, guessObjects) {
+        var items = list.itemsArray(),
+            obj = {};
+        if (canBeObject(items)) {
+            items.forEach(function (pair) {
+                var value = pair.length() === 2 ? pair.at(2) : undefined;
+                obj[pair.at(1)] = (value instanceof List ?
+                    objectify(value, guessObjects) : value);
+            });
+            return obj;
+        }
+        return items.map(function (element) {
+            return element instanceof List ?
+                objectify(element, guessObjects) : element;
+        });
+    }
+
+    function canBeObject(array) {
+        // try to determine whether the contents of a list
+        // might be better represented as dictionary/object
+        // than as array
+        var keys;
+        if (array.every(function (element) {
+            return element instanceof List && (element.length() < 3);
+        })) {
+            keys = array.map(function (each) {return each.at(1); });
+            return keys.every(function (each) {
+                return isString(each) &&
+                    isUniqueIn(each, keys);
+            });
+        }
+    }
+
+    function isUniqueIn(element, array) {
+        return array.indexOf(element) === array.lastIndexOf(element);
+    }
+
+    return JSON.stringify(objectify(this, guessObjects));
 };
 
 // List testing
@@ -445,6 +548,31 @@ List.prototype.equalTo = function (other) {
         j += 1;
     }
     return true;
+};
+
+List.prototype.canBeCSV = function () {
+    return this.itemsArray().every(function (value) {
+        return (!isNaN(+value) && typeof value !== 'boolean') ||
+            isString(value) ||
+            (value instanceof List && value.hasOnlyAtomicData());
+    });
+};
+
+List.prototype.canBeJSON = function () {
+    return this.itemsArray().every(function (value) {
+        return !isNaN(+value) ||
+            isString(value) ||
+            value === true ||
+            value === false ||
+            (value instanceof List && value.canBeJSON());
+    });
+};
+
+List.prototype.hasOnlyAtomicData = function () {
+    return this.itemsArray().every(function (value) {
+        return (!isNaN(+value) && typeof value !== 'boolean') ||
+            isString(value);
+    });
 };
 
 // ListWatcherMorph ////////////////////////////////////////////////////
@@ -555,12 +683,12 @@ ListWatcherMorph.prototype.init = function (list, parentCell) {
 ListWatcherMorph.prototype.update = function (anyway) {
     var i, idx, ceil, morphs, cell, cnts, label, button, max,
         starttime, maxtime = 1000;
-
     this.frame.contents.children.forEach(function (m) {
         if (m instanceof CellMorph) {
             if (m.contentsMorph instanceof ListWatcherMorph) {
                 m.contentsMorph.update();
-            } else if (isSnapObject(m.contents)) {
+            } else if (isSnapObject(m.contents) ||
+                    (m.contents instanceof Costume)) {
                 m.update();
             }
         }
@@ -810,11 +938,11 @@ ListWatcherMorph.prototype.userMenu = function () {
 };
 
 ListWatcherMorph.prototype.showTableView = function () {
-    var view = this.parentThatIsAnyOf([
+    var view = this.parentThatIsA(
         SpriteBubbleMorph,
         SpeechBubbleMorph,
         CellMorph
-    ]);
+    );
     if (!view) {return; }
     if (view instanceof SpriteBubbleMorph) {
         view.changed();
