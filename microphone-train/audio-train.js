@@ -16,9 +16,9 @@ const create_user_recognizer = async () => {
     if (user_recognizer) {
         return user_recognizer;
     }
-    builtin_recognizer = SpeechCommands.create('BROWSER_FFT');
+    builtin_recognizer = speechCommands.create('BROWSER_FFT');
     await builtin_recognizer.ensureModelLoaded();
-    builtin_recognizer.params().sampleRateHz = 48000;
+//     builtin_recognizer.params().sampleRateHz = 48000;
     user_recognizer = builtin_recognizer.createTransfer('user trained'); // cache user's recognizer
     return user_recognizer;
 };
@@ -41,11 +41,11 @@ const update_info_texts = (labels, tensor_data_set) => {
 
 const train_user_recognizer = () => {
     user_recognizer.train({epochs: 25,
-    //                   callback: {
-    //                     onEpochEnd: async (epoch, logs) => {
-    //                       console.log(`Epoch ${epoch}: loss=${logs.loss}, accuracy=${logs.acc}`);
-    //                     }
-    //                   }
+                      callback: {
+                        onEpochEnd: async (epoch, logs) => {
+                          console.log(`Epoch ${epoch}: loss=${logs.loss}, accuracy=${logs.acc}`);
+                        }
+                      }
                             })
                         .then(() => {
                                 window.parent.postMessage({show_message: "Training finished",
@@ -53,7 +53,10 @@ const train_user_recognizer = () => {
                                                            "*");
                             })
                         .catch (error => {
-                             report_error(error.message);
+                            if (error.message !== "Cannot read property 'toString' of null") {
+                                // this error doesn't seem to matter...
+                                report_error(error.message);
+                            }
                         });
 };
 
@@ -61,18 +64,6 @@ const initialise = async function (training_class_names) {
     if (training_classes) {
         // already initialised
         return;
-    }
-    let report_error = function (error_message) {
-        try { // since window.parent.ecraft2learn may trigger a permission error
-            if (window.parent.ecraft2learn.support_window_visible('training using microphone')) {
-                alert(error_message);
-            } else {
-                window.parent.postMessage({error: error_message}, "*");
-            }
-        } catch (error) {
-            console.error(error_message);
-            window.parent.postMessage({error: error_message}, "*");
-        }
     }
     window.parent.postMessage({show_message: "Loading..."}, "*");
     create_user_recognizer().then(() => {
@@ -110,8 +101,7 @@ const initialise = async function (training_class_names) {
                 return;
             }
             currently_listening_recognizer = recognizer;
-            recognizer
-                .startStreaming(
+            recognizer.listen(
                     recognition => {
                         let scores = recognition.scores;
                         let labels = recognizer.wordLabels();
@@ -126,7 +116,7 @@ const initialise = async function (training_class_names) {
         };
         const stop_recognising = function (clear_pending_recognitions) {
             if (currently_listening_recognizer) {
-                currently_listening_recognizer.stopStreaming()
+                currently_listening_recognizer.stopListening()
                     .then(() => {
                         currently_listening_recognizer = undefined;
                         if (pending_recognitions && pending_recognitions.length > 0) {
@@ -170,8 +160,9 @@ const initialise = async function (training_class_names) {
             document.body.appendChild(button);
             document.body.appendChild(results_div);
             const start = () => {
-                if (Object.keys(user_recognizer.transferExamples).length !== training_class_names.length) {
-                    results_div.innerHTML = "Training is missing. Only " + Object.keys(user_recognizer.transferExamples).length +
+                const example_counts = user_recognizer.countExamples();
+                if (Object.keys(example_counts).length !== training_class_names.length) {
+                    results_div.innerHTML = "Training is missing. Only " + Object.keys(example_counts).length +
                                             " words have been trained. Expected all " + training_class_names.length +
                                             " words to be trained.";
                     return;
@@ -210,8 +201,6 @@ const initialise = async function (training_class_names) {
                 return;
             }
             examples_collected = 0;
-            // probably hidden so the following won't be seen
-            window.parent.postMessage({show_message: "Training model with new examples"}, "*");
             train_user_recognizer();
         };
         // remove any previously added buttons
@@ -245,6 +234,19 @@ const initialise = async function (training_class_names) {
 //             });
 //         });
 //     }
+};
+
+const report_error = function (error_message) {
+    try { // since window.parent.ecraft2learn may trigger a permission error
+        if (window.parent.ecraft2learn.support_window_visible('training using microphone')) {
+            alert(error_message);
+        } else {
+            window.parent.postMessage({error: error_message}, "*");
+        }
+    } catch (error) {
+        console.error(error_message);
+        window.parent.postMessage({error: error_message}, "*");
+    }
 };
 
 window.addEventListener(
