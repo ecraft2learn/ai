@@ -78,10 +78,12 @@ const initialise = async function (training_class_names) {
                     return;
                 }
                 let recognizer = user_training ? user_recognizer : builtin_recognizer;
-                recognise(recognizer,
+                add_samples_to_model().then(() => {
+                    recognise(recognizer,
                           recognitions => {
                               window.parent.postMessage({confidences: recognitions}, "*");
                           });
+                });
             } else if (event.data === 'stop') { // from clicking on stop sign or running eCraft2Learn.stop_audio_recognition
                 pending_recognitions = [];
                 stop_recognising(true);
