@@ -92,14 +92,14 @@ CursorMorph.prototype.initializeTextarea = function () {
         } else if (keyName === "Enter" && (singleLineText || shift)) {
             myself.accept();
         } else {
-            myself.target.escalateEvent('reactToKeystroke', event);
+//             myself.target.escalateEvent('reactToKeystroke', event);
         }
     });
 
     // For other keyboard events, first let the textarea element handle the
     // events, then we take its state and update the target morph and cursor
     // morph accordingly.
-    this.textarea.addEventListener('keyup', function (event) {
+    this.textarea.addEventListener('input', function (event) {
         myself.world().currentKey = null;
 
         var target = myself.target;
@@ -160,6 +160,27 @@ CursorMorph.prototype.initializeTextarea = function () {
 
         myself.updateTextAreaPosition();
         target.escalateEvent('reactToKeystroke', event);
+    });
+    this.textarea.addEventListener('keyup', function (event) {
+        var textarea = myself.textarea;
+        var target = myself.target;
+
+        if (textarea.selectionStart === textarea.selectionEnd) {
+            target.startMark = null;
+            target.endMark = null;
+        } else {
+            if (textarea.selectionDirection === 'backward') {
+                target.startMark = textarea.selectionEnd;
+                target.endMark = textarea.selectionStart;
+            } else {
+                target.startMark = textarea.selectionStart;
+                target.endMark = textarea.selectionEnd;
+            }
+        }
+        target.changed();
+        target.drawNew();
+        target.changed();
+        myself.gotoSlot(textarea.selectionEnd);
     });
 };
 
