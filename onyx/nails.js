@@ -190,7 +190,7 @@ const display_results = (canvas) => {
                 email_link_added = true;             
             }
         };
-        document.getElementById('camera-image').onclick = display_data;         
+        document.getElementById('camera-image').onclick = display_data;    
     });
 };
 
@@ -663,6 +663,7 @@ const confidences = (result, full_description, correct_class_index) => {
     }
     if (scores[0].score < minimum_confidence) {
         message = not_confident_message;
+        traffic_light_class = 'gray-light';
     } else {
         if (scores[0].name === old_serious_name) {
             message += "it is most likely this warrants a second opinion and you should seek medical advice.";

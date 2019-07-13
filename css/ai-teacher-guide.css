@@ -247,6 +247,14 @@ figcaption {
   padding: 4px;
   box-shadow: 5px 3px 5px black;
 }
+.gray-light {
+  background-color: #787a78;
+  display: block;
+  color: white;
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 5px 3px 5px black;  
+}
 .full-response {
   position: absolute;
   left: 15%;
