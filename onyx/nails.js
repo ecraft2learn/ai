@@ -190,7 +190,7 @@ const display_results = (canvas) => {
                 email_link_added = true;             
             }
         };
-        document.getElementById('camera-image').onclick = display_data;          
+        document.getElementById('camera-image').onclick = display_data;         
     });
 };
 
@@ -866,16 +866,18 @@ const draw_maintaining_aspect_ratio = (source,
     const context = canvas.getContext('2d');
     let destination_x = 0;
     let destination_y = 0;
-    const width_height_ratio = source_width/source_height;
+    const source_width_height_ratio = source_width/source_height;
+    const destination_width_height_ratio = destination_width/destination_height;
+    const source_destination_ratio = source_width_height_ratio/destination_width_height_ratio;
     // if source doesn't have the same aspect ratio as the destination then
     // draw it centered without changing the aspect ratio
-    if (width_height_ratio > 1) {
+    if (source_destination_ratio > 1) {
         const height_before_adjustment = destination_height;
-        destination_height /= width_height_ratio;
+        destination_height /= source_destination_ratio;
         destination_y = (height_before_adjustment-destination_height)/2;
-    } else if (width_height_ratio < 1) {
+    } else if (source_destination_ratio < 1) {
         const width_before_adjustment = destination_width;
-        destination_width *= width_height_ratio;
+        destination_width *= source_destination_ratio;
         destination_x = (width_before_adjustment-destination_width)/2;
     }
     context.drawImage(source, 
@@ -964,8 +966,8 @@ const rectangle_selection = () => {
             const source = video.hidden ? document.getElementById('canvas') : video;
             draw_maintaining_aspect_ratio(source,
                                           temporary_canvas,
-                                          source.width,
-                                          source.height,
+                                          temporary_canvas.width,
+                                          temporary_canvas.height,
                                           box_left-source_box.left,
                                           box_top-source_box.top,
                                           box.width,
