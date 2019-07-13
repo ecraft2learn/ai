@@ -229,6 +229,7 @@ figcaption {
   border-radius: 8px;
   padding: 4px;
   box-shadow: 5px 3px 5px black;
+  width: fit-content;
 }
 .amber-light {
   background-color: #d6b862;
@@ -237,7 +238,7 @@ figcaption {
   border-radius: 8px;
   padding: 4px;
   box-shadow: 5px 3px 5px black;
-  width:  fit-content;
+  width: fit-content;
 }
 .green-light {
   background-color: #386838;
@@ -246,6 +247,7 @@ figcaption {
   border-radius: 8px;
   padding: 4px;
   box-shadow: 5px 3px 5px black;
+  width: fit-content;
 }
 .gray-light {
   background-color: #787a78;
@@ -253,13 +255,14 @@ figcaption {
   color: white;
   border-radius: 8px;
   padding: 4px;
-  box-shadow: 5px 3px 5px black;  
+  box-shadow: 5px 3px 5px black;
+  width: fit-content; 
 }
 .full-response {
   position: absolute;
   left: 15%;
   top: 30%;
-  width: 70%;
+  width: fit-content;
   padding: 10px;
   border-radius: 8px;
   background-color: white;
