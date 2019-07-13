@@ -1192,25 +1192,14 @@ let not_confident_answers = 0; // less than minimum_confidence for top answer
 const process_prediction = (result, image_or_canvas, class_index, image_index, image_count) => {
     const image_url = get_url_from_image_or_canvas(image_or_canvas);
     const table_of_image_and_response = !(option === 'diagnose' && is_mobile());
+    const correct_prediction = correct(result, class_index);
     let message = "";
     if (table_of_image_and_response) {
         message = "<table><tr><td><img src='" + image_url + "' width=128 height=128></img></td><td style='padding: 8px;'>";
     }
-    let full_confidence_message = confidences(result, true, class_index);
-    let short_confidence_message = confidences(result, false, class_index);
+    const full_confidence_message = confidences(result, true, class_index);
+    const short_confidence_message = confidences(result, false, class_index);
     const class_name = class_names[class_index];
-    if (typeof image_count !== 'undefined') { // or would option === 'experiment' be clearer
-        message += "&nbsp;" + better_name(class_name) + "#" + image_count;
-    } else if (class_name) {
-        message += "According to experts this is ";
-        if (class_name === old_serious_name) {
-            message += "a condition that should be seen by a doctor. ";
-        } else if (class_name === 'non-serious') {
-            message += "abnormal but not serious. ";
-        } else if (class_name === 'normal') {
-            message += "normal. ";
-        }
-    }
     window.full_popup_message = full_confidence_message;
     message += "<span class='clickable' onclick='popup_full_message(event)'>"
                + short_confidence_message
@@ -1223,7 +1212,25 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
                    + "image source"
                    + "</a>";
     }
-    let correct_prediction = correct(result, class_index);
+    if (typeof image_count !== 'undefined') { // or would option === 'experiment' be clearer
+        message += "&nbsp;" + better_name(class_name) + "#" + image_count;
+    } else if (class_name) {
+        if (correct_prediction) {
+            message += "<br>According to experts this image is ";
+        } else {
+            message += "<br><span style='color:red;'>However, according to experts this image is ";
+        }
+        if (class_name === old_serious_name) {
+            message += "a condition that should be seen by a doctor. ";
+        } else if (class_name === 'non-serious') {
+            message += "abnormal but not serious. ";
+        } else if (class_name === 'normal') {
+            message += "normal. ";
+        }
+        if (!correct_prediction) {
+            message += "</span>";
+        }
+    }
     if (correct_prediction) {
         number_right++;
         if (!long_experimental_results && option === 'experiment') {
