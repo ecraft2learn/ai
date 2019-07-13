@@ -23,8 +23,11 @@ const VIDEO_HEIGHT = 224;
 
 const old_serious_name = "warrants second opinion";
 const new_serious_name = "check with a GP";
+const name_substitutions = 
+    {"warrants second opinion": "check with a GP",
+     "non-serious": "abnormal but not serious"}
 const better_name = (name) =>
-    name === old_serious_name ? new_serious_name : name;
+    name_substitutions[name] || name;
 
 const number_of_random_images = 4;
 const random_image_padding = 4;
@@ -676,7 +679,7 @@ const confidences = (result, full_description, correct_class_index) => {
                 message + " (Confidence score is " + scores[1].score + "%)";
             }
         } else {
-            message += "the nail's condition is " + scores[0].name;
+            message += "the nail's condition is " + better_name(scores[0].name);
             if (full_description) {
                 message += " with confidence score of " + scores[0].score + "%. ";
                 if (scores.length > 1 && scores[1].name === old_serious_name && scores[1].score > 0) {
@@ -1189,6 +1192,8 @@ let true_positives = 0;
 let number_right = 0;
 let not_confident_answers = 0; // less than minimum_confidence for top answer 
 
+window.full_popup_messages = [];
+
 const process_prediction = (result, image_or_canvas, class_index, image_index, image_count) => {
     const image_url = get_url_from_image_or_canvas(image_or_canvas);
     const table_of_image_and_response = !(option === 'diagnose' && is_mobile());
@@ -1200,8 +1205,9 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
     const full_confidence_message = confidences(result, true, class_index);
     const short_confidence_message = confidences(result, false, class_index);
     const class_name = class_names[class_index];
-    window.full_popup_message = full_confidence_message;
-    message += "<span class='clickable' onclick='popup_full_message(event)'>"
+    window.full_popup_messages.push(full_confidence_message);
+    message += "<span class='clickable' onclick='popup_full_message(event, "
+               + (window.full_popup_messages.length-1) + ")'>"
                + short_confidence_message
                + "</span>";
     if (image_or_canvas.title && window.location.hash.indexOf('debug') >= 0) {
@@ -1215,19 +1221,17 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
     if (typeof image_count !== 'undefined') { // or would option === 'experiment' be clearer
         message += "&nbsp;" + better_name(class_name) + "#" + image_count;
     } else if (class_name) {
-        if (correct_prediction) {
-            message += "<br>According to experts this image is ";
+        if (correct_prediction && short_confidence_message.indexOf(not_confident_message) < 0) {
+            message += "<br>Experts who analysed this photo agree. ";
         } else {
-            message += "<br><span style='color:red;'>However, according to experts this image is ";
-        }
-        if (class_name === old_serious_name) {
-            message += "a condition that should be seen by a doctor. ";
-        } else if (class_name === 'non-serious') {
-            message += "abnormal but not serious. ";
-        } else if (class_name === 'normal') {
-            message += "normal. ";
-        }
-        if (!correct_prediction) {
+            message += "<br><span style='color:red;'>However according to experts, this image is ";
+            if (class_name === old_serious_name) {
+                message += "a condition that should be seen by a doctor. ";
+            } else if (class_name === 'non-serious') {
+                message += "abnormal but not serious. ";
+            } else if (class_name === 'normal') {
+                message += "normal. ";
+            }
             message += "</span>";
         }
     }
@@ -1290,11 +1294,11 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
     return message;
 };
 
-const popup_full_message = (event) => {
+const popup_full_message = (event, message_number) => {
     event.stopPropagation();
     const full_response_element = document.getElementById('full-response');
     full_response_element.hidden = false;
-    full_response_element.innerHTML = window.full_popup_message;
+    full_response_element.innerHTML = window.full_popup_messages[message_number];
     const hide_on_any_click = () => {
         full_response_element.hidden = true;
         window.removeEventListener('click', hide_on_any_click);
