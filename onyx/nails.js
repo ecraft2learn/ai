@@ -177,7 +177,7 @@ const display_results = (canvas) => {
 //             result_description = "<img src='" + data_url + "' width=128 height=128></img><br>" 
 //                                  + result_description;
 //         }
-        const message = result_description; // response_element(result_description);
+        const message = result_description;
         const camera_image_element = document.getElementById('camera-image');
         camera_image_element.src = data_url;
         camera_image_element.hidden = false;
@@ -573,7 +573,7 @@ const start_up = () => {
 
 const remove_parent_element = (event) => {
     // used in onclick in HTML 
-    event.currentTarget.closest('.prediction-response').remove();
+    event.currentTarget.closest('tr').remove();
 };
 
 const display_message = (message, element_id, append) => {
@@ -1310,9 +1310,9 @@ const response_element = (message) => {
     if (is_mobile() || message === "") {
         return message;
     }
-    return "<div class='prediction-response'>"
+    return "<td>"
            + message
-           + "&nbsp;<button class='close-button' onclick='remove_parent_element(event)'>&times;</button></div>";
+           + "&nbsp;<button class='close-button' onclick='remove_parent_element(event)'>&times;</button></td>";
 
 };
 

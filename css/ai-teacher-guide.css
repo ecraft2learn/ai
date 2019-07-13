@@ -117,7 +117,19 @@ figcaption {
   /* width:  fit-content; */
 }
 .close-button {
-/* 	based upon http://jsfiddle.net/adzFe/14/ */cursor: pointer;color: white;border: 1px solid #AEAEAE;border-radius: 20px;background: #605F61;font-size: 26px;font-weight: bold;display: inline-block;line-height: 0px;padding: 11px 4px;margin-left: 6px;position: relative;top: -70px;left: 97%;}
+/* 	based upon http://jsfiddle.net/adzFe/14/ */
+  cursor: pointer;
+  color: white;
+  border: 1px solid #AEAEAE;
+  border-radius: 20px;
+  background: #605F61;
+  font-size: 26px;
+  font-weight: bold;
+  display: inline-block;
+  line-height: 0px;
+  padding: 11px 4px;
+  margin-left: 6px;
+}
 .advanced-topic {
   cursor: pointer;
   color: #316d37;
