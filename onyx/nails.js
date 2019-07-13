@@ -1207,7 +1207,8 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
     const class_name = class_names[class_index];
     window.full_popup_messages.push(full_confidence_message);
     message += "<span class='clickable' onclick='popup_full_message(event, "
-               + (window.full_popup_messages.length-1) + ")'>"
+               + (window.full_popup_messages.length-1) + ")'"
+               + " title='Click for more details.'>"
                + short_confidence_message
                + "</span>";
     if (image_or_canvas.title && window.location.hash.indexOf('debug') >= 0) {
