@@ -117,7 +117,7 @@ figcaption {
   margin: auto;
   /* width:  fit-content; */
 }
-.close-button {
+.x-close-button {
 /* 	based upon http://jsfiddle.net/adzFe/14/ */
   cursor: pointer;
   color: white;

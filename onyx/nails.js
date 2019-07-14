@@ -1313,8 +1313,7 @@ const response_element = (message) => {
     }
     return "<td>"
            + message
-           + "&nbsp;<button class='close-button' onclick='remove_parent_element(event)'>&times;</button></td>";
-
+           + "&nbsp;<button class='x-close-button' onclick='remove_parent_element(event)'>&times;</button></td>";
 };
 
 const maximum_confidence = (confidences) => {
