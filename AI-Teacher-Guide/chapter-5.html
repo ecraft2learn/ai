@@ -272,10 +272,13 @@ These texts may have captured
 <a href="https://developers.googleblog.com/2018/04/text-embedding-models-contain-bias.html" target="_blank">
 societal biases</a>.
 For example, the following example seems to have captured the bias that butchers are male and bakers female.
+But the bias is so weak that if <a href="https://en.wikipedia.org/wiki/Cosine_similarity" target="_blank">cosine similarity</a>
+is used instead of <a href="https://en.wikipedia.org/wiki/Euclidean_distance" target="_blank">Euclidean distance</a>
+the unbiased "chef" is found.
 Some word embedding databases have the bias that doctors are male and nurses female.
-The word embeddings we are using will answer the question "father is to doctor as mother is to X" with "nurse".
-Is this a bias? Or might it be due to the fact that only mothers can nurse babies?
-Run some experiments below to explore this question.
+They will answer the question "man is to doctor as woman is to X" with "nurse".
+Is this a bias? Or might it be due to the fact that only women can nurse babies?
+Run some experiments below to explore these kinds of questions.
 </p>
 <figure class = "snap-iframe"
         id = "word analogy bias"
