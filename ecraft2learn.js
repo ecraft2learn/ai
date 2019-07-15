@@ -198,7 +198,7 @@ window.ecraft2learn =
     };
     let invoke_callback = function (callback) { // any number of additional arguments
         // callback could either be a Snap! object or a JavaScript function
-        if (inside_snap() && inside_snap() && callback instanceof Context) { // assume Snap! callback
+        if (inside_snap() && callback instanceof Context) { // assume Snap! callback
             if (callback.stopped_by_user) {
                 return;
             }
@@ -2993,60 +2993,45 @@ xhr.send();
       report_progress(best_word, best_distance, words_considered, 'final');
       return best_word;
   },
-  // following is not really useful
-//   closest_and_farthest_word: (close_target_features, far_target_features, exceptions, distance_measure, language) => {
-//       // finds words with the best score which is computed based on closeness to and furtherness to far_target_features
-//       // distance_measure is either Euclidean distance or Cosine similarity 
-//       // some researchers use cosine similarity and others Euclidean distance
-//       // see https://en.wikipedia.org/wiki/Cosine_similarity
-//       language = extract_language_code(language);
-//       if (typeof words_to_features[language] !== 'object') {
-//           console.error("closest_word called before word embeddings loaded.")
-//           return;
-//       }
-//       if (typeof exceptions !== 'object') {
-//           exceptions = [];
-//       } else if (!(exceptions instanceof Array)) {
-//           exceptions = exceptions.asArray();
-//       }
-//       if (!(close_target_features instanceof Array)) {
-//           close_target_features = close_target_features.asArray();
-//       }
-//       if (!(far_target_features instanceof Array)) {
-//           far_target_features = far_target_features.asArray();
-//       }
-//       if (close_target_features.length === 0) {
-//           return "Can't find words close to the empty vector.\nProbably due to requesting the features of an unknown word.";
-//       }
-//       if (far_target_features.length === 0) {
-//           return "Can't find words far from the empty vector.\nProbably due to requesting the features of an unknown word.";
-//       }
-//       let use_distance = distance_measure === 'Euclidean distance';
-//       let words_considered = 0;
-//       let best_word, score;
-//       let best_score = Number.MAX_VALUE;
-//       const close_target_magnitude = magnitude(close_target_features);
-//       const far_target_magnitude = magnitude(far_target_features);
-//       Object.keys(words_to_features[language]).forEach(function (word) {
-//           if (exceptions.indexOf(word) < 0) {
-//               let candidate_features = words_to_features[language][word];
-//               words_considered++;
-//               let close_distance = use_distance ? distance_squared(close_target_features, candidate_features) :
-//                                                   // subtract from 1 since closest cosine similarity is 1
-//                                                   1-cosine_similarity(close_target_features, candidate_features, close_target_magnitude); 
-//               let far_distance   = use_distance ? distance_squared(far_target_features, candidate_features) :
-//                                                   // subtract from 1 since closest cosine similarity is 1
-//                                                   1-cosine_similarity(far_target_features, candidate_features, far_target_magnitude);
-//               let score = close_distance-far_distance;
-//               if (score < best_score) {
-// //                   console.log(word, score, "close", close_distance, "far", far_distance);
-//                   best_word = word;
-//                   best_score = score;
-//               }
-//           }
-//       });
-//       return best_word;
-//   },
+  load_tensorflow: (callback) => {
+      if (typeof tf === 'undefined') {
+          const script = document.createElement('script');
+          script.src = "../js/tfjs.js";
+          script.onload = () => {
+                              invoke_callback(callback);
+          };
+          document.body.appendChild(script);
+      } else {
+          invoke_callback(callback);
+      }
+  },
+  closest_words: (target_features, language, distances_too, callback) => {
+      record_callbacks(callback);
+      language = extract_language_code(language);
+      if (!ecraft2learn.words_to_features_tensors) {
+          ecraft2learn.words_to_features_tensors = {};
+      }
+      if (!ecraft2learn.words_to_features_tensors.hasOwnProperty(language)) {
+          ecraft2learn.words_to_features_tensors[language] = 
+              tf.tensor(Object.values(words_to_features[language]));
+      }
+      const word_tensors = ecraft2learn.words_to_features_tensors[language];
+      const words = Object.keys(words_to_features[language]);
+      const target_tensor = tf.tensor(snap_to_javascript(target_features));
+      const cosines_tensor = tf.metrics.cosineProximity(target_tensor, word_tensors);
+      const cosines_float32 = cosines_tensor.dataSync();
+      // using tf.tidy instead of explicitly disposing of tensors caused Snap! to repeated call this
+      target_tensor.dispose();
+      cosines_tensor.dispose();
+      const cosines = new Array(...cosines_float32);
+      const words_and_cosines = cosines.map((cosine, index) => [words[index], cosine]);
+      const sorted_words_and_cosines = words_and_cosines.sort((a, b) => a[1]-b[1]); 
+      if (distances_too) {
+          invoke_callback(callback, javascript_to_snap(sorted_words_and_cosines));
+      } else {
+          return invoke_callback(callback, javascript_to_snap(sorted_words_and_cosines.map(word_and_cosine => word_and_cosine[0])));
+      }
+  },
   initialise_all: function () {
       Object.values(ecraft2learn.support_window).forEach(function (support_window) {
           support_window.close();
