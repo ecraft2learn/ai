@@ -145,6 +145,26 @@ This use of word embeddings works for grammatical analogies as well.
 Try solving "slow is to slower as fast is to what?".
 You might need to add 'fast' as an exception.
 </p>
+<h4 class="instructions-white">Finding all the 'closest' words</h4>
+<p class="instructions">
+If you were to use the <span class="block-name">closest word to</span> reporter to sort all
+the words by distance to a list of features it would take about a full day since it will have
+to call the reporter 20,000 times.
+Instead we provide the <span class="block-name">closest words to</span> reporter that 
+does it all at once in less than a second
+(except the first time it is called it may take several seconds).
+Optionally it can also report the distances as cosines.
+</p>
+<figure class = "snap-iframe"
+        id = "sort closest words"
+        container_style = "width: 850px; height: 650px" 
+        caption = "Find all the words closest to a word or list of features. TRY IT!">
+</figure>
+<p class="instructions">
+While one rarely needs all 20,000 words it might be interesting to compare two words by
+seeing how many of the nearest 100 or 500 words of each are in common.
+Think up other uses for this reporter.
+</p>
 
 <h4 class="instructions-white">Drawing word embeddings</h4>
 <p class="instructions">
