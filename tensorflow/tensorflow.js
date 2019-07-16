@@ -12,14 +12,10 @@ let model; // used for defaults such as model name when creating a model
 
 let data = {}; // training and validation data either for "all models" or named models
 const get_data = (model_name, kind) => {
-    if (!data.hasOwnProperty(model_name) ||
-        !(data[model_name].hasOwnProperty('training') || data[model_name].hasOwnProperty('validation'))) {
+    if (!data.hasOwnProperty(model_name) || !data[model_name].hasOwnProperty(kind)) {
         if (model_name !== 'all models') {
             return get_data('all models', kind);
         }
-        return;
-    }
-    if (typeof data[model_name][kind] === 'undefined') {
         return;
     }
     return data[model_name][kind];
@@ -103,7 +99,7 @@ const categorical_loss_functions =
      "Softmax Cross Entropy": "softmaxCrossEntropy"};
 
 const loss_function_named = (name) => {
-    return loss_functions[name] || name;
+    return loss_functions[name] || categorical_loss_functions[name] || name;
 };
 
 const categorical_loss_function_named = (name) => {
@@ -194,9 +190,13 @@ const create_model = function (name, layers, optimizer_full_name, input_shape, o
     if (!optimizer) {
         optimizer = 'adam';
     }
-    let loss_function = categories ?
-                        'softmaxCrossEntropy' : 
-                        loss_function_named((options.loss_function || 'meanSquaredError'));
+    if (categories) {
+        options.loss_function = "Softmax Cross Entropy";
+        const gui = parameters_interface(create_parameters_interface);
+        gui.model.remove(loss_function_gui);
+        loss_function_gui = gui.model.add(gui_state["Model"], 'Loss function', Object.keys(categorical_loss_functions));
+    }
+    let loss_function = loss_function_named(options.loss_function || 'meanSquaredError');
 //     tf.tidy(() => {
         model.compile({loss: typeof loss_function === 'string' ? tf.losses[loss_function] : loss_function,
                        optimizer: optimizer,
@@ -825,11 +825,13 @@ const create_parameters_interface = function () {
           optimize: create_hyperparameter_optimize_parameters(parameters_gui)};
 };
 
+let loss_function_gui;
+
 const create_model_parameters = (parameters_gui) => {
     const model = parameters_gui.addFolder("Model");
     model.add(gui_state["Model"], "Layers");
     model.add(gui_state["Model"], 'Optimization method', Object.keys(optimization_methods));
-    model.add(gui_state["Model"], 'Loss function', Object.keys(loss_functions));
+    loss_function_gui = model.add(gui_state["Model"], 'Loss function', Object.keys(loss_functions));
     return model;  
 };
 
