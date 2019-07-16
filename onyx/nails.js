@@ -386,7 +386,7 @@ const add_images = (when_finished, just_one_class, only_class_index, except_imag
 //                         model_callback);
         }
     };
-    const one_shot = (index, n) => {
+    const one_hot = (index, n) => {
         let vector = [];
         for (let i = 0; i < n; i++) {
             vector.push(i === index ? 1 : 0);
@@ -412,7 +412,7 @@ const add_images = (when_finished, just_one_class, only_class_index, except_imag
             }
             if (xs instanceof Array) { // need this for training or testing
                 const x = logits.dataSync();
-                const y = one_shot(class_index, class_names.length);
+                const y = one_hot(class_index, class_names.length);
                 if (typeof every_nth_for_testing === 'number') {
                     if (image_counter%every_nth_for_testing === 0 && option === 'create model') {
                         xs_validation.push(x);
