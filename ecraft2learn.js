@@ -1121,7 +1121,7 @@ window.ecraft2learn =
                                   'Loaded',
                                   () => {
                                       return {data: {input: snap_to_javascript(input, true),
-                                                     output: snap_to_javascript(output, true)},
+                                                     output: snap_to_javascript(output, false)},
                                               model_name: model_name,
                                               kind: kind,
                                               ignore_old_dataset: ignore_old_dataset,

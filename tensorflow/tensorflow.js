@@ -12,7 +12,8 @@ let model; // used for defaults such as model name when creating a model
 
 let data = {}; // training and validation data either for "all models" or named models
 const get_data = (model_name, kind) => {
-    if (typeof data[model_name] === 'undefined') {
+    if (!data.hasOwnProperty(model_name) ||
+        !(data[model_name].hasOwnProperty('training') || data[model_name].hasOwnProperty('validation'))) {
         if (model_name !== 'all models') {
             return get_data('all models', kind);
         }
@@ -24,14 +25,52 @@ const get_data = (model_name, kind) => {
     return data[model_name][kind];
 };
 const set_data = (model_name, kind, value) => {
-    if (typeof data[model_name] === 'undefined') {
+    if (!data.hasOwnProperty(model_name)) {
         data[model_name] = {};
+    }
+    if (value.hasOwnProperty('output')) {
+        if (value.output.length > 0 && isNaN(+value.output[0])) {
+            let labels;
+            [value.output, labels] = to_one_hot(value.output);
+            data[model_name].categories = labels;
+            if (model_name === 'all models') {
+               // recreate all models with softmax and one-hot created before this data was available
+               Object.keys(data).forEach((name) => {
+                   if (data[name].hasOwnProperty('recreate')) {
+                       data[name]['recreate']();
+                   }
+               })
+            } else if (data[model_name].hasOwnProperty('recreate')) {
+                data[model_name]['recreate']();               
+            }
+        } else {
+            value.output = value.output.map((n) => +n); // string to number
+            data[model_name].categories = undefined;
+        }        
     }
     data[model_name][kind] = value;
     if (kind === 'training') {
         optimize_hyperparameters_interface_button.disabled = false;
         train_button.disabled = false;
     }
+};
+const to_one_hot = (labels) => {
+    const unique_labels = [];
+    labels.forEach((label) => {
+      if (unique_labels.indexOf(label) < 0) {
+          unique_labels.push(label);
+      }
+    });
+    const one_hot = (index, n) => {
+        let vector = [];
+        for (let i = 0; i < n; i++) {
+            vector.push(i === index ? 1 : 0);
+        }
+        return vector;
+    };
+    const one_hot_labels =
+        labels.map((label) => one_hot(unique_labels.indexOf(label), unique_labels.length));
+    return [one_hot_labels, unique_labels];
 };
 
 const optimization_methods =
@@ -58,12 +97,17 @@ const loss_functions =
 //      "Huber Loss": "huberLoss", // this caused training nonsense
      "Log Loss": "logLoss",
      "Mean Squared Error": "meanSquaredError"};
-     // following require more arguments
-//      "Sigmoid Cross Entropy": "sigmoidCrossEntropy",
-//      "Softmax Cross Entropy": "categoricalCrossentropy"
+
+const categorical_loss_functions =
+    {//"Sigmoid Cross Entropy": "sigmoidCrossEntropy", - requires more arguments
+     "Softmax Cross Entropy": "softmaxCrossEntropy"};
 
 const loss_function_named = (name) => {
     return loss_functions[name] || name;
+};
+
+const categorical_loss_function_named = (name) => {
+    return categorical_loss_functions[name] || name;
 };
 
 const add_to_models = function (new_model) {
@@ -105,6 +149,15 @@ const create_model = function (name, layers, optimizer_full_name, input_shape, o
     const model = tf.sequential({name: name});
     model.ready_for_training = false;
     tensorflow.add_to_models(model); // using tensorflow.add_to_models in case it has been extended
+    const categories = get_data(name, "categories"); // if defined
+    if (!categories) {
+        // need to recreate this model if later it gets data that uses categories
+        set_data(name,
+                 'recreate',
+                 () => {
+                     create_model(name, layers, optimizer_full_name, input_shape, options);
+                 });
+    }
     layers.forEach((configuration, index) => {
         let layer_activation;
         if (typeof configuration === 'number') {
@@ -117,9 +170,14 @@ const create_model = function (name, layers, optimizer_full_name, input_shape, o
         if (size > 0) {
             let configuration = {units: size,
                                  useBias: index !== layers.length-1}; // except for last layer
-            if (index !== layers.length-1) {
-                // all but the last one has an activation function
-                configuration.activation = options.activation || 'relu';
+            if (index === layers.length-1) {
+                if (categories) {
+                    configuration.activation = 'softmax';
+                    configuration.units = categories.length;
+                }
+            } else {
+                // all but the last one has an activation function unless categorical 
+                configuration.activation = options.activation || 'relu';              
             }
             if (layer_activation) { // if explicitly specified override default activation function
                 configuration.activation = layer_activation;
@@ -136,11 +194,13 @@ const create_model = function (name, layers, optimizer_full_name, input_shape, o
     if (!optimizer) {
         optimizer = 'adam';
     }
-    let loss_function = loss_function_named((options.loss_function || 'meanSquaredError'));
+    let loss_function = categories ?
+                        'softmaxCrossEntropy' : 
+                        loss_function_named((options.loss_function || 'meanSquaredError'));
 //     tf.tidy(() => {
         model.compile({loss: typeof loss_function === 'string' ? tf.losses[loss_function] : loss_function,
                        optimizer: optimizer,
-                       metrics: ['accuracy']
+                       metrics: categories && ['accuracy']
                       });
 //     });
     gui_state["Model"]["Layers"] = layers.toString();
@@ -662,7 +722,13 @@ const predict = (model_name, inputs, success_callback, error_callback) => {
             input_tensor = tf.tensor2d(inputs); //, [inputs.length].concat(shape_of_data(inputs))); 
         }
         let prediction = model.predict(input_tensor);
-        success_callback(reshape_array(prediction.dataSync(), model.outputShape));
+        const results = reshape_array(prediction.dataSync(), model.outputShape);
+        const categories = get_data(model_name, 'categories');
+        if (categories) {
+            success_callback(categorical_results(results, categories));
+        } else {
+            success_callback(results);
+        }
     } catch (error) {
         error_callback(error.message);
     }
@@ -1003,7 +1069,10 @@ const create_prediction_interface = () => {
     draw_area.appendChild(div);
     const make_prediction = (model_name) => {
         const success_callback = (results) => {
-            if (input_input.value.indexOf('[') < 0) {
+            const categories = get_data(model_name, 'categories');
+            if (categories) {
+                results = JSON.stringify(results);
+            } else if (input_input.value.indexOf('[') < 0) {
                 results = results[0]; // only one number in inputs so only one result
             } else {
                 results = "[" + results + "]";
@@ -1052,6 +1121,15 @@ const create_prediction_interface = () => {
     const prediction_button = create_button("Make prediction", choose_model_then_make_prediction);
     draw_area.appendChild(prediction_button);
 };
+
+const categorical_results = (results, categories) => 
+      results.map((result) => {
+                          const result_as_object = {};
+                          result.forEach((result, index) => {(
+                              result_as_object[categories[index]] = result)
+                          });
+                          return result_as_object;
+                 });
 
 let save_model_button;
 let load_model_button;
