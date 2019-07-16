@@ -5,6 +5,9 @@ body {
   margin: 0 auto;
   float: none;
 }
+.main {
+  background-color: white;
+}
 p {
   border-radius: 8px;
   padding: 8px;
