@@ -85,7 +85,7 @@ const optimizer_named = (name, learning_rate) => {
     return optimization_methods[name] || name;
 };
 
-const loss_functions = 
+const non_categorical_loss_functions = 
     {"Absolute Difference": "absoluteDifference",
 //     "Compute Weighted Loss": "computeWeightedLoss", // caused "Cannot compute gradient: gradient function not found for notEqual." errors
 //      "Cosine Distance": "cosineDistance", // was causing crazy predictions
@@ -98,12 +98,10 @@ const categorical_loss_functions =
     {//"Sigmoid Cross Entropy": "sigmoidCrossEntropy", - requires more arguments
      "Softmax Cross Entropy": "softmaxCrossEntropy"};
 
-const loss_function_named = (name) => {
-    return loss_functions[name] || categorical_loss_functions[name] || name;
-};
+const loss_functions = (categories) => categories ? categorical_loss_functions : non_categorical_loss_functions;
 
-const categorical_loss_function_named = (name) => {
-    return categorical_loss_functions[name] || name;
+const loss_function_named = (name) => {
+    return non_categorical_loss_functions[name] || categorical_loss_functions[name] || name;
 };
 
 const add_to_models = function (new_model) {
@@ -190,13 +188,19 @@ const create_model = function (name, layers, optimizer_full_name, input_shape, o
     if (!optimizer) {
         optimizer = 'adam';
     }
+    const gui = parameters_interface(create_parameters_interface);
     if (categories) {
         options.loss_function = "Softmax Cross Entropy";
-        const gui = parameters_interface(create_parameters_interface);
-        gui.model.remove(loss_function_gui);
-        loss_function_gui = gui.model.add(gui_state["Model"], 'Loss function', Object.keys(categorical_loss_functions));
+        gui.model.remove(non_categorical_loss_function_gui);
+        categorical_loss_function_gui = 
+            gui.model.add(gui_state["Model"],
+                          'Loss function',
+                          Object.keys(categorical_loss_functions));
+    } else {
+        gui.model.remove(categorical_loss_function_gui);
+        gui.model.add(non_categorical_loss_function_gui);
     }
-    let loss_function = loss_function_named(options.loss_function || 'meanSquaredError');
+    let loss_function = loss_function_named(options.loss_function || default_loss_function(categories));
 //     tf.tidy(() => {
         model.compile({loss: typeof loss_function === 'string' ? tf.losses[loss_function] : loss_function,
                        optimizer: optimizer,
@@ -247,13 +251,14 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
             };
         return;
     }
+    const categories = get_data(model.name, 'categories');
     try {
         // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
         let epoch_history = [];
-        const metrics = ['loss', 'val_loss', 'acc', 'val_acc'];
-        const container = {name: 'Loss and accuracy',
-                           tab: 'Training',
+        const metrics = categories ? ['loss', 'val_loss', 'acc', 'val_acc'] : ['loss', 'val_loss'];
+        const container = {tab: 'Training',
                            styles: { height: '400px' }};
+        container.name = categories ? 'Loss and accuracy' : 'Loss';                           
         let callbacks;
         let epoch_end_callback;
         if (use_tfjs_vis &&
@@ -285,7 +290,7 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
             const optimizer = optimizer_named(optimizer_full_name);
             const loss_function_full_name = gui_state["Model"]["Loss function"];
             const loss_function = loss_function_named(loss_function_full_name);
-            model.compile({loss: (loss_function || 'meanSquaredError'),
+            model.compile({loss: (loss_function || default_loss_function(categories)),
                            optimizer: optimizer});
         }
         if (model.optimizer.learningRate && options.learning_rate) { 
@@ -369,6 +374,8 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
     }
 };
 
+const default_loss_function = (categories) => categories ? 'softmaxCrossEntropy' : 'meanSquaredError';
+
 const get_tensors = (model_name, kind) => {
     let data = get_data(model_name, kind);
     if (!data) {
@@ -425,6 +432,7 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
     lowest_loss = Number.MAX_VALUE;
     const name_element = document.getElementById('name_element');
     const model_name = name_element ? name_element.value : model ? model.name : 'my-model';
+    const categories = get_data(model_name, 'categories');
     let [xs, ys] = get_tensors(model_name, 'training');
     let validation_tensors = get_tensors(model_name, 'validation'); // undefined if no validation data
     const display_trial = (parameters, element) => {
@@ -441,7 +449,7 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
             element.innerHTML += "Optimization method = " + inverse_lookup(parameters.optimization_method, optimization_methods) + "<br>";
         }
         if (parameters.loss_function) {
-            element.innerHTML += "Loss function = " + inverse_lookup(parameters.loss_function, loss_functions) + "<br>";
+            element.innerHTML += "Loss function = " + inverse_lookup(parameters.loss_function, loss_functions(categories)) + "<br>";
         }
     };
     const install_settings = (parameters) => {
@@ -458,7 +466,7 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
             gui_state["Model"]["Optimization method"] = inverse_lookup(parameters.optimization_method, optimization_methods);
         }
         if (parameters.loss_function) {
-            gui_state["Model"]["Loss function"] = inverse_lookup(parameters.loss_function, loss_functions);
+            gui_state["Model"]["Loss function"] = inverse_lookup(parameters.loss_function, loss_functions(categories));
         }
         let gui = parameters_interface(create_parameters_interface);
         gui.model.__controllers.forEach((controller) => {
@@ -634,11 +642,12 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
 //         }); 
     };
     const space = {};
+    const categories = get_data(model_name, 'categories');
     if (to_boolean(gui_state["Optimize"]["Search for best Optimization method"])) {
         space.optimization_method = hpjs.choice(Object.values(optimization_methods));
     }
     if (to_boolean(gui_state["Optimize"]["Search for best loss function"])) {
-        space.loss_function = hpjs.choice(Object.values(loss_functions));
+        space.loss_function = hpjs.choice(Object.values(loss_functions(categories)));
     }
     if (to_boolean(gui_state["Optimize"]["Search for best number of training iterations"])) {
         const current_epochs = Math.round(gui_state["Training"]["Number of iterations"]); // epochs || 
@@ -825,13 +834,13 @@ const create_parameters_interface = function () {
           optimize: create_hyperparameter_optimize_parameters(parameters_gui)};
 };
 
-let loss_function_gui;
+let non_categorical_loss_function_gui, categorical_loss_function_gui;
 
 const create_model_parameters = (parameters_gui) => {
     const model = parameters_gui.addFolder("Model");
     model.add(gui_state["Model"], "Layers");
     model.add(gui_state["Model"], 'Optimization method', Object.keys(optimization_methods));
-    loss_function_gui = model.add(gui_state["Model"], 'Loss function', Object.keys(loss_functions));
+    non_categorical_loss_function_gui = model.add(gui_state["Model"], 'Loss function', Object.keys(non_categorical_loss_functions));
     return model;  
 };
 
@@ -1499,12 +1508,13 @@ const receive_message =
             let number_of_experiments = message.number_of_experiments;
             let epochs = message.epochs;
             let model_name = message.model_name || 'all models';
+            const categories = get_data(model_name, 'categories');
             let time_stamp = message.time_stamp;
             const success_callback = (result) => {
                 let best_parameters = result.argmin;
                 best_parameters.input_shape = shape_of_data((get_data(model_name, 'training') || get_data(model_name, 'validation')).input[0]);
                 best_parameters.optimization_method = inverse_lookup(best_parameters.optimization_method, optimization_methods);
-                best_parameters.loss_function       = inverse_lookup(best_parameters.loss_function, loss_functions);
+                best_parameters.loss_function       = inverse_lookup(best_parameters.loss_function, loss_functions(categories));
                 // So validation data is used when creating and training the model with the best parameters.
                 best_parameters.used_validation_data = !!get_data(model_name, 'validation');
                 event.source.postMessage({optimize_hyperparameters_time_stamp: time_stamp,
@@ -1514,7 +1524,7 @@ const receive_message =
             const experiment_end_callback = (n, trial) => {
                 let parameters = trial.args;
                 parameters.optimization_method = inverse_lookup(parameters.optimization_method, optimization_methods);
-                parameters.loss_function       = inverse_lookup(parameters.loss_function, loss_functions);
+                parameters.loss_function       = inverse_lookup(parameters.loss_function, loss_functions(categories));
                 event.source.postMessage({optimize_hyperparameters_time_stamp: time_stamp,
                                           trial_number: n,
                                           trial_optimize_hyperparameters: parameters,
