@@ -191,14 +191,22 @@ const create_model = function (name, layers, optimizer_full_name, input_shape, o
     const gui = parameters_interface(create_parameters_interface);
     if (categories) {
         options.loss_function = "Softmax Cross Entropy";
-        gui.model.remove(non_categorical_loss_function_gui);
-        categorical_loss_function_gui = 
-            gui.model.add(gui_state["Model"],
-                          'Loss function',
-                          Object.keys(categorical_loss_functions));
+        if (non_categorical_loss_function_gui.__li.parentNode) {
+            gui.model.remove(non_categorical_loss_function_gui);
+        }
+        if (!categorical_loss_function_gui.__li.parentNode) {
+            categorical_loss_function_gui = 
+                gui.model.add(gui_state["Model"],
+                              'Loss function',
+                              Object.keys(categorical_loss_functions));          
+        }
     } else {
-        gui.model.remove(categorical_loss_function_gui);
-        gui.model.add(non_categorical_loss_function_gui);
+        if (categorical_loss_function_gui.__li.parentNode) {
+            gui.model.remove(categorical_loss_function_gui);
+        }
+        if (!non_categorical_loss_function_gui.__li.parentNode) {
+            gui.model.add(non_categorical_loss_function_gui);
+        }
     }
     let loss_function = loss_function_named(options.loss_function || default_loss_function(categories));
 //     tf.tidy(() => {
