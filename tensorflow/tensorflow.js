@@ -188,26 +188,9 @@ const create_model = function (name, layers, optimizer_full_name, input_shape, o
     if (!optimizer) {
         optimizer = 'adam';
     }
-    const gui = parameters_interface(create_parameters_interface);
     if (categories) {
         options.loss_function = "Softmax Cross Entropy";
-        if (non_categorical_loss_function_gui && non_categorical_loss_function_gui.__li.parentNode) {
-            gui.model.remove(non_categorical_loss_function_gui);
-        }
-        if (!categorical_loss_function_gui || !categorical_loss_function_gui.__li.parentNode) {
-            categorical_loss_function_gui = 
-                gui.model.add(gui_state["Model"],
-                              'Loss function',
-                              Object.keys(categorical_loss_functions));
-            gui_state["Model"]["Loss function"] = Object.keys(categorical_loss_functions)[0];        
-        }
-    } else {
-        if (categorical_loss_function_gui && categorical_loss_function_gui.__li.parentNode) {
-            gui.model.remove(categorical_loss_function_gui);
-        }
-        if (!non_categorical_loss_function_gui || !non_categorical_loss_function_gui.__li.parentNode) {
-            gui.model.add(non_categorical_loss_function_gui);
-        }
+        gui_state["Model"]["Loss function"] = options.loss_function;
     }
     let loss_function = loss_function_named(options.loss_function || default_loss_function(categories));
 //     tf.tidy(() => {
@@ -660,7 +643,7 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
         space.loss_function = hpjs.choice(Object.values(loss_functions(categories)));
     }
     if (to_boolean(gui_state["Optimize"]["Search for best number of training iterations"])) {
-        const current_epochs = Math.round(gui_state["Training"]["Number of iterations"]); // epochs || 
+        const current_epochs = Math.round(gui_state["Training"]["Number of iterations"]); // epochs
         const minimum = Math.max(1, Math.round(current_epochs/2));
         const maximum = current_epochs*2;
         const number_of_choices = 5;
@@ -844,13 +827,16 @@ const create_parameters_interface = function () {
           optimize: create_hyperparameter_optimize_parameters(parameters_gui)};
 };
 
-let non_categorical_loss_function_gui, categorical_loss_function_gui;
 
 const create_model_parameters = (parameters_gui) => {
     const model = parameters_gui.addFolder("Model");
     model.add(gui_state["Model"], "Layers");
     model.add(gui_state["Model"], 'Optimization method', Object.keys(optimization_methods));
-    non_categorical_loss_function_gui = model.add(gui_state["Model"], 'Loss function', Object.keys(non_categorical_loss_functions));
+    if (model && get_data(model.name, 'categories')) {
+        model.add(gui_state["Model"], 'Loss function', Object.keys(categorical_loss_functions));
+    } else {
+        model.add(gui_state["Model"], 'Loss function', Object.keys(non_categorical_loss_functions));
+    }
     return model;  
 };
 
