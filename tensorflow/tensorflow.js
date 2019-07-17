@@ -191,20 +191,21 @@ const create_model = function (name, layers, optimizer_full_name, input_shape, o
     const gui = parameters_interface(create_parameters_interface);
     if (categories) {
         options.loss_function = "Softmax Cross Entropy";
-        if (non_categorical_loss_function_gui.__li.parentNode) {
+        if (non_categorical_loss_function_gui && non_categorical_loss_function_gui.__li.parentNode) {
             gui.model.remove(non_categorical_loss_function_gui);
         }
-        if (!categorical_loss_function_gui.__li.parentNode) {
+        if (!categorical_loss_function_gui || !categorical_loss_function_gui.__li.parentNode) {
             categorical_loss_function_gui = 
                 gui.model.add(gui_state["Model"],
                               'Loss function',
-                              Object.keys(categorical_loss_functions));          
+                              Object.keys(categorical_loss_functions));
+            gui_state["Model"]["Loss function"] = Object.keys(categorical_loss_functions)[0];        
         }
     } else {
-        if (categorical_loss_function_gui.__li.parentNode) {
+        if (categorical_loss_function_gui && categorical_loss_function_gui.__li.parentNode) {
             gui.model.remove(categorical_loss_function_gui);
         }
-        if (!non_categorical_loss_function_gui.__li.parentNode) {
+        if (!non_categorical_loss_function_gui || !non_categorical_loss_function_gui.__li.parentNode) {
             gui.model.add(non_categorical_loss_function_gui);
         }
     }
@@ -527,7 +528,8 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
                                                      () => {
                                                          install_settings(result.argmin);
                                                          install_settings_button.innerHTML =
-                                                            "Settings installed. Re-create and re-train your model before testings it predictions.";
+                                                            "Settings installed. Re-create and re-train your model before testings it predictions."
+                                                            + install_settings_button.innerHTML;
                                                      });
             xs.dispose();
             ys.dispose();
@@ -817,7 +819,7 @@ const gui_state =
              "Loss function": 'Mean Squared Error'},
    "Training": {"Learning rate": .001,
                 "Number of iterations": 100,
-                "Validation split": 0.1,
+                "Validation split": 0.2,
                 "Shuffle data": true},
    "Predictions": {},
    "Optimize": {"Number of experiments": 10,
