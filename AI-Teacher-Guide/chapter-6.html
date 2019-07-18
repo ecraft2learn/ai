@@ -124,6 +124,54 @@ A simple example is
 a model that estimates the distance a point is from the origin</a>.
 Given values for <i>x</i> and <i>y</i> it estimates the square root of the sum of the squares of each.
 </p>
+<h3 class="instructions-white">Training a model to label data</h3>
+<p class="instructions">
+You can train a model to put a label on data.
+For example, here is a model trained to provide a name for a color.
+It was trained to output a label for a vector of three numbers:
+<a href="https://en.wikipedia.org/wiki/HSL_and_HSV" target="_blank">hue, saturation, and brightness</a>.
+50 different random colors were given one of nine color names.
+Instead of responding with a number or a color name the model lists a "score"
+for each of the possible color names. The scores add up to 1.
+The percentage of confidences of each label is obtained by multiplying each score by 100.
+The following model does well with only a few colors,
+perhaps you can improve by training it with more colors and by training it better.
+</p>
+<figure class = "snap-iframe"
+        id = "naming colors"
+        full_screen = "true"
+        edit_mode = "true"
+        stage_ratio = "1"
+        container_style = "width: 900px; height: 700px" 
+        caption = "Test a simple model that names colors. IMPROVE IT!">
+</figure>
+Here is a <a href="../snap/snap.html?project=naming colors&noRun" target="_blank">full-screen version</a>.
+<p class="advanced-topic">
+Neural nets only work with numbers so how do outputs such "red" and "green" work?
+Click to learn how.
+</p>
+<span class="advanced-topic-body">
+<p class="how-it-works">
+The Snap! blocks for machine learning check if the output values are numbers.
+When they aren't it collects together all the unique values (e.g., all the color names in the data).
+It then uses a technique called <a href="https://en.wikipedia.org/wiki/One-hot" target="_blank">one hot</a>.
+If the colors were "red", "green", and "blue" they could be converted to 0, 1, and 2.
+But it wouldn't work well since the numbers imply that "red" is closer to "green" than "blue".
+Even if you think that is OK what about when one adds "white" or "black" to the list?
+With one hot red can be <1, 0, 0>, green <0, 1, 0> and blue <0, 0, 1>.
+Each color is equally distant to any other this way.
+</p>
+<p class="how-it-works">
+The model responds with predictions with a vector of numbers between 0 and 1 that add up to 1.
+Each number is what the model estimates is the probability
+that the correct color name is the corresponding one in the list of color names.
+E.g. For if the prediction is <.5, .2, .3> for "red", "green", and "blue" then
+the model is estimating that the odds of red being correct is 50%, green 20%, and blue 30%.
+The Snap! model prediction blocks return a list where each element is a list of a color name and number.
+The <span class="block-name">Name this color ...</span> in the above sample project
+sorts the list by the probability scores and multiplies by 100 to convert to percentages.
+</p>
+</span>
 <h3 class="how-it-works-white">A brief introduction to deep neural nets</h3>
 <p class="how-it-works">
 A deep neural net consists of an input layer, some number of hidden layers, and an output layer.
