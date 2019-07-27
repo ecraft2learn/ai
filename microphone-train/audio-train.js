@@ -18,7 +18,7 @@ const create_user_recognizer = async () => {
     }
     builtin_recognizer = speechCommands.create('BROWSER_FFT');
     await builtin_recognizer.ensureModelLoaded();
-//     builtin_recognizer.params().sampleRateHz = 48000;
+    builtin_recognizer.params().sampleRateHz = 44100; // avoids a warning about 48000 expected
     user_recognizer = builtin_recognizer.createTransfer('user trained'); // cache user's recognizer
     return user_recognizer;
 };
@@ -147,6 +147,9 @@ const initialise = async function (training_class_names) {
                          info_text.count++;
                          info_text.innerHTML = "&nbsp;&nbsp;" + info_text.count + " examples trained";
                     }                         
+             })
+             .catch(error => {
+                 report_error(error.message);
              });
         };
         let train_off = function (class_index, info_text) {
