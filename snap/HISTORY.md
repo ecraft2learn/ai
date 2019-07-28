@@ -1,4 +1,105 @@
-# Snap<em>!</em> (BYOB) History
+# Snap! (BYOB) History
+
+## in development:
+* **New Features:**
+* **Notable Changes:**
+* **Notable Fixes:**
+* **Translation Updates:**
+
+## v5.0.8
+* **Notable Fix:**
+    * fixed default names for 'script variables' block
+
+### 2019-07-25
+* blocks: fixed default names for 'script variables' block
+* prepared maintenance release
+
+## v5.0.7
+* **Notable Fix:**
+    * fixed #2041
+
+### 2019-07-24
+* byob: fixed #2041
+* prepared maintenance release
+
+## v5.0.6
+* **Notable Fix:**
+    * IME text editing support, thanks, Zhenlei Jia @swiperthefox!
+
+### 2019-07-23
+* morphic: minor code reformatting for LINTers
+* prepared maintenance release
+
+### 2019-07-22
+* new dev version
+* morphic, blocks: support for enhanced character set keyboard input, thanks, @swiperthefox!
+
+## v5.0.5
+* **Notable Fix:**
+    * fixed cloud project collection support, thanks Bernat!
+
+## v5.0.4
+* **Notable Fixes:**
+    * fixed a glitch when running a generic WHEN hat block with a literal Boolean input
+    * fixed a bug in the SHOW PICTURE block of the "Pixels" library 
+
+### 2019-07-10
+* threads: fixed a glitch when running a generic WHEN hat block with a literal Boolean input
+* fixed a bug in the SHOW PICTURE block of the "Pixels" library
+* tweaked "messages" menu for custom blocks, thanks, Joan!
+* maintenance release
+
+## v5.0.3
+* **Notable Change:**
+    * CSV-parsing auto-detects the most likely delimiter among comma, semi-colon, pipe and tab
+
+### 2019-07-10
+* threads: enhanced CSV-parsing to auto-detect the most likely delimiter among comma, semi-colon, pipe and tab
+* maintenance release
+
+## v5.0.2
+* **New Feature:**
+    * experimental tolerant color collision detection (in dev mode)
+* **Notable Fixes:**
+    * fixed a layout glitch for variadic C-shaped input slots, thanks, Bernat, for reporting it!
+    * updated the manual for the new WRITE block, thanks, Brian
+
+### 2019-07-09
+* blocks: fixed a layout glitch for variadic C-shaped input slots, thanks, Bernat, for reporting it!
+* updated the manual for the new WRITE block, thanks, Brian (was #2448)
+* maintenance release
+
+### 2019-07-08
+* new dev version
+* morphic, objects, threads: experimental tolerant color collision detection (in dev mode)
+
+## v5.0.1
+* **Notable Changes:**
+    * gliding animation when inserting  blocks using the keyboard
+    * optimized collision detection
+* **Notable Fixes:**
+    * show "browser" source option in project dialog when (deprecated) locally stored projects still exist
+    * list watchers occasionally didn't show cells after reassigning a changed list to a variable
+    * FOREACH over a linked list failed for scripts mutating it
+    * eliminated an occasional empty label line when variadic inputs wrap as a whole, thanks, Mary, for reporting this bug!
+
+### 2019-07-04
+* gui: show "browser" source option in project dialog when (deprecated) locally stored projects still exist
+* maintenance release
+
+### 2019-07-03
+* blocks: eliminated an occasional empty label line when variadic inputs wrap as a whole, thanks, Mary, for reporting this bug!
+
+### 2019-07-02
+* morphic: optimized collision detection by only looking at the alpha channel data
+
+### 2019-07-01
+* new dev version
+* lists: fixed #2446
+* threads: fixed an issue when iterating over a linked list with a script mutating it, thanks, Brian!
+* cloud: fixed collection grid page size, thanks, Bernat! 
+* morphic: fixed a race condition in Morph.glideTo()
+* blocks: added gliding animation when inserting  blocks using the keyboard
 
 ## v5
 ### 2019-06-27

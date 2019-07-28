@@ -108,7 +108,7 @@ BooleanSlotMorph, XML_Serializer, SnapTranslator*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.byob = '2019-June-24';
+modules.byob = '2019-July-24';
 
 // Declarations
 
@@ -324,7 +324,8 @@ CustomBlockDefinition.prototype.dropDownMenuOf = function (inputName) {
             fname = this.declarations.get(inputName)[2].slice(2);
             if (contains(
                 [
-                    'messagesReceivedMenu',
+                    'messagesMenu',
+                    'messagesReceivedMenu',    //for backward (5.0.0 - 5.0.3) support
                     'objectsMenu',
                     'costumesMenu',
                     'soundsMenu',
@@ -747,9 +748,9 @@ CustomCommandBlockMorph.prototype.refreshPrototype = function () {
         }
     });
 
-    // remember the edited prototype spec
-    protoSpec = this.specFromFragments();
-
+    // remember the edited prototype spec,
+    // and prevent removing the last one
+    protoSpec = this.specFromFragments() || this.blockSpec;
 
     // update the prototype's type
     // and possibly exchange 'this' for 'myself'
@@ -2655,7 +2656,8 @@ BlockLabelFragment.prototype.hasOptions = function () {
 BlockLabelFragment.prototype.hasSpecialMenu = function () {
     return contains(
         [
-            '§_messagesReceivedMenu',
+            '§_messagesMenu',
+            '§_messagesReceivedMenu',    //for backward (5.0.0 - 5.0.3) support
             '§_objectsMenu',
             '§_costumesMenu',
             '§_soundsMenu',
@@ -2819,7 +2821,6 @@ BlockLabelFragmentMorph.prototype.mouseClickLeft = function () {
 
 BlockLabelFragmentMorph.prototype.updateBlockLabel = function (newFragment) {
     var prot = this.parentThatIsA(BlockMorph);
-
     this.fragment = newFragment;
     if (prot) {
         prot.refreshPrototype();
@@ -3207,9 +3208,9 @@ InputSlotDialogMorph.prototype.getInput = function () {
                 this.slots.defaultInputField.getValue();
         }
         return lbl;
-    } else if (!this.noDelete) {
-        this.fragment.isDeleted = true;
     }
+    // otherwise remove the fragment
+    this.fragment.isDeleted = true;
     return null;
 };
 
@@ -3764,7 +3765,7 @@ InputSlotDialogMorph.prototype.specialOptionsMenu = function () {
     }
 
     addSpecialOptions('(none)', '');
-    addSpecialOptions('messages', '§_messagesReceivedMenu');
+    addSpecialOptions('messages', '§_messagesMenu');
     addSpecialOptions('objects', '§_objectsMenu');
     // addSpecialOptions('data types', '§_typesMenu');
     addSpecialOptions('costumes', '§_costumesMenu');

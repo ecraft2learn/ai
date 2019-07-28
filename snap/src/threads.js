@@ -61,7 +61,7 @@ StageMorph, SpriteMorph, StagePrompterMorph, Note, modules, isString, copy,
 isNil, WatcherMorph, List, ListWatcherMorph, alert, console, TableMorph, Color,
 TableFrameMorph, ColorSlotMorph, isSnapObject, Map, newCanvas, Symbol*/
 
-modules.threads = '2019-June-25';
+modules.threads = '2019-July-15';
 
 var ThreadManager;
 var Process;
@@ -460,7 +460,7 @@ ThreadManager.prototype.doWhen = function (block, receiver, stopIt) {
     // since we're asking for the whole context instead of just the result
     // of the computation, we need to look at the result-context's first
     // input to find out whether the condition is met
-    if (test && test.inputs[0] === true) {
+    if (test === true || (test && test.inputs && test.inputs[0] === true)) {
         this.startProcess(
             block,
             receiver,
@@ -2173,8 +2173,6 @@ Process.prototype.doWaitUntil = function (goalCondition) {
 // Process interpolated iteration primitives
 
 Process.prototype.doForEach = function (upvar, list, script) {
-
-//Process.prototype.reportFindFirst = function (predicate, list) {
     // perform a script for each element of a list, assigning the
     // current iteration's element to a variable with the name
     // specified in the "upvar" parameter, so it can be referenced
@@ -2183,29 +2181,22 @@ Process.prototype.doForEach = function (upvar, list, script) {
 
     var next;
     this.assertType(list, 'list');
-    if (list.isLinked) {
-        if (this.context.accumulator === null) {
-            this.context.accumulator = {
-                source : list,
-                remaining : list.length()
-            };
-        }
-        if (this.context.accumulator.remaining === 0) {
-            return;
-        }
+    if (this.context.accumulator === null) {
+	this.context.accumulator = {
+	    source : list,
+	    remaining : list.length(),
+            idx : 0
+	};
+    }
+    if (this.context.accumulator.remaining === 0) {
+	return;
+    }
+    this.context.accumulator.remaining -= 1;
+    if (this.context.accumulator.source.isLinked) {
         next = this.context.accumulator.source.at(1);
-        this.context.accumulator.remaining -= 1;
         this.context.accumulator.source =
             this.context.accumulator.source.cdr();
     } else { // arrayed
-        if (this.context.accumulator === null) {
-            this.context.accumulator = {
-                idx : 0
-            };
-        }
-        if (this.context.accumulator.idx === list.length()) {
-            return;
-        }
         this.context.accumulator.idx += 1;
         next = list.at(this.context.accumulator.idx);
     }
@@ -3458,6 +3449,29 @@ Process.prototype.reportTextSplit = function (string, delimiter) {
 };
 
 Process.prototype.parseCSV = function (text) {
+    // try to address the kludge that Excel sometimes uses commas
+    // and sometimes semi-colons as delimiters, try to find out
+    // which makes more sense by examining the first line
+    return this.rawParseCSV(text, this.guessDelimiterCSV(text));
+};
+
+Process.prototype.guessDelimiterCSV = function (text) {
+    // assumes that the first line contains the column headers.
+    // report the first delimiter for which parsing the header
+    // yields more than a single field, otherwise default to comma
+    var delims = [',', ';', '|', '\t'],
+        len = delims.length,
+        firstLine = text.split('\n')[0],
+        i;
+    for (i = 0; i < len; i += 1) {
+        if (this.rawParseCSV(firstLine, delims[i]).length() > 1) {
+            return delims[i];
+        }
+    }
+    return delims[0];
+};
+
+Process.prototype.rawParseCSV = function (text, delim) {
     // RFC 4180
     // parse a csv table into a two-dimensional list.
     // if the table contains just a single row return it a one-dimensional
@@ -3471,6 +3485,7 @@ Process.prototype.parseCSV = function (text) {
         len = text.length,
         idx,
         char;
+    delim = delim || ',';
     for (idx = 0; idx < len; idx += 1) {
         char = text[idx];
         if (char === '\"') {
@@ -3478,7 +3493,7 @@ Process.prototype.parseCSV = function (text) {
                 fields[col] += char;
             }
             esc = !esc;
-        } else if (char === ',' && esc) {
+        } else if (char === delim && esc) {
             char = '';
             col += 1;
             fields[col] = char;
@@ -3854,7 +3869,7 @@ Process.prototype.objectTouchingObject = function (thisObj, name) {
     );
 };
 
-Process.prototype.reportTouchingColor = function (aColor) {
+Process.prototype.reportTouchingColor = function (aColor, tolerance) {
     // also check for any parts (subsprites)
     var thisObj = this.blockReceiver(),
         stage;
@@ -3862,36 +3877,15 @@ Process.prototype.reportTouchingColor = function (aColor) {
     if (thisObj) {
         stage = thisObj.parentThatIsA(StageMorph);
         if (stage) {
-            if (thisObj.isTouching(stage.colorFiltered(aColor, thisObj))) {
+            if (thisObj.isTouching(
+                stage.colorFiltered(aColor, thisObj, tolerance))
+            ) {
                 return true;
             }
             return thisObj.parts.some(
                 function (any) {
-                    return any.isTouching(stage.colorFiltered(aColor, any));
-                }
-            );
-        }
-    }
-    return false;
-};
-
-Process.prototype.reportColorIsTouchingColor = function (color1, color2) {
-    // also check for any parts (subsprites)
-    var thisObj = this.blockReceiver(),
-        stage;
-
-    if (thisObj) {
-        stage = thisObj.parentThatIsA(StageMorph);
-        if (stage) {
-            if (thisObj.colorFiltered(color1).isTouching(
-                    stage.colorFiltered(color2, thisObj)
-                )) {
-                return true;
-            }
-            return thisObj.parts.some(
-                function (any) {
-                    return any.colorFiltered(color1).isTouching(
-                        stage.colorFiltered(color2, any)
+                    return any.isTouching(
+                        stage.colorFiltered(aColor, any, tolerance)
                     );
                 }
             );
@@ -3899,6 +3893,41 @@ Process.prototype.reportColorIsTouchingColor = function (color1, color2) {
     }
     return false;
 };
+
+Process.prototype.reportFuzzyTouchingColor =
+    Process.prototype.reportTouchingColor;
+
+Process.prototype.reportColorIsTouchingColor = function (
+    color1,
+    color2,
+    tolerance
+) {
+    // also check for any parts (subsprites)
+    var thisObj = this.blockReceiver(),
+        stage;
+
+    if (thisObj) {
+        stage = thisObj.parentThatIsA(StageMorph);
+        if (stage) {
+            if (thisObj.colorFiltered(color1, tolerance).isTouching(
+                    stage.colorFiltered(color2, thisObj, tolerance)
+                )) {
+                return true;
+            }
+            return thisObj.parts.some(
+                function (any) {
+                    return any.colorFiltered(color1, tolerance).isTouching(
+                        stage.colorFiltered(color2, any, tolerance)
+                    );
+                }
+            );
+        }
+    }
+    return false;
+};
+
+Process.prototype.reportFuzzyColorIsTouchingColor =
+    Process.prototype.reportColorIsTouchingColor;
 
 Process.prototype.reportAspect = function (aspect, location) {
     // sense colors and sprites anywhere,

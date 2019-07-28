@@ -72,19 +72,19 @@
 DialogBoxMorph, InputFieldMorph, SpriteIconMorph, BlockMorph, SymbolMorph,
 ThreadManager, VariableFrame, detect, BlockMorph, BoxMorph, Color, Animation,
 CommandBlockMorph, FrameMorph, HatBlockMorph, MenuMorph, Morph, MultiArgMorph,
-Point, ReporterBlockMorph, ScriptsMorph, StringMorph, SyntaxElementMorph,
-TextMorph, contains, degrees, detect, newCanvas, nop, radians, Array,
-CursorMorph, Date, FrameMorph, HandMorph, Math, MenuMorph, Morph, invoke,
-MorphicPreferences, Object, PenMorph, Point, Rectangle, ScrollFrameMorph,
-SliderMorph, String, StringMorph, TextMorph, contains, copy, degrees, detect,
-document, isNaN, isString, newCanvas, nop, parseFloat, radians, window,
-modules, IDE_Morph, VariableDialogMorph, HTMLCanvasElement, Context, List,
-SpeechBubbleMorph, RingMorph, isNil, FileReader, TableDialogMorph, VideoMotion,
-BlockEditorMorph, BlockDialogMorph, PrototypeHatBlockMorph, localize,
-TableMorph, TableFrameMorph, normalizeCanvas, BooleanSlotMorph, HandleMorph,
-AlignmentMorph, Process, XML_Element, VectorPaintEditorMorph, WorldMap*/
+Point, ReporterBlockMorph, ScriptsMorph, StringMorph, SyntaxElementMorph,  nop,
+TextMorph, contains, degrees, detect, newCanvas, radians, Array, CursorMorph,
+Date, FrameMorph, HandMorph, Math, MenuMorph, Morph, invoke, MorphicPreferences,
+Object, PenMorph, Point, Rectangle, ScrollFrameMorph, SliderMorph, String,
+StringMorph, TextMorph, contains, copy, degrees, detect, document, isNaN,
+isString, newCanvas, nop, parseFloat, radians, window, modules, IDE_Morph,
+VariableDialogMorph, HTMLCanvasElement, Context, List, RingMorph, VideoMotion,
+SpeechBubbleMorph, InputSlotMorph, isNil, FileReader, TableDialogMorph,
+BlockEditorMorph, BlockDialogMorph, PrototypeHatBlockMorph,  BooleanSlotMorph,
+localize, TableMorph, TableFrameMorph, normalizeCanvas, VectorPaintEditorMorph,
+HandleMorph, AlignmentMorph, Process, XML_Element, WorldMap*/
 
-modules.objects = '2019-June-25';
+modules.objects = '2019-July-15';
 
 var SpriteMorph;
 var StageMorph;
@@ -875,7 +875,24 @@ SpriteMorph.prototype.initBlocks = function () {
             dev: true,
             type: 'reporter',
             category: 'sensing',
-            spec: 'filtered for %clr'
+            spec: 'filter %clr tolerance %n %',
+            defaults: [null, 15]
+        },
+        reportFuzzyTouchingColor: {
+            dev: true,
+            only: SpriteMorph,
+            type: 'predicate',
+            category: 'sensing',
+            spec: 'touching %clr tolerance %n ?',
+            defaults: [null, 15]
+        },
+        reportFuzzyColorIsTouchingColor: {
+            dev: true,
+            only: SpriteMorph,
+            type: 'predicate',
+            category: 'sensing',
+            spec: 'color %clr is touching %clr tolerance %n ?',
+            defaults: [null, null, 15]
         },
         reportAspect: {
             type: 'reporter',
@@ -1913,7 +1930,7 @@ SpriteMorph.prototype.rotationCenter = function () {
     return this.position().add(this.rotationOffset);
 };
 
-SpriteMorph.prototype.colorFiltered = function (aColor) {
+SpriteMorph.prototype.colorFiltered = function (aColor, tolerance) {
     // answer a new Morph containing my image filtered by aColor
     // ignore transparency (alpha)
     var morph = new Morph(),
@@ -1940,7 +1957,9 @@ SpriteMorph.prototype.colorFiltered = function (aColor) {
             src.data[i + 1],
             src.data[i + 2]
         );
-        if (clr.eq(aColor)) {
+        if ((tolerance && clr.isCloseTo(aColor, false, tolerance)) ||
+            clr.eq(aColor)
+        ) {
             dta.data[i] = src.data[i];
             dta.data[i + 1] = src.data[i + 1];
             dta.data[i + 2] = src.data[i + 2];
@@ -2407,6 +2426,8 @@ SpriteMorph.prototype.blockTemplates = function (category) {
             blocks.push(watcherToggle('reportThreadCount'));
             blocks.push(block('reportThreadCount'));
             blocks.push(block('colorFiltered'));
+            blocks.push(block('reportFuzzyTouchingColor'));
+            blocks.push(block('reportFuzzyColorIsTouchingColor'));
             blocks.push(block('reportStackSize'));
             blocks.push(block('reportFrameCount'));
         }
@@ -5463,11 +5484,11 @@ SpriteMorph.prototype.allMessageNames = function () {
     all.forEach(function (script) {
         script.allChildren().forEach(function (morph) {
             var txt;
-            if (morph.selector && contains(
-                ['receiveMessage', 'doBroadcast', 'doBroadcastAndWait'],
-                morph.selector
+            if (morph instanceof InputSlotMorph && morph.choices && contains(
+                ['messagesMenu', 'messagesReceivedMenu'],
+                morph.choices
             )) {
-                txt = morph.inputs()[0].evaluate();
+                txt = morph.evaluate();
                 if (isString(txt) && txt !== '') {
                     if (!contains(msgs, txt)) {
                         msgs.push(txt);
@@ -7352,7 +7373,11 @@ StageMorph.prototype.clearProjectionLayer = function () {
     this.changed();
 };
 
-StageMorph.prototype.colorFiltered = function (aColor, excludedSprite) {
+StageMorph.prototype.colorFiltered = function (
+    aColor,
+    excludedSprite,
+    tolerance
+) {
     // answer a new Morph containing my image filtered by aColor
     // ignore the excludedSprite, because its collision is checked
     // ignore transparency (alpha)
@@ -7381,7 +7406,9 @@ StageMorph.prototype.colorFiltered = function (aColor, excludedSprite) {
             src.data[i + 1],
             src.data[i + 2]
         );
-        if (clr.eq(aColor)) {
+        if ((tolerance && clr.isCloseTo(aColor, false, tolerance)) ||
+            clr.eq(aColor)
+        ) {
             dta.data[i] = src.data[i];
             dta.data[i + 1] = src.data[i + 1];
             dta.data[i + 2] = src.data[i + 2];

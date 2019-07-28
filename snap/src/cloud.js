@@ -34,7 +34,7 @@
 /*global modules, hex_sha512*/
 
 modules = modules || {};
-modules.cloud = '2019-April-25';
+modules.cloud = '2019-July-17';
 
 // Global stuff
 
@@ -980,11 +980,15 @@ Cloud.prototype.getUserCollections = function (
                 encodeURIComponent(collectionUsername) :
                 '%username') +
             '/collections?' +
-            this.encodeDict({
-                page: page || '',
-                pageSize: page ? pageSize | 16 : '',
-                matchtext: searchTerm ? encodeURIComponent(searchTerm) : ''
-            }),
+            this.encodeDict(
+                page > 0 ?
+                    {
+                        page: page,
+                        pagesize: pageSize || 16,
+                        matchtext:
+                            searchTerm ? encodeURIComponent(searchTerm) : ''
+                    } : {}
+            ),
         onSuccess,
         onError,
         'Could not fetch collections'
@@ -1025,7 +1029,7 @@ Cloud.prototype.getCollections = function (
 ) {
     var dict = {
         page: page,
-        pageSize: page ? pageSize | 16 : '',
+        pagesize: page ? pageSize || 16 : '',
     };
 
     if (searchTerm) { dict.matchtext = encodeURIComponent(searchTerm); }
