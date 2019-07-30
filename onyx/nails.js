@@ -8,15 +8,13 @@ let xs_test = option === 'create model' || option === 'experiment' ? [] : undefi
 let ys_test = option === 'create model' || option === 'experiment' ? [] : undefined;
 let xs_validation = option === 'create model' ? [] : undefined;
 let ys_validation = option === 'create model' ? [] : undefined;
-let load_model_named = option !== 'create model' && !use_knn ? model_name : undefined;
+let load_model_named = option !== 'create model' && model_name;
 let loaded_model;
 
 // if tensor_tsv is defined then collect all the logits of each image into a TSV string (tab-separated values)
 let tensor_tsv   = projector_data ? "" : undefined;
 let metadata_tsv = projector_data ? "" : undefined;
 const CREATE_SPRITE_IMAGE = projector_data;
-
-const SAVE_TENSORS = false; // if KNN
 
 const VIDEO_WIDTH  = 224; // this version of MobileNet expects 224x224 images
 const VIDEO_HEIGHT = 224;
@@ -39,9 +37,6 @@ if (is_chrome() && is_ios()) {
     p.innerHTML = "<big>On iPhones and iPads this app only works in the Safari browser.</big>";
     document.body.insertBefore(p, document.body.firstChild)
 }
-
-// number of nearest neighbours for KNN - one extra for experiments since we remove self-votes
-let top_k = option === 'experiment' ? 6 : 5;
 
 const long_experimental_results = false;
 const histogram_buckets = [];
@@ -143,7 +138,6 @@ class_names.forEach((class_name) => {
 
 const number_precision = (x, n) => Math.round(x*Math.pow(10, n))/Math.pow(10, n);
 
-let classifier;
 let mobilenet_model;
 let video;
 
@@ -407,9 +401,6 @@ const add_images = (when_finished, just_one_class, only_class_index, except_imag
             if (typeof metadata_tsv !== 'undefined') {
                 metadata_tsv += class_names[class_index] + "\t" + class_names[class_index] + "#" + image_index + "\n";
             }
-            if (use_knn) {
-                classifier.addExample(logits, class_index);
-            }
             if (xs instanceof Array) { // need this for training or testing
                 const x = logits.dataSync();
                 const y = one_hot(class_index, class_names.length);
@@ -431,23 +422,16 @@ const add_images = (when_finished, just_one_class, only_class_index, except_imag
         if (image_sprite_canvas) {
             add_image_to_sprite_image(class_images[image_index], image_sprite_canvas);
         }
-        next_image(image_callback, undefined, when_all_finished)
+        next_image(image_callback, when_all_finished)
     };
-    next_image(image_callback, undefined, when_all_finished);
+    next_image(image_callback, when_all_finished);
 };
 
 const make_prediction = (image, callback) => {
     return tf.tidy(() => {
         const logits = infer(image);
         const logits_data = logits.dataSync();
-        if (use_knn) {
-            classifier.predictClass(logits, top_k).then((result) => {
-                callback(result, logits_data);          
-            });            
-        } else {
-            callback(loaded_model.predict([logits]).dataSync(),
-                     logits_data)
-        }
+        callback(loaded_model.predict([logits]).dataSync(), logits_data)
     });
 };
 
@@ -460,9 +444,6 @@ const infer = (image) => {
 };
 
 const load_mobilenet = (callback) => {
-    if (use_knn) {
-        classifier = knnClassifier.create();
-    }
     mobilenet.load(2).then((model) => { // version 2
         mobilenet_model = model;
         return callback();
@@ -479,11 +460,7 @@ const initialise_page = () => {
               }
               video = camera;
               video.play();
-              if (window.saved_tensors && use_knn && !CREATE_SPRITE_IMAGE && !SAVE_TENSORS && option !== 'experiment' && typeof xs === 'undefined') {
-                  load_data_set(window.saved_tensors);
-                  start_up();
-              } else if (option === 'create model' || 
-                         (use_knn && option !== 'diagnose')) {
+              if (option === 'create model') {
                   add_images(start_up);
               } else {
                   start_up();
@@ -560,11 +537,8 @@ const start_up = () => {
                 run_new_experiments();
             }
         });
-    } else if (option === 'experiment') {
-        run_experiments(); // report any matches with confidence less than this confidence
-    }
-    if (SAVE_TENSORS) {
-        save_tensors(classifier.getClassifierDataset());
+    } else{
+        alert("Expected load_model_named to have a value.")
     }
     document.getElementById('go-to-camera').addEventListener('click', go_to_camera_interface);
     document.getElementById('go-to-tutorial').addEventListener('click', go_to_tutorial_interface);
@@ -596,26 +570,12 @@ const reset_response = () => {
     document.getElementById('camera-response').innerHTML = "";
 };
 
-const remove_one_vote = (score, self_vote) => {
-    if (option === 'experiment') {
-        if (self_vote) {
-            // remove the vote for itself
-            score -= 1/top_k;
-        }
-        score *= top_k/(top_k-1); // one fewer voters since ignoring self vote        
-    }
-    return Math.round(100*score); // convert to percentage
-};
-
 const correct = (result, class_index) => {
     // only called if running tests
     let max_score = -1;
     let max_score_indices = [];
     for (let index = 0; index < class_names.length; index++) {
-        let score = use_knn ? result.confidences[index] : result[index];
-        if (index === class_index && use_knn) {
-            score -= 1/top_k; // remove the self vote
-        }
+        let score = result[index];
         if (score > max_score) {
             max_score = score;
             max_score_indices = [index];
@@ -639,12 +599,7 @@ const confidences = (result, full_description, correct_class_index) => {
 //     let highest_score = 0;
 //     let second_highest_score = 0;
     class_names.forEach((name, class_index) => {
-        let score;
-        if (use_knn) {
-            score = remove_one_vote(result.confidences[class_index], correct_class_index === class_index);
-        } else {
-            score = Math.round(result[class_index]*100)
-        }
+        let score = Math.round(result[class_index]*100)
         if (full_description) {
             scores_message += better_name(name) + " = " + score + "%; ";
         }
@@ -703,7 +658,7 @@ const update_histogram = (result, correct_class_index, image_URL, title) => {
         let highest_wrong_class_index = class_names.length; // if no wrong scores returns number of classes
         let highest_wrong_score = 0;
         for (let index = 0; index < class_names.length; index++) {
-            const confidence = use_knn ? result.confidences[index] : result[index]
+            const confidence = result[index]
             if (index !== correct_class_index && confidence > highest_wrong_score) {
                 highest_wrong_class_index = index;
                 highest_wrong_score = confidence;
@@ -714,8 +669,7 @@ const update_histogram = (result, correct_class_index, image_URL, title) => {
     if (long_experimental_results) {
         class_names.forEach((name, class_index) => {
             const correct = correct_class_index === class_index;
-            const score = use_knn ? remove_one_vote(result.confidences[class_index], correct) : 
-                                    Math.round(100*result[class_index]);
+            const score = Math.round(100*result[class_index]);
             const highest_wrong_class_index = find_highest_wrong_class_index(result, correct_class_index);
             // score-1 so that 0-20 is 0; 25-40 is 1; ... 85-100 is 4
             const bucket_index = Math.max(0, Math.floor((score-1)/(100/bucket_count)));
@@ -737,8 +691,7 @@ const update_histogram = (result, correct_class_index, image_URL, title) => {
 const update_confusion_matrix = (result, correct_class_index) => {
     class_names.forEach((name, class_index) => {
         const correct = correct_class_index === class_index;
-        const score = use_knn ? remove_one_vote(result.confidences[class_index], correct) :
-                                Math.round(result[class_index]*100);
+        const score = Math.round(result[class_index]*100);
         if (confusion_matrix[correct_class_index] === undefined) {
             confusion_matrix[correct_class_index] = class_names.map(() => 0);
         }
@@ -1056,6 +1009,71 @@ const multi_nail_image_box = (image_description, image_index) => {
 
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
+// partial attempt to use JavaScript generators but doesn't work well with callbacks from image loading
+// const next_image_generator = {*generator () {
+//     let class_index = 0;
+//     let image_index = -1; // incremented to 0 soon - this is the index into the list of image file_names or multi-images
+//     let image_count = 0;
+//     let multi_nail_image; // image that has multiple nails on it
+//     let multi_nail_description; // object with at least file_name and count attributes
+//     let nails_remaining_in_multi_nail = 0;
+//     const class_name = class_names[class_index];
+//     if (image_count >= number_of_images[class_name]-1) { 
+//         // no more images for this class_index
+//         image_index = 0;
+//         image_count = 0;
+//         multi_nail_image = undefined;
+//         class_index++;
+//         if (class_index === class_names.length) { // no more classes 
+//             return; // done
+//         } else {
+//             image_count++;
+//             if (nails_remaining_in_multi_nail > 0) {
+//                 nails_remaining_in_multi_nail--;
+//             } else {
+//                 image_index++;
+//                 multi_nail_image = undefined;
+//             }
+//         }
+//         const maximum_confidence = (confidences) => {
+//             return Math.max(...Object.values(confidences));
+//         };
+//         const canvas_of_next_nail_in_multi_nail_image = (images_description) => 
+//             canvas_of_multi_nail_image(multi_nail_image,
+//                                        multi_nail_image_box(images_description, nails_remaining_in_multi_nail));
+//         const load_or_extract_image = (image_callback) => {
+//             const class_name = class_names[class_index];
+//             const image_or_images_description = images[class_name][image_index];
+//             if (!image_or_images_description) {
+//                 // no images for this class since testing other things
+//                 return;
+//             }
+//             if (typeof image_or_images_description !== 'string') {
+//                 if (multi_nail_image) {
+//                     // no need to load it again
+//                     image_callback(canvas_of_next_nail_in_multi_nail_image(image_or_images_description),
+//                                    class_index, image_index, image_count);
+//                     return;
+//                 }
+//                 load_image(image_or_images_description.file_name,
+//                            (image) => {
+//                                multi_nail_image = image;
+//                                multi_nail_description = image_or_images_description;
+//                                nails_remaining_in_multi_nail = 
+//                                    number_of_images_in_multi_nail_file(image_or_images_description);
+//                                load_or_extract_image();
+//                            });
+//                 return;
+//             }
+//             load_image(image_or_images_description, 
+//                        (image) => {
+//                            image_callback(image, class_index, image_index, image_count);
+//                        });
+//         };
+//         yield load_or_extract_image; // the function to call with an image callback to get an image
+//     };
+// }};
+
 const create_next_image_generator = () => {   
     let class_index;
     let image_index;
@@ -1086,8 +1104,6 @@ const create_next_image_generator = () => {
                     when_all_finished();
                 };
                 return;
-//             } else {
-//                 next_image(image_callback, when_class_finished, when_all_finished);
             }
         } else {
             image_count++;
@@ -1180,7 +1196,7 @@ const run_new_experiments = () => {
                                    + image_count + "," + confidence + "\n";                
             }
         }
-        next_image(next, undefined, when_finished);
+        next_image(next, when_finished);
     };
     next_image(next);
 };
@@ -1277,8 +1293,7 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
                 // this re-orders the results
                 const index = class_names.indexOf(name);
                 const correct = index === class_index;
-                const score = use_knn ? remove_one_vote(result.confidences[index], correct) :
-                                        Math.round(result[index]*100);
+                const score = Math.round(result[index]*100);
                 csv[class_name] += score;
                 if (index < class_names.length-1) {
                     // no need to add comma to the last one
@@ -1351,38 +1366,6 @@ const report_final_statistics = () => {
     }
 };
 
-const run_experiments = () => {
-    const [next_image, reset_next_image] = create_next_image_generator();
-    display_message("<p><b>Confidence scores for each possible classification. " + 
-                    "<span style=color:red>Red entries</span> are where the correct classification " +
-                    "was not the most confident answer.</b></p>",
-                    'main');
-    const next_experiment = () => {
-        const class_finished = (class_index) => {
-            const class_name = class_names[class_index];
-            const total = number_of_images[class_name];
-            display_message("<p>Number whose highest confidence score is the correct answer = " + 
-                            number_right + "/" + total + 
-                            " (" + Math.round(100*number_right/total) + "%)</p>",
-                            'main',
-                            true);
-            add_textarea(csv[class_name]);
-            number_right = 0;
-        };
-        const image_callback = (image_or_canvas, class_index, image_index, image_count) => {
-            make_prediction(image_or_canvas, 
-                            (result) => {
-                                display_message(process_prediction(result, image_or_canvas, class_index, image_index, image_count),
-                                                'main',
-                                                true);
-                                next_experiment(); 
-                            });
-        };
-        next_image(image_callback, class_finished, report_final_statistics);
-    };
-    next_experiment();
-};
-
 const save_logits_as_tsv = (logits) => {
     const embedding = logits.dataSync();
     let tsv_row = "";
@@ -1436,62 +1419,62 @@ const add_textarea = (text) => {
     document.body.appendChild(text_area);
 };
 
-const save_tensors = (tensors) => {
-    // based upon https://stackoverflow.com/questions/19721439/download-json-object-as-a-file-from-browser
-    // tried using JSON.stringify but arrays became "0":xxx, "1":xxx, ...
-    // also needed to move tensors from GPU using dataSync
-    let json = '{"nails_tensors":{';
-    let keys = Object.keys(tensors);
-    const jsonify_tensor = (tensor) => {
-        let flat_array = tensor.dataSync();
-        let shape = tensor.shape;
-        json += '{"shape":' + JSON.stringify(shape) + ',' +
-                '"data":' + JSON.stringify(Object.values(flat_array)) + '}';
-    };
-    keys.forEach(function (key, index) {
-        json += '"' + key + '":[';
-        let tensor_or_array_of_tensors = tensors[key];
-        if (tensor_or_array_of_tensors instanceof Array) {
-            json += '[';
-            tensor_or_array_of_tensors.forEach((tensor, index) => {
-                jsonify_tensor(tensor);
-                if (index < tensor_or_array_of_tensors.length-1) { // except for last one
-                    json += ',';
-                 }
-            });
-            json += ']';
-        } else {
-            jsonify_tensor(tensor_or_array_of_tensors);
-        }
-        if (index === keys.length-1) {
-            json += ']'; // no comma on the last one
-        } else {
-            json += '],';
-        }
-    });
-    json += '},';
-    json += '"labels":' + JSON.stringify(class_names);
-    json += '}';
-    add_textarea("window.saved_tensors = " + json);
-};
+// const save_tensors = (tensors) => {
+//     // based upon https://stackoverflow.com/questions/19721439/download-json-object-as-a-file-from-browser
+//     // tried using JSON.stringify but arrays became "0":xxx, "1":xxx, ...
+//     // also needed to move tensors from GPU using dataSync
+//     let json = '{"nails_tensors":{';
+//     let keys = Object.keys(tensors);
+//     const jsonify_tensor = (tensor) => {
+//         let flat_array = tensor.dataSync();
+//         let shape = tensor.shape;
+//         json += '{"shape":' + JSON.stringify(shape) + ',' +
+//                 '"data":' + JSON.stringify(Object.values(flat_array)) + '}';
+//     };
+//     keys.forEach(function (key, index) {
+//         json += '"' + key + '":[';
+//         let tensor_or_array_of_tensors = tensors[key];
+//         if (tensor_or_array_of_tensors instanceof Array) {
+//             json += '[';
+//             tensor_or_array_of_tensors.forEach((tensor, index) => {
+//                 jsonify_tensor(tensor);
+//                 if (index < tensor_or_array_of_tensors.length-1) { // except for last one
+//                     json += ',';
+//                  }
+//             });
+//             json += ']';
+//         } else {
+//             jsonify_tensor(tensor_or_array_of_tensors);
+//         }
+//         if (index === keys.length-1) {
+//             json += ']'; // no comma on the last one
+//         } else {
+//             json += '],';
+//         }
+//     });
+//     json += '},';
+//     json += '"labels":' + JSON.stringify(class_names);
+//     json += '}';
+//     add_textarea("window.saved_tensors = " + json);
+// };
 
-const load_data_set = (data_set) => {
-    const restore_tensor = (shape_and_data) => tf.tensor(shape_and_data.data, shape_and_data.shape);
-    try {
-        let tensor_data_set = {};
-        Object.entries(data_set['nails_tensors']).forEach(function (entry) {
-            if (entry[1][0] instanceof Array) {
-                tensor_data_set[entry[0]] = entry[1][0].map(restore_tensor);
-            } else {
-                tensor_data_set[entry[0]] = restore_tensor(entry[1][0]);
-            }
-        });
-        classifier.setClassifierDataset(tensor_data_set);
-        return true;
-    } catch (error) {
-        alert("Error loading saved training: " + error);
-    }
-};
+// const load_data_set = (data_set) => {
+//     const restore_tensor = (shape_and_data) => tf.tensor(shape_and_data.data, shape_and_data.shape);
+//     try {
+//         let tensor_data_set = {};
+//         Object.entries(data_set['nails_tensors']).forEach(function (entry) {
+//             if (entry[1][0] instanceof Array) {
+//                 tensor_data_set[entry[0]] = entry[1][0].map(restore_tensor);
+//             } else {
+//                 tensor_data_set[entry[0]] = restore_tensor(entry[1][0]);
+//             }
+//         });
+//         classifier.setClassifierDataset(tensor_data_set);
+//         return true;
+//     } catch (error) {
+//         alert("Error loading saved training: " + error);
+//     }
+// };
 
 const on_click = () => {
     document.getElementById('user-agreement').remove();
