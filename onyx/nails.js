@@ -1088,13 +1088,9 @@ const create_next_image_generator = () => {
         nails_remaining_in_multi_nail = 0;
     };
     reset_next_image();
-    const next_image = (image_callback, when_class_finished, when_all_finished) => {
+    const next_image = (image_callback, when_all_finished, skip) => {
         const class_name = class_names[class_index];
         if (image_count >= number_of_images[class_name]-1) { 
-            // no more images for this class_index
-            if (when_class_finished) {
-                when_class_finished(class_index);
-            }
             image_index = 0;
             image_count = 0;
             multi_nail_image = undefined;
@@ -1121,6 +1117,9 @@ const create_next_image_generator = () => {
             canvas_of_multi_nail_image(multi_nail_image,
                                        multi_nail_image_box(images_description, nails_remaining_in_multi_nail));
         const load_or_extract_image = () => {
+            if (skip) {
+                return;
+            }
             const class_name = class_names[class_index];
             const image_or_images_description = images[class_name][image_index];
             if (!image_or_images_description) {
@@ -1493,10 +1492,51 @@ const update_page = () => {
         + "to learn more about this project and app.</p>"
 };
 
+const save_tensors = (start, stop) => {
+    let xs = "[";
+    let ys = "[";
+    const [next_image, reset_next_image] = create_next_image_generator();
+    const when_finished = () => {
+        // save the tensors
+        add_textarea("// " + start + "-" + stop + "\n" +
+                     "window.xs = " + xs + "];\n" +
+                     "window.ys = " + ys + "];\n");
+    }
+    let image_counter = 0;
+    const next = (image, class_index) => {
+        const skip = image_counter < start;
+        if (!skip) {
+            const logits = infer(image);
+            xs += "[";
+            logits.dataSync().forEach((x) => {
+                xs += x + ",";
+            });
+            xs += "],\n";
+            logits.dispose();
+            ys += class_index + ",";
+            image_counter++;
+            console.log(image_counter);
+            if (image_counter === stop) {
+                when_finished();
+                return;
+            }        
+        }
+        next_image(next, when_finished, skip);
+    }
+    next_image(next, when_finished);
+};
+
 window.addEventListener('DOMContentLoaded',
                         (event) => {
                             update_page();
                             load_mobilenet(() => {
+                                if (option === 'save tensors') {
+                                    save_tensors(0, 4000);
+//                                     save_tensors(1000, 1999);
+//                                     save_tensors(2000, 2999);
+//                                     save_tensors(3000, 3999);
+                                    return;
+                                }
                                 initialise_page();
                                 if (option === 'diagnose') {
                                     add_random_images(() => {

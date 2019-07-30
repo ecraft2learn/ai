@@ -14,14 +14,14 @@
                 navigator.serviceWorker.register('service-worker.js');
             }
 
-            const use_knn = false; // deprecated - old way this used to work 
-
             // choices are diagnose, create model, experiment
             let option = 'diagnose';
             if (window.location.hash.indexOf('train') >= 0) {
                 option = 'create model';
             } else if (window.location.hash.indexOf('experiment') >= 0) {
                 option = 'experiment';
+            } else if (window.location.hash.indexOf('save-tensors') >= 0) {
+                option = 'save tensors';
             }
 
             // korean.js korean-small.js korean-tests.js korean-tests-small.js 
@@ -71,15 +71,15 @@
                 }
             };
 
-            load_local_or_remote_scripts(["../js/tfjs.js", "../js/tfjs-vis.js", "../js/mobilenet.js", //      "../js/knn-classifier.js",
-            ...images_js, "../js/user-agent.js", "nails.js", //      "saved_tensors_normal_serious_non_serious.js",
+            load_local_or_remote_scripts(["../js/tfjs.js", "../js/tfjs-vis.js", "../js/mobilenet.js", 
+            ...images_js, "../js/user-agent.js", "nails.js", 
             "md5-min.js", "train.js", //      "../js/translate.js"
             ], // using the same locally cached version so nothing breaks when released versions are updated
-            ["../js/tfjs.js", "../js/mobilenet.js", //      "../js/knn-classifier.js",
+            ["../js/tfjs.js", "../js/mobilenet.js", 
             //      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs",
             //      "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet",
             //      "https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier",
-            ...images_js, "../js/user-agent.js", "nails.js", //      "saved_tensors_normal_serious_non_serious.js",
+            ...images_js, "../js/user-agent.js", "nails.js", 
             "md5-min.js", "train.js", //      "../js/translate.js"
             ]);
         </script>
