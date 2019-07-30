@@ -1492,36 +1492,32 @@ const update_page = () => {
         + "to learn more about this project and app.</p>"
 };
 
-const save_tensors = (start, stop) => {
+const save_tensors = () => {
     let xs = "[";
     let ys = "[";
     const [next_image, reset_next_image] = create_next_image_generator();
     const when_finished = () => {
         // save the tensors
-        add_textarea("// " + start + "-" + stop + "\n" +
-                     "window.xs = " + xs + "];\n" +
+        add_textarea("window.xs = " + xs + "];\n" +
                      "window.ys = " + ys + "];\n");
     }
     let image_counter = 0;
     const next = (image, class_index) => {
-        const skip = image_counter < start;
-        if (!skip) {
-            const logits = infer(image);
-            xs += "[";
-            logits.dataSync().forEach((x) => {
-                xs += x + ",";
-            });
-            xs += "],\n";
-            logits.dispose();
-            ys += class_index + ",";
-            image_counter++;
-            console.log(image_counter);
-            if (image_counter === stop) {
-                when_finished();
-                return;
-            }        
-        }
-        next_image(next, when_finished, skip);
+        const logits = infer(image);
+        xs += "[";
+        logits.dataSync().forEach((x) => {
+            xs += x + ",";
+        });
+        xs += "],\n";
+        logits.dispose();
+        ys += class_index + ",";
+        image_counter++;
+//         console.log(image_counter);
+        if (image_counter === stop) {
+            when_finished();
+            return;
+        }        
+        next_image(next, when_finished);
     }
     next_image(next, when_finished);
 };
