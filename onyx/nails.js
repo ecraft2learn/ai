@@ -45,7 +45,9 @@ const minimum_confidence = 60;
 
 const confusion_matrix = [];
 
-const class_names = class_names_of_saved_tensors || Object.keys(images);
+const class_names = typeof class_names_of_saved_tensors === 'undefined' ?
+                    Object.keys(images) : 
+                    class_names_of_saved_tensors;
 
 const class_colors = ["green",
                       "red",
