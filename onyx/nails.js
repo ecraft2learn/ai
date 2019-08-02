@@ -2,12 +2,10 @@
 // copyright not yet determined but will be some sort of open source
 'use strict';
 
-let xs = option === 'create model' ? [] : undefined;
-let ys = option === 'create model' ? [] : undefined;
-let xs_test = option === 'create model' || option === 'experiment' ? [] : undefined;
-let ys_test = option === 'create model' || option === 'experiment' ? [] : undefined;
 let xs_validation = option === 'create model' ? [] : undefined;
 let ys_validation = option === 'create model' ? [] : undefined;
+let xs_test = option === 'create model' || option === 'experiment' ? [] : undefined;
+let ys_test = option === 'create model' || option === 'experiment' ? [] : undefined;
 let load_model_named = option !== 'create model' && model_name;
 let loaded_model;
 
@@ -47,7 +45,7 @@ const minimum_confidence = 60;
 
 const confusion_matrix = [];
 
-const class_names = Object.keys(images);
+const class_names = class_names_of_saved_tensors || Object.keys(images);
 
 const class_colors = ["green",
                       "red",
@@ -117,24 +115,26 @@ const images_fitting_in = (height) => 20*(((height-68)/128)-1);
 
 const number_of_images = {};
 
-class_names.forEach((class_name) => {
-    number_of_images[class_name] = 0;
-    images[class_name].forEach((image_or_images) => {
-        if (typeof image_or_images === 'string') {
-            number_of_images[class_name]++;
-        } else if (image_or_images.count)  {
-            const total_available = number_of_images_in_multi_nail_file(image_or_images);
-            if (image_or_images.count > total_available) {
-                console.log("Count of " + image_or_images.count + " is greater than " + total_available
-                            + " for " + image_or_images.file_name);
-                image_or_images.count = total_available;
+if (typeof images !== 'undefined') {
+    class_names.forEach((class_name) => {
+        number_of_images[class_name] = 0;
+        images[class_name].forEach((image_or_images) => {
+            if (typeof image_or_images === 'string') {
+                number_of_images[class_name]++;
+            } else if (image_or_images.count)  {
+                const total_available = number_of_images_in_multi_nail_file(image_or_images);
+                if (image_or_images.count > total_available) {
+                    console.log("Count of " + image_or_images.count + " is greater than " + total_available
+                                + " for " + image_or_images.file_name);
+                    image_or_images.count = total_available;
+                }
+                number_of_images[class_name] += image_or_images.count;
+            } else {
+                number_of_images[class_name] += number_of_images_in_multi_nail_file(image_or_images);
             }
-            number_of_images[class_name] += image_or_images.count;
-        } else {
-            number_of_images[class_name] += number_of_images_in_multi_nail_file(image_or_images);
-        }
-    });
-});
+        });
+    });    
+}
 
 const number_precision = (x, n) => Math.round(x*Math.pow(10, n))/Math.pow(10, n);
 
@@ -344,6 +344,61 @@ const get_url_from_image_or_canvas = (image_or_canvas) => {
     }
 };
 
+const start_training = () => {
+//             const model_callback = (model) => {
+//                 xs.forEach((logits, index) => {
+//                     const prediction_tensor = model.predict(tf.tensor([logits]));
+//                     const class_index = ys[index].indexOf(1);
+//                     const class_name = class_names[class_index];
+//                     const confidence = prediction_tensor.dataSync()[class_index];
+//                     console.log(index, confidence, class_name, confidence < .6 ? "problem?" : "");
+//                 });
+//             };
+    training_options.class_names = class_names; // for displaying confusion matrix
+    training_options.model_name = model_name;
+    let new_xs = [];
+    let new_ys = [];
+    if (xs_validation.length === 0 &&
+        typeof validation_fraction === 'number' && 
+        typeof testing_fraction === 'number') {
+        // if I want reproducability I should use tf.randomUniform with a seed
+        xs.forEach((x, index) => {
+            if (fraction_kept > Math.random()) {
+                const random = Math.random();
+                const y = one_hot(ys[index], class_names.length)
+                if (random < validation_fraction) {
+                    xs_validation.push(x);
+                    ys_validation.push(y);
+                } else if (random < validation_fraction+testing_fraction) {
+                    xs_test.push(x);
+                    ys_test.push(y);
+                } else {
+                    new_xs.push(x);
+                    new_ys.push(y);                
+                }             
+            } 
+        });
+        xs = new_xs;
+        ys = new_ys;
+    }
+    train_model(xs,
+                ys,
+                xs_validation,
+                ys_validation,
+                xs_test,
+                ys_test,
+                training_options);
+//              model_callback);
+};
+
+const one_hot = (index, n) => {
+    let vector = [];
+    for (let i = 0; i < n; i++) {
+        vector.push(i === index ? 1 : 0);
+    }
+    return vector;
+};
+
 const add_images = (when_finished, just_one_class, only_class_index, except_image_index) => {
     let class_index = just_one_class ? only_class_index : 0;
     let image_index = -1; // incremented to 0 soon
@@ -360,32 +415,9 @@ const add_images = (when_finished, just_one_class, only_class_index, except_imag
             add_textarea(image_sprite_canvas.toDataURL() + "");
         }
         if (xs instanceof Array) {
-//             const model_callback = (model) => {
-//                 xs.forEach((logits, index) => {
-//                     const prediction_tensor = model.predict(tf.tensor([logits]));
-//                     const class_index = ys[index].indexOf(1);
-//                     const class_name = class_names[class_index];
-//                     const confidence = prediction_tensor.dataSync()[class_index];
-//                     console.log(index, confidence, class_name, confidence < .6 ? "problem?" : "");
-//                 });
-//             };
-            training_options.class_names = class_names; // for displaying confusion matrix
-            train_model(xs,
-                        ys,
-                        xs_validation,
-                        ys_validation,
-                        xs_test,
-                        ys_test,
-                        training_options);
-//                         model_callback);
+
+            start_training();
         }
-    };
-    const one_hot = (index, n) => {
-        let vector = [];
-        for (let i = 0; i < n; i++) {
-            vector.push(i === index ? 1 : 0);
-        }
-        return vector;
     };
     const image_callback = (image_or_canvas, class_index, image_index) => {
         if (image_index !== except_image_index) {
@@ -460,11 +492,7 @@ const initialise_page = () => {
               }
               video = camera;
               video.play();
-              if (option === 'create model') {
-                  add_images(start_up);
-              } else {
-                  start_up();
-              }
+              start_up();
             },
          (error) => {
              unable_to_access_camera(error);       
@@ -496,6 +524,11 @@ const go_to_tutorial_interface = () => {
 };
 
 const start_up = () => {
+    if (option === 'create model') {
+        document.body.innerHTML = "Training started";
+        start_training();
+        return;
+    } 
     const use_photo = "Or take a picture of a finger or toe nail on a screen or in a photograph. ";
     const instructions = is_mobile() ?
                          "Take a picture of your fingernail using your device by clicking the button below. "
@@ -530,7 +563,7 @@ const start_up = () => {
             document.body.style.backgroundColor = 'white';
         });
     }
-    if (load_model_named) { // check that not training?
+    if (load_model_named) { 
         tf.loadLayersModel("models/" + load_model_named + ".json").then((model) => {
             loaded_model = model;
             if (option === 'experiment') {
@@ -1418,6 +1451,80 @@ const add_textarea = (text) => {
     document.body.appendChild(text_area);
 };
 
+const on_click = () => {
+    document.getElementById('user-agreement').remove();
+    document.getElementById('camera-interface').hidden = true;
+    document.getElementById('main').hidden = false;
+};
+
+const update_page = () => {
+    document.getElementById('agreement').innerHTML =
+        "<p class='agreement-text'>The Onyx app contains general information about nail conditions and does not constitute medical advice. "
+        + "If you have any specific questions about any medical matter, you should consult your doctor or other professional healthcare provider.</p>" 
+        + "<p class='agreement-text'>Images taken through this app are processed locally on your device. "
+        + "Images will neither be processed nor stored remotely.</p>"
+        + "<p class='agreement-text'>The <a href='https://github.com/ecraft2learn/ai/tree/master/onyx' target='_blank'>source code</a> "
+        + "for this app is available for inspection. Visit the <a href='http://www.education.ox.ac.uk/' target='_blank'>Onyx home page</a> "
+        + "to learn more about this project and app.</p>"
+};
+
+const save_tensors = () => {
+    let xs = "[";
+    let ys = "[";
+    const [next_image, reset_next_image] = create_next_image_generator();
+    const when_finished = () => {
+        // save the tensors
+        add_textarea("window.class_names_of_saved_tensors = " + class_names + ";\n" +
+                     "window.xs = " + xs + "];\n" +
+                     "window.ys = " + ys + "];\n");
+    }
+    let image_counter = 0;
+    const next = (image, class_index) => {
+        const logits = infer(image);
+        xs += "[";
+        logits.dataSync().forEach((x) => {
+            xs += x + ",";
+        });
+        xs += "],\n";
+        logits.dispose();
+        ys += class_index + ",";
+        image_counter++;
+        if (image_counter === stop) {
+            when_finished();
+            return;
+        }        
+        next_image(next, when_finished);
+    }
+    next_image(next, when_finished);
+};
+
+window.addEventListener('DOMContentLoaded',
+                        (event) => {
+                            update_page();
+                            load_mobilenet(() => {
+                                if (option === 'save tensors') {
+                                    save_tensors();
+                                    return;
+                                }
+                                initialise_page();
+                                if (option === 'diagnose') {
+                                    add_random_images(() => {
+                                        const agreement_button = document.createElement('button');
+                                        agreement_button.innerHTML = "Accept";
+                                        agreement_button.className = 'generic-button';
+                                        agreement_button.addEventListener('click', on_click);
+                                        document.getElementById('user-agreement').appendChild(agreement_button);
+                                        document.getElementById('please-wait').hidden = true;                                    
+                                    });
+                                } else { // no need for agreement when training or experimenting
+                                    on_click();
+                                };                      
+                            });
+                        },
+                        false);
+
+// if I ever need to sae and restore KNN classifiers:
+
 // const save_tensors = (tensors) => {
 //     // based upon https://stackoverflow.com/questions/19721439/download-json-object-as-a-file-from-browser
 //     // tried using JSON.stringify but arrays became "0":xxx, "1":xxx, ...
@@ -1474,78 +1581,3 @@ const add_textarea = (text) => {
 //         alert("Error loading saved training: " + error);
 //     }
 // };
-
-const on_click = () => {
-    document.getElementById('user-agreement').remove();
-    document.getElementById('camera-interface').hidden = true;
-    document.getElementById('main').hidden = false;
-};
-
-const update_page = () => {
-    document.getElementById('agreement').innerHTML =
-        "<p class='agreement-text'>The Onyx app contains general information about nail conditions and does not constitute medical advice. "
-        + "If you have any specific questions about any medical matter, you should consult your doctor or other professional healthcare provider.</p>" 
-        + "<p class='agreement-text'>Images taken through this app are processed locally on your device. "
-        + "Images will neither be processed nor stored remotely.</p>"
-        + "<p class='agreement-text'>The <a href='https://github.com/ecraft2learn/ai/tree/master/onyx' target='_blank'>source code</a> "
-        + "for this app is available for inspection. Visit the <a href='http://www.education.ox.ac.uk/' target='_blank'>Onyx home page</a> "
-        + "to learn more about this project and app.</p>"
-};
-
-const save_tensors = () => {
-    let xs = "[";
-    let ys = "[";
-    const [next_image, reset_next_image] = create_next_image_generator();
-    const when_finished = () => {
-        // save the tensors
-        add_textarea("window.xs = " + xs + "];\n" +
-                     "window.ys = " + ys + "];\n");
-    }
-    let image_counter = 0;
-    const next = (image, class_index) => {
-        const logits = infer(image);
-        xs += "[";
-        logits.dataSync().forEach((x) => {
-            xs += x + ",";
-        });
-        xs += "],\n";
-        logits.dispose();
-        ys += class_index + ",";
-        image_counter++;
-//         console.log(image_counter);
-        if (image_counter === stop) {
-            when_finished();
-            return;
-        }        
-        next_image(next, when_finished);
-    }
-    next_image(next, when_finished);
-};
-
-window.addEventListener('DOMContentLoaded',
-                        (event) => {
-                            update_page();
-                            load_mobilenet(() => {
-                                if (option === 'save tensors') {
-                                    save_tensors(0, 4000);
-//                                     save_tensors(1000, 1999);
-//                                     save_tensors(2000, 2999);
-//                                     save_tensors(3000, 3999);
-                                    return;
-                                }
-                                initialise_page();
-                                if (option === 'diagnose') {
-                                    add_random_images(() => {
-                                        const agreement_button = document.createElement('button');
-                                        agreement_button.innerHTML = "Accept";
-                                        agreement_button.className = 'generic-button';
-                                        agreement_button.addEventListener('click', on_click);
-                                        document.getElementById('user-agreement').appendChild(agreement_button);
-                                        document.getElementById('please-wait').hidden = true;                                    
-                                    });
-                                } else { // no need for agreement when training or experimenting
-                                    on_click();
-                                };                      
-                            });
-                        },
-                        false);

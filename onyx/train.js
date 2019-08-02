@@ -19,7 +19,6 @@
 
 "use strict"
 
-
 const compute_confusion_matrix = (predictions, truth, n) => {
     // predictions and truth flattened 
     let matrix = [];
@@ -153,20 +152,52 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
        button.className = "save-training-button";
        button.addEventListener('click', save_model);
        document.body.appendChild(button);
-       const test_loss = model.evaluate(xs_test, ys_test);
+       const test_loss_tensor = model.evaluate(xs_test, ys_test);
+       const test_loss = test_loss_tensor[0].dataSync()[0];
+       const test_accuracy = test_loss_tensor[1].dataSync()[0];
+       tf.dispose(test_loss_tensor); // both of them
        const test_loss_message = document.createElement('p');
-       test_loss_message.innerHTML = "Data loss = " + data_loss
+       let results = "Data loss = " + data_loss
                                      + "<br>Validation loss = " + validation_loss
-                                     + "<br>Test loss = " + test_loss[0].dataSync()[0]
+                                     + "<br>Test loss = " + test_loss
                                      + "<br>Data accuracy = " + data_accuracy
                                      + "<br>Validation accuracy = " + validation_accuracy
-                                     + "<br>Test accuracy = " + test_loss[1].dataSync()[0];
+                                     + "<br>Test accuracy = " + test_accuracy;
+       results += // CSV for pasting into a spreadsheet
+           "<br><br>Name,Layer1,Layer2,Layer3,layer4,layer5,Batch size, Dropout rate, Epochs,Optimizer, Initializer," +
+           "Testing fraction, Validation fraction, Fraction kept," +
+           "Validation loss, Test loss, Data accuracy, Validation accuracy, Test accuracy";
+       results += "<br>";
+       results += '"' + model_name + '",';
+       for (let i = 0; i < 5; i++) {
+           if (i < hidden_layer_sizes.length) {
+               results += hidden_layer_sizes[i];
+           } else {
+               results += 0;
+           }
+           results += ",";
+       }
+       results += batch_size + ",";
+       results += drop_out_rate + ",";
+       results += epochs + ",";
+       results += '"' + options.optimizer_name + '",';
+       results += '"' + options.layer_initializer_name + '",';
+       results += testing_fraction + ",";
+       results += validation_fraction + ",";
+       results += fraction_kept + ",";
+       results += validation_loss + ",";
+       results += test_loss + ",";
+       results += data_accuracy + ",";
+       results += validation_accuracy + ",";
+       results += test_accuracy;
+       test_loss_message.innerHTML = results;                  
        document.body.appendChild(test_loss_message);
        if (callback) {
            callback(model);
        }
        const predictions = model.predict(xs_test, ys_test);
        const matrix = compute_confusion_matrix(predictions.dataSync(), ys_test.dataSync(), number_of_classes);
+       predictions.dispose();
        tfvis.render.confusionMatrix({name: 'Confusion Matrix All',
                                      tab: 'Charts'},
                                     {values: matrix,

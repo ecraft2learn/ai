@@ -13,7 +13,6 @@
             if ('serviceWorker'in navigator && window.location.hostname !== 'localhost') {
                 navigator.serviceWorker.register('service-worker.js');
             }
-
             // choices are diagnose, create model, experiment
             let option = 'diagnose';
             if (window.location.hash.indexOf('train') >= 0) {
@@ -26,18 +25,21 @@
 
             // korean.js korean-small.js korean-tests.js korean-tests-small.js 
             // originals.js originals-normal-fungal.js or originals-normal-serious-non-serious.js
-            let images_js;
+            let additional_js;
             if (option === 'diagnose') {
                 // 166 random images from each class
-                images_js = ["korean-tests-166-each.js"];
-            } else {
+                additional_js = ["korean-tests-166-each.js"];
+            } else if (option === 'save tensors'){
                 // both Korean training thumbnails and their test images
-                images_js = ["korean.js", "korean-tests.js"]; //, "originals-normal-serious-non-serious.js"];  
+                additional_js = ["korean.js", "korean-tests.js"]; //, "originals-normal-serious-non-serious.js"];  
+            } else if (option === 'create model') {
+                additional_js = ["saved_tensors.js"];
             }
-
-            const model_name = 
-                "normal-fungal-serious-320-150-epochs-all-varianceScaling-no-originals";
-            const every_nth_for_testing = 5;
+            const model_name = "normal-fungal-serious-02-08-2019a";
+            const every_nth_for_testing = 5; // not used if loading saved_tensors instead of images for training
+            const testing_fraction = .2;
+            const validation_fraction = .2;
+            const fraction_kept = 1; // 1 to keep all data
             // 20% set aside for testing and evaluation each
             const projector_data = false;
             // whether we want to generate files to visualising the data
@@ -52,6 +54,12 @@
                 epochs: 150,
                 optimizer: () => tf.train.rmsprop(0.00001),
                 layer_initializer: (index) => 'varianceScaling',
+                // for reporting results
+                optimizer_name: 'rms',
+                layer_initializer_name: 'varianceScaling',
+                testing_fraction,
+                validation_fraction,
+                fraction_kept
             };
 
             let images;
@@ -71,17 +79,18 @@
                 }
             };
 
-            load_local_or_remote_scripts(["../js/tfjs.js", "../js/tfjs-vis.js", "../js/mobilenet.js", 
-            ...images_js, "../js/user-agent.js", "nails.js", 
-            "md5-min.js", "train.js", //      "../js/translate.js"
-            ], // using the same locally cached version so nothing breaks when released versions are updated
-            ["../js/tfjs.js", "../js/mobilenet.js", 
-            //      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs",
-            //      "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet",
-            //      "https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier",
-            ...images_js, "../js/user-agent.js", "nails.js", 
-            "md5-min.js", "train.js", //      "../js/translate.js"
-            ]);
+            load_local_or_remote_scripts(
+                ["../js/tfjs.js", "../js/tfjs-vis.js", "../js/mobilenet.js", 
+                ...additional_js, "../js/user-agent.js", "nails.js", 
+                "md5-min.js", "train.js", //      "../js/translate.js"
+                ], // using the same locally cached version so nothing breaks when released versions are updated
+                ["../js/tfjs.js", "../js/mobilenet.js", 
+                //      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs",
+                //      "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet",
+                //      "https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier",
+                ...additional_js, "../js/user-agent.js", "nails.js", 
+                "md5-min.js", "train.js", //      "../js/translate.js"
+                ]);
         </script>
     </head>
     <body>
