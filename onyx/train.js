@@ -82,7 +82,7 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
                        tab: 'Training',
                        styles: { height: '600px' }};
     const ftfvis_options = {callbacks: ['onEpochEnd'],
-                            yAxisDomain: [.3, .5],
+                            yAxisDomain: [.2, .4],
                             height: 300};
     let callbacks = tfvis ? tfvis.show.fitCallbacks(container, metrics, ftfvis_options) : {};
     let data_loss;
@@ -164,32 +164,33 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
                                      + "<br>Validation accuracy = " + validation_accuracy
                                      + "<br>Test accuracy = " + test_accuracy;
        results += // CSV for pasting into a spreadsheet
-           "<br><br>Name,Layer1,Layer2,Layer3,layer4,layer5,Batch size, Dropout rate, Epochs,Optimizer, Initializer," +
-           "Testing fraction, Validation fraction, Fraction kept," +
-           "Validation loss, Test loss, Data accuracy, Validation accuracy, Test accuracy";
+           "<br><br>Name,Layer1,Layer2,Layer3,layer4,layer5,Batch size, Dropout rate, Epochs,Optimizer, Initializer, " +
+           "Testing fraction, Validation fraction, Fraction kept, " +
+           "Validation loss, Test loss, Data accuracy, Validation accuracy, Test accuracy, Image count";
        results += "<br>";
-       results += '"' + model_name + '",';
+       results +=  model_name + ", ";
        for (let i = 0; i < 5; i++) {
            if (i < hidden_layer_sizes.length) {
                results += hidden_layer_sizes[i];
            } else {
                results += 0;
            }
-           results += ",";
+           results += ", ";
        }
-       results += batch_size + ",";
-       results += drop_out_rate + ",";
-       results += epochs + ",";
-       results += '"' + options.optimizer_name + '",';
-       results += '"' + options.layer_initializer_name + '",';
-       results += testing_fraction + ",";
-       results += validation_fraction + ",";
-       results += fraction_kept + ",";
-       results += validation_loss + ",";
-       results += test_loss + ",";
-       results += data_accuracy + ",";
-       results += validation_accuracy + ",";
-       results += test_accuracy;
+       results += batch_size + ", ";
+       results += drop_out_rate + ", ";
+       results += epochs + ", ";
+       results += options.optimizer_name + ", ";
+       results += options.layer_initializer_name + ", ";
+       results += testing_fraction + ", ";
+       results += validation_fraction + ", ";
+       results += fraction_kept + ", ";
+       results += validation_loss + ", ";
+       results += test_loss + ", ";
+       results += data_accuracy + ", ";
+       results += validation_accuracy + ", ";
+       results += test_accuracy + ", ";
+       results += xs_array.length + xs_validation_array.length + xs_test_array.length;
        test_loss_message.innerHTML = results;                  
        document.body.appendChild(test_loss_message);
        if (callback) {

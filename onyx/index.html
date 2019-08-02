@@ -37,7 +37,7 @@
             }
             const model_name = "normal-fungal-serious-02-08-2019a";
             const every_nth_for_testing = 5; // not used if loading saved_tensors instead of images for training
-            const testing_fraction = .2;
+            const testing_fraction = .3;
             const validation_fraction = .2;
             const fraction_kept = 1; // 1 to keep all data
             // 20% set aside for testing and evaluation each
@@ -46,16 +46,14 @@
 
             const training_options = {
                 model_name: model_name,
-                hidden_layer_sizes: [320],
-//                 learning_rate: 0.00001,
-//                 batch_size_fraction: 0.2,
-                batch_size: 256,
-                drop_out_rate: 0.5,
-                epochs: 150,
+                hidden_layer_sizes: [1280, 16],
+                batch_size: 32,
+                drop_out_rate: 0.25,
+                epochs: 100,
                 optimizer: () => tf.train.rmsprop(0.00001),
                 layer_initializer: (index) => 'varianceScaling',
                 // for reporting results
-                optimizer_name: 'rms',
+                optimizer_name: 'rms-0.00001',
                 layer_initializer_name: 'varianceScaling',
                 testing_fraction,
                 validation_fraction,
