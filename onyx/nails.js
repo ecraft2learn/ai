@@ -330,12 +330,15 @@ const add_random_image = (parent, image_to_replace, callback) => {
     }
 };
 
-const load_image = function (image_url, callback) {
+const load_image = function (image_url, callback, error_callback) {
     let image = new Image();
-    image.src = image_url;
     image.onload = () => {
         callback(image);
     };
+    if (error_callback) {
+        image.onerror = error_callback;
+    }
+    image.src = image_url;
 };
 
 const get_url_from_image_or_canvas = (image_or_canvas) => {
@@ -1175,12 +1178,20 @@ const create_next_image_generator = () => {
                                nails_remaining_in_multi_nail = 
                                    number_of_images_in_multi_nail_file(image_or_images_description);
                                load_or_extract_image();
+                           },
+                           (error) => {
+                               console.error(image_or_images_description.file_name);
+                               next_image(image_callback, when_all_finished, skip);
                            });
                 return;
             }
             load_image(image_or_images_description, 
                        (image) => {
                            image_callback(image, class_index, image_index, image_count);
+                       },
+                       (error) => {
+                           console.error(image_or_images_description);
+                           next_image(image_callback, when_all_finished, skip);
                        });
         };
         load_or_extract_image();
