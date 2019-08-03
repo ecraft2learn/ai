@@ -26,19 +26,21 @@
             // korean.js korean-small.js korean-tests.js korean-tests-small.js 
             // originals.js originals-normal-fungal.js or originals-normal-serious-non-serious.js
             let additional_js;
-            if (option === 'diagnose') {
+            if (option === 'diagnose' || option === 'experiment') {
                 // 166 random images from each class
                 additional_js = ["korean-tests-166-each.js"];
             } else if (option === 'save tensors'){
                 // both Korean training thumbnails and their test images
-                additional_js = ["korean.js", "korean-tests.js"]; //, "originals-normal-serious-non-serious.js"];  
+                additional_js = ["korean-big.js", "korean-tests.js"]; //, "originals-normal-serious-non-serious.js"];  
             } else if (option === 'create model') {
-                additional_js = ["saved-tensors-v2.js"];
+                additional_js = ["saved-tensors-v3.js"];
+            } else {
+                additional_js = [];
             }
             const model_name = "normal-fungal-serious-02-08-2019a";
             const every_nth_for_testing = 5; // not used if loading saved_tensors instead of images for training
-            const testing_fraction = .3;
-            const validation_fraction = .2;
+            const testing_fraction = .15;
+            const validation_fraction = .15;
             const fraction_kept = 1; // 1 to keep all data
             // 20% set aside for testing and evaluation each
             const projector_data = false;

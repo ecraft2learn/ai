@@ -89,6 +89,10 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
     let validation_loss;
     let data_accuracy;
     let validation_accuracy;
+    let lowest_validation_loss = 100000;
+    let lowest_validation_loss_epoch;
+    let highest_accuracy = 0;
+    let highest_accuracy_epoch;
     if (tfvis) {
         const epoch_end_callback = callbacks.onEpochEnd;
         callbacks.onEpochEnd = (epoch, history) => {
@@ -100,7 +104,14 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
             validation_loss = history.val_loss;
             data_accuracy = history.acc;
             validation_accuracy = history.val_acc;
-//             console.log(batch, logs);
+            if (validation_loss < lowest_validation_loss) {
+                lowest_validation_loss = validation_loss;
+                lowest_validation_loss_epoch = epoch;
+            }
+            if (validation_accuracy > highest_accuracy) {
+                highest_accuracy = validation_accuracy;
+                highest_accuracy_epoch = epoch;
+            }
         };      
     }
 /**
@@ -166,7 +177,8 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
        results += // CSV for pasting into a spreadsheet
            "<br><br>Name,Layer1,Layer2,Layer3,layer4,layer5,Batch size, Dropout rate, Epochs,Optimizer, Initializer, " +
            "Testing fraction, Validation fraction, Fraction kept, " +
-           "Validation loss, Test loss, Data accuracy, Validation accuracy, Test accuracy, Image count";
+           "Validation loss, Test loss, Data accuracy, Validation accuracy, Test accuracy, Image count, " +
+           "Lowest validation loss, Lowest validation loss epoch, Highest accuracy, Highest accuracy epoch";
        results += "<br>";
        results +=  model_name + ", ";
        for (let i = 0; i < 5; i++) {
@@ -190,7 +202,11 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
        results += data_accuracy + ", ";
        results += validation_accuracy + ", ";
        results += test_accuracy + ", ";
-       results += xs_array.length + xs_validation_array.length + xs_test_array.length;
+       results += xs_array.length + xs_validation_array.length + xs_test_array.length + ", ";
+       results += lowest_validation_loss + ", ";
+       results += lowest_validation_loss_epoch + ", ";
+       results += highest_accuracy + ", ";
+       results += highest_accuracy_epoch + ", ";
        test_loss_message.innerHTML = results;                  
        document.body.appendChild(test_loss_message);
        if (callback) {
