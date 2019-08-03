@@ -1476,7 +1476,7 @@ const save_tensors = () => {
     const [next_image, reset_next_image] = create_next_image_generator();
     const when_finished = () => {
         // save the tensors
-        add_textarea("window.class_names_of_saved_tensors = " + class_names + ";\n" +
+        add_textarea("window.class_names_of_saved_tensors = " + JSON.stringify(class_names) + ";\n" +
                      "window.xs = " + xs + "];\n" +
                      "window.ys = " + ys + "];\n");
     }
