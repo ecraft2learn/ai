@@ -1353,6 +1353,7 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
 const popup_full_message = (event, message_number) => {
     event.stopPropagation();
     const full_response_element = document.getElementById('full-response');
+    event.currentTarget.appendChild(full_response_element);
     full_response_element.hidden = false;
     full_response_element.innerHTML = window.full_popup_messages[message_number];
     const hide_on_any_click = () => {
