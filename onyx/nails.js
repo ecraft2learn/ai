@@ -438,22 +438,22 @@ const add_images = (when_finished, just_one_class, only_class_index, except_imag
             if (typeof metadata_tsv !== 'undefined') {
                 metadata_tsv += class_names[class_index] + "\t" + class_names[class_index] + "#" + image_index + "\n";
             }
-            if (xs instanceof Array) { // need this for training or testing
-                const x = logits.dataSync();
-                const y = one_hot(class_index, class_names.length);
-                if (typeof every_nth_for_testing === 'number') {
-                    if (image_counter%every_nth_for_testing === 0 && option === 'create model') {
-                        xs_validation.push(x);
-                        ys_validation.push(y);
-                    } else if (image_counter%every_nth_for_testing === 1) { 
-                        xs_test.push(x);
-                        ys_test.push(y);
-                    } else {
-                        xs.push(x);
-                        ys.push(y);                       
-                    }
-                }
-            }
+//             if (xs instanceof Array) { // need this for training or testing
+//                 const x = logits.dataSync();
+//                 const y = one_hot(class_index, class_names.length);
+//                 if (typeof every_nth_for_testing === 'number') {
+//                     if (image_counter%every_nth_for_testing === 0 && option === 'create model') {
+//                         xs_validation.push(x);
+//                         ys_validation.push(y);
+//                     } else if (image_counter%every_nth_for_testing === 1) { 
+//                         xs_test.push(x);
+//                         ys_test.push(y);
+//                     } else {
+//                         xs.push(x);
+//                         ys.push(y);                       
+//                     }
+//                 }
+//             }
             logits.dispose();
         }   
         if (image_sprite_canvas) {
@@ -572,7 +572,7 @@ const start_up = () => {
         tf.loadLayersModel("models/" + load_model_named + ".json").then((model) => {
             loaded_model = model;
             if (option === 'experiment') {
-                run_new_experiments();
+                run_experiments();
             }
         });
     } else{
@@ -1199,7 +1199,7 @@ const create_next_image_generator = () => {
     return [next_image, reset_next_image];
 };
 
-const run_new_experiments = () => {
+const run_experiments = () => {
     const [next_image, reset_next_image] = create_next_image_generator();
     let image_counter = 0;
     let confidences = {};
@@ -1220,26 +1220,21 @@ const run_new_experiments = () => {
     };
     const next = (image, class_index, image_index, image_count) => {
         image_counter++;
-        if (typeof every_nth_for_testing !== 'number' ||
-            image_counter%every_nth_for_testing === 1) {
-            const logits = infer(image);
-            const prediction_tensor = loaded_model.predict([logits]);
-            const prediction = prediction_tensor.dataSync();
-            const confidence = prediction[class_index];
-            const class_name = class_names[class_index];
-            const image_description = images[class_name][image_index];
-            image.title = typeof image_description === 'string' ?
-                          image_description :
-                          image_description.file_name + "#" + image_count;
-            let message = process_prediction(prediction, image, class_index, image_index, image_count);
-    //         let message = "<img src='" + get_url_from_image_or_canvas(image) + "' width=100 height=100></img>" 
-    //                       + class_names[class_index] + "#" + image_index + " (" + image_count + ") = " + number_precision(confidence, 4);
-            confidences[class_name].push([confidence, message]);
-            if (long_experimental_results) {
-                csv[class_name] += "https://ecraft2learn.github.io/ai/onyx/"
-                                   + images[class_name][image_index] + ","
-                                   + image_count + "," + confidence + "\n";                
-            }
+        const logits = infer(image);
+        const prediction_tensor = loaded_model.predict([logits]);
+        const prediction = prediction_tensor.dataSync();
+        const confidence = prediction[class_index];
+        const class_name = class_names[class_index];
+        const image_description = images[class_name][image_index];
+        image.title = typeof image_description === 'string' ?
+                      image_description :
+                      image_description.file_name + "#" + image_count;
+        let message = process_prediction(prediction, image, class_index, image_index, image_count);
+        confidences[class_name].push([confidence, message]);
+        if (long_experimental_results) {
+            csv[class_name] += "https://ecraft2learn.github.io/ai/onyx/"
+                               + images[class_name][image_index] + ","
+                               + image_count + "," + confidence + "\n";                
         }
         next_image(next, when_finished);
     };
