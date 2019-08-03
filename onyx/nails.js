@@ -593,13 +593,7 @@ const display_message = (message, element_id, append) => {
         return;
     }
     if (append && !is_mobile()) {
-        let after = "";
-        if (message.indexOf("class='prediction-response'") >= 0) {
-            after = "";
-        } else {
-            after = "<br>";
-        }
-        message = message + after + document.getElementById(element_id).innerHTML;
+        message = message + document.getElementById(element_id).innerHTML;
     }
     document.getElementById(element_id || 'main').innerHTML = message;
 };
