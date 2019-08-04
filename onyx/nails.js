@@ -352,8 +352,6 @@ const get_url_from_image_or_canvas = (image_or_canvas) => {
 const start_training = () => {
     training_options.class_names = class_names; // for displaying confusion matrix
     training_options.model_name = model_name;
-    let new_xs = [];
-    let new_ys = [];
     const splitting_data = xs_validation.length === 0 &&
                            typeof validation_fraction === 'number' && 
                            typeof testing_fraction === 'number';
@@ -361,6 +359,12 @@ const start_training = () => {
     const original_ys = ys;
     const split_data = () => {
         // if I want reproducability I should use tf.randomUniform with a seed
+        let new_xs = [];
+        let new_ys = [];
+        xs_validation = [];
+        ys_validation = [];
+        xs_test = [];
+        ys_test = [];
         original_xs.forEach((x, index) => {
             if (fraction_kept > Math.random()) {
                 const random = Math.random();
