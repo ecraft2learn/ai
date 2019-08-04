@@ -61,6 +61,8 @@ const combine_normal_and_non_serious = (matrix_3x3) => {
     return matrix_2x2;
 };
 
+let tfjs_vis_surface;
+
 const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array, options, callback) => {
     const {model_name, class_names, hidden_layer_sizes, batch_size, epochs, drop_out_rate, optimizer, layer_initializer} 
           = options;
@@ -74,7 +76,8 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
     const xs_test = tf.tensor(xs_test_array);
     const ys_test = tf.tensor(ys_test_array);
 
-    const surface = tfvis && tfvis.visor().surface({name: model_name, tab: 'Training'});
+    const surface = tfjs_vis_surface || (tfvis && tfvis.visor().surface({name: model_name, tab: 'Training'}));
+    tfjs_vis_surface = surface;
     // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
     let epoch_history = [];
     const metrics = ['loss', 'val_loss', 'acc', 'val_acc'];
@@ -167,17 +170,23 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
        const test_loss = test_loss_tensor[0].dataSync()[0];
        const test_accuracy = test_loss_tensor[1].dataSync()[0];
        tf.dispose(test_loss_tensor); // both of them
-       const test_loss_message = document.createElement('p');
-       let results = "Data loss = " + data_loss
-                                     + "<br>Validation loss = " + validation_loss
-                                     + "<br>Test loss = " + test_loss
-                                     + "<br>Data accuracy = " + data_accuracy
-                                     + "<br>Validation accuracy = " + validation_accuracy
-                                     + "<br>Test accuracy = " + test_accuracy;
-       results += // CSV for pasting into a spreadsheet
-           "<br><br>Name,Layer1,Layer2,Layer3,layer4,layer5,Batch size, Dropout rate, Epochs,Optimizer, Initializer, " +
+       const response =
+           {"Data loss ": data_loss,
+            "Validation loss": validation_loss,
+            "Test loss": test_loss,
+            "Data accuracy": data_accuracy,
+            "Validation accuracy": validation_accuracy,
+            "Test accuracy": test_accuracy,
+            "Lowest validation loss": lowest_validation_loss,
+            "Lowest validation loss epoch": lowest_validation_loss_epoch, 
+            "Highest accuracy": highest_accuracy,
+            "Highest accuracy epoch": highest_accuracy_epoch
+           };
+       const test_loss_message = document.createElement('p');      
+       let results = // CSV for pasting into a spreadsheet
+           "<br>Name, Layer1,Layer2,Layer3,layer4,layer5, Batch size, Dropout rate, Epochs, Optimizer, Initializer, " +
            "Testing fraction, Validation fraction, Fraction kept, " +
-           "Validation loss, Test loss, Data accuracy, Validation accuracy, Test accuracy, Image count, " +
+           "Data loss, Validation loss, Test loss, Data accuracy, Validation accuracy, Test accuracy, Image count, " +
            "Lowest validation loss, Lowest validation loss epoch, Highest accuracy, Highest accuracy epoch";
        results += "<br>";
        results +=  model_name + ", ";
@@ -197,6 +206,7 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
        results += testing_fraction + ", ";
        results += validation_fraction + ", ";
        results += fraction_kept + ", ";
+       results += data_loss + ", ";
        results += validation_loss + ", ";
        results += test_loss + ", ";
        results += data_accuracy + ", ";
@@ -210,11 +220,12 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
        test_loss_message.innerHTML = results;                  
        document.body.appendChild(test_loss_message);
        if (callback) {
-           callback(model);
+           callback(response);
        }
        const predictions = model.predict(xs_test, ys_test);
        const matrix = compute_confusion_matrix(predictions.dataSync(), ys_test.dataSync(), number_of_classes);
        predictions.dispose();
+//        tf.dispose(model); // still may want to save it if it is a good one
        tfvis.render.confusionMatrix({name: 'Confusion Matrix All',
                                      tab: 'Charts'},
                                     {values: matrix,

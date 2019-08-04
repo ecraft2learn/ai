@@ -42,16 +42,17 @@
             const testing_fraction = .15;
             const validation_fraction = .15;
             const fraction_kept = 1; // 1 to keep all data
+            const number_of_training_repeats = 3;
             // 20% set aside for testing and evaluation each
             const projector_data = false;
             // whether we want to generate files to visualising the data
 
             const training_options = {
                 model_name: model_name,
-                hidden_layer_sizes: [1280, 16],
-                batch_size: 32,
-                drop_out_rate: 0.25,
-                epochs: 100,
+                hidden_layer_sizes: [128, 16],
+                batch_size: 256,
+                drop_out_rate: 0.5,
+                epochs: 200,
                 optimizer: () => tf.train.rmsprop(0.00001),
                 layer_initializer: (index) => 'varianceScaling',
                 // for reporting results
@@ -84,7 +85,7 @@
                 ...additional_js, "../js/user-agent.js", "nails.js", 
                 "md5-min.js", "train.js", //      "../js/translate.js"
                 ], // using the same locally cached version so nothing breaks when released versions are updated
-                ["../js/tfjs.js", "../js/mobilenet.js", 
+                ["../js/tfjs.js", "../js/tfjs-vis.js", "../js/mobilenet.js", 
                 //      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs",
                 //      "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet",
                 //      "https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier",

@@ -350,27 +350,21 @@ const get_url_from_image_or_canvas = (image_or_canvas) => {
 };
 
 const start_training = () => {
-//             const model_callback = (model) => {
-//                 xs.forEach((logits, index) => {
-//                     const prediction_tensor = model.predict(tf.tensor([logits]));
-//                     const class_index = ys[index].indexOf(1);
-//                     const class_name = class_names[class_index];
-//                     const confidence = prediction_tensor.dataSync()[class_index];
-//                     console.log(index, confidence, class_name, confidence < .6 ? "problem?" : "");
-//                 });
-//             };
     training_options.class_names = class_names; // for displaying confusion matrix
     training_options.model_name = model_name;
     let new_xs = [];
     let new_ys = [];
-    if (xs_validation.length === 0 &&
-        typeof validation_fraction === 'number' && 
-        typeof testing_fraction === 'number') {
+    const splitting_data = xs_validation.length === 0 &&
+                           typeof validation_fraction === 'number' && 
+                           typeof testing_fraction === 'number';
+    const original_xs = xs;
+    const original_ys = ys;
+    const split_data = () => {
         // if I want reproducability I should use tf.randomUniform with a seed
-        xs.forEach((x, index) => {
+        original_xs.forEach((x, index) => {
             if (fraction_kept > Math.random()) {
                 const random = Math.random();
-                const y = one_hot(ys[index], class_names.length)
+                const y = one_hot(original_ys[index], class_names.length);
                 if (random < validation_fraction) {
                     xs_validation.push(x);
                     ys_validation.push(y);
@@ -385,15 +379,46 @@ const start_training = () => {
         });
         xs = new_xs;
         ys = new_ys;
+    };
+    let responses = [];
+    const resport_averages = () => {
+        const responses_total = responses[0];
+        for (let i = 1; i < number_of_training_repeats; i++) {
+            const entries = Object.entries(responses[i]);
+            entries.forEach((entry) => {
+                responses_total[entry[0]] += entry[1];
+            });
+        };
+        const csv = "<br>Number of training repeats, " + 
+                    Object.keys(responses_total) + "<br>" +
+                    number_of_training_repeats + ", " +
+                    Object.values(responses_total).map(value => value/number_of_training_repeats) + "<br>";
+        const averages = document.createElement('p');
+        averages.innerHTML = csv;
+        document.body.appendChild(averages);
+    };
+    const next_training = () => {
+        if (splitting_data) {
+            split_data();
+        }
+        train_model(xs,
+                    ys,
+                    xs_validation,
+                    ys_validation,
+                    xs_test,
+                    ys_test,
+                    training_options,
+                    model_callback);        
     }
-    train_model(xs,
-                ys,
-                xs_validation,
-                ys_validation,
-                xs_test,
-                ys_test,
-                training_options);
-//              model_callback);
+    const model_callback = (response) => {
+        responses.push(response);
+        if (responses.length === number_of_training_repeats) {
+            resport_averages();
+        } else {
+            next_training();
+        }
+    };
+    next_training();
 };
 
 const one_hot = (index, n) => {
@@ -1040,6 +1065,8 @@ const multi_nail_image_box = (image_description, image_index) => {
 };
 
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+// redo this using https://stackoverflow.com/questions/57296471/how-can-one-use-tensorflow-js-tf-data-generator-for-remote-data-sources-since-ge
 
 // partial attempt to use JavaScript generators but doesn't work well with callbacks from image loading
 // const next_image_generator = {*generator () {
