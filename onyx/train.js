@@ -230,9 +230,9 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
        results += test_accuracy + ", ";
        results += xs_array.length + xs_validation_array.length + xs_test_array.length + ", ";
        results += lowest_validation_loss + ", ";
-       results += lowest_validation_loss_epoch + ", ";
+       results += Math.round(lowest_validation_loss_epoch) + ", ";
        results += highest_accuracy + ", ";
-       results += highest_accuracy_epoch + ", ";
+       results += Math.round(highest_accuracy_epoch) + ", ";
        results += confusion_matrix[0] + ', ' + confusion_matrix[1] + ', ' + confusion_matrix[2];
        test_loss_message.innerHTML = results;
        document.body.appendChild(test_loss_message);
