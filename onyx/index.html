@@ -13,13 +13,14 @@
             if ('serviceWorker'in navigator && window.location.hostname !== 'localhost') {
                 navigator.serviceWorker.register('service-worker.js');
             }
+            const parameters = new URLSearchParams(window.location.hash.slice(1));
             // choices are diagnose, create model, experiment
             let option = 'diagnose';
-            if (window.location.hash.indexOf('train') >= 0) {
+            if (parameters.has('train')) {
                 option = 'create model';
-            } else if (window.location.hash.indexOf('experiment') >= 0) {
+            } else if (parameters.has('experiment')) {
                 option = 'experiment';
-            } else if (window.location.hash.indexOf('save-tensors') >= 0) {
+            } else if (parameters.has('save-tensors')) {
                 option = 'save tensors';
             }
 
@@ -37,13 +38,15 @@
             } else {
                 additional_js = [];
             }
-            const model_name = "normal-fungal-serious-02-08-2019a";
-//             const every_nth_for_testing = 5; // not used if loading saved_tensors instead of images for training
+            const model_name = parameters.has('balanced') || option !== 'diagnose' ? 
+                               "normal-fungal-serious-04-08-2019a" : 
+                               "normal-fungal-serious-02-08-2019a";
+            // 15% set aside for testing and evaluation each
             const testing_fraction = .15;
             const validation_fraction = .15;
             const fraction_kept = 1; // 1 to keep all data
             const number_of_training_repeats = 3;
-            // 20% set aside for testing and evaluation each
+
             const projector_data = false;
             // whether we want to generate files to visualising the data
 
@@ -52,7 +55,7 @@
                 hidden_layer_sizes: [128, 16],
                 batch_size: 256,
                 drop_out_rate: 0.5,
-                epochs: 200,
+                epochs: 250,
                 optimizer: () => tf.train.rmsprop(0.00001),
                 layer_initializer: (index) => 'varianceScaling',
                 // for reporting results
