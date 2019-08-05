@@ -64,7 +64,7 @@ const combine_normal_and_non_serious = (matrix_3x3) => {
 let tfjs_vis_surface;
 
 const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array, options, callback) => {
-    const {model_name, class_names, hidden_layer_sizes, batch_size, epochs, drop_out_rate, optimizer, layer_initializer} 
+    const {model_name, class_names, hidden_layer_sizes, batch_size, epochs, drop_out_rate, optimizer, layer_initializer, training_number} 
           = options;
     let model;
     const input_size = xs_array[0].length;
@@ -76,18 +76,19 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
     const xs_test = tf.tensor(xs_test_array);
     const ys_test = tf.tensor(ys_test_array);
 
-    const surface = tfjs_vis_surface || (tfvis && tfvis.visor().surface({name: model_name, tab: 'Training'}));
+    const surface = tfjs_vis_surface || (tfvis && tfvis.visor().surface({name: model_name, tab: 'Training#' + training_number}));
     tfjs_vis_surface = surface;
     // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
     let epoch_history = [];
     const metrics = ['loss', 'val_loss', 'acc', 'val_acc'];
     const container = {name: 'Loss and accuracy',
-                       tab: 'Training',
+                       tab: 'Training#' + training_number,
                        styles: { height: '600px' }};
     const ftfvis_options = {callbacks: ['onEpochEnd'],
                             yAxisDomain: [.2, .5],
                             height: 300};
     let callbacks = tfvis ? tfvis.show.fitCallbacks(container, metrics, ftfvis_options) : {};
+    const stop_early_callbacks = tf.callbacks.earlyStopping();
     let data_loss;
     let validation_loss;
     let data_accuracy;
@@ -227,11 +228,11 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
        predictions.dispose();
 //        tf.dispose(model); // still may want to save it if it is a good one
        tfvis.render.confusionMatrix({name: 'Confusion Matrix All',
-                                     tab: 'Charts'},
+                                     tab: 'Charts#' + training_number},
                                     {values: matrix,
                                      tickLabels: class_names});
        tfvis.render.confusionMatrix({name: 'Confusion Matrix GP or not',
-                                     tab: 'Charts'},
+                                     tab: 'Charts#' + training_number},
                                     {values: combine_normal_and_non_serious(matrix),
                                      tickLabels: ['ok', 'serious']});
   });

@@ -405,6 +405,7 @@ const start_training = () => {
         if (splitting_data) {
             split_data();
         }
+        training_options.training_number = 1+responses.length; // for visualization tab names
         train_model(xs,
                     ys,
                     xs_validation,
