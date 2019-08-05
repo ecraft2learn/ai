@@ -86,7 +86,7 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
                        styles: { height: '800px' }};
     const ftfvis_options = {callbacks: ['onEpochEnd'],
                             yAxisDomain: [.2, .5],
-                            width: 400,
+                            width: 500,
                             height: 300};
     let callbacks = tfvis ? tfvis.show.fitCallbacks(container, metrics, ftfvis_options) : {};
     const stop_early_callbacks = tf.callbacks.earlyStopping();
@@ -233,7 +233,7 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
        results += lowest_validation_loss_epoch + ", ";
        results += highest_accuracy + ", ";
        results += highest_accuracy_epoch + ", ";
-       results += matrix[0] + ', ' + matrix[1] + ', ' + matrix[2];
+       results += confusion_matrix[0] + ', ' + confusion_matrix[1] + ', ' + confusion_matrix[2];
        test_loss_message.innerHTML = results;
        document.body.appendChild(test_loss_message);
        if (callback) {
@@ -242,11 +242,11 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
 //        tf.dispose(model); // still may want to save it if it is a good one
        tfvis.render.confusionMatrix({name: 'Confusion Matrix All',
                                      tab: 'Charts#' + training_number},
-                                    {values: matrix,
+                                    {values: confusion_matrix,
                                      tickLabels: class_names});
        tfvis.render.confusionMatrix({name: 'Confusion Matrix GP or not',
                                      tab: 'Charts#' + training_number},
-                                    {values: combine_normal_and_non_serious(matrix),
+                                    {values: combine_normal_and_non_serious(confusion_matrix),
                                      tickLabels: ['ok', 'serious']});
   });
 
