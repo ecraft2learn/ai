@@ -103,6 +103,7 @@ window.addEventListener(
                short_checkbox.checked = hide;
             }
         };
+        // following works because in Snap! the hash is #?...
         const parameters = new URLSearchParams(window.location.hash);
 //         if (parameters.has("student")) {
 //             add_style_sheet("/ai/css/student.css"); 
