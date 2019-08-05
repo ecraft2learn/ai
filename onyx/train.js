@@ -64,7 +64,7 @@ const combine_normal_and_non_serious = (matrix_3x3) => {
 let tfjs_vis_surface;
 
 const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array, options, callback) => {
-    const {model_name, class_names, hidden_layer_sizes, batch_size, epochs, drop_out_rate, optimizer, layer_initializer, training_number} 
+    const {model_name, class_names, hidden_layer_sizes, batch_size, epochs, drop_out_rate, optimizer, layer_initializer, training_number, regularizer} 
           = options;
     let model;
     const input_size = xs_array[0].length;
@@ -83,9 +83,10 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
     const metrics = ['loss', 'val_loss', 'acc', 'val_acc'];
     const container = {name: 'Loss and accuracy',
                        tab: 'Training#' + training_number,
-                       styles: { height: '600px' }};
+                       styles: { height: '800px' }};
     const ftfvis_options = {callbacks: ['onEpochEnd'],
                             yAxisDomain: [.2, .5],
+                            width: 400,
                             height: 300};
     let callbacks = tfvis ? tfvis.show.fitCallbacks(container, metrics, ftfvis_options) : {};
     const stop_early_callbacks = tf.callbacks.earlyStopping();
@@ -125,12 +126,16 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
   // rather than adding layers to the mobilenet model, we "freeze" the weights
   // of the mobilenet model, and only train weights from the new model.
   model = tf.sequential({name: model_name});
+  
   hidden_layer_sizes.forEach((size, index) => {
+       const kernelRegularizer = regularizer(index); // can be undefined
+       const kernelInitializer = layer_initializer(index);
        model.add(tf.layers.dense({inputShape: index === 0 ? input_size : undefined,
                                   units: size,
                                   activation: 'relu',
-                                  kernelInitializer: layer_initializer(index),
-                                  useBias: true
+                                  kernelInitializer,
+                                  kernelRegularizer,
+                                  useBias: true,
                                  }));
        if (drop_out_rate > 0) {
            model.add(tf.layers.dropout(drop_out_rate));
@@ -146,19 +151,16 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
   // We use categoricalCrossentropy which is the loss function we use for
   // categorical classification which measures the error between our predicted
   // probability distribution over classes (probability that an input is of each
-  // class), versus the label (100% probability in the true class)>
+  // class), versus the label (100% probability in the true class)
   model.compile({optimizer: optimizer(),
                  loss: 'categoricalCrossentropy',
                  metrics: ['accuracy']});
-
-  // Train the model! Model.fit() will shuffle xs & ys so we don't have to.
   model.fit(xs, ys, {
     batch_size,
     epochs: epochs,
-//     validationSplit: .2,
     validationData: [xs_validation, ys_validation],
     shuffle: true,
-    callbacks: callbacks}).then(() => {
+    callbacks: callbacks}).then(() => { // [stop_early_callbacks, callbacks]
        const save_model = async () => {
           return await model.save('downloads://' + model_name);
        };
@@ -170,7 +172,16 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
        const test_loss_tensor = model.evaluate(xs_test, ys_test);
        const test_loss = test_loss_tensor[0].dataSync()[0];
        const test_accuracy = test_loss_tensor[1].dataSync()[0];
+       const predictions = model.predict(xs_test, ys_test);
+       const confusion_matrix = compute_confusion_matrix(predictions.dataSync(), ys_test.dataSync(), number_of_classes);
+       predictions.dispose();
        tf.dispose(test_loss_tensor); // both of them
+       xs.dispose();
+       ys.dispose();
+       xs_validation.dispose();
+       ys_validation.dispose();
+       xs_test.dispose();
+       ys_test.dispose();
        const response =
            {"Data loss ": data_loss,
             "Validation loss": validation_loss,
@@ -185,10 +196,13 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
            };
        const test_loss_message = document.createElement('p');      
        let results = // CSV for pasting into a spreadsheet
-           "<br>Name, Layer1,Layer2,Layer3,layer4,layer5, Batch size, Dropout rate, Epochs, Optimizer, Initializer, " +
+           "<br>Name, Layer1,Layer2,Layer3,layer4,layer5, Batch size, Dropout rate, Epochs, Optimizer, Initializer, Regularizer," +
            "Testing fraction, Validation fraction, Fraction kept, " +
            "Data loss, Validation loss, Test loss, Data accuracy, Validation accuracy, Test accuracy, Image count, " +
-           "Lowest validation loss, Lowest validation loss epoch, Highest accuracy, Highest accuracy epoch";
+           "Lowest validation loss, Lowest validation loss epoch, Highest accuracy, Highest accuracy epoch, " +
+           "Normal correct, Abnormal but is Normal, Serious but is Normal, " +
+           "Normal but is Abnormal, Abnormal corect, Serious but is Abnormal, " +
+           "Normal but is Serious, Abnormal but is Serious, Serious correct";
        results += "<br>";
        results +=  model_name + ", ";
        for (let i = 0; i < 5; i++) {
@@ -204,6 +218,7 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
        results += epochs + ", ";
        results += options.optimizer_name + ", ";
        results += options.layer_initializer_name + ", ";
+       results += options.regularizer_name + ", ";
        results += testing_fraction + ", ";
        results += validation_fraction + ", ";
        results += fraction_kept + ", ";
@@ -218,14 +233,12 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
        results += lowest_validation_loss_epoch + ", ";
        results += highest_accuracy + ", ";
        results += highest_accuracy_epoch + ", ";
-       test_loss_message.innerHTML = results;                  
+       results += matrix[0] + ', ' + matrix[1] + ', ' + matrix[2];
+       test_loss_message.innerHTML = results;
        document.body.appendChild(test_loss_message);
        if (callback) {
            callback(response);
        }
-       const predictions = model.predict(xs_test, ys_test);
-       const matrix = compute_confusion_matrix(predictions.dataSync(), ys_test.dataSync(), number_of_classes);
-       predictions.dispose();
 //        tf.dispose(model); // still may want to save it if it is a good one
        tfvis.render.confusionMatrix({name: 'Confusion Matrix All',
                                      tab: 'Charts#' + training_number},
