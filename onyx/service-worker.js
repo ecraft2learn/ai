@@ -2,7 +2,7 @@
 // caches files locally
 // based upon https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Offline_Service_workers
 
-const cache_name = "onyx-nail-v22";
+const cache_name = "onyx-nail-v23";
 
 const files_to_cache = [
 "/ai/onyx/dev.html",
@@ -24,6 +24,8 @@ const files_to_cache = [
 "/ai/js/mobilenet_v2_100_224/classification/2/group1-shard4of4?tfjs-format=file",
 "/ai/onyx/models/normal-fungal-serious-02-08-2019a.json",
 "/ai/onyx/models/normal-fungal-serious-02-08-2019a.weights.bin",
+"/ai/onyx/models/normal-fungal-serious-04-08-2019a.json",
+"/ai/onyx/models/normal-fungal-serious-04-08-2019a.weights.bin",
 "/ai/onyx/icons/icon-32.png",
 "/ai/onyx/onyx-nails.webmanifest",
 
