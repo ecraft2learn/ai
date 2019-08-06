@@ -1,1 +1,6 @@
-<input type="file" accept="image/*">
+<input type="file" accept="image/*" id="file-input" capture="environment">
+<script>
+  const fileInput = document.getElementById('file-input');
+
+  fileInput.addEventListener('change', (e) => alert(e.target.files.length + " files"));
+</script>
