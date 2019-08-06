@@ -52,10 +52,10 @@
 
             const training_options = {
                 model_name: model_name,
-                hidden_layer_sizes: [128, 64],
+                hidden_layer_sizes: [128, 64, 32],
                 batch_size: 256,
-                drop_out_rate: 0.5,
-                epochs: 250,
+                drop_out_rate: 0,
+                epochs: 300,
                 optimizer: (i) => tf.train.rmsprop(0.00001),
                 regularizer: (i) => tf.regularizers.l2(),
                 layer_initializer: (index) => 'varianceScaling',

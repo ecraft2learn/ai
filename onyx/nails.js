@@ -349,6 +349,19 @@ const get_url_from_image_or_canvas = (image_or_canvas) => {
     }
 };
 
+const shuffle = (a) => {
+/**
+ * From https://stackoverflow.com/questions/6274339/how-can-i-shuffle-an-array
+ * Shuffles array in place. ES6 version
+ * @param {Array} a items An array containing the items.
+ */
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;    
+};
+
 const start_training = () => {
     training_options.class_names = class_names; // for displaying confusion matrix
     training_options.model_name = model_name;
@@ -359,30 +372,39 @@ const start_training = () => {
     const original_ys = ys;
     const split_data = () => {
         // if I want reproducability I should use tf.randomUniform with a seed
-        let new_xs = [];
-        let new_ys = [];
-        xs_validation = [];
-        ys_validation = [];
-        xs_test = [];
-        ys_test = [];
-        original_xs.forEach((x, index) => {
-            if (fraction_kept > Math.random()) {
-                const random = Math.random();
-                const y = one_hot(original_ys[index], class_names.length);
-                if (random < validation_fraction) {
-                    xs_validation.push(x);
-                    ys_validation.push(y);
-                } else if (random < validation_fraction+testing_fraction) {
-                    xs_test.push(x);
-                    ys_test.push(y);
-                } else {
-                    new_xs.push(x);
-                    new_ys.push(y);                
-                }             
-            } 
-        });
-        xs = new_xs;
-        ys = new_ys;
+        let xs_ys = original_xs.map((x, index) => [x, one_hot(original_ys[index], class_names.length)]);
+        shuffle(xs_ys);
+        if (fraction_kept < 1) {
+            xs_ys.splice(Math.round((1-fraction_kept)*xs_ys.length));
+        }
+        const validation_count = Math.round(validation_fraction*xs_ys.length);
+        const test_count = Math.round(testing_fraction*xs_ys.length);
+        const new_count = xs_ys.length-(validation_count+test_count);
+        const xs_ys_validation = xs_ys.slice(0, validation_count);
+        const xs_ys_test = xs_ys.slice(validation_count, validation_count+test_count);
+        xs_ys = xs_ys.slice(validation_count+test_count);
+        xs_validation = xs_ys_validation.map((x_y) => x_y[0]);
+        ys_validation = xs_ys_validation.map((x_y) => x_y[1]);
+        xs_test = xs_ys_test.map((x_y) => x_y[0]);
+        ys_test = xs_ys_test.map((x_y) => x_y[1]);
+        xs = xs_ys.map((x_y) => x_y[0]);
+        ys = xs_ys.map((x_y) => x_y[1]);
+//         original_xs.forEach((x, index) => {
+//             if (fraction_kept > Math.random()) {
+//                 const random = Math.random();
+//                 const y = one_hot(original_ys[index], class_names.length);
+//                 if (random < validation_fraction) {
+//                     xs_validation.push(x);
+//                     ys_validation.push(y);
+//                 } else if (random < validation_fraction+testing_fraction) {
+//                     xs_test.push(x);
+//                     ys_test.push(y);
+//                 } else {
+//                     new_xs.push(x);
+//                     new_ys.push(y);                
+//                 }             
+//             } 
+//         });
     };
     let responses = [];
     const resport_averages = () => {
