@@ -194,6 +194,11 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
             "Highest accuracy": highest_accuracy,
             "Highest accuracy epoch": highest_accuracy_epoch
            };
+       ["Normal correct","Abnormal but is Normal", "Serious but is Normal",
+        "Normal but is Abnormal", "Abnormal correct", "Serious but is Abnormal",
+        "Normal but is Serious", "Abnormal but is Serious", "Serious correct"].map((label, index) => {
+          response[label] = confusion_matrix[index%3] [Math.floor(index/3)];
+        });
        const test_loss_message = document.createElement('p');      
        let results = // CSV for pasting into a spreadsheet
            "<br>Name, Layer1,Layer2,Layer3,layer4,layer5, Batch size, Dropout rate, Epochs, Optimizer, Initializer, Regularizer," +
@@ -201,7 +206,7 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
            "Data loss, Validation loss, Test loss, Data accuracy, Validation accuracy, Test accuracy, Image count, " +
            "Lowest validation loss, Lowest validation loss epoch, Highest accuracy, Highest accuracy epoch, " +
            "Normal correct, Abnormal but is Normal, Serious but is Normal, " +
-           "Normal but is Abnormal, Abnormal corect, Serious but is Abnormal, " +
+           "Normal but is Abnormal, Abnormal correct, Serious but is Abnormal, " +
            "Normal but is Serious, Abnormal but is Serious, Serious correct";
        results += "<br>";
        results +=  model_name + ", ";
