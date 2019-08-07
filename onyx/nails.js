@@ -1580,7 +1580,7 @@ const save_tensors = () => {
          document.body.appendChild(button);
     }
     let image_counter = 0;
-    const next = (image_or_canvas, class_index, image_index, image_counter) => {
+    const next = (image_or_canvas, class_index, image_index, thumbnail_index) => {
         const logits = infer(image_or_canvas);
         xs += "[";
         logits.dataSync().forEach((x) => {
@@ -1598,7 +1598,7 @@ const save_tensors = () => {
         const file_name = typeof file_name_or_description === 'string' ?
                           file_name_or_description :
                           file_name_or_description.file_name;
-        sources += "'" + file_name + "#" + image_counter + "',\n";   // new line since huge lines cause editors to hang
+        sources += "'" + file_name + "#" + thumbnail_index + "',\n";   // new line since huge lines cause editors to hang
         next_image(next, when_finished);
     }
     next_image(next, when_finished);
