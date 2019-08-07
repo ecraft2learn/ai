@@ -1298,6 +1298,9 @@ let not_confident_answers = 0; // less than minimum_confidence for top answer
 
 window.full_popup_messages = [];
 
+const MORE_DETAILS = "More details";
+const LESS_DETAILS = "Less details";
+
 const process_prediction = (result, image_or_canvas, class_index, image_index, image_count) => {
     const image_url = get_url_from_image_or_canvas(image_or_canvas);
     const table_of_image_and_response = !(option === 'diagnose' && is_mobile());
@@ -1310,11 +1313,14 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
     const short_confidence_message = confidences(result, false, class_index);
     const class_name = class_names[class_index];
     window.full_popup_messages.push(full_confidence_message);
-    message += "<span class='clickable' onclick='popup_full_message(event, "
-               + (window.full_popup_messages.length-1) + ")'"
-               + " title='Click for more details.'>"
-               + short_confidence_message
-               + "</span>";
+    const more_details_html = 
+        "<span class='clickable' onclick='popup_full_message(event, "
+        + (window.full_popup_messages.length-1) + ")'"
+        + " title='Click for more details.'>"
+        + "<span class='generic-button more-button'>" + MORE_DETAILS + "</span>"
+        + "</span>"
+        + "&nbsp;";
+    message += short_confidence_message;               
     if (image_or_canvas.title && window.location.hash.indexOf('debug') >= 0) {
         message += "&nbsp;"
                    + "<a href='"
@@ -1391,7 +1397,7 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
             csv[class_name] += "\n";
         }        
     }
-    message = response_element(message);
+    message = response_element(message, more_details_html);
     if (table_of_image_and_response) {
         message += "</tr></table>";
     }
@@ -1400,24 +1406,37 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
 
 const popup_full_message = (event, message_number) => {
     event.stopPropagation();
-    const full_response_element = document.getElementById('full-response');
-    event.currentTarget.appendChild(full_response_element);
-    full_response_element.hidden = false;
-    full_response_element.innerHTML = window.full_popup_messages[message_number];
+    let full_response_element = document.createElement('div'); // document.getElementById('full-response');
+    full_response_element.className = "response-text full-response";
     const hide_on_any_click = () => {
-        full_response_element.hidden = true;
-        window.removeEventListener('click', hide_on_any_click);
+        if (full_response_element) {
+            full_response_element.remove();
+            full_response_element = null;
+            more_button.innerHTML = more_button.innerHTML.replace(LESS_DETAILS, MORE_DETAILS);            
+        }
+//         window.removeEventListener('click', hide_on_any_click);
+    };
+    const more_button = event.currentTarget;
+    if (more_button.innerText === MORE_DETAILS) {
+        more_button.innerHTML = more_button.innerHTML.replace(MORE_DETAILS, LESS_DETAILS);
+    } else {
+        hide_on_any_click();
+        return;
     }
-    window.addEventListener('click', hide_on_any_click);
+    more_button.appendChild(full_response_element);
+    full_response_element.innerHTML = window.full_popup_messages[message_number];
+//     window.addEventListener('click', hide_on_any_click);
 };
 
-const response_element = (message) => {
+const response_element = (message, before_close_button) => {
     if (is_mobile() || message === "") {
         return message;
     }
     return "<td>"
            + message
-           + "&nbsp;<button class='x-close-button' onclick='remove_parent_element(event)'>&times;</button></td>";
+           + "&nbsp;"
+           + (before_close_button || "")
+           + "<button class='x-close-button' onclick='remove_parent_element(event)'>&times;</button></td>";
 };
 
 const maximum_confidence = (confidences) => {
@@ -1508,6 +1527,23 @@ const add_textarea = (text) => {
     document.body.appendChild(text_area);
 };
 
+const create_anchor_that_looks_like_a_button = (label, listener) => {
+    let button = document.createElement('a');
+    button.innerHTML = label;
+    button.className = 'generic-button';
+    button.href = "#";
+    button.addEventListener('click', listener);
+    return button;
+};
+
+const download_string = (label, name, data) => {
+    const button = create_anchor_that_looks_like_a_button(label);
+    const file = new Blob([JSON.stringify(data)], {type: 'text'});
+    button.href = URL.createObjectURL(file);
+    button.download = name;
+    return button;
+};
+
 const on_click = () => {
     document.getElementById('user-agreement').remove();
     document.getElementById('camera-interface').hidden = true;
@@ -1528,16 +1564,22 @@ const update_page = () => {
 const save_tensors = () => {
     let xs = "[";
     let ys = "[";
+    let sources = "[";
     const [next_image, reset_next_image] = create_next_image_generator();
     const when_finished = () => {
         // save the tensors
-        add_textarea("window.class_names_of_saved_tensors = " + JSON.stringify(class_names) + ";\n" +
-                     "window.xs = " + xs + "];\n" +
-                     "window.ys = " + ys + "];\n");
+        const button =
+            download_string("Download tensors",
+                            "saved-tensors.js",
+                            "window.class_names_of_saved_tensors = " + JSON.stringify(class_names) + ";\n" +
+                            "window.xs = " + xs + "];\n" +
+                            "window.ys = " + ys + "];\n" +
+                            "window.sources = " + sources + "];\n");
+         document.body.appendChild(button);
     }
     let image_counter = 0;
-    const next = (image, class_index) => {
-        const logits = infer(image);
+    const next = (image_or_canvas, class_index, image_index, image_counter) => {
+        const logits = infer(image_or_canvas);
         xs += "[";
         logits.dataSync().forEach((x) => {
             xs += x + ",";
@@ -1549,7 +1591,12 @@ const save_tensors = () => {
         if (image_counter === stop) {
             when_finished();
             return;
-        }        
+        }
+        const file_name_or_description = images[class_names[class_index]][image_index];
+        const file_name = typeof file_name_or_description === 'string' ?
+                          file_name_or_description :
+                          file_name_or_description.file_name;
+        sources += "'" + file_name + "#" + image_counter + "',\n";   // new line since huge lines cause editors to hang
         next_image(next, when_finished);
     }
     next_image(next, when_finished);
