@@ -1404,21 +1404,23 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
     return message;
 };
 
+const full_response_class = 'response-text full-response';
+
 const popup_full_message = (event, message_number) => {
     event.stopPropagation();
-    let full_response_element = document.createElement('div'); // document.getElementById('full-response');
-    full_response_element.className = "response-text full-response";
+    const full_response_element = document.createElement('div'); // document.getElementById('full-response');
+    full_response_element.className = full_response_class;
     const hide_on_any_click = () => {
-        if (full_response_element) {
-            full_response_element.remove();
-            full_response_element = null;
-            more_button.innerHTML = more_button.innerHTML.replace(LESS_DETAILS, MORE_DETAILS);            
+        const full_response = event.currentTarget.children[1];
+        if (full_response && full_response.className === full_response_class) {
+            full_response.remove();
+            more_button.firstElementChild.innerHTML = MORE_DETAILS;            
         }
 //         window.removeEventListener('click', hide_on_any_click);
     };
     const more_button = event.currentTarget;
-    if (more_button.innerText === MORE_DETAILS) {
-        more_button.innerHTML = more_button.innerHTML.replace(MORE_DETAILS, LESS_DETAILS);
+    if (more_button.firstElementChild.innerText === MORE_DETAILS) {
+        more_button.firstElementChild.innerHTML = LESS_DETAILS;
     } else {
         hide_on_any_click();
         return;
@@ -1538,7 +1540,7 @@ const create_anchor_that_looks_like_a_button = (label, listener) => {
 
 const download_string = (label, name, data) => {
     const button = create_anchor_that_looks_like_a_button(label);
-    const file = new Blob([JSON.stringify(data)], {type: 'text'});
+    const file = new Blob([data], {type: 'text'});
     button.href = URL.createObjectURL(file);
     button.download = name;
     return button;
@@ -1557,7 +1559,7 @@ const update_page = () => {
         + "<p class='agreement-text'>Images taken through this app are processed locally on your device. "
         + "Images will neither be processed nor stored remotely.</p>"
         + "<p class='agreement-text'>The <a href='https://github.com/ecraft2learn/ai/tree/master/onyx' target='_blank'>source code</a> "
-        + "for this app is available for inspection. Visit the <a href='http://www.education.ox.ac.uk/' target='_blank'>Onyx home page</a> "
+        + "for this app is available for inspection. Visit the <a href='http://www.mhealthpartners.org/projects/onyx/' target='_blank'>Onyx home page</a> "
         + "to learn more about this project and app.</p>"
 };
 
