@@ -238,7 +238,10 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
        results +=lowest_validation_loss_epoch + ", ";
        results += highest_accuracy + ", ";
        results += highest_accuracy_epoch + ", ";
-       results += confusion_matrix[0] + ', ' + confusion_matrix[1] + ', ' + confusion_matrix[2];
+       const percentage_of_tests = (x) => 100*x/xs_test_array.length
+       results += confusion_matrix[0].map(percentage_of_tests) + ', ' + 
+                  confusion_matrix[1].map(percentage_of_tests) + ', ' + 
+                  confusion_matrix[2].map(percentage_of_tests);
        test_loss_message.innerHTML = results;
        document.body.appendChild(test_loss_message);
        if (callback) {
