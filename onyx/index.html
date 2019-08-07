@@ -27,19 +27,21 @@
             // korean.js korean-small.js korean-tests.js korean-tests-small.js 
             // originals.js originals-normal-fungal.js or originals-normal-serious-non-serious.js
             let additional_js;
-            if (option === 'diagnose' || option === 'experiment') {
+            if (option === 'diagnose') {
                 // 166 random images from each class
                 additional_js = ["korean-tests-80-each.js"];
+            } else if (option === 'experiment') {
+                 additional_js = ["korean-tests-80-each.js", "korean-tests.js"];
             } else if (option === 'save tensors'){
                 // both Korean training thumbnails and their test images
-                additional_js = ["korean-big.js", "korean-tests.js"]; //, "originals-normal-serious-non-serious.js"];  
+                additional_js = ["korean-big.js"]; //, "korean-tests.js", "originals-normal-serious-non-serious.js"];  
             } else if (option === 'create model') {
-                additional_js = ["saved-tensors-v5.js"];
+                additional_js = ["saved-tensors-v6.js"];
             } else {
                 additional_js = [];
             }
             const model_name = parameters.has('balanced') || option !== 'diagnose' ? 
-                               "normal-fungal-serious-04-08-2019a" : 
+                               "07-08-2019a" : 
                                "normal-fungal-serious-02-08-2019a";
             // 15% set aside for testing and evaluation each
             const testing_fraction = .15;
@@ -54,7 +56,7 @@
                 model_name: model_name,
                 hidden_layer_sizes: [1280],
                 batch_size: 256,
-                drop_out_rate: 0,
+                drop_out_rate: .25,
                 epochs: 300,
                 optimizer: (i) => tf.train.rmsprop(0.00001),
                 regularizer: (i) => tf.regularizers.l2(),
@@ -142,7 +144,6 @@
         </div>
     </div>
     <p id="please-wait" style="font-size: x-large;color: darkred">Please wait for this app to load.</p>
-    <div id="full-response" class="response-text full-response" hidden>
     </div>
  </div>
 </body>
