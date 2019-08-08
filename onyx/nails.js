@@ -18,9 +18,9 @@ const VIDEO_WIDTH  = 224; // this version of MobileNet expects 224x224 images
 const VIDEO_HEIGHT = 224;
 
 const old_serious_name = "warrants second opinion";
-const new_serious_name = "check with a GP";
+const new_serious_name = "check with a doctor";
 const name_substitutions = 
-    {"warrants second opinion": "check with a GP",
+    {"warrants second opinion": new_serious_name,
      "non-serious": "abnormal but not serious"}
 const better_name = (name) =>
     name_substitutions[name] || name;
@@ -713,18 +713,18 @@ const confidences = (result, full_description, correct_class_index) => {
                 message + " (Confidence score is " + scores[0].score + "%)";
             }
         } else if (scores.length > 1 && scores[1].name === old_serious_name && scores[1].score >= 20) {
-            message += "that perhaps a GP should be consulted.";
+            message += "that perhaps a doctor should be consulted.";
             if (full_description) {
                 message + " (Confidence score is " + scores[1].score + "%)";
             }
         } else {
             message += "the nail's condition is " + better_name(scores[0].name);
             if (full_description) {
-                message += " with confidence score of " + scores[0].score + "%. ";
+                message += " with a confidence of " + scores[0].score + "%. ";
                 if (scores.length > 1 && scores[1].name === old_serious_name && scores[1].score > 0) {
-                    message += "The confidence score for consulting a GP is " + scores[1].score + "%.";
+                    message += "The confidence score for consulting a doctor is " + scores[1].score + "%.";
                 } else if (scores.length > 1 && scores[1].score > 0) {
-                    message += "Otherwise it is " + scores[1].name + " with confidence score of " + scores[1].score + "%.";
+                    message += "Otherwise it is " + scores[1].name + " with confidence of " + scores[1].score + "%.";
                 }
             } else {
                 message += ".";

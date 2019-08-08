@@ -215,40 +215,48 @@ figcaption {
 .clickable {
   cursor: pointer;
 }
+.red {
+  background-color: #a70606;
+  color: white;
+}
 .red-light {
   background-color: #a70606;
   display: block;
   color: white;
-/*   border-radius: 8px; */
   padding: 4px;
-/*   box-shadow: 5px 3px 5px black; */
   width: fit-content;
+}
+.amber {
+  background-color: #d6b862;
+  color: white;
 }
 .amber-light {
   background-color: #d6b862;
   display: block;
   color: white;
-/*   border-radius: 8px; */
   padding: 4px;
-/*   box-shadow: 5px 3px 5px black; */
   width: fit-content;
+}
+.green {
+  background-color: #386838;
+  color: white;
 }
 .green-light {
   background-color: #386838;
   display: block;
   color: white;
-/*   border-radius: 8px; */
   padding: 4px;
-/*   box-shadow: 5px 3px 5px black; */
   width: fit-content;
+}
+.gray {
+  background-color: #787a78;
+  color: white;
 }
 .gray-light {
   background-color: #787a78;
   display: block;
   color: white;
-/*   border-radius: 8px; */
   padding: 4px;
-/*   box-shadow: 5px 3px 5px black; */
   width: fit-content; 
 }
 .full-response {
