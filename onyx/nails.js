@@ -232,7 +232,9 @@ const setup_camera = (callback) => {
           if (window.location.hash.indexOf('beta') >= 0) {
               video.hidden = true;
               toggle_freeze_button.innerHTML = 
-                    '<input type="file" accept="image/*" id="camera-input" name="camera-input" capture="environment">';
+                    '<div><label for="camera-input">Click this to take a photo: </label>' +
+                    '<input type="file" accept="image/*" id="camera-input" name="camera-input" capture="environment">' +
+                    '</div>';
               toggle_freeze_button.addEventListener('change', (event) => {
                   if (event.target.files.length > 0) {
                       const file = event.target.files[0];

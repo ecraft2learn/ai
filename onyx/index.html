@@ -41,7 +41,7 @@
                 additional_js = [];
             }
             const model_name = parameters.has('balanced') || option !== 'diagnose' ? 
-                               "07-08-2019a" : 
+                               "08-08-2019a" : 
                                "normal-fungal-serious-02-08-2019a";
             // 15% set aside for testing and evaluation each
             const testing_fraction = .15;
@@ -54,7 +54,7 @@
 
             const training_options = {
                 model_name: model_name,
-                hidden_layer_sizes: [1280, 128],
+                hidden_layer_sizes: [640],
                 batch_size: 256,
                 drop_out_rate: .5,
                 epochs: 300,
