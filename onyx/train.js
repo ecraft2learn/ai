@@ -166,7 +166,7 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
        };
        const percentage_of_tests = (x) => +(100*x/xs_test_array.length).toFixed(2);
        const show_layers = () => {
-           const surface = {name: 'Layers', tab: 'Model inspection'};
+           const surface = {name: 'Layers', tab: 'Model inspection#' + training_number};
            tfvis.show.modelSummary(surface, model);
            for (let i = 0; i < hidden_layer_sizes.length; i++) {
                tfvis.show.layer(surface, model.getLayer(undefined, i));
