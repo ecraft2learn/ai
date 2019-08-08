@@ -165,6 +165,14 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
           return await model.save('downloads://' + model_name);
        };
        const percentage_of_tests = (x) => +(100*x/xs_test_array.length).toFixed(2);
+       const show_layers = () => {
+           const surface = {name: 'Layers', tab: 'Model inspection'};
+           tfvis.show.modelSummary(surface, model);
+           for (let i = 0; i < hidden_layer_sizes.length; i++) {
+               tfvis.show.layer(surface, model.getLayer(undefined, i));
+           } 
+       };
+       show_layers();
        const button = document.createElement('button');
        button.innerHTML = "Save model";
        button.className = "save-training-button";
