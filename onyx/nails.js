@@ -418,7 +418,7 @@ const start_training = () => {
         const csv = "<br>Number of training repeats, " + 
                     Object.keys(responses_total) + "<br>" +
                     number_of_training_repeats + ", " +
-                    Object.values(responses_total).map(value => value/number_of_training_repeats) + "<br>";
+                    Object.values(responses_total).map(value => (value/number_of_training_repeats).toFixed(3)) + "<br>";
         const averages = document.createElement('p');
         averages.innerHTML = csv;
         document.body.appendChild(averages);

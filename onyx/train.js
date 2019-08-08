@@ -164,6 +164,7 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
        const save_model = async () => {
           return await model.save('downloads://' + model_name);
        };
+       const percentage_of_tests = (x) => +(100*x/xs_test_array.length).toFixed(2);
        const button = document.createElement('button');
        button.innerHTML = "Save model";
        button.className = "save-training-button";
@@ -197,7 +198,7 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
        ["Normal correct","Abnormal but is Normal", "Serious but is Normal",
         "Normal but is Abnormal", "Abnormal correct", "Serious but is Abnormal",
         "Normal but is Serious", "Abnormal but is Serious", "Serious correct"].map((label, index) => {
-          response[label] = confusion_matrix[index%3] [Math.floor(index/3)];
+            response[label] = percentage_of_tests(confusion_matrix[index%3] [Math.floor(index/3)]);
         });
        const test_loss_message = document.createElement('p');      
        let results = // CSV for pasting into a spreadsheet
@@ -229,16 +230,15 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
        results += fraction_kept + ", ";
        results += data_loss + ", ";
        results += validation_loss + ", ";
-       results += test_loss + ", ";
-       results += data_accuracy + ", ";
-       results += validation_accuracy + ", ";
-       results += test_accuracy + ", ";
+       results += test_loss.toFixed(4) + ", ";
+       results += data_accuracy.toFixed(4) + ", ";
+       results += validation_accuracy.toFixed(4) + ", ";
+       results += test_accuracy.toFixed(4) + ", ";
        results += xs_array.length + xs_validation_array.length + xs_test_array.length + ", ";
-       results += lowest_validation_loss + ", ";
+       results += lowest_validation_loss.toFixed(4) + ", ";
        results +=lowest_validation_loss_epoch + ", ";
-       results += highest_accuracy + ", ";
+       results += highest_accuracy.toFixed(4) + ", ";
        results += highest_accuracy_epoch + ", ";
-       const percentage_of_tests = (x) => 100*x/xs_test_array.length
        results += confusion_matrix[0].map(percentage_of_tests) + ', ' + 
                   confusion_matrix[1].map(percentage_of_tests) + ', ' + 
                   confusion_matrix[2].map(percentage_of_tests);

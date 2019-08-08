@@ -59,10 +59,10 @@
                 drop_out_rate: .25,
                 epochs: 300,
                 optimizer: (i) => tf.train.rmsprop(0.00001),
-                regularizer: (i) => tf.regularizers.l2(),
+                regularizer: (i) => tf.regularizers.l2(1e-2),
                 layer_initializer: (index) => 'varianceScaling',
                 // for reporting results
-                regularizer_name: 'l2()',
+                regularizer_name: 'l2(1e-2)',
                 optimizer_name: 'rms-0.00001',
                 layer_initializer_name: 'varianceScaling',
                 testing_fraction,
