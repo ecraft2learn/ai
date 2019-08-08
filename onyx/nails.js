@@ -228,9 +228,23 @@ const setup_camera = (callback) => {
           }
       };
       const toggle_freeze_button = document.getElementById('toggle video');
-      if (is_mobile()) {
-          toggle_freeze_button.innerHTML = "Click to take photo";
-          toggle_freeze_button.addEventListener('click', analyse_camera_image);
+      if (is_mobile() || window.location.hash.indexOf('beta') >= 0) { // REMOVE window.location.hash.indexOf('beta') >= 0
+          if (window.location.hash.indexOf('beta') >= 0) {
+              video.hidden = true;
+              toggle_freeze_button.innerHTML = 
+                    '<input type="file" accept="image/*" id="camera-input" name="camera-input" capture="environment">';
+              toggle_freeze_button.addEventListener('change', (event) => {
+                  if (event.target.files.length > 0) {
+                      const file = event.target.files[0];
+                      const url = window.URL.createObjectURL(file);
+                      const image = predict_when_image_loaded();
+                      image.src = url;
+                  }
+              });
+          } else {
+              toggle_freeze_button.innerHTML = "Click to take photo";
+              toggle_freeze_button.addEventListener('click', analyse_camera_image);              
+          }
       } else {
           toggle_freeze_button.addEventListener('click', toggle_click);  
       }
@@ -1029,11 +1043,11 @@ const receive_drop = (event) => {
     if (event.dataTransfer.items) {
         // Use DataTransferItemList interface to access the file(s)
         for (let i = 0; i < event.dataTransfer.items.length; i++) {
-          // If dropped items aren't files, reject them
-          if (event.dataTransfer.items[i].kind === 'file') {
-            file = event.dataTransfer.items[i].getAsFile();
-            break;
-          }
+            // If dropped items aren't files, reject them
+            if (event.dataTransfer.items[i].kind === 'file') {
+                file = event.dataTransfer.items[i].getAsFile();
+                break;
+            }
         }
     } else {
         // Use DataTransfer interface to access the file(s)
@@ -1042,21 +1056,30 @@ const receive_drop = (event) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => {
-        const image = new Image();
-        image.onload = () => {
-            const canvas = document.getElementById('canvas');
-            canvas.getContext('2d').drawImage(image, 0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
-            canvas.hidden = false;
-            video.hidden = true;
-            make_prediction(canvas, (results) => {
-                display_message(process_prediction(results, canvas), 'camera-response', true);
-                display_message("You can select a sub-region of your image.", 'camera-response', true);
-                const video_button = document.getElementById('toggle video');
-                video_button.innerHTML = "Restore camera";
-            });
-        };
+        const image = predict_when_image_loaded();
         image.src = reader.result;
     };  
+};
+
+const predict_when_image_loaded = () => {
+    const image = new Image();
+    image.onload = (event) => {
+        const canvas = document.getElementById('canvas');
+        canvas.getContext('2d').drawImage(event.currentTarget, 0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
+        if (video) { // device might not have a camera
+            canvas.hidden = false;
+            video.hidden = true;
+        }
+        make_prediction(canvas, (results) => {
+            display_message(process_prediction(results, canvas), 'camera-response', true);
+            display_message("You can select a sub-region of your image.", 'camera-response', true);
+            if (video) {
+                const video_button = document.getElementById('toggle video');
+                video_button.innerHTML = "Restore camera";
+            }
+        });
+    };
+    return image;
 };
 
 const canvas_of_multi_nail_image = (multi_nail_image, box) => {
