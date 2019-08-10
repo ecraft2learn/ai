@@ -193,6 +193,8 @@ const display_results = (canvas) => {
     });
 };
 
+const is_beta = () => window.location.hash.indexOf('beta') >= 0;
+
 const setup_camera = (callback) => {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       throw new Error('Browser API navigator.mediaDevices.getUserMedia not available');
@@ -228,13 +230,11 @@ const setup_camera = (callback) => {
           }
       };
       const toggle_freeze_button = document.getElementById('toggle video');
-      if (is_mobile() || window.location.hash.indexOf('beta') >= 0) { // REMOVE window.location.hash.indexOf('beta') >= 0
-          if (window.location.hash.indexOf('beta') >= 0) {
+      if (is_mobile() || is_beta()) { // REMOVE is_beta eventually
+          if (is_beta()) { // if successful is_mobile will do this without "beta"
               video.hidden = true;
               toggle_freeze_button.innerHTML = 
-                    '<div><label for="camera-input">Click this to take a photo: </label>' +
-                    '<input type="file" accept="image/*" id="camera-input" name="camera-input" capture="environment">' +
-                    '</div>';
+                    '<input type="file" accept="image/*" id="camera-input" name="camera-input" capture="environment">';
               toggle_freeze_button.addEventListener('change', (event) => {
                   if (event.target.files.length > 0) {
                       const file = event.target.files[0];
@@ -602,13 +602,15 @@ const start_up = () => {
         start_training();
         return;
     } 
-    const use_photo = "Or take a picture of a finger or toe nail on a screen or in a photograph. ";
+//     const use_photo = "Or take a picture of a finger or toe nail on a screen or in a photograph. ";
     const instructions = is_mobile() ?
-                         "Take a picture of your fingernail using your device by clicking the button below. "
-                         + use_photo
+                         (is_beta() ? 
+                            "Take a picture using your camera app by tapping 'Choose file'." :
+                            "Take a picture of your fingernail using your device by clicking the button below. ")
+//                          + use_photo
                          + "Make sure only one nail is visible in each photo." :
                          "Take a picture by clicking the button below. "
-                         + use_photo 
+//                          + use_photo 
                          + "Then you will be able to select a nail in the image.";
     document.getElementById('camera-instructions').innerHTML = 
         video ? instructions : "Camera not available";
@@ -1074,10 +1076,13 @@ const predict_when_image_loaded = () => {
         }
         make_prediction(canvas, (results) => {
             display_message(process_prediction(results, canvas), 'camera-response', true);
-            display_message("You can select a sub-region of your image.", 'camera-response', true);
-            if (video) {
-                const video_button = document.getElementById('toggle video');
-                video_button.innerHTML = "Restore camera";
+            if (!is_mobile() || !is_beta()) {
+                // only desktop non-beta do this
+                display_message("You can select a sub-region of your image.", 'camera-response', true);
+                if (video) {
+                    const video_button = document.getElementById('toggle video');
+                    video_button.innerHTML = "Restore camera";
+                }
             }
         });
     };
@@ -1339,11 +1344,11 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
     const class_name = class_names[class_index];
     window.full_popup_messages.push(full_confidence_message);
     const more_details_html = 
-        "<span class='clickable' onclick='popup_full_message(event, "
+        "<div class='clickable' onclick='popup_full_message(event, "
         + (window.full_popup_messages.length-1) + ")'"
         + " title='Click for more details.'>"
         + "<span class='generic-button more-button'>" + MORE_DETAILS + "</span>"
-        + "</span>"
+        + "</div>"
         + "&nbsp;";
     message += short_confidence_message;               
     if (image_or_canvas.title && window.location.hash.indexOf('debug') >= 0) {
@@ -1456,13 +1461,17 @@ const popup_full_message = (event, message_number) => {
 };
 
 const response_element = (message, before_close_button) => {
-    if (is_mobile() || message === "") {
+    if (message === "") {
         return message;
     }
-    return "<td>"
-           + message
+    const new_message = message
            + "&nbsp;"
            + (before_close_button || "")
+    if (is_mobile()) {
+        return new_message;
+    }
+    return "<td>"
+           + new_message
            + "<button class='x-close-button' onclick='remove_parent_element(event)'>&times;</button></td>";
 };
 
