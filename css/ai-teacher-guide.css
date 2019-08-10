@@ -79,10 +79,37 @@ figcaption {
 }
 .freeze-video, .training-button, .testing-button, .return-to-snap-button, .save-training-button,
  .save-validation-button, .together_button, .support-window-button, .generic-button {
-/* originally copied from jquery-ui many subsequent edits */margin-top: 10px;/*  padding: .8em 1em; */display: inline-block;position: relative;line-height: normal;margin-right: .1em;cursor: pointer;vertical-align: middle;text-align: center;font-size: 1.1em;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;border-radius: 8px;padding: 10px;box-shadow: 5px 3px 5px black;color: navy;cursor: pointer;text-decoration: none;width: fit-content;background-color: buttonface;}
+/* originally copied from jquery-ui many subsequent edits */
+margin-top: 10px;
+/*  padding: .8em 1em; */
+display: inline-block;
+position:absolute relative;
+line-height: normal;
+margin-right: .1em;
+cursor: pointer;
+vertical-align: middle;
+text-align: center;
+font-size: 1.1em;
+-webkit-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+border-radius: 8px;
+padding: 10px;
+box-shadow: 5px 3px 5px black;
+color: navy;
+cursor: pointer;
+text-decoration: none;
+width: fit-content;
+background-color: buttonface;
+}
 .button:disabled, button[disabled] {
   color: #a8a881;
   background-color: #ece8e4;
+}
+.back-to-tutorial-button {
+  margin-top: -12px;
+  margin-bottom: 6px;
 }
 .save-training-button, .save-validation-button, .support-window-button {
   display: block;
@@ -270,5 +297,5 @@ figcaption {
 .more-button {
   display:inline-block;
   font-size: .8em;
-  margin-top: -8px;
+  margin-top: -16px;
 }

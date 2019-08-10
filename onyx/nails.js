@@ -175,8 +175,12 @@ const display_results = (canvas) => {
 //         }
         const message = result_description;
         const camera_image_element = document.getElementById('camera-image');
+        if (is_mobile() && !is_beta()) {
+            camera_image_element.width = 42;
+            camera_image_element.height = 56;
+            camera_image_element.hidden = false;
+        }
         camera_image_element.src = data_url;
-        camera_image_element.hidden = false;
         display_message(message, 'camera-response', true);
         const display_data = (event) => {
             navigator.clipboard.writeText(data);
@@ -189,7 +193,7 @@ const display_results = (canvas) => {
                 email_link_added = true;             
             }
         };
-        document.getElementById('camera-image').onclick = display_data;    
+        document.getElementById('camera-image').onclick = display_data;
     });
 };
 
@@ -252,8 +256,8 @@ const setup_camera = (callback) => {
       }
       video.onloadedmetadata = () => {
           if (is_mobile()) {
-              video.width = 128;
-              video.height = 128;
+//               video.width = 224;
+//               video.height = 224;
           } else if (video.videoWidth) {
               // in Chrome videoWidth is 0 but without this FireFox can't map the selection rectangle properly
               video.width = video.videoWidth;
@@ -1344,11 +1348,12 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
     const class_name = class_names[class_index];
     window.full_popup_messages.push(full_confidence_message);
     const more_details_html = 
+        "<div style='text-align: center'>" +
         "<div class='clickable' onclick='popup_full_message(event, "
         + (window.full_popup_messages.length-1) + ")'"
         + " title='Click for more details.'>"
         + "<span class='generic-button more-button'>" + MORE_DETAILS + "</span>"
-        + "</div>"
+        + "</div></div>"
         + "&nbsp;";
     message += short_confidence_message;               
     if (image_or_canvas.title && window.location.hash.indexOf('debug') >= 0) {
@@ -1430,6 +1435,10 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
     message = response_element(message, more_details_html);
     if (table_of_image_and_response) {
         message += "</tr></table>";
+    }
+    if (is_mobile()) {
+        // saves screen real estate while results are being displayed
+        document.getElementById('go-to-tutorial').classList.add('back-to-tutorial-button');
     }
     return message;
 };
