@@ -82,22 +82,22 @@ const create_csv_settings = () => {
 create_csv_settings();
 
 const multi_nail_image_width = (multi_nail_description) => {
-    return multi_nail_description.image_width || 100; // 100x100 is used in the Korean images
+    return (multi_nail_description && multi_nail_description.image_width) || 100; // 100x100 is used in the Korean images
 };
 const multi_nail_image_height = (multi_nail_description) => {
-    return multi_nail_description.image_height || 100; // 100x100 is used in the Korean images
+    return (multi_nail_description && multi_nail_description.image_height) || 100; // 100x100 is used in the Korean images
 };
 const multi_nail_image_delta_x = (multi_nail_description) => {
-    return multi_nail_description.delta_x || 112; 
+    return (multi_nail_description && multi_nail_description.delta_x) || 112; 
 };
 const multi_nail_image_delta_y = (multi_nail_description) => {
-    return multi_nail_description.delta_y || 128; 
+    return (multi_nail_description && multi_nail_description.delta_y) || 128; 
 };
 const multi_nail_image_start_x = (multi_nail_description) => {
-    return multi_nail_description.start_x || 16; 
+    return (multi_nail_description && multi_nail_description.start_x) || 16; 
 };
 const multi_nail_image_start_y = (multi_nail_description) => {
-    return multi_nail_description.start_y || 48; 
+    return (multi_nail_description && multi_nail_description.start_y) || 48; 
 };
 const number_of_images_in_multi_nail_file = (multi_nail_description) => {
     const {width, height} = multi_nail_description.dimensions;
@@ -294,9 +294,12 @@ const add_image_or_canvas = (parent, image_or_canvas, class_name, image_to_repla
         const analyse_image_and_replace_self =
             (result) => {
                 const class_index = class_names.indexOf(class_name);
-                const image_element = document.getElementById('random-image-chosen');
-                image_element.src = get_url_from_image_or_canvas(image_or_canvas);
-                image_element.hidden = false;
+                if (is_mobile()) {
+                    // desktop version adds the image to its table
+                    const image_element = document.getElementById('random-image-chosen');
+                    image_element.src = get_url_from_image_or_canvas(image_or_canvas);
+                    image_element.hidden = false;                    
+                }
                 let message = process_prediction(result, image_or_canvas, class_index);
                 display_message(message, 'random-image-response', true);
                 add_random_image(null, image_or_canvas); // replaces self with new random image                      
@@ -536,12 +539,18 @@ const add_images = (when_finished, just_one_class, only_class_index, except_imag
     next_image(image_callback, when_all_finished);
 };
 
+let current_logits;
 const make_prediction = (image, callback) => {
-    return tf.tidy(() => {
-        const logits = infer(image);
-        const logits_data = logits.dataSync();
-        callback(loaded_model.predict([logits]).dataSync(), logits_data)
-    });
+    const logits = infer(image);
+    if (current_logits) {
+        current_logits.dispose(); // no longer needed
+    }
+    current_logits = logits;
+    const logits_data = logits.dataSync();
+    const prediction_tensor = loaded_model.predict([logits]);
+    const prediction = prediction_tensor.dataSync();
+    prediction_tensor.dispose();
+    callback(prediction, logits_data);
 };
 
 // 'conv_preds' is the logits activation of MobileNet.
@@ -1093,14 +1102,14 @@ const predict_when_image_loaded = () => {
     return image;
 };
 
-const canvas_of_multi_nail_image = (multi_nail_image, box) => {
+const canvas_of_multi_nail_image = (multi_nail_image, box, width, height) => {
     const canvas = document.createElement('canvas');
-    canvas.width = image_dimension;
-    canvas.height = image_dimension;
+    canvas.width = width || image_dimension;
+    canvas.height = height || image_dimension;
     draw_maintaining_aspect_ratio(multi_nail_image,
                                   canvas,
-                                  image_dimension,
-                                  image_dimension,
+                                  canvas.width,
+                                  canvas.height,
                                   box.x,
                                   box.y,
                                   box.width,
@@ -1108,8 +1117,10 @@ const canvas_of_multi_nail_image = (multi_nail_image, box) => {
     return canvas;
 };
 
-const multi_nail_image_box = (image_description, image_index) => {
-    const width = image_description.dimensions.width;
+const multi_nail_image_box = (image_description, image_index, width) => {
+    if (!width) {
+        width = image_description.dimensions.width;
+    } 
     const images_per_row = Math.floor((width-multi_nail_image_start_x(image_description))
                                       /multi_nail_image_delta_x(image_description));
     if (typeof image_index === 'undefined') {
@@ -1250,7 +1261,7 @@ const create_next_image_generator = () => {
                 if (multi_nail_image) {
                     // no need to load it again
                     image_callback(canvas_of_next_nail_in_multi_nail_image(image_or_images_description),
-                                   class_index, image_index, image_count);
+                                   class_index, image_index, image_count, nails_remaining_in_multi_nail);
                     return;
                 }
                 load_image(image_or_images_description.file_name,
@@ -1348,7 +1359,7 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
     const class_name = class_names[class_index];
     window.full_popup_messages.push(full_confidence_message);
     const more_details_html = 
-        "<div style='text-align: center'>" +
+        "<div style='text-align: right'>" +
         "<div class='clickable' onclick='popup_full_message(event, "
         + (window.full_popup_messages.length-1) + ")'"
         + " title='Click for more details.'>"
@@ -1445,28 +1456,79 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
 
 const full_response_class = 'response-text full-response';
 
+const width_of_multi_nail_images = 2260;
+
+const number_of_close_images = 10;
+
 const popup_full_message = (event, message_number) => {
     event.stopPropagation();
     const full_response_element = document.createElement('div'); // document.getElementById('full-response');
     full_response_element.className = full_response_class;
-    const hide_on_any_click = () => {
+    const hide_full_response = () => {
         const full_response = event.currentTarget.children[1];
         if (full_response && full_response.className === full_response_class) {
             full_response.remove();
             more_button.firstElementChild.innerHTML = MORE_DETAILS;            
         }
-//         window.removeEventListener('click', hide_on_any_click);
     };
     const more_button = event.currentTarget;
     if (more_button.firstElementChild.innerText === MORE_DETAILS) {
         more_button.firstElementChild.innerHTML = LESS_DETAILS;
     } else {
-        hide_on_any_click();
+        hide_full_response();
         return;
+    }
+    const why_button = document.createElement('button');
+    let explanation;
+    const display_closest_images = (sorted_image_labels_and_sources) => {
+        const div = document.createElement('div');
+        let index = 0;
+        const next_image = () => {
+            const [label, source, distance] = sorted_image_labels_and_sources[index];
+            let file_name, image_number;
+            if (source.indexOf('#') < 0) {
+                file_name = source;
+            } else {
+                [file_name, image_number] = source.split('#');
+            }
+            load_image(file_name,
+                       (image_or_canvas) => {
+                           if (index === 0) {
+                               // first one
+                               explanation.remove();
+                           }
+                           if (image_number) {
+                               const box = multi_nail_image_box(undefined, +image_number, width_of_multi_nail_images);
+                               image_or_canvas = canvas_of_multi_nail_image(image_or_canvas, box, 96, 96);
+                               image_or_canvas.title = file_name + "#" + image_number + " " + box.x + " " + box.y; // for debugging 
+                               console.log(file_name, image_number, box.x, box.y);
+                           }
+//                            image_or_canvas.title = label + " and distance is " + distance.toFixed(3);  
+                           div.appendChild(image_or_canvas);
+                           index++;
+                           if (index < sorted_image_labels_and_sources.length) {
+                               next_image();
+                           }
+                       });
+        };
+        next_image();
+        more_button.parentElement.insertBefore(div, more_button);
+    };
+    const explain_why = (event) => {
+        explanation = document.createElement('p');
+        explanation.innerHTML = "Of the thousands of images used in training you will soon see the " + 
+                                number_of_close_images + " closest images here.";
+        why_button.parentElement.insertBefore(explanation, why_button);
+        show_closest_images(number_of_close_images, current_logits, display_closest_images);
+    };
+    why_button.innerHTML = "Why?";
+    why_button.className = 'generic-button';
+    why_button.addEventListener('click', explain_why);
+    if (is_beta()) {
+       more_button.parentElement.insertBefore(why_button, more_button);       
     }
     more_button.appendChild(full_response_element);
     full_response_element.innerHTML = window.full_popup_messages[message_number];
-//     window.addEventListener('click', hide_on_any_click);
 };
 
 const response_element = (message, before_close_button) => {
@@ -1623,7 +1685,7 @@ const save_tensors = () => {
          document.body.appendChild(button);
     }
     let image_counter = 0;
-    const next = (image_or_canvas, class_index, image_index, thumbnail_index) => {
+    const next = (image_or_canvas, class_index, image_index, image_count, thumbnail_index) => {
         const logits = infer(image_or_canvas);
         xs += "[";
         logits.dataSync().forEach((x) => {
@@ -1645,6 +1707,40 @@ const save_tensors = () => {
         next_image(next, when_finished);
     }
     next_image(next, when_finished);
+};
+
+const show_closest_images = (n, image_logits, callback) => {
+    const when_tensors_loaded = () => {
+        const sorted_images = image_sources_sorted_by_cosine_proximity(image_logits);
+        callback(sorted_images.slice(0, n));
+    };
+    if (typeof xs === 'undefined') {
+        load_saved_tensors(when_tensors_loaded);
+    } else {
+        when_tensors_loaded();
+    }
+};
+
+const load_saved_tensors = (callback) => {
+    const script = document.createElement('script');
+    script.onload = callback;
+    script.src = saved_tensor_file_name;
+    script.charset = "UTF-8";
+    document.head.appendChild(script);
+};
+
+const image_sources_sorted_by_cosine_proximity = (image_logits) => {
+    if (xs instanceof Array) {
+        xs = tf.tensor(xs);
+    }
+    const cosines_tensor = tf.metrics.cosineProximity(image_logits, xs);
+    const cosines_float32 = cosines_tensor.dataSync();
+    // using tf.tidy instead of explicitly disposing of tensors caused Snap! to repeated call this
+    cosines_tensor.dispose();
+    const cosines = new Array(...cosines_float32);
+    const labels_and_cosines =
+        cosines.map((cosine, index) => [class_names_of_saved_tensors[ys[index]], sources[index], 1-Math.abs(cosine)]);
+    return labels_and_cosines.sort((a, b) => a[2]-b[2]);
 };
 
 window.addEventListener('DOMContentLoaded',
