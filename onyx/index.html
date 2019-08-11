@@ -42,7 +42,7 @@
             }
             const model_name = parameters.has('beta') || option !== 'diagnose' ? 
                                "08-08-2019a" : 
-                               "normal-fungal-serious-04-08-2019a";
+                               "normal-fungal-serious-04-10-2019a";
             // 15% set aside for testing and evaluation each
             const testing_fraction = .15;
             const validation_fraction = .15;
@@ -54,16 +54,16 @@
 
             const training_options = {
                 model_name: model_name,
-                hidden_layer_sizes: [160, 16],
+                hidden_layer_sizes: [320],
                 batch_size: 256,
                 drop_out_rate: .5,
                 epochs: 600,
-                optimizer: (i) => tf.train.rmsprop(0.00001),
+                optimizer: (i) => tf.train.adam(0.00001), // tf.train.rmsprop(0.00001),
                 regularizer: (i) => tf.regularizers.l2(1e-2),
                 layer_initializer: (index) => 'varianceScaling',
                 // for reporting results
                 regularizer_name: 'l2(1e-2)',
-                optimizer_name: 'rms-0.00001',
+                optimizer_name: 'adam(0.00001)', // 'rms-0.00001',
                 layer_initializer_name: 'varianceScaling',
                 testing_fraction,
                 validation_fraction,
