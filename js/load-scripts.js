@@ -26,6 +26,6 @@ function load_local_or_remote_scripts (local_URLs, remote_URLs, callback) {
     };
     let scripts_remaining = (window.location.hostname === "localhost" || window.location.protocol === "file") ?
                             local_URLs :
-                            remote_URLs;
+                            (remote_URLs || local_URLs); // if remote_URLs not provided just use local ones
     load_URLs();
 }
