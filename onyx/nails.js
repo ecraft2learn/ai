@@ -686,8 +686,10 @@ const display_message = (message, element_id, append) => {
     message_element.innerHTML = message;
     if (element && append && !is_mobile()) {
         element.insertBefore(message_element, element.firstChild);
+    } else if (element.childElementCount === 0) {
+        element.appendChild(message_element);
     } else {
-        element.replaceChild(message_element, element.firstChild);
+        element.replaceChild(message_element, element.firstElementChild);
     }
 };
 
@@ -1358,11 +1360,10 @@ const MORE_DETAILS = "More details";
 
 const process_prediction = (result, image_or_canvas, class_index, image_index, image_count) => {
     const image_url = get_url_from_image_or_canvas(image_or_canvas);
-    const table_of_image_and_response = !(option === 'diagnose' && is_mobile());
     const correct_prediction = correct(result, class_index);
-    let message = "";
-    if (table_of_image_and_response) {
-        message = "<table><tr><td><img src='" + image_url + "' width=128 height=128></img></td><td style='padding: 8px;'>";
+    let message = "<table><tr>";
+    if (!is_mobile()) {
+        message += "<td><img src='" + image_url + "' width=128 height=128></img></td><td style='padding: 8px;'>";
     }
     const full_confidence_message = confidences(result, true, class_index);
     const short_confidence_message = confidences(result, false, class_index);
@@ -1375,9 +1376,7 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
         + "<span class='generic-button more-button'>" + MORE_DETAILS + "</span>"
         + "</div></td>"
     message += short_confidence_message;   
-    if (table_of_image_and_response) {
-        message += "</td>";
-    }            
+    message += "</td>";         
     if (image_or_canvas.title && window.location.hash.indexOf('debug') >= 0) {
         message += "&nbsp;"
                    + "<a href='"
@@ -1455,9 +1454,6 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
         }        
     }
     message = response_element(message + more_details_html);
-//     if (table_of_image_and_response) {
-//         message += "</tr></table>";
-//     }
     if (is_mobile()) {
         // saves screen real estate while results are being displayed
         document.getElementById('go-to-tutorial').classList.add('back-to-tutorial-button');
@@ -1546,8 +1542,13 @@ const add_full_message = (event, message_number) => {
     why_button.title = "Click to see the images used in training closest to this one."
     why_button.addEventListener('click', explain_why);      
     const row = more_button.closest('tr');
-    const short_response_element = row.children[1];
-    row.replaceChild(full_response_element, short_response_element);
+    if (is_mobile()) {
+        const short_response_element = document.getElementById('random-image-response').firstElementChild;
+        short_response_element.replaceChild(full_response_element, short_response_element.firstElementChild);
+    } else {
+        const short_response_element = row.children[1];
+        row.replaceChild(full_response_element, short_response_element);       
+    }
     full_response_element.innerHTML = window.full_popup_messages[message_number];
     more_button.parentElement.replaceChild(why_button, more_button); 
 };
@@ -1706,7 +1707,17 @@ const save_tensors = () => {
     }
     const next = (image_or_canvas, class_index, image_index, image_count, thumbnail_index) => {
         const logits = infer(image_or_canvas);
-        const logits_as_string =  "[" + logits.arraySync()[0].map(x => x === 0 ? x : x.toFixed(3)) + "]";
+        const shorten_weight = (x) => {
+            if (x === 0) {
+                return 0;
+            }
+            const short_form = x.toFixed(4);
+            if (short_form[0] === '0') {
+                return short_form.slice(1); // save some space since 0.xx can occur almost 8 million times
+            }
+            return short_form;
+        };
+        const logits_as_string =  "[" + logits.arraySync()[0].map(shorten_weight) + "]";
         logits.dispose();
         const file_name_or_description = images[class_names[class_index]][image_index];
         const file_name = typeof file_name_or_description === 'string' ?
