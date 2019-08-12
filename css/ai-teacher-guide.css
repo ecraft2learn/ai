@@ -259,6 +259,12 @@ background-color: buttonface;
   padding: 4px;
   width: fit-content;
 }
+.red-border {
+  border-radius: 8px;
+  border: #a70606 solid 6px;
+  display: inline-block;
+  width: fit-content;
+}
 .amber {
   background-color: #d6b862;
   color: white;
@@ -268,6 +274,12 @@ background-color: buttonface;
   display: block;
   color: white;
   padding: 4px;
+  width: fit-content;
+}
+.amber-border {
+  border-radius: 8px;
+  border: #d6b862 solid 6px;
+  display: inline-block;
   width: fit-content;
 }
 .green {
@@ -280,6 +292,12 @@ background-color: buttonface;
   color: white;
   padding: 4px;
   width: fit-content;
+}
+.green-border {
+  border-radius: 8px;
+  border: #386838 solid 6px;
+  display: inline-block;
+  width: fit-content;  
 }
 .gray {
   background-color: #787a78;

@@ -21,7 +21,11 @@ const old_serious_name = "warrants second opinion";
 const new_serious_name = "check with a doctor";
 const name_substitutions = 
     {"warrants second opinion": new_serious_name,
-     "non-serious": "abnormal but not serious"}
+     "non-serious": "abnormal but not serious"};
+const border_class_name =
+    {"warrants second opinion": "red-border",
+     "non-serious": "amber-border",
+     "normal": "green-border"};
 const better_name = (name) =>
     name_substitutions[name] || name;
 
@@ -1512,8 +1516,11 @@ const add_full_message = (event, message_number) => {
                            }
                            image_or_canvas.title = better_name(label) + " and distance is " + distance.toFixed(3) +
                                                    // following only useful for development
-                                                   " (" + file_name + "#" + image_number + ")";  
-                           images.appendChild(image_or_canvas);
+                                                   " (" + file_name + "#" + image_number + ")";
+                           const frame = document.createElement('span');
+                           frame.className = border_class_name[label];
+                           frame.appendChild(image_or_canvas);
+                           images.appendChild(frame);
                            index++;
                            if (index < sorted_image_labels_and_sources.length) {
                                next_image();
@@ -1682,6 +1689,8 @@ const save_tensors = () => {
     let xs = "[";
     let ys = "[";
     let sources = "[";
+    let image_counter = 0;
+    const image_counts_per_class = class_names.map(() => 0);
     const [next_image, reset_next_image] = create_next_image_generator();
     const when_finished = () => {
         // save the tensors
@@ -1693,27 +1702,29 @@ const save_tensors = () => {
                             "window.ys = " + ys + "];\n" +
                             "window.sources = " + sources + "];\n");
          document.body.appendChild(button);
+         console.log(image_counts_per_class);
     }
-    let image_counter = 0;
     const next = (image_or_canvas, class_index, image_index, image_count, thumbnail_index) => {
         const logits = infer(image_or_canvas);
-        xs += "[";
-        logits.dataSync().forEach((x) => {
-            xs += x + ",";
-        });
-        xs += "],\n";
+        const logits_as_string =  "[" + logits.arraySync()[0].map(x => x === 0 ? x : x.toFixed(3)) + "]";
         logits.dispose();
-        ys += class_index + ",";
-        image_counter++;
-        if (image_counter === stop) {
-            when_finished();
-            return;
-        }
         const file_name_or_description = images[class_names[class_index]][image_index];
         const file_name = typeof file_name_or_description === 'string' ?
                           file_name_or_description :
                           file_name_or_description.file_name;
-        sources += "'" + file_name + "#" + thumbnail_index + "',\n";   // new line since huge lines cause editors to hang
+        if (xs.indexOf(logits_as_string) < 0) {
+            xs += logits_as_string + ",\n";  
+            ys += class_index + ",";
+            image_counter++;
+            image_counts_per_class[class_index]++;
+            if (image_counter === stop) {
+                when_finished();
+                return;
+            }
+            sources += "'" + file_name + "#" + thumbnail_index + "',\n";   // new line since huge lines cause editors to hang
+        } else {
+            console.log(file_name, thumbnail_index);
+        }
         next_image(next, when_finished);
     }
     next_image(next, when_finished);
