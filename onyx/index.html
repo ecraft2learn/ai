@@ -57,7 +57,7 @@
                 hidden_layer_sizes: [320],
                 batch_size: 256,
                 drop_out_rate: .5,
-                epochs: 1000,
+                epochs: 2000,
                 optimizer: (i) => tf.train.adamax(0.00001), // tf.train.rmsprop(0.00001),
                 regularizer: (i) => tf.regularizers.l2(1e-2),
                 layer_initializer: (index) => 'varianceScaling',
@@ -120,7 +120,7 @@
 <!--        following dimensions are good when phone is in "portrait" orientation -->
             <img id="camera-image" width=224 height=224 hidden />
             <div id="random-image-response-box" class="in-box">
-            <div id='camera-response' class="response-text"></div>
+                <div id='camera-response' class="response-text"></div>
             </div>
             <div id="selection-rectangle" hidden style="border: 2px dotted yellow; position: absolute;"></div>
             <button id="go-to-tutorial" class="generic-button">Back to Tutorial</button>

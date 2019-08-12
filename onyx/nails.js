@@ -666,19 +666,25 @@ const start_up = () => {
 };
 
 
-const remove_parent_element = (event) => {
-    // used in onclick in HTML 
-    event.currentTarget.closest('tr').remove();
+const remove_my_message = (event) => {
+    // used in onclick in HTML
+    const my_message = event.currentTarget.closest('.message-element');
+    my_message.remove(); 
 };
 
 const display_message = (message, element_id, append) => {
     if (message === "") {
         return;
     }
-    if (append && !is_mobile()) {
-        message = message + document.getElementById(element_id).innerHTML;
+    const element = document.getElementById(element_id || 'main');
+    const message_element = document.createElement('span');
+    message_element.className = 'message-element'; // no CSS used to remove this element later
+    message_element.innerHTML = message;
+    if (element && append && !is_mobile()) {
+        element.insertBefore(message_element, element.firstChild);
+    } else {
+        element.replaceChild(message_element, element.firstChild);
     }
-    document.getElementById(element_id || 'main').innerHTML = message;
 };
 
 const reset_response = () => {
@@ -1344,7 +1350,7 @@ let not_confident_answers = 0; // less than minimum_confidence for top answer
 window.full_popup_messages = [];
 
 const MORE_DETAILS = "More details";
-const LESS_DETAILS = "Less details";
+// const LESS_DETAILS = "Less details";
 
 const process_prediction = (result, image_or_canvas, class_index, image_index, image_count) => {
     const image_url = get_url_from_image_or_canvas(image_or_canvas);
@@ -1359,14 +1365,15 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
     const class_name = class_names[class_index];
     window.full_popup_messages.push(full_confidence_message);
     const more_details_html = 
-        "<div style='text-align: right'>" +
-        "<div class='clickable' onclick='popup_full_message(event, "
+        "<td><div class='clickable' onclick='add_full_message(event, "
         + (window.full_popup_messages.length-1) + ")'"
         + " title='Click for more details.'>"
         + "<span class='generic-button more-button'>" + MORE_DETAILS + "</span>"
-        + "</div></div>"
-        + "&nbsp;";
-    message += short_confidence_message;               
+        + "</div></td>"
+    message += short_confidence_message;   
+    if (table_of_image_and_response) {
+        message += "</td>";
+    }            
     if (image_or_canvas.title && window.location.hash.indexOf('debug') >= 0) {
         message += "&nbsp;"
                    + "<a href='"
@@ -1379,9 +1386,9 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
         message += "&nbsp;" + better_name(class_name) + "#" + image_count;
     } else if (class_name) {
         if (correct_prediction && short_confidence_message.indexOf(not_confident_message) < 0) {
-            message += "<br>Experts who analysed this photo agree. ";
+            message += "<td>Experts who analysed this photo agree.</td>";
         } else {
-            message += "<br><span style='color:red;'>However according to experts, this image is ";
+            message += "<td><span style='color:red;'>However according to experts, this image is ";
             if (class_name === old_serious_name) {
                 message += "a condition that should be seen by a doctor. ";
             } else if (class_name === 'non-serious') {
@@ -1389,7 +1396,7 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
             } else if (class_name === 'normal') {
                 message += "normal. ";
             }
-            message += "</span>";
+            message += "</span></td>";
         }
     }
     if (correct_prediction) {
@@ -1443,10 +1450,10 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
             csv[class_name] += "\n";
         }        
     }
-    message = response_element(message, more_details_html);
-    if (table_of_image_and_response) {
-        message += "</tr></table>";
-    }
+    message = response_element(message + more_details_html);
+//     if (table_of_image_and_response) {
+//         message += "</tr></table>";
+//     }
     if (is_mobile()) {
         // saves screen real estate while results are being displayed
         document.getElementById('go-to-tutorial').classList.add('back-to-tutorial-button');
@@ -1460,28 +1467,28 @@ const width_of_multi_nail_images = 2260;
 
 const number_of_close_images = 10;
 
-const popup_full_message = (event, message_number) => {
+const add_full_message = (event, message_number) => {
     event.stopPropagation();
-    const full_response_element = document.createElement('div'); // document.getElementById('full-response');
+    const full_response_element = document.createElement('div');
     full_response_element.className = full_response_class;
-    const hide_full_response = () => {
-        const full_response = event.currentTarget.children[1];
-        if (full_response && full_response.className === full_response_class) {
-            full_response.remove();
-            more_button.firstElementChild.innerHTML = MORE_DETAILS;            
-        }
-    };
+//     const hide_full_response = () => {
+//         const full_response = event.currentTarget.children[1];
+//         if (full_response && full_response.className === full_response_class) {
+//             full_response.remove();
+//             more_button.firstElementChild.innerHTML = MORE_DETAILS;            
+//         }
+//     };
     const more_button = event.currentTarget;
-    if (more_button.firstElementChild.innerText === MORE_DETAILS) {
-        more_button.firstElementChild.innerHTML = LESS_DETAILS;
-    } else {
-        hide_full_response();
-        return;
-    }
+//     if (more_button.firstElementChild.innerText === MORE_DETAILS) {
+//         more_button.firstElementChild.innerHTML = LESS_DETAILS;
+//     } else {
+//         hide_full_response();
+//         return;
+//     }
     const why_button = document.createElement('button');
     let explanation;
     const display_closest_images = (sorted_image_labels_and_sources) => {
-        const div = document.createElement('div');
+        const images = document.createElement('div');
         let index = 0;
         const next_image = () => {
             const [label, source, distance] = sorted_image_labels_and_sources[index];
@@ -1494,17 +1501,19 @@ const popup_full_message = (event, message_number) => {
             load_image(file_name,
                        (image_or_canvas) => {
                            if (index === 0) {
-                               // first one
-                               explanation.remove();
+                               // first one displayed
+                               document.getElementById('please-wait-for-images').remove();
                            }
                            if (image_number) {
                                const box = multi_nail_image_box(undefined, +image_number, width_of_multi_nail_images);
                                image_or_canvas = canvas_of_multi_nail_image(image_or_canvas, box, 96, 96);
-                               image_or_canvas.title = file_name + "#" + image_number + " " + box.x + " " + box.y; // for debugging 
-                               console.log(file_name, image_number, box.x, box.y);
+//                                image_or_canvas.title = file_name + "#" + image_number + " " + box.x + " " + box.y; // for debugging 
+//                                console.log(file_name, image_number, box.x, box.y);
                            }
-//                            image_or_canvas.title = label + " and distance is " + distance.toFixed(3);  
-                           div.appendChild(image_or_canvas);
+                           image_or_canvas.title = better_name(label) + " and distance is " + distance.toFixed(3) +
+                                                   // following only useful for development
+                                                   " (" + file_name + "#" + image_number + ")";  
+                           images.appendChild(image_or_canvas);
                            index++;
                            if (index < sorted_image_labels_and_sources.length) {
                                next_image();
@@ -1512,38 +1521,39 @@ const popup_full_message = (event, message_number) => {
                        });
         };
         next_image();
-        more_button.parentElement.insertBefore(div, more_button);
+//         more_button.parentElement.insertBefore(div, more_button);
+        full_response_element.appendChild(images);
     };
     const explain_why = (event) => {
-        explanation = document.createElement('p');
-        explanation.innerHTML = "Of the thousands of images used in training you will soon see the " + 
-                                number_of_close_images + " closest images here.";
-        why_button.parentElement.insertBefore(explanation, why_button);
+        explanation = document.createElement('div');
+        explanation.innerHTML = "Of the thousands of images used in training here are the " + 
+                                number_of_close_images + " closest images.&nbsp;" +
+                                "<span id='please-wait-for-images'>Searching. Please wait.</span>";
+//         why_button.parentElement.insertBefore(explanation, why_button);
+        full_response_element.appendChild(explanation);
         show_closest_images(number_of_close_images, current_logits, display_closest_images);
+        why_button.remove();
     };
     why_button.innerHTML = "Why?";
-    why_button.className = 'generic-button';
-    why_button.addEventListener('click', explain_why);
-    if (is_beta()) {
-       more_button.parentElement.insertBefore(why_button, more_button);       
-    }
-    more_button.appendChild(full_response_element);
+    why_button.className = 'generic-button no-margin';
+    why_button.title = "Click to see the images used in training closest to this one."
+    why_button.addEventListener('click', explain_why);      
+    const row = more_button.closest('tr');
+    const short_response_element = row.children[1];
+    row.replaceChild(full_response_element, short_response_element);
     full_response_element.innerHTML = window.full_popup_messages[message_number];
+    more_button.parentElement.replaceChild(why_button, more_button); 
 };
 
-const response_element = (message, before_close_button) => {
+const response_element = (message) => {
     if (message === "") {
         return message;
     }
-    const new_message = message
-           + "&nbsp;"
-           + (before_close_button || "")
     if (is_mobile()) {
-        return new_message;
+        return message + "</table>";
     }
-    return "<td>"
-           + new_message
-           + "<button class='x-close-button' onclick='remove_parent_element(event)'>&times;</button></td>";
+    return message
+           + "<td><button class='x-close-button' onclick='remove_my_message(event)'>&times;</button></td></table>";
 };
 
 const maximum_confidence = (confidences) => {

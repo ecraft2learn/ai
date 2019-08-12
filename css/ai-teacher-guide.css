@@ -103,6 +103,12 @@ text-decoration: none;
 width: fit-content;
 background-color: buttonface;
 }
+.no-margin {
+  margin-top: 0px;
+  margin-bottom: 0px;
+  margin-left: 0px;
+  margin-right: 0px;
+}
 .button:disabled, button[disabled] {
   color: #a8a881;
   background-color: #ece8e4;
