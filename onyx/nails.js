@@ -1518,6 +1518,7 @@ const full_response_class = 'response-text full-response';
 const width_of_multi_nail_images = 2260;
 
 const number_of_close_images = 10;
+const size_of_close_images = 96;
 
 const add_full_message = (event, message_number) => {
     event.stopPropagation();
@@ -1558,13 +1559,15 @@ const add_full_message = (event, message_number) => {
                            }
                            if (image_number) {
                                const box = multi_nail_image_box(undefined, +image_number, width_of_multi_nail_images);
-                               image_or_canvas = canvas_of_multi_nail_image(image_or_canvas, box, 96, 96);
-//                                image_or_canvas.title = file_name + "#" + image_number + " " + box.x + " " + box.y; // for debugging 
-//                                console.log(file_name, image_number, box.x, box.y);
+                               image_or_canvas = canvas_of_multi_nail_image(image_or_canvas, box, size_of_close_images, size_of_close_images);
+                           } else {
+                               image_or_canvas.width  = size_of_close_images;
+                               image_or_canvas.height = size_of_close_images;
                            }
                            image_or_canvas.title = better_name(label) + " and distance is " + distance.toFixed(3) +
                                                    // following only useful for development
-                                                   " (" + file_name + "#" + image_number + ")";
+                                                   " (" + file_name + 
+                                                   (image_number ? "#" + image_number : "") + ")";
                            const frame = document.createElement('span');
                            frame.className = border_class_name[label];
                            frame.appendChild(image_or_canvas);
