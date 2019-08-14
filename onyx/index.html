@@ -22,8 +22,10 @@
                 option = 'experiment';
             } else if (parameters.has('save-tensors')) {
                 option = 'save tensors';
+            } else if (parameters.has('de-duplicate')) {
+                option = 'de-duplicate';
             }
-            const saved_tensor_file_name = "saved-tensors-v6.js";
+            const saved_tensor_file_name = "saved-tensors-v2.js";
             // korean.js korean-small.js korean-tests.js korean-tests-small.js 
             // originals.js originals-normal-fungal.js or originals-normal-serious-non-serious.js
             let additional_js;
@@ -31,19 +33,19 @@
                 // 166 random images from each class
                 additional_js = ["korean-tests-80-each.js"];
             } else if (option === 'experiment') {
-                 additional_js = ["korean-tests-80-each.js", "korean-tests.js"];
+                 additional_js = ["korean-tests-80-each.js"];
             } else if (option === 'save tensors') {
                 // both Korean training thumbnails and their test images
-                additional_js = ["korean-big.js"]; //, "korean-tests.js", "originals-normal-serious-non-serious.js"];  
-            } else if (option === 'create model') {
+                additional_js = ["korean-big.js", "korean-tests.js"]; // "originals-normal-serious-non-serious.js"];  
+            } else if (option === 'create model' || option === 'de-duplicate') {
                 additional_js = [saved_tensor_file_name];
             } else {
                 additional_js = [];
             }
             const model_name = parameters.has('beta') || option !== 'diagnose' ? 
-                               "08-08-2019a" : 
+                               (option === 'create model' ? "13-08-2019a" : "08-08-2019a") : 
                                "normal-fungal-serious-04-08-2019a";
-            // 15% set aside for testing and evaluation each
+            // set aside for testing and validation
             const testing_fraction = .15;
             const validation_fraction = .15;
             const fraction_kept = 1; // 1 to keep all data
@@ -57,7 +59,7 @@
                 hidden_layer_sizes: [320],
                 batch_size: 256,
                 drop_out_rate: .5,
-                epochs: 2000,
+                epochs: 1200,
                 optimizer: (i) => tf.train.adamax(0.00001), // tf.train.rmsprop(0.00001),
                 regularizer: (i) => tf.regularizers.l2(1e-2),
                 layer_initializer: (index) => 'varianceScaling',

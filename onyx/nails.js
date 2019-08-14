@@ -399,39 +399,51 @@ const start_training = () => {
     const original_ys = ys;
     const split_data = () => {
         // if I want reproducability I should use tf.randomUniform with a seed
-        let xs_ys = original_xs.map((x, index) => [x, one_hot(original_ys[index], class_names.length)]);
+        let xs_ys = original_xs.map((x, index) => [x, original_ys[index]]);
         shuffle(xs_ys);
         if (fraction_kept < 1) {
             xs_ys.splice(Math.round((1-fraction_kept)*xs_ys.length));
         }
+        xs_ys = xs_ys.sort((a, b) => a[1]-b[1]); // sort by class to make equal quantities
+        const find_start = (class_index) => {
+            for (let i = 0; i < xs_ys.length; i++) {
+                if (xs_ys[i][1] === class_index) {
+                    return i;
+                }
+            }
+        };
+        const starts = class_names.map((ignore, class_index) => find_start(class_index));
         const validation_count = Math.round(validation_fraction*xs_ys.length);
+        const validation_count_per_class = Math.round(validation_count/class_names.length);
         const test_count = Math.round(testing_fraction*xs_ys.length);
-        const new_count = xs_ys.length-(validation_count+test_count);
-        const xs_ys_validation = xs_ys.slice(0, validation_count);
-        const xs_ys_test = xs_ys.slice(validation_count, validation_count+test_count);
-        xs_ys = xs_ys.slice(validation_count+test_count);
+        const test_count_per_class = Math.round(test_count/class_names.length);
+        const new_count = xs_ys.length-(validation_count_per_class+test_count_per_class)*class_names.length;
+        const validation_ends = starts.map((start) => start+validation_count_per_class);
+        let xs_ys_validation = [];
+        validation_ends.forEach((end, index) => {
+            xs_ys_validation = xs_ys_validation.concat(xs_ys.slice(starts[index], end));
+        });
+        const test_ends = validation_ends.map((start) => start+test_count_per_class);
+        let xs_ys_test = [];
+        test_ends.forEach((end, index) => {
+            xs_ys_test = xs_ys_test.concat(xs_ys.slice(validation_ends[index], end));
+        });
+        let new_xs_ys = [];
+        starts.push(xs_ys.length); // so starts [index+1] is the end of the class
+        test_ends.forEach((test_end, index) => {
+            new_xs_ys = new_xs_ys.concat(xs_ys.slice(test_ends[index], starts[index+1]));
+        });
         xs_validation = xs_ys_validation.map((x_y) => x_y[0]);
-        ys_validation = xs_ys_validation.map((x_y) => x_y[1]);
+        ys_validation = xs_ys_validation.map((x_y) => one_hot(x_y[1], class_names.length));
         xs_test = xs_ys_test.map((x_y) => x_y[0]);
-        ys_test = xs_ys_test.map((x_y) => x_y[1]);
-        xs = xs_ys.map((x_y) => x_y[0]);
-        ys = xs_ys.map((x_y) => x_y[1]);
-//         original_xs.forEach((x, index) => {
-//             if (fraction_kept > Math.random()) {
-//                 const random = Math.random();
-//                 const y = one_hot(original_ys[index], class_names.length);
-//                 if (random < validation_fraction) {
-//                     xs_validation.push(x);
-//                     ys_validation.push(y);
-//                 } else if (random < validation_fraction+testing_fraction) {
-//                     xs_test.push(x);
-//                     ys_test.push(y);
-//                 } else {
-//                     new_xs.push(x);
-//                     new_ys.push(y);                
-//                 }             
-//             } 
-//         });
+        ys_test = xs_ys_test.map((x_y) => one_hot(x_y[1], class_names.length));
+        if (xs_test.length === 0) {
+            // if not setting aside test data then use validation for confusion matrix etc.
+            xs_test = xs_validation;
+            ys_test = ys_validation;
+        }
+        xs = new_xs_ys.map((x_y) => x_y[0]);
+        ys = new_xs_ys.map((x_y) => one_hot(x_y[1], class_names.length));
     };
     let responses = [];
     const resport_averages = () => {
@@ -499,7 +511,6 @@ const add_images = (when_finished, just_one_class, only_class_index, except_imag
             add_textarea(image_sprite_canvas.toDataURL() + "");
         }
         if (xs instanceof Array) {
-
             start_training();
         }
     };
@@ -517,22 +528,6 @@ const add_images = (when_finished, just_one_class, only_class_index, except_imag
             if (typeof metadata_tsv !== 'undefined') {
                 metadata_tsv += class_names[class_index] + "\t" + class_names[class_index] + "#" + image_index + "\n";
             }
-//             if (xs instanceof Array) { // need this for training or testing
-//                 const x = logits.dataSync();
-//                 const y = one_hot(class_index, class_names.length);
-//                 if (typeof every_nth_for_testing === 'number') {
-//                     if (image_counter%every_nth_for_testing === 0 && option === 'create model') {
-//                         xs_validation.push(x);
-//                         ys_validation.push(y);
-//                     } else if (image_counter%every_nth_for_testing === 1) { 
-//                         xs_test.push(x);
-//                         ys_test.push(y);
-//                     } else {
-//                         xs.push(x);
-//                         ys.push(y);                       
-//                     }
-//                 }
-//             }
             logits.dispose();
         }   
         if (image_sprite_canvas) {
@@ -613,12 +608,69 @@ const go_to_tutorial_interface = () => {
     document.getElementById('tutorial-interface').hidden = false;
 };
 
+const de_duplicate = () => {
+    const clean_up_source = (source) => {
+        const undefined_start = source.indexOf('#undefined'); // should be there
+        if (undefined_start >= 0) {
+            return source.slice(0, undefined_start);
+        }
+        return source;
+    };
+    const threshold = 1e-3;
+    let new_xs = "[";
+    let new_ys = "[";
+    let new_sources = "[";
+    for (let class_index = 0; class_index < class_names.length; class_index++) {
+        ys.forEach((y, i) => {
+            if (y === class_index) {
+                // only look for duplicates within a class
+                const xs_i_tensor = tf.tensor(xs[i]);
+                let duplicate_found_distance = false;
+                for (let j = i+1; j < xs.length; j++) {
+                    if (ys[j] === class_index) {
+                        const xs_j_tensor = tf.tensor(xs[j]);
+                        const distance_tensor = tf.losses.meanSquaredError(xs_i_tensor, xs_j_tensor);
+                        const distance = distance_tensor.dataSync()[0];
+                        xs_j_tensor.dispose();
+                        if (distance < threshold) {
+                            duplicate_found_distance = distance;
+                            console.log(duplicate_found_distance, sources[i], sources[j], xs[i], ys[i]);
+                            break;
+                        }
+                    }
+                }
+                if (duplicate_found_distance === false) {
+                    new_xs += "[" + xs[i] + "],\n";
+                    new_ys += ys[i] + ",";
+                    new_sources += '"' + clean_up_source(sources[i]) + ",\n";
+                } else {
+                    duplicate_found_distance = false;
+                }
+                xs_i_tensor.dispose();
+            }
+        });
+    }
+    const button =
+        download_string("Download tensors",
+                        "saved-tensors.js",
+                        "window.class_names_of_saved_tensors = " + JSON.stringify(class_names) + ";\n" +
+                        "window.xs = " + new_xs + "];\n" +
+                        "window.ys = " + new_ys + "];\n" +
+                        "window.sources = " + new_sources + "];\n");
+    document.body.appendChild(button);
+};
+
 const start_up = () => {
     if (option === 'create model') {
         document.body.innerHTML = "Training started";
         start_training();
         return;
     } 
+    if (option === 'de-duplicate') {
+        document.body.innerHTML = "De-duplication started";
+        de_duplicate();
+        return;
+    }
 //     const use_photo = "Or take a picture of a finger or toe nail on a screen or in a photograph. ";
     const instructions = is_mobile() ?
                          (is_beta() ? 
@@ -1771,7 +1823,7 @@ const image_sources_sorted_by_cosine_proximity = (image_logits) => {
     cosines_tensor.dispose();
     const cosines = new Array(...cosines_float32);
     const labels_and_cosines =
-        cosines.map((cosine, index) => [class_names_of_saved_tensors[ys[index]], sources[index], 1-Math.abs(cosine)]);
+        cosines.map((cosine, index) => [class_names_of_saved_tensors[ys[index]], sources[index], 1-Math.abs(cosine)]);                                       
     return labels_and_cosines.sort((a, b) => a[2]-b[2]);
 };
 
