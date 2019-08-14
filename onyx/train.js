@@ -85,7 +85,7 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
                        tab: 'Training#' + training_number,
                        styles: { height: '800px' }};
     const ftfvis_options = {callbacks: ['onEpochEnd'],
-                            yAxisDomain: [.2, .5],
+                            yAxisDomain: [.2, .6],
                             width: 500,
                             height: 300};
     let callbacks = tfvis ? tfvis.show.fitCallbacks(container, metrics, ftfvis_options) : {};
@@ -128,7 +128,7 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
   model = tf.sequential({name: model_name});
   
   hidden_layer_sizes.forEach((size, index) => {
-       const kernelRegularizer = regularizer(index); // can be undefined
+       const kernelRegularizer = regularizer && regularizer(index); // can be undefined
        const kernelInitializer = layer_initializer(index);
        model.add(tf.layers.dense({inputShape: index === 0 ? input_size : undefined,
                                   units: size,
@@ -242,7 +242,11 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
        results += data_accuracy.toFixed(4) + ", ";
        results += validation_accuracy.toFixed(4) + ", ";
        results += test_accuracy.toFixed(4) + ", ";
-       results += xs_array.length + xs_validation_array.length + xs_test_array.length + ", ";
+       if (xs_validation_array === xs_test_array) {
+           results += xs_array.length + xs_validation_array.length + ", ";
+       } else {
+           results += xs_array.length + xs_validation_array.length + xs_test_array.length + ", ";
+       }
        results += lowest_validation_loss.toFixed(4) + ", ";
        results +=lowest_validation_loss_epoch + ", ";
        results += highest_accuracy.toFixed(4) + ", ";
