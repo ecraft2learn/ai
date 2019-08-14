@@ -43,7 +43,7 @@
                 additional_js = [];
             }
             const model_name = parameters.has('beta') || option !== 'diagnose' ? 
-                               (option === 'create model' ? "13-08-2019a" : "08-08-2019a") : 
+                               (option === 'create model' ? "14-08-2019a" : "08-08-2019a") : 
                                "normal-fungal-serious-04-08-2019a";
             // set aside for testing and validation
             const testing_fraction = .15;
@@ -59,13 +59,13 @@
                 hidden_layer_sizes: [320],
                 batch_size: 256,
                 drop_out_rate: .5,
-                epochs: 1200,
-                optimizer: (i) => tf.train.adamax(0.00001), // tf.train.rmsprop(0.00001),
+                epochs: 600,
+                optimizer: (i) => tf.train.adam(), // tf.train.rmsprop(0.00001),
                 regularizer: (i) => tf.regularizers.l2(1e-2),
                 layer_initializer: (index) => 'varianceScaling',
                 // for reporting results
                 regularizer_name: 'l2(1e-2)',
-                optimizer_name: 'adamax(0.00001)', // 'rms-0.00001',
+                optimizer_name: 'adam()', // 'rms-0.00001',
                 layer_initializer_name: 'varianceScaling',
                 testing_fraction,
                 validation_fraction,
