@@ -608,6 +608,8 @@ const go_to_tutorial_interface = () => {
     document.getElementById('tutorial-interface').hidden = false;
 };
 
+const camera_interface = () => !document.getElementById('camera-interface').hidden;
+
 const de_duplicate = () => {
     const clean_up_source = (source) => {
         const undefined_start = source.indexOf('#undefined'); // should be there
@@ -1598,7 +1600,10 @@ const add_full_message = (event, message_number) => {
     why_button.addEventListener('click', explain_why);      
     const row = more_button.closest('tr');
     if (is_mobile()) {
-        const short_response_element = document.getElementById('random-image-response').firstElementChild;
+        const short_response_element = 
+            (camera_interface() ? document.getElementById('camera-response') :
+                                  document.getElementById('random-image-response')) 
+             .firstElementChild;
         short_response_element.replaceChild(full_response_element, short_response_element.firstElementChild);
     } else {
         const short_response_element = row.children[1];
