@@ -103,6 +103,9 @@ text-decoration: none;
 width: fit-content;
 background-color: buttonface;
 }
+.center-contents {
+ text-align: center; 
+}
 .no-margin {
   margin-top: 0px;
   margin-bottom: 0px;

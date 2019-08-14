@@ -1415,7 +1415,7 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
     const correct_prediction = correct(result, class_index);
     let message = "<table><tr>";
     if (!is_mobile()) {
-        message += "<td><img src='" + image_url + "' width=128 height=128></img></td><td style='padding: 8px;'>";
+        message += "<td><img src='" + image_url + "' width=128 height=128></img></td>";
     }
     const full_confidence_message = confidences(result, true, class_index);
     const short_confidence_message = confidences(result, false, class_index);
@@ -1542,6 +1542,7 @@ const add_full_message = (event, message_number) => {
     let explanation;
     const display_closest_images = (sorted_image_labels_and_sources) => {
         const images = document.createElement('div');
+        images.className = "center-contents";
         let index = 0;
         const next_image = () => {
             const [label, source, distance] = sorted_image_labels_and_sources[index];
@@ -1579,15 +1580,14 @@ const add_full_message = (event, message_number) => {
                        });
         };
         next_image();
-//         more_button.parentElement.insertBefore(div, more_button);
         full_response_element.appendChild(images);
     };
     const explain_why = (event) => {
         explanation = document.createElement('div');
         explanation.innerHTML = "Of the thousands of images used in training here are the " + 
-                                number_of_close_images + " closest images.&nbsp;" +
-                                "<span id='please-wait-for-images'>Searching. Please wait.</span>";
-//         why_button.parentElement.insertBefore(explanation, why_button);
+                                number_of_close_images + " closest images." +
+                                "<span id='please-wait-for-images'>&nbsp;Searching. Please wait.</span>";
+        explanation.className = 'center-contents';
         full_response_element.appendChild(explanation);
         show_closest_images(number_of_close_images, current_logits, display_closest_images);
         why_button.remove();
@@ -1821,10 +1821,9 @@ const image_sources_sorted_by_cosine_proximity = (image_logits) => {
         xs = tf.tensor(xs);
     }
     const cosines_tensor = tf.metrics.cosineProximity(image_logits, xs);
-    const cosines_float32 = cosines_tensor.dataSync();
+    const cosines = cosines_tensor.arraySync();
     // using tf.tidy instead of explicitly disposing of tensors caused Snap! to repeated call this
     cosines_tensor.dispose();
-    const cosines = new Array(...cosines_float32);
     const labels_and_cosines =
         cosines.map((cosine, index) => [class_names_of_saved_tensors[ys[index]], sources[index], 1-Math.abs(cosine)]);                                       
     return labels_and_cosines.sort((a, b) => a[2]-b[2]);
