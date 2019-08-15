@@ -649,6 +649,7 @@ const de_duplicate = () => {
         return source;
     };
     const threshold = 1e-3;
+    const second_threshold = 1e-2;
     let new_xs = "[";
     let new_ys = "[";
     let new_sources = "[";
@@ -664,9 +665,12 @@ const de_duplicate = () => {
                         const distance_tensor = tf.losses.meanSquaredError(xs_i_tensor, xs_j_tensor);
                         const distance = distance_tensor.dataSync()[0];
                         xs_j_tensor.dispose();
-                        if (distance < threshold) {
+                        if (distance < second_threshold) {
                             duplicate_found_distance = distance;
-                            console.log(duplicate_found_distance, sources[i], sources[j], xs[i], ys[i]);
+                            if (distance >= threshold) {
+                                // report those between the two thresholds
+                                console.log(duplicate_found_distance, sources[i], sources[j], xs[i], ys[i]);
+                            }
                             break;
                         }
                     }
