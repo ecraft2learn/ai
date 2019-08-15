@@ -24,8 +24,10 @@
                 option = 'save tensors';
             } else if (parameters.has('de-duplicate')) {
                 option = 'de-duplicate';
+            } else if (parameters.has('equalize')) {
+                option = 'equalize';
             }
-            const saved_tensor_file_name = "saved-tensors.js";
+            const saved_tensor_file_name = "saved-tensors-v4.js";
             // korean.js korean-small.js korean-tests.js korean-tests-small.js 
             // originals.js originals-normal-fungal.js or originals-normal-serious-non-serious.js
             let additional_js;
@@ -37,7 +39,7 @@
             } else if (option === 'save tensors') {
                 // both Korean training thumbnails and their test images
                 additional_js = ["korean-big.js", "korean-tests.js"]; // "originals-normal-serious-non-serious.js"];  
-            } else if (option === 'create model' || option === 'de-duplicate') {
+            } else if (option === 'create model' || option === 'de-duplicate' || option === 'equalize') {
                 additional_js = [saved_tensor_file_name];
             } else {
                 additional_js = [];
@@ -59,13 +61,13 @@
                 hidden_layer_sizes: [320],
                 batch_size: 256,
                 drop_out_rate: .5,
-                epochs: 500,
-                optimizer: (i) => tf.train.adadelta(), // tf.train.rmsprop(0.00001),
+                epochs: 1200,
+                optimizer: (i) => tf.train.adamax(1e-5), // tf.train.adadelta(), // tf.train.rmsprop(0.00001),
                 regularizer: (i) => tf.regularizers.l2(1e-2),
                 layer_initializer: (index) => 'varianceScaling',
                 // for reporting results
                 regularizer_name: 'l2(1e-2)',
-                optimizer_name: 'adadelta()',
+                optimizer_name: 'adamax(1e-5)',
                 layer_initializer_name: 'varianceScaling',
                 testing_fraction,
                 validation_fraction,

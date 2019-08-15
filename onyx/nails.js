@@ -610,6 +610,36 @@ const go_to_tutorial_interface = () => {
 
 const camera_interface = () => !document.getElementById('camera-interface').hidden;
 
+const equalize_classes = () => {
+    const sizes = [];
+    let previous_start = 0;
+    for (let class_index = 0; class_index < class_names.length; class_index++) {
+        let start = ys.indexOf(class_index+1);
+        if (start < 0) {
+            start = ys.length;
+        }
+        const size = start-previous_start;
+        sizes.push(size);
+        previous_start = start;
+    }
+    const min_size = Math.min(...sizes);
+    for (let class_index = 0; class_index < class_names.length; class_index++) {
+        const excess = sizes[class_index]-min_size;
+        const start = ys.indexOf(class_index);
+        xs.splice(start, excess);
+        ys.splice(start, excess);
+        sources.splice(start, excess);
+    }
+    const stringify_with_new_lines = (array) => {
+        let string = "[";
+        array.forEach((element) => {
+            string += element instanceof Array ? '[' + element + '],\n' : '"' + element + '",\n';
+        });
+        return string + "]";
+    }
+    add_download_button(stringify_with_new_lines(xs), "[" + ys + "]", stringify_with_new_lines(sources));
+}
+
 const de_duplicate = () => {
     const clean_up_source = (source) => {
         const undefined_start = source.indexOf('#undefined'); // should be there
@@ -644,7 +674,7 @@ const de_duplicate = () => {
                 if (duplicate_found_distance === false) {
                     new_xs += "[" + xs[i] + "],\n";
                     new_ys += ys[i] + ",";
-                    new_sources += '"' + clean_up_source(sources[i]) + ",\n";
+                    new_sources += '"' + clean_up_source(sources[i]) + '",\n';
                 } else {
                     duplicate_found_distance = false;
                 }
@@ -652,13 +682,17 @@ const de_duplicate = () => {
             }
         });
     }
+    add_download_button(new_xs + "]", new_ys + "]", new_sources + "]");
+};
+
+const add_download_button = (xs_string, ys_string, sources_string) => {
     const button =
         download_string("Download tensors",
                         "saved-tensors.js",
                         "window.class_names_of_saved_tensors = " + JSON.stringify(class_names) + ";\n" +
-                        "window.xs = " + new_xs + "];\n" +
-                        "window.ys = " + new_ys + "];\n" +
-                        "window.sources = " + new_sources + "];\n");
+                        "window.xs = " + xs_string + ";\n" +
+                        "window.ys = " + ys_string + ";\n" +
+                        "window.sources = " + sources_string + ";\n");
     document.body.appendChild(button);
 };
 
@@ -671,6 +705,11 @@ const start_up = () => {
     if (option === 'de-duplicate') {
         document.body.innerHTML = "De-duplication started";
         de_duplicate();
+        return;
+    }
+    if (option === 'equalize') {
+        document.body.innerHTML = "Equalization started";
+        equalize_classes();
         return;
     }
 //     const use_photo = "Or take a picture of a finger or toe nail on a screen or in a photograph. ";
@@ -1754,15 +1793,7 @@ const save_tensors = () => {
     const image_counts_per_class = class_names.map(() => 0);
     const [next_image, reset_next_image] = create_next_image_generator();
     const when_finished = () => {
-        // save the tensors
-        const button =
-            download_string("Download tensors",
-                            "saved-tensors.js",
-                            "window.class_names_of_saved_tensors = " + JSON.stringify(class_names) + ";\n" +
-                            "window.xs = " + xs + "];\n" +
-                            "window.ys = " + ys + "];\n" +
-                            "window.sources = " + sources + "];\n");
-         document.body.appendChild(button);
+        add_download_button(xs + "]", ys + "]", sources + "]");
          console.log(image_counts_per_class);
     }
     const next = (image_or_canvas, class_index, image_index, image_count, thumbnail_index) => {
