@@ -1472,8 +1472,7 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
         + " title='Click for more details.'>"
         + "<span class='generic-button more-button'>" + MORE_DETAILS + "</span>"
         + "</div></td>"
-    message += short_confidence_message;   
-    message += "</td>";         
+    message += "<td>" + short_confidence_message + "</td>";       
     if (image_or_canvas.title && window.location.hash.indexOf('debug') >= 0) {
         message += "&nbsp;"
                    + "<a href='"
