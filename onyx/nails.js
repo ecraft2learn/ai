@@ -382,8 +382,13 @@ const shuffle = (a) => {
  * Shuffles array in place. ES6 version
  * @param {Array} a items An array containing the items.
  */
+    const seedable_random() = () => {
+        var x = Math.sin(SEED++) * 10000;
+        return x - Math.floor(x);
+    };
+
     for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
+        const j = Math.floor(seedable_random() * (i + 1));
         [a[i], a[j]] = [a[j], a[i]];
     }
     return a;    
