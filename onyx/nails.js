@@ -376,27 +376,27 @@ const get_url_from_image_or_canvas = (image_or_canvas) => {
     }
 };
 
-const shuffle = (a) => {
-/**
- * From https://stackoverflow.com/questions/6274339/how-can-i-shuffle-an-array
- * Shuffles array in place. ES6 version
- * @param {Array} a items An array containing the items.
- */
-    let seed = SEED;
-    const seedable_random = 
-        seed ? 
-        () => { // not so good but good enough
-            const x = Math.sin(seed++) * 10000;
-            return x - Math.floor(x);
-        }
-        :
-        Math.random;
-    for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(seedable_random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;    
-};
+// const shuffle = (a) => {
+// /**
+//  * From https://stackoverflow.com/questions/6274339/how-can-i-shuffle-an-array
+//  * Shuffles array in place. ES6 version
+//  * @param {Array} a items An array containing the items.
+//  */
+//     let seed = SEED;
+//     const seedable_random = 
+//         seed ? 
+//         () => { // not so good but good enough
+//             const x = Math.sin(seed++) * 10000;
+//             return x - Math.floor(x);
+//         }
+//         :
+//         Math.random;
+//     for (let i = a.length - 1; i > 0; i--) {
+//         const j = Math.floor(seedable_random() * (i + 1));
+//         [a[i], a[j]] = [a[j], a[i]];
+//     }
+//     return a;    
+// };
 
 const start_training = () => {
     training_options.class_names = class_names; // for displaying confusion matrix
@@ -409,7 +409,7 @@ const start_training = () => {
     const split_data = () => {
         // if I want reproducability I should use tf.randomUniform with a seed
         let xs_ys = original_xs.map((x, index) => [x, original_ys[index]]);
-        shuffle(xs_ys);
+        tf.util.shuffle(xs_ys);
         if (fraction_kept < 1) {
             xs_ys.splice(Math.round((1-fraction_kept)*xs_ys.length));
         }
@@ -658,7 +658,7 @@ const de_duplicate = () => {
         return source;
     };
     const threshold = 1e-3;
-    const second_threshold = 1e-2;
+    const second_threshold = 1e-2; // didn't find any > 1e-3 and < 1e-2 - also tried 1e-1 but then did get clearly different images
     let new_xs = "[";
     let new_ys = "[";
     let new_sources = "[";
