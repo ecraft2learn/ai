@@ -64,7 +64,7 @@ const combine_normal_and_non_serious = (matrix_3x3) => {
 let tfjs_vis_surface;
 
 const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array, options, callback) => {
-    const {model_name, class_names, hidden_layer_sizes, batch_size, epochs, drop_out_rate, optimizer, layer_initializer, training_number, regularizer} 
+    const {model_name, class_names, hidden_layer_sizes, batch_size, epochs, drop_out_rate, optimizer, layer_initializer, training_number, regularizer, seed} 
           = options;
     let model;
     const input_size = xs_array[0].length;
@@ -138,7 +138,9 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
                                   useBias: true,
                                  }));
        if (drop_out_rate > 0) {
-           model.add(tf.layers.dropout(drop_out_rate));
+           // Error: Non-default seed is not implemented in Dropout layer yet: 1
+           model.add(tf.layers.dropout({rate: drop_out_rate,
+                                        seed: SEED}));
        }
   });
   // last layer. The number of units of the last layer should correspond

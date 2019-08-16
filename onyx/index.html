@@ -52,6 +52,7 @@
             const validation_fraction = .15;
             const fraction_kept = 1; // 1 to keep all data
             const number_of_training_repeats = 3;
+            const SEED = undefined;
 
             const projector_data = false;
             // whether we want to generate files to visualising the data
@@ -61,14 +62,14 @@
                 hidden_layer_sizes: [320],
                 batch_size: 256,
                 drop_out_rate: .5,
-                epochs: 1200,
-                optimizer: (i) => tf.train.adamax(1e-5), // tf.train.adadelta(), // tf.train.rmsprop(0.00001),
+                epochs: 600,
+                optimizer: (i) => tf.train.rmsprop(1e-5, undefined, .9), // tf.train.adamax(1e-5), // tf.train.adadelta(), // ,
                 regularizer: (i) => tf.regularizers.l2(1e-2),
-                layer_initializer: (index) => 'varianceScaling',
+                layer_initializer: (index) => tf.initializers.varianceScaling({seed: SEED}),
                 // for reporting results
                 regularizer_name: 'l2(1e-2)',
-                optimizer_name: 'adamax(1e-5)',
-                layer_initializer_name: 'varianceScaling',
+                optimizer_name: 'rmsprop(1e-5, undefined, .9)',
+                layer_initializer_name: 'varianceScaling({seed: ' + SEED + '})',
                 testing_fraction,
                 validation_fraction,
                 fraction_kept
@@ -92,17 +93,17 @@
             };
 
             load_local_or_remote_scripts(
-                ["../js/tfjs.js", "../js/tfjs-vis.js", "../js/mobilenet.js", 
-                ...additional_js, "../js/user-agent.js", "nails.js", 
-                "md5-min.js", "train.js", //      "../js/translate.js"
-                ], // using the same locally cached version so nothing breaks when released versions are updated
-                ["../js/tfjs.js", "../js/tfjs-vis.js", "../js/mobilenet.js", 
+                ["../js/tfjs.js", 
+                 "../js/tfjs-vis.js",
+                 "../js/mobilenet.js", 
+                 ...additional_js,
+                 "../js/user-agent.js",
+                 "nails.js", 
+                 "md5-min.js",
+                 "train.js", //      "../js/translate.js"
+                ]);
                 //      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs",
                 //      "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet",
-                //      "https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier",
-                ...additional_js, "../js/user-agent.js", "nails.js", 
-                "md5-min.js", "train.js", //      "../js/translate.js"
-                ]);
         </script>
     </head>
     <body>
