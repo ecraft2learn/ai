@@ -85,7 +85,7 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
                        tab: 'Training#' + training_number,
                        styles: { height: '800px' }};
     const ftfvis_options = {callbacks: ['onEpochEnd'],
-                            yAxisDomain: [.2, .6],
+                            yAxisDomain: [.3, .8],
                             width: 500,
                             height: 300};
     let callbacks = tfvis ? tfvis.show.fitCallbacks(container, metrics, ftfvis_options) : {};
