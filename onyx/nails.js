@@ -1653,16 +1653,10 @@ const add_full_message = (event, message_number) => {
     why_button.title = "Click to see the images used in training closest to this one."
     why_button.addEventListener('click', explain_why);      
     const row = more_button.closest('tr');
-    if (is_mobile()) {
-        const short_response_element = 
-            (camera_interface() ? document.getElementById('camera-response') :
-                                  document.getElementById('random-image-response')) 
-             .firstElementChild;
-        short_response_element.replaceChild(full_response_element, short_response_element.firstElementChild);
-    } else {
-        const short_response_element = row.children[1];
-        row.replaceChild(full_response_element, short_response_element);       
-    }
+    // copy of photo not in the row if mobile since there is only one row
+    const short_response_element_index = is_mobile() ? 0 : 1; 
+    const short_response_element = row.children[short_response_element_index];
+    row.replaceChild(full_response_element, short_response_element);       
     full_response_element.innerHTML = window.full_popup_messages[message_number];
     more_button.parentElement.replaceChild(why_button, more_button); 
 };
