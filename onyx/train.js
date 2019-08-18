@@ -64,7 +64,8 @@ const combine_normal_and_non_serious = (matrix_3x3) => {
 let tfjs_vis_surface;
 
 const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array, options, callback) => {
-    const {model_name, class_names, hidden_layer_sizes, batch_size, epochs, drop_out_rate, optimizer, layer_initializer, training_number, regularizer, seed} 
+    const {model_name, class_names, hidden_layer_sizes, batch_size, epochs, drop_out_rate, optimizer,
+           layer_initializer, training_number, regularizer, seed, stop_if_no_progress_for_n_epochs} 
           = options;
     let model;
     const input_size = xs_array[0].length;
@@ -88,28 +89,26 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
                             yAxisDomain: [.3, .8],
                             width: 500,
                             height: 300};
-    let callbacks = tfvis ? tfvis.show.fitCallbacks(container, metrics, ftfvis_options) : {};
-    const stop_early_callbacks = tf.callbacks.earlyStopping();
+    const tfvis_callbacks = tfvis && tfvis.show.fitCallbacks(container, metrics, ftfvis_options);
+//     const stop_early_callbacks = auto_stop && tf.callbacks.earlyStopping();
     let data_loss;
     let validation_loss;
     let data_accuracy;
     let validation_accuracy;
-    let lowest_validation_loss = 100000;
+    let lowest_validation_loss;
     let lowest_validation_loss_epoch;
     let highest_accuracy = 0;
     let highest_accuracy_epoch;
-    if (tfvis) {
-        const epoch_end_callback = callbacks.onEpochEnd;
-        callbacks.onEpochEnd = (epoch, history) => {
-            if (epoch_end_callback) {
-                epoch_end_callback(epoch, history);
-            }
+    let last_epoch = 0;
+    const stats_callback = 
+        {onEpochEnd: async (epoch, history) => {
             epoch_history.push(history);
+            last_epoch = epoch;
             data_loss = history.loss;
             validation_loss = history.val_loss;
             data_accuracy = history.acc;
             validation_accuracy = history.val_acc;
-            if (validation_loss < lowest_validation_loss) {
+            if (typeof lowest_validation_loss === 'undefined' || validation_loss < lowest_validation_loss) {
                 lowest_validation_loss = validation_loss;
                 lowest_validation_loss_epoch = epoch;
             }
@@ -117,8 +116,32 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
                 highest_accuracy = validation_accuracy;
                 highest_accuracy_epoch = epoch;
             }
-        };      
-    }
+            if (tfvis_callbacks) {
+                tfvis_callbacks.onEpochEnd(epoch, history);
+            }
+            if (epoch-highest_accuracy_epoch >= stop_if_no_progress_for_n_epochs &&
+                epoch-lowest_validation_loss_epoch >= stop_if_no_progress_for_n_epochs) {
+                // if there has been no progress in accuracy or loss then stop 
+                throw new Error("No progress for " + stop_if_no_progress_for_n_epochs + " epochs at epoch " + epoch);
+            }
+//             if (stop_early_callbacks) {
+//                 const response = await stop_early_callbacks.onEpochEnd(epoch, history);
+//                 if (response) {
+//                     console.log(response);
+//                     return response;
+//                 }
+//             }
+        }};
+//     if (tfvis_callbacks) {
+//         const epoch_end_callback = tfvis_callbacks.onEpochEnd;
+//         tfvis_callbacks.onEpochEnd = (epoch, history) => {
+//             if (epoch_end_callback) {
+//                 epoch_end_callback(epoch, history);
+//             }
+//             epoch_history.push(history);
+// //             stats_callback.onEpochEnd(epoch, history); // while TFJS issue 1792 is still open
+//         };      
+//     }
 /**
  * Sets up and trains the classifier.
  */
@@ -157,12 +180,22 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
   model.compile({optimizer: optimizer(),
                  loss: 'categoricalCrossentropy',
                  metrics: ['accuracy']});
-  model.fit(xs, ys, {
-    batch_size,
-    epochs: epochs,
-    validationData: [xs_validation, ys_validation],
-    shuffle: true,
-    callbacks: callbacks}).then(() => { // [stop_early_callbacks, callbacks]
+//   let callbacks;
+//   if (auto_stop) {
+//       // [stats_callback, stop_early_callbacks, tfvis_callbacks] causes TFJS bug - 
+//       // see https://github.com/tensorflow/tfjs/issues/1792#issuecomment-519723345
+//       callbacks = [stop_early_callbacks];
+//   } else if (tfvis_callbacks) {
+//       callbacks = [tfvis_callbacks];
+//   } else {
+//       callbacks = [stats_callback];
+//   }
+  const config = {batch_size,
+                  epochs: epochs,
+                  validationData: [xs_validation, ys_validation],
+                  shuffle: true,
+                  callbacks: stats_callback};
+  const after_fit_callback = () => { 
        const save_model = async () => {
           return await model.save('downloads://' + model_name);
        };
@@ -203,7 +236,8 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
             "Lowest validation loss": lowest_validation_loss,
             "Lowest validation loss epoch": lowest_validation_loss_epoch, 
             "Highest accuracy": highest_accuracy,
-            "Highest accuracy epoch": highest_accuracy_epoch
+            "Highest accuracy epoch": highest_accuracy_epoch,
+            "Last epoch": last_epoch,
            };
        ["Normal correct","Abnormal but is Normal", "Serious but is Normal",
         "Normal but is Abnormal", "Abnormal correct", "Serious but is Abnormal",
@@ -241,18 +275,18 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
        results += data_loss + ", ";
        results += validation_loss + ", ";
        results += test_loss.toFixed(4) + ", ";
-       results += data_accuracy.toFixed(4) + ", ";
-       results += validation_accuracy.toFixed(4) + ", ";
+       results += (data_accuracy && data_accuracy.toFixed(4)) + ", ";
+       results += (validation_accuracy && validation_accuracy.toFixed(4)) + ", ";
        results += test_accuracy.toFixed(4) + ", ";
        if (xs_validation_array === xs_test_array) {
            results += xs_array.length + xs_validation_array.length + ", ";
        } else {
            results += xs_array.length + xs_validation_array.length + xs_test_array.length + ", ";
        }
-       results += lowest_validation_loss.toFixed(4) + ", ";
-       results +=lowest_validation_loss_epoch + ", ";
-       results += highest_accuracy.toFixed(4) + ", ";
-       results += highest_accuracy_epoch + ", ";
+       results += (lowest_validation_loss && lowest_validation_loss.toFixed(4)) + ", ";
+       results += (lowest_validation_loss_epoch && lowest_validation_loss_epoch) + ", ";
+       results += (highest_accuracy && highest_accuracy.toFixed(4)) + ", ";
+       results += (highest_accuracy_epoch && highest_accuracy_epoch) + ", ";
        results += confusion_matrix[0].map(percentage_of_tests) + ', ' + 
                   confusion_matrix[1].map(percentage_of_tests) + ', ' + 
                   confusion_matrix[2].map(percentage_of_tests);
@@ -270,8 +304,16 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
                                      tab: 'Charts#' + training_number},
                                     {values: combine_normal_and_non_serious(confusion_matrix),
                                      tickLabels: ['ok', 'serious']});
-  });
-
+  };
+  const fit_error_handler = (error) => {
+      if (error.message.indexOf('No progress for ') >= 0) {
+          console.log(error.message);
+          after_fit_callback();
+      } else {
+          throw error;
+      }
+  };
+  model.fit(xs, ys, config).then(after_fit_callback, fit_error_handler);
 };
 
 

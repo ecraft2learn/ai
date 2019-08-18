@@ -401,6 +401,8 @@ const get_url_from_image_or_canvas = (image_or_canvas) => {
 const start_training = () => {
     training_options.class_names = class_names; // for displaying confusion matrix
     training_options.model_name = model_name;
+    training_options.seed = SEED;
+    training_options.stop_if_no_progress_for_n_epochs = stop_if_no_progress_for_n_epochs;
     const splitting_data = xs_validation.length === 0 &&
                            typeof validation_fraction === 'number' && 
                            typeof testing_fraction === 'number';
@@ -463,9 +465,10 @@ const start_training = () => {
                 responses_total[entry[0]] += entry[1];
             });
         };
-        const csv = "<br>Number of training repeats, " + 
+        const csv = "<br>Number of training repeats, Stop if no progress, " + 
                     Object.keys(responses_total) + "<br>" +
                     number_of_training_repeats + ", " +
+                    stop_if_no_progress_for_n_epochs + ", " +
                     Object.values(responses_total).map(value => (value/number_of_training_repeats).toFixed(3)) + "<br>";
         const averages = document.createElement('p');
         averages.innerHTML = csv;
