@@ -99,6 +99,7 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
     let lowest_validation_loss_epoch;
     let highest_accuracy = 0;
     let highest_accuracy_epoch;
+    let highest_accuracy_weights = [];
     let last_epoch = 0;
     const stats_callback = 
         {onEpochEnd: async (epoch, history) => {
@@ -115,13 +116,28 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
             if (validation_accuracy > highest_accuracy) {
                 highest_accuracy = validation_accuracy;
                 highest_accuracy_epoch = epoch;
+                if (highest_accuracy_epoch) {
+                    highest_accuracy_weights.forEach((layer_weights) => {
+                        layer_weights.forEach((tensor) => {
+                            tensor.dispose();
+                        });
+                    });
+                    highest_accuracy_weights = [];
+                    model.layers.forEach((layer) => {
+                        highest_accuracy_weights.push(layer.getWeights().map(tf.clone));
+                    });                  
+                }
             }
             if (tfvis_callbacks) {
                 tfvis_callbacks.onEpochEnd(epoch, history);
             }
             if (epoch-highest_accuracy_epoch >= stop_if_no_progress_for_n_epochs &&
                 epoch-lowest_validation_loss_epoch >= stop_if_no_progress_for_n_epochs) {
-                // if there has been no progress in accuracy or loss then stop 
+                // if there has been no progress in accuracy or loss then stop
+                // first restore best weights
+                model.layers.forEach((layer, index) => {
+                    layer.setWeights(highest_accuracy_weights[index]);
+                });  
                 throw new Error("No progress for " + stop_if_no_progress_for_n_epochs + " epochs at epoch " + epoch);
             }
 //             if (stop_early_callbacks) {
@@ -203,7 +219,7 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
        const show_layers = () => {
            const surface = {name: 'Layers', tab: 'Model inspection#' + training_number};
            tfvis.show.modelSummary(surface, model);
-           for (let i = 0; i < hidden_layer_sizes.length; i++) {
+           for (let i = 0; i < model.layers.length; i++) {
                tfvis.show.layer(surface, model.getLayer(undefined, i));
            } 
        };

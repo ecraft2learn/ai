@@ -52,7 +52,7 @@
             const validation_fraction = .15;
             const fraction_kept = 1; // 1 to keep all data
             const number_of_training_repeats = 3;
-            const stop_if_no_progress_for_n_epochs = 10;
+            const stop_if_no_progress_for_n_epochs = 20;
             const SEED = undefined;
 
             const projector_data = false;
@@ -64,12 +64,12 @@
                 batch_size: 256,
                 drop_out_rate: .5,
                 epochs: 2000,
-                optimizer: (i) =>  tf.train.adamax(1e-5), // tf.train.rmsprop(1e-4), tf.train.adadelta(),
-//                 regularizer: (i) => tf.regularizers.l2(1e-2),
+                optimizer: (i) =>  tf.train.rmsprop(1e-4), // tf.train.adamax(1e-5), tf.train.adadelta(),
+                regularizer: (i) => tf.regularizers.l2(1e-3),
                 layer_initializer: (index) => tf.initializers.varianceScaling({seed: SEED}),
                 // for reporting results
-                regularizer_name: 'none',
-                optimizer_name: 'adamax(1e-5)',
+                regularizer_name: 'l2(1e-3)',
+                optimizer_name: 'rmsprop(1e-4)',
                 layer_initializer_name: 'varianceScaling({seed: ' + SEED + '})',
                 testing_fraction,
                 validation_fraction,
