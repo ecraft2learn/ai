@@ -168,7 +168,7 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
   
   hidden_layer_sizes.forEach((size, index) => {
        const kernelRegularizer = regularizer && regularizer(index); // can be undefined
-       const kernelInitializer = layer_initializer(index);
+       const kernelInitializer = layer_initializer && layer_initializer(index);
        model.add(tf.layers.dense({inputShape: index === 0 ? input_size : undefined,
                                   units: size,
                                   activation: 'relu',
@@ -185,7 +185,7 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
   // last layer. The number of units of the last layer should correspond
   // to the number of classes we want to predict.
   model.add(tf.layers.dense({units: number_of_classes,
-                             kernelInitializer: layer_initializer(hidden_layer_sizes.length),
+                             kernelInitializer: layer_initializer && layer_initializer(hidden_layer_sizes.length),
                              useBias: false,
                              activation: 'softmax'
                             }));
