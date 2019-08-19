@@ -573,7 +573,7 @@ const infer = (image) => {
 };
 
 const load_mobilenet = (callback) => {
-    mobilenet.load(2).then((model) => { // version 2
+    mobilenet.load({version: 2, alpha: 1}).then((model) => {
         mobilenet_model = model;
         return callback();
     });  
