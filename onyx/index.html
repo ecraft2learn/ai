@@ -45,7 +45,7 @@
                 additional_js = [];
             }
             const model_name = option !== 'diagnose' ? 
-                               (option === 'create model' ? "19-08-2019a" : "15-08-2019b") : 
+                               (option === 'create model' ? "20-08-2019a" : "15-08-2019b") : 
                                "15-08-2019a"; // "normal-fungal-serious-04-08-2019a";
             // set aside for testing and validation
             const testing_fraction = 0;
@@ -60,7 +60,7 @@
 
             const training_options = {
                 model_name: model_name,
-                hidden_layer_sizes: [100],
+                hidden_layer_sizes: [10, 10],
                 batch_size: 256,
                 drop_out_rate: .5,
                 epochs: 2000,
@@ -94,9 +94,9 @@
             };
 
             load_local_or_remote_scripts(
-                ["https://cdn.jsdelivr.net/npm/@tensorflow/tfjs", //"../js/tfjs.js", 
+                ["../js/tfjs.js", 
                  "../js/tfjs-vis.js",
-                 "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet", // "../js/mobilenet.js", 
+                 "../js/mobilenet.js",
                  ...additional_js,
                  "../js/user-agent.js",
                  "nails.js", 
