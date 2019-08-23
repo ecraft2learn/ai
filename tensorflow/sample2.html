@@ -1,0 +1,49 @@
+<html>
+  <head>
+    <!-- Load TensorFlow.js -->
+    <script src="../js/tfjs.js"> 
+//     "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs">
+ </script>
+
+    <!-- Place your code in the script tag below. You can also use an external .js file -->
+    <script>
+      tf.enableDebugMode();
+      let callbacks = {onEpochEnd: async (epoch, h) => {
+          console.log(epoch, h);
+      }};
+      // Define a model for linear regression.
+      const model = tf.sequential();
+      model.add(tf.layers.dense({units: 100, inputShape: [1], useBias: true, activation: 'relu'}));
+      model.add(tf.layers.dense({units: 50, useBias: true, activation: 'relu'}));
+      model.add(tf.layers.dense({units: 20, useBias: true, activation: 'relu'}));
+      model.add(tf.layers.dense({units: 10, useBias: true, activation: 'relu'}));
+      model.add(tf.layers.dense({units: 5, useBias: true, activation: 'relu'}));
+      model.add(tf.layers.dense({units: 1, useBias: false}));
+      model.compile({loss: 'meanSquaredError', optimizer: 'sgd'});
+      const ints = [];
+      const squares = [];
+      const data_size = 1000;
+      for (let i = 0; i < data_size; i++) {
+          const x = Math.random()*40;
+          ints.push(x);
+          squares.push(x*x);
+      }
+      const xs = tf.tensor2d(squares, [data_size, 1]);
+      const ys = tf.tensor2d(ints, [data_size, 1]);
+      const test = tf.tensor2d([.5, 100], [2, 1]);
+      // Train the model using the data.
+      model.fit(xs, ys, {epochs: 5,
+                         validationSplit: .2,
+                         callbacks
+                         }).then(() => {
+          tf.tidy(() => {
+              model.predict(test).print();
+          });
+       });
+    </script>
+  </head>
+
+  <body>
+  Results in the browser's console.
+  </body>
+</html>
