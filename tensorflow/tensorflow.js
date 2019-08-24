@@ -2,6 +2,8 @@
 // Written by Ken Kahn 
 // License: New BSD
 
+"use strict"
+
 window.tensorflow = 
 ((function () {
 
@@ -48,6 +50,9 @@ const set_data = (model_name, kind, value) => {
     if (kind === 'training') {
         optimize_hyperparameters_interface_button.disabled = false;
         train_button.disabled = false;
+    }
+    if (kind === 'training' && get_model(model_name)) {
+        ensure_last_layer_right_size(get_model(model_name), value);
     }
 };
 const to_one_hot = (labels) => {
@@ -129,8 +134,21 @@ const shape_of_data = (data) => {
    }
 };
 
-const create_model = function (name, layers, optimizer_full_name, input_shape, options) {
-    if (!input_shape && !get_data(name, 'training') && !get_data(name, 'validation')) {
+const ensure_last_layer_right_size = (model, data) => {
+    const output_size = Array.isArray(data.output[0]) ? data.output[0].length : 1;
+    const last_layer_size = model.layers[model.layers.length-1].units;
+    if (output_size !== last_layer_size) {
+        throw new Error("The last layer of your model determines how many numbers are in each prediction. " +
+                        "The size of your last layer is " + last_layer_size + 
+                        " but the size of the training data output is " + output_size +
+                        ". Please make sure the model's last layer is " + output_size);
+    }   
+};
+
+const create_model = (name, layers, optimizer_full_name, input_shape, options) => {
+    const training_data = get_data(name, 'training');
+    const validation_data = get_data(name, 'validation');
+    if (!input_shape && !training_data) {
         throw new Error("Cannot create a model before knowing what the data is like.\nProvide at least one example of the data.");
     }
     const optimizer = optimizer_named(optimizer_full_name);
@@ -153,7 +171,7 @@ const create_model = function (name, layers, optimizer_full_name, input_shape, o
                  });
     }
     layers.forEach((configuration, index) => {
-        let layer_activation;
+        let layer_activation, size;
         if (typeof configuration === 'number') {
             size = configuration;
         } else {
@@ -178,11 +196,13 @@ const create_model = function (name, layers, optimizer_full_name, input_shape, o
             }                  
             if (index === 0) { // first one needs inputShape
                 configuration.inputShape = input_shape ||
-                                           shape_of_data((get_data(name, 'training') || get_data(name, 'validation')).input[0]);    
+                                           shape_of_data((training_data || validation_data).input[0]);    
             }
-//             tf.tidy(() => {
-                model.add(tf.layers.dense(configuration));
-//             });      
+            model.add(tf.layers.dense(configuration));
+//             if (index < layers.length-1) {
+//                 model.add(tf.layers.batchNormalization());
+//                 model.add(tf.layers.dropout({rate: .5}));
+//             }
         }
     });
     if (!optimizer) {
@@ -209,12 +229,34 @@ const create_model = function (name, layers, optimizer_full_name, input_shape, o
         model.callback_when_ready_for_training();
         model.callback_when_ready_for_training = undefined;
     }
+    if (training_data) {
+        ensure_last_layer_right_size(model, training_data);
+    }
     return model;
 };
 
+const normalize = (tensor) => {
+    // divides all by max-min value
+    let min = Math.min();
+    let max = Math.max();
+    const data = tensor.flatten().arraySync();
+    data.forEach((x) => {
+        if (x < min) {
+            min = x;
+        } else if (x > max) {
+            max = x;
+        }
+    });
+    const difference = max-min;
+    if (difference !== 0) {
+        return [difference, tensor.div(tf.scalar(difference))];
+    }
+};
+
 const train_model = async (model_or_model_name, training_data, validation_data, options,
-                           use_tfjs_vis, success_callback, error_callback) => {
+                           use_tfjs_vis, success_callback, error_callback, message_element) => {
     // validation_data is optional - if provided not used for training only calculating loss
+    let message_to_user;
     if (!model_or_model_name) {
         model_or_model_name = model; // current model (if there is one)
     }
@@ -231,6 +273,12 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
     } else {
         model = model_or_model_name;
     }
+    try {
+        ensure_last_layer_right_size(model, training_data);
+    } catch (error) {
+        error_callback({message: error.message});
+        return;
+    }
     if (!model.ready_for_training) {
         let previous_callback = model.callback_when_ready_for_training;
         model.callback_when_ready_for_training = 
@@ -239,7 +287,7 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
                     previous_callback();
                 }
                 train_model(model, training_data, validation_data, options,
-                            use_tfjs_vis, success_callback, error_callback);
+                            use_tfjs_vis, success_callback, error_callback, message_element);
             };
         return;
     }
@@ -257,7 +305,7 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
             (window.parent === window || // not an iframe
              !window.parent.ecraft2learn || // parent isn't ecraft2learn library
              window.parent.ecraft2learn.support_window_visible("tensorflow.js"))) { // is visible
-            callbacks = tfvis.show.fitCallbacks(container, metrics, {callbacks: ['onEpochEnd']});
+            callbacks = tfvis.show.fitCallbacks(container, metrics, {callbacks: ['onEpochEnd'], yAxisDomain: [0, 1000]});
             epoch_end_callback = callbacks.onEpochEnd;
         } else {
             callbacks = {};
@@ -266,13 +314,16 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
             if (epoch_end_callback) {
                 epoch_end_callback(epoch, history);
             }
+            if (isNaN(history.loss)) {
+                throw new Error('Training stopped due to loss being "not a Number"');
+            }
             // and in any case do the following 
             if (epoch > 4 &&
                 epoch_history[epoch-1].loss === history.loss &&
                 epoch_history[epoch-2].loss === history.loss &&
                 epoch_history[epoch-3].loss === history.loss) {
                 // no progress for last 4 epochs 
-                throw new Error('Training stuck after ' + (epoch-4) + ' steps');
+                throw new Error('Training stopped after ' + (epoch-4) + ' steps due to lack of progress.');
             }
             epoch_history.push(history);
         };
@@ -302,6 +353,12 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
             gui_state["Training"]['Shuffle data'] = options.shuffle;
         }
         let [xs, ys] = get_tensors(model.name, 'training');
+//         const [normalization_factor, new_xs] = normalize(xs);
+//         if (normalization_factor) {
+//             xs.dispose();
+//             xs = new_xs;
+//             model.normalization_factor = normalization_factor;
+//         }
         let configuration = {epochs: (+options.epochs || 10),
                              shuffle: options.shuffle,
                              validationSplit: +options.validation_split,
@@ -312,9 +369,11 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
         }
         const then_handler = (extra_info) => {
             let duration = Math.round((Date.now()-start)/1000); // seconds to 3 decimal places
-            let response = {loss:     epoch_history[epoch_history.length-1].loss,
+            let response = epoch_history[epoch_history.length-1] ?
+                           {loss:     epoch_history[epoch_history.length-1].loss,
                             accuracy: epoch_history[epoch_history.length-1].acc,
-                            "duration in seconds": duration};
+                            "duration in seconds": duration} : 
+                           {"duration in seconds": duration};
             if (typeof extra_info === 'string') {
                 response.extra_info = extra_info;
             }
@@ -332,11 +391,14 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
             }
         };
         const error_handler = (error) => {
-            if (error.message.indexOf('Training stuck') === 0) {
+            if (error.message.indexOf('Training stopped') === 0) {
                 // only did some training but not really an error
                 then_handler(error.message);
+                if (message_element) {
+                    message_element.innerHTML += "<br>" + error.message;
+                }
             } else {
-                 error_callback(error);
+                error_callback(error);
 //                  model.summary();
             }
         };
@@ -364,6 +426,7 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
     } catch (error) {
         error_callback(error);
     }
+    return message_to_user;
 };
 
 const default_loss_function = (categories) => categories ? 'softmaxCrossEntropy' : 'meanSquaredError';
@@ -723,6 +786,11 @@ const predict = (model_name, inputs, success_callback, error_callback) => {
         } else {
             input_tensor = tf.tensor2d(inputs); //, [inputs.length].concat(shape_of_data(inputs))); 
         }
+        if (model.normalization_factor) {
+            const new_input_tensor = input_tensor.div(tf.scalar(model.normalization_factor));
+            input_tensor.dispose();
+            input_tensor = new_input_tensor;
+        }
         let prediction = model.predict(input_tensor);
         const results = reshape_array(prediction.dataSync(), model.outputShape);
         const categories = get_data(model_name, 'categories');
@@ -975,8 +1043,16 @@ const train_with_parameters = async function (surface_name) {
         let loss = training_statistics.loss;
         let accuracy = training_statistics.accuracy;
         let duration = training_statistics["duration in seconds"];
-        message.innerHTML = "<br>Training " + model_name + " took " + duration + " seconds. " +
-                            "Final error rate is " + loss + " and accuracy is " + accuracy + ".";
+        message.innerHTML = "<br>Training " + model_name + " took " + duration + " seconds. ";
+        if (isNaN(loss)) {
+            message.innerHTML += "Training failed because some numbers became too large for the system. " +
+                                 "This can be caused by many different things. " +
+                                 "Try different optimization methods, loss functions, or convert the input data to numbers between -1 and 1. " +
+                                 "Often the problem is due to <a href='https://en.wikipedia.org/wiki/Vanishing_gradient_problem' target='_blank'>vanishing gradiants</a>.";
+        } else {
+            message.innerHTML += "Final error rate is " + loss + 
+                                  (accuracy ? (" and accuracy is " + accuracy) : "") + ".";
+        }
         enable_evaluate_button();   
     };
     let error_callback = (error) => {
@@ -1000,17 +1076,20 @@ const train_with_parameters = async function (surface_name) {
     message.innerHTML += ". Please wait.";
     setTimeout(async function () {
         // without the timeout the message above isn't displayed
-        await train_model(model_name,
-                          training_data,
-                          validation_data,
-                          {epochs: Math.round(gui_state["Training"]["Number of iterations"]),
-                           learning_rate: gui_state["Training"]["Learning rate"],
-                           validation_split: gui_state["Training"]["Validation split"],
-                           shuffle: to_boolean(gui_state["Training"]["Shuffle data"]),
-                          },
-                          true, // show progress using tfjs-vis 
-                          success_callback,
-                          error_callback);
+        const message_to_user = 
+            await train_model(model_name,
+                              training_data,
+                              validation_data,
+                              {epochs: Math.round(gui_state["Training"]["Number of iterations"]),
+                               learning_rate: gui_state["Training"]["Learning rate"],
+                               validation_split: gui_state["Training"]["Validation split"],
+                               shuffle: to_boolean(gui_state["Training"]["Shuffle data"]),
+                              },
+                              true, // show progress using tfjs-vis 
+                              success_callback,
+                              error_callback,
+                              message);
+
     });
   };
   const create_model_menu = (click_handler) => {
@@ -1130,13 +1209,13 @@ const create_prediction_interface = () => {
 };
 
 const categorical_results = (results, categories) => 
-      results.map((result) => {
-                          const result_as_object = {};
-                          result.forEach((result, index) => {(
-                              result_as_object[categories[index]] = result)
-                          });
-                          return result_as_object;
-                 });
+    results.map((result) => {
+        const result_as_object = {};
+        result.forEach((result, index) => {(
+            result_as_object[categories[index]] = result)
+        });
+        return result_as_object;
+    });
 
 let save_model_button;
 let load_model_button;
@@ -1376,14 +1455,19 @@ const receive_message =
     async (event) => {
         let message = event.data;
         if (typeof message.data !== 'undefined') {
-            let kind = message.kind;
-            let model_name = message.model_name || 'all models';
-            if (message.ignore_old_dataset) {
-                set_data(model_name, kind, message.data);
-            } else {
-                set_data(model_name, kind, add_to_data(message.data, model_name, kind));
+            try {
+                let kind = message.kind;
+                let model_name = message.model_name || 'all models';
+                if (message.ignore_old_dataset) {
+                    set_data(model_name, kind, message.data);
+                } else {
+                    set_data(model_name, kind, add_to_data(message.data, model_name, kind));
+                }
+                event.source.postMessage({data_received: message.time_stamp}, "*");
+            } catch (error) {
+                event.source.postMessage({data_message_failed: message.data,
+                                          error_message: error.message}, "*");
             }
-            event.source.postMessage({data_received: message.time_stamp}, "*");
         } else if (typeof message.create_model !== 'undefined') {
             try {
                 let model = create_model(message.create_model.name,

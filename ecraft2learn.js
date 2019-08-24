@@ -1128,11 +1128,22 @@ window.ecraft2learn =
                                               time_stamp: time_stamp};
                                   },
                                   (message) => {
-                                      return message.data_received === time_stamp;
+                                      return message.data_received === time_stamp ||
+                                             message.error_message;
                                   },
                                   (message) => {
-                                      invoke_callback(callback, true);
-                                  }); // there is no error response
+                                      if (message.error_message) {
+                                          if (typeof error_callback === 'undefined') {
+                                              // only error currently supported is that the model's last 
+                                              // layer is wrong so it is a model creation error 
+                                              inform("Error creating a model", message.error_message);             
+                                          } else {
+                                              invoke_callback(error_callback, message.error_message);
+                                          }
+                                      } else {
+                                          invoke_callback(callback, true);
+                                      }
+                                  }); 
     };
     const train_model = (model_name, epochs, learning_rate, shuffle, validation_split,
                          success_callback, error_callback) => {
