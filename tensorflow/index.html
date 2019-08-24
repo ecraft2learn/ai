@@ -12,18 +12,12 @@ load_local_or_remote_scripts(
      "tensorflow.js",
      "../js/training-utilities.js",
      "../js/translate.js"],
+     undefined, 
      // using the same locally cached version so nothing breaks when released versions are updated
-    ["../js/tfjs.js",
-     "../js/tfjs-vis.js",
-     "../js/dat.gui.js",
-     "../js/hyperparameters.min.js", 
 //      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest",
 //      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis",
 //      "https://cdn.jsdelivr.net/npm/dat.gui",
 //      "https://cdn.jsdelivr.net/npm/hyperparameters@latest/dist/hyperparameters.min.js",
-     "tensorflow.js",
-     "../js/training-utilities.js",
-     "../js/translate.js"],
      () => {
          // when all the scripts have loaded
          create_return_to_snap_button(undefined, "return_to_snap");
