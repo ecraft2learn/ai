@@ -171,13 +171,18 @@ const create_model = (name, layers, optimizer_full_name, input_shape, options) =
                  });
     }
     layers.forEach((configuration, index) => {
+        let layer_options = [];
         let layer_activation, size;
         if (typeof configuration === 'number') {
             size = configuration;
         } else {
             let parts = configuration.split(' ');
             size = +parts[0];
-            layer_activation = parts.length > 1 && parts[1];
+            if (parts.length === 2) {
+                layer_activation = parts[1];
+            } else if (parts.length > 2) {
+                layer_options = parts.slice(1); // e.g. '10 dropout .5 activation relu' becomes ['dropout', '.5', 'activation', 'relu']
+            }
         }
         if (size > 0) {
             let configuration = {units: size,
@@ -191,18 +196,23 @@ const create_model = (name, layers, optimizer_full_name, input_shape, options) =
                 // all but the last one has an activation function unless categorical 
                 configuration.activation = options.activation || 'relu';              
             }
-            if (layer_activation) { // if explicitly specified override default activation function
+            // if explicitly specified override default activation function
+            if (layer_activation) {
+                // for backwards compatibility
                 configuration.activation = layer_activation;
+            } else if (layer_options.indexOf('activation') >= 0) {
+                configuration.activation = layer_options[layer_options.indexOf('activation')+1];
             }                  
             if (index === 0) { // first one needs inputShape
                 configuration.inputShape = input_shape ||
                                            shape_of_data((training_data || validation_data).input[0]);    
             }
             model.add(tf.layers.dense(configuration));
-//             if (index < layers.length-1) {
-//                 model.add(tf.layers.batchNormalization());
-//                 model.add(tf.layers.dropout({rate: .5}));
-//             }
+            if (index < layers.length-1 && layer_options.indexOf('dropout') >= 0) {
+                const rate = +layer_options[layer_options.indexOf('dropout')+1];
+                model.add(tf.layers.dropout({rate: rate}));
+            }
+//              model.add(tf.layers.batchNormalization());
         }
     });
     if (!optimizer) {
@@ -942,29 +952,15 @@ let create_model_with_current_settings_button;
 
 const get_layers = () => {
   const quote_non_numeric_layers = (layers) => {
-      let first_alpha = layers.search(/[A-Za-z]/);
-      if (first_alpha < 0) {
-          return layers;
-      }
-      let end_of_alpha = layers.substring(first_alpha).search(/[^A-Za-z]/);
-      if (end_of_alpha < 0) {
-          // end of layers
-          end_of_alpha = layers.length;
-      } else {
-          end_of_alpha += first_alpha;
-      }
-      let preceding_comma = layers.substring(0, first_alpha).lastIndexOf(',');
-      let start_of_preceding_number;
-      if (preceding_comma < 0) {
-           // preceding number is the first one
-           start_of_preceding_number = 0;
-       } else {
-           start_of_preceding_number = preceding_comma+1;
-       }
-       return layers.substring(0, start_of_preceding_number) +
-              '"' + layers.substring(start_of_preceding_number, end_of_alpha) + '"' + 
-              quote_non_numeric_layers(layers.substring(end_of_alpha));
-       };
+      const parts = layers.split(',');
+      return parts.map(layer => {
+          if (layer.indexOf(' ') < 0) {
+              return layer;
+          } else {
+              return '"' + layer + '"';
+          }
+      });
+  };
   try {
        let json = quote_non_numeric_layers(gui_state["Model"]["Layers"]);
        return JSON.parse('[' + json + ']');
