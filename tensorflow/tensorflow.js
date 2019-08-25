@@ -315,7 +315,7 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
             (window.parent === window || // not an iframe
              !window.parent.ecraft2learn || // parent isn't ecraft2learn library
              window.parent.ecraft2learn.support_window_visible("tensorflow.js"))) { // is visible
-            callbacks = tfvis.show.fitCallbacks(container, metrics, {callbacks: ['onEpochEnd'], yAxisDomain: [0, 1000]});
+            callbacks = tfvis.show.fitCallbacks(container, metrics, {callbacks: ['onEpochEnd'], yAxisDomain: [0, 10]});
             epoch_end_callback = callbacks.onEpochEnd;
         } else {
             callbacks = {};
@@ -379,9 +379,12 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
         }
         const then_handler = (extra_info) => {
             let duration = Math.round((Date.now()-start)/1000); // seconds to 3 decimal places
-            let response = epoch_history[epoch_history.length-1] ?
-                           {loss:     epoch_history[epoch_history.length-1].loss,
-                            accuracy: epoch_history[epoch_history.length-1].acc,
+            const last_epoch = epoch_history[epoch_history.length-1];
+            let response = last_epoch ?
+                           {"training loss":     last_epoch.loss.toFixed(3),
+                            "validation loss":   last_epoch.val_loss && last_epoch.val_loss.toFixed(3),
+                            "training accuracy": last_epoch.acc && (100*last_epoch.acc).toFixed(1) + "%",
+                            "validation accuracy": last_epoch.val_acc && (100*last_epoch.val_acc).toFixed(1) + "%",
                             "duration in seconds": duration} : 
                            {"duration in seconds": duration};
             if (typeof extra_info === 'string') {
@@ -1036,18 +1039,27 @@ const train_with_parameters = async function (surface_name) {
   const train_with_current_settings = async function (model_name) {
     let message = document.createElement('p');
     let success_callback = (training_statistics) => {
-        let loss = training_statistics.loss;
-        let accuracy = training_statistics.accuracy;
-        let duration = training_statistics["duration in seconds"];
-        message.innerHTML = "<br>Training " + model_name + " took " + duration + " seconds. ";
+        const loss = training_statistics["training loss"];
+        const accuracy = training_statistics["training accuracy"];
+        const validation_loss = training_statistics["validation loss"];
+        const validation_accuracy = training_statistics["validation accuracy"];
+        message.innerHTML = "<br>Training " + model_name + " took " + training_statistics["duration in seconds"] + " seconds. ";
         if (isNaN(loss)) {
             message.innerHTML += "Training failed because some numbers became too large for the system. " +
                                  "This can be caused by many different things. " +
                                  "Try different optimization methods, loss functions, or convert the input data to numbers between -1 and 1. " +
                                  "Often the problem is due to <a href='https://en.wikipedia.org/wiki/Vanishing_gradient_problem' target='_blank'>vanishing gradiants</a>.";
         } else {
-            message.innerHTML += "Final error rate is " + loss + 
-                                  (accuracy ? (" and accuracy is " + accuracy) : "") + ".";
+            message.innerHTML += "<br>Final error rate for training data is " + loss + ".";
+            if (validation_loss) {
+                message.innerHTML += "<br>Validation data error is " + validation_loss + ".";
+            }
+            if (accuracy) {
+                message.innerHTML += "<br>Training data accuracy is " + accuracy + ".";
+            }
+            if (validation_accuracy) {
+                message.innerHTML += "<br>Validation data accuracy is " + validation_accuracy + ".";
+            }
         }
         enable_evaluate_button();   
     };
