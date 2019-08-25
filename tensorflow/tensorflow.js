@@ -957,6 +957,7 @@ const get_layers = () => {
   const quote_non_numeric_layers = (layers) => {
       const parts = layers.split(',');
       return parts.map(layer => {
+          layers = layers.trim(); // remove extraneous white space
           if (layer.indexOf(' ') < 0) {
               return layer;
           } else {
