@@ -79,11 +79,15 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
     const ys_test = tf.tensor(ys_test_array);
 
     const surface = tfjs_vis_surface || (tfvis && tfvis.visor().surface({name: model_name, tab: 'Training#' + training_number}));
-    tfjs_vis_surface = surface;
+    tfjs_vis_surface = surface; // re-use same one accross multiple calls
     // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
     let epoch_history = [];
-    const metrics = ['loss', 'val_loss', 'acc', 'val_acc'];
-    const container = {name: 'Loss and accuracy',
+    const metrics = ['loss', 'val_loss'];
+    if (tfvis_options.measure_accuracy) {
+        metrics.push('acc');
+        metrics.push('val_acc');
+    };
+    const container = {name: tfvis_options.measure_accuracy ? 'Loss and accuracy' : 'Loss',
                        tab: 'Training#' + training_number,
                        styles: { height: '800px' }};
     const tfvis_callbacks = tfvis_options && tfvis.show.fitCallbacks(container, metrics, tfvis_options);

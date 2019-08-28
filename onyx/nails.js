@@ -483,7 +483,8 @@ const start_training = () => {
             {callbacks: ['onEpochEnd'],
              yAxisDomain: [.3, .8],
              width: 500,
-             height: 300};
+             height: 300,
+             measure_accuracy: true};
         train_model(xs,
                     ys,
                     xs_validation,
