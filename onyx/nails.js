@@ -483,7 +483,11 @@ const start_training = () => {
              yAxisDomain: [.3, .8],
              width: 500,
              height: 300,
-             measure_accuracy: true};
+             measure_accuracy: true,
+             display_confusion_matrix: true,
+             display_collapsed_confusion_matrix: {indices: [[0, 1], [2]],
+                                                  labels: ['OK', "Serious"]},
+             display_layers: true};
         train_model(xs,
                     ys,
                     xs_validation,

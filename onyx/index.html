@@ -62,7 +62,7 @@
                 hidden_layer_sizes: [100, 10],
                 batch_size: 256,
                 drop_out_rate: .5,
-                epochs: 2,
+                epochs: 50,
                 optimizer: (i) =>  tf.train.rmsprop(1e-5), // tf.train.adamax(1e-5), tf.train.adadelta(),
                 regularizer: (i) => tf.regularizers.l2(1e-3),
                 layer_initializer: (index) => tf.initializers.varianceScaling({seed: SEED}),

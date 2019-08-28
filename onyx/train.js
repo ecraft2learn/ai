@@ -51,13 +51,21 @@ const compute_confusion_matrix = (predictions, truth, n) => {
     return matrix;
 };
 
-const combine_normal_and_non_serious = (matrix_3x3) => {
-    const serious = 2;
-    const matrix_2x2 = [[0, 0], [0, 0]];
-    matrix_2x2[0][0] = matrix_3x3[0][0]+matrix_3x3[0][1]+matrix_3x3[1][0]+matrix_3x3[1][1];
-    matrix_2x2[0][1] = matrix_3x3[0][2]+matrix_3x3[1][2];
-    matrix_2x2[1][0] = matrix_3x3[2][0]+matrix_3x3[2][1];
-    matrix_2x2[1][1] = matrix_3x3[2][2];
+const collapse_confusion_matrix = (matrix, indices) => {
+    const matrix_2x2 = [[0, 0], [0, 0]];    
+    for (let i = 0; i < matrix.length; i++) {
+        for (let j = 0; j < matrix.length; j++) {
+            if (indices[0].includes(i) && indices[0].includes(j)) {
+                matrix_2x2[0][0] += matrix[i][j];
+            } else if (indices[0].includes(i) && indices[1].includes(j)) {
+                matrix_2x2[0][1] += matrix[i][j];
+            } else if (indices[1].includes(i) && indices[0].includes(j)) {
+                matrix_2x2[1][0] += matrix[i][j];
+            } else  {
+                matrix_2x2[1][1] += matrix[i][j];
+            }
+        }
+    }
     return matrix_2x2;
 };
 
@@ -198,7 +206,9 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
                tfvis.show.layer(surface, model.getLayer(undefined, i));
            } 
        };
-       show_layers();
+       if (tfvis_options.display_layers) {
+           show_layers();
+       }
        const button = document.createElement('button');
        button.innerHTML = "Save model";
        button.className = "save-training-button";
@@ -208,7 +218,8 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
        const test_loss = test_loss_tensor[0].dataSync()[0];
        const test_accuracy = test_loss_tensor[1].dataSync()[0];
        const predictions = model.predict(xs_test, ys_test);
-       const confusion_matrix = compute_confusion_matrix(predictions.dataSync(), ys_test.dataSync(), class_names.length);
+       const confusion_matrix = tfvis_options.display_confusion_matrix &&
+                                compute_confusion_matrix(predictions.dataSync(), ys_test.dataSync(), class_names.length);
        predictions.dispose();
        tf.dispose(test_loss_tensor); // both of them
        xs.dispose();
@@ -230,11 +241,13 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
             "Highest accuracy epoch": highest_accuracy_epoch,
             "Last epoch": last_epoch,
            };
-       ["Normal correct","Abnormal but is Normal", "Serious but is Normal",
-        "Normal but is Abnormal", "Abnormal correct", "Serious but is Abnormal",
-        "Normal but is Serious", "Abnormal but is Serious", "Serious correct"].map((label, index) => {
-            response[label] = percentage_of_tests(confusion_matrix[index%3] [Math.floor(index/3)]);
-        });
+       if (confusion_matrix) {
+           ["Normal correct","Abnormal but is Normal", "Serious but is Normal",
+            "Normal but is Abnormal", "Abnormal correct", "Serious but is Abnormal",
+            "Normal but is Serious", "Abnormal but is Serious", "Serious correct"].map((label, index) => {
+                response[label] = percentage_of_tests(confusion_matrix[index%3] [Math.floor(index/3)]);
+            });         
+       }
        const test_loss_message = document.createElement('p');      
        let results = // CSV for pasting into a spreadsheet
            "<br>Name, Layer1,Layer2,Layer3,layer4,layer5, Batch size, Dropout rate, Epochs, Optimizer, Initializer, Regularizer," +
@@ -278,23 +291,30 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
        results += (lowest_validation_loss_epoch && lowest_validation_loss_epoch) + ", ";
        results += (highest_accuracy && highest_accuracy.toFixed(4)) + ", ";
        results += (highest_accuracy_epoch && highest_accuracy_epoch) + ", ";
-       results += confusion_matrix[0].map(percentage_of_tests) + ', ' + 
-                  confusion_matrix[1].map(percentage_of_tests) + ', ' + 
-                  confusion_matrix[2].map(percentage_of_tests);
+       if (confusion_matrix) {
+           results += confusion_matrix[0].map(percentage_of_tests) + ', ' + 
+                      confusion_matrix[1].map(percentage_of_tests) + ', ' + 
+                      confusion_matrix[2].map(percentage_of_tests);        
+       }
+
        test_loss_message.innerHTML = results;
        document.body.appendChild(test_loss_message);
        if (callback) {
            callback(response);
        }
-//        tf.dispose(model); // still may want to save it if it is a good one
-       tfvis.render.confusionMatrix({name: 'Confusion Matrix All',
-                                     tab: 'Charts#' + training_number},
-                                    {values: confusion_matrix,
-                                     tickLabels: class_names});
-       tfvis.render.confusionMatrix({name: 'Confusion Matrix GP or not',
-                                     tab: 'Charts#' + training_number},
-                                    {values: combine_normal_and_non_serious(confusion_matrix),
-                                     tickLabels: ['ok', 'serious']});
+       if (confusion_matrix) {
+           tfvis.render.confusionMatrix({name: 'Confusion Matrix All',
+                                         tab: 'Charts#' + training_number},
+                                        {values: confusion_matrix,
+                                         tickLabels: class_names});
+           if (tfvis_options.display_collapsed_confusion_matrix) {
+               tfvis.render.confusionMatrix({name: 'Confusion Matrix GP or not',
+                                             tab: 'Charts#' + training_number},
+                                            {values: collapse_confusion_matrix(confusion_matrix, 
+                                                                               tfvis_options.display_collapsed_confusion_matrix.indices),
+                                             tickLabels: tfvis_options.display_collapsed_confusion_matrix.labels});
+           }
+       } 
   };
   const fit_error_handler = (error) => {
       if (error.message.indexOf('No progress for ') >= 0) {
