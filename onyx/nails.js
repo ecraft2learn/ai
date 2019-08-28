@@ -479,6 +479,11 @@ const start_training = () => {
             split_data();
         }
         training_options.training_number = 1+responses.length; // for visualization tab names
+        training_options.tfvis_options =
+            {callbacks: ['onEpochEnd'],
+             yAxisDomain: [.3, .8],
+             width: 500,
+             height: 300};
         train_model(xs,
                     ys,
                     xs_validation,

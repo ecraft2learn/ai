@@ -65,7 +65,8 @@ let tfjs_vis_surface;
 
 const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array, options, callback) => {
     const {model_name, class_names, hidden_layer_sizes, batch_size, epochs, drop_out_rate, optimizer,
-           layer_initializer, training_number, regularizer, seed, stop_if_no_progress_for_n_epochs} 
+           layer_initializer, training_number, regularizer, seed, stop_if_no_progress_for_n_epochs,
+           tfvis_options} 
           = options;
     let model;
     const input_size = xs_array[0].length;
@@ -85,12 +86,9 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
     const container = {name: 'Loss and accuracy',
                        tab: 'Training#' + training_number,
                        styles: { height: '800px' }};
-    const ftfvis_options = {callbacks: ['onEpochEnd'],
-                            yAxisDomain: [.3, .8],
-                            width: 500,
-                            height: 300};
-    const tfvis_callbacks = tfvis && tfvis.show.fitCallbacks(container, metrics, ftfvis_options);
-//     const stop_early_callbacks = auto_stop && tf.callbacks.earlyStopping();
+    const tfvis_callbacks = tfvis_options && tfvis.show.fitCallbacks(container, metrics, tfvis_options);
+    // auto_stop replaced by the more controllable stop_if_no_progress_for_n_epochs
+    //  const stop_early_callbacks = auto_stop && tf.callbacks.earlyStopping();
     let data_loss;
     let validation_loss;
     let data_accuracy;
@@ -140,24 +138,8 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
                 });  
                 throw new Error("No progress for " + stop_if_no_progress_for_n_epochs + " epochs at epoch " + epoch);
             }
-//             if (stop_early_callbacks) {
-//                 const response = await stop_early_callbacks.onEpochEnd(epoch, history);
-//                 if (response) {
-//                     console.log(response);
-//                     return response;
-//                 }
-//             }
         }};
-//     if (tfvis_callbacks) {
-//         const epoch_end_callback = tfvis_callbacks.onEpochEnd;
-//         tfvis_callbacks.onEpochEnd = (epoch, history) => {
-//             if (epoch_end_callback) {
-//                 epoch_end_callback(epoch, history);
-//             }
-//             epoch_history.push(history);
-// //             stats_callback.onEpochEnd(epoch, history); // while TFJS issue 1792 is still open
-//         };      
-//     }
+
 /**
  * Sets up and trains the classifier.
  */
@@ -196,16 +178,6 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
   model.compile({optimizer: optimizer(),
                  loss: 'categoricalCrossentropy',
                  metrics: ['accuracy']});
-//   let callbacks;
-//   if (auto_stop) {
-//       // [stats_callback, stop_early_callbacks, tfvis_callbacks] causes TFJS bug - 
-//       // see https://github.com/tensorflow/tfjs/issues/1792#issuecomment-519723345
-//       callbacks = [stop_early_callbacks];
-//   } else if (tfvis_callbacks) {
-//       callbacks = [tfvis_callbacks];
-//   } else {
-//       callbacks = [stats_callback];
-//   }
   const config = {batch_size,
                   epochs: epochs,
                   validationData: [xs_validation, ys_validation],
