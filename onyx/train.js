@@ -70,7 +70,6 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
           = options;
     let model;
     const input_size = xs_array[0].length;
-    const number_of_classes = class_names.length;
     const xs = tf.tensor(xs_array);
     const ys = tf.tensor(ys_array);
     const xs_validation = tf.tensor(xs_validation_array);
@@ -170,7 +169,7 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
   });
   // last layer. The number of units of the last layer should correspond
   // to the number of classes we want to predict.
-  model.add(tf.layers.dense({units: number_of_classes,
+  model.add(tf.layers.dense({units: typeof ys_array[0] === 'number' ? 1 : ys_array[0].length,
                              kernelInitializer: layer_initializer && layer_initializer(hidden_layer_sizes.length),
                              useBias: false,
                              activation: 'softmax'
@@ -209,7 +208,7 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
        const test_loss = test_loss_tensor[0].dataSync()[0];
        const test_accuracy = test_loss_tensor[1].dataSync()[0];
        const predictions = model.predict(xs_test, ys_test);
-       const confusion_matrix = compute_confusion_matrix(predictions.dataSync(), ys_test.dataSync(), number_of_classes);
+       const confusion_matrix = compute_confusion_matrix(predictions.dataSync(), ys_test.dataSync(), class_names.length);
        predictions.dispose();
        tf.dispose(test_loss_tensor); // both of them
        xs.dispose();
