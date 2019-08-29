@@ -72,20 +72,67 @@ const collapse_confusion_matrix = (matrix, indices) => {
 let tfjs_vis_surface;
 
 const create_and_train_model = (datasets, options, callback) => {
-    const {xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array} = datasets;
-    const {model_name, class_names, hidden_layer_sizes, batch_size, epochs, drop_out_rate, optimizer,
-           layer_initializer, training_number, regularizer, seed, stop_if_no_progress_for_n_epochs,
-           tfvis_options} 
-          = options;
-    let model;
+    const model = create_model(datasets, options);
+    train_model(model, datasets, options, callback);
+};
+
+const create_model = (datasets, options) => {
+    const {xs_array, ys_array} = datasets;
+    const {model_name, class_names, hidden_layer_sizes, categorical, drop_out_rate, optimizer, layer_initializer, regularizer, seed} = options;
     const input_size = xs_array[0].length;
+    // Creates a fully connected model. By creating a separate model,
+    // rather than adding layers to the mobilenet model, we "freeze" the weights
+    // of the mobilenet model, and only train weights from the new model.
+    const model = tf.sequential({name: model_name}); 
+    hidden_layer_sizes.forEach((size, index) => {
+         const kernelRegularizer = regularizer && regularizer(index); // can be undefined
+         const kernelInitializer = layer_initializer && layer_initializer(index);
+         model.add(tf.layers.dense({inputShape: index === 0 ? input_size : undefined,
+                                    units: size,
+                                    activation: 'relu',
+                                    kernelInitializer,
+                                    kernelRegularizer,
+                                    useBias: true,
+                                   }));
+         if (drop_out_rate > 0) {
+             // Error: Non-default seed is not implemented in Dropout layer yet: 1
+             model.add(tf.layers.dropout({rate: drop_out_rate,
+                                          seed: SEED}));
+         }
+    });
+    if (categorical) {
+        // last layer. The number of units of the last layer should correspond
+        // to the number of classes we want to predict.
+        model.add(tf.layers.dense({units: typeof ys_array[0] === 'number' ? 1 : ys_array[0].length,
+                                   kernelInitializer: layer_initializer && layer_initializer(hidden_layer_sizes.length),
+                                   useBias: false,
+                                   activation: 'softmax'
+                                  }));
+        // We use categoricalCrossentropy which is the loss function we use for
+        // categorical classification which measures the error between our predicted
+        // probability distribution over classes (probability that an input is of each
+        // class), versus the label (100% probability in the true class)
+        model.compile({optimizer: optimizer(),
+                       loss: 'categoricalCrossentropy',
+                       metrics: ['accuracy']});
+    } else {
+// to do
+    }
+    return model;
+};
+
+const train_model = (model, datasets, options, callback) => {
+   const {xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array} = datasets;
+   const {model_name, class_names, hidden_layer_sizes, batch_size, epochs, drop_out_rate, optimizer,
+          layer_initializer, training_number, regularizer, seed, stop_if_no_progress_for_n_epochs,
+          tfvis_options} 
+         = options;
     const xs = tf.tensor(xs_array);
     const ys = tf.tensor(ys_array);
     const xs_validation = tf.tensor(xs_validation_array);
     const ys_validation = tf.tensor(ys_validation_array);
     const xs_test = tf.tensor(xs_test_array);
     const ys_test = tf.tensor(ys_test_array);
-
     const surface = tfjs_vis_surface || (tfvis && tfvis.visor().surface({name: model_name, tab: 'Training#' + training_number}));
     tfjs_vis_surface = surface; // re-use same one accross multiple calls
     // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
@@ -151,45 +198,6 @@ const create_and_train_model = (datasets, options, callback) => {
                 throw new Error("No progress for " + stop_if_no_progress_for_n_epochs + " epochs at epoch " + epoch);
             }
         }};
-
-/**
- * Sets up and trains the classifier.
- */
-  // Creates a fully connected model. By creating a separate model,
-  // rather than adding layers to the mobilenet model, we "freeze" the weights
-  // of the mobilenet model, and only train weights from the new model.
-  model = tf.sequential({name: model_name});
-  
-  hidden_layer_sizes.forEach((size, index) => {
-       const kernelRegularizer = regularizer && regularizer(index); // can be undefined
-       const kernelInitializer = layer_initializer && layer_initializer(index);
-       model.add(tf.layers.dense({inputShape: index === 0 ? input_size : undefined,
-                                  units: size,
-                                  activation: 'relu',
-                                  kernelInitializer,
-                                  kernelRegularizer,
-                                  useBias: true,
-                                 }));
-       if (drop_out_rate > 0) {
-           // Error: Non-default seed is not implemented in Dropout layer yet: 1
-           model.add(tf.layers.dropout({rate: drop_out_rate,
-                                        seed: SEED}));
-       }
-  });
-  // last layer. The number of units of the last layer should correspond
-  // to the number of classes we want to predict.
-  model.add(tf.layers.dense({units: typeof ys_array[0] === 'number' ? 1 : ys_array[0].length,
-                             kernelInitializer: layer_initializer && layer_initializer(hidden_layer_sizes.length),
-                             useBias: false,
-                             activation: 'softmax'
-                            }));
-  // We use categoricalCrossentropy which is the loss function we use for
-  // categorical classification which measures the error between our predicted
-  // probability distribution over classes (probability that an input is of each
-  // class), versus the label (100% probability in the true class)
-  model.compile({optimizer: optimizer(),
-                 loss: 'categoricalCrossentropy',
-                 metrics: ['accuracy']});
   const config = {batch_size,
                   epochs: epochs,
                   validationData: [xs_validation, ys_validation],

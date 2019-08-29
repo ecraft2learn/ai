@@ -399,9 +399,9 @@ const get_url_from_image_or_canvas = (image_or_canvas) => {
 // };
 
 const start_training = () => {
-    training_options.class_names = class_names.map(better_name); // for displaying confusion matrix
-    training_options.model_name = model_name;
-    training_options.seed = SEED;
+    model_options.class_names = class_names.map(better_name); // for displaying confusion matrix
+    model_options.model_name = model_name;
+    model_options.seed = SEED;
     const splitting_data = xs_validation.length === 0 &&
                            typeof validation_fraction === 'number' && 
                            typeof testing_fraction === 'number';
@@ -473,7 +473,7 @@ const start_training = () => {
         const csv = "<br>Number of training repeats, Stop if no progress, " + 
                     Object.keys(responses_total) + "<br>" +
                     number_of_training_repeats + ", " +
-                    training_options.stop_if_no_progress_for_n_epochs + ", " +
+                    model_options.stop_if_no_progress_for_n_epochs + ", " +
                     Object.values(responses_total).map(value => (value/number_of_training_repeats).toFixed(3)) + "<br>";
         const averages = document.createElement('p');
         averages.innerHTML = csv;
@@ -483,8 +483,9 @@ const start_training = () => {
         if (splitting_data) {
             split_data();
         }
-        training_options.training_number = 1+responses.length; // for visualization tab names
-        training_options.tfvis_options =
+        model_options.training_number = 1+responses.length; // for visualization tab names
+        model_options.categorical = true;
+        model_options.tfvis_options =
             {callbacks: ['onEpochEnd'],
              yAxisDomain: [.3, .8],
              width: 500,
@@ -500,7 +501,7 @@ const start_training = () => {
                                 ys_validation_array :ys_validation,
                                 xs_test_array: xs_test,
                                 ys_test_array: ys_test},
-                               training_options,
+                               model_options,
                                model_callback);
     }
     const test_loss_message = document.createElement('p');
@@ -514,7 +515,7 @@ const start_training = () => {
         test_loss_message.innerHTML += response.csv_values + "<br>";
         responses.push(response);
         const button = document.createElement('button');
-        button.innerHTML = "Save model #" + training_options.training_number;
+        button.innerHTML = "Save model #" + model_options.training_number;
         button.className = "save-training-button";
         const model = response.model;
         const save_model = async () => {
