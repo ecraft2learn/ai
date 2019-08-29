@@ -494,14 +494,14 @@ const start_training = () => {
 //              display_collapsed_confusion_matrix: {indices: [[0, 1], [2]],
 //                                                   labels: ['OK', "Serious"]},
              display_layers: true};
-        train_model(xs,
-                    ys,
-                    xs_validation,
-                    ys_validation,
-                    xs_test,
-                    ys_test,
-                    training_options,
-                    model_callback);
+        create_and_train_model({xs_array: xs,
+                                ys_array: ys,
+                                xs_validation_array: xs_validation,
+                                ys_validation_array :ys_validation,
+                                xs_test_array: xs_test,
+                                ys_test_array: ys_test},
+                               training_options,
+                               model_callback);
     }
     const test_loss_message = document.createElement('p');
     let first_time = true;

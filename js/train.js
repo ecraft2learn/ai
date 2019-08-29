@@ -71,7 +71,8 @@ const collapse_confusion_matrix = (matrix, indices) => {
 
 let tfjs_vis_surface;
 
-const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array, options, callback) => {
+const create_and_train_model = (datasets, options, callback) => {
+    const {xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array} = datasets;
     const {model_name, class_names, hidden_layer_sizes, batch_size, epochs, drop_out_rate, optimizer,
            layer_initializer, training_number, regularizer, seed, stop_if_no_progress_for_n_epochs,
            tfvis_options} 
