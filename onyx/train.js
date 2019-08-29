@@ -43,9 +43,9 @@ const compute_confusion_matrix = (predictions, truth, n) => {
     for (let i = 0; i < n; i++) {
         matrix.push(row());
     }
-    for (let i = 0; i < predictions.length; i += 3) {
-        const prediction_value = index_of_max(predictions.slice(i,i+3));
-        const truth_value = index_of_max(truth.slice(i,i+3));
+    for (let i = 0; i < predictions.length; i += n) {
+        const prediction_value = index_of_max(predictions.slice(i,i+n));
+        const truth_value = index_of_max(truth.slice(i,i+n));
         matrix[truth_value][prediction_value]++;
     }
     return matrix;
@@ -210,8 +210,9 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
        const test_loss = test_loss_tensor[0].dataSync()[0];
        const test_accuracy = test_loss_tensor[1].dataSync()[0];
        const predictions = model.predict(xs_test, ys_test);
+       const number_of_classes = class_names.length;
        const confusion_matrix = tfvis_options.display_confusion_matrix &&
-                                compute_confusion_matrix(predictions.dataSync(), ys_test.dataSync(), class_names.length);
+                                compute_confusion_matrix(predictions.dataSync(), ys_test.dataSync(), number_of_classes);
        predictions.dispose();
        tf.dispose(test_loss_tensor); // both of them
        xs.dispose();
@@ -232,25 +233,23 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
             "Highest accuracy": highest_accuracy,
             "Highest accuracy epoch": highest_accuracy_epoch,
             "Last epoch": last_epoch,
-           };
-       if (confusion_matrix) {
-           ["Normal correct","Abnormal but is Normal", "Serious but is Normal",
-            "Normal but is Abnormal", "Abnormal correct", "Serious but is Abnormal",
-            "Normal but is Serious", "Abnormal but is Serious", "Serious correct"].map((label, index) => {
-                response[label] = percentage_of_tests(confusion_matrix[index%3] [Math.floor(index/3)]);
-            });         
-       }     
+           };     
        let csv_labels = // CSV for pasting into a spreadsheet
            "<br>Name, Layer1,Layer2,Layer3,layer4,layer5, Batch size, Dropout rate, Epochs, Optimizer, Initializer, Regularizer," +
            "Testing fraction, Validation fraction, Fraction kept, " +
            "Data loss, Validation loss, Test loss, Data accuracy, Validation accuracy, Test accuracy, Image count, " +
            "Lowest validation loss, Lowest validation loss epoch, Highest accuracy, Highest accuracy epoch, ";
        if (confusion_matrix) {
+           let confusion_labels = [];
            confusion_matrix.forEach((row, i) => {
                row.forEach((item, j) => {
-                   csv_labels += class_names[i] + "-" + class_names[j] + ",";
+                   confusion_labels.push(class_names[i] + "-" + class_names[j]);
                });
-           });   
+           });
+           csv_labels += confusion_labels;
+           confusion_labels.map((label, index) => {
+                response[label] = percentage_of_tests(confusion_matrix[index%number_of_classes] [Math.floor(index/number_of_classes)]);
+            });  
        }
        let csv_values =  model_name + ", ";
        for (let i = 0; i < 5; i++) {

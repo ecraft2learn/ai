@@ -399,7 +399,7 @@ const get_url_from_image_or_canvas = (image_or_canvas) => {
 // };
 
 const start_training = () => {
-    training_options.class_names = class_names; // for displaying confusion matrix
+    training_options.class_names = class_names.map(better_name); // for displaying confusion matrix
     training_options.model_name = model_name;
     training_options.seed = SEED;
     const splitting_data = xs_validation.length === 0 &&
@@ -457,11 +457,17 @@ const start_training = () => {
     };
     let responses = [];
     const resport_averages = () => {
-        const responses_total = responses[0];
-        for (let i = 1; i < number_of_training_repeats; i++) {
+        const responses_total = {};
+        for (let i = 0; i < number_of_training_repeats; i++) {
             const entries = Object.entries(responses[i]);
             entries.forEach((entry) => {
-                responses_total[entry[0]] += entry[1];
+                if (typeof entry[1] === 'number') {
+                    if (typeof responses_total[entry[0]] === 'number') {
+                       responses_total[entry[0]] += entry[1];
+                    } else {
+                        responses_total[entry[0]] = entry[1];
+                    }
+                }
             });
         };
         const csv = "<br>Number of training repeats, Stop if no progress, " + 
@@ -510,8 +516,9 @@ const start_training = () => {
         const button = document.createElement('button');
         button.innerHTML = "Save model #" + training_options.training_number;
         button.className = "save-training-button";
+        const model = response.model;
         const save_model = async () => {
-            return await response.model.save('downloads://' + model_name);
+            return await model.save('downloads://' + model_name);
         };
         button.addEventListener('click', save_model);
         document.body.appendChild(button);
