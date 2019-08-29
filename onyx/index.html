@@ -51,7 +51,7 @@
             const testing_fraction = 0;
             const validation_fraction = .15;
             const fraction_kept = 1; // 1 to keep all data
-            const number_of_training_repeats = 1;
+            const number_of_training_repeats = 2;
             const SEED = undefined;
 
             const projector_data = false;
@@ -62,7 +62,7 @@
                 hidden_layer_sizes: [100, 10],
                 batch_size: 256,
                 drop_out_rate: .5,
-                epochs: 50,
+                epochs: 2,
                 optimizer: (i) =>  tf.train.rmsprop(1e-5), // tf.train.adamax(1e-5), tf.train.adadelta(),
                 regularizer: (i) => tf.regularizers.l2(1e-3),
                 layer_initializer: (index) => tf.initializers.varianceScaling({seed: SEED}),

@@ -485,8 +485,8 @@ const start_training = () => {
              height: 300,
              measure_accuracy: true,
              display_confusion_matrix: true,
-             display_collapsed_confusion_matrix: {indices: [[0, 1], [2]],
-                                                  labels: ['OK', "Serious"]},
+//              display_collapsed_confusion_matrix: {indices: [[0, 1], [2]],
+//                                                   labels: ['OK', "Serious"]},
              display_layers: true};
         train_model(xs,
                     ys,
@@ -495,10 +495,26 @@ const start_training = () => {
                     xs_test,
                     ys_test,
                     training_options,
-                    model_callback);        
+                    model_callback);
     }
+    const test_loss_message = document.createElement('p');
+    let first_time = true;
+    document.body.appendChild(test_loss_message);
     const model_callback = (response) => {
+        if (first_time) {
+            test_loss_message.innerHTML = response.csv_labels + "<br>";
+            first_time = false;
+        }
+        test_loss_message.innerHTML += response.csv_values + "<br>";
         responses.push(response);
+        const button = document.createElement('button');
+        button.innerHTML = "Save model #" + training_options.training_number;
+        button.className = "save-training-button";
+        const save_model = async () => {
+            return await response.model.save('downloads://' + model_name);
+        };
+        button.addEventListener('click', save_model);
+        document.body.appendChild(button);
         if (responses.length === number_of_training_repeats) {
             resport_averages();
         } else {

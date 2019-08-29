@@ -195,9 +195,6 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
                   shuffle: true,
                   callbacks: stats_callback};
   const after_fit_callback = () => { 
-       const save_model = async () => {
-          return await model.save('downloads://' + model_name);
-       };
        const percentage_of_tests = (x) => +(100*x/xs_test_array.length).toFixed(2);
        const show_layers = () => {
            const surface = {name: 'Layers', tab: 'Model inspection#' + training_number};
@@ -209,11 +206,6 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
        if (tfvis_options.display_layers) {
            show_layers();
        }
-       const button = document.createElement('button');
-       button.innerHTML = "Save model";
-       button.className = "save-training-button";
-       button.addEventListener('click', save_model);
-       document.body.appendChild(button);
        const test_loss_tensor = model.evaluate(xs_test, ys_test);
        const test_loss = test_loss_tensor[0].dataSync()[0];
        const test_accuracy = test_loss_tensor[1].dataSync()[0];
@@ -247,58 +239,60 @@ const train_model = (xs_array, ys_array, xs_validation_array, ys_validation_arra
             "Normal but is Serious", "Abnormal but is Serious", "Serious correct"].map((label, index) => {
                 response[label] = percentage_of_tests(confusion_matrix[index%3] [Math.floor(index/3)]);
             });         
-       }
-       const test_loss_message = document.createElement('p');      
-       let results = // CSV for pasting into a spreadsheet
+       }     
+       let csv_labels = // CSV for pasting into a spreadsheet
            "<br>Name, Layer1,Layer2,Layer3,layer4,layer5, Batch size, Dropout rate, Epochs, Optimizer, Initializer, Regularizer," +
            "Testing fraction, Validation fraction, Fraction kept, " +
            "Data loss, Validation loss, Test loss, Data accuracy, Validation accuracy, Test accuracy, Image count, " +
-           "Lowest validation loss, Lowest validation loss epoch, Highest accuracy, Highest accuracy epoch, " +
-           "Normal correct, Abnormal but is Normal, Serious but is Normal, " +
-           "Normal but is Abnormal, Abnormal correct, Serious but is Abnormal, " +
-           "Normal but is Serious, Abnormal but is Serious, Serious correct";
-       results += "<br>";
-       results +=  model_name + ", ";
+           "Lowest validation loss, Lowest validation loss epoch, Highest accuracy, Highest accuracy epoch, ";
+       if (confusion_matrix) {
+           confusion_matrix.forEach((row, i) => {
+               row.forEach((item, j) => {
+                   csv_labels += class_names[i] + "-" + class_names[j] + ",";
+               });
+           });   
+       }
+       let csv_values =  model_name + ", ";
        for (let i = 0; i < 5; i++) {
            if (i < hidden_layer_sizes.length) {
-               results += hidden_layer_sizes[i];
+               csv_values += hidden_layer_sizes[i];
            } else {
-               results += 0;
+               csv_values += 0;
            }
-           results += ", ";
+           csv_values += ", ";
        }
-       results += batch_size + ", ";
-       results += drop_out_rate + ", ";
-       results += epochs + ", ";
-       results += options.optimizer_name + ", ";
-       results += options.layer_initializer_name + ", ";
-       results += options.regularizer_name + ", ";
-       results += testing_fraction + ", ";
-       results += validation_fraction + ", ";
-       results += fraction_kept + ", ";
-       results += data_loss + ", ";
-       results += validation_loss + ", ";
-       results += test_loss.toFixed(4) + ", ";
-       results += (data_accuracy && data_accuracy.toFixed(4)) + ", ";
-       results += (validation_accuracy && validation_accuracy.toFixed(4)) + ", ";
-       results += test_accuracy.toFixed(4) + ", ";
+       csv_values += batch_size + ", ";
+       csv_values += drop_out_rate + ", ";
+       csv_values += epochs + ", ";
+       csv_values += options.optimizer_name + ", ";
+       csv_values += options.layer_initializer_name + ", ";
+       csv_values += options.regularizer_name + ", ";
+       csv_values += testing_fraction + ", ";
+       csv_values += validation_fraction + ", ";
+       csv_values += fraction_kept + ", ";
+       csv_values += data_loss + ", ";
+       csv_values += validation_loss + ", ";
+       csv_values += test_loss.toFixed(4) + ", ";
+       csv_values += (data_accuracy && data_accuracy.toFixed(4)) + ", ";
+       csv_values += (validation_accuracy && validation_accuracy.toFixed(4)) + ", ";
+       csv_values += test_accuracy.toFixed(4) + ", ";
        if (xs_validation_array === xs_test_array) {
-           results += xs_array.length + xs_validation_array.length + ", ";
+           csv_values += xs_array.length + xs_validation_array.length + ", ";
        } else {
-           results += xs_array.length + xs_validation_array.length + xs_test_array.length + ", ";
+           csv_values += xs_array.length + xs_validation_array.length + xs_test_array.length + ", ";
        }
-       results += (lowest_validation_loss && lowest_validation_loss.toFixed(4)) + ", ";
-       results += (lowest_validation_loss_epoch && lowest_validation_loss_epoch) + ", ";
-       results += (highest_accuracy && highest_accuracy.toFixed(4)) + ", ";
-       results += (highest_accuracy_epoch && highest_accuracy_epoch) + ", ";
+       csv_values += (lowest_validation_loss && lowest_validation_loss.toFixed(4)) + ", ";
+       csv_values += (lowest_validation_loss_epoch && lowest_validation_loss_epoch) + ", ";
+       csv_values += (highest_accuracy && highest_accuracy.toFixed(4)) + ", ";
+       csv_values += (highest_accuracy_epoch && highest_accuracy_epoch) + ", ";
        if (confusion_matrix) {
-           results += confusion_matrix[0].map(percentage_of_tests) + ', ' + 
-                      confusion_matrix[1].map(percentage_of_tests) + ', ' + 
-                      confusion_matrix[2].map(percentage_of_tests);        
+           confusion_matrix.forEach(row => {
+               csv_values += row.map(percentage_of_tests) + ', '; 
+           });      
        }
-
-       test_loss_message.innerHTML = results;
-       document.body.appendChild(test_loss_message);
+       response.csv_labels = csv_labels;
+       response.csv_values = csv_values;
+       response.model = model;
        if (callback) {
            callback(response);
        }
