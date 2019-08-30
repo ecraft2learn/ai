@@ -80,7 +80,7 @@ const create_and_train_model = (datasets, options, success_callback, failure_cal
 const create_model = (options, failure_callback) => {
     try {
         const {model_name, class_names, hidden_layer_sizes, drop_out_rate, optimizer, layer_initializer, regularizer, 
-               activation, last_activation, seed, datasets} = options;
+               loss_function, activation, last_activation, seed, datasets} = options;
         let {input_shape, output_size} = options;
         if (!input_shape) {
             if (datasets) {
@@ -135,13 +135,13 @@ const create_model = (options, failure_callback) => {
                                    useBias: false,
                                    activation: last_activation || (class_names && 'softmax')
                                   }));
-            // We use categoricalCrossentropy which is the loss function we use for
-            // categorical classification which measures the error between our predicted
-            // probability distribution over classes (probability that an input is of each
-            // class), versus the label (100% probability in the true class)
-            model.compile({optimizer: optimizer(),
-                           loss: 'categoricalCrossentropy',
-                           metrics: ['accuracy']});
+        // We use categoricalCrossentropy which is the loss function we use for
+        // categorical classification which measures the error between our predicted
+        // probability distribution over classes (probability that an input is of each
+        // class), versus the label (100% probability in the true class)
+        model.compile({optimizer: typeof optimizer === 'string' ? optimizer : optimizer(),
+                       loss: loss_function || (class_names ? 'categoricalCrossentropy' : 'meanSquaredError'),
+                       metrics: class_names && ['accuracy']});
         return model;
   } catch (error) {
       if (failure_callback) {
