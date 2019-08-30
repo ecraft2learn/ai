@@ -72,25 +72,52 @@ const collapse_confusion_matrix = (matrix, indices) => {
 let tfjs_vis_surface;
 
 const create_and_train_model = (datasets, options, success_callback, failure_callback) => {
-    const model = create_model(datasets, options, failure_callback);
+    options.datasets = datasets; // in case needed to compute input_shape
+    const model = create_model(options, failure_callback);
     train_model(model, datasets, options, success_callback, failure_callback);
 };
 
-const create_model = (datasets, options, failure_callback) => {
+const create_model = (options, failure_callback) => {
     try {
-        const {xs_array, ys_array} = datasets;
-        const {model_name, class_names, hidden_layer_sizes, categorical, drop_out_rate, optimizer, layer_initializer, regularizer, seed} = options;
-        const input_size = xs_array[0].length;
+        const {model_name, class_names, hidden_layer_sizes, drop_out_rate, optimizer, layer_initializer, regularizer, 
+               activation, last_activation, seed, datasets} = options;
+        let {input_shape, output_size} = options;
+        if (!input_shape) {
+            if (datasets) {
+                input_shape = shape_of_data(datasets.xs_array[0]);
+            }
+        }
+        if (!input_shape) {
+            throw new Error("Unable to create a model without knowing the shape of the input. Shape not provided and input data not known.");
+        }
+        if (!output_size) {
+            if (datasets) {
+                output_size = typeof datasets.ys_array[0] === 'number' ? 1 : datasets.ys_array[0].length;
+            }
+        }
+        if (!output_size) {
+            throw new Error("Unable to create a model without knowing the size of each output. Size not provided and output data not known.");
+        }
         // Creates a fully connected model. By creating a separate model,
         // rather than adding layers to the mobilenet model, we "freeze" the weights
         // of the mobilenet model, and only train weights from the new model.
-        const model = tf.sequential({name: model_name}); 
+        const model = tf.sequential({name: model_name});
+        const tfjs_function = (fun, function_table, layer_index) => {
+            if (!fun) {
+                return;
+            }
+            if (typeof fun === 'string') {
+                return function_table[fun]();
+            }
+            return fun(layer_index);
+        };
         hidden_layer_sizes.forEach((size, index) => {
-             const kernelRegularizer = regularizer && regularizer(index); // can be undefined
-             const kernelInitializer = layer_initializer && layer_initializer(index);
-             model.add(tf.layers.dense({inputShape: index === 0 ? input_size : undefined,
+             const kernelRegularizer = tfjs_function(regularizer, tf.regularizers, index);
+             const kernelInitializer = tfjs_function(layer_initializer, tf.initializers, index);
+             const activation_function = tfjs_function(activation, tf, index) || 'relu';
+             model.add(tf.layers.dense({inputShape: index === 0 ? input_shape : undefined,
                                         units: size,
-                                        activation: 'relu',
+                                        activation_function,
                                         kernelInitializer,
                                         kernelRegularizer,
                                         useBias: true,
@@ -101,14 +128,13 @@ const create_model = (datasets, options, failure_callback) => {
                                               seed: SEED}));
              }
         });
-        if (categorical) {
-            // last layer. The number of units of the last layer should correspond
-            // to the number of classes we want to predict.
-            model.add(tf.layers.dense({units: typeof ys_array[0] === 'number' ? 1 : ys_array[0].length,
-                                       kernelInitializer: layer_initializer && layer_initializer(hidden_layer_sizes.length),
-                                       useBias: false,
-                                       activation: 'softmax'
-                                      }));
+        // last layer. The number of units of the last layer should correspond
+        // to the output size (number of classes if categorical)
+        model.add(tf.layers.dense({units: output_size,
+                                   kernelInitializer: tfjs_function(layer_initializer, tf.initializers, hidden_layer_sizes.length),
+                                   useBias: false,
+                                   activation: last_activation || (class_names && 'softmax')
+                                  }));
             // We use categoricalCrossentropy which is the loss function we use for
             // categorical classification which measures the error between our predicted
             // probability distribution over classes (probability that an input is of each
@@ -116,9 +142,6 @@ const create_model = (datasets, options, failure_callback) => {
             model.compile({optimizer: optimizer(),
                            loss: 'categoricalCrossentropy',
                            metrics: ['accuracy']});
-        } else {
-    // to do
-        }
         return model;
   } catch (error) {
       if (failure_callback) {
@@ -228,8 +251,8 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
            const test_loss = test_loss_tensor[0].dataSync()[0];
            const test_accuracy = test_loss_tensor[1].dataSync()[0];
            const predictions = model.predict(xs_test, ys_test);
-           const number_of_classes = class_names.length;
-           const confusion_matrix = tfvis_options.display_confusion_matrix &&
+           const number_of_classes = class_names && class_names.length;
+           const confusion_matrix = class_names && tfvis_options.display_confusion_matrix &&
                                     compute_confusion_matrix(predictions.dataSync(), ys_test.dataSync(), number_of_classes);
            predictions.dispose();
            tf.dispose(test_loss_tensor); // both of them
@@ -343,6 +366,16 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
             throw error;
         }
     }
+};
+
+const shape_of_data = (data) => {
+   if (typeof data === 'number') {
+       return [1];
+   } else if (typeof data[0] === "number") {
+      return [data.length];
+   } else {
+      return [data.length].concat(shape_of_data(data[0]));
+   }
 };
 
 
