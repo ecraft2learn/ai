@@ -1071,29 +1071,29 @@ window.ecraft2learn =
         send_request_when_support_window_is(window_ready_state, support_window_type, send_request);
     };
     // following functions use the layers level of tensorflow.js to create models, train, and predict
-    const create_tensorflow_model = function(name, layers, optimizer, loss_function, input_size, success_callback, error_callback,
-                                             activation_function_name) { // nothing uses this just yet defaults to 'relu'
-        if (typeof input_size === 'string' && +input_size !== NaN) {
-            input_size = +input_size; // convert string to number
+    const create_tensorflow_model = function(name, layers, optimizer, loss_function, input_shape, success_callback, error_callback,
+                                             activation_function_name) { 
+        if (typeof input_shape === 'string' && !isNaN(+input_shape)) {
+            input_shape = +input_shape; // convert string to number
         }
         record_callbacks(success_callback, error_callback);
         const time_stamp = Date.now();
         request_of_support_window('tensorflow.js',
                                   'Loaded',
                                   () => {
-                                      let configuration = {name: name,
-                                                           layers: snap_to_javascript(layers),
+                                      let configuration = {model_name: name,
+                                                           hidden_layer_sizes: snap_to_javascript(layers),
                                                            optimizer: optimizer,
-                                                           options: {loss_function: loss_function,
-                                                                     activation: activation_function_name},
+                                                           activation: activation_function_name,
+                                                           loss_function: loss_function,
                                                            time_stamp: time_stamp};
                                       // if no size is provided then it will be computed from the training data
-                                      if (typeof input_size === 'number') {
-                                          configuration.input_size = [input_size];
-                                      } else if (input_size instanceof List) {
-                                          configuration.input_size = snap_to_javascript(input_size, true); 
-                                      } else if (input_size instanceof Array) {
-                                          configuration.input_size = input_size; 
+                                      if (typeof input_shape === 'number') {
+                                          configuration.input_shape = [input_shape];
+                                      } else if (input_shape instanceof List) {
+                                          configuration.input_shape = snap_to_javascript(input_shape, true); 
+                                      } else if (input_shape instanceof Array) {
+                                          configuration.input_shape = input_shape; 
                                       }
                                       return {create_model: configuration};
                                   },

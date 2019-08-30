@@ -95,9 +95,6 @@ const create_model = (options, failure_callback) => {
                 output_size = typeof datasets.ys_array[0] === 'number' ? 1 : datasets.ys_array[0].length;
             }
         }
-        if (!output_size) {
-            throw new Error("Unable to create a model without knowing the size of each output. Size not provided and output data not known.");
-        }
         // Creates a fully connected model. By creating a separate model,
         // rather than adding layers to the mobilenet model, we "freeze" the weights
         // of the mobilenet model, and only train weights from the new model.
@@ -111,12 +108,16 @@ const create_model = (options, failure_callback) => {
             }
             return fun(layer_index);
         };
+        // if output_size isn't provided then assume user specified it as the last hidden_layer_sizes
+        if (!output_size) {
+            output_size = hidden_layer_sizes.splice(-1)[0]; // remove last item and use it as the output_size
+        }
         hidden_layer_sizes.forEach((size, index) => {
              const kernelRegularizer = tfjs_function(regularizer, tf.regularizers, index);
              const kernelInitializer = tfjs_function(layer_initializer, tf.initializers, index);
              const activation_function = tfjs_function(activation, tf, index) || 'relu';
              model.add(tf.layers.dense({inputShape: index === 0 ? input_shape : undefined,
-                                        units: size,
+                                        units: +size,
                                         activation_function,
                                         kernelInitializer,
                                         kernelRegularizer,
@@ -130,7 +131,7 @@ const create_model = (options, failure_callback) => {
         });
         // last layer. The number of units of the last layer should correspond
         // to the output size (number of classes if categorical)
-        model.add(tf.layers.dense({units: output_size,
+        model.add(tf.layers.dense({units: +output_size,
                                    kernelInitializer: tfjs_function(layer_initializer, tf.initializers, hidden_layer_sizes.length),
                                    useBias: false,
                                    activation: last_activation || (class_names && 'softmax')
@@ -155,7 +156,7 @@ const create_model = (options, failure_callback) => {
 const train_model = (model, datasets, options, success_callback, failure_callback) => {
     try {
        const {xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array} = datasets;
-       const {model_name, class_names, hidden_layer_sizes, batch_size, epochs, drop_out_rate, optimizer,
+       const {model_name, class_names, hidden_layer_sizes, batch_size, epochs, learning_rate, drop_out_rate, optimizer,
               layer_initializer, training_number, regularizer, seed, stop_if_no_progress_for_n_epochs,
               tfvis_options} 
              = options;
@@ -174,6 +175,9 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
             metrics.push('acc');
             metrics.push('val_acc');
         };
+        if (learning_rate) {
+            model.optimizer.learningRate = learning_rate;
+        }
         const container = {name: tfvis_options.measure_accuracy ? 'Loss and accuracy' : 'Loss',
                            tab: 'Training#' + training_number,
                            styles: { height: '800px' }};
