@@ -1153,10 +1153,10 @@ window.ecraft2learn =
                                   'Loaded',
                                   () => {
                                       return {train: {model_name: model_name,
-                                                      options: {epochs: epochs,
-                                                                learning_rate: learning_rate,
-                                                                shuffle: shuffle,
-                                                                validation_split: validation_split},
+                                                      epochs: epochs,
+                                                      learning_rate: learning_rate,
+                                                      shuffle: shuffle,
+                                                      validation_split: validation_split,
                                                       time_stamp: time_stamp}};
                                   },
                                   (message) => {

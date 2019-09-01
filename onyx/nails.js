@@ -376,27 +376,27 @@ const get_url_from_image_or_canvas = (image_or_canvas) => {
     }
 };
 
-// const shuffle = (a) => {
-// /**
-//  * From https://stackoverflow.com/questions/6274339/how-can-i-shuffle-an-array
-//  * Shuffles array in place. ES6 version
-//  * @param {Array} a items An array containing the items.
-//  */
-//     let seed = SEED;
-//     const seedable_random = 
-//         seed ? 
-//         () => { // not so good but good enough
-//             const x = Math.sin(seed++) * 10000;
-//             return x - Math.floor(x);
-//         }
-//         :
-//         Math.random;
-//     for (let i = a.length - 1; i > 0; i--) {
-//         const j = Math.floor(seedable_random() * (i + 1));
-//         [a[i], a[j]] = [a[j], a[i]];
-//     }
-//     return a;    
-// };
+const shuffle = (a) => {
+/**
+ * From https://stackoverflow.com/questions/6274339/how-can-i-shuffle-an-array
+ * Shuffles array in place. ES6 version
+ * @param {Array} a items An array containing the items.
+ */
+    let seed = SEED;
+    const seedable_random = 
+        seed ? 
+        () => { // not so good but good enough
+            const x = Math.sin(seed++) * 10000;
+            return x - Math.floor(x);
+        }
+        :
+        Math.random;
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(seedable_random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;    
+};
 
 const start_training = () => {
     model_options.class_names = class_names.map(better_name); // for displaying confusion matrix
@@ -410,7 +410,8 @@ const start_training = () => {
     const split_data = () => {
         // if I want reproducability I should use tf.randomUniform with a seed
         let xs_ys = original_xs.map((x, index) => [x, original_ys[index]]);
-        tf.util.shuffle(xs_ys);
+        tf.util.shuffle(xs_ys); // a better shuffle but unlike the following has no random seed for reproducability
+//         shuffle(xs_ys);
         if (fraction_kept < 1) {
             xs_ys.splice(Math.round((1-fraction_kept)*xs_ys.length));
         }
@@ -509,9 +510,14 @@ const start_training = () => {
     document.body.appendChild(test_loss_message);
     const model_callback = (response) => {
         if (first_time) {
+            // need to insert testing_fraction, validation_fraction, fraction_kept
             test_loss_message.innerHTML = response.csv_labels + "<br>";
             first_time = false;
         }
+             // insert 
+//            csv_values += testing_fraction + ", ";
+//            csv_values += validation_fraction + ", ";
+//            csv_values += fraction_kept + ", ";       
         test_loss_message.innerHTML += response.csv_values + "<br>";
         responses.push(response);
         const button = document.createElement('button');
