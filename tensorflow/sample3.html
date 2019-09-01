@@ -1,0 +1,41 @@
+<html>
+  <head>
+    <!-- Load TensorFlow.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"> </script>
+
+    <!-- Place your code in the script tag below. You can also use an external .js file -->
+    <script>
+    const test = repeat => {
+      const model = tf.sequential();
+      model.add(tf.layers.dense({units: 10, 
+                                 inputShape: [1],
+                                 kernelInitializer: tf.initializers.varianceScaling({seed: 1}),
+                                 useBias: true,
+//                                  biasInitializer: tf.initializers.varianceScaling({seed: 1})
+                                 }));
+      model.add(tf.layers.dense({units: 1, 
+                                 kernelInitializer: tf.initializers.varianceScaling({seed: 1}),
+                                 useBias: true,
+//                                  biasInitializer: tf.initializers.varianceScaling({seed: 1})
+                                 }));
+      model.compile({loss: 'meanSquaredError', optimizer: 'sgd'});
+      const xs = tf.tensor2d([1, 2, 3, 4], [4, 1]);
+      const ys = tf.tensor2d([1, 3, 5, 7], [4, 1]);
+      model.fit(xs, ys, {epochs: 2,
+                         shuffle: true,
+                         }).then((history) => {
+                                   console.log(history.history.loss);
+                                   if (repeat) {
+                                       test(false);
+                                   }
+                         })
+       };
+     test(true);
+       
+    </script>
+  </head>
+
+  <body>
+  Results in the browser's console.
+  </body>
+</html>
