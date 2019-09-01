@@ -84,8 +84,9 @@ const optimization_methods =
      "Root Mean Squared Prop": "rmsprop"};
 
 const optimizer_named = (name, learning_rate) => {
+    name = name.trim();
     if (name === 'Momentum' || name === 'momentum') {
-        return  tf.train.momentum((learning_rate || .001), .9);
+        return tf.train.momentum((learning_rate || .001), .9);
     }
     return optimization_methods[name] || name;
 };
@@ -100,12 +101,14 @@ const non_categorical_loss_functions =
      "Mean Squared Error": "meanSquaredError"};
 
 const categorical_loss_functions =
-    {//"Sigmoid Cross Entropy": "sigmoidCrossEntropy", - requires more arguments
+    {//"Sigmoid Cross Entropy": "sigmoidCrossEntropy", - requires more arguments - could supply them
+    // and what about tf.metrics.binaryCrossentropy
      "Softmax Cross Entropy": "softmaxCrossEntropy"};
 
 const loss_functions = (categories) => categories ? categorical_loss_functions : non_categorical_loss_functions;
 
 const loss_function_named = (name) => {
+    name = name.trim();
     return non_categorical_loss_functions[name] || categorical_loss_functions[name] || name;
 };
 
@@ -145,7 +148,7 @@ const ensure_last_layer_right_size = (model, data) => {
     }   
 };
 
-const create_model = (name, layers, optimizer_full_name, input_shape, options) => {
+const create_model_old = (name, layers, optimizer_full_name, input_shape, options) => {
     const training_data = get_data(name, 'training');
     const validation_data = get_data(name, 'validation');
     if (!input_shape && !training_data) {
@@ -263,7 +266,7 @@ const normalize = (tensor) => {
     }
 };
 
-const train_model = async (model_or_model_name, training_data, validation_data, options,
+const train_model_old = async (model_or_model_name, training_data, validation_data, options,
                            use_tfjs_vis, success_callback, error_callback, message_element) => {
     // validation_data is optional - if provided not used for training only calculating loss
     let message_to_user;
@@ -315,7 +318,7 @@ const train_model = async (model_or_model_name, training_data, validation_data, 
             (window.parent === window || // not an iframe
              !window.parent.ecraft2learn || // parent isn't ecraft2learn library
              window.parent.ecraft2learn.support_window_visible("tensorflow.js"))) { // is visible
-            callbacks = tfvis.show.fitCallbacks(container, metrics, {callbacks: ['onEpochEnd'], yAxisDomain: [0, 10]});
+            callbacks = tfvis.show.fitCallbacks(container, metrics, {callbacks: ['onEpochEnd'], yAxisDomain: [0, 1]});
             epoch_end_callback = callbacks.onEpochEnd;
         } else {
             callbacks = {};
@@ -797,7 +800,7 @@ const predict = (model_name, inputs, success_callback, error_callback) => {
         if (typeof inputs[0] === 'number') {
             input_tensor = tf.tensor2d(inputs, [inputs.length, 1]);
         } else {
-            input_tensor = tf.tensor2d(inputs); //, [inputs.length].concat(shape_of_data(inputs))); 
+            input_tensor = tf.tensor2d(inputs); 
         }
         if (model.normalization_factor) {
             const new_input_tensor = input_tensor.div(tf.scalar(model.normalization_factor));
@@ -1479,11 +1482,10 @@ const receive_message =
             }
         } else if (typeof message.create_model !== 'undefined') {
             try {
-                let model = create_model(message.create_model.name,
-                                         message.create_model.layers,
-                                         message.create_model.optimizer.trim(),
-                                         message.create_model.input_size,
-                                         message.create_model.options);
+                const options = message.create_model;
+                options.loss_function = loss_function_named(options.loss_function);
+                options.optimizer = optimizer_named(options.optimizer);
+                const model = create_model(options);
                 tensorflow.add_to_models(model);
                 let description = [];
                 model.summary(50, // line length
@@ -1491,16 +1493,24 @@ const receive_message =
                               (line) => {
                                   description.push(line);
                               });
-                event.source.postMessage({model_created: message.create_model.name,
+                event.source.postMessage({model_created: message.create_model.model_name,
                                           description: description}, "*");
             } catch (error) {
-                event.source.postMessage({create_model_failed: message.create_model.name,
+                event.source.postMessage({create_model_failed: message.create_model.model_name,
                                           error_message: error.message}, "*");
             }
         } else if (typeof message.train !== 'undefined') {
             const success_callback = (information) => {
+                // only post string and number values
+                const concise_information = {};
+                Object.entries(information).forEach(entry => {
+                    const type = typeof entry[1];
+                    if (type === 'number' || type === 'string') {
+                        concise_information[entry[0]] = entry[1];
+                    }
+                });
                 event.source.postMessage({training_completed: message.train.time_stamp,
-                                          information: information}, "*");
+                                          information: concise_information}, "*");
             };
             const error_callback = (error_message) => {
                 if (typeof error_message === 'object') {
@@ -1510,11 +1520,21 @@ const receive_message =
                                           error_message: error_message}, "*");
             };
             let model_name = message.train.model_name;
-            train_model(model_name,
-                        get_data(model_name, 'training'),
-                        get_data(model_name, 'validation'),
-                        message.train.options,
-                        message.train.show_progress, 
+            const training_data = get_data(model_name, 'training');
+            const xs_array = training_data.input;
+            const ys_array = training_data.output;
+            const validation_data = get_data(model_name, 'validation');
+            let xs_validation_array, ys_validation_array;
+            if (validation_data) {
+                xs_validation_array = validation_data.input;
+                ys_validation_array = validation_data.output;
+            }
+            const datasets = {model_name, xs_array, ys_array, xs_validation_array, ys_validation_array};
+            const options = {...message.train, // make them match the new conventions
+                             tfvis_options: message.train.show_progress,}
+            train_model(get_model(model_name),
+                        datasets,
+                        options,                         
                         success_callback,
                         error_callback);
         } else if (typeof message.predict !== 'undefined') {
