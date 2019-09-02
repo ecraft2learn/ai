@@ -898,6 +898,7 @@ const gui_state =
              "Loss function": 'Mean Squared Error'},
    "Training": {"Learning rate": .001,
                 "Number of iterations": 100,
+                "Stop if no progress for number of iterations": 10,  // stop_if_no_progress_for_n_epochs
                 "Validation split": 0.2,
                 "Shuffle data": true,
                 "Graph minimum loss": 0,
@@ -945,6 +946,7 @@ const create_training_parameters = (parameters_gui) => {
     const training = parameters_gui.addFolder("Training");
     // sliders weren't helping and sometimes caused mysterious errors
     training.add(gui_state["Training"], 'Number of iterations'); //.min(1).max(1000);
+    training.add(gui_state["Training"], 'Stop if no progress for number of iterations');
     training.add(gui_state["Training"], 'Learning rate'); //.min(.00001).max(1);
     training.add(gui_state["Training"], 'Validation split'); //.min(0).max(.999);
     training.add(gui_state["Training"], 'Shuffle data', [true, false]);
@@ -1123,6 +1125,7 @@ const train_with_parameters = async function (surface_name) {
         await train_model(get_model(model_name),
                           get_data(model_name, 'datasets'),
                           {epochs: Math.round(gui_state["Training"]["Number of iterations"]),
+                           stop_if_no_progress_for_n_epochs: gui_state["Training"]["Stop if no progress for number of iterations"],
                            learning_rate: gui_state["Training"]["Learning rate"],
                            validation_split: gui_state["Training"]["Validation split"],
                            shuffle: to_boolean(gui_state["Training"]["Shuffle data"]),
