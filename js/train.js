@@ -154,6 +154,8 @@ const create_model = (options, failure_callback) => {
   }
 };
 
+const tab_label = (label) => label + (typeof training_number === 'undefined' ? '' : '#' + training_number);
+
 const train_model = (model, datasets, options, success_callback, failure_callback) => {
     try {
         let {xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array} = datasets;
@@ -226,7 +228,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
         const ys_validation = ys_validation_array && ys_validation_array.length > 0 && tf.tensor(ys_validation_array);
         const xs_test = xs_test_array && xs_test_array.length > 0 && tf.tensor(xs_test_array);
         const ys_test = ys_test_array && ys_test_array.length > 0 && tf.tensor(ys_test_array);
-        const surface = tfjs_vis_surface || (tfvis_options && tfvis && tfvis.visor().surface({name: model_name, tab: 'Training#' + training_number}));
+        const surface = tfjs_vis_surface || (tfvis_options && tfvis && tfvis.visor().surface({name: model_name, tab: tab_label('Training')}));
         tfjs_vis_surface = surface; // re-use same one accross multiple calls
         // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
         let epoch_history = [];
@@ -240,8 +242,8 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
         }
         const container = tfvis_options &&
                           {name: tfvis_options.measure_accuracy ? 'Loss and accuracy' : 'Loss',
-                           tab: 'Training#' + training_number,
-                           styles: { height: '800px' }};
+                           tab: tab_label('Training'),
+                           styles: { height: tfvis_options && tfvis_options.container_height ? tfvis_options.container_height : '800px'}}; 
         const tfvis_callbacks = tfvis_options && tfvis.show.fitCallbacks(container, metrics, tfvis_options);
         // auto_stop replaced by the more controllable stop_if_no_progress_for_n_epochs
         //  const stop_early_callbacks = auto_stop && tf.callbacks.earlyStopping();
@@ -306,7 +308,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
       const after_fit_callback = () => { 
          const percentage_of_tests = (x) => +(100*x/xs_test_array.length).toFixed(2);
          const show_layers = () => {
-             const surface = {name: 'Layers', tab: 'Model inspection#' + training_number};
+             const surface = {name: 'Layers', tab: tab_label('Model inspection')};
              tfvis.show.modelSummary(surface, model);
              for (let i = 0; i < model.layers.length; i++) {
                  tfvis.show.layer(surface, model.getLayer(undefined, i));
@@ -336,7 +338,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
              ys_validation.dispose();
          }
          const response =
-             {"Training loss ": data_loss,
+             {"Training loss": data_loss,
               "Validation loss": validation_loss,
               "Test loss": test_loss,
               "Training accuracy": data_accuracy,
@@ -347,6 +349,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
               "Highest accuracy": highest_accuracy,
               "Highest accuracy epoch": highest_accuracy_epoch,
               "Last epoch": last_epoch,
+              "Duration in seconds": (Date.now()-start)/1000, 
              };     
          let csv_labels = // CSV for pasting into a spreadsheet
              "Name, Layer1,Layer2,Layer3,layer4,layer5, Batch size, Dropout rate, Epochs, Optimizer, Initializer, Regularizer," +
@@ -418,12 +421,12 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
          }
          if (confusion_matrix) {
              tfvis.render.confusionMatrix({name: 'Confusion Matrix All',
-                                           tab: 'Charts#' + training_number},
+                                           tab: tab_label('Charts')},
                                           {values: confusion_matrix,
                                            tickLabels: class_names});
              if (tfvis_options.display_collapsed_confusion_matrix) {
                  tfvis.render.confusionMatrix({name: 'Confusion Matrix GP or not',
-                                               tab: 'Charts#' + training_number},
+                                               tab: tab_label('Charts')},
                                               {values: collapse_confusion_matrix(confusion_matrix, 
                                                                                  tfvis_options.display_collapsed_confusion_matrix.indices),
                                                tickLabels: tfvis_options.display_collapsed_confusion_matrix.labels});
@@ -442,6 +445,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
               }
           }
       };
+      const start = Date.now();
       model.fit(xs, ys, config).then(after_fit_callback, fit_error_handler);
     } catch(error) {
         if (failure_callback) {

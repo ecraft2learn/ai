@@ -1055,26 +1055,26 @@ const train_with_parameters = async function (surface_name) {
   const train_with_current_settings = async function (model_name) {
     let message = document.createElement('p');
     let success_callback = (training_statistics) => {
-        const loss = training_statistics["training loss"];
-        const accuracy = training_statistics["training accuracy"];
-        const validation_loss = training_statistics["validation loss"];
-        const validation_accuracy = training_statistics["validation accuracy"];
-        message.innerHTML = "<br>Training " + model_name + " took " + training_statistics["duration in seconds"] + " seconds. ";
+        const loss = training_statistics["Training loss"];
+        const accuracy = training_statistics["Training accuracy"];
+        const validation_loss = training_statistics["Validation loss"];
+        const validation_accuracy = training_statistics["Validation accuracy"];
+        message.innerHTML = "<br>Training " + model_name + " took " + training_statistics["Duration in seconds"].toFixed(2) + " seconds. ";
         if (isNaN(loss)) {
             message.innerHTML += "Training failed because some numbers became too large for the system. " +
                                  "This can be caused by many different things. " +
                                  "Try different optimization methods, loss functions, or convert the input data to numbers between -1 and 1. " +
                                  "Often the problem is due to <a href='https://en.wikipedia.org/wiki/Vanishing_gradient_problem' target='_blank'>vanishing gradiants</a>.";
         } else {
-            message.innerHTML += "<br>Final error rate for training data is " + loss + ".";
+            message.innerHTML += "<br>Final error rate for training data is " + loss.toFixed(3) + ".";
             if (validation_loss) {
-                message.innerHTML += "<br>Validation data error is " + validation_loss + ".";
+                message.innerHTML += "<br>Validation data error is " + validation_loss.toFixed(3) + ".";
             }
             if (accuracy) {
-                message.innerHTML += "<br>Training data accuracy is " + accuracy + ".";
+                message.innerHTML += "<br>Training data accuracy is " + accuracy.toFixed(3) + ".";
             }
             if (validation_accuracy) {
-                message.innerHTML += "<br>Validation data accuracy is " + validation_accuracy + ".";
+                message.innerHTML += "<br>Validation data accuracy is " + validation_accuracy.toFixed(3) + ".";
             }
         }
         enable_evaluate_button();   
@@ -1109,7 +1109,7 @@ const train_with_parameters = async function (surface_name) {
                                validation_split: gui_state["Training"]["Validation split"],
                                shuffle: to_boolean(gui_state["Training"]["Shuffle data"]),
                                tfvis_options: {callbacks: ['onEpochEnd'],
-                                               yAxisDomain: [0, 1], // add this to gui for user control 
+                                               yAxisDomain: [0, 200], // add this to gui for user control 
                                                width: 500,
                                                height: 300,
                                                measure_accuracy: !!categories,
