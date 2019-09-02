@@ -376,13 +376,12 @@ const get_url_from_image_or_canvas = (image_or_canvas) => {
     }
 };
 
-const shuffle = (a) => {
+const shuffle = (a, seed) => {
 /**
  * From https://stackoverflow.com/questions/6274339/how-can-i-shuffle-an-array
  * Shuffles array in place. ES6 version
  * @param {Array} a items An array containing the items.
  */
-    let seed = SEED;
     const seedable_random = 
         seed ? 
         () => { // not so good but good enough
@@ -402,60 +401,6 @@ const start_training = () => {
     model_options.class_names = class_names.map(better_name); // for displaying confusion matrix
     model_options.model_name = model_name;
     model_options.seed = SEED;
-    const splitting_data = xs_validation.length === 0 &&
-                           typeof validation_fraction === 'number' && 
-                           typeof testing_fraction === 'number';
-    const original_xs = xs;
-    const original_ys = ys;
-    const split_data = () => {
-        // if I want reproducability I should use tf.randomUniform with a seed
-        let xs_ys = original_xs.map((x, index) => [x, original_ys[index]]);
-        tf.util.shuffle(xs_ys); // a better shuffle but unlike the following has no random seed for reproducability
-//         shuffle(xs_ys);
-        if (fraction_kept < 1) {
-            xs_ys.splice(Math.round((1-fraction_kept)*xs_ys.length));
-        }
-        xs_ys = xs_ys.sort((a, b) => a[1]-b[1]); // sort by class to make equal quantities
-        const find_start = (class_index) => {
-            for (let i = 0; i < xs_ys.length; i++) {
-                if (xs_ys[i][1] === class_index) {
-                    return i;
-                }
-            }
-        };
-        const starts = class_names.map((ignore, class_index) => find_start(class_index));
-        const validation_count = Math.round(validation_fraction*xs_ys.length);
-        const validation_count_per_class = Math.round(validation_count/class_names.length);
-        const test_count = Math.round(testing_fraction*xs_ys.length);
-        const test_count_per_class = Math.round(test_count/class_names.length);
-        const new_count = xs_ys.length-(validation_count_per_class+test_count_per_class)*class_names.length;
-        const validation_ends = starts.map((start) => start+validation_count_per_class);
-        let xs_ys_validation = [];
-        validation_ends.forEach((end, index) => {
-            xs_ys_validation = xs_ys_validation.concat(xs_ys.slice(starts[index], end));
-        });
-        const test_ends = validation_ends.map((start) => start+test_count_per_class);
-        let xs_ys_test = [];
-        test_ends.forEach((end, index) => {
-            xs_ys_test = xs_ys_test.concat(xs_ys.slice(validation_ends[index], end));
-        });
-        let new_xs_ys = [];
-        starts.push(xs_ys.length); // so starts [index+1] is the end of the class
-        test_ends.forEach((test_end, index) => {
-            new_xs_ys = new_xs_ys.concat(xs_ys.slice(test_ends[index], starts[index+1]));
-        });
-        xs_validation = xs_ys_validation.map((x_y) => x_y[0]);
-        ys_validation = xs_ys_validation.map((x_y) => one_hot(x_y[1], class_names.length));
-        xs_test = xs_ys_test.map((x_y) => x_y[0]);
-        ys_test = xs_ys_test.map((x_y) => one_hot(x_y[1], class_names.length));
-        if (xs_test.length === 0) {
-            // if not setting aside test data then use validation for confusion matrix etc.
-            xs_test = xs_validation;
-            ys_test = ys_validation;
-        }
-        xs = new_xs_ys.map((x_y) => x_y[0]);
-        ys = new_xs_ys.map((x_y) => one_hot(x_y[1], class_names.length));
-    };
     let responses = [];
     const resport_averages = () => {
         const responses_total = {};
@@ -481,9 +426,6 @@ const start_training = () => {
         document.body.appendChild(averages);
     };
     const next_training = () => {
-        if (splitting_data) {
-            split_data();
-        }
         model_options.training_number = 1+responses.length; // for visualization tab names
         model_options.categorical = true;
         model_options.tfvis_options =
@@ -493,31 +435,30 @@ const start_training = () => {
              height: 300,
              measure_accuracy: true,
              display_confusion_matrix: true,
-//              display_collapsed_confusion_matrix: {indices: [[0, 1], [2]],
-//                                                   labels: ['OK', "Serious"]},
+             display_collapsed_confusion_matrix: {indices: [[0, 1], [2]],
+                                                  labels: ['OK', "Serious"]},
              display_layers: true};
+        const error_callback = (error) => {
+            report_error("Internal error: " + error.message);
+        };
         create_and_train_model({xs_array: xs,
-                                ys_array: ys,
+                                ys_array: one_hot(ys, class_names.length),
                                 xs_validation_array: xs_validation,
-                                ys_validation_array :ys_validation,
+                                ys_validation_array: one_hot(ys_validation, class_names.length),
                                 xs_test_array: xs_test,
-                                ys_test_array: ys_test},
+                                ys_test_array: one_hot(ys_test, class_names.length)},
                                model_options,
-                               model_callback);
+                               model_callback,
+                               error_callback);
     }
     const test_loss_message = document.createElement('p');
     let first_time = true;
     document.body.appendChild(test_loss_message);
     const model_callback = (response) => {
         if (first_time) {
-            // need to insert testing_fraction, validation_fraction, fraction_kept
             test_loss_message.innerHTML = response.csv_labels + "<br>";
             first_time = false;
         }
-             // insert 
-//            csv_values += testing_fraction + ", ";
-//            csv_values += validation_fraction + ", ";
-//            csv_values += fraction_kept + ", ";       
         test_loss_message.innerHTML += response.csv_values + "<br>";
         responses.push(response);
         const button = document.createElement('button');
@@ -538,12 +479,14 @@ const start_training = () => {
     next_training();
 };
 
-const one_hot = (index, n) => {
-    let vector = [];
-    for (let i = 0; i < n; i++) {
-        vector.push(i === index ? 1 : 0);
-    }
-    return vector;
+const one_hot = (array_of_class_indices, n) => {
+    return array_of_class_indices.map((index) => {
+        let vector = [];
+        for (let i = 0; i < n; i++) {
+            vector.push(i === index ? 1 : 0);
+        }
+        return vector;        
+    });
 };
 
 const add_images = (when_finished, just_one_class, only_class_index, except_image_index) => {
@@ -638,15 +581,17 @@ const initialise_page = () => {
    };
 };
 
-const unable_to_access_camera = (error) => {
+const report_error = (message) => {
     let info = document.getElementById('info');
-    info.innerHTML = "<p style='font-size: x-large;'>"
-                     + "Failed to access the camera. You can still click on random images. "
-                     + error.message
-                     + "</p>";
-//                       'This browser either does not support video capture, ' +
-//                       'lacks permission to use the camera, ' +
-//                       'or this device does not have a camera.';
+    if (!info) {
+        info = document.createElement('span');
+        document.body.appendChild(info);
+    }
+    info.innerHTML = "<p style='font-size: x-large;'>" + message + "</p>";
+};
+
+const unable_to_access_camera = (error) => {
+    report_error("Failed to access the camera. You can still click on random images. " + error.message);
 };
 
 const go_to_camera_interface = () => {

@@ -156,11 +156,69 @@ const create_model = (options, failure_callback) => {
 
 const train_model = (model, datasets, options, success_callback, failure_callback) => {
     try {
-       const {xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array} = datasets;
-       const {model_name, class_names, hidden_layer_sizes, batch_size, shuffle, epochs, validation_split, learning_rate, drop_out_rate, optimizer,
-              layer_initializer, training_number, regularizer, seed, stop_if_no_progress_for_n_epochs,
-              tfvis_options} 
-             = options;
+        let {xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array} = datasets;
+        const {model_name, class_names, hidden_layer_sizes, batch_size, shuffle, epochs, validation_split, learning_rate, drop_out_rate, optimizer,
+               layer_initializer, training_number, regularizer, seed, stop_if_no_progress_for_n_epochs,
+               testing_fraction, validation_fraction, fraction_kept,
+               tfvis_options} 
+              = options;
+        const splitting_data = xs_validation_array.length === 0 && // no validation data provided
+              typeof validation_fraction === 'number' && 
+              typeof testing_fraction === 'number';
+        const original_xs = xs_array;
+        const original_ys = ys_array;
+        const split_data = () => {
+            // if I want reproducability I should use tf.randomUniform with a seed
+            let xs_ys = original_xs.map((x, index) => [x, original_ys[index]]);
+            tf.util.shuffle(xs_ys); // this is a better shuffle but unlike the following has no random seed for reproducability
+    //         shuffle(xs_ys, SEED);
+            if (fraction_kept < 1) {
+                xs_ys.splice(Math.round((1-fraction_kept)*xs_ys.length));
+            }
+            xs_ys = xs_ys.sort((a, b) => a[1].indexOf(1)-b[1].indexOf(1)); // sort by class to make equal quantities
+            const find_start = (class_index) => {
+                for (let i = 0; i < xs_ys.length; i++) {
+                    if (xs_ys[i][1] === class_index) {
+                        return i;
+                    }
+                }
+            };
+            const starts = class_names.map((ignore, class_index) => find_start(class_index));
+            const validation_count = Math.round(validation_fraction*xs_ys.length);
+            const validation_count_per_class = Math.round(validation_count/class_names.length);
+            const test_count = Math.round(testing_fraction*xs_ys.length);
+            const test_count_per_class = Math.round(test_count/class_names.length);
+            const new_count = xs_ys.length-(validation_count_per_class+test_count_per_class)*class_names.length;
+            const validation_ends = starts.map((start) => start+validation_count_per_class);
+            let xs_ys_validation = [];
+            validation_ends.forEach((end, index) => {
+                xs_ys_validation = xs_ys_validation.concat(xs_ys.slice(starts[index], end));
+            });
+            const test_ends = validation_ends.map((start) => start+test_count_per_class);
+            let xs_ys_test = [];
+            test_ends.forEach((end, index) => {
+                xs_ys_test = xs_ys_test.concat(xs_ys.slice(validation_ends[index], end));
+            });
+            let new_xs_ys = [];
+            starts.push(xs_ys.length); // so starts [index+1] is the end of the class
+            test_ends.forEach((test_end, index) => {
+                new_xs_ys = new_xs_ys.concat(xs_ys.slice(test_ends[index], starts[index+1]));
+            });
+            xs_validation_array = xs_ys_validation.map((x_y) => x_y[0]);
+            ys_validation_array = xs_ys_validation.map((x_y) => x_y[1]);
+            xs_test_array = xs_ys_test.map((x_y) => x_y[0]);
+            ys_test_array = xs_ys_test.map((x_y) => x_y[1]);
+            if (xs_test_array.length === 0) {
+                // if not setting aside test data then use validation for confusion matrix etc.
+                xs_test_array = xs_validation_array;
+                ys_test_array = ys_validation_array;
+            }
+            xs_array = new_xs_ys.map((x_y) => x_y[0]);
+            ys_array = new_xs_ys.map((x_y) => x_y[1]);
+        };
+        if (splitting_data) {
+            split_data();
+        }
         const xs = tf.tensor(xs_array);
         const ys = tf.tensor(ys_array);
         const xs_validation = xs_validation_array && xs_validation_array.length > 0 && tf.tensor(xs_validation_array);
@@ -325,6 +383,9 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
          csv_values += options.optimizer_name + ", ";
          csv_values += options.layer_initializer_name + ", ";
          csv_values += options.regularizer_name + ", ";
+         csv_values += testing_fraction + ", ";
+         csv_values += validation_fraction + ", ";
+         csv_values += fraction_kept + ", ";    
          csv_values += data_loss + ", ";
          csv_values += validation_loss + ", ";
          csv_values += (test_loss && test_loss.toFixed(4)) + ", ";
@@ -373,7 +434,11 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
               console.log(error.message);
               after_fit_callback();
           } else {
-              throw error;
+              if (failure_callback) {
+                  failure_callback(error);
+              } else {
+                  throw error;
+              }
           }
       };
       model.fit(xs, ys, config).then(after_fit_callback, fit_error_handler);
