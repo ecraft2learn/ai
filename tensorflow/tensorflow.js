@@ -1007,12 +1007,15 @@ const create_model_with_parameters = function (surface_name) {
     let name_input;
     let message;
     const create_model_with_current_settings = function () {
-        let layers = get_layers();
-        const name = name_input.value;
+        let hidden_layer_sizes = get_layers();
+        const model_name = name_input.value;
         const optimizer_full_name = gui_state["Model"]["Optimization method"];
+        const optimizer = optimizer_named(optimizer_full_name);
         const loss_function_full_name = gui_state["Model"]["Loss function"];
+        const loss_function = loss_function_named(loss_function_full_name);
+        const datasets = get_data(model_name, 'datasets');
         try {
-            model = create_model(name, layers, optimizer_full_name, undefined, {loss: loss_function_full_name});
+            model = create_model({model_name, hidden_layer_sizes, optimizer, loss_function, datasets});
         } catch (error) {
             message.innerHTML = error.message;
             report_error(error);
