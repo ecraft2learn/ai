@@ -1085,6 +1085,10 @@ const train_with_parameters = async function (surface_name) {
                     message.innerHTML += " The lowest validation error was " + lowest_validation_loss.toFixed(3) + 
                                          " at cycle " + training_statistics["Lowest validation loss epoch"] + ".";
                 }
+                if (validation_loss > 100) { 
+                    message.innerHTML += " With such a high validation loss the model predictions are likely to be poor. " +
+                                         " You might be able to fix this with more data, different sizes for the model's layers, or other settings.";
+                }
             }
             if (accuracy) {
                 message.innerHTML += "<br>Training data accuracy is " + accuracy.toFixed(3) + ".";
