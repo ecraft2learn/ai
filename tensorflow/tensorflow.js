@@ -899,7 +899,12 @@ const gui_state =
    "Training": {"Learning rate": .001,
                 "Number of iterations": 100,
                 "Validation split": 0.2,
-                "Shuffle data": true},
+                "Shuffle data": true,
+                "Graph minimum loss": 0,
+                "Graph maximum loss": 0,
+                "Graph width": 500,
+                "Graph height": 300
+                },
    "Predictions": {},
    "Optimize": {"Number of experiments": 10,
                 "Search for best Optimization method": true,
@@ -943,6 +948,10 @@ const create_training_parameters = (parameters_gui) => {
     training.add(gui_state["Training"], 'Learning rate'); //.min(.00001).max(1);
     training.add(gui_state["Training"], 'Validation split'); //.min(0).max(.999);
     training.add(gui_state["Training"], 'Shuffle data', [true, false]);
+    training.add(gui_state["Training"], 'Graph minimum loss');
+    training.add(gui_state["Training"], 'Graph maximum loss');
+    training.add(gui_state["Training"], 'Graph width');
+    training.add(gui_state["Training"], 'Graph height');
     return training;
 };
 
@@ -1058,6 +1067,7 @@ const train_with_parameters = async function (surface_name) {
         const loss = training_statistics["Training loss"];
         const accuracy = training_statistics["Training accuracy"];
         const validation_loss = training_statistics["Validation loss"];
+        const lowest_validation_loss = training_statistics["Lowest validation loss"];
         const validation_accuracy = training_statistics["Validation accuracy"];
         message.innerHTML = "<br>Training " + model_name + " took " + training_statistics["Duration in seconds"].toFixed(2) + " seconds. ";
         if (isNaN(loss)) {
@@ -1068,7 +1078,11 @@ const train_with_parameters = async function (surface_name) {
         } else {
             message.innerHTML += "<br>Final error rate for training data is " + loss.toFixed(3) + ".";
             if (validation_loss) {
-                message.innerHTML += "<br>Validation data error is " + validation_loss.toFixed(3) + ".";
+                message.innerHTML += "<br>Final validation data error is " + validation_loss.toFixed(3) + ".";
+                if (validation_loss !== lowest_validation_loss) {
+                    message.innerHTML += " The lowest validation error was " + lowest_validation_loss.toFixed(3) + 
+                                         " at cycle " + training_statistics["Lowest validation loss epoch"] + ".";
+                }
             }
             if (accuracy) {
                 message.innerHTML += "<br>Training data accuracy is " + accuracy.toFixed(3) + ".";
@@ -1100,23 +1114,27 @@ const train_with_parameters = async function (surface_name) {
     message.innerHTML += ". Please wait.";
     setTimeout(async function () {
         // without the timeout the message above isn't displayed
-        const categories = get_data(model_name, 'categories')
-        const message_to_user = 
-            await train_model(get_model(model_name),
-                              get_data(model_name, 'datasets'),
-                              {epochs: Math.round(gui_state["Training"]["Number of iterations"]),
-                               learning_rate: gui_state["Training"]["Learning rate"],
-                               validation_split: gui_state["Training"]["Validation split"],
-                               shuffle: to_boolean(gui_state["Training"]["Shuffle data"]),
-                               tfvis_options: {callbacks: ['onEpochEnd'],
-                                               yAxisDomain: [0, 200], // add this to gui for user control 
-                                               width: 500,
-                                               height: 300,
-                                               measure_accuracy: !!categories,
-                                               display_confusion_matrix: !!categories},
-                              },
-                              success_callback,
-                              error_callback);
+        const categories = get_data(model_name, 'categories');
+        const graph_minimum = gui_state["Training"]["Graph minimum loss"];
+        const graph_maximum = gui_state["Training"]["Graph maximum loss"];
+        const width = gui_state["Training"]["Graph width"];
+        const height = gui_state["Training"]["Graph height"];
+        const yAxisDomain = graph_minimum === graph_maximum ? undefined : [graph_minimum, graph_maximum];
+        await train_model(get_model(model_name),
+                          get_data(model_name, 'datasets'),
+                          {epochs: Math.round(gui_state["Training"]["Number of iterations"]),
+                           learning_rate: gui_state["Training"]["Learning rate"],
+                           validation_split: gui_state["Training"]["Validation split"],
+                           shuffle: to_boolean(gui_state["Training"]["Shuffle data"]),
+                           tfvis_options: {callbacks: ['onEpochEnd'],
+                                           yAxisDomain,
+                                           width,
+                                           height,
+                                           measure_accuracy: !!categories,
+                                           display_confusion_matrix: !!categories},
+                           },
+                          success_callback,
+                          error_callback);
 
     });
   };
