@@ -162,7 +162,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                testing_fraction, validation_fraction, fraction_kept,
                tfvis_options} 
               = options;
-        const splitting_data = xs_validation_array.length === 0 && // no validation data provided
+        const splitting_data = (!xs_validation_array ||  xs_validation_array.length === 0) && // no validation data provided
               typeof validation_fraction === 'number' && 
               typeof testing_fraction === 'number';
         const original_xs = xs_array;
