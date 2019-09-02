@@ -311,7 +311,8 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                       validationSplit: validation_split,
                       shuffle,
                       callbacks: stats_callback};
-      const after_fit_callback = () => { 
+      const after_fit_callback = () => {
+         model.ready_for_prediction = true;
          const percentage_of_tests = (x) => +(100*x/xs_test_array.length).toFixed(2);
          const show_layers = () => {
              const surface = {name: 'Layers', tab: tab_label('Model inspection')};
