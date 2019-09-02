@@ -1146,18 +1146,21 @@ window.ecraft2learn =
                                   }); 
     };
     const train_model = (model_name, epochs, learning_rate, shuffle, validation_split,
-                         success_callback, error_callback) => {
+                         success_callback, error_callback,
+                         // following added after release so easiest to add them at the end
+                         stop_if_no_progress_for_n_epochs) => {
         record_callbacks(success_callback, error_callback);
         const time_stamp = Date.now();
         request_of_support_window('tensorflow.js',
                                   'Loaded',
                                   () => {
-                                      return {train: {model_name: model_name,
-                                                      epochs: epochs,
-                                                      learning_rate: learning_rate,
-                                                      shuffle: shuffle,
-                                                      validation_split: validation_split,
-                                                      time_stamp: time_stamp}};
+                                      return {train: {model_name,
+                                                      epochs,
+                                                      learning_rate,
+                                                      shuffle,
+                                                      validation_split,
+                                                      time_stamp,
+                                                      stop_if_no_progress_for_n_epochs}};
                                   },
                                   (message) => {
                                       return message.training_completed === time_stamp ||
