@@ -299,10 +299,10 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                     throw new Error("No progress for " + stop_if_no_progress_for_n_epochs + " epochs at epoch " + epoch);
                 }
             }};
-      const config = {batch_size,
+      const config = {batchSize: batch_size,
                       epochs,
                       validationData: xs_validation && [xs_validation, ys_validation],
-                      validation_split,
+                      validationSplit: validation_split,
                       shuffle,
                       callbacks: stats_callback};
       const after_fit_callback = () => { 
