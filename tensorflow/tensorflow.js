@@ -898,7 +898,7 @@ const gui_state =
              "Loss function": 'Mean Squared Error'},
    "Training": {"Learning rate": .001,
                 "Number of iterations": 100,
-                "Stop if no progress for number of iterations": 10,  // stop_if_no_progress_for_n_epochs
+                "Stop if no progress for number of iterations": 10,
                 "Validation split": 0.2,
                 "Shuffle data": true,
                 "Graph minimum loss": 0,
@@ -1066,6 +1066,7 @@ const train_with_parameters = async function (surface_name) {
   const train_with_current_settings = async function (model_name) {
     let message = document.createElement('p');
     let success_callback = (training_statistics) => {
+        const final_epoch = training_statistics["Last epoch"];
         const loss = training_statistics["Training loss"];
         const accuracy = training_statistics["Training accuracy"];
         const validation_loss = training_statistics["Validation loss"];
@@ -1078,12 +1079,15 @@ const train_with_parameters = async function (surface_name) {
                                  "Try different optimization methods, loss functions, or convert the input data to numbers between -1 and 1. " +
                                  "Often the problem is due to <a href='https://en.wikipedia.org/wiki/Vanishing_gradient_problem' target='_blank'>vanishing gradiants</a>.";
         } else {
+            if (final_epoch < epochs-1) {
+                message.innerHTML += "<br>There was no progress for " + stop_if_no_progress_for_n_epochs + " cycles so training stopped.";
+            }
             message.innerHTML += "<br>Final error rate for training data is " + loss.toFixed(3) + ".";
             if (validation_loss) {
                 message.innerHTML += "<br>Final validation data error is " + validation_loss.toFixed(3) + ".";
                 if (validation_loss !== lowest_validation_loss) {
-                    message.innerHTML += " The lowest validation error was " + lowest_validation_loss.toFixed(3) + 
-                                         " at cycle " + training_statistics["Lowest validation loss epoch"] + ".";
+                    message.innerHTML += " The lowest validation error was " + lowest_validation_loss.toFixed(3) +  "." +
+                                         " Using the trained model from cycle " + training_statistics["Lowest validation loss epoch"] +  ".";
                 }
                 if (validation_loss > 100) { 
                     message.innerHTML += " With such a high validation loss the model predictions are likely to be poor. " +
@@ -1095,6 +1099,10 @@ const train_with_parameters = async function (surface_name) {
             }
             if (validation_accuracy) {
                 message.innerHTML += "<br>Validation data accuracy is " + validation_accuracy.toFixed(3) + ".";
+                if (validation_accuracy !== lowest_validation_accuracy) {
+                    message.innerHTML += " The lowest validation accuracy was " + lowest_validation_accuracy.toFixed(3) +  "." +
+                                         " Using the trained model from cycle " + training_statistics["Lowest validation accuracy epoch"] +  ".";
+                }
             }
         }
         enable_evaluate_button();   
@@ -1102,6 +1110,8 @@ const train_with_parameters = async function (surface_name) {
     let error_callback = (error) => {
         message.innerHTML = "<br><b>Error:</b> " + error.message + "<br>";
     };
+    const epochs = Math.round(gui_state["Training"]["Number of iterations"]);
+    const stop_if_no_progress_for_n_epochs = gui_state["Training"]["Stop if no progress for number of iterations"];
     draw_area.appendChild(message);
     let training_data   = get_data(model_name, 'training');
     let validation_data = get_data(model_name, 'validation');
@@ -1128,8 +1138,8 @@ const train_with_parameters = async function (surface_name) {
         const yAxisDomain = graph_minimum === graph_maximum ? undefined : [graph_minimum, graph_maximum];
         await train_model(get_model(model_name),
                           get_data(model_name, 'datasets'),
-                          {epochs: Math.round(gui_state["Training"]["Number of iterations"]),
-                           stop_if_no_progress_for_n_epochs: gui_state["Training"]["Stop if no progress for number of iterations"],
+                          {epochs,
+                           stop_if_no_progress_for_n_epochs,
                            learning_rate: gui_state["Training"]["Learning rate"],
                            validation_split: gui_state["Training"]["Validation split"],
                            shuffle: to_boolean(gui_state["Training"]["Shuffle data"]),

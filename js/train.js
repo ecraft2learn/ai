@@ -255,8 +255,19 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
         let lowest_validation_loss_epoch;
         let highest_accuracy;
         let highest_accuracy_epoch;
-        let highest_accuracy_weights = [];
+        let best_weights = [];
         let last_epoch = 0;
+        const update_best_weights = () => {
+            best_weights.forEach((layer_weights) => {
+                layer_weights.forEach((tensor) => {
+                                         tensor.dispose();
+                                      });
+                });
+                best_weights = [];
+                model.layers.forEach((layer) => {
+                                        best_weights.push(layer.getWeights().map(tf.clone));
+                });     
+        };
         const stats_callback = 
             {onEpochEnd: async (epoch, history) => {
                 epoch_history.push(history);
@@ -268,20 +279,15 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                 if (typeof lowest_validation_loss === 'undefined' || validation_loss < lowest_validation_loss) {
                     lowest_validation_loss = validation_loss;
                     lowest_validation_loss_epoch = epoch;
+                    if (!validation_accuracy) {
+                        update_best_weights();
+                    }
                 }
                 if (validation_accuracy && (typeof highest_accuracy === 'undefined' || validation_accuracy > highest_accuracy)) {
                     highest_accuracy = validation_accuracy;
                     highest_accuracy_epoch = epoch;
                     if (highest_accuracy_epoch) {
-                        highest_accuracy_weights.forEach((layer_weights) => {
-                            layer_weights.forEach((tensor) => {
-                                tensor.dispose();
-                            });
-                        });
-                        highest_accuracy_weights = [];
-                        model.layers.forEach((layer) => {
-                            highest_accuracy_weights.push(layer.getWeights().map(tf.clone));
-                        });                  
+                        update_best_weights();
                     }
                 }
                 if (tfvis_callbacks) {
@@ -294,7 +300,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                     // or just loss if accuracy not appropriate
                     // first restore best weights
                     model.layers.forEach((layer, index) => {
-                        layer.setWeights(highest_accuracy_weights[index]);
+                        layer.setWeights(best_weights[index]);
                     });  
                     throw new Error("No progress for " + stop_if_no_progress_for_n_epochs + " epochs at epoch " + epoch);
                 }
@@ -413,8 +419,8 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                  csv_values += row.map(percentage_of_tests) + ', '; 
              });      
          }
-         response.csv_labels = csv_labels;
-         response.csv_values = csv_values;
+         response["Column labels for saving results in a spreadsheet"] = csv_labels;
+         response["Spreadsheet values"] = csv_values;
          response.model = model;
          if (success_callback) {
              success_callback(response);

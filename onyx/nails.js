@@ -456,10 +456,10 @@ const start_training = () => {
     document.body.appendChild(test_loss_message);
     const model_callback = (response) => {
         if (first_time) {
-            test_loss_message.innerHTML = response.csv_labels + "<br>";
+            test_loss_message.innerHTML = response["Column labels for saving results in a spreadsheet"] + "<br>";
             first_time = false;
         }
-        test_loss_message.innerHTML += response.csv_values + "<br>";
+        test_loss_message.innerHTML += response["Spreadsheet values"] + "<br>";
         responses.push(response);
         const button = document.createElement('button');
         button.innerHTML = "Save model #" + model_options.training_number;
