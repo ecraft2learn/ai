@@ -14,6 +14,18 @@ let model; // used for defaults such as model name when creating a model
 
 let data = {}; // training and validation data either for "all models" or named models
 const get_data = (model_name, kind) => {
+    if (kind === 'datasets') {
+        const training_data = get_data(model_name, 'training');
+        const xs_array = training_data.input;
+        const ys_array = training_data.output;
+        const validation_data = get_data(model_name, 'validation');
+        let xs_validation_array, ys_validation_array;
+        if (validation_data) {
+            xs_validation_array = validation_data.input;
+            ys_validation_array = validation_data.output;
+         }
+         return {model_name, xs_array, ys_array, xs_validation_array, ys_validation_array};
+    }
     if (!data.hasOwnProperty(model_name) || !data[model_name].hasOwnProperty(kind)) {
         if (model_name !== 'all models') {
             return get_data('all models', kind);
@@ -148,105 +160,105 @@ const ensure_last_layer_right_size = (model, data) => {
     }   
 };
 
-const create_model_old = (name, layers, optimizer_full_name, input_shape, options) => {
-    const training_data = get_data(name, 'training');
-    const validation_data = get_data(name, 'validation');
-    if (!input_shape && !training_data) {
-        throw new Error("Cannot create a model before knowing what the data is like.\nProvide at least one example of the data.");
-    }
-    const optimizer = optimizer_named(optimizer_full_name);
-    if (!optimizer) {
-        throw new Error("Could not recognise '" + optimizer_full_name + "' as an optimizer.");
-    }
-    if (typeof options !== 'object') {
-        options = {}; // none
-    }
-    const model = tf.sequential({name: name});
-    model.ready_for_training = false;
-    tensorflow.add_to_models(model); // using tensorflow.add_to_models in case it has been extended
-    const categories = get_data(name, "categories"); // if defined
-    if (!categories) {
-        // need to recreate this model if later it gets data that uses categories
-        set_data(name,
-                 'recreate',
-                 () => {
-                     create_model(name, layers, optimizer_full_name, input_shape, options);
-                 });
-    }
-    layers.forEach((configuration, index) => {
-        let layer_options = [];
-        let layer_activation, size;
-        if (typeof configuration === 'number') {
-            size = configuration;
-        } else {
-            let parts = configuration.split(' ');
-            size = +parts[0];
-            if (parts.length === 2) {
-                layer_activation = parts[1];
-            } else if (parts.length > 2) {
-                layer_options = parts.slice(1); // e.g. '10 dropout .5 activation relu' becomes ['dropout', '.5', 'activation', 'relu']
-            }
-        }
-        if (size > 0) {
-            let configuration = {units: size,
-                                 useBias: index !== layers.length-1}; // except for last layer
-            if (index === layers.length-1) {
-                if (categories) {
-                    configuration.activation = 'softmax';
-                    configuration.units = categories.length;
-                }
-            } else {
-                // all but the last one has an activation function unless categorical 
-                configuration.activation = options.activation || 'relu';              
-            }
-            // if explicitly specified override default activation function
-            if (layer_activation) {
-                // for backwards compatibility
-                configuration.activation = layer_activation;
-            } else if (layer_options.indexOf('activation') >= 0) {
-                configuration.activation = layer_options[layer_options.indexOf('activation')+1];
-            }                  
-            if (index === 0) { // first one needs inputShape
-                configuration.inputShape = input_shape ||
-                                           shape_of_data((training_data || validation_data).input[0]);    
-            }
-            model.add(tf.layers.dense(configuration));
-            if (index < layers.length-1 && layer_options.indexOf('dropout') >= 0) {
-                const rate = +layer_options[layer_options.indexOf('dropout')+1];
-                model.add(tf.layers.dropout({rate: rate}));
-            }
-//              model.add(tf.layers.batchNormalization());
-        }
-    });
-    if (!optimizer) {
-        optimizer = 'adam';
-    }
-    if (categories) {
-        options.loss_function = "Softmax Cross Entropy";
-        gui_state["Model"]["Loss function"] = options.loss_function;
-    }
-    let loss_function = loss_function_named(options.loss_function || default_loss_function(categories));
-//     tf.tidy(() => {
-        model.compile({loss: typeof loss_function === 'string' ? tf.losses[loss_function] : loss_function,
-                       optimizer: optimizer,
-                       metrics: categories && ['accuracy']
-                      });
+// const create_model_old = (name, layers, optimizer_full_name, input_shape, options) => {
+//     const training_data = get_data(name, 'training');
+//     const validation_data = get_data(name, 'validation');
+//     if (!input_shape && !training_data) {
+//         throw new Error("Cannot create a model before knowing what the data is like.\nProvide at least one example of the data.");
+//     }
+//     const optimizer = optimizer_named(optimizer_full_name);
+//     if (!optimizer) {
+//         throw new Error("Could not recognise '" + optimizer_full_name + "' as an optimizer.");
+//     }
+//     if (typeof options !== 'object') {
+//         options = {}; // none
+//     }
+//     const model = tf.sequential({name: name});
+//     model.ready_for_training = false;
+//     tensorflow.add_to_models(model); // using tensorflow.add_to_models in case it has been extended
+//     const categories = get_data(name, "categories"); // if defined
+//     if (!categories) {
+//         // need to recreate this model if later it gets data that uses categories
+//         set_data(name,
+//                  'recreate',
+//                  () => {
+//                      create_model(name, layers, optimizer_full_name, input_shape, options);
+//                  });
+//     }
+//     layers.forEach((configuration, index) => {
+//         let layer_options = [];
+//         let layer_activation, size;
+//         if (typeof configuration === 'number') {
+//             size = configuration;
+//         } else {
+//             let parts = configuration.split(' ');
+//             size = +parts[0];
+//             if (parts.length === 2) {
+//                 layer_activation = parts[1];
+//             } else if (parts.length > 2) {
+//                 layer_options = parts.slice(1); // e.g. '10 dropout .5 activation relu' becomes ['dropout', '.5', 'activation', 'relu']
+//             }
+//         }
+//         if (size > 0) {
+//             let configuration = {units: size,
+//                                  useBias: index !== layers.length-1}; // except for last layer
+//             if (index === layers.length-1) {
+//                 if (categories) {
+//                     configuration.activation = 'softmax';
+//                     configuration.units = categories.length;
+//                 }
+//             } else {
+//                 // all but the last one has an activation function unless categorical 
+//                 configuration.activation = options.activation || 'relu';              
+//             }
+//             // if explicitly specified override default activation function
+//             if (layer_activation) {
+//                 // for backwards compatibility
+//                 configuration.activation = layer_activation;
+//             } else if (layer_options.indexOf('activation') >= 0) {
+//                 configuration.activation = layer_options[layer_options.indexOf('activation')+1];
+//             }                  
+//             if (index === 0) { // first one needs inputShape
+//                 configuration.inputShape = input_shape ||
+//                                            shape_of_data((training_data || validation_data).input[0]);    
+//             }
+//             model.add(tf.layers.dense(configuration));
+//             if (index < layers.length-1 && layer_options.indexOf('dropout') >= 0) {
+//                 const rate = +layer_options[layer_options.indexOf('dropout')+1];
+//                 model.add(tf.layers.dropout({rate: rate}));
+//             }
+// //              model.add(tf.layers.batchNormalization());
+//         }
 //     });
-    gui_state["Model"]["Layers"] = layers.toString();
-    gui_state["Model"]["Optimization method"] = optimizer_full_name;
-    if (options.loss_function) {
-        gui_state["Model"]["Loss function"] = options.loss_function;
-    }
-    model.ready_for_training = true;
-    if (model.callback_when_ready_for_training) {
-        model.callback_when_ready_for_training();
-        model.callback_when_ready_for_training = undefined;
-    }
-    if (training_data) {
-        ensure_last_layer_right_size(model, training_data);
-    }
-    return model;
-};
+//     if (!optimizer) {
+//         optimizer = 'adam';
+//     }
+//     if (categories) {
+//         options.loss_function = "Softmax Cross Entropy";
+//         gui_state["Model"]["Loss function"] = options.loss_function;
+//     }
+//     let loss_function = loss_function_named(options.loss_function || default_loss_function(categories));
+// //     tf.tidy(() => {
+//         model.compile({loss: typeof loss_function === 'string' ? tf.losses[loss_function] : loss_function,
+//                        optimizer: optimizer,
+//                        metrics: categories && ['accuracy']
+//                       });
+// //     });
+//     gui_state["Model"]["Layers"] = layers.toString();
+//     gui_state["Model"]["Optimization method"] = optimizer_full_name;
+//     if (options.loss_function) {
+//         gui_state["Model"]["Loss function"] = options.loss_function;
+//     }
+//     model.ready_for_training = true;
+//     if (model.callback_when_ready_for_training) {
+//         model.callback_when_ready_for_training();
+//         model.callback_when_ready_for_training = undefined;
+//     }
+//     if (training_data) {
+//         ensure_last_layer_right_size(model, training_data);
+//     }
+//     return model;
+// };
 
 const normalize = (tensor) => {
     // divides all by max-min value
@@ -266,184 +278,184 @@ const normalize = (tensor) => {
     }
 };
 
-const train_model_old = async (model_or_model_name, training_data, validation_data, options,
-                           use_tfjs_vis, success_callback, error_callback, message_element) => {
-    // validation_data is optional - if provided not used for training only calculating loss
-    let message_to_user;
-    if (!model_or_model_name) {
-        model_or_model_name = model; // current model (if there is one)
-    }
-    if (!model_or_model_name) {
-        error_callback({message: "No model or name provided to train model."});
-        return;
-    }
-    if (typeof model_or_model_name === 'string') {
-        model = models[model_or_model_name];
-        if (!model) {
-            error_callback({message: "No model named '" + model_or_model_name + "'"});
-            return;
-        }
-    } else {
-        model = model_or_model_name;
-    }
-    try {
-        ensure_last_layer_right_size(model, training_data);
-    } catch (error) {
-        error_callback({message: error.message});
-        return;
-    }
-    if (!model.ready_for_training) {
-        let previous_callback = model.callback_when_ready_for_training;
-        model.callback_when_ready_for_training = 
-            () => {
-                if (previous_callback) {
-                    previous_callback();
-                }
-                train_model(model, training_data, validation_data, options,
-                            use_tfjs_vis, success_callback, error_callback, message_element);
-            };
-        return;
-    }
-    const categories = get_data(model.name, 'categories');
-    try {
-        // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
-        let epoch_history = [];
-        const metrics = categories ? ['loss', 'val_loss', 'acc', 'val_acc'] : ['loss', 'val_loss'];
-        const container = {tab: 'Training',
-                           styles: { height: '400px' }};
-        container.name = categories ? 'Loss and accuracy' : 'Loss';                           
-        let callbacks;
-        let epoch_end_callback;
-        if (use_tfjs_vis &&
-            (window.parent === window || // not an iframe
-             !window.parent.ecraft2learn || // parent isn't ecraft2learn library
-             window.parent.ecraft2learn.support_window_visible("tensorflow.js"))) { // is visible
-            callbacks = tfvis.show.fitCallbacks(container, metrics, {callbacks: ['onEpochEnd'], yAxisDomain: [0, 1]});
-            epoch_end_callback = callbacks.onEpochEnd;
-        } else {
-            callbacks = {};
-        }
-        callbacks.onEpochEnd = (epoch, history) => {
-            if (epoch_end_callback) {
-                epoch_end_callback(epoch, history);
-            }
-            if (isNaN(history.loss)) {
-                throw new Error('Training stopped due to loss being "not a Number"');
-            }
-            // and in any case do the following 
-            if (epoch > 4 &&
-                epoch_history[epoch-1].loss === history.loss &&
-                epoch_history[epoch-2].loss === history.loss &&
-                epoch_history[epoch-3].loss === history.loss) {
-                // no progress for last 4 epochs 
-                throw new Error('Training stopped after ' + (epoch-4) + ' steps due to lack of progress.');
-            }
-            epoch_history.push(history);
-        };
-        if (!model.optimizer) {
-            // loaded models lack an optimizer and loss function
-            const optimizer_full_name = gui_state["Model"]["Optimization method"];
-            const optimizer = optimizer_named(optimizer_full_name);
-            const loss_function_full_name = gui_state["Model"]["Loss function"];
-            const loss_function = loss_function_named(loss_function_full_name);
-            model.compile({loss: (loss_function || default_loss_function(categories)),
-                           optimizer: optimizer});
-        }
-        if (model.optimizer.learningRate && options.learning_rate) { 
-            // only if optimizer has a learningRate property
-            // perhaps it would be better to create optimizers with the correct learning_rate
-            // e.g. tf.train.xxx(learning_rate)
-            model.optimizer.learningRate = options.learning_rate;
-            gui_state["Training"]['Learning rate'] = options.learning_rate;
-        }
-        if (options.epochs) {
-            gui_state["Training"]['Number of iterations'] = options.epochs;
-        }
-        if (options.validation_split) {
-            gui_state["Training"]['Validation split'] = +options.validation_split;
-        }
-        if (typeof options.shuffle === 'boolean') {
-            gui_state["Training"]['Shuffle data'] = options.shuffle;
-        }
-        let [xs, ys] = get_tensors(model.name, 'training');
-//         const [normalization_factor, new_xs] = normalize(xs);
-//         if (normalization_factor) {
-//             xs.dispose();
-//             xs = new_xs;
-//             model.normalization_factor = normalization_factor;
+// const train_model_old = async (model_or_model_name, training_data, validation_data, options,
+//                            use_tfjs_vis, success_callback, error_callback, message_element) => {
+//     // validation_data is optional - if provided not used for training only calculating loss
+//     let message_to_user;
+//     if (!model_or_model_name) {
+//         model_or_model_name = model; // current model (if there is one)
+//     }
+//     if (!model_or_model_name) {
+//         error_callback({message: "No model or name provided to train model."});
+//         return;
+//     }
+//     if (typeof model_or_model_name === 'string') {
+//         model = models[model_or_model_name];
+//         if (!model) {
+//             error_callback({message: "No model named '" + model_or_model_name + "'"});
+//             return;
 //         }
-        let configuration = {epochs: (+options.epochs || 10),
-                             shuffle: options.shuffle,
-                             validationSplit: +options.validation_split,
-                             callbacks: callbacks};
-        let validation_tensors = get_tensors(model.name, 'validation'); // undefined if no validation data
-        if (validation_tensors) {
-            configuration.validationData = validation_tensors;
-        }
-        const then_handler = (extra_info) => {
-            let duration = Math.round((Date.now()-start)/1000); // seconds to 3 decimal places
-            const last_epoch = epoch_history[epoch_history.length-1];
-            let response = last_epoch ?
-                           {"training loss":     last_epoch.loss.toFixed(3),
-                            "validation loss":   last_epoch.val_loss && last_epoch.val_loss.toFixed(3),
-                            "training accuracy": last_epoch.acc && (100*last_epoch.acc).toFixed(1) + "%",
-                            "validation accuracy": last_epoch.val_acc && (100*last_epoch.val_acc).toFixed(1) + "%",
-                            "duration in seconds": duration} : 
-                           {"duration in seconds": duration};
-            if (typeof extra_info === 'string') {
-                response.extra_info = extra_info;
-            }
-            success_callback(response);
-            model.ready_for_prediction = true;
-            if (model.callback_when_ready_for_prediction) {
-                model.callback_when_ready_for_prediction();
-                model.callback_when_ready_for_prediction = undefined;
-            }
-            xs.dispose();
-            ys.dispose();
-            if (validation_tensors && validation_tensors.length === 2) {
-                validation_tensors[0].dispose();
-                validation_tensors[1].dispose();
-            }
-        };
-        const error_handler = (error) => {
-            if (error.message.indexOf('Training stopped') === 0) {
-                // only did some training but not really an error
-                then_handler(error.message);
-                if (message_element) {
-                    message_element.innerHTML += "<br>" + error.message;
-                }
-            } else {
-                error_callback(error);
-//                  model.summary();
-            }
-        };
-        // Train the model using the data
-        let start = Date.now();
-        // do I really need tidy at all since I dispose of tensors explicitly
-//         if (configuration.validationSplit) {
-//             // see https://github.com/tensorflow/tfjs/issues/927
-//             // hack until resolved - note there may be a memory leak here
-//             // tests indicate that the memory loss is only for the first time this is run
-//             // presumably the validation set is cached 
-//             model.fit(xs, ys, configuration)
-//                 .then((x) => {
-//                          tf.tidy(() => {
-//                              then_handler(x);
-//                          });
-//                      },
-//                      error_handler);
+//     } else {
+//         model = model_or_model_name;
+//     }
+//     try {
+//         ensure_last_layer_right_size(model, training_data);
+//     } catch (error) {
+//         error_callback({message: error.message});
+//         return;
+//     }
+//     if (!model.ready_for_training) {
+//         let previous_callback = model.callback_when_ready_for_training;
+//         model.callback_when_ready_for_training = 
+//             () => {
+//                 if (previous_callback) {
+//                     previous_callback();
+//                 }
+//                 train_model(model, training_data, validation_data, options,
+//                             use_tfjs_vis, success_callback, error_callback, message_element);
+//             };
+//         return;
+//     }
+//     const categories = get_data(model.name, 'categories');
+//     try {
+//         // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
+//         let epoch_history = [];
+//         const metrics = categories ? ['loss', 'val_loss', 'acc', 'val_acc'] : ['loss', 'val_loss'];
+//         const container = {tab: 'Training',
+//                            styles: { height: '400px' }};
+//         container.name = categories ? 'Loss and accuracy' : 'Loss';                           
+//         let callbacks;
+//         let epoch_end_callback;
+//         if (use_tfjs_vis &&
+//             (window.parent === window || // not an iframe
+//              !window.parent.ecraft2learn || // parent isn't ecraft2learn library
+//              window.parent.ecraft2learn.support_window_visible("tensorflow.js"))) { // is visible
+//             callbacks = tfvis.show.fitCallbacks(container, metrics, {callbacks: ['onEpochEnd'], yAxisDomain: [0, 1]});
+//             epoch_end_callback = callbacks.onEpochEnd;
 //         } else {
-//             tf.tidy(() => {
-                model.fit(xs, ys, configuration)
-                    .then(then_handler, error_handler);
-//                 });       
+//             callbacks = {};
 //         }
-    } catch (error) {
-        error_callback(error);
-    }
-    return message_to_user;
-};
+//         callbacks.onEpochEnd = (epoch, history) => {
+//             if (epoch_end_callback) {
+//                 epoch_end_callback(epoch, history);
+//             }
+//             if (isNaN(history.loss)) {
+//                 throw new Error('Training stopped due to loss being "not a Number"');
+//             }
+//             // and in any case do the following 
+//             if (epoch > 4 &&
+//                 epoch_history[epoch-1].loss === history.loss &&
+//                 epoch_history[epoch-2].loss === history.loss &&
+//                 epoch_history[epoch-3].loss === history.loss) {
+//                 // no progress for last 4 epochs 
+//                 throw new Error('Training stopped after ' + (epoch-4) + ' steps due to lack of progress.');
+//             }
+//             epoch_history.push(history);
+//         };
+//         if (!model.optimizer) {
+//             // loaded models lack an optimizer and loss function
+//             const optimizer_full_name = gui_state["Model"]["Optimization method"];
+//             const optimizer = optimizer_named(optimizer_full_name);
+//             const loss_function_full_name = gui_state["Model"]["Loss function"];
+//             const loss_function = loss_function_named(loss_function_full_name);
+//             model.compile({loss: (loss_function || default_loss_function(categories)),
+//                            optimizer: optimizer});
+//         }
+//         if (model.optimizer.learningRate && options.learning_rate) { 
+//             // only if optimizer has a learningRate property
+//             // perhaps it would be better to create optimizers with the correct learning_rate
+//             // e.g. tf.train.xxx(learning_rate)
+//             model.optimizer.learningRate = options.learning_rate;
+//             gui_state["Training"]['Learning rate'] = options.learning_rate;
+//         }
+//         if (options.epochs) {
+//             gui_state["Training"]['Number of iterations'] = options.epochs;
+//         }
+//         if (options.validation_split) {
+//             gui_state["Training"]['Validation split'] = +options.validation_split;
+//         }
+//         if (typeof options.shuffle === 'boolean') {
+//             gui_state["Training"]['Shuffle data'] = options.shuffle;
+//         }
+//         let [xs, ys] = get_tensors(model.name, 'training');
+// //         const [normalization_factor, new_xs] = normalize(xs);
+// //         if (normalization_factor) {
+// //             xs.dispose();
+// //             xs = new_xs;
+// //             model.normalization_factor = normalization_factor;
+// //         }
+//         let configuration = {epochs: (+options.epochs || 10),
+//                              shuffle: options.shuffle,
+//                              validationSplit: +options.validation_split,
+//                              callbacks: callbacks};
+//         let validation_tensors = get_tensors(model.name, 'validation'); // undefined if no validation data
+//         if (validation_tensors) {
+//             configuration.validationData = validation_tensors;
+//         }
+//         const then_handler = (extra_info) => {
+//             let duration = Math.round((Date.now()-start)/1000); // seconds to 3 decimal places
+//             const last_epoch = epoch_history[epoch_history.length-1];
+//             let response = last_epoch ?
+//                            {"training loss":     last_epoch.loss.toFixed(3),
+//                             "validation loss":   last_epoch.val_loss && last_epoch.val_loss.toFixed(3),
+//                             "training accuracy": last_epoch.acc && (100*last_epoch.acc).toFixed(1) + "%",
+//                             "validation accuracy": last_epoch.val_acc && (100*last_epoch.val_acc).toFixed(1) + "%",
+//                             "duration in seconds": duration} : 
+//                            {"duration in seconds": duration};
+//             if (typeof extra_info === 'string') {
+//                 response.extra_info = extra_info;
+//             }
+//             success_callback(response);
+//             model.ready_for_prediction = true;
+//             if (model.callback_when_ready_for_prediction) {
+//                 model.callback_when_ready_for_prediction();
+//                 model.callback_when_ready_for_prediction = undefined;
+//             }
+//             xs.dispose();
+//             ys.dispose();
+//             if (validation_tensors && validation_tensors.length === 2) {
+//                 validation_tensors[0].dispose();
+//                 validation_tensors[1].dispose();
+//             }
+//         };
+//         const error_handler = (error) => {
+//             if (error.message.indexOf('Training stopped') === 0) {
+//                 // only did some training but not really an error
+//                 then_handler(error.message);
+//                 if (message_element) {
+//                     message_element.innerHTML += "<br>" + error.message;
+//                 }
+//             } else {
+//                 error_callback(error);
+// //                  model.summary();
+//             }
+//         };
+//         // Train the model using the data
+//         let start = Date.now();
+//         // do I really need tidy at all since I dispose of tensors explicitly
+// //         if (configuration.validationSplit) {
+// //             // see https://github.com/tensorflow/tfjs/issues/927
+// //             // hack until resolved - note there may be a memory leak here
+// //             // tests indicate that the memory loss is only for the first time this is run
+// //             // presumably the validation set is cached 
+// //             model.fit(xs, ys, configuration)
+// //                 .then((x) => {
+// //                          tf.tidy(() => {
+// //                              then_handler(x);
+// //                          });
+// //                      },
+// //                      error_handler);
+// //         } else {
+// //             tf.tidy(() => {
+//                 model.fit(xs, ys, configuration)
+//                     .then(then_handler, error_handler);
+// //                 });       
+// //         }
+//     } catch (error) {
+//         error_callback(error);
+//     }
+//     return message_to_user;
+// };
 
 const default_loss_function = (categories) => categories ? 'softmaxCrossEntropy' : 'meanSquaredError';
 
@@ -1088,19 +1100,23 @@ const train_with_parameters = async function (surface_name) {
     message.innerHTML += ". Please wait.";
     setTimeout(async function () {
         // without the timeout the message above isn't displayed
+        const categories = get_data(model_name, 'categories')
         const message_to_user = 
-            await train_model(model_name,
-                              training_data,
-                              validation_data,
+            await train_model(get_model(model_name),
+                              get_data(model_name, 'datasets'),
                               {epochs: Math.round(gui_state["Training"]["Number of iterations"]),
                                learning_rate: gui_state["Training"]["Learning rate"],
                                validation_split: gui_state["Training"]["Validation split"],
                                shuffle: to_boolean(gui_state["Training"]["Shuffle data"]),
+                               tfvis_options: {callbacks: ['onEpochEnd'],
+                                               yAxisDomain: [0, 1], // add this to gui for user control 
+                                               width: 500,
+                                               height: 300,
+                                               measure_accuracy: !!categories,
+                                               display_confusion_matrix: !!categories},
                               },
-                              true, // show progress using tfjs-vis 
                               success_callback,
-                              error_callback,
-                              message);
+                              error_callback);
 
     });
   };
@@ -1520,20 +1536,10 @@ const receive_message =
                                           error_message: error_message}, "*");
             };
             let model_name = message.train.model_name;
-            const training_data = get_data(model_name, 'training');
-            const xs_array = training_data.input;
-            const ys_array = training_data.output;
-            const validation_data = get_data(model_name, 'validation');
-            let xs_validation_array, ys_validation_array;
-            if (validation_data) {
-                xs_validation_array = validation_data.input;
-                ys_validation_array = validation_data.output;
-            }
-            const datasets = {model_name, xs_array, ys_array, xs_validation_array, ys_validation_array};
             const options = {...message.train, // make them match the new conventions
                              tfvis_options: message.train.show_progress,}
             train_model(get_model(model_name),
-                        datasets,
+                        get_data(model_name, 'datasets'),
                         options,                         
                         success_callback,
                         error_callback);

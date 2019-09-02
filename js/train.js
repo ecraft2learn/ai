@@ -157,11 +157,12 @@ const create_model = (options, failure_callback) => {
 const train_model = (model, datasets, options, success_callback, failure_callback) => {
     try {
         let {xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array} = datasets;
-        const {model_name, class_names, hidden_layer_sizes, batch_size, shuffle, epochs, validation_split, learning_rate, drop_out_rate, optimizer,
+        const {class_names, hidden_layer_sizes, batch_size, shuffle, epochs, validation_split, learning_rate, drop_out_rate, optimizer,
                layer_initializer, training_number, regularizer, seed, stop_if_no_progress_for_n_epochs,
                testing_fraction, validation_fraction, fraction_kept,
                tfvis_options} 
               = options;
+        const model_name = model.name;
         const splitting_data = (!xs_validation_array ||  xs_validation_array.length === 0) && // no validation data provided
               typeof validation_fraction === 'number' && 
               typeof testing_fraction === 'number';
