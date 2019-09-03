@@ -1366,8 +1366,8 @@ const save_and_load = function () {
     let load_training_data_input = file_input("Load training data file: ", 'load_training_data');
     load_training_data_input.title = "Select the saved data that will be used to train a model.";
     load_training_data_input.onchange = make_load_data_listener('training', 'all models');
-    load_data_message = {training:   document.createElement('div'),
-                         validation: document.createElement('div')};
+    const load_data_message = {training:   document.createElement('div'),
+                               validation: document.createElement('div')};
     let load_validation_data_input = file_input("Load validation data file: ", 'load_validation_data');
     load_validation_data_input.title = "Select the saved data that will be used to evaluate the progress on each training step when computing the loss."
     load_validation_data_input.onchange = make_load_data_listener('validation', 'all models');

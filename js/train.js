@@ -120,7 +120,7 @@ const create_model = (options, failure_callback) => {
                                         units: +size,
                                         activation_function,
                                         kernelInitializer,
-//                                         biasInitializer: kernelInitializer,
+//                                      biasInitializer: kernelInitializer,
                                         kernelRegularizer,
                                         useBias: true,
                                        }));
@@ -311,156 +311,157 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                       validationSplit: validation_split,
                       shuffle,
                       callbacks: stats_callback};
-      const after_fit_callback = () => {
-         model.ready_for_prediction = true;
-         const percentage_of_tests = (x) => +(100*x/xs_test_array.length).toFixed(2);
-         const show_layers = () => {
-             const surface = {name: 'Layers', tab: tab_label('Model inspection')};
-             tfvis.show.modelSummary(surface, model);
-             for (let i = 0; i < model.layers.length; i++) {
-                 tfvis.show.layer(surface, model.getLayer(undefined, i));
-             } 
-         };
-         if (tfvis_options && tfvis_options.display_layers) {
-             show_layers();
-         }
-         let confusion_matrix, test_loss, test_accuracy, number_of_classes;
-         if (xs_test && class_names) {
-             const test_loss_tensor = model.evaluate(xs_test, ys_test);
-             test_loss = test_loss_tensor[0].dataSync()[0];
-             test_accuracy = test_loss_tensor[1].dataSync()[0];
-             const predictions = model.predict(xs_test, ys_test);
-             number_of_classes = class_names && class_names.length;
-             confusion_matrix = class_names && tfvis_options.display_confusion_matrix &&
-                                compute_confusion_matrix(predictions.dataSync(), ys_test.dataSync(), number_of_classes);
-             predictions.dispose();
-             tf.dispose(test_loss_tensor); // both of them 
-             xs_test.dispose();
-             ys_test.dispose();              
-         }
-         xs.dispose();
-         ys.dispose();
-         if (xs_validation) {
-             xs_validation.dispose();
-             ys_validation.dispose();
-         }
-         const response =
-             {"Training loss": data_loss,
-              "Validation loss": validation_loss,
-              "Test loss": test_loss,
-              "Training accuracy": data_accuracy,
-              "Validation accuracy": validation_accuracy,
-              "Test accuracy": test_accuracy,
-              "Lowest validation loss": lowest_validation_loss,
-              "Lowest validation loss epoch": lowest_validation_loss_epoch, 
-              "Highest accuracy": highest_accuracy,
-              "Highest accuracy epoch": highest_accuracy_epoch,
-              "Last epoch": last_epoch,
-              "Duration in seconds": (Date.now()-start)/1000, 
-             };     
-         let csv_labels = // CSV for pasting into a spreadsheet
-             "Name, Layer1,Layer2,Layer3,layer4,layer5, Batch size, Dropout rate, Epochs, Optimizer, Initializer, Regularizer," +
-             "Testing fraction, Validation fraction, Fraction kept, " +
-             Object.keys(response) + ", ";
-         if (confusion_matrix) {
-             let confusion_labels = [];
-             confusion_matrix.forEach((row, i) => {
-                 row.forEach((item, j) => {
-                     confusion_labels.push(class_names[i] + "-" + class_names[j]);
-                 });
-             });
-             csv_labels += confusion_labels;
-             confusion_labels.map((label, index) => {
-                 response[label] = percentage_of_tests(confusion_matrix[index%number_of_classes] [Math.floor(index/number_of_classes)]);
-             });  
-         }
-         let csv_values =  model_name + ", ";
-         let i = 0;
-         let values_recorded = 0;
-         while (i < model.layers.length) {
-             if (model.layers[i].units) {
-                 csv_values += model.layers[i].units + ", ";
-                 values_recorded++;
-                 // otherwise ignore it - e.g. dropout layer  
-             }
-             i++;
-         }
-         for (; values_recorded < 5; values_recorded++) { // 5 is the maximum number of layers the spreadsheet can handle
-             csv_values += "0, "; // unused layers
-         }
-         csv_values += batch_size + ", ";
-         csv_values += drop_out_rate + ", ";
-         csv_values += epochs + ", ";
-         csv_values += options.optimizer_name + ", ";
-         csv_values += options.layer_initializer_name + ", ";
-         csv_values += options.regularizer_name + ", ";
-         csv_values += testing_fraction + ", ";
-         csv_values += validation_fraction + ", ";
-         csv_values += fraction_kept + ", ";    
-         csv_values += data_loss + ", ";
-         csv_values += validation_loss + ", ";
-         csv_values += (test_loss && test_loss.toFixed(4)) + ", ";
-         csv_values += (data_accuracy && data_accuracy.toFixed(4)) + ", ";
-         csv_values += (validation_accuracy && validation_accuracy.toFixed(4)) + ", ";
-         csv_values += (test_accuracy && test_accuracy.toFixed(4)) + ", ";
-         if (!xs_validation_array) {
-             // what about validation_split????
-             csv_values += xs_array.length + ", ";
-         } else if (xs_validation_array === xs_test_array) {
-             csv_values += xs_array.length + xs_validation_array.length + ", ";
-         } else {
-             csv_values += xs_array.length + xs_validation_array.length + xs_test_array.length + ", ";
-         }
-         csv_values += (lowest_validation_loss && lowest_validation_loss.toFixed(4)) + ", ";
-         csv_values += (lowest_validation_loss_epoch && lowest_validation_loss_epoch) + ", ";
-         csv_values += (highest_accuracy && highest_accuracy.toFixed(4)) + ", ";
-         csv_values += (highest_accuracy_epoch && highest_accuracy_epoch) + ", ";
-         if (confusion_matrix) {
-             confusion_matrix.forEach(row => {
-                 csv_values += row.map(percentage_of_tests) + ', '; 
-             });      
-         }
-         response["Column labels for saving results in a spreadsheet"] = csv_labels;
-         response["Spreadsheet values"] = csv_values;
-         response.model = model;
-         if (success_callback) {
-             success_callback(response);
-         }
-         if (confusion_matrix) {
-             tfvis.render.confusionMatrix({name: 'Confusion Matrix All',
-                                           tab: tab_label('Charts')},
-                                          {values: confusion_matrix,
-                                           tickLabels: class_names});
-             if (tfvis_options.display_collapsed_confusion_matrix) {
-                 tfvis.render.confusionMatrix({name: 'Confusion Matrix GP or not',
-                                               tab: tab_label('Charts')},
-                                              {values: collapse_confusion_matrix(confusion_matrix, 
-                                                                                 tfvis_options.display_collapsed_confusion_matrix.indices),
-                                               tickLabels: tfvis_options.display_collapsed_confusion_matrix.labels});
-             }
-         } 
-      };
-      const fit_error_handler = (error) => {
-          if (error.message.indexOf('No progress for ') >= 0) {
-              console.log(error.message);
-              after_fit_callback();
-          } else {
-              if (failure_callback) {
-                  failure_callback(error);
-              } else {
-                  throw error;
-              }
+      const after_fit_callback = (full_history) => {
+          console.log(full_history);
+          model.ready_for_prediction = true;
+          const percentage_of_tests = (x) => +(100*x/xs_test_array.length).toFixed(2);
+          const show_layers = () => {
+              const surface = {name: 'Layers', tab: tab_label('Model inspection')};
+              tfvis.show.modelSummary(surface, model);
+              for (let i = 0; i < model.layers.length; i++) {
+                  tfvis.show.layer(surface, model.getLayer(undefined, i));
+              } 
+          };
+          if (tfvis_options && tfvis_options.display_layers) {
+              show_layers();
           }
-      };
-      const start = Date.now();
-      model.fit(xs, ys, config).then(after_fit_callback, fit_error_handler);
-    } catch(error) {
-        if (failure_callback) {
-            failure_callback(error);
-        } else {
-            throw error;
-        }
-    }
+          let confusion_matrix, test_loss, test_accuracy, number_of_classes;
+          if (xs_test && class_names) {
+              const test_loss_tensor = model.evaluate(xs_test, ys_test);
+              test_loss = test_loss_tensor[0].dataSync()[0];
+              test_accuracy = test_loss_tensor[1].dataSync()[0];
+              const predictions = model.predict(xs_test, ys_test);
+              number_of_classes = class_names && class_names.length;
+              confusion_matrix = class_names && tfvis_options.display_confusion_matrix &&
+                                 compute_confusion_matrix(predictions.dataSync(), ys_test.dataSync(), number_of_classes);
+              predictions.dispose();
+              tf.dispose(test_loss_tensor); // both of them 
+              xs_test.dispose();
+              ys_test.dispose();              
+          }
+          xs.dispose();
+          ys.dispose();
+          if (xs_validation) {
+              xs_validation.dispose();
+              ys_validation.dispose();
+          }
+          const response =
+              {"Training loss": data_loss,
+               "Validation loss": validation_loss,
+               "Test loss": test_loss,
+               "Training accuracy": data_accuracy,
+               "Validation accuracy": validation_accuracy,
+               "Test accuracy": test_accuracy,
+               "Lowest validation loss": lowest_validation_loss,
+               "Lowest validation loss epoch": lowest_validation_loss_epoch, 
+               "Highest accuracy": highest_accuracy,
+               "Highest accuracy epoch": highest_accuracy_epoch,
+               "Last epoch": last_epoch,
+               "Duration in seconds": (Date.now()-start)/1000, 
+              };     
+          let csv_labels = // CSV for pasting into a spreadsheet
+              "Name, Layer1,Layer2,Layer3,layer4,layer5, Batch size, Dropout rate, Epochs, Optimizer, Initializer, Regularizer," +
+              "Testing fraction, Validation fraction, Fraction kept, " +
+              Object.keys(response) + ", ";
+          if (confusion_matrix) {
+              let confusion_labels = [];
+              confusion_matrix.forEach((row, i) => {
+                  row.forEach((item, j) => {
+                      confusion_labels.push(class_names[i] + "-" + class_names[j]);
+                  });
+              });
+              csv_labels += confusion_labels;
+              confusion_labels.map((label, index) => {
+                  response[label] = percentage_of_tests(confusion_matrix[index%number_of_classes] [Math.floor(index/number_of_classes)]);
+              });  
+          }
+          let csv_values =  model_name + ", ";
+          let i = 0;
+          let values_recorded = 0;
+          while (i < model.layers.length) {
+              if (model.layers[i].units) {
+                  csv_values += model.layers[i].units + ", ";
+                  values_recorded++;
+                  // otherwise ignore it - e.g. dropout layer  
+              }
+              i++;
+          }
+          for (; values_recorded < 5; values_recorded++) { // 5 is the maximum number of layers the spreadsheet can handle
+              csv_values += "0, "; // unused layers
+          }
+          csv_values += batch_size + ", ";
+          csv_values += drop_out_rate + ", ";
+          csv_values += epochs + ", ";
+          csv_values += options.optimizer_name + ", ";
+          csv_values += options.layer_initializer_name + ", ";
+          csv_values += options.regularizer_name + ", ";
+          csv_values += testing_fraction + ", ";
+          csv_values += validation_fraction + ", ";
+          csv_values += fraction_kept + ", ";    
+          csv_values += data_loss + ", ";
+          csv_values += validation_loss + ", ";
+          csv_values += (test_loss && test_loss.toFixed(4)) + ", ";
+          csv_values += (data_accuracy && data_accuracy.toFixed(4)) + ", ";
+          csv_values += (validation_accuracy && validation_accuracy.toFixed(4)) + ", ";
+          csv_values += (test_accuracy && test_accuracy.toFixed(4)) + ", ";
+          if (!xs_validation_array) {
+              // what about validation_split????
+              csv_values += xs_array.length + ", ";
+          } else if (xs_validation_array === xs_test_array) {
+              csv_values += xs_array.length + xs_validation_array.length + ", ";
+          } else {
+              csv_values += xs_array.length + xs_validation_array.length + xs_test_array.length + ", ";
+          }
+          csv_values += (lowest_validation_loss && lowest_validation_loss.toFixed(4)) + ", ";
+          csv_values += (lowest_validation_loss_epoch && lowest_validation_loss_epoch) + ", ";
+          csv_values += (highest_accuracy && highest_accuracy.toFixed(4)) + ", ";
+          csv_values += (highest_accuracy_epoch && highest_accuracy_epoch) + ", ";
+          if (confusion_matrix) {
+              confusion_matrix.forEach(row => {
+                  csv_values += row.map(percentage_of_tests) + ', '; 
+              });      
+          }
+          response["Column labels for saving results in a spreadsheet"] = csv_labels;
+          response["Spreadsheet values"] = csv_values;
+          response.model = model;
+          if (success_callback) {
+              success_callback(response);
+          }
+          if (confusion_matrix) {
+              tfvis.render.confusionMatrix({name: 'Confusion Matrix All',
+                                            tab: tab_label('Charts')},
+                                           {values: confusion_matrix,
+                                            tickLabels: class_names});
+              if (tfvis_options.display_collapsed_confusion_matrix) {
+                  tfvis.render.confusionMatrix({name: 'Confusion Matrix GP or not',
+                                                tab: tab_label('Charts')},
+                                               {values: collapse_confusion_matrix(confusion_matrix, 
+                                                                                  tfvis_options.display_collapsed_confusion_matrix.indices),
+                                                tickLabels: tfvis_options.display_collapsed_confusion_matrix.labels});
+              } 
+          } 
+       };
+       const fit_error_handler = (error) => {
+           if (error.message.indexOf('No progress for ') >= 0) {
+               console.log(error.message);
+               after_fit_callback();
+           } else {
+               if (failure_callback) {
+                   failure_callback(error);
+               } else {
+                   throw error;
+               }
+           } 
+       };
+       const start = Date.now();
+       model.fit(xs, ys, config).then(after_fit_callback, fit_error_handler);
+     } catch(error) {
+         if (failure_callback) {
+             failure_callback(error);
+         } else {
+             throw error;
+         }
+     } 
 };
 
 const shape_of_data = (data) => {
