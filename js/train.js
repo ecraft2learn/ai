@@ -110,7 +110,7 @@ const create_model = (options, failure_callback) => {
         };
         // if output_size isn't provided then assume user specified it as the last hidden_layer_sizes
         if (!output_size) {
-            output_size = hidden_layer_sizes.splice(-1)[0]; // remove last item and use it as the output_size
+            output_size = +hidden_layer_sizes.splice(-1)[0]; // remove last item and use it as the output_size
         }
         hidden_layer_sizes.forEach((size, index) => {
             const kernelRegularizer = tfjs_function(regularizer, tf.regularizers, index);

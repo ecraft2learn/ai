@@ -110,12 +110,12 @@ const optimizer_named = (name, learning_rate) => {
 };
 
 const non_categorical_loss_functions = 
-    {"Absolute Difference": "absoluteDifference",
+    {// "Absolute Difference": "absoluteDifference",
 //     "Compute Weighted Loss": "computeWeightedLoss", // caused "Cannot compute gradient: gradient function not found for notEqual." errors
 //      "Cosine Distance": "cosineDistance", // was causing crazy predictions
 //      "Hinge Loss": "hingeLoss", // appropriate for support vector machines
 //      "Huber Loss": "huberLoss", // this caused training nonsense
-     "Log Loss": "logLoss",
+//      "Log Loss": "logLoss",
      "Mean Squared Error": "meanSquaredError"};
 
 const categorical_loss_functions =
@@ -675,7 +675,7 @@ const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
    }
 };
 
-const optimize = async (model_name, xs, ys, validation_tensors, number_of_experiments, 
+const optimize = async (model_name, xs, ys, validation_tensors, number_of_experiments, epochs,
                         onExperimentBegin, onExperimentEnd, error_callback) => {
     const create_and_train_model = async ({layers, optimization_method, loss_function, epochs, learning_rate}, { xs, ys }) => {
         if (!layers) {
@@ -693,12 +693,21 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
         if (!learning_rate) {
             learning_rate = gui_state["Training"]["Learning rate"];
         }
-        const model = create_model(model_name,
-                                   layers,
-                                   optimization_method,
-                                   undefined,
-                                   {loss: loss_function,
-                                    learning_rate: learning_rate});
+        const model = create_model({model_name,
+        // support this:
+//                                     tensor_datasets: {xs, 
+//                                                       ys,
+//                                                       xs_validation: validation_tensors && validation_tensors[0],
+//                                                       ys_validation: validation_tensors && validation_tensors[1]},
+                                    datasets: {xs_array: xs.arraySync(),
+                                               ys_array: xs.arraySync(),
+                                               xs_validation_array: validation_tensors && validation_tensors[0].arraySync(),
+                                               ys_validation_array: validation_tensors && validation_tensors[1].arraySync(),
+                                               },
+                                    hidden_layer_sizes: layers,
+                                    optimizer: optimization_method,
+                                    loss_function,
+                                    learning_rate});
         if (model.optimizer.learningRate) { 
             model.optimizer.learningRate = learning_rate;
         }
@@ -707,6 +716,7 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
             configuration.validationData = validation_tensors;
         }
         return new Promise((resolve) => {
+            // use train_model from train.js ...
             // to run tidy in this context need to create a new promise
 //             tf.tidy(() => {
                 model.fit(xs, ys, configuration).then(
@@ -1692,7 +1702,7 @@ const receive_message =
                                           "*");
             }
             const error_callback = (error) => {
-                console.log(tf.memory());
+                console.log(error, tf.memory());
                 event.source.postMessage({optimize_hyperparameters_time_stamp: time_stamp,
                                           error_message: "Error while optimizing hyperparameters. " + 
                                                          error.message},
