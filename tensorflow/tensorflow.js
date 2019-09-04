@@ -16,6 +16,12 @@ let data = {}; // training and validation data either for "all models" or named 
 const get_data = (model_name, kind) => {
     if (kind === 'datasets') {
         const training_data = get_data(model_name, 'training');
+        if (!training_data) {
+            if (model_name !== 'all models') {
+                return get_data('all models', kind);
+            }
+            return;
+        }
         const xs_array = training_data.input;
         const ys_array = training_data.output;
         const validation_data = get_data(model_name, 'validation');
@@ -1016,6 +1022,7 @@ const create_model_with_parameters = function (surface_name) {
         const datasets = get_data(model_name, 'datasets');
         try {
             model = create_model({model_name, hidden_layer_sizes, optimizer, loss_function, datasets});
+            tensorflow.add_to_models(model);
         } catch (error) {
             message.innerHTML = error.message;
             report_error(error);
@@ -1574,11 +1581,9 @@ const receive_message =
                                           error_message: error_message}, "*");
             };
             let model_name = message.train.model_name;
-            const options = {...message.train, // make them match the new conventions
-                             tfvis_options: message.train.show_progress,}
             train_model(get_model(model_name),
                         get_data(model_name, 'datasets'),
-                        options,                         
+                        message.train,                         
                         success_callback,
                         error_callback);
         } else if (typeof message.predict !== 'undefined') {
@@ -1626,6 +1631,8 @@ const receive_message =
                                            enable_evaluate_button();
                                            event.source.postMessage({model_loaded: URL,
                                                                      model_name: name}, "*");
+//                                            model.compile({loss: 'meanSquaredError', optimizer: 'adamax'});
+                                           show_layers(model);
                                        },
                                        error_callback);
             } catch (error) {

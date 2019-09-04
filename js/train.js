@@ -113,38 +113,42 @@ const create_model = (options, failure_callback) => {
             output_size = hidden_layer_sizes.splice(-1)[0]; // remove last item and use it as the output_size
         }
         hidden_layer_sizes.forEach((size, index) => {
-             const kernelRegularizer = tfjs_function(regularizer, tf.regularizers, index);
-             const kernelInitializer = tfjs_function(layer_initializer, tf.initializers, index);
-             const activation_function = tfjs_function(activation, tf, index) || 'relu';
-             model.add(tf.layers.dense({inputShape: index === 0 ? input_shape : undefined,
-                                        units: +size,
-                                        activation_function,
-                                        kernelInitializer,
-//                                      biasInitializer: kernelInitializer,
-                                        kernelRegularizer,
-                                        useBias: true,
-                                       }));
-             if (drop_out_rate > 0) {
-                 // Error: Non-default seed is not implemented in Dropout layer yet: 1
-                 model.add(tf.layers.dropout({rate: drop_out_rate,
-                                              seed: SEED}));
-             }
-        });
-        // last layer. The number of units of the last layer should correspond
-        // to the output size (number of classes if categorical)
-        model.add(tf.layers.dense({units: +output_size,
-                                   kernelInitializer: tfjs_function(layer_initializer, tf.initializers, hidden_layer_sizes.length),
-                                   useBias: false,
-                                   activation: last_activation || (class_names && 'softmax')
-                                  }));
-        // We use categoricalCrossentropy which is the loss function we use for
-        // categorical classification which measures the error between our predicted
-        // probability distribution over classes (probability that an input is of each
-        // class), versus the label (100% probability in the true class)
-        model.compile({optimizer: typeof optimizer === 'string' ? optimizer : optimizer(),
-                       loss: loss_function || (class_names ? 'categoricalCrossentropy' : 'meanSquaredError'),
-                       metrics: class_names && ['accuracy']});
-        return model;
+            const kernelRegularizer = tfjs_function(regularizer, tf.regularizers, index);
+            const kernelInitializer = tfjs_function(layer_initializer, tf.initializers, index);
+            const activation_function = tfjs_function(activation, tf, index) || 'relu';
+            const configuration = {inputShape: index === 0 ? input_shape : undefined,
+                                   units: +size,
+                                   activation_function,
+//                                    kernelInitializer,
+//                                 biasInitializer: kernelInitializer,
+//                                    kernelRegularizer,
+                                   useBias: true,
+                                  };
+            model.add(tf.layers.dense(configuration));
+            if (drop_out_rate > 0) {
+                // Error: Non-default seed is not implemented in Dropout layer yet: 1
+                model.add(tf.layers.dropout({rate: drop_out_rate,
+                                             seed: SEED}));
+            }
+       });
+       // last layer. The number of units of the last layer should correspond
+       // to the output size (number of classes if categorical)
+       const configuration = {units: +output_size,
+                              kernelInitializer: tfjs_function(layer_initializer, tf.initializers, hidden_layer_sizes.length),
+                              useBias: false,
+                              activation: last_activation || (class_names && 'softmax')
+                             };
+       model.add(tf.layers.dense(configuration));
+       // We use categoricalCrossentropy which is the loss function we use for
+       // categorical classification which measures the error between our predicted
+       // probability distribution over classes (probability that an input is of each
+       // class), versus the label (100% probability in the true class)
+       const compile_options = {optimizer: typeof optimizer === 'string' ? optimizer : optimizer(),
+                               loss: loss_function || (class_names ? 'categoricalCrossentropy' : 'meanSquaredError'),
+                               metrics: class_names && ['accuracy']};
+       model.compile(compile_options);
+       show_layers(model);
+       return model;
   } catch (error) {
       if (failure_callback) {
           failure_callback(error);
@@ -154,12 +158,21 @@ const create_model = (options, failure_callback) => {
   }
 };
 
+const show_layers = (model) => {
+    const surface = {name: 'Layers', tab: tab_label('Model inspection')};
+    tfvis.show.modelSummary(surface, model);
+    for (let i = 0; i < model.layers.length; i++) {
+        surface.name = "Layer#" + i;
+        tfvis.show.layer(surface, model.getLayer(undefined, i));
+    } 
+};
+
 const tab_label = (label) => label + (typeof training_number === 'undefined' ? '' : '#' + training_number);
 
 const train_model = (model, datasets, options, success_callback, failure_callback) => {
     try {
         let {xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array} = datasets;
-        const {class_names, hidden_layer_sizes, batch_size, shuffle, epochs, validation_split, learning_rate, drop_out_rate, optimizer,
+        const {class_names, batch_size, shuffle, epochs, validation_split, learning_rate, drop_out_rate, optimizer,
                layer_initializer, training_number, regularizer, seed, stop_if_no_progress_for_n_epochs,
                testing_fraction, validation_fraction, fraction_kept,
                tfvis_options} 
@@ -243,7 +256,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
         const container = tfvis_options &&
                           {name: tfvis_options.measure_accuracy ? 'Loss and accuracy' : 'Loss',
                            tab: tab_label('Training'),
-                           styles: { height: tfvis_options && tfvis_options.container_height ? tfvis_options.container_height : '800px'}}; 
+                           styles: {height: tfvis_options && tfvis_options.container_height ? tfvis_options.container_height : '800px'}}; 
         const tfvis_callbacks = tfvis_options && tfvis.show.fitCallbacks(container, metrics, tfvis_options);
         // auto_stop replaced by the more controllable stop_if_no_progress_for_n_epochs
         //  const stop_early_callbacks = auto_stop && tf.callbacks.earlyStopping();
@@ -266,7 +279,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                 best_weights = [];
                 model.layers.forEach((layer) => {
                                         best_weights.push(layer.getWeights().map(tf.clone));
-                });     
+                });
         };
         const stats_callback = 
             {onEpochEnd: async (epoch, history) => {
@@ -305,26 +318,19 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                     throw new Error("No progress for " + stop_if_no_progress_for_n_epochs + " epochs at epoch " + epoch);
                 }
             }};
-      const config = {batchSize: batch_size,
-                      epochs,
-                      validationData: xs_validation && [xs_validation, ys_validation],
-                      validationSplit: validation_split,
-                      shuffle,
-                      callbacks: stats_callback};
+      const configuration = {batchSize: batch_size,
+                             epochs,
+                             validationData: xs_validation && [xs_validation, ys_validation],
+                             validationSplit: validation_split,
+                             shuffle,
+                             callbacks: stats_callback};
       const after_fit_callback = (full_history) => {
           console.log(full_history);
           model.ready_for_prediction = true;
           const percentage_of_tests = (x) => +(100*x/xs_test_array.length).toFixed(2);
-          const show_layers = () => {
-              const surface = {name: 'Layers', tab: tab_label('Model inspection')};
-              tfvis.show.modelSummary(surface, model);
-              for (let i = 0; i < model.layers.length; i++) {
-                  tfvis.show.layer(surface, model.getLayer(undefined, i));
-              } 
-          };
-          if (tfvis_options && tfvis_options.display_layers) {
-              show_layers();
-          }
+//           if (tfvis_options && tfvis_options.display_layers) {
+              show_layers(model);
+//           }
           let confusion_matrix, test_loss, test_accuracy, number_of_classes;
           if (xs_test && class_names) {
               const test_loss_tensor = model.evaluate(xs_test, ys_test);
@@ -454,7 +460,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
            } 
        };
        const start = Date.now();
-       model.fit(xs, ys, config).then(after_fit_callback, fit_error_handler);
+       model.fit(xs, ys, configuration).then(after_fit_callback, fit_error_handler);
      } catch(error) {
          if (failure_callback) {
              failure_callback(error);

@@ -1151,6 +1151,7 @@ window.ecraft2learn =
                          stop_if_no_progress_for_n_epochs) => {
         record_callbacks(success_callback, error_callback);
         const time_stamp = Date.now();
+        const tfvis_options = {};
         request_of_support_window('tensorflow.js',
                                   'Loaded',
                                   () => {
@@ -1159,6 +1160,7 @@ window.ecraft2learn =
                                                       learning_rate,
                                                       shuffle,
                                                       validation_split,
+                                                      tfvis_options,
                                                       time_stamp,
                                                       stop_if_no_progress_for_n_epochs}};
                                   },
