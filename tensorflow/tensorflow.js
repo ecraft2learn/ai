@@ -524,6 +524,7 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
     const categories = get_data(model_name, 'categories');
     let [xs, ys] = get_tensors(model_name, 'training');
     let validation_tensors = get_tensors(model_name, 'validation'); // undefined if no validation data
+    let epochs = gui_state["Training"]["Number of iterations"];
     const display_trial = (parameters, element) => {
         if (parameters.layers) {
             element.innerHTML += "Layers = " + parameters.layers + "<br>";
@@ -592,7 +593,7 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
         stop_on_next_experiment = false;
     };
     const number_of_experiments = Math.round(gui_state["Optimize"]["Number of experiments"]);
-    optimize(model_name, xs, ys, validation_tensors, number_of_experiments, onExperimentBegin, onExperimentEnd, error_handler)
+    optimize(model_name, xs, ys, validation_tensors, number_of_experiments, epochs, onExperimentBegin, onExperimentEnd, error_handler)
         .then((result) => {
             if (!result) {
                 // error has been handled
@@ -1419,7 +1420,7 @@ const load_model = async function () {
   const model_name = saved_model_element.files[0].name.substring(0, saved_model_element.files[0].name.length-".json".length);
   message.innerHTML = model_name + " loaded and ready to evaluate.";
   model.name = model_name;
-  model.ready_for_training = true;
+//   model.ready_for_training = true; -- must be compiled to do more training
   model.ready_for_prediction = true;
   if (models[name]) {
       message.innerHTML += "<br>Replaced a model with the same name.";
