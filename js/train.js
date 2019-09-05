@@ -144,7 +144,7 @@ const create_model = (options, failure_callback) => {
        // probability distribution over classes (probability that an input is of each
        // class), versus the label (100% probability in the true class)
        const compile_options = {optimizer: typeof optimizer === 'string' ? optimizer : optimizer(),
-                               loss: loss_function || (class_names ? 'categoricalCrossentropy' : 'meanSquaredError'),
+                               loss: (typeof loss_function === 'string' ?  tf.losses[loss_function] : loss_function) || (class_names ? 'categoricalCrossentropy' : 'meanSquaredError'),
                                metrics: class_names && ['accuracy']};
        model.compile(compile_options);
        show_layers(model);
@@ -170,6 +170,12 @@ const show_layers = (model) => {
 const tab_label = (label) => label + (typeof training_number === 'undefined' ? '' : '#' + training_number);
 
 const train_model = (model, datasets, options, success_callback, failure_callback) => {
+    if (!model.ready_for_training && model.ready_for_prediction) {
+        // been loaded but never compiled
+        // not clear how to provide options to override the following defaults
+        model.compile({optimizer: 'sgd',
+                       loss: 'meanSquaredError'});
+    }
     try {
         let {xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array} = datasets;
         const {class_names, batch_size, shuffle, epochs, validation_split, learning_rate, drop_out_rate, optimizer,
