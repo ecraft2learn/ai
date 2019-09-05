@@ -413,7 +413,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
           if (!xs_validation_array) {
               // what about validation_split????
               csv_values += xs_array.length + ", ";
-          } else if (xs_validation_array === xs_test_array) {
+          } else if (!xs_test_array || xs_validation_array === xs_test_array) {
               csv_values += xs_array.length + xs_validation_array.length + ", ";
           } else {
               csv_values += xs_array.length + xs_validation_array.length + xs_test_array.length + ", ";
