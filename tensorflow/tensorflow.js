@@ -713,15 +713,11 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
         if (model.optimizer.learningRate) { 
             model.optimizer.learningRate = learning_rate;
         }
-        const configuration = {epochs};
-        if (validation_tensors) {
-            configuration.validationData = validation_tensors;
-        }
         return new Promise((resolve) => {
             train_model(get_model(model_name),
                         datasets,
                         {epochs, // previously was only epochs -- but what about all the following/
-                         stop_if_no_progress_for_n_epochs,
+//                          stop_if_no_progress_for_n_epochs,
                          learning_rate: gui_state["Training"]["Learning rate"],
                          validation_split: gui_state["Training"]["Validation split"],
                          shuffle: to_boolean(gui_state["Training"]["Shuffle data"])},
@@ -737,7 +733,7 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
                                 loss = Number.MAX_VALUE;
                             }
                             resolve({loss: loss,
-                                     history: h.history,
+                                     history: results,
                                      status: hpjs.STATUS_OK});
                         },
                         error_callback);
