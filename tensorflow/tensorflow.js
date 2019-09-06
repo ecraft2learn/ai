@@ -522,7 +522,7 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
     const name_element = document.getElementById('name_element');
     const model_name = name_element ? name_element.value : model ? model.name : 'my-model';
     const categories = get_data(model_name, 'categories');
-    let [xs, ys] = get_tensors(model_name, 'training');
+    const [xs, ys] = get_tensors(model_name, 'training');
     let validation_tensors = get_tensors(model_name, 'validation'); // undefined if no validation data
     let epochs = gui_state["Training"]["Number of iterations"];
     const display_trial = (parameters, element) => {
@@ -706,18 +706,15 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
         if (!learning_rate) {
             learning_rate = gui_state["Training"]["Learning rate"];
         }
-        const datasets = {xs_array: xs.arraySync(),
-                          ys_array: xs.arraySync(),
-                          xs_validation_array: validation_tensors && validation_tensors[0].arraySync(),
-                          ys_validation_array: validation_tensors && validation_tensors[1].arraySync(),
-                         };
+        const input_shape = shape_of_data(get_data(model_name, 'training').input[0]);
+        const tensor_datasets = {xs, 
+                                 ys,
+                                 xs_validation: validation_tensors && validation_tensors[0],
+                                 ys_validation: validation_tensors && validation_tensors[1],
+                                };
         const model = create_model({model_name,
-        // support this:
-//                                     tensor_datasets: {xs, 
-//                                                       ys,
-//                                                       xs_validation: validation_tensors && validation_tensors[0],
-//                                                       ys_validation: validation_tensors && validation_tensors[1]},
-                                    datasets,
+                                    tensor_datasets,
+                                    input_shape,
                                     hidden_layer_sizes: layers,
                                     optimizer: optimization_method,
                                     loss_function,
@@ -727,8 +724,8 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
         }
         return new Promise((resolve) => {
             train_model(model,
-                        datasets,
-                        {epochs, // previously was only epochs -- but what about all the following/
+                        tensor_datasets,
+                        {epochs, 
 //                          stop_if_no_progress_for_n_epochs,
                          learning_rate: gui_state["Training"]["Learning rate"],
                          validation_split: gui_state["Training"]["Validation split"],
@@ -751,7 +748,6 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
                         },
                         error_callback);
             });
-//         }); 
     };
     const space = {};
     const categories = get_data(model_name, 'categories');

@@ -80,12 +80,18 @@ const create_and_train_model = (datasets, options, success_callback, failure_cal
 const create_model = (options, failure_callback) => {
     try {
         const {model_name, class_names, hidden_layer_sizes, drop_out_rate, optimizer, layer_initializer, regularizer, learning_rate,
-               loss_function, activation, last_activation, seed, datasets} = options;
+               loss_function, activation, last_activation, seed, datasets, tensor_datasets} = options;
         const tfvis_options = tfvis ? options.tfvis_options || {} : {}; // ignore options if tfvis not loaded
         let {input_shape} = options;
         if (!input_shape) {
             if (datasets) {
                 input_shape = shape_of_data(datasets.xs_array[0]);
+            } else if (tensor_datasets) {
+                input_shape = tensor_dataset.xs.shape.slice(1);
+                if (input_shape.length === 0) {
+                    input_shape = [1];
+                }
+                // shape_of_data(tensor_dataset.dataSync().xs[0]);
             }
         }
         if (!input_shape) {
@@ -167,6 +173,84 @@ const show_layers = (model) => {
 
 const tab_label = (label) => label + (typeof training_number === 'undefined' ? '' : '#' + training_number);
 
+const to_tensor_datasets = (array_datasets) => {
+    let {xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array} = array_datasets;
+    let test_and_validation_identical;
+    const splitting_data = (!xs_validation_array || xs_validation_array.length === 0) && // no validation data provided
+                           typeof validation_fraction === 'number' && typeof testing_fraction === 'number';
+    const original_xs = xs_array;
+    const original_ys = ys_array;
+    const split_data = () => {
+        // if I want reproducability I should use tf.randomUniform with a seed
+        let xs_ys = original_xs.map((x,index) => [x, original_ys[index]]);
+        tf.util.shuffle(xs_ys);
+        // this is a better shuffle but unlike the following has no random seed for reproducability
+        //         shuffle(xs_ys, SEED);
+        if (fraction_kept < 1) {
+            xs_ys.splice(Math.round((1 - fraction_kept) * xs_ys.length));
+        }
+        xs_ys = xs_ys.sort((a,b) => a[1].indexOf(1) - b[1].indexOf(1));
+        // sort by class to make equal quantities
+        const find_start = (class_index) => {
+            for (let i = 0; i < xs_ys.length; i++) {
+                if (xs_ys[i][1] === class_index) {
+                    return i;
+                }
+            }
+        };
+        const starts = class_names.map((ignore,class_index) => find_start(class_index));
+        const validation_count = Math.round(validation_fraction * xs_ys.length);
+        const validation_count_per_class = Math.round(validation_count / class_names.length);
+        const test_count = Math.round(testing_fraction * xs_ys.length);
+        const test_count_per_class = Math.round(test_count / class_names.length);
+        const new_count = xs_ys.length - (validation_count_per_class + test_count_per_class) * class_names.length;
+        const validation_ends = starts.map((start) => start + validation_count_per_class);
+        let xs_ys_validation = [];
+        validation_ends.forEach((end,index) => {
+            xs_ys_validation = xs_ys_validation.concat(xs_ys.slice(starts[index], end));
+        });
+        const test_ends = validation_ends.map((start) => start + test_count_per_class);
+        let xs_ys_test = [];
+        test_ends.forEach((end,index) => {
+            xs_ys_test = xs_ys_test.concat(xs_ys.slice(validation_ends[index], end));
+        });
+        let new_xs_ys = [];
+        starts.push(xs_ys.length);
+        // so starts [index+1] is the end of the class
+        test_ends.forEach((test_end,index) => {
+            new_xs_ys = new_xs_ys.concat(xs_ys.slice(test_ends[index], starts[index + 1]));
+        });
+        xs_validation_array = xs_ys_validation.map((x_y) => x_y[0]);
+        ys_validation_array = xs_ys_validation.map((x_y) => x_y[1]);
+        xs_test_array = xs_ys_test.map((x_y) => x_y[0]);
+        ys_test_array = xs_ys_test.map((x_y) => x_y[1]);
+        if (xs_test_array.length === 0) {
+            // if not setting aside test data then use validation for confusion matrix etc.
+            xs_test_array = xs_validation_array;
+            ys_test_array = ys_validation_array;
+            test_and_validation_identical = true;
+        }
+        xs_array = new_xs_ys.map((x_y) => x_y[0]);
+        ys_array = new_xs_ys.map((x_y) => x_y[1]);
+    };
+    if (splitting_data) {
+        split_data();
+    }
+    const xs = tf.tensor(xs_array);
+    const ys = tf.tensor(ys_array);
+    const xs_validation = xs_validation_array && xs_validation_array.length > 0 && tf.tensor(xs_validation_array);
+    const ys_validation = ys_validation_array && ys_validation_array.length > 0 && tf.tensor(ys_validation_array);
+    const xs_test = xs_test_array && xs_test_array.length > 0 && tf.tensor(xs_test_array);
+    const ys_test = ys_test_array && ys_test_array.length > 0 && tf.tensor(ys_test_array);
+    return {xs,
+            ys,
+            xs_validation,
+            ys_validation,
+            xs_test,
+            ys_test,
+            test_and_validation_identical};
+};
+
 const train_model = (model, datasets, options, success_callback, failure_callback) => {
     if (!model.ready_for_training && model.ready_for_prediction) {
         // been loaded but never compiled
@@ -174,77 +258,19 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
         model.compile({optimizer: 'sgd',
                        loss: 'meanSquaredError'});
     }
+    const create_tensors = !!datasets.xs_array;
+    if (create_tensors) {
+        // datasets are JavaScript arrays (prior to possible splitting) so compute tensor version
+        datasets = to_tensor_datasets(datasets);
+    }
     try {
-        let {xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array} = datasets;
+        const {xs, ys, xs_validation, ys_validation, xs_test, ys_test, test_and_validation_identical} = datasets;
         const {class_names, batch_size, shuffle, epochs, validation_split, learning_rate, drop_out_rate, optimizer,
                layer_initializer, training_number, regularizer, seed, stop_if_no_progress_for_n_epochs,
                testing_fraction, validation_fraction, fraction_kept} 
               = options;
         const tfvis_options = tfvis ? options.tfvis_options || {} : {}; // ignore options if tfvis not loaded
         const model_name = model.name;
-        const splitting_data = (!xs_validation_array ||  xs_validation_array.length === 0) && // no validation data provided
-              typeof validation_fraction === 'number' && 
-              typeof testing_fraction === 'number';
-        const original_xs = xs_array;
-        const original_ys = ys_array;
-        const split_data = () => {
-            // if I want reproducability I should use tf.randomUniform with a seed
-            let xs_ys = original_xs.map((x, index) => [x, original_ys[index]]);
-            tf.util.shuffle(xs_ys); // this is a better shuffle but unlike the following has no random seed for reproducability
-    //         shuffle(xs_ys, SEED);
-            if (fraction_kept < 1) {
-                xs_ys.splice(Math.round((1-fraction_kept)*xs_ys.length));
-            }
-            xs_ys = xs_ys.sort((a, b) => a[1].indexOf(1)-b[1].indexOf(1)); // sort by class to make equal quantities
-            const find_start = (class_index) => {
-                for (let i = 0; i < xs_ys.length; i++) {
-                    if (xs_ys[i][1] === class_index) {
-                        return i;
-                    }
-                }
-            };
-            const starts = class_names.map((ignore, class_index) => find_start(class_index));
-            const validation_count = Math.round(validation_fraction*xs_ys.length);
-            const validation_count_per_class = Math.round(validation_count/class_names.length);
-            const test_count = Math.round(testing_fraction*xs_ys.length);
-            const test_count_per_class = Math.round(test_count/class_names.length);
-            const new_count = xs_ys.length-(validation_count_per_class+test_count_per_class)*class_names.length;
-            const validation_ends = starts.map((start) => start+validation_count_per_class);
-            let xs_ys_validation = [];
-            validation_ends.forEach((end, index) => {
-                xs_ys_validation = xs_ys_validation.concat(xs_ys.slice(starts[index], end));
-            });
-            const test_ends = validation_ends.map((start) => start+test_count_per_class);
-            let xs_ys_test = [];
-            test_ends.forEach((end, index) => {
-                xs_ys_test = xs_ys_test.concat(xs_ys.slice(validation_ends[index], end));
-            });
-            let new_xs_ys = [];
-            starts.push(xs_ys.length); // so starts [index+1] is the end of the class
-            test_ends.forEach((test_end, index) => {
-                new_xs_ys = new_xs_ys.concat(xs_ys.slice(test_ends[index], starts[index+1]));
-            });
-            xs_validation_array = xs_ys_validation.map((x_y) => x_y[0]);
-            ys_validation_array = xs_ys_validation.map((x_y) => x_y[1]);
-            xs_test_array = xs_ys_test.map((x_y) => x_y[0]);
-            ys_test_array = xs_ys_test.map((x_y) => x_y[1]);
-            if (xs_test_array.length === 0) {
-                // if not setting aside test data then use validation for confusion matrix etc.
-                xs_test_array = xs_validation_array;
-                ys_test_array = ys_validation_array;
-            }
-            xs_array = new_xs_ys.map((x_y) => x_y[0]);
-            ys_array = new_xs_ys.map((x_y) => x_y[1]);
-        };
-        if (splitting_data) {
-            split_data();
-        }
-        const xs = tf.tensor(xs_array);
-        const ys = tf.tensor(ys_array);
-        const xs_validation = xs_validation_array && xs_validation_array.length > 0 && tf.tensor(xs_validation_array);
-        const ys_validation = ys_validation_array && ys_validation_array.length > 0 && tf.tensor(ys_validation_array);
-        const xs_test = xs_test_array && xs_test_array.length > 0 && tf.tensor(xs_test_array);
-        const ys_test = ys_test_array && ys_test_array.length > 0 && tf.tensor(ys_test_array);
         const surface = tfjs_vis_surface || (tfvis_options.display_graphs && tfvis.visor().surface({name: model_name, tab: tab_label('Training')}));
         tfjs_vis_surface = surface; // re-use same one accross multiple calls
         // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
@@ -331,7 +357,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
       const after_fit_callback = (full_history) => {
           console.log(full_history);
           model.ready_for_prediction = true;
-          const percentage_of_tests = (x) => +(100*x/xs_test_array.length).toFixed(2);
+          const percentage_of_tests = (x) => +(100*x/xs.shape[0]).toFixed(2);
           if (tfvis_options.display_layers) {
               show_layers(model);
           }
@@ -346,12 +372,16 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                                  compute_confusion_matrix(predictions.dataSync(), ys_test.dataSync(), number_of_classes);
               predictions.dispose();
               tf.dispose(test_loss_tensor); // both of them 
-              xs_test.dispose();
-              ys_test.dispose();              
+              if (create_tensors) {
+                  xs_test.dispose();
+                  ys_test.dispose();
+              }              
           }
-          xs.dispose();
-          ys.dispose();
-          if (xs_validation) {
+          if (create_tensors) {
+              xs.dispose();
+              ys.dispose();
+          }
+          if (create_tensors && xs_validation) {
               xs_validation.dispose();
               ys_validation.dispose();
           }
@@ -415,13 +445,13 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
           csv_values += (data_accuracy && data_accuracy.toFixed(4)) + ", ";
           csv_values += (validation_accuracy && validation_accuracy.toFixed(4)) + ", ";
           csv_values += (test_accuracy && test_accuracy.toFixed(4)) + ", ";
-          if (!xs_validation_array) {
+          if (!xs_validation) {
               // what about validation_split????
-              csv_values += xs_array.length + ", ";
-          } else if (!xs_test_array || xs_validation_array === xs_test_array) {
-              csv_values += xs_array.length + xs_validation_array.length + ", ";
+              csv_values += xs.shape[0] + ", ";
+          } else if (!xs_test || test_and_validation_identical) {
+              csv_values += xs.shape[0] + xs_validation.shape[0] + ", ";
           } else {
-              csv_values += xs_array.length + xs_validation_array.length + xs_test_array.length + ", ";
+              csv_values += xs.shape[0] + xs_validation.shape[0] + xs_test.shape[0] + ", ";
           }
           csv_values += (lowest_validation_loss && lowest_validation_loss.toFixed(4)) + ", ";
           csv_values += (lowest_validation_loss_epoch && lowest_validation_loss_epoch) + ", ";
