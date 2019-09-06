@@ -578,10 +578,11 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
     };
     let onExperimentEnd = (i, trial) => {
         if (trial.result.loss < lowest_loss) {
-            optimize_hyperparameters_messages.innerHTML += "<b>Best loss so far = " + trial.result.loss.toFixed(5) + "</b>";
+            // tried toFixed(...) but error can be 1e-12 and shows up as just zeroes
+            optimize_hyperparameters_messages.innerHTML += "<b>Best loss so far = " + trial.result.loss + "</b>";
             lowest_loss = trial.result.loss;
         } else {
-            optimize_hyperparameters_messages.innerHTML += "Loss = " + trial.result.loss.toFixed(5)  + "<br>";
+            optimize_hyperparameters_messages.innerHTML += "Loss = " + trial.result.loss + "<br>";
         }                            
     };
 //     optimize_hyperparameters_messages.innerHTML = "<b>Searching for good parameter values. Please wait.</b>";
@@ -714,7 +715,7 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
             model.optimizer.learningRate = learning_rate;
         }
         return new Promise((resolve) => {
-            train_model(get_model(model_name),
+            train_model(model,
                         datasets,
                         {epochs, // previously was only epochs -- but what about all the following/
 //                          stop_if_no_progress_for_n_epochs,
