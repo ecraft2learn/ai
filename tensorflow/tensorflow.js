@@ -485,7 +485,8 @@ const get_tensors = (model_name, kind) => {
 };
 
 let optimize_hyperparameters_messages; // only need one even if called multiple times
-let lowest_loss; 
+let lowest_loss  = Number.MAX_VALUE;
+let best_model; 
 let stop_on_next_experiment = false;
 let hyperparameter_searching = false;
 const optimize_hyperparameters_button = document.createElement('button');
@@ -580,16 +581,16 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
             const install_settings_button = document.createElement('button');
             install_settings_button.className = "support-window-button";
             draw_area.appendChild(install_settings_button);
-            install_settings_button.innerHTML = "Click to install best settings found (loss = " + lowest_loss + "):<br>";
-            display_trial(result.argmin, install_settings_button);
+            install_settings_button.innerHTML = "Click to set model to best one found (loss = " + lowest_loss + ")";
+//             display_trial(result.argmin, install_settings_button);
             const settings = result.argmin;
-            settings.model_name = model.name;
+            settings.model_name = (model || previous_model).name;
             install_settings_button.addEventListener('click',
                                                      () => {
+                                                         model = best_model;
+                                                         add_to_models(model);
                                                          install_settings(settings);
-                                                         install_settings_button.innerHTML =
-                                                            "Settings installed. Re-create and re-train your model before testings it predictions."
-                                                            + install_settings_button.innerHTML;
+                                                         install_settings_button.remove();
                                                      });
             xs.dispose();
             ys.dispose();
@@ -667,7 +668,7 @@ const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
                       previous_model = undefined;
 //                       console.log(tf.memory(), "final", result);
                   }
-              });                   
+              });
    } catch (error) {
        if (error_callback) {
            let error_message;
@@ -731,19 +732,27 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
                          validation_split: gui_state["Training"]["Validation split"],
                          shuffle: to_boolean(gui_state["Training"]["Shuffle data"])},
                         (results) => {
-                            if (previous_model && !previous_model.disposed_previously) {
-                                previous_model.dispose();
-                                previous_model.disposed_previously = true;
-                            }
+//                             if (previous_model && !previous_model.disposed_previously) {
+//                                 previous_model.dispose();
+//                                 previous_model.disposed_previously = true;
+//                             }
                             previous_model = model;
-                            tf.disposeVariables();
+//                             tf.disposeVariables();
                             let loss = results['Lowest validation loss'] || results['Validation loss'] || 
                                        results['Lowest training loss'] || results['Training loss'];
                             if (isNaN(loss)) {
                                 loss = Number.MAX_VALUE;
                             }
-                            resolve({loss: loss,
-                                     results: results,
+                            if (loss < lowest_loss) {
+                                lowest_loss = loss;
+                                if (best_model) {
+                                    best_model.dispose();
+                                }
+                                best_model = model;
+                            }
+                            resolve({loss,
+                                     results,
+                                     best_model,
                                      status: hpjs.STATUS_OK});
                         },
                         error_callback);
@@ -799,11 +808,13 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
         space.layers = hpjs.choice(choices);
     }
     try {
-        return await hpjs.fmin(create_and_train_model,
-                               space,
-                               hpjs.search.randomSearch,
-                               number_of_experiments,
-                               {xs, ys, callbacks: { onExperimentBegin, onExperimentEnd }});
+        const result = await hpjs.fmin(create_and_train_model,
+                                       space,
+                                       hpjs.search.randomSearch,
+                                       number_of_experiments,
+                                       {xs, ys, callbacks: {onExperimentBegin, onExperimentEnd}});
+        console.log(best_model);
+        return result;
     } catch (error) {
         if (error_callback) {
             error_callback(error);
@@ -1030,7 +1041,7 @@ const create_model_with_parameters = function (surface_name) {
     parameters_interface(create_parameters_interface).model.open();
     let name_input;
     let message;
-    const create_model_with_current_settings = function () {
+    const create_model_with_current_settings = () => {
         let hidden_layer_sizes = get_layers();
         const model_name = name_input.value;
         const optimizer_full_name = gui_state["Model"]["Optimization method"];
@@ -1650,7 +1661,7 @@ const receive_message =
                                            // until https://github.com/tensorflow/tfjs/issues/885 is resolved need to update the name
                                            let name = URL.substring(URL.lastIndexOf('/')+1, URL.lastIndexOf('.'));
                                            model.name = name;
-                                           add_to_models(model);
+                                           tensorflow.add_to_models(model);
                                            enable_evaluate_button();
                                            event.source.postMessage({model_loaded: URL,
                                                                      model_name: name}, "*");
