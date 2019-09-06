@@ -1180,6 +1180,8 @@ const train_with_parameters = async function (surface_name) {
                                            width,
                                            height,
                                            measure_accuracy: !!categories,
+                                           display_graphs: true,
+                                           display_layers: true,
                                            display_confusion_matrix: !!categories},
                            },
                           success_callback,

@@ -81,6 +81,7 @@ const create_model = (options, failure_callback) => {
     try {
         const {model_name, class_names, hidden_layer_sizes, drop_out_rate, optimizer, layer_initializer, regularizer, learning_rate,
                loss_function, activation, last_activation, seed, datasets} = options;
+        const tfvis_options = tfvis ? options.tfvis_options || {} : {}; // ignore options if tfvis not loaded
         let {input_shape} = options;
         if (!input_shape) {
             if (datasets) {
@@ -142,7 +143,9 @@ const create_model = (options, failure_callback) => {
                                loss,
                                metrics: class_names && ['accuracy']};
        model.compile(compile_options);
-       show_layers(model);
+       if (tfvis_options.display_layers) {
+           show_layers(model);
+       }
        return model;
   } catch (error) {
       if (failure_callback) {
@@ -175,9 +178,9 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
         let {xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array} = datasets;
         const {class_names, batch_size, shuffle, epochs, validation_split, learning_rate, drop_out_rate, optimizer,
                layer_initializer, training_number, regularizer, seed, stop_if_no_progress_for_n_epochs,
-               testing_fraction, validation_fraction, fraction_kept,
-               tfvis_options} 
+               testing_fraction, validation_fraction, fraction_kept} 
               = options;
+        const tfvis_options = tfvis ? options.tfvis_options || {} : {}; // ignore options if tfvis not loaded
         const model_name = model.name;
         const splitting_data = (!xs_validation_array ||  xs_validation_array.length === 0) && // no validation data provided
               typeof validation_fraction === 'number' && 
@@ -242,23 +245,23 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
         const ys_validation = ys_validation_array && ys_validation_array.length > 0 && tf.tensor(ys_validation_array);
         const xs_test = xs_test_array && xs_test_array.length > 0 && tf.tensor(xs_test_array);
         const ys_test = ys_test_array && ys_test_array.length > 0 && tf.tensor(ys_test_array);
-        const surface = tfjs_vis_surface || (tfvis_options && tfvis && tfvis.visor().surface({name: model_name, tab: tab_label('Training')}));
+        const surface = tfjs_vis_surface || (tfvis_options.display_graphs && tfvis.visor().surface({name: model_name, tab: tab_label('Training')}));
         tfjs_vis_surface = surface; // re-use same one accross multiple calls
         // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
         let epoch_history = [];
         const metrics = ['loss', 'val_loss'];
-        if (tfvis_options && tfvis_options.measure_accuracy) {
+        if (tfvis_options.measure_accuracy) {
             metrics.push('acc');
             metrics.push('val_acc');
         };
         if (learning_rate) {
             model.optimizer.learningRate = learning_rate;
         }
-        const container = tfvis_options &&
+        const container = tfvis_options.display_graphs &&
                           {name: tfvis_options.measure_accuracy ? 'Loss and accuracy' : 'Loss',
                            tab: tab_label('Training'),
-                           styles: {height: tfvis_options && tfvis_options.container_height ? tfvis_options.container_height : '800px'}}; 
-        const tfvis_callbacks = tfvis_options && tfvis.show.fitCallbacks(container, metrics, tfvis_options);
+                           styles: {height: tfvis_options.container_height ? tfvis_options.container_height : '800px'}}; 
+        const tfvis_callbacks = tfvis_options.display_graphs && tfvis.show.fitCallbacks(container, metrics, tfvis_options);
         // auto_stop replaced by the more controllable stop_if_no_progress_for_n_epochs
         //  const stop_early_callbacks = auto_stop && tf.callbacks.earlyStopping();
         let data_loss;
@@ -329,9 +332,9 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
           console.log(full_history);
           model.ready_for_prediction = true;
           const percentage_of_tests = (x) => +(100*x/xs_test_array.length).toFixed(2);
-//           if (tfvis_options && tfvis_options.display_layers) {
+          if (tfvis_options.display_layers) {
               show_layers(model);
-//           }
+          }
           let confusion_matrix, test_loss, test_accuracy, number_of_classes;
           if (xs_test && class_names) {
               const test_loss_tensor = model.evaluate(xs_test, ys_test);

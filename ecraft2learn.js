@@ -1086,6 +1086,7 @@ window.ecraft2learn =
                                                            optimizer: optimizer,
                                                            activation: activation_function_name,
                                                            loss_function: loss_function,
+                                                           tfvis_options: {display_layers: true},
                                                            time_stamp: time_stamp};
                                       // if no size is provided then it will be computed from the training data
                                       if (typeof input_shape === 'number') {
@@ -1151,7 +1152,8 @@ window.ecraft2learn =
                          stop_if_no_progress_for_n_epochs) => {
         record_callbacks(success_callback, error_callback);
         const time_stamp = Date.now();
-        const tfvis_options = {};
+        const tfvis_options = {display_graphs: true,
+                               display_confusion_matrix: true};
         request_of_support_window('tensorflow.js',
                                   'Loaded',
                                   () => {
