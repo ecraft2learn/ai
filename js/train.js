@@ -314,6 +314,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
         // auto_stop replaced by the more controllable stop_if_no_progress_for_n_epochs
         //  const stop_early_callbacks = auto_stop && tf.callbacks.earlyStopping();
         let data_loss;
+        let lowest_data_loss;
         let validation_loss;
         let data_accuracy;
         let validation_accuracy;
@@ -322,6 +323,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
         let highest_accuracy;
         let highest_accuracy_epoch;
         let best_weights = [];
+        let update_weights = false;
         let last_epoch = 0;
         const stats_callback = 
             {onEpochEnd: async (epoch, history) => {
@@ -331,19 +333,28 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                 validation_loss = history.val_loss;
                 data_accuracy = history.acc;
                 validation_accuracy = history.val_acc;
+                if (typeof lowest_data_loss === 'undefined' || data_loss < lowest_data_loss) {
+                    lowest_data_loss = data_loss;
+                    if (!validation_loss) { // only using training data 
+                        update_weights = true;
+                    }
+                }
                 if (typeof lowest_validation_loss === 'undefined' || validation_loss < lowest_validation_loss) {
                     lowest_validation_loss = validation_loss;
                     lowest_validation_loss_epoch = epoch;
                     if (!validation_accuracy) {
-                        best_weights = update_best_weights(model, best_weights);
+                        update_weights = true;
                     }
                 }
                 if (validation_accuracy && (typeof highest_accuracy === 'undefined' || validation_accuracy > highest_accuracy)) {
                     highest_accuracy = validation_accuracy;
                     highest_accuracy_epoch = epoch;
                     if (highest_accuracy_epoch) {
-                        best_weights = update_best_weights(model, best_weights);
+                        update_weights = true;
                     }
+                }
+                if (update_weights) {
+                    best_weights = update_best_weights(model, best_weights);
                 }
                 if (tfvis_callbacks) {
                     tfvis_callbacks.onEpochEnd(epoch, history);

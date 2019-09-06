@@ -737,12 +737,12 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
                             }
                             previous_model = model;
                             tf.disposeVariables();
-                            let loss = results['Validation loss'] || results['Training loss'];
+                            let loss = results['Lowest validation loss'] || results['Validation loss'] || 
+                                       results['Lowest training loss'] || results['Training loss'];
                             if (isNaN(loss)) {
                                 loss = Number.MAX_VALUE;
                             }
                             resolve({loss: loss,
-//                                      history: results.history,
                                      results: results,
                                      status: hpjs.STATUS_OK});
                         },
