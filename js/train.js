@@ -251,6 +251,29 @@ const to_tensor_datasets = (array_datasets) => {
             test_and_validation_identical};
 };
 
+const update_best_weights = (model, best_weights) => {
+    if (best_weights) {
+        best_weights.forEach((layer_weights) => {
+            layer_weights.forEach((tensor) => {
+                tensor.dispose();
+            });
+        });
+    };
+    best_weights = [];
+    model.layers.forEach((layer) => {
+        best_weights.push(layer.getWeights().map(tf.clone));
+    });
+    return best_weights;
+};
+
+const set_model_weights = (model, best_weights) => {
+    if (best_weights) {
+        model.layers.forEach((layer, index) => {
+            layer.setWeights(best_weights[index]);
+        });        
+    }
+};
+
 const train_model = (model, datasets, options, success_callback, failure_callback) => {
     if (!model.ready_for_training && model.ready_for_prediction) {
         // been loaded but never compiled
@@ -300,17 +323,6 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
         let highest_accuracy_epoch;
         let best_weights = [];
         let last_epoch = 0;
-        const update_best_weights = () => {
-            best_weights.forEach((layer_weights) => {
-                layer_weights.forEach((tensor) => {
-                                         tensor.dispose();
-                                      });
-                });
-                best_weights = [];
-                model.layers.forEach((layer) => {
-                                        best_weights.push(layer.getWeights().map(tf.clone));
-                });
-        };
         const stats_callback = 
             {onEpochEnd: async (epoch, history) => {
                 epoch_history.push(history);
@@ -323,14 +335,14 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                     lowest_validation_loss = validation_loss;
                     lowest_validation_loss_epoch = epoch;
                     if (!validation_accuracy) {
-                        update_best_weights();
+                        best_weights = update_best_weights(model, best_weights);
                     }
                 }
                 if (validation_accuracy && (typeof highest_accuracy === 'undefined' || validation_accuracy > highest_accuracy)) {
                     highest_accuracy = validation_accuracy;
                     highest_accuracy_epoch = epoch;
                     if (highest_accuracy_epoch) {
-                        update_best_weights();
+                        best_weights = update_best_weights(model, best_weights);
                     }
                 }
                 if (tfvis_callbacks) {
@@ -342,10 +354,10 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                     // if there has been no progress in accuracy or loss then stop
                     // or just loss if accuracy not appropriate
                     // first restore best weights
-                    model.layers.forEach((layer, index) => {
-                        layer.setWeights(best_weights[index]);
-                    });  
-                    throw new Error("No progress for " + stop_if_no_progress_for_n_epochs + " epochs at epoch " + epoch);
+                    set_model_weights(model, best_weights);
+                    const error = new Error("No progress for " + stop_if_no_progress_for_n_epochs + " epochs at epoch " + epoch);
+                    error.history = epoch_history;
+                    throw error;
                 }
             }};
       const configuration = {batchSize: batch_size,
@@ -485,7 +497,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
        const fit_error_handler = (error) => {
            if (error.message.indexOf('No progress for ') >= 0) {
                console.log(error.message);
-               after_fit_callback();
+               after_fit_callback(error.history);
            } else {
                if (failure_callback) {
                    failure_callback(error);
