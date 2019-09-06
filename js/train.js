@@ -81,7 +81,7 @@ const create_model = (options, failure_callback) => {
     try {
         const {model_name, class_names, hidden_layer_sizes, drop_out_rate, optimizer, layer_initializer, regularizer, learning_rate,
                loss_function, activation, last_activation, seed, datasets} = options;
-        let {input_shape, output_size} = options;
+        let {input_shape} = options;
         if (!input_shape) {
             if (datasets) {
                 input_shape = shape_of_data(datasets.xs_array[0]);
@@ -89,11 +89,6 @@ const create_model = (options, failure_callback) => {
         }
         if (!input_shape) {
             throw new Error("Unable to create a model without knowing the shape of the input. Shape not provided and input data not known.");
-        }
-        if (!output_size) {
-            if (datasets) {
-                output_size = typeof datasets.ys_array[0] === 'number' ? 1 : datasets.ys_array[0].length;
-            }
         }
         // Creates a fully connected model. By creating a separate model,
         // rather than adding layers to the mobilenet model, we "freeze" the weights
@@ -108,21 +103,24 @@ const create_model = (options, failure_callback) => {
             }
             return fun(layer_index);
         };
-        // if output_size isn't provided then assume user specified it as the last hidden_layer_sizes
-        if (!output_size) {
-            output_size = +hidden_layer_sizes.splice(-1)[0]; // remove last item and use it as the output_size
+        if (datasets) {
+            const output_size = typeof datasets.ys_array[0] === 'number' ? 1 : datasets.ys_array[0].length;
+            const last_layer_size = +hidden_layer_sizes[hidden_layer_sizes.length-1];
+            if (output_size !== last_layer_size) {
+                hidden_layer_sizes.push(output_size);
+            }
         }
         hidden_layer_sizes.forEach((size, index) => {
             const kernelRegularizer = tfjs_function(regularizer, tf.regularizers, index);
             const kernelInitializer = tfjs_function(layer_initializer, tf.initializers, index);
             const activation_function = tfjs_function(activation, tf, index) || 'relu';
+            const last_layer = index === hidden_layer_sizes.length-1;
             const configuration = {inputShape: index === 0 ? input_shape : undefined,
                                    units: +size,
-                                   activation_function,
-//                                    kernelInitializer,
-//                                 biasInitializer: kernelInitializer,
-//                                    kernelRegularizer,
-                                   useBias: true,
+                                   activation: last_layer ? last_activation || (class_names && 'softmax') : activation_function,
+                                   kernelInitializer,
+                                   kernelRegularizer,
+                                   useBias: !last_layer, // last one has no bias 
                                   };
             model.add(tf.layers.dense(configuration));
             if (drop_out_rate > 0) {
@@ -131,14 +129,6 @@ const create_model = (options, failure_callback) => {
                                              seed: SEED}));
             }
        });
-       // last layer. The number of units of the last layer should correspond
-       // to the output size (number of classes if categorical)
-       const configuration = {units: +output_size,
-                              kernelInitializer: tfjs_function(layer_initializer, tf.initializers, hidden_layer_sizes.length),
-                              useBias: false,
-                              activation: last_activation || (class_names && 'softmax')
-                             };
-       model.add(tf.layers.dense(configuration));
        // We use categoricalCrossentropy which is the loss function we use for
        // categorical classification which measures the error between our predicted
        // probability distribution over classes (probability that an input is of each
@@ -374,6 +364,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                "Highest accuracy": highest_accuracy,
                "Highest accuracy epoch": highest_accuracy_epoch,
                "Last epoch": last_epoch,
+               "history": full_history,
                "Duration in seconds": (Date.now()-start)/1000, 
               };     
           let csv_labels = // CSV for pasting into a spreadsheet

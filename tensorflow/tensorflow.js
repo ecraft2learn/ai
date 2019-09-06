@@ -542,30 +542,6 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
             element.innerHTML += "Loss function = " + inverse_lookup(parameters.loss_function, loss_functions(categories)) + "<br>";
         }
     };
-    const install_settings = (parameters) => {
-        if (parameters.layers) {
-            gui_state["Model"]["Layers"] = parameters.layers.toString();
-        }
-        if (parameters.epochs) {
-            gui_state["Training"]["Number of iterations"] = parameters.epochs;
-        }
-        if (parameters.learning_rate) {
-            gui_state["Training"]["Learning rate"] = parameters.learning_rate;
-        } 
-        if (parameters.optimization_method) {
-            gui_state["Model"]["Optimization method"] = inverse_lookup(parameters.optimization_method, optimization_methods);
-        }
-        if (parameters.loss_function) {
-            gui_state["Model"]["Loss function"] = inverse_lookup(parameters.loss_function, loss_functions(categories));
-        }
-        let gui = parameters_interface(create_parameters_interface);
-        gui.model.__controllers.forEach((controller) => {
-            controller.updateDisplay();
-        });
-        gui.training.__controllers.forEach((controller) => {
-            controller.updateDisplay();
-        });
-    };
     let onExperimentBegin = (i, trial) => {
         if (stop_on_next_experiment) {
            stop_on_next_experiment = false;
@@ -606,9 +582,11 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
             draw_area.appendChild(install_settings_button);
             install_settings_button.innerHTML = "Click to install best settings found (loss = " + lowest_loss + "):<br>";
             display_trial(result.argmin, install_settings_button);
+            const settings = result.argmin;
+            settings.model_name = model.name;
             install_settings_button.addEventListener('click',
                                                      () => {
-                                                         install_settings(result.argmin);
+                                                         install_settings(settings);
                                                          install_settings_button.innerHTML =
                                                             "Settings installed. Re-create and re-train your model before testings it predictions."
                                                             + install_settings_button.innerHTML;
@@ -623,6 +601,39 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
             hyperparameter_searching = false;
             stop_on_next_experiment = false;
         });
+};
+
+const install_settings = (parameters) => {
+    const hidden_layer_sizes = parameters.hidden_layer_sizes || parameters.layers;
+    if (hidden_layer_sizes) {
+        gui_state["Model"]["Layers"] = hidden_layer_sizes.toString();
+    }
+    if (parameters.epochs) {
+        gui_state["Training"]["Number of iterations"] = parameters.epochs;
+    }
+    if (parameters.learning_rate) {
+        gui_state["Training"]["Learning rate"] = parameters.learning_rate;
+    }
+    const optimizer = parameters.optimizer || parameters.optimization_method;
+    if (optimizer) {
+        gui_state["Model"]["Optimization method"] = inverse_lookup(optimizer, optimization_methods);
+    }
+    if (parameters.loss_function) {
+        gui_state["Model"]["Loss function"] = inverse_lookup(parameters.loss_function, loss_functions(get_data(parameters.model_name, 'categories')));
+    }
+    if (typeof parameters.stop_if_no_progress_for_n_epochs === 'number') {
+        gui_state["Training"]["Stop if no progress for number of iterations"] = parameters.stop_if_no_progress_for_n_epochs;
+    }
+    if (typeof parameters.shuffle === 'boolean') {
+         gui_state["Training"]["Shuffle data"] = parameters.shuffle;
+    }
+    const gui = parameters_interface(create_parameters_interface);
+    gui.model.__controllers.forEach((controller) => {
+        controller.updateDisplay();
+    });
+    gui.training.__controllers.forEach((controller) => {
+        controller.updateDisplay();
+    });
 };
 
 const inverse_lookup = (value, table) => {
@@ -734,7 +745,8 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
                                 loss = Number.MAX_VALUE;
                             }
                             resolve({loss: loss,
-                                     history: results,
+//                                      history: results.history,
+                                     results: results,
                                      status: hpjs.STATUS_OK});
                         },
                         error_callback);
@@ -1557,6 +1569,7 @@ const receive_message =
                 options.loss_function = loss_function_named(options.loss_function);
                 options.optimizer = optimizer_named(options.optimizer);
                 const model = create_model(options);
+                install_settings(options);
                 tensorflow.add_to_models(model);
                 let description = [];
                 model.summary(50, // line length
@@ -1567,6 +1580,7 @@ const receive_message =
                 event.source.postMessage({model_created: message.create_model.model_name,
                                           description: description}, "*");
             } catch (error) {
+                console.log(error);
                 event.source.postMessage({create_model_failed: message.create_model.model_name,
                                           error_message: error.message}, "*");
             }
@@ -1591,6 +1605,7 @@ const receive_message =
                                           error_message: error_message}, "*");
             };
             let model_name = message.train.model_name;
+            install_settings(message.train);
             train_model(get_model(model_name),
                         get_data(model_name, 'datasets'),
                         message.train,                         
