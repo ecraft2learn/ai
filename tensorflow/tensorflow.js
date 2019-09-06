@@ -110,12 +110,12 @@ const optimizer_named = (name, learning_rate) => {
 };
 
 const non_categorical_loss_functions = 
-    {// "Absolute Difference": "absoluteDifference",
+    {"Absolute Difference": "absoluteDifference",
 //     "Compute Weighted Loss": "computeWeightedLoss", // caused "Cannot compute gradient: gradient function not found for notEqual." errors
 //      "Cosine Distance": "cosineDistance", // was causing crazy predictions
 //      "Hinge Loss": "hingeLoss", // appropriate for support vector machines
 //      "Huber Loss": "huberLoss", // this caused training nonsense
-//      "Log Loss": "logLoss",
+     "Log Loss": "logLoss",
      "Mean Squared Error": "meanSquaredError"};
 
 const categorical_loss_functions =
@@ -524,6 +524,7 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
     const categories = get_data(model_name, 'categories');
     let [xs, ys] = get_tensors(model_name, 'training');
     let validation_tensors = get_tensors(model_name, 'validation'); // undefined if no validation data
+    let epochs = gui_state["Training"]["Number of iterations"];
     const display_trial = (parameters, element) => {
         if (parameters.layers) {
             element.innerHTML += "Layers = " + parameters.layers + "<br>";
@@ -532,7 +533,7 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
             element.innerHTML += "Number of training iterations = " + parameters.epochs + "<br>";
         }
         if (parameters.learning_rate) {
-            element.innerHTML += "Learning rate = " + parameters.learning_rate + "<br>";
+            element.innerHTML += "Learning rate = " + parameters.learning_rate.toFixed(5) + "<br>";
         }
         if (parameters.optimization_method) {
             element.innerHTML += "Optimization method = " + inverse_lookup(parameters.optimization_method, optimization_methods) + "<br>";
@@ -565,25 +566,25 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
             controller.updateDisplay();
         });
     };
-    let onExperimentBegin = () => {
+    let onExperimentBegin = (i, trial) => {
         if (stop_on_next_experiment) {
            stop_on_next_experiment = false;
            hyperparameter_searching = false;
            optimize_hyperparameters_button.innerHTML = search_button_label;
            return true; // to stop the search
         }
+        optimize_hyperparameters_messages.innerHTML += "<br><br>Experiment " + (i+1) + ":<br>";
+        display_trial(trial.args, optimize_hyperparameters_messages);
     };
     let onExperimentEnd = (i, trial) => {
-        optimize_hyperparameters_messages.innerHTML = "Experiment " + i + ":<br>";
-        display_trial(trial.args, optimize_hyperparameters_messages);
         if (trial.result.loss < lowest_loss) {
-            optimize_hyperparameters_messages.innerHTML += "<b>Best loss so far = " + trial.result.loss + "</b>";
+            optimize_hyperparameters_messages.innerHTML += "<b>Best loss so far = " + trial.result.loss.toFixed(5) + "</b>";
             lowest_loss = trial.result.loss;
         } else {
-            optimize_hyperparameters_messages.innerHTML += "Loss = " + trial.result.loss;
+            optimize_hyperparameters_messages.innerHTML += "Loss = " + trial.result.loss.toFixed(5)  + "<br>";
         }                            
     };
-    optimize_hyperparameters_messages.innerHTML = "<b>Searching for good parameter values. Please wait.</b>";
+//     optimize_hyperparameters_messages.innerHTML = "<b>Searching for good parameter values. Please wait.</b>";
     const error_handler = (error) => {
         optimize_hyperparameters_messages.innerHTML = "Sorry but an error occured.<br>" + error.message;
         draw_area.appendChild(optimize_hyperparameters_messages);
@@ -592,13 +593,13 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
         stop_on_next_experiment = false;
     };
     const number_of_experiments = Math.round(gui_state["Optimize"]["Number of experiments"]);
-    optimize(model_name, xs, ys, validation_tensors, number_of_experiments, onExperimentBegin, onExperimentEnd, error_handler)
+    optimize(model_name, xs, ys, validation_tensors, number_of_experiments, epochs, onExperimentBegin, onExperimentEnd, error_handler)
         .then((result) => {
             if (!result) {
                 // error has been handled
                 return;
             }
-            optimize_hyperparameters_messages.remove(); 
+//             optimize_hyperparameters_messages.remove(); 
             const install_settings_button = document.createElement('button');
             install_settings_button.className = "support-window-button";
             draw_area.appendChild(install_settings_button);
@@ -693,17 +694,18 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
         if (!learning_rate) {
             learning_rate = gui_state["Training"]["Learning rate"];
         }
+        const datasets = {xs_array: xs.arraySync(),
+                          ys_array: xs.arraySync(),
+                          xs_validation_array: validation_tensors && validation_tensors[0].arraySync(),
+                          ys_validation_array: validation_tensors && validation_tensors[1].arraySync(),
+                         };
         const model = create_model({model_name,
         // support this:
 //                                     tensor_datasets: {xs, 
 //                                                       ys,
 //                                                       xs_validation: validation_tensors && validation_tensors[0],
 //                                                       ys_validation: validation_tensors && validation_tensors[1]},
-                                    datasets: {xs_array: xs.arraySync(),
-                                               ys_array: xs.arraySync(),
-                                               xs_validation_array: validation_tensors && validation_tensors[0].arraySync(),
-                                               ys_validation_array: validation_tensors && validation_tensors[1].arraySync(),
-                                               },
+                                    datasets,
                                     hidden_layer_sizes: layers,
                                     optimizer: optimization_method,
                                     loss_function,
@@ -711,33 +713,30 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
         if (model.optimizer.learningRate) { 
             model.optimizer.learningRate = learning_rate;
         }
-        const configuration = {epochs};
-        if (validation_tensors) {
-            configuration.validationData = validation_tensors;
-        }
         return new Promise((resolve) => {
-            // use train_model from train.js ...
-            // to run tidy in this context need to create a new promise
-//             tf.tidy(() => {
-                model.fit(xs, ys, configuration).then(
-                    (h) => {
-                        if (previous_model && !previous_model.disposed_previously) {
-                            previous_model.dispose();
-                            previous_model.disposed_previously = true;
-                        }
-                        previous_model = model;
-                        tf.disposeVariables();
-                        let loss = h.history.loss[h.history.loss.length-1];
-                        if (isNaN(loss)) {
-                            loss = Number.MAX_VALUE;
-                        }
-//                         console.log(tf.memory(), "experiment", {loss: loss}); // making sure this really does fix the tensor memory leak
-                        resolve({loss: loss,
-                                 history: h.history,
-                                 status: hpjs.STATUS_OK});          
+            train_model(get_model(model_name),
+                        datasets,
+                        {epochs, // previously was only epochs -- but what about all the following/
+//                          stop_if_no_progress_for_n_epochs,
+                         learning_rate: gui_state["Training"]["Learning rate"],
+                         validation_split: gui_state["Training"]["Validation split"],
+                         shuffle: to_boolean(gui_state["Training"]["Shuffle data"])},
+                        (results) => {
+                            if (previous_model && !previous_model.disposed_previously) {
+                                previous_model.dispose();
+                                previous_model.disposed_previously = true;
+                            }
+                            previous_model = model;
+                            tf.disposeVariables();
+                            let loss = results['Training loss'];
+                            if (isNaN(loss)) {
+                                loss = Number.MAX_VALUE;
+                            }
+                            resolve({loss: loss,
+                                     history: results,
+                                     status: hpjs.STATUS_OK});
                         },
-                    error_callback
-                );
+                        error_callback);
             });
 //         }); 
     };
@@ -1419,7 +1418,7 @@ const load_model = async function () {
   const model_name = saved_model_element.files[0].name.substring(0, saved_model_element.files[0].name.length-".json".length);
   message.innerHTML = model_name + " loaded and ready to evaluate.";
   model.name = model_name;
-  model.ready_for_training = true;
+//   model.ready_for_training = true; -- must be compiled to do more training
   model.ready_for_prediction = true;
   if (models[name]) {
       message.innerHTML += "<br>Replaced a model with the same name.";

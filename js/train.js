@@ -79,7 +79,7 @@ const create_and_train_model = (datasets, options, success_callback, failure_cal
 
 const create_model = (options, failure_callback) => {
     try {
-        const {model_name, class_names, hidden_layer_sizes, drop_out_rate, optimizer, layer_initializer, regularizer, 
+        const {model_name, class_names, hidden_layer_sizes, drop_out_rate, optimizer, layer_initializer, regularizer, learning_rate,
                loss_function, activation, last_activation, seed, datasets} = options;
         let {input_shape, output_size} = options;
         if (!input_shape) {
@@ -143,8 +143,13 @@ const create_model = (options, failure_callback) => {
        // categorical classification which measures the error between our predicted
        // probability distribution over classes (probability that an input is of each
        // class), versus the label (100% probability in the true class)
-       const compile_options = {optimizer: typeof optimizer === 'string' ? optimizer : optimizer(),
-                               loss: loss_function || (class_names ? 'categoricalCrossentropy' : 'meanSquaredError'),
+       const optimizer_function = ['Momentum', 'momentum'].includes(optimizer) ? 
+                                  tf.train.momentum((typeof learning_rate === 'undefined' ? .001 : learning_rate), .9) :
+                                  (typeof optimizer === 'string' ? tf.train[optimizer]() : optimizer());
+       const loss = (typeof loss_function === 'string' ?  tf.losses[loss_function] : loss_function) || 
+                    (class_names ? 'categoricalCrossentropy' : 'meanSquaredError');
+       const compile_options = {optimizer: optimizer_function,
+                               loss,
                                metrics: class_names && ['accuracy']};
        model.compile(compile_options);
        show_layers(model);
@@ -170,6 +175,12 @@ const show_layers = (model) => {
 const tab_label = (label) => label + (typeof training_number === 'undefined' ? '' : '#' + training_number);
 
 const train_model = (model, datasets, options, success_callback, failure_callback) => {
+    if (!model.ready_for_training && model.ready_for_prediction) {
+        // been loaded but never compiled
+        // not clear how to provide options to override the following defaults
+        model.compile({optimizer: 'sgd',
+                       loss: 'meanSquaredError'});
+    }
     try {
         let {xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array} = datasets;
         const {class_names, batch_size, shuffle, epochs, validation_split, learning_rate, drop_out_rate, optimizer,
