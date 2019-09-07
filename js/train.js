@@ -309,7 +309,9 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
         const container = tfvis_options.display_graphs &&
                           {name: tfvis_options.measure_accuracy ? 'Loss and accuracy' : 'Loss',
                            tab: tab_label('Training'),
-                           styles: {height: tfvis_options.container_height ? tfvis_options.container_height : '800px'}}; 
+                           styles: {height: tfvis_options.container_height ? 
+                                            tfvis_options.container_height : 
+                                            tfvis_options.measure_accuracy ? 800 : 400}}; 
         const tfvis_callbacks = tfvis_options.display_graphs && tfvis.show.fitCallbacks(container, metrics, tfvis_options);
         // auto_stop replaced by the more controllable stop_if_no_progress_for_n_epochs
         //  const stop_early_callbacks = auto_stop && tf.callbacks.earlyStopping();
