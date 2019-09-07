@@ -79,7 +79,7 @@ const create_and_train_model = (datasets, options, success_callback, failure_cal
 
 const create_model = (options, failure_callback) => {
     try {
-        const {model_name, class_names, hidden_layer_sizes, drop_out_rate, optimizer, layer_initializer, regularizer, learning_rate,
+        const {model_name, class_names, hidden_layer_sizes, dropout_rate, optimizer, layer_initializer, regularizer, learning_rate,
                loss_function, activation, last_activation, seed, datasets, tensor_datasets} = options;
         const tfvis_options = tfvis ? options.tfvis_options || {} : {}; // ignore options if tfvis not loaded
         let {input_shape} = options;
@@ -97,9 +97,6 @@ const create_model = (options, failure_callback) => {
         if (!input_shape) {
             throw new Error("Unable to create a model without knowing the shape of the input. Shape not provided and input data not known.");
         }
-        // Creates a fully connected model. By creating a separate model,
-        // rather than adding layers to the mobilenet model, we "freeze" the weights
-        // of the mobilenet model, and only train weights from the new model.
         const model = tf.sequential({name: model_name});
         const tfjs_function = (fun, function_table, layer_index) => {
             if (!fun) {
@@ -130,9 +127,9 @@ const create_model = (options, failure_callback) => {
                                    useBias: !last_layer, // last one has no bias 
                                   };
             model.add(tf.layers.dense(configuration));
-            if (!last_layer && drop_out_rate > 0) {
+            if (!last_layer && dropout_rate > 0) {
                 // Error: Non-default seed is not implemented in Dropout layer yet: 1
-                model.add(tf.layers.dropout({rate: drop_out_rate,
+                model.add(tf.layers.dropout({rate: dropout_rate,
                                              seed}));
             }
        });
@@ -288,7 +285,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
     }
     try {
         const {xs, ys, xs_validation, ys_validation, xs_test, ys_test, test_and_validation_identical} = datasets;
-        const {class_names, batch_size, shuffle, epochs, validation_split, learning_rate, drop_out_rate, optimizer,
+        const {class_names, batch_size, shuffle, epochs, validation_split, learning_rate, dropout_rate, optimizer,
                layer_initializer, training_number, regularizer, seed, stop_if_no_progress_for_n_epochs,
                testing_fraction, validation_fraction, fraction_kept} 
               = options;
@@ -459,7 +456,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
               csv_values += "0, "; // unused layers
           }
           csv_values += batch_size + ", ";
-          csv_values += drop_out_rate + ", ";
+          csv_values += dropout_rate + ", ";
           csv_values += epochs + ", ";
           csv_values += options.optimizer_name + ", ";
           csv_values += options.layer_initializer_name + ", ";

@@ -624,6 +624,12 @@ const install_settings = (parameters) => {
     if (parameters.loss_function) {
         gui_state["Model"]["Loss function"] = inverse_lookup(parameters.loss_function, loss_functions(get_data(parameters.model_name, 'categories')));
     }
+    if (parameters.activation) {
+        gui_state["Model"]["Activation function"] = parameters.activation;
+    }
+    if (parameters.dropout_rate) {
+        gui_state["Model"]["Dropout rate"] = parameters.dropout_rate;
+    }
     if (typeof parameters.stop_if_no_progress_for_n_epochs === 'number') {
         gui_state["Training"]["Stop if no progress for number of iterations"] = parameters.stop_if_no_progress_for_n_epochs;
     }
@@ -932,7 +938,9 @@ const gui_state =
   // following inspired by https://github.com/johnflux/deep-learning-tictactoe/blob/master/play.py
   {"Model": {"Layers": "100, 50, 20, 1",
              "Optimization method": 'Stochastic Gradient Descent',
-             "Loss function": 'Mean Squared Error'},
+             "Loss function": 'Mean Squared Error',
+             "Activation function": 'relu',
+             "Dropout rate": 0.5},
    "Training": {"Learning rate": .001,
                 "Number of iterations": 100,
                 "Stop if no progress for number of iterations": 20,
@@ -976,6 +984,10 @@ const create_model_parameters = (parameters_gui) => {
     } else {
         model.add(gui_state["Model"], 'Loss function', Object.keys(non_categorical_loss_functions));
     }
+    model.add(gui_state["Model"], 'Dropout rate');
+    const activation_functions =
+        ['elu', 'hardSigmoid', 'linear', 'relu', 'relu6', 'selu', 'sigmoid', 'softmax', 'softplus', 'softsign', 'tanh'];
+    model.add(gui_state["Model"], 'Activation function', activation_functions);
     return model;  
 };
 
@@ -1577,8 +1589,10 @@ const receive_message =
         } else if (typeof message.create_model !== 'undefined') {
             try {
                 const options = message.create_model;
+                const model_name = message.create_model.model_name;
                 options.loss_function = loss_function_named(options.loss_function);
                 options.optimizer = optimizer_named(options.optimizer);
+                options.datasets = get_data(model_name, 'datasets');
                 const model = create_model(options);
                 install_settings(options);
                 tensorflow.add_to_models(model);
@@ -1588,7 +1602,7 @@ const receive_message =
                               (line) => {
                                   description.push(line);
                               });
-                event.source.postMessage({model_created: message.create_model.model_name,
+                event.source.postMessage({model_created: model_name,
                                           description: description}, "*");
             } catch (error) {
                 console.log(error);
