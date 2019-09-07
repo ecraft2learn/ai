@@ -120,7 +120,7 @@ const create_model = (options, failure_callback) => {
         hidden_layer_sizes.forEach((size, index) => {
             const kernelRegularizer = tfjs_function(regularizer, tf.regularizers, index);
             const kernelInitializer = tfjs_function(layer_initializer, tf.initializers, index);
-            const activation_function = tfjs_function(activation, tf, index) || 'relu';
+            const activation_function = (typeof activation === 'string' ? activation : tfjs_function(activation, tf.layers, index)) || 'relu';
             const last_layer = index === hidden_layer_sizes.length-1;
             const configuration = {inputShape: index === 0 ? input_shape : undefined,
                                    units: +size,
@@ -133,7 +133,7 @@ const create_model = (options, failure_callback) => {
             if (!last_layer && drop_out_rate > 0) {
                 // Error: Non-default seed is not implemented in Dropout layer yet: 1
                 model.add(tf.layers.dropout({rate: drop_out_rate,
-                                             seed: SEED}));
+                                             seed}));
             }
        });
        // We use categoricalCrossentropy which is the loss function we use for
