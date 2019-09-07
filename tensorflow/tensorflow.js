@@ -935,7 +935,7 @@ const gui_state =
              "Loss function": 'Mean Squared Error'},
    "Training": {"Learning rate": .001,
                 "Number of iterations": 100,
-                "Stop if no progress for number of iterations": 10,
+                "Stop if no progress for number of iterations": 20,
                 "Validation split": 0.2,
                 "Shuffle data": true,
                 "Graph minimum loss": 0,
