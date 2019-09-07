@@ -130,7 +130,7 @@ const create_model = (options, failure_callback) => {
                                    useBias: !last_layer, // last one has no bias 
                                   };
             model.add(tf.layers.dense(configuration));
-            if (drop_out_rate > 0) {
+            if (!last_layer && drop_out_rate > 0) {
                 // Error: Non-default seed is not implemented in Dropout layer yet: 1
                 model.add(tf.layers.dropout({rate: drop_out_rate,
                                              seed: SEED}));
