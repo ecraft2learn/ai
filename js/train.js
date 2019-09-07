@@ -193,7 +193,7 @@ const to_tensor_datasets = (array_datasets) => {
         // sort by class to make equal quantities
         const find_start = (class_index) => {
             for (let i = 0; i < xs_ys.length; i++) {
-                if (xs_ys[i][1] === class_index) {
+                if (xs_ys[i][1].indexOf(1) === class_index) {
                     return i;
                 }
             }
@@ -332,6 +332,9 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                 epoch_history.push(history);
                 last_epoch = epoch;
                 data_loss = history.loss;
+                if (isNaN(data_loss)) {
+                    throw new Error("Training loss has become 'not-a-number'.");
+                }
                 validation_loss = history.val_loss;
                 data_accuracy = history.acc;
                 validation_accuracy = history.val_acc;
