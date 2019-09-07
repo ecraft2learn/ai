@@ -165,10 +165,10 @@ const create_model = (options, failure_callback) => {
 const show_layers = (model) => {
     const surface = {name: 'Layers', tab: tab_label('Model inspection')};
     tfvis.show.modelSummary(surface, model);
-    for (let i = 0; i < model.layers.length; i++) {
-        surface.name = "Layer#" + i;
-        tfvis.show.layer(surface, model.getLayer(undefined, i));
-    } 
+    model.layers.forEach((layer, index) => {
+        surface.name = "Layer#" + index;
+        tfvis.show.layer(surface, layer);
+    });
 };
 
 const tab_label = (label) => label + (typeof training_number === 'undefined' ? '' : '#' + training_number);

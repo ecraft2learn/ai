@@ -485,7 +485,7 @@ const get_tensors = (model_name, kind) => {
 };
 
 let optimize_hyperparameters_messages; // only need one even if called multiple times
-let lowest_loss  = Number.MAX_VALUE;
+let lowest_loss;
 let best_model; 
 let stop_on_next_experiment = false;
 let hyperparameter_searching = false;
@@ -554,7 +554,7 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
         display_trial(trial.args, optimize_hyperparameters_messages);
     };
     let onExperimentEnd = (i, trial) => {
-        if (trial.result.loss < lowest_loss) {
+        if (trial.result.loss <= lowest_loss) {
             // tried toFixed(...) but error can be 1e-12 and shows up as just zeroes
             optimize_hyperparameters_messages.innerHTML += "<b>Best loss so far = " + trial.result.loss + "</b>";
             lowest_loss = trial.result.loss;
@@ -581,14 +581,16 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
             const install_settings_button = document.createElement('button');
             install_settings_button.className = "support-window-button";
             draw_area.appendChild(install_settings_button);
-            install_settings_button.innerHTML = "Click to set model to best one found (loss = " + lowest_loss + ")";
-//             display_trial(result.argmin, install_settings_button);
+            const model_name = best_model.name;
+            install_settings_button.innerHTML = "Click to set '" + model_name + "' to best one found (loss = " + lowest_loss + ")<br>";
+            display_trial(result.argmin, install_settings_button);
             const settings = result.argmin;
-            settings.model_name = (model || previous_model).name;
+            settings.model_name = model_name;
             install_settings_button.addEventListener('click',
                                                      () => {
                                                          model = best_model;
                                                          add_to_models(model);
+                                                         show_layers(model);
                                                          install_settings(settings);
                                                          install_settings_button.remove();
                                                      });
@@ -1605,6 +1607,7 @@ const receive_message =
                 });
                 event.source.postMessage({training_completed: message.train.time_stamp,
                                           information: concise_information}, "*");
+                enable_evaluate_button();
             };
             const error_callback = (error_message) => {
                 if (typeof error_message === 'object') {
