@@ -536,11 +536,23 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
         if (parameters.learning_rate) {
             element.innerHTML += "Learning rate = " + parameters.learning_rate.toFixed(5) + "<br>";
         }
+        if (typeof parameters.dropout_rate !== 'undefined') {
+            element.innerHTML += "Dropout rate = " + parameters.dropout_rate.toFixed(3) + "<br>";
+        }
         if (parameters.optimization_method) {
             element.innerHTML += "Optimization method = " + inverse_lookup(parameters.optimization_method, optimization_methods) + "<br>";
         }
+        if (parameters.activation) {
+            element.innerHTML += "Activation function = " + parameters.activation + "<br>";
+        }
         if (parameters.loss_function) {
             element.innerHTML += "Loss function = " + inverse_lookup(parameters.loss_function, loss_functions(categories)) + "<br>";
+        }
+        if (typeof parameters.validation_split !== 'undefined') {
+            element.innerHTML += "Validation split = " + parameters.validation_split.toFixed(3) + "<br>";
+        }
+        if (typeof parameters.shuffle !== 'undefined') {
+            element.innerHTML += "Shuffle data = " + parameters.shuffle + "<br>";
         }
     };
     let onExperimentBegin = (i, trial) => {
@@ -574,29 +586,36 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
         stop_on_next_experiment = false;
     };
     const number_of_experiments = Math.round(gui_state["Optimize"]["Number of experiments"]);
+    best_model = undefined; // to be found
     optimize(model_name, xs, ys, validation_tensors, number_of_experiments, epochs, onExperimentBegin, onExperimentEnd, error_handler)
         .then((result) => {
             if (!result) {
                 // error has been handled
                 return;
             }
-//             optimize_hyperparameters_messages.remove(); 
-            const install_settings_button = document.createElement('button');
-            install_settings_button.className = "support-window-button";
-            draw_area.appendChild(install_settings_button);
-            const model_name = best_model.name;
-            install_settings_button.innerHTML = "Click to set '" + model_name + "' to best one found (loss = " + lowest_loss + ")<br>";
-            display_trial(result.argmin, install_settings_button);
-            const settings = result.argmin;
-            settings.model_name = model_name;
-            install_settings_button.addEventListener('click',
-                                                     () => {
-                                                         model = best_model;
-                                                         add_to_models(model);
-                                                         show_layers(model);
-                                                         install_settings(settings);
-                                                         install_settings_button.remove();
-                                                     });
+            if (!best_model) {
+                // all experiments failed
+                const message = document.createElement('p');
+                message.innerHTML = "All experiments failed. Try different settings.";
+                draw_area.appendChild(message);
+            } else {
+                const install_settings_button = document.createElement('button');
+                install_settings_button.className = "support-window-button";
+                draw_area.appendChild(install_settings_button);
+                const model_name = best_model.name;
+                install_settings_button.innerHTML = "Click to set '" + model_name + "' to best one found (loss = " + lowest_loss + ")<br>";
+                display_trial(result.argmin, install_settings_button);
+                const settings = result.argmin;
+                settings.model_name = model_name;
+                install_settings_button.addEventListener('click',
+                                                         () => {
+                                                             model = best_model;
+                                                             add_to_models(model);
+                                                             show_layers(model, 'Model after creation');
+                                                             install_settings(settings);
+                                                             install_settings_button.remove();
+                                                         });
+            }
             xs.dispose();
             ys.dispose();
             if (validation_tensors && validation_tensors.length === 2) {
@@ -630,14 +649,17 @@ const install_settings = (parameters) => {
     if (parameters.activation) {
         gui_state["Model"]["Activation function"] = parameters.activation;
     }
-    if (parameters.dropout_rate) {
+    if (typeof parameters.dropout_rate !== 'undefined') {
         gui_state["Model"]["Dropout rate"] = parameters.dropout_rate;
+    }
+    if (typeof parameters.validation_split !== 'undefined') {
+        gui_state["Training"]["Validation split"] = parameters.validation_split;
     }
     if (typeof parameters.stop_if_no_progress_for_n_epochs === 'number') {
         gui_state["Training"]["Stop if no progress for number of iterations"] = parameters.stop_if_no_progress_for_n_epochs;
     }
     if (typeof parameters.shuffle === 'boolean') {
-         gui_state["Training"]["Shuffle data"] = parameters.shuffle;
+        gui_state["Training"]["Shuffle data"] = parameters.shuffle;
     }
     const gui = parameters_interface(create_parameters_interface);
     gui.model.__controllers.forEach((controller) => {
@@ -702,7 +724,9 @@ const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
 
 const optimize = async (model_name, xs, ys, validation_tensors, number_of_experiments, epochs,
                         onExperimentBegin, onExperimentEnd, error_callback) => {
-    const create_and_train_model = async ({layers, optimization_method, loss_function, epochs, learning_rate}, { xs, ys }) => {
+    const create_and_train_model = async ({layers, optimization_method, loss_function, epochs, learning_rate,
+                                           dropout_rate, validation_split, activation, shuffle}, 
+                                          {xs, ys}) => {
         if (!layers) {
             layers = get_layers();
         }
@@ -712,11 +736,23 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
         if (!loss_function) {
             loss_function = gui_state["Model"]["Loss function"];
         }
+        if (!activation) {
+            activation = gui_state["Model"]["Activation function"]
+        }
         if (!epochs) {
             epochs = Math.round(gui_state["Training"]["Number of iterations"]);
         }
         if (!learning_rate) {
             learning_rate = gui_state["Training"]["Learning rate"];
+        }
+        if (typeof dropout_rate === 'undefined') {
+            dropout_rate = gui_state["Model"]["Dropout rate"];
+        }
+        if (typeof validation_split === 'undefined') {
+            validation_split = gui_state["Model"]["Validation split"];
+        }
+        if (typeof shuffle !== 'boolean') {
+            shuffle = to_boolean(gui_state["Training"]["Shuffle data"]);
         }
         const input_shape = shape_of_data(get_data(model_name, 'training').input[0]);
         const tensor_datasets = {xs, 
@@ -730,6 +766,8 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
                                     hidden_layer_sizes: layers,
                                     optimizer: optimization_method,
                                     loss_function,
+                                    activation,
+                                    dropout_rate,
                                     learning_rate});
         if (model.optimizer.learningRate) { 
             model.optimizer.learningRate = learning_rate;
@@ -738,10 +776,9 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
             train_model(model,
                         tensor_datasets,
                         {epochs, 
-//                          stop_if_no_progress_for_n_epochs,
-                         learning_rate: gui_state["Training"]["Learning rate"],
-                         validation_split: gui_state["Training"]["Validation split"],
-                         shuffle: to_boolean(gui_state["Training"]["Shuffle data"])},
+                         learning_rate,
+                         validation_split,
+                         shuffle},
                         (results) => {
 //                             if (previous_model && !previous_model.disposed_previously) {
 //                                 previous_model.dispose();
@@ -784,18 +821,36 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
     if (to_boolean(gui_state["Optimize"]["Search for best loss function"])) {
         space.loss_function = hpjs.choice(Object.values(loss_functions(categories)));
     }
+    if (to_boolean(gui_state["Optimize"]["Search for best activation function"])) {
+        space.activation = hpjs.choice(activation_functions);
+    }
+    if (to_boolean(gui_state["Optimize"]["Search for best shuffle data setting"])) {
+        space.shuffle = hpjs.choice([true, false]);
+    }
     if (to_boolean(gui_state["Optimize"]["Search for best number of training iterations"])) {
-        const current_epochs = Math.round(gui_state["Training"]["Number of iterations"]); // epochs
+        const current_epochs = Math.round(gui_state["Training"]["Number of iterations"]);
         const minimum = Math.max(1, Math.round(current_epochs/2));
         const maximum = current_epochs*2;
-        const number_of_choices = 5;
+        const number_of_choices = 10;
         const increment = Math.max(1, Math.round((maximum-minimum)/number_of_choices)); 
         space.epochs = hpjs.quniform(minimum, maximum, increment);
+    }
+    if (to_boolean(gui_state["Optimize"]["Search for best validation split"])) {
+        const current_validation_split = gui_state["Training"]["Validation split"];
+        const minimum = current_validation_split < .05 ? 0 : current_validation_split/2;
+        const maximum = Math.min(.95, current_validation_split*1.5+.1);
+        space.validation_split = hpjs.uniform(minimum, maximum);
+    }
+    if (to_boolean(gui_state["Optimize"]["Search for best dropout rate"])) {
+        const current_dropout_rate = gui_state["Model"]["Dropout rate"];
+        const minimum = current_dropout_rate < .05 ? 0 : current_dropout_rate/2;
+        const maximum = Math.min(.75, current_dropout_rate*1.5+.1);
+        space.dropout_rate = hpjs.uniform(minimum, maximum);
     }
     if (to_boolean(gui_state["Optimize"]["Search for best learning rate"])) {
         const current_learning_rate = gui_state["Training"]["Learning rate"];
         const current_learning_rate_log = Math.log(current_learning_rate);
-        const number_of_choices = 5;
+        const number_of_choices = 10;
         space.learning_rate = hpjs.qloguniform(current_learning_rate_log-1, current_learning_rate_log+1, current_learning_rate/number_of_choices);
     }
     if (to_boolean(gui_state["Optimize"]["Search for best number of layers"])) {
@@ -831,7 +886,6 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
                                        hpjs.search.randomSearch,
                                        number_of_experiments,
                                        {xs, ys, callbacks: {onExperimentBegin, onExperimentEnd}});
-        console.log(best_model);
         return result;
     } catch (error) {
         if (error_callback) {
@@ -965,11 +1019,13 @@ const gui_state =
    "Optimize": {"Number of experiments": 10,
                 "Search for best Optimization method": true,
                 "Search for best loss function": true,
+                "Search for best dropout rate": true,
+                "Search for best activation function": true,
                 "Search for best number of training iterations": true,
                 "Search for best number of layers": true,
-                "Search for best learning rate": true
-                // could add more here
-                }
+                "Search for best learning rate": true,
+                "Search for best validation split": true,
+                "Search for best shuffle data setting": true}
 };
 
 const create_parameters_interface = function () {
@@ -984,6 +1040,8 @@ const create_parameters_interface = function () {
           optimize: create_hyperparameter_optimize_parameters(parameters_gui)};
 };
 
+const activation_functions =
+    ['elu', 'hardSigmoid', 'linear', 'relu', 'relu6', 'selu', 'sigmoid', 'softmax', 'softplus', 'softsign', 'tanh'];
 
 const create_model_parameters = (parameters_gui) => {
     const model = parameters_gui.addFolder("Model");
@@ -995,8 +1053,6 @@ const create_model_parameters = (parameters_gui) => {
         model.add(gui_state["Model"], 'Loss function', Object.keys(non_categorical_loss_functions));
     }
     model.add(gui_state["Model"], 'Dropout rate');
-    const activation_functions =
-        ['elu', 'hardSigmoid', 'linear', 'relu', 'relu6', 'selu', 'sigmoid', 'softmax', 'softplus', 'softsign', 'tanh'];
     model.add(gui_state["Model"], 'Activation function', activation_functions);
     return model;  
 };
@@ -1021,9 +1077,13 @@ const create_hyperparameter_optimize_parameters = (parameters_gui) => {
     optimize.add(gui_state["Optimize"], 'Number of experiments');
     optimize.add(gui_state["Optimize"], 'Search for best Optimization method', [true, false]);
     optimize.add(gui_state["Optimize"], 'Search for best loss function', [true, false]);
+    optimize.add(gui_state["Optimize"], 'Search for best dropout rate', [true, false]);
+    optimize.add(gui_state["Optimize"], 'Search for best activation function', [true, false]);
     optimize.add(gui_state["Optimize"], 'Search for best number of training iterations', [true, false]);
     optimize.add(gui_state["Optimize"], 'Search for best number of layers', [true, false]);
     optimize.add(gui_state["Optimize"], 'Search for best learning rate', [true, false]);
+    optimize.add(gui_state["Optimize"], 'Search for best validation split', [true, false]);
+    optimize.add(gui_state["Optimize"], 'Search for best shuffle data setting', [true, false]);
     return optimize;
 };
 
@@ -1693,7 +1753,7 @@ const receive_message =
                                            event.source.postMessage({model_loaded: URL,
                                                                      model_name: name}, "*");
 //                                            model.compile({loss: 'meanSquaredError', optimizer: 'adamax'});
-                                           show_layers(model);
+                                           show_layers(model, 'Model after loading');
                                        },
                                        error_callback);
             } catch (error) {

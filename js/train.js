@@ -146,7 +146,7 @@ const create_model = (options, failure_callback) => {
                                metrics: class_names && ['accuracy']};
        model.compile(compile_options);
        if (tfvis_options.display_layers_after_creation) {
-           show_layers(model, true);
+           show_layers(model, 'Model after creation');
        }
        return model;
   } catch (error) {
@@ -158,8 +158,8 @@ const create_model = (options, failure_callback) => {
   }
 };
 
-const show_layers = (model, after_creation) => {
-    const surface = {name: 'Layers', tab: tab_label(after_creation ? 'Model after creation': 'Model after training')};
+const show_layers = (model, tab_name) => {
+    const surface = {name: 'Layers', tab: tab_label(tab_name)};
     tfvis.show.modelSummary(surface, model);
     model.layers.forEach((layer, index) => {
         surface.name = "Layer#" + index;
@@ -385,7 +385,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
           model.ready_for_prediction = true;
           const percentage_of_tests = (x) => +(100*x/xs.shape[0]).toFixed(2);
           if (tfvis_options.display_layers_after_training) {
-              show_layers(model, false);
+              show_layers(model, 'Model after training');
           }
           let confusion_matrix, test_loss, test_accuracy, number_of_classes;
           if (xs_test && class_names) {
