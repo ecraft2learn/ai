@@ -554,12 +554,15 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
         display_trial(trial.args, optimize_hyperparameters_messages);
     };
     let onExperimentEnd = (i, trial) => {
-        if (trial.result.loss <= lowest_loss) {
+        const loss = trial.result.loss;
+        if (loss === Number.MAX_VALUE) {
+            optimize_hyperparameters_messages.innerHTML += "Training failed and reported a loss that is not a number.<br>";
+        } else if (loss <= lowest_loss) {
             // tried toFixed(...) but error can be 1e-12 and shows up as just zeroes
-            optimize_hyperparameters_messages.innerHTML += "<b>Best loss so far = " + trial.result.loss + "</b>";
-            lowest_loss = trial.result.loss;
+            optimize_hyperparameters_messages.innerHTML += "<b>Best loss so far = " + loss + "</b>";
+            lowest_loss = loss;
         } else {
-            optimize_hyperparameters_messages.innerHTML += "Loss = " + trial.result.loss + "<br>";
+            optimize_hyperparameters_messages.innerHTML += "Loss = " + loss + "<br>";
         }                            
     };
 //     optimize_hyperparameters_messages.innerHTML = "<b>Searching for good parameter values. Please wait.</b>";
@@ -763,7 +766,14 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
                                      best_model,
                                      status: hpjs.STATUS_OK});
                         },
-                        error_callback);
+                        (error) => {
+                            if (error.message === not_a_number_error_message) {
+                                resolve({loss: Number.MAX_VALUE,
+                                         status: hpjs.STATUS_OK});
+                            } else if (error_callback) {
+                                error_callback(error);
+                            }
+                        });
             });
     };
     const space = {};

@@ -271,6 +271,8 @@ const set_model_weights = (model, best_weights) => {
     }
 };
 
+const not_a_number_error_message = "Training loss has become 'not-a-number'.";
+
 const train_model = (model, datasets, options, success_callback, failure_callback) => {
     if (!model.ready_for_training && model.ready_for_prediction) {
         // been loaded but never compiled
@@ -329,7 +331,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                 last_epoch = epoch;
                 data_loss = history.loss;
                 if (isNaN(data_loss)) {
-                    throw new Error("Training loss has become 'not-a-number'.");
+                    throw new Error(not_a_number_error_message);
                 }
                 validation_loss = history.val_loss;
                 data_accuracy = history.acc;
