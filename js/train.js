@@ -357,8 +357,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                 if (update_weights) {
                     best_weights = update_best_weights(model, best_weights);
                 }
-                if (tfvis_callbacks && epoch > 0) {
-                    // first epoch often has huge loss causing graph to be hard to read 
+                if (tfvis_callbacks) {
                     tfvis_callbacks.onEpochEnd(epoch, history);
                 }
                 if (stop_if_no_progress_for_n_epochs &&
