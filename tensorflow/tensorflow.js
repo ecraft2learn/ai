@@ -1063,9 +1063,8 @@ const create_model_with_parameters = function (surface_name) {
         const loss_function_full_name = gui_state["Model"]["Loss function"];
         const loss_function = loss_function_named(loss_function_full_name);
         const datasets = get_data(model_name, 'datasets');
-        const tfvis_options = {display_layers_after_creation: true};
         try {
-            model = create_model({model_name, hidden_layer_sizes, optimizer, loss_function, datasets, tfvis_options});
+            model = create_model({model_name, hidden_layer_sizes, optimizer, loss_function, datasets});
             tensorflow.add_to_models(model);
         } catch (error) {
             message.innerHTML = error.message;
@@ -1203,7 +1202,7 @@ const train_with_parameters = async function (surface_name) {
                                            height,
                                            measure_accuracy: !!categories,
                                            display_graphs: true,
-                                           display_layers_after_training: true,
+                                           display_layers: true,
                                            display_confusion_matrix: !!categories},
                            },
                           success_callback,

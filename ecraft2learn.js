@@ -1087,7 +1087,7 @@ window.ecraft2learn =
                                                            activation: activation_function_name,
                                                            loss_function,
                                                            dropout_rate,
-                                                           tfvis_options: {display_layers: true},
+                                                           tfvis_options: {display_layers_after_creation: true},
                                                            time_stamp: time_stamp};
                                       // if no size is provided then it will be computed from the training data
                                       if (typeof input_shape === 'number') {
