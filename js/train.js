@@ -69,8 +69,6 @@ const collapse_confusion_matrix = (matrix, indices) => {
     return matrix_2x2;
 };
 
-let tfjs_vis_surface;
-
 const create_and_train_model = (datasets, options, success_callback, failure_callback) => {
     options.datasets = datasets; // in case needed to compute input_shape
     const model = create_model(options, failure_callback);
@@ -82,6 +80,7 @@ const create_model = (options, failure_callback) => {
         const {model_name, class_names, hidden_layer_sizes, dropout_rate, optimizer, layer_initializer, regularizer, learning_rate,
                loss_function, activation, last_activation, seed, datasets, tensor_datasets} = options;
         const tfvis_options = tfvis ? options.tfvis_options || {} : {}; // ignore options if tfvis not loaded
+        training_number = options.training_number;
         let {input_shape} = options;
         if (!input_shape) {
             if (datasets) {
@@ -146,8 +145,8 @@ const create_model = (options, failure_callback) => {
                                loss,
                                metrics: class_names && ['accuracy']};
        model.compile(compile_options);
-       if (tfvis_options.display_layers) {
-           show_layers(model);
+       if (tfvis_options.display_layers_after_creation) {
+           show_layers(model, true);
        }
        return model;
   } catch (error) {
@@ -159,8 +158,8 @@ const create_model = (options, failure_callback) => {
   }
 };
 
-const show_layers = (model) => {
-    const surface = {name: 'Layers', tab: tab_label('Model inspection')};
+const show_layers = (model, after_creation) => {
+    const surface = {name: 'Layers', tab: tab_label(after_creation ? 'Model after creation': 'Model after training')};
     tfvis.show.modelSummary(surface, model);
     model.layers.forEach((layer, index) => {
         surface.name = "Layer#" + index;
@@ -168,6 +167,7 @@ const show_layers = (model) => {
     });
 };
 
+let training_number;
 const tab_label = (label) => label + (typeof training_number === 'undefined' ? '' : '#' + training_number);
 
 const to_tensor_datasets = (array_datasets) => {
@@ -286,13 +286,12 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
     try {
         const {xs, ys, xs_validation, ys_validation, xs_test, ys_test, test_and_validation_identical} = datasets;
         const {class_names, batch_size, shuffle, epochs, validation_split, learning_rate, dropout_rate, optimizer,
-               layer_initializer, training_number, regularizer, seed, stop_if_no_progress_for_n_epochs,
+               layer_initializer, regularizer, seed, stop_if_no_progress_for_n_epochs,
                testing_fraction, validation_fraction, fraction_kept} 
               = options;
         const tfvis_options = tfvis ? options.tfvis_options || {} : {}; // ignore options if tfvis not loaded
         const model_name = model.name;
-        const surface = tfjs_vis_surface || (tfvis_options.display_graphs && tfvis.visor().surface({name: model_name, tab: tab_label('Training')}));
-        tfjs_vis_surface = surface; // re-use same one accross multiple calls
+        training_number = options.training_number;
         // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
         let epoch_history = [];
         const metrics = ['loss', 'val_loss'];
@@ -384,8 +383,8 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
           console.log(full_history);
           model.ready_for_prediction = true;
           const percentage_of_tests = (x) => +(100*x/xs.shape[0]).toFixed(2);
-          if (tfvis_options.display_layers) {
-              show_layers(model);
+          if (tfvis_options.display_layers_after_training) {
+              show_layers(model, false);
           }
           let confusion_matrix, test_loss, test_accuracy, number_of_classes;
           if (xs_test && class_names) {

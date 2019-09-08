@@ -437,7 +437,8 @@ const start_training = () => {
              display_confusion_matrix: true,
              display_collapsed_confusion_matrix: {indices: [[0, 1], [2]],
                                                   labels: ['OK', "Serious"]},
-             display_layers: true,
+             display_layers_after_creation: true,
+             display_layers_after_training: true,
              display_graphs: true};
         const error_callback = (error) => {
             report_error("Internal error: " + error.message);
