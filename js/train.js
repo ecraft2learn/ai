@@ -77,10 +77,11 @@ const create_and_train_model = (datasets, options, success_callback, failure_cal
 
 const create_model = (options, failure_callback) => {
     try {
-        const {model_name, class_names, hidden_layer_sizes, dropout_rate, optimizer, layer_initializer, regularizer, learning_rate,
+        const {model_name, hidden_layer_sizes, dropout_rate, optimizer, layer_initializer, regularizer, learning_rate,
                loss_function, activation, last_activation, seed, datasets, tensor_datasets} = options;
         const tfvis_options = tfvis ? options.tfvis_options || {} : {}; // ignore options if tfvis not loaded
         training_number = options.training_number;
+        let class_names = options.class_names;
         let {input_shape} = options;
         if (!input_shape) {
             if (datasets) {
@@ -95,6 +96,20 @@ const create_model = (options, failure_callback) => {
         }
         if (!input_shape) {
             throw new Error("Unable to create a model without knowing the shape of the input. Shape not provided and input data not known.");
+        }
+        if (typeof tensorflow !== 'undefined') {
+            // running this from Snap!
+            if (!class_names) {
+                class_names = tensorflow.get_data(model_name, 'categories');
+            }
+            if (!class_names ) {
+                // need to recreate this model if later it gets data that uses categories
+                tensorflow.set_data(model_name,
+                                    'recreate',
+                                    () => {
+                                        create_model(options, failure_callback);
+                                    });
+            }
         }
         const model = tf.sequential({name: model_name});
         const tfjs_function = (fun, function_table, layer_index) => {
@@ -119,7 +134,7 @@ const create_model = (options, failure_callback) => {
             const activation_function = (typeof activation === 'string' ? activation : tfjs_function(activation, tf.layers, index)) || 'relu';
             const last_layer = index === hidden_layer_sizes.length-1;
             const configuration = {inputShape: index === 0 ? input_shape : undefined,
-                                   units: +size,
+                                   units: last_layer && class_names ? class_names.length : +size,
                                    activation: last_layer ? last_activation || (class_names && 'softmax') : activation_function,
                                    kernelInitializer,
                                    kernelRegularizer,
