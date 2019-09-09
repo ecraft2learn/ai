@@ -1663,6 +1663,7 @@ const receive_message =
                 options.loss_function = loss_function_named(options.loss_function);
                 options.optimizer = optimizer_named(options.optimizer);
                 options.datasets = get_data(model_name, 'datasets');
+                options.class_names = get_data(model_name, 'categories');
                 const model = create_model(options);
                 install_settings(options);
                 tensorflow.add_to_models(model);
