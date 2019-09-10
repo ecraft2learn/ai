@@ -524,7 +524,11 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                                                                                   tfvis_options.display_collapsed_confusion_matrix.indices),
                                                 tickLabels: tfvis_options.display_collapsed_confusion_matrix.labels});
               } 
-          } 
+          }
+          if (model.callback_when_ready_for_prediction) {
+              model.callback_when_ready_for_prediction();
+              model.callback_when_ready_for_prediction = undefined;
+          }
        };
        const fit_error_handler = (error) => {
            if (error.message.indexOf('No progress for ') >= 0) {
