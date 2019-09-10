@@ -7,19 +7,12 @@ load_local_or_remote_scripts(
     ["../js/tfjs.js",
      "../js/hyperparameters.min.js",
      "../js/tfjs-vis.js",
-     "../js/dat.gui.js"],
+     "../js/dat.gui.js",
+     "../js/train.js",
+     "../tensorflow/tensorflow.js",
+     "./tic-tac-toe.js"]);
      // using the same locally cached version so nothing breaks when released versions are updated
-    ["../js/tfjs.js",
-     "../js/hyperparameters.min.js",
-     "../js/tfjs-vis.js",
-     "../js/dat.gui.js"
-//      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest",
-//      "https://cdn.jsdelivr.net/npm/hyperparameters@latest/dist/hyperparameters.min.js",
-//      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis",
-//      "https://cdn.jsdelivr.net/npm/dat.gui"
-     ]);
 </script>
-<script src="../tensorflow/tensorflow.js"></script>
 <link href="../css/ai-teacher-guide.css" rel="stylesheet">
 <title>Training a model to win Tic Tac Toe games</title>
 </head>
@@ -106,7 +99,6 @@ You can also use the games for validation.
 Challenge a friend or classmate (or all your classmates) to train the best Tic Tac Toe player.
 Run a thousand games for each contest to see whose player is stronger.
 </p>
-<script src="./tic-tac-toe.js"> </script>
 <script src="../js/bottom-of-page.js"></script>
 </body>
 </html>
