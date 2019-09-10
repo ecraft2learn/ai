@@ -106,12 +106,15 @@ const create_model = (options, failure_callback) => {
                 // need to recreate this model if later it gets data that uses categories
                 tensorflow.set_data(model_name,
                                     'recreate',
-                                    () => {
-                                        create_model(options, failure_callback);
+                                    (callback) => {
+                                        model = create_model(options, failure_callback);
+                                        if (callback) {
+                                            callback();
+                                        }
                                     });
             }
         }
-        const model = tf.sequential({name: model_name});
+        let model = tf.sequential({name: model_name});
         const tfjs_function = (fun, function_table, layer_index) => {
             if (!fun) {
                 return;

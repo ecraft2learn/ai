@@ -40,7 +40,7 @@ const get_data = (model_name, kind) => {
     }
     return data[model_name][kind];
 };
-const set_data = (model_name, kind, value) => {
+const set_data = (model_name, kind, value, callback) => {
     if (!data.hasOwnProperty(model_name)) {
         data[model_name] = {};
     }
@@ -50,14 +50,16 @@ const set_data = (model_name, kind, value) => {
             [value.output, labels] = to_one_hot(value.output);
             data[model_name].categories = labels;
             if (model_name === 'all models') {
-               // recreate all models with softmax and one-hot created before this data was available
+               // recreate all models with for example softmax and one-hot created before this data was available
                Object.keys(data).forEach((name) => {
                    if (data[name].hasOwnProperty('recreate')) {
-                       data[name]['recreate']();
+                       data[name]['recreate'](callback);
+                       callback = undefined;
                    }
                })
             } else if (data[model_name].hasOwnProperty('recreate')) {
-                data[model_name]['recreate']();               
+                data[model_name]['recreate'](callback);
+                callback = undefined;               
             }
         } else {
             value.output = value.output.map((n) => +n); // string to number
@@ -71,6 +73,9 @@ const set_data = (model_name, kind, value) => {
     }
     if (kind === 'training' && get_model(model_name)) {
         ensure_last_layer_right_size(get_model(model_name), value);
+    }
+    if (callback) {
+        callback();
     }
 };
 const to_one_hot = (labels) => {
@@ -1644,14 +1649,16 @@ const receive_message =
         let message = event.data;
         if (typeof message.data !== 'undefined') {
             try {
-                let kind = message.kind;
-                let model_name = message.model_name || 'all models';
+                const kind = message.kind;
+                const model_name = message.model_name || 'all models';
+                const callback = () => {
+                    event.source.postMessage({data_received: message.time_stamp}, "*"); 
+                };
                 if (message.ignore_old_dataset) {
-                    set_data(model_name, kind, message.data);
+                    set_data(model_name, kind, message.data, callback);
                 } else {
-                    set_data(model_name, kind, add_to_data(message.data, model_name, kind));
+                    set_data(model_name, kind, add_to_data(message.data, model_name, kind, callback));
                 }
-                event.source.postMessage({data_received: message.time_stamp}, "*");
             } catch (error) {
                 event.source.postMessage({data_message_failed: message.data,
                                           error_message: error.message}, "*");
