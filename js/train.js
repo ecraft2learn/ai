@@ -292,6 +292,14 @@ const set_model_weights = (model, best_weights) => {
 const not_a_number_error_message = "Training loss has become 'not-a-number'.";
 
 const train_model = (model, datasets, options, success_callback, failure_callback) => {
+    if (!datasets) {
+        const message = "Cannot train '" + model.name + "' before sending some training data.";
+        if (failure_callback) {
+            failure_callback(message);
+            return;
+        }
+        throw new Error(message);        
+    }
     if (!model.ready_for_training && model.ready_for_prediction) {
         // been loaded but never compiled
         // not clear how to provide options to override the following defaults
@@ -562,7 +570,3 @@ const shape_of_data = (data) => {
       return [data.length].concat(shape_of_data(data[0]));
    }
 };
-
-
-
-
