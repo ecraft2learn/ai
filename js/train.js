@@ -596,7 +596,8 @@ const predict = (model_name, inputs, success_callback, error_callback) => {
             input_tensor = new_input_tensor;
         }
         let prediction = model.predict(input_tensor);
-        const results = prediction.arraySync();
+        const results = prediction.arraySync().map((element) => Array.isArray(element) && element.length === 1 ?
+                                                                element[0] : element);
         const categories = tensorflow.get_data(model_name, 'categories');
         if (categories) {
             success_callback(categorical_results(results, categories));
