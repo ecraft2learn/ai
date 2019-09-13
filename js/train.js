@@ -102,7 +102,7 @@ const create_model = (options, failure_callback) => {
             if (!class_names) {
                 class_names = tensorflow.get_data(model_name, 'categories');
             }
-            if (!class_names ) {
+            if (!class_names) {
                 // need to recreate this model if later it gets data that uses categories
                 tensorflow.set_data(model_name,
                                     'recreate',
@@ -560,6 +560,51 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
              throw error;
          }
      } 
+};
+
+let last_prediction;
+
+const predict = (model_name, inputs, success_callback, error_callback) => {
+    let model = tensorflow.get_model(model_name);
+    if (!model) {
+        error_callback("No model named " + model_name);
+        return;
+    }
+    if (!model.ready_for_prediction) {
+        let previous_callback = model.callback_when_ready_for_prediction;
+        model.callback_when_ready_for_prediction = 
+            () => {
+                if (previous_callback) {
+                    previous_callback();
+                }
+                predict(model_name, inputs, success_callback, error_callback);
+        };
+        return;
+    }
+    last_prediction = JSON.stringify(inputs);
+    try {
+        let input_tensor;
+        if (typeof inputs[0] === 'number') {
+            input_tensor = tf.tensor2d(inputs, [inputs.length, 1]);
+        } else {
+            input_tensor = tf.tensor2d(inputs); 
+        }
+        if (model.normalization_factor) {
+            const new_input_tensor = input_tensor.div(tf.scalar(model.normalization_factor));
+            input_tensor.dispose();
+            input_tensor = new_input_tensor;
+        }
+        let prediction = model.predict(input_tensor);
+        const results = prediction.arraySync();
+        const categories = tensorflow.get_data(model_name, 'categories');
+        if (categories) {
+            success_callback(categorical_results(results, categories));
+        } else {
+            success_callback(results);
+        }
+    } catch (error) {
+        error_callback(error.message);
+    }
 };
 
 const shape_of_data = (data) => {
