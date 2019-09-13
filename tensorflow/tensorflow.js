@@ -1310,15 +1310,6 @@ const create_prediction_interface = () => {
     draw_area.appendChild(prediction_button);
 };
 
-const categorical_results = (results, categories) => 
-    results.map((result) => {
-        const result_as_object = {};
-        result.forEach((result, index) => {(
-            result_as_object[categories[index]] = result)
-        });
-        return result_as_object;
-    });
-
 let save_model_button;
 let load_model_button;
 let save_data_button;

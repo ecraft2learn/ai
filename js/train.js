@@ -108,6 +108,7 @@ const create_model = (options, failure_callback) => {
                                     'recreate',
                                     (callback) => {
                                         model = create_model(options, failure_callback);
+                                        tensorflow.add_to_models(model);
                                         if (callback) {
                                             callback();
                                         }
@@ -606,6 +607,15 @@ const predict = (model_name, inputs, success_callback, error_callback) => {
         error_callback(error.message);
     }
 };
+
+const categorical_results = (results, categories) => 
+    results.map((result) => {
+        const result_as_object = {};
+        result.forEach((result, index) => {(
+            result_as_object[categories[index]] = result)
+        });
+        return result_as_object;
+    });
 
 const shape_of_data = (data) => {
    if (typeof data === 'number') {
