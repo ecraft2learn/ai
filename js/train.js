@@ -295,7 +295,7 @@ const not_a_number_error_message = "Training loss has become 'not-a-number'.";
 
 const train_model = (model, datasets, options, success_callback, failure_callback) => {
     if (!datasets) {
-        const message = "Cannot train '" + model.name + "' before sending some training data.";
+        const message = "Cannot train '" + options.model_name + "' before sending some training data.";
         if (failure_callback) {
             failure_callback(message);
             return;
