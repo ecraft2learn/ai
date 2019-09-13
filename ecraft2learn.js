@@ -122,6 +122,9 @@ window.ecraft2learn =
                   // problem with the following is that some ecraft2learn functions have
                   // closed over outer variables and also some window's listeners have been added
 //                 ecraft2learn.initialise_all();
+                  Object.values(ecraft2learn.support_iframe).forEach(iframe => {
+                      iframe.remove();
+                  });
                    // find the URL where this library lives and reload it
                   let this_url = document.querySelector('script[src*="ecraft2learn.js"]').src;
                   ecraft2learn = undefined;
