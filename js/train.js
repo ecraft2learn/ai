@@ -281,13 +281,19 @@ const set_model_weights = (model, best_weights) => {
 const not_a_number_error_message = "Training loss has become 'not-a-number'.";
 
 const train_model = (model, datasets, options, success_callback, failure_callback) => {
-    if (!datasets) {
-        const message = "Cannot train '" + options.model_name + "' before sending some training data.";
+    let error_message;
+    if (!model) {
+        error_message = "No model provided for training. " +
+                        "Perhaps the name is misspelled or you are trying to train before the model was created.";
+    } else if (!datasets) {
+        error_message = "Cannot train '" + options.model_name + "' before sending some training data.";      
+    }    
+    if (error_message) {
         if (failure_callback) {
-            failure_callback(message);
+            failure_callback(error_message);
             return;
         }
-        throw new Error(message);        
+        throw new Error(error_message);         
     }
     if (!model.ready_for_training && model.ready_for_prediction) {
         // been loaded but never compiled

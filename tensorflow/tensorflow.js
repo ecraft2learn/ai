@@ -1627,10 +1627,16 @@ const receive_message =
                 event.source.postMessage({prediction_failed: message.predict.time_stamp, 
                                           error_message: error_message}, "*");
             };
-            predict(get_model(message.predict.model_name), 
+            const model_name = message.predict.model_name;
+            const model = get_model(model_name);
+            if (!model) {
+                error_callback("No model named '" + model_name + "' for prediction.");
+                return;
+            }
+            predict(model, 
                     message.predict.input,
                     success_callback, error_callback,
-                    get_data(message.predict.model_name, 'categories'));
+                    get_data(model_name, 'categories'));
         } else if (typeof message.is_model_ready_for_prediction !== 'undefined') {
             let name = message.is_model_ready_for_prediction.model_name;
             let model = models[name];
