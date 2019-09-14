@@ -1,21 +1,8 @@
-/**
- * @license
- * Copyright 2018 Google LLC. All Rights Reserved.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * =============================================================================
+ /**
+ * Implements JavaScript functions that extend Snap! to access AI cloud services and the machine learning library tensorflow.js
+ * Authors: Ken Kahn
+ * License: New BSD
  */
-
-// Based on https://github.com/tensorflow/tfjs-examples/blob/master/webcam-transfer-learning/index.js
 
 "use strict"
 
@@ -565,8 +552,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
 
 let last_prediction;
 
-const predict = (model_name, inputs, success_callback, error_callback) => {
-    let model = tensorflow.get_model(model_name);
+const predict = (model, inputs, success_callback, error_callback, categories) => {
     if (!model) {
         error_callback("No model named " + model_name);
         return;
@@ -578,7 +564,7 @@ const predict = (model_name, inputs, success_callback, error_callback) => {
                 if (previous_callback) {
                     previous_callback();
                 }
-                predict(model_name, inputs, success_callback, error_callback);
+                predict(model, inputs, success_callback, error_callback, categories);
         };
         return;
     }
@@ -598,7 +584,6 @@ const predict = (model_name, inputs, success_callback, error_callback) => {
         let prediction = model.predict(input_tensor);
         const results = prediction.arraySync().map((element) => Array.isArray(element) && element.length === 1 ?
                                                                 element[0] : element);
-        const categories = tensorflow.get_data(model_name, 'categories');
         if (categories) {
             success_callback(categorical_results(results, categories));
         } else {
