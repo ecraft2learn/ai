@@ -774,9 +774,6 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
                                     activation,
                                     dropout_rate,
                                     learning_rate});
-        if (model.optimizer.learningRate) { 
-            model.optimizer.learningRate = learning_rate;
-        }
         return new Promise((resolve) => {
             train_model(model,
                         tensor_datasets,
