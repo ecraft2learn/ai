@@ -1630,7 +1630,7 @@ const receive_message =
             const model_name = message.predict.model_name;
             const model = get_model(model_name);
             if (!model) {
-                error_callback("No model named '" + model_name + "' for prediction.");
+                error_callback("Prediction not possible since there is no model named '" + model_name + "'.");
                 return;
             }
             predict(model, 
