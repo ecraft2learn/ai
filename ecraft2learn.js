@@ -1311,7 +1311,29 @@ window.ecraft2learn =
                                           inform("Error while optimizing hyperparameters", message.error_message);
                                       }
                                   });
-    }
+    };
+    const replace_with_best_model = (model_name, success_callback, error_callback) => {
+        record_callbacks(success_callback, error_callback);
+        request_of_support_window('tensorflow.js', 
+                                  'Loaded',
+                                  () => {
+                                      return {replace_with_best_model: model_name};
+                                  },
+                                  (message) => {
+                                      return message.model_replaced === model_name ||
+                                             message.error_replacing_model === model_name;
+                                  },
+                                  (message) => {
+                                      if (message.model_replaced === model_name) {
+                                          invoke_callback(success_callback, javascript_to_snap(model_name));
+                                      } else if (error_callback) {
+                                          console.log(message.error_message);
+                                          invoke_callback(error_callback, javascript_to_snap(message.error_message));
+                                      } else {
+                                          inform("Error while replacing a model with best search results", message.error_message);
+                                      }
+                                  });
+    };
     var image_url_of_costume = function (costume) {
         var canvas = costume.contents;
         return canvas.toDataURL('image/png');        
@@ -2847,20 +2869,21 @@ xhr.send();
       };
       yahoo_weather(place, element_name, units_code, yahoo_callback, yahoo_error_callback, key, secret);
   },
-  create_costume_with_style: create_costume_with_style,
-  get_image_features: get_image_features,
-  create_tensorflow_model: create_tensorflow_model,
-  send_data: send_data,
-  train_model: train_model,
-  is_model_ready_for_prediction: is_model_ready_for_prediction,
-  predictions_from_model: predictions_from_model,
-  load_tensorflow_model_from_URL: load_tensorflow_model_from_URL,
-  load_data_from_URL: load_data_from_URL,
-  optimize_hyperparameters: optimize_hyperparameters,
+  create_costume_with_style,
+  get_image_features,
+  create_tensorflow_model,
+  send_data,
+  train_model,
+  is_model_ready_for_prediction,
+  predictions_from_model,
+  load_tensorflow_model_from_URL,
+  load_data_from_URL,
+  optimize_hyperparameters,
+  replace_with_best_model,
   display_support_window: open_support_window,
-  image_class: image_class,
-  inform: inform,
-  show_message: show_message,
+  image_class,
+  inform,
+  show_message,
   load_camera_training_from_file: (callback) => {
       load_transfer_training_from_file('camera', callback);
   },
@@ -2881,8 +2904,8 @@ xhr.send();
       load_transfer_training_from_URL('camera', URL, user_callback);
   },
   // some word embedding functionality
-  dot_product: dot_product,
-  cosine_similarity: cosine_similarity,
+  dot_product,
+  cosine_similarity,
   euclidean_distance: (x, y) => Math.sqrt(distance_squared(x, y)),
   word_embeddings_ready: (language, callback, word_embeddings_url) => {
       let word_locations_url;

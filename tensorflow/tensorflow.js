@@ -136,11 +136,12 @@ const loss_function_named = (name) => {
 };
 
 const add_to_models = function (new_model) {
-    if (models[new_model.name] && models[new_model.name] !== new_model && 
-        !models[new_model.name].disposed_previously) {
+    const current_model = models[new_model.name];
+    if (current_model && current_model !== new_model && 
+        !current_model.disposed) {
         try {
-            tf.dispose(models[new_model.name]);
-            models[new_model.name].disposed_previously = true;
+            current_model.dispose();
+            current_model.disposed = true;
         } catch (error) {
             console.log("Unable to dispose of old version of model " + new_model.name);
             console.error(error);
@@ -491,7 +492,7 @@ const get_tensors = (model_name, kind) => {
 
 let optimize_hyperparameters_messages; // only need one even if called multiple times
 let lowest_loss;
-let best_model; 
+let best_model;
 let stop_on_next_experiment = false;
 let hyperparameter_searching = false;
 const optimize_hyperparameters_button = document.createElement('button');
@@ -591,7 +592,6 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
         stop_on_next_experiment = false;
     };
     const number_of_experiments = Math.round(gui_state["Optimize"]["Number of experiments"]);
-    best_model = undefined; // to be found
     optimize(model_name, xs, ys, validation_tensors, number_of_experiments, epochs, onExperimentBegin, onExperimentEnd, error_handler)
         .then((result) => {
             if (!result) {
@@ -634,7 +634,7 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
 };
 
 const install_settings = (parameters) => {
-    const hidden_layer_sizes = parameters.hidden_layer_sizes || parameters.layers;
+    const hidden_layer_sizes = parameters.hidden_layer_sizes || parameters.layers; // layers is the older name
     if (hidden_layer_sizes) {
         gui_state["Model"]["Layers"] = hidden_layer_sizes.toString();
     }
@@ -700,11 +700,10 @@ const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
                     undefined, experiment_end_callback, error_callback)
               .then((result) => {
                   success_callback(result);
-                  if (previous_model && !previous_model.disposed_previously) {
+                  if (previous_model && !previous_model.disposed && previous_model !== best_model) {
                       previous_model.dispose();
-                      previous_model.disposed_previously = true;
+                      previous_model.disposed = true;
                       previous_model = undefined;
-//                       console.log(tf.memory(), "final", result);
                   }
               });
    } catch (error) {
@@ -782,9 +781,9 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
                          validation_split,
                          shuffle},
                         (results) => {
-//                             if (previous_model && !previous_model.disposed_previously) {
+//                             if (previous_model && !previous_model.disposed) {
 //                                 previous_model.dispose();
-//                                 previous_model.disposed_previously = true;
+//                                 previous_model.disposed = true;
 //                             }
                             previous_model = model;
 //                             tf.disposeVariables();
@@ -793,10 +792,11 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
                             if (isNaN(loss)) {
                                 loss = Number.MAX_VALUE;
                             }
-                            if (loss < lowest_loss) {
+                            if (loss < lowest_loss || typeof lowest_loss === 'undefined') {
                                 lowest_loss = loss;
                                 if (best_model) {
                                     best_model.dispose();
+                                    best_model.disposed = true;
                                 }
                                 best_model = model;
                             }
@@ -815,6 +815,7 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
                         });
             });
     };
+    best_model = undefined; // to be found
     const space = {};
     const categories = get_data(model_name, 'categories');
     if (to_boolean(gui_state["Optimize"]["Search for best Optimization method"])) {
@@ -1709,12 +1710,15 @@ const receive_message =
             const categories = get_data(model_name, 'categories');
             let time_stamp = message.time_stamp;
             const success_callback = (result) => {
-                let best_parameters = result.argmin;
+                const best_parameters = result.argmin;
                 best_parameters.input_shape = shape_of_data((get_data(model_name, 'training') || get_data(model_name, 'validation')).input[0]);
                 best_parameters.optimization_method = inverse_lookup(best_parameters.optimization_method, optimization_methods);
                 best_parameters.loss_function       = inverse_lookup(best_parameters.loss_function, loss_functions(categories));
                 // So validation data is used when creating and training the model with the best parameters.
                 best_parameters.used_validation_data = !!get_data(model_name, 'validation');
+                const model = get_model(model_name);
+                model.best_model = best_model;
+                model.best_parameters = best_parameters;
                 event.source.postMessage({optimize_hyperparameters_time_stamp: time_stamp,
                                           final_optimize_hyperparameters: best_parameters},
                                           "*");
@@ -1738,7 +1742,43 @@ const receive_message =
             };
             optimize_hyperparameters(model_name, number_of_experiments, epochs,
                                      experiment_end_callback, success_callback, error_callback);
+        } else if (typeof message.replace_with_best_model !== 'undefined') {
+            const model_name = message.replace_with_best_model;
+            replace_with_best_model(model_name,
+                                    () => {
+                                        event.source.postMessage({model_replaced: model_name});
+                                    },
+                                    (error_message) => {
+                                        event.source.postMessage({error_replacing_model: model_name,
+                                                                  error_message});
+                                    });
         }
+};
+
+const replace_with_best_model = (name_of_model_used_in_search, success_callback, error_callback) => {
+    const model = get_model(name_of_model_used_in_search);
+    let error_message;
+    if (!model) {
+        error_message = "No model named '" + name_of_model_used_in_search + "' found.";
+    }
+    if (!model.best_model) {
+        error_message = "No model found by searching for better parameters for model '" + 
+                        name_of_model_used_in_search +
+                        "' to replace it."; 
+    }
+    if (error_message) {
+        if (error_callback) {
+            error_callback(error_message);
+            return;
+        }
+        throw new Error(error_message);        
+    }
+    add_to_models(model.best_model);
+    install_settings(model.best_parameters);
+    show_layers(model.best_model, 'Model found by parameter search');
+    if (success_callback) {
+        success_callback();
+    }
 };
 
 window.addEventListener('message', receive_message);
@@ -1762,5 +1802,6 @@ return {get_model: get_model,
         create_hyperparamter_optimization_tab: create_hyperparamter_optimization_tab,
         save_and_load: save_and_load,
         create_button: create_button,
+        replace_with_best_model: replace_with_best_model,
         replace_button_results: replace_button_results};
 }()));
