@@ -74,9 +74,7 @@ const set_data = (model_name, kind, value, callback) => {
     if (kind === 'training' && get_model(model_name)) {
         ensure_last_layer_right_size(get_model(model_name), value);
     }
-    if (callback) {
-        callback();
-    }
+    invoke_callback(callback);
 };
 const to_one_hot = (labels) => {
     const unique_labels = [];
@@ -699,7 +697,7 @@ const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
            optimize(model_name, xs, ys, validation_tensors, number_of_experiments, epochs, 
                     undefined, experiment_end_callback, error_callback)
               .then((result) => {
-                  success_callback(result);
+                  invoke_callback(success_callback, result);
                   if (previous_model && !previous_model.disposed && previous_model !== best_model) {
                       previous_model.dispose();
                       previous_model.disposed = true;
@@ -718,7 +716,7 @@ const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
                error_message = error.message;
                console.log(tf.memory()); // in case is a GPU memory problem good know this
            }
-           error_callback(new Error(error_message));
+           invoke_callback(error_callback, new Error(error_message));
        } else {
            console.error(error);
        }
@@ -810,7 +808,7 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
                                 resolve({loss: Number.MAX_VALUE,
                                          status: hpjs.STATUS_OK});
                             } else if (error_callback) {
-                                error_callback(error);
+                                invoke_callback(error_callback, error);
                             }
                         });
             });
@@ -892,7 +890,7 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
         return result;
     } catch (error) {
         if (error_callback) {
-            error_callback(error);
+            invoke_callback(error_callback, error);
         }
     }
 };
@@ -1145,13 +1143,15 @@ const train_with_parameters = async function (surface_name) {
     let error_callback = (error) => {
         message.innerHTML = "<br><b>Error:</b> " + error.message + "<br>";
     };
+    record_callbacks(success_callback, error_callback);
     const epochs = Math.round(gui_state["Training"]["Number of iterations"]);
     const stop_if_no_progress_for_n_epochs = gui_state["Training"]["Stop if no progress for number of iterations"];
     draw_area.appendChild(message);
     let training_data   = get_data(model_name, 'training');
     let validation_data = get_data(model_name, 'validation');
     if (!training_data || !training_data.input) {
-        error_callback(new Error("Cannot begin training before creating or loading training data."));
+        invoke_callback(error_callback,
+                        new Error("Cannot begin training before creating or loading training data."));
         return;
     }
     if (train_with_current_settings_button.firstChild.nextSibling) {
@@ -1269,7 +1269,8 @@ const create_prediction_interface = () => {
         };
         const error_callback = (error_message) => {
             draw_area.appendChild(create_message_element(error_message));
-        }; 
+        };
+        record_callbacks(success_callback, error_callback);
         try {
             let inputs = +input_input.value || JSON.parse(input_input.value);
             if (typeof inputs === 'number') {
@@ -1280,7 +1281,7 @@ const create_prediction_interface = () => {
                     success_callback, error_callback,
                     get_data(model_name, 'categories'));
         } catch (error) {
-            error_callback(error.message);
+            invoke_callback(error_callback, error.message);
         }
     };
     const choose_model_then_make_prediction = () => {
@@ -1536,9 +1537,9 @@ const contents_of_URL = (URL, success_callback, error_callback) => {
     xhr.open('GET', URL, true);
     xhr.onreadystatechange = (event) => {
         if (xhr.readyState == 4 && xhr.status == 200) {
-            success_callback(xhr.responseText);
+            invoke_callback(success_callback, xhr.responseText);
         } else if (xhr.status >= 400) {
-            error_callback(new Error("Received error code " + xhr.status + "."));
+            invoke_callback(error_callback, new Error("Received error code " + xhr.status + "."));
         }
     };
     xhr.onerror = error_callback;
@@ -1548,7 +1549,9 @@ const contents_of_URL = (URL, success_callback, error_callback) => {
 const receive_message =
     async (event) => {
         let message = event.data;
-        if (typeof message.data !== 'undefined') {
+        if (message === 'stop') {
+            stop_all();
+        } else if (typeof message.data !== 'undefined') {
             try {
                 const kind = message.kind;
                 const model_name = message.model_name || 'all models';
@@ -1609,6 +1612,7 @@ const receive_message =
                 event.source.postMessage({training_failed: message.train.time_stamp,
                                           error_message: error_message}, "*");
             };
+            record_callbacks(success_callback, error_callback);
             let model_name = message.train.model_name;
             install_settings(message.train);
             train_model(get_model(model_name),
@@ -1625,10 +1629,12 @@ const receive_message =
                 event.source.postMessage({prediction_failed: message.predict.time_stamp, 
                                           error_message: error_message}, "*");
             };
+            record_callbacks(success_callback, error_callback);
             const model_name = message.predict.model_name;
             const model = get_model(model_name);
             if (!model) {
-                error_callback("Prediction not possible since there is no model named '" + model_name + "'.");
+                invoke_callback(error_callback, 
+                                "Prediction not possible since there is no model named '" + model_name + "'.");
                 return;
             }
             predict(model, 
@@ -1675,7 +1681,7 @@ const receive_message =
                                        },
                                        error_callback);
             } catch (error) {
-                error_callback(error);
+                invoke_callback(error_callback, error);
             }
         } else if (typeof message.load_data_from_URL !== 'undefined') {
             let URL = message.load_data_from_URL;
@@ -1694,7 +1700,7 @@ const receive_message =
                     event.source.postMessage({data_loaded: URL,
                                               info: info}, "*");
                 } catch (error) {
-                    error_callback(error);
+                    invoke_callback(error_callback, error);
                 }
             };
             const error_callback = (error) => {
@@ -1702,6 +1708,7 @@ const receive_message =
                                           error_message: "Error loading data from " + URL + ". " + 
                                                          error.message}, "*");
             };
+            record_callbacks(success_callback, error_callback);
             contents_of_URL(URL, success_callback, error_callback);
         } else if (typeof message.optimize_hyperparameters !== 'undefined') {
             let number_of_experiments = message.number_of_experiments;
@@ -1740,6 +1747,7 @@ const receive_message =
                                                          error.message},
                                           "*");
             };
+            record_callbacks(success_callback, error_callback, experiment_end_callback);
             optimize_hyperparameters(model_name, number_of_experiments, epochs,
                                      experiment_end_callback, success_callback, error_callback);
         } else if (typeof message.replace_with_best_model !== 'undefined') {
@@ -1767,7 +1775,7 @@ const replace_with_best_model = (name_of_model_used_in_search, success_callback,
     }
     if (error_message) {
         if (error_callback) {
-            error_callback(error_message);
+            invoke_callback(error_callback, error_message);
             return;
         }
         throw new Error(error_message);        
@@ -1776,7 +1784,7 @@ const replace_with_best_model = (name_of_model_used_in_search, success_callback,
     install_settings(model.best_parameters);
     show_layers(model.best_model, 'Model found by parameter search');
     if (success_callback) {
-        success_callback();
+        invoke_callback(success_callback);
     }
 };
 

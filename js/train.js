@@ -57,12 +57,14 @@ const collapse_confusion_matrix = (matrix, indices) => {
 };
 
 const create_and_train_model = (datasets, options, success_callback, failure_callback) => {
+    record_callbacks(success_callback, failure_callback);
     options.datasets = datasets; // in case needed to compute input_shape
     const model = create_model(options, failure_callback);
     train_model(model, datasets, options, success_callback, failure_callback);
 };
 
 const create_model = (options, failure_callback) => {
+    record_callbacks(failure_callback);
     try {
         const {model_name, hidden_layer_sizes, dropout_rate, optimizer, layer_initializer, regularizer, learning_rate,
                loss_function, activation, last_activation, seed, datasets, tensor_datasets} = options;
@@ -96,9 +98,7 @@ const create_model = (options, failure_callback) => {
                                     (callback) => {
                                         model = create_model(options, failure_callback);
                                         tensorflow.add_to_models(model);
-                                        if (callback) {
-                                            callback();
-                                        }
+                                        invoke_callback(callback);
                                     });
             }
         }
@@ -158,7 +158,7 @@ const create_model = (options, failure_callback) => {
        return model;
   } catch (error) {
       if (failure_callback) {
-          failure_callback(error);
+          invoke_callback(failure_callback, error);
        } else {
           throw error;
        }
@@ -290,11 +290,12 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
     }    
     if (error_message) {
         if (failure_callback) {
-            failure_callback(error_message);
+            invoke_callback(failure_callback, error_message);
             return;
         }
         throw new Error(error_message);         
     }
+    record_callbacks(success_callback, failure_callback);
     if (!model.ready_for_training && model.ready_for_prediction) {
         // been loaded but never compiled
         // not clear how to provide options to override the following defaults
@@ -512,9 +513,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
           response["Column labels for saving results in a spreadsheet"] = csv_labels;
           response["Spreadsheet values"] = csv_values;
           response.model = model;
-          if (success_callback) {
-              success_callback(response);
-          }
+          invoke_callback(success_callback, response);
           if (confusion_matrix) {
               tfvis.render.confusionMatrix({name: 'Confusion Matrix All',
                                             tab: tab_label('Charts')},
@@ -536,10 +535,10 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
        const fit_error_handler = (error) => {
            if (error.message.indexOf('No progress for ') >= 0) {
                console.log(error.message);
-               after_fit_callback(error.history);
+               invoke_callback(after_fit_callback, error.history);
            } else {
                if (failure_callback) {
-                   failure_callback(error);
+                   invoke_callback(failure_callback, error);
                } else {
                    throw error;
                }
@@ -549,7 +548,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
        model.fit(xs, ys, configuration).then(after_fit_callback, fit_error_handler);
      } catch(error) {
          if (failure_callback) {
-             failure_callback(error);
+             invoke_callback(failure_callback, error);
          } else {
              throw error;
          }
@@ -560,9 +559,10 @@ let last_prediction;
 
 const predict = (model, inputs, success_callback, error_callback, categories) => {
     if (!model) {
-        error_callback("No model named " + model_name);
+        invoke_callback(error_callback, "No model named " + model_name);
         return;
     }
+    record_callbacks(success_callback, error_callback);
     if (!model.ready_for_prediction) {
         let previous_callback = model.callback_when_ready_for_prediction;
         model.callback_when_ready_for_prediction = 
@@ -591,12 +591,12 @@ const predict = (model, inputs, success_callback, error_callback, categories) =>
         const results = prediction.arraySync().map((element) => Array.isArray(element) && element.length === 1 ?
                                                                 element[0] : element);
         if (categories) {
-            success_callback(categorical_results(results, categories));
+            invoke_callback(success_callback, categorical_results(results, categories));
         } else {
-            success_callback(results);
+            invoke_callback(success_callback, results);
         }
     } catch (error) {
-        error_callback(error.message);
+        invoke_callback(error_callback, error.message);
     }
 };
 
@@ -617,4 +617,35 @@ const shape_of_data = (data) => {
    } else {
       return [data.length].concat(shape_of_data(data[0]));
    }
+};
+ 
+let outstanding_callbacks = [];
+
+function record_callbacks () {
+    Array.from(arguments).forEach(function (callback) {
+        if (typeof callback === 'function' && outstanding_callbacks.indexOf(callback) < 0) {
+            outstanding_callbacks.push(callback);
+        }
+    });
+};
+
+function invoke_callback (callback) { // any number of additional arguments
+    if (callback && callback.stopped_prematurely) {
+        return;
+    }
+    if (typeof callback === 'function') { 
+        callback.apply(this, Array.prototype.slice.call(arguments, 1));
+        const index = outstanding_callbacks.indexOf(callback);
+        if (index >= 0) {
+            outstanding_callbacks.splice(index, 1);
+        }
+    }
+    // otherwise no callback provided so ignore it
+};
+
+const stop_all = () => {
+    outstanding_callbacks.forEach(function (callback) {
+        callback.stopped_prematurely = true;
+    });
+    outstanding_callbacks = [];
 };
