@@ -691,6 +691,7 @@ let previous_model;
 const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
                                   experiment_end_callback, success_callback, error_callback) => {
    // this is meant to be called when messages are received from a client page (e.g. Snap!)
+   record_callbacks(success_callback, error_callback);
    try {   
        const [xs, ys] = get_tensors(model_name, 'training');
        const validation_tensors = get_tensors(model_name, 'validation'); // undefined if no validation data
@@ -729,6 +730,9 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
     const create_and_train_model = async ({layers, optimization_method, loss_function, epochs, learning_rate,
                                            dropout_rate, validation_split, activation, shuffle}, 
                                           {xs, ys}) => {
+        if (create_and_train_model.stopped_prematurely) {
+            return;
+        }
         if (!layers) {
             layers = get_layers();
         }
@@ -813,6 +817,7 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
                         });
             });
     };
+    record_callbacks(create_and_train_model, error_callback);
     best_model = undefined; // to be found
     const space = {};
     const categories = get_data(model_name, 'categories');
@@ -1533,6 +1538,7 @@ window.addEventListener('DOMContentLoaded',
                         });
 
 const contents_of_URL = (URL, success_callback, error_callback) => {
+    record_callbacks(success_callback, error_callback);
     const xhr = new XMLHttpRequest();
     xhr.open('GET', URL, true);
     xhr.onreadystatechange = (event) => {
@@ -1548,6 +1554,9 @@ const contents_of_URL = (URL, success_callback, error_callback) => {
 
 const receive_message =
     async (event) => {
+        if (window.stopped_prematurely) {
+            return;
+        }
         let message = event.data;
         if (message === 'stop') {
             stop_all();
@@ -1741,7 +1750,7 @@ const receive_message =
                                           "*");
             }
             const error_callback = (error) => {
-                console.log(error, tf.memory());
+                console.log(error);
                 event.source.postMessage({optimize_hyperparameters_time_stamp: time_stamp,
                                           error_message: "Error while optimizing hyperparameters. " + 
                                                          error.message},

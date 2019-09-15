@@ -25,6 +25,9 @@ window.addEventListener('load', function () {
 				ide_morph.showMessage("Error fetching " + project_path);
 				return;
 			}
+			if (ecraft2learn) {
+				ecraft2learn.stop_all_scripts();
+			}
 			setTimeout(function () {
 				           const parameters = new URLSearchParams(window.parent.location.hash);
 				           if (parameters.get('locale')) {

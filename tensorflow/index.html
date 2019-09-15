@@ -22,6 +22,7 @@ load_local_or_remote_scripts(
      () => {
          // when all the scripts have loaded
          create_return_to_snap_button(undefined, "return_to_snap");
+         window.addEventListener('onbeforeunload', stop_all);
      });
 </script>
     <link href="../css/ai-teacher-guide.css" rel="stylesheet">

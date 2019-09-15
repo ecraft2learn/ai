@@ -544,8 +544,10 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                }
            } 
        };
+       record_callbacks(after_fit_callback);
        const start = Date.now();
-       model.fit(xs, ys, configuration).then(after_fit_callback, fit_error_handler);
+       model.fit(xs, ys, configuration)
+           .then((full_history) => invoke_callback(after_fit_callback, full_history), fit_error_handler);
      } catch(error) {
          if (failure_callback) {
              invoke_callback(failure_callback, error);
@@ -568,10 +570,11 @@ const predict = (model, inputs, success_callback, error_callback, categories) =>
         model.callback_when_ready_for_prediction = 
             () => {
                 if (previous_callback) {
-                    previous_callback();
+                    invoke_callback(previous_callback);
                 }
                 predict(model, inputs, success_callback, error_callback, categories);
         };
+        record_callbacks(model.callback_when_ready_for_prediction);
         return;
     }
     last_prediction = JSON.stringify(inputs);

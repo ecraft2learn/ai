@@ -117,21 +117,25 @@ window.ecraft2learn =
           }
           let original_open_project = SnapSerializer.prototype.openProject;
           SnapSerializer.prototype.openProject = function (project, ide) {
+              stop_all_scripts();
               if (ecraft2learn.snap_project_opened && window.parent === window) {
                   // already been opened and not inside an iframe
                   // problem with the following is that some ecraft2learn functions have
                   // closed over outer variables and also some window's listeners have been added
 //                 ecraft2learn.initialise_all();
-                  Object.values(ecraft2learn.support_iframe).forEach(iframe => {
-                      iframe.remove();
-                  });
+                  const iframes_to_remove = Object.values(ecraft2learn.support_iframe);
                    // find the URL where this library lives and reload it
                   let this_url = document.querySelector('script[src*="ecraft2learn.js"]').src;
                   ecraft2learn = undefined;
                   load_script(this_url, 
-                              function () {
+                              () => {
                                   original_open_project(project, ide);
-                                  ecraft2learn.snap_project_opened = true;
+                                  ecraft2learn.snap_project_opened = true;                                  
+                                  // removing the iframes is delayed until now
+                                  // since their windows may be waiting for 'stop' messages to clean up
+                                  iframes_to_remove.forEach(iframe => {
+                                      iframe.remove();
+                                  });
                               });
               } else {
                   original_open_project(project, ide);
@@ -2884,6 +2888,7 @@ xhr.send();
   image_class,
   inform,
   show_message,
+  stop_all_scripts,
   load_camera_training_from_file: (callback) => {
       load_transfer_training_from_file('camera', callback);
   },
