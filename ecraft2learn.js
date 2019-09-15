@@ -3081,12 +3081,12 @@ xhr.send();
       Object.values(ecraft2learn.support_window).forEach(function (support_window) {
           support_window.close();
       });
+      stop_all_scripts();
       ecraft2learn.outstanding_callbacks = [];
       ecraft2learn.support_window = {};
       ecraft2learn.support_window_is_ready = {};
       ecraft2learn.support_iframe = {};
-      ecraft2learn.training_buckets = {};
-      stop_all_scripts();      
+      ecraft2learn.training_buckets = {};   
   },
   reload: function () {
       // for debugging
