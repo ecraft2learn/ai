@@ -1760,8 +1760,7 @@ const replace_with_best_model = (name_of_model_used_in_search, success_callback,
     let error_message;
     if (!model) {
         error_message = "No model named '" + name_of_model_used_in_search + "' found.";
-    }
-    if (!model.best_model) {
+    } else if (!model.best_model) {
         error_message = "No model found by searching for better parameters for model '" + 
                         name_of_model_used_in_search +
                         "' to replace it."; 
