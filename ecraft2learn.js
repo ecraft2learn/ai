@@ -2601,6 +2601,18 @@ xhr.send();
       // prefer window.open but that is blocked as a popup
       document.location.assign("https://github.com/ecraft2learn/ai/wiki", "_blank");
   },
+  re_open_full_window: () => {
+      const project_path = window.frameElement.getAttribute('project_path');
+      if (project_path) {
+          // remove .xml as well
+          const project_name = project_path.substring(project_path.lastIndexOf('/')+1).slice(0, -4);
+          const url = project_path.substring(0, project_path.indexOf("/ai/")+4) + 
+                      "snap/snap.html?project=" + project_name + "&noRun&editMode";
+          window.open(url, "_blank");
+      } else {
+          // report error 
+      }
+  },
   wikipedia_domain: function () {
       if (ecraft2learn.default_language) {
           return "https://" + ecraft2learn.default_language.substring(0, 2) + ".wikipedia.org";
