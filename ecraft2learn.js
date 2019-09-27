@@ -1616,6 +1616,21 @@ window.ecraft2learn =
         });
         return result;
     };
+    const verify_features = (features) => {
+        const contents = features && features.contents; // should be an array of numbers
+        if (Array.isArray(contents)) {
+            if (contents.length === 0) {
+                throw new Error("No features provided. Perhaps from an unknown word.");
+            }
+            contents.forEach((n) => {
+                if (typeof n !== 'number') {
+                    throw new Error("Expected features to be a list of only numbers but received a " + typeof n);
+                }
+            });
+        } else {
+            throw new Error("Didn't receive a list of numbers as expected.");
+        }
+    };
     const word_to_features_or_location = function (word, language, features) {
         if (typeof word !== 'string') {
             inform((features ? 'features' : 'location') + " of word",
@@ -2973,6 +2988,7 @@ xhr.send();
       // distance_measure is either Euclidean distance or Cosine similarity 
       // some researchers use cosine similarity and others Euclidean distance
       // see https://en.wikipedia.org/wiki/Cosine_similarity
+      verify_features(target_features);
       language = extract_language_code(language);
       if (typeof words_to_features[language] !== 'object') {
           console.error("closest_word called before word embeddings loaded.")
@@ -3059,6 +3075,7 @@ xhr.send();
       }
   },
   closest_words: (target_features, language, distances_too, callback) => {
+      verify_features(target_features);
       record_callbacks(callback);
       language = extract_language_code(language);
       if (!ecraft2learn.words_to_features_tensors) {
