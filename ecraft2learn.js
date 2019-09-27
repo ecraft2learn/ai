@@ -1550,7 +1550,10 @@ window.ecraft2learn =
             return;
         }
         record_callbacks(callback);
-        var ide = get_snap_ide(ecraft2learn.snap_context);
+        const ide = get_snap_ide(ecraft2learn.snap_context);
+        if (!message) {
+            message = "No message available.";
+        }
         if (!ide.informing) {
             var box = new DialogBoxMorph();
             ide.informing = true;
