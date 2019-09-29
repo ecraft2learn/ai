@@ -237,7 +237,7 @@ window.addEventListener(
              let iframe     = document.createElement('iframe');
              let figcaption = document.createElement('figcaption');
              let img        = document.createElement('img');
-             img.src = path_to_ai_folder + "/ai/AI-teacher-guide-projects/" + name + ".png";
+             img.src = path_to_ai_folder + "/ai/AI-Teacher-Guide/images/" + name + ".png";
              img.className = "image-of-iframe";
              let replace_with_iframe = function () {
                  // add a loading div message for a few seconds...
@@ -261,8 +261,8 @@ window.addEventListener(
                                              },
                                              1000);
                                          });
+                 project_folder = path_to_ai_folder + "/ai/projects/";
                  if (full_screen) {
-                     project_folder = path_to_ai_folder + "/ai/projects/";
                      if (full_screen === 'true') {
                          iframe.setAttribute('full_screen', 'true');
                      }
@@ -275,7 +275,6 @@ window.addEventListener(
                      iframe.style = style;
                      figure.insertBefore(iframe, figcaption);
                  } else {
-                     project_folder = path_to_ai_folder + "/ai/AI-teacher-guide-projects/";
                      iframe.className = "iframe-clipped";
                      let iframe_style = element.getAttribute('iframe_style');
                      if (iframe_style) {
