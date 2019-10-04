@@ -2598,8 +2598,9 @@ xhr.send();
       console.timeEnd(label);
   },
   open_help_page: function () {
-      // prefer window.open but that is blocked as a popup
-      document.location.assign("https://github.com/ecraft2learn/ai/wiki", "_blank");
+      // this can be blocked as a popup (FireFox and Edge) but they offer to display the page anyway
+      // alternative is to use document.location.assign to replace current page but back to previous page restores thing
+      window.open("https://github.com/ecraft2learn/ai/wiki", "_blank");
   },
   re_open_full_window: () => {
       const project_path = window.frameElement.getAttribute('project_path');
