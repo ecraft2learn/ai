@@ -443,8 +443,8 @@ const start_training = () => {
         const error_callback = (error) => {
             report_error("Internal error: " + error.message);
         };
-        create_and_train_model(collect_datasets(),
-                               model_options,
+        model_options.datasets = collect_datasets();
+        create_and_train_model(model_options,
                                model_callback,
                                error_callback);
     }
