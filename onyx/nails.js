@@ -443,12 +443,7 @@ const start_training = () => {
         const error_callback = (error) => {
             report_error("Internal error: " + error.message);
         };
-        create_and_train_model({xs_array: xs,
-                                ys_array: one_hot(ys, class_names.length),
-                                xs_validation_array: xs_validation,
-                                ys_validation_array: one_hot(ys_validation, class_names.length),
-                                xs_test_array: xs_test,
-                                ys_test_array: one_hot(ys_test, class_names.length)},
+        create_and_train_model(collect_datasets(),
                                model_options,
                                model_callback,
                                error_callback);
@@ -481,7 +476,19 @@ const start_training = () => {
     next_training();
 };
 
+const collect_datasets = () => {
+    return {xs_array: xs,
+            ys_array: one_hot(ys, class_names.length),
+            xs_validation_array: xs_validation,
+            ys_validation_array: one_hot(ys_validation, class_names.length),
+            xs_test_array: xs_test,
+            ys_test_array: one_hot(ys_test, class_names.length)};
+};
+
 const one_hot = (array_of_class_indices, n) => {
+    if (!array_of_class_indices) {
+        return;
+    }
     return array_of_class_indices.map((index) => {
         let vector = [];
         for (let i = 0; i < n; i++) {
@@ -707,6 +714,11 @@ const start_up = () => {
     if (option === 'de-duplicate') {
         document.body.innerHTML = "De-duplication started";
         de_duplicate();
+        return;
+    }
+    if (option === 'search') {
+        document.body.innerHTML = "Hyperparameter search started";
+        search();
         return;
     }
     if (option === 'equalize') {
@@ -1858,6 +1870,28 @@ const image_sources_sorted_by_cosine_proximity = (image_logits) => {
     const labels_and_cosines =
         cosines.map((cosine, index) => [class_names_of_saved_tensors[ys[index]], sources[index], 1-Math.abs(cosine)]);                                       
     return labels_and_cosines.sort((a, b) => a[2]-b[2]);
+};
+
+const search = () => {
+    const success_callback = (results) => {
+        const trials = results.trials;
+        const compare = (a, b) => b.result.results["Highest accuracy"]-a.result.results["Highest accuracy"];
+        trials.sort(compare);
+        console.log("all", trials);
+        const p = document.createElement('p');
+        document.body.appendChild(p);
+        p.innerHTML = trials[0].result.results["Spreadsheet values"];
+        p.innerHTML += "<br><b>Accuracy: </b>" + trials.map(trial => trial.result.results["Highest accuracy"] + "&nbsp;");
+        const space = model_options.search.space;
+        Object.keys(space).forEach(key => {
+            p.innerHTML += "<br><b>" + key + ": </b>" + trials.map(trial => trial.args[key] + "&nbsp;");
+        });
+    };
+    const error_callback = (results) => {
+        console.log('error', results);
+    };
+    model_options.class_names = class_names;
+    hyperparameter_search(model_options, collect_datasets(), success_callback, error_callback);
 };
 
 window.addEventListener('DOMContentLoaded',

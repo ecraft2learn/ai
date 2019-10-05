@@ -14,7 +14,7 @@
                 navigator.serviceWorker.register('service-worker.js');
             }
             const parameters = new URLSearchParams(window.location.hash.slice(1));
-            // choices are diagnose, create model, experiment
+            // choices are diagnose, create model, experiment, search, ...
             let option = 'diagnose';
             if (parameters.has('train')) {
                 option = 'create model';
@@ -24,6 +24,8 @@
                 option = 'save tensors';
             } else if (parameters.has('de-duplicate')) {
                 option = 'de-duplicate';
+            } else if (parameters.has('search')) {
+                option = 'search';
             } else if (parameters.has('equalize')) {
                 option = 'equalize';
             }
@@ -35,18 +37,21 @@
                 // 166 random images from each class
                 additional_js = ["korean-tests-80-each.js"];
             } else if (option === 'experiment') {
-                 additional_js = ["korean-tests-80-each.js"];
+                additional_js = ["korean-tests-80-each.js"];
             } else if (option === 'save tensors') {
                 // both Korean training thumbnails and their test images
                 additional_js = ["korean-big.js", "korean-tests.js"]; // "originals-normal-serious-non-serious.js"];  
-            } else if (option === 'create model' || option === 'de-duplicate' || option === 'equalize') {
+            } else if (option === 'create model' || option === 'de-duplicate' || option === 'equalize' || option === 'search') {
                 additional_js = [saved_tensor_file_name];
             } else {
                 additional_js = [];
             }
+            if (option === 'search') {
+                additional_js.push("../js/hyperparameters.js");
+            }
             const model_name = option !== 'diagnose' ? 
-                               (option === 'create model' ? "20-08-2019a" : "15-08-2019b") : 
-                               "15-08-2019a"; // "normal-fungal-serious-04-08-2019a";
+                               (option === 'create model'  || option === 'search' ? "20-08-2019a" : "15-08-2019b") : 
+                               "15-08-2019a";
             // set aside for testing and validation
             const testing_fraction = 0;
             const validation_fraction = .15;
@@ -61,10 +66,10 @@
                 model_name: model_name,
                 hidden_layer_sizes: [100, 10],
                 batch_size: 256,
-                drop_out_rate: .5,
+                dropout_rate: .5,
                 shuffle: true,
-                epochs: 2,
-                optimizer: (i) =>  tf.train.rmsprop(1e-5), // tf.train.adamax(1e-5), tf.train.adadelta(),
+                epochs: 1000,
+                optimizer: (i) => tf.train.rmsprop(1e-5), // tf.train.adamax(1e-5), tf.train.adadelta(),
                 regularizer: (i) => tf.regularizers.l2({l2: 1e-3}),
                 layer_initializer: (index) => tf.initializers.varianceScaling({seed: SEED}),
                 // for reporting results
@@ -75,25 +80,33 @@
                 validation_fraction,
                 fraction_kept,
                 stop_if_no_progress_for_n_epochs: 20,
+                search: {type: 'randomSearch', // or 'gridSearch' but it triggers an exception
+                         number_of_experiments: 25,
+                         space: {// epochs: [50, 100, 200, 500, 1000],
+                                 // dropout_rate: [0, .25, .5, .75],
+                                 // validation_fraction: [.1, .2, .3], // will this work OK?
+                                 optimizer: [(i) => tf.train.rmsprop(1e-5),
+                                             (i) => tf.train.rmsprop(1e-4),
+                                             (i) => tf.train.rmsprop(1e-3),
+                                             (i) => tf.train.adamax(1e-5),
+                                             (i) => tf.train.adadelta()],
+                                 batch_size: [32, 256],
+                                 hidden_layer_sizes: [[30, 10], [100, 10], [200, 10], [200, 20], [300, 10], [100, 30, 10], [300, 100, 30, 10]]}}
             };
-
             let images;
-
-            const add_to_dataset = (additional_images)=>{
+            const add_to_dataset = (additional_images) => {
                 if (!images) {
                     images = additional_images;
                 } else {
-                    Object.keys(additional_images).forEach((key)=>{
+                    Object.keys(additional_images).forEach((key)=> {
                         if (images[key]) {
                             images[key] = images[key].concat(additional_images[key]);
                         } else {
                             images[key] = additional_images[key];
                         }
-                    }
-                    );
+                    });
                 }
             };
-
             load_local_or_remote_scripts(
                 ["../js/tfjs.js", 
                  "../js/tfjs-vis.js",

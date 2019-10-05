@@ -56,11 +56,10 @@ const collapse_confusion_matrix = (matrix, indices) => {
     return matrix_2x2;
 };
 
-const create_and_train_model = (datasets, options, success_callback, failure_callback) => {
-    record_callbacks(success_callback, failure_callback);
-    options.datasets = datasets; // in case needed to compute input_shape
+const create_and_train_model = (options, success_callback, failure_callback) => {
+//     record_callbacks(success_callback, failure_callback); // this isn't meant to be called by Snap!
     const model = create_model(options, failure_callback);
-    return train_model(model, datasets, options, success_callback, failure_callback);
+    return train_model(model, options.datasets, options, success_callback, failure_callback);
 };
 
 const create_model = (options, failure_callback) => {
@@ -403,7 +402,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                              shuffle,
                              callbacks: stats_callback};
       const after_fit_callback = (full_history) => {
-          console.log(full_history);
+//           console.log(full_history);
           model.ready_for_prediction = true;
           const percentage_of_tests = (x) => +(100*x/xs.shape[0]).toFixed(2);
           if (tfvis_options.display_layers_after_training) {
@@ -653,23 +652,26 @@ const stop_all = () => {
     outstanding_callbacks = [];
 };
 
-const hyperparameter_search = (number_of_experiments, callback, error_callback) => {
+const hyperparameter_search = (options, datasets, success_callback, error_callback) => {
     let previous_model;
     let lowest_loss;
     let best_model;
-    const create_and_train = async (options, datasets) => {
-        const model = create_model(options);
+    options.datasets = datasets; // in case needed to compute input_shape
+    const create_and_train = async (search_options) => {
+        console.log(search_options);
+        const new_options = Object.assign({}, options, search_options);
+        const model = create_model(new_options);
         return new Promise((resolve) => {
             train_model(model,
-                        tensor_datasets,
-                        {epochs, 
-                         learning_rate,
-                         validation_split,
-                         shuffle},
+                        datasets,
+                        new_options,
                         (results) => {
                             previous_model = model;
-                            let loss = results['Lowest validation loss'] || results['Validation loss'] || 
-                                       results['Lowest training loss'] || results['Training loss'];
+                            let loss = results["Highest accuracy"] && -results["Highest accuracy"] || // minimize negative accuracy
+                                       results['Lowest validation loss'] || 
+                                       results['Validation loss'] || 
+                                       results['Lowest training loss'] || 
+                                       results['Training loss'];
                             if (isNaN(loss)) {
                                 loss = Number.MAX_VALUE;
                             }
@@ -696,10 +698,15 @@ const hyperparameter_search = (number_of_experiments, callback, error_callback) 
                         });
             });
     };
+    const space = options.search.space;
+    Object.entries(space).forEach(([key, value]) => {
+        space[key] = hpjs.choice(value);
+    });
     hpjs.fmin(create_and_train,
               space,
-              hpjs.search.randomSearch,
-              number_of_experiments,
-              {xs, ys, callbacks: {onExperimentBegin, onExperimentEnd}})
-        .then(callback).catch(error_callback);
+              hpjs.search[options.search.type],
+              options.search.number_of_experiments,
+              options)
+        .then(success_callback)
+        .catch(error_callback);
 };
