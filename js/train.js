@@ -404,7 +404,8 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
       const after_fit_callback = (full_history) => {
 //           console.log(full_history);
           model.ready_for_prediction = true;
-          const percentage_of_tests = (x) => +(100*x/xs.shape[0]).toFixed(2);
+          const number_of_tests = xs_test && xs_test.shape[0];
+          const percentage_of_tests = (x) => +(100*x/number_of_tests).toFixed(2);
           if (tfvis_options.display_layers_after_training) {
               show_layers(model, 'Model after training');
           }
