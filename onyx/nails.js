@@ -1886,6 +1886,7 @@ const search = () => {
         Object.keys(space).forEach(key => {
             p.innerHTML += "<br><b>" + key + ": </b>" + trials.map(trial => trial.args[key] + "&nbsp;");
         });
+        p.innerHTML += "<br><b>Highest accuracy epoch: </b>" + trials.map(trial => trial.result.results["Highest accuracy epoch"] + "&nbsp;");
     };
     const error_callback = (results) => {
         console.log('error', results);
