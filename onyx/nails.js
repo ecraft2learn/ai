@@ -458,15 +458,8 @@ const start_training = () => {
         }
         test_loss_message.innerHTML += response["Spreadsheet values"] + "<br>";
         responses.push(response);
-        const button = document.createElement('button');
-        button.innerHTML = "Save model #" + model_options.training_number;
-        button.className = "save-training-button";
-        const model = response.model;
-        const save_model = async () => {
-            return await model.save('downloads://' + model_name);
-        };
-        button.addEventListener('click', save_model);
-        document.body.appendChild(button);
+        const label = "Save model #" + model_options.training_number;
+        add_save_model_button(label, model, model_name);
         if (responses.length === number_of_training_repeats) {
             resport_averages();
         } else {
@@ -474,6 +467,18 @@ const start_training = () => {
         }
     };
     next_training();
+};
+
+const add_save_model_button = (label, model, model_name) => {
+    const button = document.createElement('button');
+    button.innerHTML = label;
+    button.className = "save-training-button";
+    const save_model = async () => {
+        return await model.save('downloads://' + model_name);
+    };
+    button.addEventListener('click', save_model);
+    document.body.appendChild(button);
+    return button;
 };
 
 const collect_datasets = () => {
@@ -1887,6 +1892,7 @@ const search = () => {
             p.innerHTML += "<br><b>" + key + ": </b>" + trials.map(trial => trial.args[key] + "&nbsp;");
         });
         p.innerHTML += "<br><b>Highest accuracy epoch: </b>" + trials.map(trial => trial.result.results["Highest accuracy epoch"] + "&nbsp;");
+        add_save_model_button("Save best model", trials[0].result.results.model, model_name)
     };
     const error_callback = (results) => {
         console.log('error', results);
