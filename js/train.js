@@ -271,9 +271,14 @@ const update_best_weights = (model, best_weights) => {
 
 const set_model_weights = (model, best_weights) => {
     if (best_weights) {
-        model.layers.forEach((layer, index) => {
-            layer.setWeights(best_weights[index]);
-        });        
+        try {
+            model.layers.forEach((layer, index) => {
+                layer.setWeights(best_weights[index]);
+            });            
+        } catch (error) {
+            model.summary();
+            console.log('failed to set model weights', error);
+        }        
     }
 };
 
@@ -416,7 +421,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
               test_accuracy = test_loss_tensor[1].dataSync()[0];
               const predictions = model.predict(xs_test, ys_test);
               number_of_classes = class_names && class_names.length;
-              confusion_matrix = class_names && tfvis_options.display_confusion_matrix &&
+              confusion_matrix = class_names && 
                                  compute_confusion_matrix(predictions.dataSync(), ys_test.dataSync(), number_of_classes);
               predictions.dispose();
               tf.dispose(test_loss_tensor); // both of them 
@@ -514,18 +519,18 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
           response["Spreadsheet values"] = csv_values;
           response.model = model;
           invoke_callback(success_callback, response);
-          if (confusion_matrix) {
+          if (confusion_matrix && tfvis_options.display_confusion_matrix) {
               tfvis.render.confusionMatrix({name: 'Confusion Matrix All',
                                             tab: tab_label('Charts')},
                                            {values: confusion_matrix,
                                             tickLabels: class_names});
-              if (tfvis_options.display_collapsed_confusion_matrix) {
-                  tfvis.render.confusionMatrix({name: 'Confusion Matrix GP or not',
-                                                tab: tab_label('Charts')},
-                                               {values: collapse_confusion_matrix(confusion_matrix, 
-                                                                                  tfvis_options.display_collapsed_confusion_matrix.indices),
-                                                tickLabels: tfvis_options.display_collapsed_confusion_matrix.labels});
-              } 
+          }
+          if (confusion_matrix && tfvis_options.display_collapsed_confusion_matrix) {
+              tfvis.render.confusionMatrix({name: 'Confusion Matrix GP or not',
+                                            tab: tab_label('Charts')},
+                                           {values: collapse_confusion_matrix(confusion_matrix, 
+                                                                              tfvis_options.display_collapsed_confusion_matrix.indices),
+                                            tickLabels: tfvis_options.display_collapsed_confusion_matrix.labels});
           }
           if (model.callback_when_ready_for_prediction) {
               model.callback_when_ready_for_prediction();
