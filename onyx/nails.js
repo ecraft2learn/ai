@@ -404,23 +404,29 @@ const start_training = () => {
     let responses = [];
     const resport_averages = () => {
         const responses_total = {};
+        let duration_in_seconds = 0;
         for (let i = 0; i < number_of_training_repeats; i++) {
             const entries = Object.entries(responses[i]);
-            entries.forEach((entry) => {
-                if (typeof entry[1] === 'number') {
-                    if (typeof responses_total[entry[0]] === 'number') {
-                       responses_total[entry[0]] += entry[1];
+            entries.forEach(([key, value]) => {
+                if (typeof value === 'number') {
+                    if (key === 'Duration in seconds') {
+                        duration_in_seconds += value;
                     } else {
-                        responses_total[entry[0]] = entry[1];
-                    }
+                        if (typeof responses_total[key] === 'number') {
+                            responses_total[key] += value;
+                        } else {
+                            responses_total[key] = value;
+                        }                   
+                    }  
                 }
             });
         };
         const csv = "<br>Number of training repeats, Stop if no progress, " + 
-                    Object.keys(responses_total) + "<br>" +
+                    Object.keys(responses_total) + ", Duration in seconds<br>" +
                     number_of_training_repeats + ", " +
                     model_options.stop_if_no_progress_for_n_epochs + ", " +
-                    Object.values(responses_total).map(value => (value/number_of_training_repeats).toFixed(3)) + "<br>";
+                    Object.values(responses_total).map(value => (value/number_of_training_repeats).toFixed(3)) + ", " +
+                    duration_in_seconds + "<br>";
         const averages = document.createElement('p');
         averages.innerHTML = csv;
         document.body.appendChild(averages);
@@ -459,7 +465,7 @@ const start_training = () => {
         test_loss_message.innerHTML += response["Spreadsheet values"] + "<br>";
         responses.push(response);
         const label = "Save model #" + model_options.training_number;
-        add_save_model_button(label, model, model_name);
+        add_save_model_button(label, response.model, model_name);
         if (responses.length === number_of_training_repeats) {
             resport_averages();
         } else {
