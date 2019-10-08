@@ -728,7 +728,11 @@ const start_up = () => {
         return;
     }
     if (option === 'search') {
-        document.body.innerHTML = "Hyperparameter search started";
+        document.body.innerHTML = "Hyperparameter search started. <span id='experiment-number'>0</span>";
+        model_options.on_experiment_end = () => {
+            document.getElementById('experiment-number').innerHTML =
+            +document.getElementById('experiment-number').innerHTML + 1;
+        }
         search();
         return;
     }
@@ -1885,17 +1889,19 @@ const image_sources_sorted_by_cosine_proximity = (image_logits) => {
 
 const search = () => {
     const success_callback = (results) => {
+        console.log(results);
         const trials = results.trials;
         const compare = (a, b) => b.result.results["Highest accuracy"]-a.result.results["Highest accuracy"];
         trials.sort(compare);
         console.log("all", trials);
+        const durations = trials.map(trial => trial.result.results["Duration in seconds"]);
         const p = document.createElement('p');
         document.body.appendChild(p);
         p.innerHTML = trials[0].result.results["Spreadsheet values"];
         p.innerHTML += "<br><b>Accuracy: </b>" + trials.map(trial => trial.result.results["Highest accuracy"] + "&nbsp;");
         const space = model_options.search.space;
-        Object.keys(space).forEach(key => {
-            p.innerHTML += "<br><b>" + key + ": </b>" + trials.map(trial => trial.args[key] + "&nbsp;");
+        Object.keys(space).forEach((key, index) => {
+            p.innerHTML += "<br><b>" + key + ": </b>" + trials.map(trial => trial.args[key] + "&nbsp;(" + durations[index] + ")&snsp;");
         });
         p.innerHTML += "<br><b>Highest accuracy epoch: </b>" + trials.map(trial => trial.result.results["Highest accuracy epoch"] + "&nbsp;");
         add_save_model_button("Save best model", trials[0].result.results.model, model_name)

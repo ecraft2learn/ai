@@ -663,13 +663,17 @@ const hyperparameter_search = (options, datasets, success_callback, error_callba
     let lowest_loss;
     let best_model;
     options.datasets = datasets; // in case needed to compute input_shape
+    if (!!datasets.xs_array) {
+        // datasets are JavaScript arrays (prior to possible splitting) so compute tensor version
+        options.tensor_datasets = to_tensor_datasets(datasets);
+    }
     const create_and_train = async (search_options) => {
         console.log(search_options);
         const new_options = Object.assign({}, options, search_options);
         const model = create_model(new_options);
         return new Promise((resolve) => {
             train_model(model,
-                        datasets,
+                        options.tensor_datasets,
                         new_options,
                         (results) => {
                             previous_model = model;
@@ -708,6 +712,9 @@ const hyperparameter_search = (options, datasets, success_callback, error_callba
     Object.entries(space).forEach(([key, value]) => {
         space[key] = hpjs.choice(value);
     });
+    if (model_options.on_experiment_end) {
+        options.callbacks = {onExperimentEnd: model_options.on_experiment_end};
+    }
     hpjs.fmin(create_and_train,
               space,
               hpjs.search[options.search.type],
