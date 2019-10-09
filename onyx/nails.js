@@ -1890,29 +1890,63 @@ const image_sources_sorted_by_cosine_proximity = (image_logits) => {
 const search = () => {
     const success_callback = (results) => {
         console.log(results);
-//         const trials = results.trials;
+//      const trials = results.trials;
         let trials = [];
         results.trials.forEach(trial => {
             if (trial.result && trial.result.results) {
                 trials.push(trial);
             } else {
+                // todo: find out why these happen
                 console.log("bad trial?", trial);
             }
         });
         const compare = (a, b) => b.result.results["Highest accuracy"]-a.result.results["Highest accuracy"];
         trials.sort(compare);
         console.log("all", trials);
-        const durations = trials.map(trial => trial.result.results["Duration in seconds"]);
+        let durations = {};
+        const accuracies = {};
+        trials.forEach(trial => {
+            Object.entries(trial.args).forEach(([key, value]) => {
+                if (!durations[key]) {
+                    durations[key] = {};
+                }
+                if (!durations[key][value]) {
+                    durations[key][value] = [];
+                }
+                durations[key][value].push(trial.result.results["Duration in seconds"]);
+                if (!accuracies[key]) {
+                    accuracies[key] = {};
+                }
+                if (!accuracies[key][value]) {
+                    accuracies[key][value] = [];
+                }
+                accuracies[key][value].push(trial.result.results["Highest accuracy"]);
+            });
+        });
         const p = document.createElement('p');
         document.body.appendChild(p);
         p.innerHTML = trials[0].result.results["Spreadsheet values"];
-        p.innerHTML += "<br><b>Accuracy: </b>" + trials.map(trial =>  "  " + trial.result.results["Highest accuracy"]);
+        p.innerHTML += "<br><br><b>Accuracy: </b>" + trials.map(trial => "  " + trial.result.results["Highest accuracy"]) + "<br>";
         const space = model_options.search.space;
         Object.keys(space).forEach(key => {
-            p.innerHTML += "<br><b>" + key + ": </b>" + trials.map((trial, index) => "  " + trial.args[key] + "&nbsp;(" + durations[index] + ")");
+            p.innerHTML += "<br><b>" + key + ": </b>" + trials.map((trial, index) => "  " + trial.args[key]) + "<br>";
+            Object.entries(durations[key]).forEach(([parameter, durations_list]) => {
+                if (durations_list.length > 0) {
+                    p.innerHTML += parameter + ": " + 
+                                   (durations_list.reduce((duration, sum) => duration+sum)/durations_list.length).toFixed(2) + " seconds (" +
+                                   durations_list.length + " items)<br>";
+                }
+            });
+            Object.entries(accuracies[key]).forEach(([parameter, accuracies_list]) => {
+                if (accuracies_list.length > 0) {
+                    p.innerHTML += parameter + ": " + 
+                                   (accuracies_list.reduce((duration, sum) => duration+sum)/accuracies_list.length).toFixed(3) + " accuracy (" +
+                                   accuracies_list.length + " items)<br>";
+                }
+            });
         });
         p.innerHTML += "<br><b>Highest accuracy epoch: </b>" + trials.map(trial => "  " + trial.result.results["Highest accuracy epoch"]);
-        add_save_model_button("Save best model", trials[0].result.results.model, model_name)
+        add_save_model_button("Save best model", trials[0].result.results.model, model_name);
     };
     const error_callback = (results) => {
         console.log('error', results);
