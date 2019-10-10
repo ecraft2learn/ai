@@ -1202,6 +1202,9 @@ const receive_drop = (event) => {
         // Use DataTransfer interface to access the file(s)
         file = event.dataTransfer.files[0].name;
     }
+    if (!file) {
+        return;
+    }
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => {
