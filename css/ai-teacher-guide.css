@@ -117,7 +117,7 @@ background-color: buttonface;
   background-color: #ece8e4;
 }
 .back-to-tutorial-button {
-  margin-top: -12px;
+  margin-top: 6px;
   margin-bottom: 6px;
 }
 .save-training-button, .save-validation-button, .support-window-button {
