@@ -292,9 +292,7 @@ const add_image_or_canvas = (parent, image_or_canvas, class_name, image_to_repla
         image_or_canvas.height = image_dimension;        
     }
     const analyse_image = (event) => {
-        if (is_mobile()) {
-            display_message("Analysing...", 'random-image-response');
-        }
+        display_message("Analysing...", 'random-image-response');
         const analyse_image_and_replace_self =
             (result) => {
                 const class_index = class_names.indexOf(class_name);
