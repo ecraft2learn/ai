@@ -50,7 +50,7 @@
                 additional_js.push("../js/hyperparameters.js");
             }
             const model_name = option !== 'diagnose' ? 
-                               (option === 'create model' || option === 'search' ? "07-10-2019c" : "15-08-2019b") : 
+                               (option === 'create model' || option === 'search' ? "07-11-2019a" : "15-08-2019b") : 
                                "19-08-2019b";
             // set aside for testing and validation
             const testing_fraction = 0;
@@ -82,11 +82,11 @@
                 stop_if_no_progress_for_n_epochs: 20,
                 split_data_on_each_experiment: true,
                 search: {type: 'randomSearch', // or 'gridSearch' but it triggers an exception
-                         number_of_experiments: 20,
+                         number_of_experiments: 200,
                          space: {// epochs: [50, 100, 200, 500, 1000],
 //                                  dropout_rate: [0, .25, .5, .75],
                                  // validation_fraction: [.1, .2, .3], // will this work OK?
-                                 batch_size: [64, 128, 256],
+                                 batch_size: [128, 256],
 //                                  optimizer: [(i) => tf.train.rmsprop(5e-4),
 //                                              (i) => tf.train.rmsprop(3e-4),
 //                                              (i) => tf.train.rmsprop(6e-4),
@@ -101,7 +101,7 @@
 //                                                (i) => tf.regularizers.l2({l2: 1e-4}),
 //                                                (i) => tf.regularizers.l2({l2: 1e-2}),
 //                                                (i) => null],
-                                 hidden_layer_sizes: [[1000], [2000], [3000]]}}
+                                 hidden_layer_sizes: [[300, 100, 30, 10], [400, 100, 25], [500, 50, 10]]}}
             };
             let images;
             const add_to_dataset = (additional_images) => {
