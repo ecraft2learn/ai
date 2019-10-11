@@ -713,12 +713,13 @@ const hyperparameter_search = (options, datasets, success_callback, error_callba
                                      status: hpjs.STATUS_OK});
                         },
                         (error) => {
-                            if (error.message === not_a_number_error_message) {
-                                resolve({loss: Number.MAX_VALUE,
-                                         status: hpjs.STATUS_OK});
-                            } else if (error_callback) {
+                            if (error.message !== not_a_number_error_message) {
+                                stop_hyperparameter_search = true;
+                                log(error);
                                 invoke_callback(error_callback, error);
                             }
+                            resolve({loss: Number.MAX_VALUE,
+                                     status: hpjs.STATUS_OK});
                         });
             });
     };
