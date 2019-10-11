@@ -561,10 +561,10 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
     };
     let onExperimentBegin = (i, trial) => {
         if (stop_on_next_experiment) {
-           stop_on_next_experiment = false;
-           hyperparameter_searching = false;
-           optimize_hyperparameters_button.innerHTML = search_button_label;
-           return true; // to stop the search
+            stop_on_next_experiment = false;
+            hyperparameter_searching = false;
+            optimize_hyperparameters_button.innerHTML = search_button_label;
+            return true; // to stop the search
         }
         optimize_hyperparameters_messages.innerHTML += "<br><br>Experiment " + (i+1) + ":<br>";
         display_trial(trial.args, optimize_hyperparameters_messages);

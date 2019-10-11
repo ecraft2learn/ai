@@ -68,7 +68,7 @@
                 batch_size: 1024,
                 dropout_rate: .5,
                 shuffle: true,
-                epochs: 500,
+                epochs: 2,
                 optimizer: (i) => tf.train.rmsprop(2e-4), // tf.train.adamax(1e-5), tf.train.adadelta(),
                 regularizer: (i) => tf.regularizers.l2({l2: 5e-4}),
                 layer_initializer: (index) => tf.initializers.varianceScaling({seed: SEED}),
@@ -81,7 +81,7 @@
                 fraction_kept,
                 stop_if_no_progress_for_n_epochs: 20,
                 search: {type: 'randomSearch', // or 'gridSearch' but it triggers an exception
-                         number_of_experiments: 20,
+                         number_of_experiments: 100,
                          space: {// epochs: [50, 100, 200, 500, 1000],
 //                                  dropout_rate: [0, .25, .5, .75],
                                  // validation_fraction: [.1, .2, .3], // will this work OK?

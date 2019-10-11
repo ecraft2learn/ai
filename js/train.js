@@ -307,18 +307,18 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                        loss: 'meanSquaredError'});
     }
     const create_tensors = !!datasets.xs_array;
+    const {xs, ys, xs_validation, ys_validation, xs_test, ys_test, test_and_validation_identical} = datasets;
+    const {class_names, batch_size, shuffle, epochs, validation_split, learning_rate, dropout_rate, optimizer,
+           layer_initializer, regularizer, seed, stop_if_no_progress_for_n_epochs,
+           testing_fraction, validation_fraction, fraction_kept, split_data_on_each_experiment} 
+          = options;
+    const tfvis_options = tfvis ? options.tfvis_options || {} : {}; // ignore options if tfvis not loaded
+    const model_name = model.name;
     if (create_tensors) {
         // datasets are JavaScript arrays (prior to possible splitting) so compute tensor version
         datasets = to_tensor_datasets(datasets);
     }
     try {
-        const {xs, ys, xs_validation, ys_validation, xs_test, ys_test, test_and_validation_identical} = datasets;
-        const {class_names, batch_size, shuffle, epochs, validation_split, learning_rate, dropout_rate, optimizer,
-               layer_initializer, regularizer, seed, stop_if_no_progress_for_n_epochs,
-               testing_fraction, validation_fraction, fraction_kept} 
-              = options;
-        const tfvis_options = tfvis ? options.tfvis_options || {} : {}; // ignore options if tfvis not loaded
-        const model_name = model.name;
         training_number = options.training_number;
         // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
         let epoch_history = [];
@@ -388,16 +388,24 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                 if (tfvis_callbacks) {
                     tfvis_callbacks.onEpochEnd(epoch, history);
                 }
+                const abort = (message) => {
+                    // first restore best weights
+                    if (best_weights) {
+                        set_model_weights(model, best_weights);
+                    }
+                    const error = new Error(message);
+                    error.history = epoch_history;
+                    throw error;
+                }
                 if (stop_if_no_progress_for_n_epochs &&
                     (!highest_accuracy_epoch || (epoch-highest_accuracy_epoch >= stop_if_no_progress_for_n_epochs)) &&
                     epoch-lowest_validation_loss_epoch >= stop_if_no_progress_for_n_epochs) {
                     // if there has been no progress in accuracy or loss then stop
                     // or just loss if accuracy not appropriate
-                    // first restore best weights
-                    set_model_weights(model, best_weights);
-                    const error = new Error("No progress for " + stop_if_no_progress_for_n_epochs + " epochs at epoch " + epoch);
-                    error.history = epoch_history;
-                    throw error;
+                    abort("No progress for " + stop_if_no_progress_for_n_epochs + " epochs at epoch " + epoch);
+                }
+                if (window.stop_hyperparameter_search) {
+                    abort("User stopped hyperparameter search at epoch " + epoch);
                 }
             }};
       const configuration = {batchSize: batch_size,
@@ -428,7 +436,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
               if (create_tensors) {
                   xs_test.dispose();
                   ys_test.dispose();
-              }              
+              }
           }
           if (create_tensors) {
               xs.dispose();
@@ -538,7 +546,8 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
           }
        };
        const fit_error_handler = (error) => {
-           if (error.message.indexOf('No progress for ') >= 0) {
+           if (error.message.indexOf('No progress for ') >= 0 || 
+               error.message.indexOf('User stopped hyperparameter search ') >= 0) {
                console.log(error.message);
                invoke_callback(after_fit_callback, error.history);
            } else {
@@ -713,7 +722,9 @@ const hyperparameter_search = (options, datasets, success_callback, error_callba
         space[key] = hpjs.choice(value);
     });
     if (model_options.on_experiment_end) {
-        options.callbacks = {onExperimentEnd: model_options.on_experiment_end};
+        options.callbacks = {onExperimentBegin: 
+                                () => window.stop_hyperparameter_search, // stop if this has been set
+                             onExperimentEnd: model_options.on_experiment_end};
     }
     hpjs.fmin(create_and_train,
               space,
