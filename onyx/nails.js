@@ -1895,7 +1895,11 @@ const search = () => {
         let trials = [];
         results.trials.forEach(trial => {
             if (trial.result && trial.result.results) {
-                trials.push(trial);
+                if (!isNaN(trial.result.results["Highest accuracy"])) {
+                    trials.push(trial);
+                } else {
+                    log('ignoring NaN', trail);
+                }
             } else {
                 // todo: find out why these happen
                 console.log("bad trial?", trial);

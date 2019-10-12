@@ -66,7 +66,7 @@ const create_model = (options, failure_callback) => {
     record_callbacks(failure_callback);
     try {
         const {model_name, hidden_layer_sizes, dropout_rate, optimizer, layer_initializer, regularizer, learning_rate,
-               loss_function, activation, last_activation, seed, datasets, tensor_datasets} = options;
+               loss_function, activation, last_activation, seed, datasets} = options;
         const tfvis_options = tfvis ? options.tfvis_options || {} : {}; // ignore options if tfvis not loaded
         training_number = options.training_number;
         let class_names = options.class_names;
@@ -74,11 +74,11 @@ const create_model = (options, failure_callback) => {
         if (!input_shape) {
             if (datasets) {
                 input_shape = shape_of_data(datasets.xs_array[0]);
-            } else if (tensor_datasets) {
-                input_shape = tensor_dataset.xs.shape.slice(1);
-                if (input_shape.length === 0) {
-                    input_shape = [1];
-                }
+//             } else if (tensor_datasets) {
+//                 input_shape = tensor_dataset.xs.shape.slice(1);
+//                 if (input_shape.length === 0) {
+//                     input_shape = [1];
+//                 }
                 // shape_of_data(tensor_dataset.dataSync().xs[0]);
             }
         }
@@ -176,82 +176,80 @@ const show_layers = (model, tab_name) => {
 let training_number;
 const tab_label = (label) => label + (typeof training_number === 'undefined' ? '' : '#' + training_number);
 
-const to_tensor_datasets = (array_datasets) => {
-    let {xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array} = array_datasets;
-    let test_and_validation_identical;
-    const splitting_data = (!xs_validation_array || xs_validation_array.length === 0) && // no validation data provided
-                           typeof validation_fraction === 'number' && typeof testing_fraction === 'number';
-    const original_xs = xs_array;
-    const original_ys = ys_array;
-    const split_data = () => {
-        // if I want reproducability I should use tf.randomUniform with a seed
-        let xs_ys = original_xs.map((x,index) => [x, original_ys[index]]);
-        tf.util.shuffle(xs_ys);
-        // this is a better shuffle but unlike the following has no random seed for reproducability
-        //         shuffle(xs_ys, SEED);
-        if (fraction_kept < 1) {
-            xs_ys.splice(Math.round((1 - fraction_kept) * xs_ys.length));
-        }
-        xs_ys = xs_ys.sort((a,b) => a[1].indexOf(1) - b[1].indexOf(1));
-        // sort by class to make equal quantities
-        const find_start = (class_index) => {
-            for (let i = 0; i < xs_ys.length; i++) {
-                if (xs_ys[i][1].indexOf(1) === class_index) {
-                    return i;
-                }
-            }
-        };
-        const starts = class_names.map((ignore,class_index) => find_start(class_index));
-        const validation_count = Math.round(validation_fraction * xs_ys.length);
-        const validation_count_per_class = Math.round(validation_count / class_names.length);
-        const test_count = Math.round(testing_fraction * xs_ys.length);
-        const test_count_per_class = Math.round(test_count / class_names.length);
-        const new_count = xs_ys.length - (validation_count_per_class + test_count_per_class) * class_names.length;
-        const validation_ends = starts.map((start) => start + validation_count_per_class);
-        let xs_ys_validation = [];
-        validation_ends.forEach((end,index) => {
-            xs_ys_validation = xs_ys_validation.concat(xs_ys.slice(starts[index], end));
-        });
-        const test_ends = validation_ends.map((start) => start + test_count_per_class);
-        let xs_ys_test = [];
-        test_ends.forEach((end,index) => {
-            xs_ys_test = xs_ys_test.concat(xs_ys.slice(validation_ends[index], end));
-        });
-        let new_xs_ys = [];
-        starts.push(xs_ys.length);
-        // so starts [index+1] is the end of the class
-        test_ends.forEach((test_end,index) => {
-            new_xs_ys = new_xs_ys.concat(xs_ys.slice(test_ends[index], starts[index + 1]));
-        });
-        xs_validation_array = xs_ys_validation.map((x_y) => x_y[0]);
-        ys_validation_array = xs_ys_validation.map((x_y) => x_y[1]);
-        xs_test_array = xs_ys_test.map((x_y) => x_y[0]);
-        ys_test_array = xs_ys_test.map((x_y) => x_y[1]);
-        if (xs_test_array.length === 0) {
-            // if not setting aside test data then use validation for confusion matrix etc.
-            xs_test_array = xs_validation_array;
-            ys_test_array = ys_validation_array;
-            test_and_validation_identical = true;
-        }
-        xs_array = new_xs_ys.map((x_y) => x_y[0]);
-        ys_array = new_xs_ys.map((x_y) => x_y[1]);
-    };
-    if (splitting_data) {
-        split_data();
+const update_tensors = (datasets) => {
+    let {xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array} = datasets;
+    tf.dispose(datasets.xs);
+    datasets.xs = tf.tensor(xs_array);
+    tf.dispose(datasets.ys);
+    datasets.ys = tf.tensor(ys_array);
+    tf.dispose(datasets.xs_validation);
+    datasets.xs_validation = xs_validation_array && xs_validation_array.length > 0 && tf.tensor(xs_validation_array);
+    tf.dispose(datasets.ys_validation);
+    datasets.ys_validation = ys_validation_array && ys_validation_array.length > 0 && tf.tensor(ys_validation_array);
+    tf.dispose(datasets.xs_test);
+    datasets.xs_test = xs_test_array && xs_test_array.length > 0 && tf.tensor(xs_test_array);
+    tf.dispose(datasets.ys_test);
+    datasets.ys_test = ys_test_array && ys_test_array.length > 0 && tf.tensor(ys_test_array);
+};
+
+const split_data = (datasets, options) => {
+    // if I want reproducability I should use tf.randomUniform with a seed
+    if (!datasets.original_xs) {
+        datasets.original_xs = datasets.xs_array;
+        datasets.original_ys = datasets.ys_array;
     }
-    const xs = tf.tensor(xs_array);
-    const ys = tf.tensor(ys_array);
-    const xs_validation = xs_validation_array && xs_validation_array.length > 0 && tf.tensor(xs_validation_array);
-    const ys_validation = ys_validation_array && ys_validation_array.length > 0 && tf.tensor(ys_validation_array);
-    const xs_test = xs_test_array && xs_test_array.length > 0 && tf.tensor(xs_test_array);
-    const ys_test = ys_test_array && ys_test_array.length > 0 && tf.tensor(ys_test_array);
-    return {xs,
-            ys,
-            xs_validation,
-            ys_validation,
-            xs_test,
-            ys_test,
-            test_and_validation_identical};
+    const {original_xs, original_ys} = datasets;
+    const {fraction_kept, validation_fraction, testing_fraction} = options;
+    let xs_ys = original_xs.map((x,index) => [x, original_ys[index]]);
+    tf.util.shuffle(xs_ys);
+    // this is a better shuffle but unlike the following has no random seed for reproducability
+    //         shuffle(xs_ys, SEED);
+    if (fraction_kept < 1) {
+        xs_ys.splice(Math.round((1 - fraction_kept) * xs_ys.length));
+    }
+    xs_ys = xs_ys.sort((a,b) => a[1].indexOf(1) - b[1].indexOf(1));
+    // sort by class to make equal quantities
+    const find_start = (class_index) => {
+        for (let i = 0; i < xs_ys.length; i++) {
+            if (xs_ys[i][1].indexOf(1) === class_index) {
+                return i;
+            }
+        }
+    };
+    const starts = class_names.map((ignore,class_index) => find_start(class_index));
+    const validation_count = Math.round(validation_fraction * xs_ys.length);
+    const validation_count_per_class = Math.round(validation_count / class_names.length);
+    const test_count = Math.round(testing_fraction * xs_ys.length);
+    const test_count_per_class = Math.round(test_count / class_names.length);
+    const new_count = xs_ys.length - (validation_count_per_class + test_count_per_class) * class_names.length;
+    const validation_ends = starts.map((start) => start + validation_count_per_class);
+    let xs_ys_validation = [];
+    validation_ends.forEach((end,index) => {
+        xs_ys_validation = xs_ys_validation.concat(xs_ys.slice(starts[index], end));
+    });
+    const test_ends = validation_ends.map((start) => start + test_count_per_class);
+    let xs_ys_test = [];
+    test_ends.forEach((end,index) => {
+        xs_ys_test = xs_ys_test.concat(xs_ys.slice(validation_ends[index], end));
+    });
+    let new_xs_ys = [];
+    starts.push(xs_ys.length);
+    // so starts [index+1] is the end of the class
+    test_ends.forEach((test_end,index) => {
+        new_xs_ys = new_xs_ys.concat(xs_ys.slice(test_ends[index], starts[index + 1]));
+    });
+    datasets.xs_validation_array = xs_ys_validation.map((x_y) => x_y[0]);
+    datasets.ys_validation_array = xs_ys_validation.map((x_y) => x_y[1]);
+    datasets.xs_test_array = xs_ys_test.map((x_y) => x_y[0]);
+    datasets.ys_test_array = xs_ys_test.map((x_y) => x_y[1]);
+    if (datasets.xs_test_array.length === 0) {
+        // if not setting aside test data then use validation for confusion matrix etc.
+        datasets.xs_test_array = datasets.xs_validation_array;
+        datasets.ys_test_array = datasets.ys_validation_array;
+        datasets.test_and_validation_identical = true;
+    }
+    datasets.xs_array = new_xs_ys.map((x_y) => x_y[0]);
+    datasets.ys_array = new_xs_ys.map((x_y) => x_y[1]);
 };
 
 const update_best_weights = (model, best_weights) => {
@@ -306,19 +304,24 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
         model.compile({optimizer: 'sgd',
                        loss: 'meanSquaredError'});
     }
+    const {class_names, batch_size, shuffle, epochs, validation_split, learning_rate, dropout_rate, optimizer,
+           layer_initializer, regularizer, seed, stop_if_no_progress_for_n_epochs,
+           testing_fraction, validation_fraction, fraction_kept, split_data_on_each_experiment} 
+          = options;
+    const tfvis_options = tfvis ? options.tfvis_options || {} : {}; // ignore options if tfvis not loaded
+    const model_name = model.name;
+    const splitting_data = split_data_on_each_experiment ||
+                           ((typeof datasets.xs_validation_array === 'undefined' || datasets.xs_validation_array.length === 0) && // no validation data provided
+                            typeof validation_fraction === 'number' && typeof testing_fraction === 'number');
+    if (splitting_data) {
+        split_data(datasets, options);
+    }
     const create_tensors = !!datasets.xs_array;
     if (create_tensors) {
         // datasets are JavaScript arrays (prior to possible splitting) so compute tensor version
-        datasets = to_tensor_datasets(datasets);
+        update_tensors(datasets);
     }
     try {
-        const {xs, ys, xs_validation, ys_validation, xs_test, ys_test, test_and_validation_identical} = datasets;
-        const {class_names, batch_size, shuffle, epochs, validation_split, learning_rate, dropout_rate, optimizer,
-               layer_initializer, regularizer, seed, stop_if_no_progress_for_n_epochs,
-               testing_fraction, validation_fraction, fraction_kept} 
-              = options;
-        const tfvis_options = tfvis ? options.tfvis_options || {} : {}; // ignore options if tfvis not loaded
-        const model_name = model.name;
         training_number = options.training_number;
         // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
         let epoch_history = [];
@@ -388,18 +391,27 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                 if (tfvis_callbacks) {
                     tfvis_callbacks.onEpochEnd(epoch, history);
                 }
+                const abort = (message) => {
+                    // first restore best weights
+                    if (best_weights) {
+                        set_model_weights(model, best_weights);
+                    }
+                    const error = new Error(message);
+                    error.history = epoch_history;
+                    throw error;
+                }
                 if (stop_if_no_progress_for_n_epochs &&
                     (!highest_accuracy_epoch || (epoch-highest_accuracy_epoch >= stop_if_no_progress_for_n_epochs)) &&
                     epoch-lowest_validation_loss_epoch >= stop_if_no_progress_for_n_epochs) {
                     // if there has been no progress in accuracy or loss then stop
                     // or just loss if accuracy not appropriate
-                    // first restore best weights
-                    set_model_weights(model, best_weights);
-                    const error = new Error("No progress for " + stop_if_no_progress_for_n_epochs + " epochs at epoch " + epoch);
-                    error.history = epoch_history;
-                    throw error;
+                    abort("No progress for " + stop_if_no_progress_for_n_epochs + " epochs at epoch " + epoch);
+                }
+                if (window.stop_hyperparameter_search) {
+                    abort("User stopped hyperparameter search at epoch " + epoch);
                 }
             }};
+      const {xs, ys, xs_validation, ys_validation, xs_test, ys_test} = datasets;
       const configuration = {batchSize: batch_size,
                              epochs,
                              validationData: xs_validation && [xs_validation, ys_validation],
@@ -408,6 +420,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                              callbacks: stats_callback};
       const after_fit_callback = (full_history) => {
 //           console.log(full_history);
+          const {xs, ys, xs_validation, ys_validation, xs_test, ys_test} = datasets;
           model.ready_for_prediction = true;
           const number_of_tests = xs_test && xs_test.shape[0];
           const percentage_of_tests = (x) => +(100*x/number_of_tests).toFixed(2);
@@ -428,7 +441,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
               if (create_tensors) {
                   xs_test.dispose();
                   ys_test.dispose();
-              }              
+              }
           }
           if (create_tensors) {
               xs.dispose();
@@ -501,7 +514,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
           if (!xs_validation) {
               // what about validation_split????
               csv_values += xs.shape[0] + ", ";
-          } else if (!xs_test || test_and_validation_identical) {
+          } else if (!xs_test || datasets.test_and_validation_identical) {
               csv_values += xs.shape[0] + xs_validation.shape[0] + ", ";
           } else {
               csv_values += xs.shape[0] + xs_validation.shape[0] + xs_test.shape[0] + ", ";
@@ -538,7 +551,8 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
           }
        };
        const fit_error_handler = (error) => {
-           if (error.message.indexOf('No progress for ') >= 0) {
+           if (error.message.indexOf('No progress for ') >= 0 || 
+               error.message.indexOf('User stopped hyperparameter search ') >= 0) {
                console.log(error.message);
                invoke_callback(after_fit_callback, error.history);
            } else {
@@ -551,7 +565,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
        };
        record_callbacks(after_fit_callback);
        const start = Date.now();
-       model.fit(xs, ys, configuration)
+       model.fit(datasets.xs, datasets.ys, configuration)
            .then((full_history) => invoke_callback(after_fit_callback, full_history), fit_error_handler);
      } catch(error) {
          if (failure_callback) {
@@ -665,7 +679,7 @@ const hyperparameter_search = (options, datasets, success_callback, error_callba
     options.datasets = datasets; // in case needed to compute input_shape
     if (!!datasets.xs_array) {
         // datasets are JavaScript arrays (prior to possible splitting) so compute tensor version
-        options.tensor_datasets = to_tensor_datasets(datasets);
+        update_tensors(datasets);
     }
     const create_and_train = async (search_options) => {
         console.log(search_options);
@@ -673,7 +687,7 @@ const hyperparameter_search = (options, datasets, success_callback, error_callba
         const model = create_model(new_options);
         return new Promise((resolve) => {
             train_model(model,
-                        options.tensor_datasets,
+                        datasets,
                         new_options,
                         (results) => {
                             previous_model = model;
@@ -699,12 +713,13 @@ const hyperparameter_search = (options, datasets, success_callback, error_callba
                                      status: hpjs.STATUS_OK});
                         },
                         (error) => {
-                            if (error.message === not_a_number_error_message) {
-                                resolve({loss: Number.MAX_VALUE,
-                                         status: hpjs.STATUS_OK});
-                            } else if (error_callback) {
+                            if (error.message !== not_a_number_error_message) {
+                                stop_hyperparameter_search = true;
+                                log(error);
                                 invoke_callback(error_callback, error);
                             }
+                            resolve({loss: Number.MAX_VALUE,
+                                     status: hpjs.STATUS_OK});
                         });
             });
     };
@@ -713,7 +728,9 @@ const hyperparameter_search = (options, datasets, success_callback, error_callba
         space[key] = hpjs.choice(value);
     });
     if (model_options.on_experiment_end) {
-        options.callbacks = {onExperimentEnd: model_options.on_experiment_end};
+        options.callbacks = {onExperimentBegin: 
+                                () => window.stop_hyperparameter_search, // stop if this has been set
+                             onExperimentEnd: model_options.on_experiment_end};
     }
     hpjs.fmin(create_and_train,
               space,
