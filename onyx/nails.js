@@ -1905,6 +1905,7 @@ const search = () => {
                 console.log("bad trial?", trial);
             }
         });
+        document.getElementById('experiment-number').innerHTML = trials.length;
         const compare = (a, b) => b.result.results["Highest accuracy"]-a.result.results["Highest accuracy"];
         trials.sort(compare);
         console.log("all", trials);
