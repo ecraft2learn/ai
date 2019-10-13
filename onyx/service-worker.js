@@ -1,6 +1,9 @@
 // Service worker for progressive web app 
 // caches files locally
 // based upon https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Offline_Service_workers
+//  * Authors: Ken Kahn
+//  * License: New BSD
+
 
 const cache_name = "onyx-nail-v30";
 
