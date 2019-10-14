@@ -125,12 +125,18 @@ showCostCalculation = function(info, fromMap, toMap) {
         $row.data('node-ids', item.fromID + ' ' + item.toID);
         $row.append($('<td>').html(-item.cost));
         $row.append($('<td>').html(item.type));
-        $node = $(makeNodeSpan(from));
 
-        $node.addClass('paired');
-        $node.data('data-pair-id', item.toID);
+        if (from != null && to != null) {
+            $node = $(makeNodeSpan(from));
 
-        $row.append($('<td>').append($('<pre>').append($node)));
+            $node.addClass('paired');
+            $node.data('data-pair-id', item.toID);
+
+            $row.append($('<td>').append($('<pre>')
+                .append($node)));
+        } else {
+            $row.append($('<td>'));
+        }
 
         var explanation;
         if (item.type === 'Match Children') {

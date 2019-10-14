@@ -199,7 +199,7 @@ PushButtonMorph.prototype.fixLayout = function () {
 
 PushButtonMorph.prototype.mouseDownLeft = function () {
     PushButtonMorph.uber.mouseDownLeft.call(this);
-    if (!this.disabled && this.label) {
+    if (this.label) {
         this.label.setCenter(this.center().add(1));
     }
 };
@@ -446,17 +446,6 @@ PushButtonMorph.prototype.createBackgrounds = function () {
         this.pressColor,
         this.pressColor.darker(this.contrast),
         this.pressColor.lighter(this.contrast)
-    );
-
-    this.disabledImage = newCanvas(ext);
-    context = this.disabledImage.getContext('2d');
-    this.drawOutline(context);
-    this.drawBackground(context, this.disabledColor);
-    this.drawEdges(
-        context,
-        this.disabledColor,
-        this.disabledColor,
-        this.disabledColor
     );
 
     this.image = this.normalImage;
@@ -3352,7 +3341,7 @@ InputFieldMorph.prototype.drawRectBorder = function (context) {
 };
 
 // PianoMenuMorph //////////////////////////////////////////////////////
-/* 
+/*
     I am a menu that looks like a piano keyboard.
 */
 

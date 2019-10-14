@@ -117,6 +117,10 @@ if ($enable_viewer) {
 		$project = $mysqli->escape_string($_GET['project']);
 		$where .= " AND projectID = '$project'";
 	}
+	if (array_key_exists('user', $_GET)) {
+		$user = $mysqli->escape_string($_GET['user']);
+		$where .= " AND userID = '$user'";
+	}
 
 	$query = "SELECT * FROM `trace` $where
 		ORDER BY assignmentID, projectID, time";

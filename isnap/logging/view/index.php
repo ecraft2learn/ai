@@ -40,7 +40,7 @@ if ($enable_viewer) {
 	}
 
 	echo "<table cellspacing='0'>";
-	echo "<thead><th>Project ID</th><th>Assignment</th><th>User</th><th>Start</th><th>End</th><th>Logs</th></thead>";
+	echo "<thead><th>Project ID</th><th>Assignment</th><th>User</th><th>Start</th><th>End</th><th>Logs</th><th>Hints</th></thead>";
 	while($row = mysqli_fetch_array($result)) {
 		$projectID = $row['projectID'];
 		$assignmentID = $row['assignmentID'];
@@ -51,9 +51,10 @@ if ($enable_viewer) {
 		$logs = $row['logs'];
 		$encodedUserID = urlencode($userID);
 		$link = "display.php?id=$projectID&assignment=$assignmentID&userID=$encodedUserID";
+		$hints = "../../hints/view/?project=$projectID&assignment=$assignmentID&userID=$encodedUserID";
 		echo "<tr><td><a target='_blank' href='$link'>$projectID</a></td>
 			<td>$assignmentID</td><td>$shortUserID</td><td>$start</td><td>$end</td>
-			<td>$logs</td></tr>";
+			<td>$logs</td><td><a target='_blank'  href='$hints'>Hints</a></td></tr>";
 	}
 	echo "</table>";
 

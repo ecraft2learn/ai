@@ -28,29 +28,84 @@
 */
 
 // Global settings /////////////////////////////////////////////////////
+// cloud.js should be able to exist indepent of Snap!
+// (The module date is included for simplicity, but is not needed elsewhere.)
 
-/*global modules, SnapSerializer, nop, hex_sha512, DialogBoxMorph, Color,
-normalizeCanvas*/
+/*global modules, hex_sha512*/
 
-modules.cloud = '2018-March-02';
+modules = modules || {};
+modules.cloud = '2019-January-17';
 
 // Global stuff
 
 var Cloud;
-var SnapCloud;
 
 // Cloud /////////////////////////////////////////////////////////////
 
-function Cloud(url) {
-    this.init(url);
+function Cloud() {
+    this.init();
 }
 
-Cloud.prototype.init = function (url) {
-    this.url = url;
+Cloud.prototype.init = function () {
+    this.urlBasePath = '/api/v1';
+    this.url = this.determineCloudDomain() + this.urlBasePath;
     this.username = null;
 };
 
-SnapCloud = new Cloud('https://cloud.snap.berkeley.edu');
+// Projects larger than this are rejected.
+Cloud.MAX_FILE_SIZE = 10 * 1024 * 1024;
+
+Cloud.prototype.knownDomains = {
+    'Snap!Cloud' : 'https://cloud.snap.berkeley.edu',
+    'Snap!Cloud (cs10)' : 'https://snap-cloud.cs10.org',
+    'Snap!Cloud (staging)': 'https://snap-staging.cs10.org',
+    'localhost': 'http://localhost:8080',
+    'localhost (secure)': 'https://localhost:4431'
+};
+
+Cloud.prototype.defaultDomain = Cloud.prototype.knownDomains['Snap!Cloud'];
+
+Cloud.prototype.determineCloudDomain = function () {
+    // We dynamically determine the domain of the cloud server.
+    // This allows for easy mirrors and development servers.
+    // The domain is determined by:
+    // 1. <meta name='snap-cloud-domain' location="X"> in snap.html.
+    // 2. The current page's domain
+    var currentDomain = window.location.host, // host includes the port.
+        metaTag = document.head.querySelector("[name='snap-cloud-domain']"),
+        cloudDomain = this.defaultDomain,
+        domainMap = this.knownDomains;
+
+    if (metaTag) { return metaTag.getAttribute('location'); }
+
+    Object.keys(domainMap).some(function (name) {
+        var server = domainMap[name];
+        if (Cloud.isMatchingDomain(currentDomain, server)) {
+            cloudDomain = server;
+            return true;
+        }
+        return false;
+    });
+
+    return cloudDomain;
+};
+
+Cloud.isMatchingDomain = function (client, server) {
+    // A matching domain means that the client-server are not subject to
+    // 3rd party cookie restrictions.
+    // see https://tools.ietf.org/html/rfc6265#section-5.1.3
+    // This matches a domain at end of a subdomain URL.
+    var position = server.indexOf(client);
+    switch (position) {
+        case -1:
+            return false;
+        case 0:
+            return client === server;
+        default:
+            return /[\.\/]/.test(server[position - 1]) &&
+                server.length === position + client.length;
+    }
+};
 
 // Dictionary handling
 
@@ -94,6 +149,8 @@ Cloud.genericErrorMessage =
 Cloud.prototype.genericError = function () {
     throw new Error(Cloud.genericErrorMessage);
 };
+
+
 
 // Low level functionality
 
@@ -192,11 +249,15 @@ Cloud.prototype.withCredentialsRequest = function (
 
 Cloud.prototype.initSession = function (onSuccess) {
     var myself = this;
+    if (location.protocol === 'file:') {
+        // disabled for now (jens)
+        return;
+    }
     this.request(
         'POST',
         '/init',
         function () { myself.checkCredentials(onSuccess); },
-        nop,
+        function () {},
         null,
         true
     );
@@ -214,7 +275,7 @@ Cloud.prototype.checkCredentials = function (onSuccess, onError, response) {
             	onSuccess.call(
                     null,
                     user.username,
-                    user.isadmin,
+                    user.role,
                     response ? JSON.parse(response) : null
                 );
             }
@@ -316,7 +377,6 @@ Cloud.prototype.changePassword = function (
         onError,
         'Could not change password'
     );
-
 };
 
 Cloud.prototype.resetPassword = function (username, onSuccess, onError) {
@@ -342,75 +402,19 @@ Cloud.prototype.resendVerification = function (username, onSuccess, onError) {
 
 // Projects
 
-Cloud.prototype.saveProject = function (ide, onSuccess, onError) {
+Cloud.prototype.saveProject = function (projectName, body, onSuccess, onError) {
+    // Expects a body object with the following paramters:
+    // xml, media, thumbnail, remixID (optional), notes (optional)
     var myself = this;
     this.checkCredentials(
         function (username) {
             if (username) {
-                var xml = ide.serializer.serialize(ide.stage),
-                    thumbnail = normalizeCanvas(
-                    	ide.stage.thumbnail(
-                        	SnapSerializer.prototype.thumbnailSize
-                    )).toDataURL(),
-                    body, mediaSize, size;
-
-                ide.serializer.isCollectingMedia = true;
-                body = {
-                    notes: ide.projectNotes,
-                    xml: xml,
-                    media: ide.hasChangedMedia ?
-                        ide.serializer.mediaXML(ide.projectName) : null,
-                    thumbnail: thumbnail
-                };
-                ide.serializer.isCollectingMedia = false;
-                ide.serializer.flushMedia();
-
-                mediaSize = body.media ? body.media.length : 0;
-                size = body.xml.length + mediaSize;
-                if (mediaSize > 10485760) {
-                    new DialogBoxMorph().inform(
-                        'Snap!Cloud - Cannot Save Project',
-                        'The media inside this project exceeds 10 MB.\n' +
-                            'Please reduce the size of costumes or sounds.\n',
-                        ide.world(),
-                        ide.cloudIcon(null, new Color(180, 0, 0))
-                    );
-                    throw new Error('Project media exceeds 10 MB size limit');
-                }
-
-                // check if serialized data can be parsed back again
-                try {
-                    ide.serializer.parse(body.xml);
-                } catch (err) {
-                    ide.showMessage(
-                    	'Serialization of program data failed:\n' + err
-                    );
-                    throw new Error(
-                    	'Serialization of program data failed:\n' + err
-                    );
-                }
-                if (body.media !== null) {
-                    try {
-                        ide.serializer.parse(body.media);
-                    } catch (err) {
-                        ide.showMessage(
-                        	'Serialization of media failed:\n' + err
-                        );
-                        throw new Error(
-                        	'Serialization of media failed:\n' + err
-                        );
-                    }
-                }
-                ide.serializer.isCollectingMedia = false;
-                ide.serializer.flushMedia();
-
-                ide.showMessage(
-                	'Uploading ' + Math.round(size / 1024) + ' KB...'
-                );
-
                 myself.request(
                     'POST',
-                    '/projects/' + encodeURIComponent(username) + '/' + encodeURIComponent(ide.projectName),
+                    '/projects/' +
+                        encodeURIComponent(username) +
+                        '/' +
+                        encodeURIComponent(projectName),
                     onSuccess,
                     onError,
                     'Project could not be saved',
@@ -494,10 +498,12 @@ Cloud.prototype.getThumbnail = function (
     );
 };
 
-Cloud.prototype.getProject = function (projectName, onSuccess, onError) {
+Cloud.prototype.getProject = function (projectName, delta, onSuccess, onError) {
     this.withCredentialsRequest(
         'GET',
-        '/projects/%username/' + encodeURIComponent(projectName),
+        '/projects/%username/' +
+            encodeURIComponent(projectName) +
+            (delta ? '?delta=' + delta : ''),
         onSuccess,
         onError,
         'Could not fetch project ' + projectName,
@@ -513,7 +519,10 @@ Cloud.prototype.getPublicProject = function (
 ) {
     this.request(
         'GET',
-        '/projects/' + encodeURIComponent(username) + '/' + encodeURIComponent(projectName),
+        '/projects/' +
+            encodeURIComponent(username) +
+            '/' +
+            encodeURIComponent(projectName),
         onSuccess,
         onError,
         'Could not fetch project ' + projectName,
@@ -529,10 +538,56 @@ Cloud.prototype.getProjectMetadata = function (
 ) {
     this.request(
         'GET',
-        '/projects/' + encodeURIComponent(username) + '/' + encodeURIComponent(projectName) + '/metadata',
+        '/projects/' +
+            encodeURIComponent(username) +
+            '/' +
+            encodeURIComponent(projectName) +
+            '/metadata',
         onSuccess,
         onError,
         'Could not fetch metadata for ' + projectName
+    );
+};
+
+Cloud.prototype.getProjectVersionMetadata = function (
+        projectName,
+    onSuccess,
+    onError
+) {
+    this.withCredentialsRequest(
+        'GET',
+        '/projects/%username/' +
+            encodeURIComponent(projectName) +
+            '/versions',
+        onSuccess,
+        onError,
+        'Could not fetch versions for project ' + projectName
+    );
+};
+
+Cloud.prototype.getRemixes = function (
+	username,
+    page,
+    pageSize,
+    projectName,
+    onSuccess,
+    onError,
+    withThumbnail
+) {
+    var path = '/projects/' +
+                encodeURIComponent(username) + '/' +
+                encodeURIComponent(projectName) + '/remixes';
+
+    if (page) {
+        path += '?page=' + page + '&pagesize=' + (pageSize || 16);
+    }
+
+    this.request(
+        'GET',
+        path,
+        onSuccess,
+        onError,
+        'Could not fetch remixes for project ' + projectName
     );
 };
 
@@ -544,8 +599,10 @@ Cloud.prototype.deleteProject = function (
 ) {
     this[username ? 'request' : 'withCredentialsRequest'](
         'DELETE',
-        '/projects/' + (username ? encodeURIComponent(username) : '%username') +
-        '/' + encodeURIComponent(projectName),
+        '/projects/' +
+            (username ? encodeURIComponent(username) : '%username') +
+            '/' +
+            encodeURIComponent(projectName),
         onSuccess,
         onError,
         'Could not delete project'
@@ -562,7 +619,8 @@ Cloud.prototype.shareProject = function (
         'POST',
         '/projects/' +
             (username ? encodeURIComponent(username) : '%username') +
-            '/' + encodeURIComponent(projectName) +
+            '/' +
+            encodeURIComponent(projectName) +
             '/metadata?ispublic=true',
         onSuccess,
         onError,
@@ -580,7 +638,8 @@ Cloud.prototype.unshareProject = function (
         'POST',
         '/projects/' +
             (username ? encodeURIComponent(username) : '%username') +
-            '/' + encodeURIComponent(projectName) +
+            '/' +
+            encodeURIComponent(projectName) +
             '/metadata?ispublic=false&ispublished=false',
         onSuccess,
         onError,
@@ -598,7 +657,8 @@ Cloud.prototype.publishProject = function (
         'POST',
         '/projects/' +
             (username ? encodeURIComponent(username) : '%username') +
-            '/' + encodeURIComponent(projectName) +
+            '/' +
+            encodeURIComponent(projectName) +
             '/metadata?ispublished=true',
         onSuccess,
         onError,
@@ -616,7 +676,8 @@ Cloud.prototype.unpublishProject = function (
         'POST',
         '/projects/' +
             (username ? encodeURIComponent(username) : '%username') +
-            '/' + encodeURIComponent(projectName) +
+            '/' +
+            encodeURIComponent(projectName) +
             '/metadata?ispublished=false',
         onSuccess,
         onError,
@@ -632,7 +693,9 @@ Cloud.prototype.updateNotes = function (
 ) {
     this.withCredentialsRequest(
         'POST',
-        '/projects/%username/' + encodeURIComponent(projectName) + '/metadata',
+        '/projects/%username/' +
+            encodeURIComponent(projectName) +
+            '/metadata',
         onSuccess,
         onError,
         'Could not update project notes',
@@ -641,3 +704,21 @@ Cloud.prototype.updateNotes = function (
     );
 };
 
+Cloud.prototype.updateProjectName = function (
+	projectName,
+    newName,
+    onSuccess,
+    onError
+) {
+    this.withCredentialsRequest(
+        'POST',
+        '/projects/%username/' +
+            encodeURIComponent(projectName) +
+            '/metadata',
+        onSuccess,
+        onError,
+        'Could not update project name',
+        false, // wants raw response
+        JSON.stringify({ projectname: newName })
+    );
+};

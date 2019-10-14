@@ -53,6 +53,8 @@ include '../config.php';
 						var contentWindow = document.getElementById('snap').contentWindow;
 						contentWindow.Assignment.setID(assignment);
 						contentWindow.ide.droppedText(xhr.responseText);
+						// Hack-y fix for losing focus when custom blocks show
+						window.setTimeout(function() { window.focus(); }, 350);
 					}
 				};
 				xhr.open("GET", "code.php?id=" + id + "&project=" + project, true);
@@ -178,6 +180,7 @@ if ($enable_viewer) {
 		$where .= " AND message <> 'Block.grabbed'";
 	}
 	$query = "SELECT id, time, message, data, code <> '' AS link, sessionID FROM $table $where ORDER BY time, id";
+	echo $query;
 	$result = $mysqli->query($query);
 	if (!$result) {
 		die ("Failed to retrieve data: (" . $mysqli->errno . ") " . $mysqli->error);
