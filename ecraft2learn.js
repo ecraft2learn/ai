@@ -2607,8 +2607,11 @@ xhr.send();
       if (project_path) {
           // remove .xml as well
           const project_name = project_path.substring(project_path.lastIndexOf('/')+1).slice(0, -4);
-          const url = project_path.substring(0, project_path.indexOf("/ai/")+4) + 
-                      "snap/snap.html?project=" + project_name + "&noRun&editMode";
+          let url = project_path.substring(0, project_path.indexOf("/ai/")+4) + 
+                   "snap/snap.html?project=" + project_name + "&noRun&editMode";
+          if (url.indexOf(window.location.search) < 0) {
+              url += window.location.search;
+          }
           window.open(url, "_blank");
       } else {
           // report error 
