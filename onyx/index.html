@@ -87,17 +87,17 @@
 //                                  dropout_rate: [0, .25, .5, .75],
                                  // validation_fraction: [.1, .2, .3], // will this work OK?
 //                                  batch_size: [128, 256],
-                                 optimizer: [(i) => tf.train.rmsprop(2e-4),
-                                             (i) => tf.train.adamax(1e-5),
-                                             (i) => tf.train.adamax(1e-4),
-                                             (i) => tf.train.adamax(3e-5),
-                                             (i) => tf.train.adadelta()
-                                             ],
+//                                  optimizer: [(i) => tf.train.rmsprop(2e-4),
+//                                              (i) => tf.train.adamax(1e-5),
+//                                              (i) => tf.train.adamax(1e-4),
+//                                              (i) => tf.train.adamax(3e-5),
+//                                              (i) => tf.train.adadelta()
+//                                              ],
 //                                  regularizer: [(i) => tf.regularizers.l2({l2: 1e-3}),
 //                                                (i) => tf.regularizers.l2({l2: 1e-4}),
 //                                                (i) => tf.regularizers.l2({l2: 1e-2}),
 //                                                (i) => null],
-//                                  hidden_layer_sizes: [[1280, 64], [1280, 32], [1280, 128, 16]]
+                                 hidden_layer_sizes: [[1280, 64], [2560, 128], [2560, 128, 16]]
                                  }}
             };
             let images;

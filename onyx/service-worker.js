@@ -5,7 +5,7 @@
 //  * License: New BSD
 
 
-const cache_name = "onyx-nail-v30";
+const cache_name = "onyx-nail-v31";
 
 const files_to_cache = [
 "/ai/onyx/index.html",
@@ -15,7 +15,7 @@ const files_to_cache = [
 "/ai/js/tfjs-vis.js",
 "/ai/js/mobilenet.js",
 "/ai/onyx/korean.js",
-"/ai/onyx/korean-tests-166-each.js",
+"/ai/onyx/korean-tests-80-each.js",
 "/ai/js/user-agent.js",
 "/ai/onyx/nails.js",
 "/ai/onyx/md5-min.js",
