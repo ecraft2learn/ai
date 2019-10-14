@@ -18,7 +18,7 @@ for how to deal with problems encountered.
 <h3 class="background-information-white">Introduction</h3>
 <p class="background-information">
 In previous chapters you used blocks that relied upon pre-trained machine learning models.
-In some cases using transfer learning you were able to extend the models a little.
+In some cases, using transfer learning you were able to extend the models a little.
 In this chapter we introduce blocks that enable you to create deep machine learning models from scratch,
 train them, and use their predictions in your projects.
 We have yet to include support for models that use images or sounds but there is a good deal one can do with numbers.
@@ -43,8 +43,8 @@ To create and use a machine learning model you need these components:
 <ol class="instructions">
 <li>
 Create a model with the desired number and size of layers.
-The model will connect the input to the first layer, the first layer to second layer,
-and so on until the last layer with is the output of the model.
+The model will connect the input to the first layer, the first layer to the second layer,
+and so on until the last layer which is the output of the model.
 More layers and wider layers typically makes the model more accurate but also slower to train and use.
 </li>
 <li>
@@ -60,16 +60,16 @@ You can use advanced optimization methods to adjust the steps and improve the tr
 </li>
 <li>
 Use the model to make predictions.
-A good way to evaluate the model is to use test data that wasn't using in training. 
+A good way to evaluate the model is to use test data that wasn't used in training. 
 If it makes good predictions on the test data you can use it to predict things about the world,
 solve mathematics puzzles, or play games.
 </li>
 </ol>
-<h3 class="instructions-white">An small example: Training a model to estimate square roots</h3>
+<h3 class="instructions-white">A small example: Training a model to estimate square roots</h3>
 <p class="instructions">
 In the following you can use the <span class="block-name">Create a neural net model ...</span>
 block to create a model with four "hidden" layers.
-(Hidden in that they are inbetween the input and the output.)
+(Hidden in that they are in-between the input and the output.)
 You then use the <span class="block-name">Send training data ...</span>
 block to set the training data to ten numbers and their square roots.
 Next you can use the <span class="block-name">Train model named ...</span> block to train the model. 
@@ -281,22 +281,22 @@ Also one needs to avoid datasets that are incomplete which occurs often.
 <p class="instructions">
 Weather and flu are seasonal so to make interesting predictions we need to say if the weather data was higher or lower than typical for that time of year
 how does it predict how the flu cases will vary from what is typical for that time of year. 
-To address this the data has been regularised which in this case means that all measurements have been divided by the average value for that measurement.
+To address this, the data has been regularised which in this case means that all measurements have been divided by the average value for that measurement.
 So a value such as 0.75 means that reading was 75% of the average value for that measurement that week of the year.
 </p>
 <p class="instructions">
 Another challenge is to work out how to evaluate how well a model does.
-Is it good enough if the model predicts better than chance given a week's weather data whether the next week's flu reports will be above ore below average?
-Or should we measure how far off the predictions are on test data from what the following week's flu occurences really were?
+Is it good enough if the model predicts better than chance given a week's weather data whether the next week's flu reports will be above or below average?
+Or should we measure how far off the predictions are on test data from what the following week's flu occurrences really were?
 </p>
 <p id="real-world-data-projects" class="instructions">
-If you want to work on the question of whether the weather partially helps predict the flu cases in the following week
+If you want to work on the question of whether the weather partially helps predict flu cases in the following week
 then there are many things to try to enhance 
 this <a href="../snap/snap.html?project=weather data&editMode" target="_blank">first draft of such a project</a>.
 Perhaps you can improve it with more or different data.
 Or designing a different machine learning model and training scheme.
 Or if start to get good predictions then see if a simpler model works almost as well.
-Maybe the percipitation measurements don't matter.
+Maybe the precipitation measurements don't matter.
 Or maybe it doesn't need the full daily measurements of the previous week.
 Alternatively, try doing something similar with other available datasets.
 </p>
