@@ -220,7 +220,7 @@ const set_class_names = function (class_names) {
 
 const load_mobilenet = async function () {
     classifier = knnClassifier.create();
-    mobilenet_model = await mobilenet.load(2); // version 2
+    mobilenet_model = await mobilenet.load({version: 2, alpha: 1}); 
 };
 
 /**
