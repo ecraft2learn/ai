@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+<head>
+	<title>A guide to AI extensions to Snap!</title>
+	<meta charset='utf-8'>
+	<link href="css/ai-teacher-guide.css" rel="stylesheet">
+	<link rel="icon" type="image/png" href="images/eCraft2Learn-Favicon.png" />
+	<script src="js/ai-guide.js"></script>
+	</head>
+<body>
+<script src="js/translate.js"></script>
+<h2>Please log in to use the Snap! AI blocks and guides</h2>
+<h3>Please enter a user name to identify you with the event logs</h3>
+<p>
+If you don't have a user name try to choose a name that no one else using this computer has used.
+</p>
+<input type='text' id='enter-name'> Please enter your user name here</input>
+</body>
+<script>
+const input_element = document.getElementById('enter-name');
+input_element.addEventListener('change',
+    () => {
+        const log = "log=" + input_element.value;
+        let url = "./index.html";
+        if (window.location.search) {
+            url += window.location.search + "&" + log;
+        } else {
+            url += "?" + log;
+        }
+        window.location.replace(url);
+    })
+</script>
+</html>
