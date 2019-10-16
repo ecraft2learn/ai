@@ -58,6 +58,9 @@ const collapse_confusion_matrix = (matrix, indices) => {
 
 const create_and_train_model = (options, success_callback, failure_callback) => {
 //     record_callbacks(success_callback, failure_callback); // this isn't meant to be called by Snap!
+    if (options.seed) {
+        Math.seedrandom(options.seed(options.training_number));
+    }
     const model = create_model(options, failure_callback);
     return train_model(model, options.datasets, options, success_callback, failure_callback);
 };
@@ -65,7 +68,7 @@ const create_and_train_model = (options, success_callback, failure_callback) => 
 const create_model = (options, failure_callback) => {
     record_callbacks(failure_callback);
     try {
-        const {model_name, hidden_layer_sizes, dropout_rate, optimizer, layer_initializer, regularizer, learning_rate,
+        const {model_name, hidden_layer_sizes, dropout_rate, optimizer, layer_initializer, batch_normalization, regularizer, learning_rate,
                loss_function, activation, last_activation, seed, datasets} = options;
         const tfvis_options = tfvis ? options.tfvis_options || {} : {}; // ignore options if tfvis not loaded
         training_number = options.training_number;
@@ -131,10 +134,17 @@ const create_model = (options, failure_callback) => {
                                    useBias: !last_layer, // last one has no bias 
                                   };
             model.add(tf.layers.dense(configuration));
-            if (!last_layer && dropout_rate > 0) {
-                // Error: Non-default seed is not implemented in Dropout layer yet: 1
-                model.add(tf.layers.dropout({rate: dropout_rate,
-                                             seed}));
+            if (!last_layer) {
+                if (dropout_rate > 0) {
+                    // Error: Non-default seed is not implemented in Dropout layer yet: 1
+                    model.add(tf.layers.dropout({rate: dropout_rate,
+//                                                  seed
+                                                 }));
+                }
+                if (batch_normalization) {
+                    const args = typeof batch_normalization === 'boolean' ? undefined : batch_normalization;
+                    model.add(tf.layers.batchNormalization(args));
+                }
             }
        });
        // We use categoricalCrossentropy which is the loss function we use for
@@ -304,7 +314,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
         model.compile({optimizer: 'sgd',
                        loss: 'meanSquaredError'});
     }
-    const {class_names, batch_size, shuffle, epochs, validation_split, learning_rate, dropout_rate, optimizer,
+    const {class_names, batch_size, shuffle, epochs, validation_split, learning_rate, dropout_rate, batch_normalization, optimizer,
            layer_initializer, regularizer, seed, stop_if_no_progress_for_n_epochs,
            testing_fraction, validation_fraction, fraction_kept, split_data_on_each_experiment} 
           = options;
@@ -467,7 +477,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                "Duration in seconds": (Date.now()-start)/1000, 
               };     
           let csv_labels = // CSV for pasting into a spreadsheet
-              "Name, Layer1,Layer2,Layer3,layer4,layer5, Batch size, Dropout rate, Epochs, Optimizer, Initializer, Regularizer," +
+              "Name, Layer1,Layer2,Layer3,layer4,layer5, Batch size, Dropout rate, Normalizer, Epochs, Optimizer, Initializer, Regularizer," +
               "Testing fraction, Validation fraction, Fraction kept, " +
               Object.keys(response) + ", ";
           if (confusion_matrix) {
@@ -498,6 +508,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
           }
           csv_values += batch_size + ", ";
           csv_values += dropout_rate + ", ";
+          csv_values += batch_normalization + ", ";
           csv_values += epochs + ", ";
           csv_values += options.optimizer_name + ", ";
           csv_values += options.layer_initializer_name + ", ";
@@ -673,6 +684,7 @@ const stop_all = () => {
 };
 
 const hyperparameter_search = (options, datasets, success_callback, error_callback) => {
+    let experiment_number = 0;
     let previous_model;
     let lowest_loss;
     let best_model;
@@ -684,12 +696,19 @@ const hyperparameter_search = (options, datasets, success_callback, error_callba
     const create_and_train = async (search_options) => {
         console.log(search_options);
         const new_options = Object.assign({}, options, search_options);
+        let seed;
+        if (new_options.seed) {
+            seed = new_options.seed(experiment_number);
+            Math.seedrandom(seed);
+        }
         const model = create_model(new_options);
         return new Promise((resolve) => {
             train_model(model,
                         datasets,
                         new_options,
                         (results) => {
+                            results.seed = seed;
+                            experiment_number++;
                             previous_model = model;
                             let loss = results["Highest accuracy"] && -results["Highest accuracy"] || // minimize negative accuracy
                                        results['Lowest validation loss'] || 

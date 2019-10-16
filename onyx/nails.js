@@ -398,9 +398,8 @@ const shuffle = (a, seed) => {
 const start_training = () => {
     model_options.class_names = class_names.map(better_name); // for displaying confusion matrix
     model_options.model_name = model_name;
-    model_options.seed = SEED;
     let responses = [];
-    const resport_averages = () => {
+    const report_averages = () => {
         const responses_total = {};
         let duration_in_seconds = 0;
         for (let i = 0; i < number_of_training_repeats; i++) {
@@ -465,7 +464,7 @@ const start_training = () => {
         const label = "Save model #" + model_options.training_number;
         add_save_model_button(label, response.model, model_name);
         if (responses.length === number_of_training_repeats) {
-            resport_averages();
+            report_averages();
         } else {
             next_training();
         }
