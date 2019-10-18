@@ -136,10 +136,7 @@ const create_model = (options, failure_callback) => {
             model.add(tf.layers.dense(configuration));
             if (!last_layer) {
                 if (dropout_rate > 0) {
-                    // Error: Non-default seed is not implemented in Dropout layer yet: 1
-                    model.add(tf.layers.dropout({rate: dropout_rate,
-//                                                  seed
-                                                 }));
+                    model.add(tf.layers.dropout({rate: dropout_rate}));
                 }
                 if (batch_normalization) {
                     const args = typeof batch_normalization === 'boolean' ? undefined : batch_normalization;
@@ -474,7 +471,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                "Highest accuracy epoch": highest_accuracy_epoch,
                "Last epoch": last_epoch,
                "history": full_history,
-               "Duration in seconds": (Date.now()-start)/1000, 
+               "Duration in seconds": (Date.now()-start)/1000,
               };     
           let csv_labels = // CSV for pasting into a spreadsheet
               "Name, Layer1,Layer2,Layer3,layer4,layer5, Batch size, Dropout rate, Normalizer, Epochs, Optimizer, Initializer, Regularizer," +
@@ -534,6 +531,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
           csv_values += (lowest_validation_loss_epoch && lowest_validation_loss_epoch) + ", ";
           csv_values += (highest_accuracy && highest_accuracy.toFixed(4)) + ", ";
           csv_values += (highest_accuracy_epoch && highest_accuracy_epoch) + ", ";
+          csv_values += options.current_seed + ", ";
           if (confusion_matrix) {
               confusion_matrix.forEach(row => {
                   csv_values += row.map(percentage_of_tests) + ', '; 
@@ -696,9 +694,9 @@ const hyperparameter_search = (options, datasets, success_callback, error_callba
     const create_and_train = async (search_options) => {
         console.log(search_options);
         const new_options = Object.assign({}, options, search_options);
-        let seed;
         if (new_options.seed) {
-            seed = new_options.seed(experiment_number);
+            const seed = new_options.seed(experiment_number);
+            new_options.current_seed = seed;
             Math.seedrandom(seed);
         }
         const model = create_model(new_options);
@@ -707,7 +705,6 @@ const hyperparameter_search = (options, datasets, success_callback, error_callba
                         datasets,
                         new_options,
                         (results) => {
-                            results.seed = seed;
                             experiment_number++;
                             previous_model = model;
                             let loss = results["Highest accuracy"] && -results["Highest accuracy"] || // minimize negative accuracy
