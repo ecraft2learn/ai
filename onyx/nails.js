@@ -204,6 +204,10 @@ const display_results = (canvas) => {
 const is_beta = () => window.location.hash.indexOf('beta') >= 0;
 
 const setup_camera = (callback) => {
+  if (option !== 'diagnose') {
+      callback();
+      return;
+  }
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       throw new Error('Browser API navigator.mediaDevices.getUserMedia not available');
   }
@@ -1791,7 +1795,11 @@ const download_string = (label, name, data) => {
 };
 
 const on_click = () => {
-    document.getElementById('user-agreement').remove();
+    const user_agreement = document.getElementById('user-agreement');
+    if (!user_agreement) {
+        return;
+    }
+    user_agreement.remove();
     document.getElementById('camera-interface').hidden = true;
     document.getElementById('main').hidden = false;
 };
