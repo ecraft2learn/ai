@@ -15,15 +15,31 @@ const fetch_logs = () => {
     }
     return "[" + logs.slice(0, logs.length-1) + "]"; // remove last comma
 };
-const copy_logs_to_clipboard = () => {
-    if (navigator.clipboard) {
-        navigator.clipboard.writeText(fetch_logs());
-    } else {
-        const div = document.createElement('div');
-        div.innerText = fetch_logs();
-        document.body.appendChild(div);
-    } 
+const download_string = (label, name, data) => {
+    const button = create_anchor_that_looks_like_a_button(label);
+    const file = new Blob([data], {type: 'text'});
+    button.href = URL.createObjectURL(file);
+    button.download = name;
+    return button;
 };
+const create_anchor_that_looks_like_a_button = (label, listener) => {
+    let button = document.createElement('a');
+    button.innerHTML = label;
+    button.className = 'generic-button';
+    button.style.marginRight = "12px";
+    button.href = "#";
+    button.addEventListener('click', listener);
+    return button;
+};
+// const copy_logs_to_clipboard = () => {
+//     if (navigator.clipboard) {
+//         navigator.clipboard.writeText(fetch_logs());
+//     } else {
+//         const div = document.createElement('div');
+//         div.innerText = fetch_logs();
+//         document.body.appendChild(div);
+//     } 
+// };
 const reset_logs = () => {
     if (confirm("Are you sure you want to delete the Snap! logs stored in this browser?")) {
         localStorage.clear();
@@ -31,11 +47,15 @@ const reset_logs = () => {
 };
 
 window.addEventListener('DOMContentLoaded', () => {
-    const fetch_logs_button = document.createElement('button');
-    fetch_logs_button.innerHTML = "Click to copy current logs to the clipboard";
-    fetch_logs_button.addEventListener('click', copy_logs_to_clipboard);
-    fetch_logs_button.classList.add('generic-button');
-    document.body.appendChild(fetch_logs_button);
+//     const fetch_logs_button = document.createElement('button');
+//     fetch_logs_button.innerHTML = "Click to copy current logs to the clipboard";
+//     fetch_logs_button.addEventListener('click', copy_logs_to_clipboard);
+//     fetch_logs_button.classList.add('generic-button');
+    const download_logs_button =
+        download_string("Download logs",
+                        "logs-" + new Date().getTime() + ".js",
+                        fetch_logs());
+    document.body.appendChild(download_logs_button);
 
     const clear_logs_button = document.createElement('button');
     clear_logs_button.innerHTML = "Click to permanently remove the logs from this browser";
