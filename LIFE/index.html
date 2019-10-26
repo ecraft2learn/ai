@@ -24,6 +24,8 @@ if (parameters.has('answer')) {
 	mode = 'answer questions'; // until new version working well
 } else if (parameters.has('train')) {
 	mode = 'create model';
+} else if (parameters.has('test')) {
+	mode = 'test';
 } else if (parameters.has('search')) {
 	mode = 'search';
 } else if (parameters.has('old-test')) {
@@ -37,6 +39,7 @@ const model_name = (mode === 'create model' || mode === 'search') ? "26-10-2019b
 const model_options = {
     seed: (number) => number,
     model_name: model_name,
+    score_threshold: 0.45,
     hidden_layer_sizes: [1024, 512, 256, 128],
     batch_size: 256,
     dropout_rate: .5,

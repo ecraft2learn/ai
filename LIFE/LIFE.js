@@ -217,7 +217,7 @@ const sentences_and_answers = () => {
     group_of_questions.push([ //14
         "Why is it important to check the airways a second time?",
         "Why should you reassess the baby's airways after it is breathing?",
-        "After bagging why do I need to reasses?",
+        "After bagging why do I need to reassess?",
         "Why access the airways a second time?",
         "What is the purpose of checking that the airways are clear a second time?",
         "Why do we need to reassess after bagging?",
@@ -244,23 +244,32 @@ const sentences_and_answers = () => {
 
 };
 
-const use_model_to_respond_to_question = async (the_question) => {
+const use_model_to_respond_to_question = async (the_question, threshold) => {
 	const start = Date.now();
 	return embedding_model.embed([the_question]).then((embedding) => {
 		const embedding_duration = (Date.now()-start)/1000 + " seconds for embedding";
 		const prediction_tensor = loaded_model.predict([embedding]);
 		const prediction = prediction_tensor.arraySync()[0];
 		let best_score = 0;
+		let second_best_score;
 		let best_answer_index;
+		let second_best_answer_index;
 		prediction.forEach((score, index) => {
 			if (score > best_score) {
+				second_best_score = best_score;
 				best_score = score;
+				second_best_answer_index = best_answer_index;
 				best_answer_index = index;
 			}
 		});
 		console.log(prediction, the_question, best_score, best_answer_index, embedding_duration, (Date.now()-start)/1000 + " seconds total");
-		if (best_score > .55) {
-			return answers[best_answer_index];
+		if (best_score >= (threshold || 0)) {
+			return best_answer_index;
+		} else {
+			return({best_answer_index,
+			        message: "Best score of " + best_score + " is less than threshold of " + threshold + 
+							 ". Best answer is: " + answers[best_answer_index] + ". Second best score is " + 
+							 second_best_score + " for answer: " + answers[second_best_answer_index]});
 		}
 	});
 };
@@ -297,7 +306,7 @@ const respond_to_question = async (the_question, distance_threshold) => {
             console.log("The second closest question is " + precision(1+second_best_answer_distance, 3) 
                         + " units away. It is '" + group_of_questions[second_best_answer][0] + "'");
         }
-        return answers[best_answer];
+        return best_answer;
     });
 };
 
@@ -305,7 +314,7 @@ const setup = () => {
     const do_when_group_of_questions_mean_embeddings_available = () => {
     	if (mode === 'old test') {
     		console.log(group_of_questions_mean_embeddings);
-        	test_all_questions();
+        	old_test_all_questions();
     	}
     };
     const obtain_embeddings = (group_number) => {
@@ -327,7 +336,31 @@ const setup = () => {
         });        
     };
     let wrong = [];
+    const write_good_and_bad = (question, bad_answer_index_or_message, good, group_number, question_number) => {
+    	document.writeln(question + "<br>");
+    	if (typeof bad_answer_index_or_message === 'number') {
+    		document.writeln("bad answer: " + answers[bad_answer_index_or_message] + "<br>");
+    	} else {
+    		if (bad_answer_index_or_message.best_answer_index !== group_number) {
+    			document.writeln("Best answer is below and threshold and wrong.<br>");
+    		}
+    		document.writeln(bad_answer_index_or_message.message + "<br>");
+    	}
+        document.writeln("good answer: " + good + "<br>");
+        document.writeln(group_number + ":" + question_number + "<br><br>");
+    };
     const test_all_questions = () => {
+        group_of_questions.forEach((group, group_number) => {
+            group.forEach((question, question_number) => {
+            	use_model_to_respond_to_question(question, model_options.score_threshold).then(answer_index => {
+					if (answer_index !== group_number) {
+						write_good_and_bad(question, answer_index, answers[group_number], group_number, question_number);
+					}
+            	});
+            }); 
+        });   	
+    };
+    const old_test_all_questions = () => {
         group_of_questions.forEach((group, group_number) => {
             group.forEach((question, question_number) => {
                 embedding_model.embed([question]).then((embedding) => {
@@ -343,10 +376,7 @@ const setup = () => {
                                     "good answer:" + answers[group_number],
                                     group_number + ":" + question_number,
                                     distances]);
-                        document.writeln(question + "<br>");
-                        document.writeln("bad answer: " + answers[distances[0][0]] + "<br>");
-                        document.writeln("good answer:" + answers[group_number] + "<br>");
-                        document.writeln(group_number + ":" + question_number + "<br>");
+                        write_good_and_bad(question, distances[0][0], answers[group_number], group_number, question_number);
                         distances.forEach((answer_id_and_distance) => {
                             document.writeln("#" + answer_id_and_distance[0] + " = " + answer_id_and_distance[1] + "<br>");
                         });
@@ -451,9 +481,15 @@ const setup = () => {
         	    callback(datasets);
 			});
 		};
-		if (mode === 'answer questions') {
+		if (mode === 'answer questions' || mode === 'test') {
 			tf.loadLayersModel("models/" + model_options.model_name + ".json").then((model) => {
-				loaded_model = model;    
+				loaded_model = model;
+				if (mode === 'answer questions') {
+					use_model_to_respond_to_question("Warm up GPU");   
+				} else if (mode === 'test') {
+					document.body.innerHTML = "Testing started";
+					test_all_questions();
+				}
 			});
 		} else if (mode === 'old test' || mode === 'old answer questions') {
 			if (group_of_questions_mean_embeddings.length === 0) {
@@ -557,11 +593,13 @@ const setup_interface =
 			};
 			const answer_question = (question) => {
 				answer_area.innerHTML = "Please wait...";
-				const handle_answer = (answer) => {
-					respond_with_answer(answer, question);
+				const handle_answer = (answer_index) => {
+					if (typeof answer_index === 'number') {
+						respond_with_answer(answers[answer_index], question);
+					}
 				};
 				if (mode === 'answer questions') {
-					use_model_to_respond_to_question(question).then(handle_answer, record_error);
+					use_model_to_respond_to_question(question, model_options.score_threshold).then(handle_answer, record_error);
 				} else if (mode === 'old answer questions') {
 					LIFE.respond_to_question(question, -0.55).then(handle_answer, record_error);
 					// reasonable matches must be less than -0.55 cosineProximity
