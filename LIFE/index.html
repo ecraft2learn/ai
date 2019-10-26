@@ -20,7 +20,9 @@ if ('serviceWorker' in navigator && window.location.hostname !== 'localhost') {
 }
 const parameters = new URLSearchParams(window.location.hash.slice(1));
 let mode;
-if (parameters.has('train')) {
+if (parameters.has('answer')) {
+	mode = 'answer questions'; // until new version working well
+} else if (parameters.has('train')) {
 	mode = 'create model';
 } else if (parameters.has('search')) {
 	mode = 'search';
@@ -31,16 +33,16 @@ if (parameters.has('train')) {
 } else {
 	mode = 'old answer questions'; // until new version working well
 }
-const model_name = (mode === 'create model' || mode === 'search') ? "25-10-2019a" : "25-10-2019a";
+const model_name = (mode === 'create model' || mode === 'search') ? "26-10-2019b" : "26-10-2019a";
 const model_options = {
     seed: (number) => number,
     model_name: model_name,
-    hidden_layer_sizes: [128, 64],
+    hidden_layer_sizes: [1024, 512, 256, 128],
     batch_size: 256,
     dropout_rate: .5,
     batch_normalization: false,
     shuffle: true,
-    epochs: 50,
+    epochs: 2000,
     optimizer: (i) => tf.train.rmsprop(2e-4), // tf.train.adamax(1e-5), tf.train.adadelta(),
     regularizer: (i) => tf.regularizers.l2({l2: 5e-4}),
     layer_initializer: (index) => tf.initializers.varianceScaling({}), // {seed: SEED}
@@ -49,16 +51,17 @@ const model_options = {
     optimizer_name: 'rmsprop(2e-4)',
     layer_initializer_name: 'varianceScaling', 
     testing_fraction: 0,
-    validation_fraction: .15,
+    validation_fraction: .3,
     stop_if_no_progress_for_n_epochs: 20,
-    number_of_training_repeats: 3,
+    number_of_training_repeats: 10,
     split_data_on_each_experiment: true,
     search: {type: 'randomSearch', // or 'gridSearch' but it triggers an exception
-             number_of_experiments: 50,
-             space: {epochs: [100, 200, 500],
+             number_of_experiments: 200,
+             space: {
+             	     epochs: [1000, 2000],
 //          dropout_rate: [0.25, .5,],
 //          batch_normalization: [true, false],
-                     validation_fraction: [.1, .2, .3, .4], 
+//                      validation_fraction: [.3, .4, .5], 
 //                      batch_size: [128, 256],
 //                      optimizer: [(i) => tf.train.rmsprop(2e-4),
 //                      (i) => tf.train.adamax(1e-5),
@@ -70,7 +73,7 @@ const model_options = {
 //                        (i) => tf.regularizers.l2({l2: 1e-4}),
 //                        (i) => tf.regularizers.l2({l2: 1e-2}),
 //                        (i) => null],
-                     hidden_layer_sizes: [[512, 64], [1024, 128], [512, 128, 16]]
+                     hidden_layer_sizes: [[512, 256, 128, 64], [512, 128, 16], [1024, 128], [1024, 512, 256, 128], ]
                      }}
             };
 </script>

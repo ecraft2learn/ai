@@ -12,6 +12,7 @@ window.LIFE =
 let group_of_questions = [];
 let answers = [];
 let embedding_model;
+let loaded_model;
 
 let group_of_questions_embeddings = [];
 let group_of_questions_mean_embeddings = [];
@@ -243,6 +244,27 @@ const sentences_and_answers = () => {
 
 };
 
+const use_model_to_respond_to_question = async (the_question) => {
+	const start = Date.now();
+	return embedding_model.embed([the_question]).then((embedding) => {
+		const embedding_duration = (Date.now()-start)/1000 + " seconds for embedding";
+		const prediction_tensor = loaded_model.predict([embedding]);
+		const prediction = prediction_tensor.arraySync()[0];
+		let best_score = 0;
+		let best_answer_index;
+		prediction.forEach((score, index) => {
+			if (score > best_score) {
+				best_score = score;
+				best_answer_index = index;
+			}
+		});
+		console.log(prediction, the_question, best_score, best_answer_index, embedding_duration, (Date.now()-start)/1000 + " seconds total");
+		if (best_score > .55) {
+			return answers[best_answer_index];
+		}
+	});
+};
+
 const precision = (x, n) => Math.round(x*Math.pow(10, n))/Math.pow(10, n);
 
 const respond_to_question = async (the_question, distance_threshold) => {
@@ -281,7 +303,7 @@ const respond_to_question = async (the_question, distance_threshold) => {
 
 const setup = () => {
     const do_when_group_of_questions_mean_embeddings_available = () => {
-    	if (mode === 'old test' >= 0) {
+    	if (mode === 'old test') {
     		console.log(group_of_questions_mean_embeddings);
         	test_all_questions();
     	}
@@ -429,7 +451,11 @@ const setup = () => {
         	    callback(datasets);
 			});
 		};
-		if (mode === 'old test' || mode === 'old answer questions') {
+		if (mode === 'answer questions') {
+			tf.loadLayersModel("models/" + model_options.model_name + ".json").then((model) => {
+				loaded_model = model;    
+			});
+		} else if (mode === 'old test' || mode === 'old answer questions') {
 			if (group_of_questions_mean_embeddings.length === 0) {
 				obtain_embeddings(0);
 			} else {
@@ -476,12 +502,6 @@ const record_error = (error) => {
         last_reported_error = error.message;
     }
 };
-
-try {
-    setup();
-} catch (error) {
-    record_error(error);
-}
 
 const load_mean_embeddings = (when_loaded_callback) => {
     const android = (navigator.userAgent.toLowerCase().indexOf('android') >= 0);
@@ -537,11 +557,15 @@ const setup_interface =
 			};
 			const answer_question = (question) => {
 				answer_area.innerHTML = "Please wait...";
-				LIFE.respond_to_question(question, -0.55).then((answer) => {
-					// reasonable matches must be less than -0.55 cosineProximity
+				const handle_answer = (answer) => {
 					respond_with_answer(answer, question);
-				},
-				record_error);
+				};
+				if (mode === 'answer questions') {
+					use_model_to_respond_to_question(question).then(handle_answer, record_error);
+				} else if (mode === 'old answer questions') {
+					LIFE.respond_to_question(question, -0.55).then(handle_answer, record_error);
+					// reasonable matches must be less than -0.55 cosineProximity
+				}
 			};
 			question_area.addEventListener('keypress',
 										   (event) => {
@@ -587,6 +611,11 @@ const setup_interface =
 
 document.addEventListener('DOMContentLoaded',
     () => {
+    	try {
+			setup();
+		} catch (error) {
+			record_error(error);
+		}
     	if (mode === 'old answer questions' || mode === 'old test') {
     		load_mean_embeddings(setup_interface);
     	} else if (mode === 'answer questions') {
