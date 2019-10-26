@@ -6,6 +6,12 @@
  */
 
 function load_local_or_remote_scripts (local_URLs, remote_URLs, callback) {
+    if (typeof local_URLs === 'string') {
+        local_URLs = [local_URLs];
+    }
+    if (typeof remote_URLs === 'string') {
+        remote_URLs = [remote_URLs];
+    }
     const load_URLs = () => {
         if (scripts_remaining.length === 0) {
             // listeners for DOMContentLoaded above may have not yet been created when they loaded

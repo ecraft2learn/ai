@@ -9,12 +9,70 @@
 	<script src="../js/tfjs.js"></script> 
     <script src="encoder/universal-sentence-encoder.js"></script>
     <script src="../js/user-agent.js"></script>
-    <script src="LIFE.js"></script>
+    <script src="./LIFE.js"></script>
+    <script src="../js/train.js"></script>
+    <script src="../js/train-report-results.js"></script>
+    <script src="../js/load-scripts.js"></script>
     <link rel="manifest" href="/ai/LIFE/LIFE.webmanifest">
 <script>
 if ('serviceWorker' in navigator && window.location.hostname !== 'localhost') {
     navigator.serviceWorker.register('service-worker.js');
 }
+const parameters = new URLSearchParams(window.location.hash.slice(1));
+let mode;
+if (parameters.has('train')) {
+	mode = 'create model';
+} else if (parameters.has('search')) {
+	mode = 'search';
+} else if (parameters.has('old-test')) {
+	mode = 'old test';
+} else if (parameters.has('old-answer-questions')) {
+	mode = 'old answer questions';
+} else {
+	mode = 'old answer questions'; // until new version working well
+}
+const model_name = (mode === 'create model' || mode === 'search') ? "25-10-2019a" : "25-10-2019a";
+const model_options = {
+    seed: (number) => number,
+    model_name: model_name,
+    hidden_layer_sizes: [128, 64],
+    batch_size: 256,
+    dropout_rate: .5,
+    batch_normalization: false,
+    shuffle: true,
+    epochs: 50,
+    optimizer: (i) => tf.train.rmsprop(2e-4), // tf.train.adamax(1e-5), tf.train.adadelta(),
+    regularizer: (i) => tf.regularizers.l2({l2: 5e-4}),
+    layer_initializer: (index) => tf.initializers.varianceScaling({}), // {seed: SEED}
+    // for reporting results
+    regularizer_name: 'l2(1e-3)',
+    optimizer_name: 'rmsprop(2e-4)',
+    layer_initializer_name: 'varianceScaling', 
+    testing_fraction: 0,
+    validation_fraction: .15,
+    stop_if_no_progress_for_n_epochs: 20,
+    number_of_training_repeats: 3,
+    split_data_on_each_experiment: true,
+    search: {type: 'randomSearch', // or 'gridSearch' but it triggers an exception
+             number_of_experiments: 50,
+             space: {epochs: [100, 200, 500],
+//          dropout_rate: [0.25, .5,],
+//          batch_normalization: [true, false],
+                     validation_fraction: [.1, .2, .3, .4], 
+//                      batch_size: [128, 256],
+//                      optimizer: [(i) => tf.train.rmsprop(2e-4),
+//                      (i) => tf.train.adamax(1e-5),
+//                      (i) => tf.train.adamax(1e-4),
+//                      (i) => tf.train.adamax(3e-5),
+//                      (i) => tf.train.adadelta()
+//                      ],
+//                      regularizer: [(i) => tf.regularizers.l2({l2: 1e-3}),
+//                        (i) => tf.regularizers.l2({l2: 1e-4}),
+//                        (i) => tf.regularizers.l2({l2: 1e-2}),
+//                        (i) => null],
+                     hidden_layer_sizes: [[512, 64], [1024, 128], [512, 128, 16]]
+                     }}
+            };
 </script>
 <style>
 p {

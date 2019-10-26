@@ -281,7 +281,7 @@ const respond_to_question = async (the_question, distance_threshold) => {
 
 const setup = () => {
     const do_when_group_of_questions_mean_embeddings_available = () => {
-    	if (window.location.hash.indexOf('test') >= 0) {
+    	if (mode === 'old test' >= 0) {
     		console.log(group_of_questions_mean_embeddings);
         	test_all_questions();
     	}
@@ -338,14 +338,121 @@ const setup = () => {
             });
         });
     };
-    sentences_and_answers();    
+    const training_data = (callback) => {
+    	let questions = [];
+    	let outputs = [];
+    	const number_of_groups = group_of_questions.length;
+    	group_of_questions.forEach((group, group_number) => {
+            group.forEach((question) => {
+            	questions.push(question);
+            	outputs.push(group_number);
+            });
+    	});
+    	embedding_model.embed(questions).then((embeddings) => {
+			callback({xs: embeddings,
+					  ys: tf.oneHot(tf.tensor1d(outputs, 'int32'), number_of_groups)});
+    	});
+    };    	
+//     	let group_number = 0;
+//     	let question_number = 0;
+//     	let group = group_of_questions[group_number];
+//     	let question;
+//     	const next_question = () => {
+//     		if (question_number === group.length) {
+//     			group_number++;
+//     			question_number = 0;
+//     			group = group_of_questions[group_number];
+//     		}
+//     		if (group_number === number_of_groups) {
+//     			callback({xs: tf.tensor(input_array),
+//                 		  ys: tf.oneHot(tf.tensor1d(output_array, 'int32'), number_of_groups)});
+//                 return;
+//     		}
+//     		question = group[question_number];
+//     		embedding_model.embed([question]).then((embedding) => {
+//     			input_array.push(embedding.arraySync());
+//                 output_array.push(group_number);
+//                 question_number++;
+//                 next_question();
+//     		});
+//     	};
+//     	next_question();
+//     };
+    sentences_and_answers();
     use.load().then((model) => {
         embedding_model = model;
-        if (group_of_questions_mean_embeddings.length === 0) {
-            obtain_embeddings(0);
-        } else {
-            do_when_group_of_questions_mean_embeddings_available();
-        }  
+		const test_loss_message = document.createElement('p');
+		let first_time = true;
+		let responses = [];
+		const number_of_training_repeats = model_options.number_of_training_repeats;
+		document.body.appendChild(test_loss_message);
+		const next_training = () => {
+			model_options.training_number = 1+responses.length; // for visualization tab names
+			model_options.categorical = true;
+			model_options.tfvis_options =
+				{callbacks: ['onEpochEnd'],
+	//              yAxisDomain: [.3, .8],
+				 width: 500,
+				 height: 300,
+				 measure_accuracy: true,
+	             display_confusion_matrix: true,
+				 display_layers_after_creation: true,
+				 display_layers_after_training: true,
+				 display_graphs: true};
+			const error_callback = (error) => {
+				record_error("Internal error: " + error.message);
+			};
+			create_and_train_model(model_options,
+								   model_callback,
+								   error_callback);
+		}
+		const model_callback = (response) => {
+			if (first_time) {
+				test_loss_message.innerHTML = response["Column labels for saving results in a spreadsheet"] + "<br>";
+				first_time = false;
+			}
+			test_loss_message.innerHTML += response["Spreadsheet values"] + "<br>";
+			responses.push(response);
+			const label = "Save model #" + model_options.training_number;
+			add_save_model_button(label, response.model, model_name);
+			if (responses.length === number_of_training_repeats) {
+				report_averages(responses, number_of_training_repeats);
+			} else {
+				next_training();
+			}
+		};
+		const setup_data = (callback) => {
+			training_data((datasets) => {
+        	    model_options.datasets = datasets;
+        	    // 'answers' is too verbose for column headers
+        	    model_options.class_names = answers.map((ignore, index) => "#" + index);
+        	    callback(datasets);
+			});
+		};
+		if (mode === 'old test' || mode === 'old answer questions') {
+			if (group_of_questions_mean_embeddings.length === 0) {
+				obtain_embeddings(0);
+			} else {
+				do_when_group_of_questions_mean_embeddings_available();
+			}        	
+        } else if (mode === 'create model') {
+        	load_local_or_remote_scripts(["../js/tfjs-vis.js"],
+        	                             undefined,
+        	                             () => {
+        	                             	setup_data(next_training);
+											});
+        } else if (mode === 'search') {
+        	document.body.innerHTML = "Hyperparameter search started. <span id='experiment-number'>0</span>";
+            model_options.on_experiment_end = () => {
+				document.getElementById('experiment-number').innerHTML =
+					+document.getElementById('experiment-number').innerHTML + 1;
+			}
+			load_local_or_remote_scripts("../js/hyperparameters.js",
+			                             undefined,
+        								 () => {
+        								 	setup_data(search);
+        								 });
+        }
     });
 };
 
@@ -386,13 +493,9 @@ const load_mean_embeddings = (when_loaded_callback) => {
 	}
 	script.onload = when_loaded_callback;
 	document.head.appendChild(script);
-// }
 };
-
-document.addEventListener(
-    'DOMContentLoaded',
-    load_mean_embeddings(
-		() => {
+const setup_interface =
+	() => {
 			let question_area = document.getElementById('question');
 			let toggle_speech_recognition = document.getElementById('speech-recognition');
 			let sound_effect = document.getElementById('sound');
@@ -480,7 +583,18 @@ document.addEventListener(
 	//             toggle_speech(); // start with it enabled
 	//         }
 			add_sample_questions();                           
-		 }));
+};
+
+document.addEventListener('DOMContentLoaded',
+    () => {
+    	if (mode === 'old answer questions' || mode === 'old test') {
+    		load_mean_embeddings(setup_interface);
+    	} else if (mode === 'answer questions') {
+    		setup_interface();
+    	} else if (mode === 'create model') {
+    		document.body.innerHTML = "Training started";
+    	}
+    });
 
 return {respond_to_question: respond_to_question};
 

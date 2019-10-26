@@ -58,7 +58,7 @@ const collapse_confusion_matrix = (matrix, indices) => {
 
 const create_and_train_model = (options, success_callback, failure_callback) => {
 //     record_callbacks(success_callback, failure_callback); // this isn't meant to be called by Snap!
-    if (options.seed) {
+    if (options.seed && typeof options.training_number === 'number') {
         Math.seedrandom(options.seed(options.training_number));
     }
     const model = create_model(options, failure_callback);
@@ -70,19 +70,20 @@ const create_model = (options, failure_callback) => {
     try {
         const {model_name, hidden_layer_sizes, dropout_rate, optimizer, layer_initializer, batch_normalization, regularizer, learning_rate,
                loss_function, activation, last_activation, seed, datasets} = options;
-        const tfvis_options = tfvis ? options.tfvis_options || {} : {}; // ignore options if tfvis not loaded
+        const tfvis_options = typeof tfvis === 'object' ? options.tfvis_options || {} : {}; // ignore options if tfvis not loaded
         training_number = options.training_number;
         let class_names = options.class_names;
         let {input_shape} = options;
         if (!input_shape) {
             if (datasets) {
-                input_shape = shape_of_data(datasets.xs_array[0]);
-//             } else if (tensor_datasets) {
-//                 input_shape = tensor_dataset.xs.shape.slice(1);
-//                 if (input_shape.length === 0) {
-//                     input_shape = [1];
-//                 }
-                // shape_of_data(tensor_dataset.dataSync().xs[0]);
+                if (datasets.xs_array) {
+                    input_shape = shape_of_data(datasets.xs_array[0]);
+                } else if (datasets.xs) {
+                    input_shape = datasets.xs.shape.slice(1);
+                    if (input_shape.length === 0) {
+                        input_shape = [1];
+                    }
+                }                   
             }
         }
         if (!input_shape) {
@@ -115,7 +116,12 @@ const create_model = (options, failure_callback) => {
             return fun(layer_index);
         };
         if (datasets) {
-            const output_size = typeof datasets.ys_array[0] === 'number' ? 1 : datasets.ys_array[0].length;
+            let output_size;
+            if (datasets.ys_array) {
+                output_size = typeof datasets.ys_array[0] === 'number' ? 1 : datasets.ys_array[0].length;
+            } else if (datasets.ys) {
+                output_size = datasets.ys.shape.slice(1)[0];
+            }
             const last_layer_size = +hidden_layer_sizes[hidden_layer_sizes.length-1];
             if (output_size !== last_layer_size) {
                 hidden_layer_sizes.push(output_size);
@@ -201,6 +207,12 @@ const update_tensors = (datasets) => {
 
 const split_data = (datasets, options) => {
     // if I want reproducability I should use tf.randomUniform with a seed
+    if (!datasets.xs_array) {
+        datasets.xs_array = datasets.xs.arraySync();
+    }
+    if (!datasets.ys_array) {
+        datasets.ys_array = datasets.ys.arraySync();
+    }
     if (!datasets.original_xs) {
         datasets.original_xs = datasets.xs_array;
         datasets.original_ys = datasets.ys_array;
@@ -217,18 +229,24 @@ const split_data = (datasets, options) => {
     xs_ys = xs_ys.sort((a,b) => a[1].indexOf(1) - b[1].indexOf(1));
     // sort by class to make equal quantities
     const find_start = (class_index) => {
+        // assumes that each class is next to each other in the datasets
         for (let i = 0; i < xs_ys.length; i++) {
             if (xs_ys[i][1].indexOf(1) === class_index) {
                 return i;
             }
         }
     };
-    const starts = class_names.map((ignore,class_index) => find_start(class_index));
+    let starts = [];
+    const output_size = datasets.ys.shape[1];
+    for (let i = 0; i < output_size; i++) {
+        starts.push(find_start(i));
+    }
+//     const starts = class_names.map((ignore, class_index) => find_start(class_index));
     const validation_count = Math.round(validation_fraction * xs_ys.length);
-    const validation_count_per_class = Math.round(validation_count / class_names.length);
+    const validation_count_per_class = Math.round(validation_count / output_size);
     const test_count = Math.round(testing_fraction * xs_ys.length);
-    const test_count_per_class = Math.round(test_count / class_names.length);
-    const new_count = xs_ys.length - (validation_count_per_class + test_count_per_class) * class_names.length;
+    const test_count_per_class = Math.round(test_count / output_size);
+    const new_count = xs_ys.length - (validation_count_per_class + test_count_per_class) * output_size;
     const validation_ends = starts.map((start) => start + validation_count_per_class);
     let xs_ys_validation = [];
     validation_ends.forEach((end,index) => {
@@ -315,7 +333,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
            layer_initializer, regularizer, seed, stop_if_no_progress_for_n_epochs,
            testing_fraction, validation_fraction, fraction_kept, split_data_on_each_experiment} 
           = options;
-    const tfvis_options = tfvis ? options.tfvis_options || {} : {}; // ignore options if tfvis not loaded
+    const tfvis_options = typeof tfvis === 'object' ? options.tfvis_options || {} : {}; // ignore options if tfvis not loaded
     const model_name = model.name;
     const splitting_data = split_data_on_each_experiment ||
                            ((typeof datasets.xs_validation_array === 'undefined' || datasets.xs_validation_array.length === 0) && // no validation data provided
