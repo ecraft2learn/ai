@@ -488,7 +488,6 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                "Highest accuracy": highest_accuracy,
                "Highest accuracy epoch": highest_accuracy_epoch,
                "Last epoch": last_epoch,
-               "history": full_history,
                "Duration in seconds": (Date.now()-start)/1000,
               };     
           let csv_labels = // CSV for pasting into a spreadsheet
@@ -558,6 +557,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
           response["Column labels for saving results in a spreadsheet"] = csv_labels;
           response["Spreadsheet values"] = csv_values;
           response.model = model;
+          response.history = full_history;               
           invoke_callback(success_callback, response);
           if (confusion_matrix && tfvis_options.display_confusion_matrix) {
               tfvis.render.confusionMatrix({name: 'Confusion Matrix All',
