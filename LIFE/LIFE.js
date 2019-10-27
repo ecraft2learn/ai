@@ -227,7 +227,7 @@ const sentences_and_answers = () => {
 
     answers.push("The baby can have secretions that come up, that were not there initially, " + 
                    "and so you still need to establish that the airway, the mouth is still clear and sometimes even in that motion of bagging, " + 
-                   "the neck might actually tilt, so you need to reassess and establish that the neck area, the head is in neutral position, " +
+                   "the neck might actually tilt, so you need to reassess and establish that the neck area, the head is in a neutral position, " +
                    "and then you reassess the breathing, that the child, that the baby still needs an intervention in breathing. That is where you look, listen and feel. ");
 
 

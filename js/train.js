@@ -58,8 +58,9 @@ const collapse_confusion_matrix = (matrix, indices) => {
 
 const create_and_train_model = (options, success_callback, failure_callback) => {
 //     record_callbacks(success_callback, failure_callback); // this isn't meant to be called by Snap!
-    if (options.seed && typeof options.training_number === 'number') {
-        Math.seedrandom(options.seed(options.training_number));
+    if (options.seed) {
+        options.current_seed = options.seed(options.training_number);
+        Math.seedrandom(options.current_seed);
     }
     const model = create_model(options, failure_callback);
     return train_model(model, options.datasets, options, success_callback, failure_callback);
@@ -493,7 +494,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
           let csv_labels = // CSV for pasting into a spreadsheet
               "Name, Layer1,Layer2,Layer3,layer4,layer5, Batch size, Dropout rate, Normalizer, Epochs, Optimizer, Initializer, Regularizer," +
               "Testing fraction, Validation fraction, Fraction kept, " +
-              Object.keys(response) + ", ";
+              Object.keys(response) + ", seed, ";
           if (confusion_matrix) {
               let confusion_labels = [];
               confusion_matrix.forEach((row, i) => {
@@ -548,7 +549,8 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
           csv_values += (lowest_validation_loss_epoch && lowest_validation_loss_epoch) + ", ";
           csv_values += (highest_accuracy && highest_accuracy.toFixed(4)) + ", ";
           csv_values += (highest_accuracy_epoch && highest_accuracy_epoch) + ", ";
-          csv_values += options.current_seed + ", ";
+          csv_values += response["Duration in seconds"] +", ";
+          csv_values += options.current_seed + ", ";               
           if (confusion_matrix) {
               confusion_matrix.forEach(row => {
                   csv_values += row.map(percentage_of_tests) + ', '; 
@@ -712,11 +714,6 @@ const hyperparameter_search = (options, datasets, success_callback, error_callba
     const create_and_train = async (search_options) => {
         console.log(search_options);
         const new_options = Object.assign({}, options, search_options);
-        if (new_options.seed) {
-            const seed = new_options.seed(experiment_number);
-            new_options.current_seed = seed;
-            Math.seedrandom(seed);
-        }
         const model = create_model(new_options);
         return new Promise((resolve) => {
             train_model(model,
