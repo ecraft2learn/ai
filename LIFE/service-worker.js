@@ -2,13 +2,16 @@
 // caches files locally
 // based upon https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Offline_Service_workers
 
-const cache_name = "life-support-v5";
+const cache_name = "life-support-v6";
 
 const files_to_cache = [
 "/ai/LIFE/index.html",
 "/ai/css/ai-teacher-guide.css",
 "/ai/ecraft2learn.js",
 "/ai/js/tfjs.js",
+"/ai/js/train.js",
+"/ai/js/train-report-results.js",
+"/ai/js/load-scripts.js",
 "/ai/LIFE/encoder/universal-sentence-encoder.js",
 "/ai/js/user-agent.js",
 "/ai/LIFE/LIFE.js",
@@ -22,6 +25,8 @@ const files_to_cache = [
 "/ai/LIFE/encoder/group1-shard5of7",
 "/ai/LIFE/encoder/group1-shard6of7",
 "/ai/LIFE/encoder/group1-shard7of7",
+"/ai/LIFE/models/26-10-2019b.json",
+"/ai/LIFE/models/26-10-2019b.weights.bin",
 "/ai/LIFE/LIFE.webmanifest",
 ];
 
