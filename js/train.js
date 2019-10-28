@@ -56,12 +56,16 @@ const collapse_confusion_matrix = (matrix, indices) => {
     return matrix_2x2;
 };
 
-const create_and_train_model = (options, success_callback, failure_callback) => {
-//     record_callbacks(success_callback, failure_callback); // this isn't meant to be called by Snap!
-    if (options.seed) {
+const set_random_number_seed = (options) => {
+     if (options.seed) {
         options.current_seed = options.seed(options.training_number);
         Math.seedrandom(options.current_seed);
-    }
+    }   
+};
+
+const create_and_train_model = (options, success_callback, failure_callback) => {
+//     record_callbacks(success_callback, failure_callback); // this isn't meant to be called by Snap!
+    set_random_number_seed(options);
     const model = create_model(options, failure_callback);
     return train_model(model, options.datasets, options, success_callback, failure_callback);
 };
@@ -222,8 +226,6 @@ const split_data = (datasets, options) => {
     const {fraction_kept, validation_fraction, testing_fraction} = options;
     let xs_ys = original_xs.map((x,index) => [x, original_ys[index]]);
     tf.util.shuffle(xs_ys);
-    // this is a better shuffle but unlike the following has no random seed for reproducability
-    //         shuffle(xs_ys, SEED);
     if (fraction_kept < 1) {
         xs_ys.splice(Math.round((1 - fraction_kept) * xs_ys.length));
     }
@@ -714,6 +716,7 @@ const hyperparameter_search = (options, datasets, success_callback, error_callba
     const create_and_train = async (search_options) => {
         console.log(search_options);
         const new_options = Object.assign({}, options, search_options);
+        set_random_number_seed(new_options);
         const model = create_model(new_options);
         return new Promise((resolve) => {
             train_model(model,
