@@ -20,7 +20,7 @@ if ('serviceWorker' in navigator && window.location.hostname !== 'localhost') {
 }
 const parameters = new URLSearchParams(window.location.hash.slice(1));
 let mode;
-if (parameters.has('answer')) {
+if (parameters.has('answer')) { // also the default
 	mode = 'answer questions'; // until new version working well
 } else if (parameters.has('train')) {
 	mode = 'create model';
@@ -33,13 +33,13 @@ if (parameters.has('answer')) {
 } else if (parameters.has('old-answer-questions')) {
 	mode = 'old answer questions';
 } else {
-	mode = 'old answer questions'; // until new version working well
+	mode = 'answer questions'; // until new version working well
 }
 const model_name = (mode === 'create model' || mode === 'search') ? "27-10-2019a" : "26-10-2019b";
 const model_options = {
     seed: (number) => Math.round((number+Math.random())*1000000),
     model_name: model_name,
-    score_threshold: 0.45,
+    score_threshold: 0.5,
     hidden_layer_sizes: [2048,128,16],
     batch_size: 256,
     dropout_rate: .5,

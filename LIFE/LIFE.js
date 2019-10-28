@@ -74,9 +74,9 @@ const sentences_and_answers = () => {
     ]);
 
     answers.push("You need to dry their legs, their hands, their stomach, and even their head. " +
-                   "You need to dry the whole baby. " + 
-                   "While drying see if the baby is breathing, is crying, or is pink. " +
-                   "And stimulate the baby as you dry.");
+                 "You need to dry the whole baby. " + 
+                 "While drying see if the baby is breathing, is crying, or is pink. " +
+                 "And stimulate the baby as you dry.");
 
     group_of_questions.push([ // 4
         "What else are you doing as you are drying the baby?",
@@ -90,8 +90,8 @@ const sentences_and_answers = () => {
     ]);
 
     answers.push("While drying see if the baby is breathing, is crying, or is pink. " + 
-                   "Be sure to dry all areas. " +
-                   "And drying also stimulates the baby.");
+                 "Be sure to dry all areas. " +
+                 "And drying also stimulates the baby.");
 
     group_of_questions.push([ // 5
         "Can I turn on the radiator instead?",
@@ -107,7 +107,8 @@ const sentences_and_answers = () => {
     // what if a student asked "Do I still need to cover the baby if it is a very hot day?"
     // my guess is that this is a reason to understand the procedure so one doesn't wrap with the second towel if it is hot enough
 
-    answers.push("The room might become warm with a heater, but it might not be warm enough for the baby, and hence, you still need to cover the body with a towel.");
+    answers.push("The room might become warm with a heater, but it might not be warm enough for the baby, " +
+    			 "and hence, you still need to cover the body with a towel.");
 
     group_of_questions.push([ // 6
         "What should I look for after drying?",
@@ -257,9 +258,12 @@ const use_model_to_respond_to_question = async (the_question, threshold) => {
 		prediction.forEach((score, index) => {
 			if (score > best_score) {
 				second_best_score = best_score;
-				best_score = score;
 				second_best_answer_index = best_answer_index;
+				best_score = score;
 				best_answer_index = index;
+			} else if (score > second_best_score) {
+				second_best_score = score;
+				second_best_answer_index = index;
 			}
 		});
 		console.log(prediction, the_question, best_score, best_answer_index, embedding_duration, (Date.now()-start)/1000 + " seconds total");
@@ -267,9 +271,9 @@ const use_model_to_respond_to_question = async (the_question, threshold) => {
 			return best_answer_index;
 		} else {
 			return({best_answer_index,
-			        message: "Best score of " + best_score + " is less than threshold of " + threshold + 
-							 ". Best answer is: " + answers[best_answer_index] + ". Second best score is " + 
-							 second_best_score + " for answer: " + answers[second_best_answer_index]});
+			        best_score,
+			        second_best_answer_index,
+			        second_best_score});
 		}
 	});
 };
@@ -336,18 +340,27 @@ const setup = () => {
         });        
     };
     let wrong = [];
-    const write_good_and_bad = (question, bad_answer_index_or_message, good, group_number, question_number) => {
+    const write_good_and_bad = (question, response, good, group_number, question_number) => {
     	document.writeln(question + "<br>");
-    	if (typeof bad_answer_index_or_message === 'number') {
-    		document.writeln("bad answer: " + answers[bad_answer_index_or_message] + "<br>");
-    	} else {
-    		if (bad_answer_index_or_message.best_answer_index !== group_number) {
-    			document.writeln("Best answer is below and threshold and wrong.<br>");
+    	if (typeof response === 'number') {
+    		document.writeln("Bad answer: " + answers[response] + "<br>");
+    	} else if (typeof response === 'object') {
+    		document.writeln("Best answer has a score of " + response.best_score + 
+    		                 " which is less than the threshold of " + model_options.score_threshold + ".<br>");
+    		if (response.best_answer_index !== group_number) {
+    			document.writeln("Best answer is below threshold and wrong.<br>");
     		}
-    		document.writeln(bad_answer_index_or_message.message + "<br>");
+    		document.writeln("Best answer is: " + answers[response.best_answer_index] + "<br>");
+    		document.writeln("And the second best answer is <b>" + 
+    			             (response.second_best_answer_index === group_number ? 'correct' : 'wrong') +
+    					     "</b> with a score of " + response.second_best_score + ".<br>");
+    		if (response.second_best_answer_index !== group_number) {
+    			// if it is right then it'll be printed out next
+    			document.writeln("Second best answer is " + answers[response.second_best_answer_index] + "<br>");
+    		}
     	}
-        document.writeln("good answer: " + good + "<br>");
-        document.writeln(group_number + ":" + question_number + "<br><br>");
+        document.writeln("Good answer: " + good + "<br>");
+        document.writeln(group_number + ":" + question_number + " (Group number: question number)<br><br>");
     };
     const test_all_questions = () => {
         group_of_questions.forEach((group, group_number) => {
@@ -565,7 +578,7 @@ const setup_interface =
 			toggle_speech_recognition.appendChild(toggle_speech_recognition_label);
 			const respond_with_answer = (answer, question) => {
 				if (answer) {
-					answer_area.innerHTML = "<b>" + answer + "</b>";
+					answer_area.innerHTML = answer;
 					if (speech_recognition_on) {
 						let voices = window.speechSynthesis.getVoices();
 						ecraft2learn.speak(answer, undefined, undefined, 
@@ -593,9 +606,17 @@ const setup_interface =
 			};
 			const answer_question = (question) => {
 				answer_area.innerHTML = "Please wait...";
-				const handle_answer = (answer_index) => {
-					if (typeof answer_index === 'number') {
-						respond_with_answer(answers[answer_index], question);
+				const handle_answer = (response) => {
+					if (typeof response === 'number') {
+						respond_with_answer("<b>" + answers[response], question + "</b>");
+					} else if (typeof response === 'object' && response.best_score+response.second_best_score > model_options.score_threshold) {
+						const answer = "Unsure which of two answers to give. " +
+						               "Probability that the following is right is " + Math.round(response.best_score*100) + '%: <b>"' + 
+						               answers[response.best_answer_index] + '"</b> ' +
+						               "And probability that the following is right is " + Math.round(response.second_best_score*100) + '%: <b>"' + 
+						               answers[response.second_best_answer_index] + '"</b>';
+						respond_with_answer(answer, question);
+						console.log(response, answer);
 					}
 				};
 				if (mode === 'answer questions') {
