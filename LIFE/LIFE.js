@@ -245,12 +245,13 @@ const sentences_and_answers = () => {
 
 };
 
-const use_model_to_respond_to_question = async (the_question, threshold) => {
+const use_model_to_respond_to_question = async (the_question) => {
 	const start = Date.now();
-	return embedding_model.embed([the_question]).then((embedding) => {
+	return embedding_model.embed([the_question]).then((question_embedding) => {
 		const embedding_duration = (Date.now()-start)/1000 + " seconds for embedding";
-		const prediction_tensor = loaded_model.predict([embedding]);
+		const prediction_tensor = loaded_model.predict([question_embedding]);
 		const prediction = prediction_tensor.arraySync()[0];
+		prediction_tensor.dispose();
 		let best_score = 0;
 		let second_best_score;
 		let best_answer_index;
@@ -267,14 +268,11 @@ const use_model_to_respond_to_question = async (the_question, threshold) => {
 			}
 		});
 		console.log(prediction, the_question, best_score, best_answer_index, embedding_duration, (Date.now()-start)/1000 + " seconds total");
-		if (best_score >= (threshold || 0)) {
-			return best_answer_index;
-		} else {
-			return({best_answer_index,
-			        best_score,
-			        second_best_answer_index,
-			        second_best_score});
-		}
+		return({best_answer_index,
+			    best_score,
+			    second_best_answer_index,
+			    second_best_score,
+			    question_embedding});
 	});
 };
 
@@ -358,6 +356,7 @@ const setup = () => {
     			// if it is right then it'll be printed out next
     			document.writeln("Second best answer is " + answers[response.second_best_answer_index] + "<br>");
     		}
+    		response.embedding.dispose();
     	}
         document.writeln("Good answer: " + good + "<br>");
         document.writeln(group_number + ":" + question_number + " (Group number: question number)<br><br>");
@@ -365,8 +364,8 @@ const setup = () => {
     const test_all_questions = () => {
         group_of_questions.forEach((group, group_number) => {
             group.forEach((question, question_number) => {
-            	use_model_to_respond_to_question(question, model_options.score_threshold).then(answer_index => {
-					if (answer_index !== group_number) {
+            	use_model_to_respond_to_question(question).then(({best_score, best_answer_index}) => {
+					if (best_score >= model_options.score_threshold && best_answer_index !== group_number) {
 						write_good_and_bad(question, answer_index, answers[group_number], group_number, question_number);
 					}
             	});
@@ -607,22 +606,65 @@ const setup_interface =
 			const answer_question = (question) => {
 				answer_area.innerHTML = "Please wait...";
 				const handle_answer = (response) => {
-					if (typeof response === 'number') {
-						respond_with_answer("<b>" + answers[response], question + "</b>");
-					} else if (typeof response === 'object' && response.best_score+response.second_best_score > model_options.score_threshold) {
-						const answer = "Unsure which of two answers to give. " +
-						               "Probability that the following is right is " + Math.round(response.best_score*100) + '%: <b>"' + 
-						               answers[response.best_answer_index] + '"</b> ' +
-						               "And probability that the following is right is " + Math.round(response.second_best_score*100) + '%: <b>"' + 
-						               answers[response.second_best_answer_index] + '"</b>';
-						respond_with_answer(answer, question);
-						console.log(response, answer);
+					const {best_score, best_answer_index, second_best_score, second_best_answer_index, question_embedding} = response;
+					const two_possible_answers = () => 
+					    // sum of top two exceeds threshold and they are less than 10% apart
+						       best_score+second_best_score > model_options.score_threshold &&
+							   best_score-second_best_score <= .1;	
+					const best_answer_close_enough = async () => {
+						const embeddings_tensor = await embedding_model.embed(group_of_questions[best_answer_index]);
+						const embeddings_for_top_match = embeddings_tensor.arraySync();
+						embeddings_tensor.dispose();
+						const distance = (array, tensor) => {
+							const another_tensor = tf.tensor(array);
+							const cosine_tensor = tf.metrics.cosineProximity(another_tensor, tensor);
+							const cosine = cosine_tensor.arraySync()[0];
+							another_tensor.dispose();
+							cosine_tensor.dispose();
+							return cosine;
+						};
+						let closest_distance = 1;
+						embeddings_for_top_match.forEach(embedding => {
+															const distance_to_possible_paraphrasing = distance(embedding, question_embedding);
+															if (distance_to_possible_paraphrasing < closest_distance) {
+																closest_distance = distance_to_possible_paraphrasing;
+															}
+													     });
+	                    return closest_distance;
+					};			
+					if (best_score >= model_options.score_threshold) {
+						respond_with_answer("<b>" + answers[best_answer_index] + "</b>", question);
+						question_embedding.dispose();
+					} else if (typeof response === 'object' && two_possible_answers()) {
+						best_answer_close_enough().then(closest_distance => {
+							console.log('closest distance', closest_distance);
+							if (closest_distance < -.5) {
+								respond_with_answer("Unsure which of two answers to give. " +
+													"The probability that the following is right is " + Math.round(response.best_score*100) + '%: <b>"' + 
+													answers[response.best_answer_index] + '"</b> ' +
+												    "And the probability that the following is right is " + Math.round(response.second_best_score*100) + '%: <b>"' + 
+													answers[response.second_best_answer_index] + '"</b>', 
+						                            question);
+							} else {
+								respond_with_answer(undefined, question);
+							}
+							question_embedding.dispose();
+						})
+					} else {
+						respond_with_answer(undefined, question);
+						question_embedding.dispose();
+					}
+					console.log(response);
+				};
+				const old_handle_answer = (best_answer_index) => {
+					if (typeof best_answer_index === 'number') {
+						respond_with_answer("<b>" + answers[best_answer_index] + "</b>", question);
 					}
 				};
 				if (mode === 'answer questions') {
-					use_model_to_respond_to_question(question, model_options.score_threshold).then(handle_answer, record_error);
+					use_model_to_respond_to_question(question).then(handle_answer, record_error);
 				} else if (mode === 'old answer questions') {
-					LIFE.respond_to_question(question, -0.55).then(handle_answer, record_error);
+					LIFE.respond_to_question(question, -0.55).then(old_handle_answer, record_error);
 					// reasonable matches must be less than -0.55 cosineProximity
 				}
 			};
