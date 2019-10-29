@@ -356,7 +356,6 @@ const setup = () => {
     			// if it is right then it'll be printed out next
     			document.writeln("Second best answer is " + answers[response.second_best_answer_index] + "<br>");
     		}
-    		response.embedding.dispose();
     	}
         document.writeln("Good answer: " + good + "<br>");
         document.writeln(group_number + ":" + question_number + " (Group number: question number)<br><br>");
@@ -364,13 +363,15 @@ const setup = () => {
     const test_all_questions = () => {
         group_of_questions.forEach((group, group_number) => {
             group.forEach((question, question_number) => {
-            	use_model_to_respond_to_question(question).then(({best_score, best_answer_index}) => {
-					if (best_score >= model_options.score_threshold && best_answer_index !== group_number) {
-						write_good_and_bad(question, answer_index, answers[group_number], group_number, question_number);
+            	use_model_to_respond_to_question(question).then(response => {
+            		const {best_score, best_answer_index, question_embedding} = response;
+					if (best_score < model_options.score_threshold || best_answer_index !== group_number) {
+						write_good_and_bad(question, response, answers[group_number], group_number, question_number);
 					}
+					question_embedding.dispose();
             	});
             }); 
-        });   	
+        }); 	
     };
     const old_test_all_questions = () => {
         group_of_questions.forEach((group, group_number) => {
@@ -636,18 +637,20 @@ const setup_interface =
 						respond_with_answer("<b>" + answers[best_answer_index] + "</b>", question);
 						question_embedding.dispose();
 					} else if (typeof response === 'object' && two_possible_answers()) {
+						const start = Date.now();
 						best_answer_close_enough().then(closest_distance => {
 							console.log('closest distance', closest_distance);
 							if (closest_distance < -.5) {
 								respond_with_answer("Unsure which of two answers to give. " +
-													"The probability that the following is right is " + Math.round(response.best_score*100) + '%: <b>"' + 
+													"The probability that the following answers your question is " + Math.round(response.best_score*100) + '%: <b>"' + 
 													answers[response.best_answer_index] + '"</b> ' +
-												    "And the probability that the following is right is " + Math.round(response.second_best_score*100) + '%: <b>"' + 
+												    "And the probability that the following answers your question is " + Math.round(response.second_best_score*100) + '%: <b>"' + 
 													answers[response.second_best_answer_index] + '"</b>', 
 						                            question);
 							} else {
 								respond_with_answer(undefined, question);
 							}
+							console.log((Date.now()-start)/1000 + " seconds to check distances");
 							question_embedding.dispose();
 						})
 					} else {
