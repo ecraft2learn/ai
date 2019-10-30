@@ -581,7 +581,7 @@ const setup_interface =
 					answer_area.innerHTML = answer;
 					if (speech_recognition_on) {
 						let voices = window.speechSynthesis.getVoices();
-						ecraft2learn.speak(answer, undefined, undefined, 
+						ecraft2learn.speak(answer_area.textContent, undefined, undefined, 
 										   ecraft2learn.get_voice_number_matching(["uk", "female"], 0));
 					}          
 				} else {
