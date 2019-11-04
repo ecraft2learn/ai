@@ -514,7 +514,7 @@ const add_images = (when_finished, just_one_class, only_class_index, except_imag
 };
 
 let current_logits;
-const make_prediction = (image, callback) => {
+const make_prediction = async (image, callback) => {
     const logits = infer(image);
     if (current_logits) {
         current_logits.dispose(); // no longer needed
@@ -524,7 +524,9 @@ const make_prediction = (image, callback) => {
     const prediction_tensor = loaded_model.predict([logits]);
     const prediction = prediction_tensor.dataSync();
     prediction_tensor.dispose();
-    callback(prediction, logits_data);
+    const mobilenet_classifications = await mobilenet_model.classify(image, 5); // top 5 classifications
+    console.log(mobilenet_classifications, "Best MobileNet classifications");
+    callback({prediction, mobilenet_classifications}, logits_data);
 };
 
 // 'conv_preds' is the logits activation of MobileNet.
@@ -800,7 +802,7 @@ const correct = (result, class_index) => {
 
 const not_confident_message = "The app is not very sure whether the nail is OK or not. Sorry.";
 
-const confidences = (result, full_description, correct_class_index) => {
+const confidences = ({prediction, mobilenet_classifications}, full_description, correct_class_index) => {
     let message = "Analysis by this app indicates ";
     let scores = [];
     let scores_message = "";
@@ -810,7 +812,7 @@ const confidences = (result, full_description, correct_class_index) => {
 //     let highest_score = 0;
 //     let second_highest_score = 0;
     class_names.forEach((name, class_index) => {
-        let score = Math.round(result[class_index]*100)
+        let score = Math.round(prediction[class_index]*100)
         if (full_description) {
             scores_message += better_name(name) + " = " + score + "%; ";
         }
@@ -860,6 +862,29 @@ const confidences = (result, full_description, correct_class_index) => {
     }
     if (full_description) {
         message = scores_message + "<br>" + message;
+    }
+    const mobilenet_classifications_threshold = traffic_light_class === 'gray-light' ? 1/4 : 3/4;
+    let top_n_probability = 0;
+    let top_n_class_names = "";
+    mobilenet_classifications.forEach((classification, index) => {
+        if (classification.probability > .02) {
+            top_n_probability += classification.probability;
+            if (index === mobilenet_classifications.length-1) { // last one
+                top_n_class_names += ", or "; 
+            } else if (index > 0) {
+               top_n_class_names += ", ";
+            }
+            top_n_class_names += '"' + classification.className + '"';            
+        }
+    });
+    if (top_n_probability >= mobilenet_classifications_threshold) {
+        const not_nail_message = "<b>The probability that this isn't a nail but instead is either a " + top_n_class_names + " is " + 
+                                 Math.round(100*top_n_probability) + "%.</b>";
+        if (full_description) {
+            message = not_nail_message + "<br>" + message;
+        } else {
+            message = not_nail_message;
+        }
     }
     return "<span class=" + traffic_light_class + ">" + message + "</span>";
 };
@@ -1415,13 +1440,15 @@ const run_experiments = () => {
         const logits = infer(image);
         const prediction_tensor = loaded_model.predict([logits]);
         const prediction = prediction_tensor.dataSync();
+        logits.dispose();
+        prediction_tensor.dispose();
         const confidence = prediction[class_index];
         const class_name = class_names[class_index];
         const image_description = images[class_name][image_index];
         image.title = typeof image_description === 'string' ?
                       image_description :
                       image_description.file_name + "#" + image_count;
-        let message = process_prediction(prediction, image, class_index, image_index, image_count);
+        let message = process_prediction({prediction}, image, class_index, image_index, image_count);
         confidences[class_name].push([confidence, message]);
         if (long_experimental_results) {
             csv[class_name] += "https://ecraft2learn.github.io/ai/onyx/"
@@ -1446,8 +1473,9 @@ const MORE_DETAILS = "More details";
 // const LESS_DETAILS = "Less details";
 
 const process_prediction = (result, image_or_canvas, class_index, image_index, image_count) => {
+    const {prediction, mobilenet_classifications} = result;
     const image_url = get_url_from_image_or_canvas(image_or_canvas);
-    const correct_prediction = correct(result, class_index);
+    const correct_prediction = correct(prediction, class_index);
     let message = "<table><tr>";
     if (!is_mobile()) {
         message += "<td><img src='" + image_url + "' width=128 height=128></img></td>";
