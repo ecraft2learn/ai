@@ -806,11 +806,7 @@ const confidences = ({prediction, mobilenet_classifications}, full_description, 
     let message = "Analysis by this app indicates ";
     let scores = [];
     let scores_message = "";
-    let traffic_light_class; // either "green_light", "amber_light", or "red_light"
-//     let name_of_highest_scoring_class;
-//     let name_of_second_highest_scoring_class;
-//     let highest_score = 0;
-//     let second_highest_score = 0;
+    let traffic_light_class;
     class_names.forEach((name, class_index) => {
         let score = Math.round(prediction[class_index]*100)
         if (full_description) {
@@ -819,9 +815,6 @@ const confidences = ({prediction, mobilenet_classifications}, full_description, 
         scores.push({name: name,
                      score: score});
     });
-//     if (full_description) {
-//         message += "<br>";
-//     }
     scores.sort((name_score_1, name_score_2) => {
         return name_score_2.score-name_score_1.score;
     });
@@ -863,28 +856,43 @@ const confidences = ({prediction, mobilenet_classifications}, full_description, 
     if (full_description) {
         message = scores_message + "<br>" + message;
     }
-    const mobilenet_classifications_threshold = traffic_light_class === 'gray-light' ? 1/4 : 3/4;
+    const low_threshold = 1/4;
+    const high_threshold = 3/4;
+    const mobilenet_classifications_threshold = traffic_light_class === 'gray-light' ? low_threshold : high_threshold;
     let top_n_probability = 0;
     let top_n_class_names = "";
     mobilenet_classifications.forEach((classification, index) => {
         if (classification.probability > .02) {
             top_n_probability += classification.probability;
             if (index === mobilenet_classifications.length-1) { // last one
-                top_n_class_names += ", or "; 
+                top_n_class_names += " or "; 
             } else if (index > 0) {
                top_n_class_names += ", ";
             }
             top_n_class_names += '"' + classification.className + '"';            
         }
     });
-    if (top_n_probability >= mobilenet_classifications_threshold) {
-        const not_nail_message = "<b>The probability that this isn't a nail but instead is either a " + top_n_class_names + " is " + 
-                                 Math.round(100*top_n_probability) + "%.</b>";
-        if (full_description) {
-            message = not_nail_message + "<br>" + message;
+    if (top_n_probability >= low_threshold) {
+        let not_nail_message = "The probability that this isn't a nail but instead is ";
+        if (top_n_class_names.length > 1) {
+            not_nail_message += "either a "; 
         } else {
+            not_nail_message += "a "
+        }
+        not_nail_message += top_n_class_names + " is " + Math.round(100*top_n_probability) + "%.";
+        if (full_description) {
+            if (top_n_probability > mobilenet_classifications_threshold) {
+                message = not_nail_message + "<br>Assuming it is a nail it is classified as: " + message;
+            } else {
+                // not so likely so mention it second
+                message += "<br>" + not_nail_message;
+            }   
+        } else if (top_n_probability > mobilenet_classifications_threshold) {
             message = not_nail_message;
         }
+    }
+    if (top_n_probability > high_threshold) {
+        traffic_light_class = 'gray-light';
     }
     return "<span class=" + traffic_light_class + ">" + message + "</span>";
 };
