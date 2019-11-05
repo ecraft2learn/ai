@@ -40,7 +40,7 @@ window.addEventListener('DOMContentLoaded',
     async function () {
         // Load the model and tell the spawner this is ready
         window.parent.postMessage({show_message: "Loading..."}, "*");
-        model = await mobilenet.load(2); // version 2
+        model = await mobilenet.load({version: 2, alpha: 1}); 
         window.parent.postMessage("Ready", '*');
         window.parent.postMessage({show_message: "Ready",
                                    duration: 2},
