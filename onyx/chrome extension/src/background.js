@@ -46866,11 +46866,11 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
         inputRange: [0, 1]
       },
       .75: {
-        url: "../js/mobilenet_v2_075_224/classification/2",
+        url: "https://ecraft2learn.github.io/ai/js/mobilenet_v2_075_224/classification/2",
         inputRange: [0, 1]
       },
       "1.00": {
-        url: "../js/mobilenet_v2_100_224/classification/2",
+        url: "https://ecraft2learn.github.io/ai/js/mobilenet_v2_100_224/classification/2",
         inputRange: [0, 1]
       }
     }
@@ -47068,7 +47068,7 @@ function clickMenuCallback(info, tab) {
 
 
 chrome.contextMenus.create({
-  title: 'Classify image with TensorFlow.js ',
+  title: 'Classify image of a nail ',
   contexts: ['image'],
   onclick: clickMenuCallback
 });
@@ -47089,7 +47089,7 @@ function () {
     this.loadModel();
   }
   /**
-   * Loads mobilenet from URL and keeps a reference to it in the object.
+   * Loads models and keeps a reference to them in the object.
    */
 
 
@@ -47138,7 +47138,7 @@ function () {
               case 15:
                 _context.prev = 15;
                 _context.t0 = _context["catch"](2);
-                console.error("Unable to load model from URL: ".concat(MOBILENET_MODEL_TFHUB_URL));
+                console.error("Unable to load model: ".concat(_context.t0.message));
 
               case 18:
               case "end":
@@ -47203,13 +47203,13 @@ function () {
                 function () {
                   var _ref = _asyncToGenerator(
                   /*#__PURE__*/
-                  regeneratorRuntime.mark(function _callee2(img) {
-                    var logits, predictions;
+                  regeneratorRuntime.mark(function _callee2(image) {
+                    var logits, classifications, predictions_tensor, predictions;
                     return regeneratorRuntime.wrap(function _callee2$(_context2) {
                       while (1) {
                         switch (_context2.prev = _context2.next) {
                           case 0:
-                            if (img) {
+                            if (image) {
                               _context2.next = 3;
                               break;
                             }
@@ -47218,18 +47218,27 @@ function () {
                             return _context2.abrupt("return");
 
                           case 3:
-                            //           const predictions = await this.predict(img);
-                            logits = _this2.mobilenet_model.infer(img, 'conv_preds');
-                            predictions = _this2.onyx_model.predict([logits]);
+                            logits = _this2.mobilenet.infer(image, 'conv_preds');
+                            _context2.next = 6;
+                            return mobilenet.classify(image, 5);
+
+                          case 6:
+                            classifications = _context2.sent;
+                            // top 5 classifications
+                            predictions_tensor = _this2.onyx_model.predict([logits]);
+                            predictions = predictions_tensor.dataSync();
+                            console.log(predictions);
+                            predictions_tensor.dispose();
                             logits.dispose();
                             message = {
                               action: 'IMAGE_CLICK_PROCESSED',
                               url: url,
-                              predictions: predictions
+                              predictions: predictions,
+                              classifications: classifications
                             };
                             chrome.tabs.sendMessage(tabId, message);
 
-                          case 8:
+                          case 14:
                           case "end":
                             return _context2.stop();
                         }

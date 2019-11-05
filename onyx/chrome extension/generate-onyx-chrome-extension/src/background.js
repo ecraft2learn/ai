@@ -18,7 +18,7 @@
 import 'babel-polyfill';
 import * as tf from '@tensorflow/tfjs';
 import {IMAGENET_CLASSES} from './imagenet_classes';
-import * as mobilenet from './mobilenet';
+import * as mobilenet from '@tensorflow-models/mobilenet';
 
 // Where to load the model from.
 // const MOBILENET_MODEL_TFHUB_URL =
@@ -113,20 +113,20 @@ class ImageClassifier {
     }
     let message;
     this.loadImage(url).then(
-        async (img) => {
-          if (!img) {
+        async (image) => {
+          if (!image) {
             console.error(
                 'Could not load image.  Either too small or unavailable.');
             return;
           }
-//           const predictions = await this.predict(img);
-          const logits = this.mobilenet.infer(img, 'conv_preds');
+          const logits = this.mobilenet.infer(image, 'conv_preds');
+          const classifications = await this.mobilenet.classify(image, 5); // top 5 classifications
           const predictions_tensor = this.onyx_model.predict([logits]);
           const predictions = predictions_tensor.dataSync();
-          console.log(predictions);
+          console.log(predictions, classifications);
           predictions_tensor.dispose();
           logits.dispose();
-          message = {action: 'IMAGE_CLICK_PROCESSED', url, predictions};
+          message = {action: 'IMAGE_CLICK_PROCESSED', url, predictions, classifications};
           chrome.tabs.sendMessage(tabId, message);
         },
         (reason) => {

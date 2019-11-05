@@ -19,8 +19,9 @@
 const TEXT_DIV_CLASSNAME = 'tfjs_mobilenet_extension_text';
 // Thresholds for LOW_CONFIDENCE_THRESHOLD and HIGH_CONFIDENCE_THRESHOLD,
 // controlling which messages are printed.
-const HIGH_CONFIDENCE_THRESHOLD = 0.5;
-const LOW_CONFIDENCE_THRESHOLD = 0.1;
+const HIGH_CONFIDENCE_THRESHOLD = 1/2;
+const LOW_CONFIDENCE_THRESHOLD = 1/10;
+const CLASSIFICATION_THRESHOLD = 1/2;
 
 /**
  * Produces a short text string summarizing the prediction and a text color
@@ -28,7 +29,7 @@ const LOW_CONFIDENCE_THRESHOLD = 0.1;
  * objects.
  * @param predictions list of scores
  */
-function textContentFromPrediction(predictions) {
+function textContentFromPrediction(predictions, classifications) {
     let scores = [];
     const class_names = ["normal", "abnormal but not serious", "check with a doctor"];
     const colors = ["#386838", "#d6b862", "#a70606"];
@@ -41,7 +42,16 @@ function textContentFromPrediction(predictions) {
         return score_2.score-score_1.score;
     });
     console.log(scores);
-    if (scores[0].score < HIGH_CONFIDENCE_THRESHOLD) {
+    let top_n_probability = 0;
+    classifications.forEach((classification, index) => {
+        if (classification.probability > .02) {
+            top_n_probability += classification.probability;           
+        }
+    });
+    if (top_n_probability >= CLASSIFICATION_THRESHOLD) {
+      return {text: classifications[0].className + " with probability " + Math.round(100*classifications[0].probability),
+              color: 'blue'};
+    } else if (scores[0].score < HIGH_CONFIDENCE_THRESHOLD) {
         return {text: "not sure", color: 'gray'};
     } else {
         return scores[0];
@@ -74,8 +84,6 @@ function removeTextElements() {
   }
 }
 
-
-
 /**
  *  Moves the provided imgNode into a container div, and adds a text div as a
  * peer.  Styles the container div and text div to place the text
@@ -88,7 +96,7 @@ function addTextElementToImageNode(imgNode, textContent, color) {
   const container = document.createElement('div');
   container.style.position = 'relative';
   container.style.textAlign = 'center';
-  container.style.colore = 'white';
+  container.style.color = 'white';
   const text = document.createElement('div');
   text.className = 'tfjs_mobilenet_extension_text';
   text.style.position = 'absolute';
@@ -102,7 +110,7 @@ function addTextElementToImageNode(imgNode, textContent, color) {
   text.style.lineHeight = '1em';
   text.style['-webkit-text-fill-color'] = color;
   text.style['-webkit-text-stroke-width'] = '1px';
-  text.style['-webkit-text-stroke-color'] = 'black';
+  text.style['-webkit-text-stroke-color'] = 'white';
   // Add the containerNode as a peer to the image, right next to the image.
   originalParent.insertBefore(container, imgNode);
   // Move the imageNode to inside the containerNode;
@@ -123,7 +131,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     // Get the list of images with this srcUrl.
     const imgElements = getImageElementsWithSrcUrl(message.url);
     for (const imgNode of imgElements) {
-      const {text, color} = textContentFromPrediction(message.predictions);
+      const {text, color} = textContentFromPrediction(message.predictions, message.classifications);
       addTextElementToImageNode(imgNode, text, color);
     }
   }
