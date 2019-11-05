@@ -857,7 +857,7 @@ const confidences = ({prediction, mobilenet_classifications}, full_description, 
         message = scores_message + "<br>" + message;
     }
     const low_threshold = 1/4;
-    const high_threshold = 3/4;
+    const high_threshold = 1/2;
     const mobilenet_classifications_threshold = traffic_light_class === 'gray-light' ? low_threshold : high_threshold;
     let top_n_probability = 0;
     let top_n_class_names = "";
@@ -872,17 +872,15 @@ const confidences = ({prediction, mobilenet_classifications}, full_description, 
             top_n_class_names += '"' + classification.className + '"';            
         }
     });
-    if (top_n_probability >= low_threshold) {
-        let not_nail_message = "The probability that this isn't a nail but instead is ";
+    if (typeof correct_class_index === 'undefined' && top_n_probability >= low_threshold) {
+        let not_nail_message = "If this isn't a nail then the probability that instead it is ";
         if (top_n_class_names.length > 1) {
-            not_nail_message += "either a "; 
-        } else {
-            not_nail_message += "a "
+            not_nail_message += "either ";
         }
         not_nail_message += top_n_class_names + " is " + Math.round(100*top_n_probability) + "%.";
         if (full_description) {
             if (top_n_probability > mobilenet_classifications_threshold) {
-                message = not_nail_message + "<br>Assuming it is a nail it is classified as: " + message;
+                message = not_nail_message + "<br>Assuming it is a nail, it is classified as: " + message;
             } else {
                 // not so likely so mention it second
                 message += "<br>" + not_nail_message;
