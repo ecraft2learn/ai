@@ -17,7 +17,7 @@ const fetch_logs = () => {
 };
 const download_string = (label, name, data) => {
     const button = create_anchor_that_looks_like_a_button(label);
-    const file = new Blob([data], {type: 'text'});
+    const file = new Blob([data], {type: 'text/plain;charset=UTF-8'});
     button.href = URL.createObjectURL(file);
     button.download = name;
     return button;
