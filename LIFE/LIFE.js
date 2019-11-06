@@ -267,7 +267,8 @@ const use_model_to_respond_to_question = async (the_question) => {
 				second_best_answer_index = index;
 			}
 		});
-		console.log(prediction, the_question, best_score, best_answer_index, embedding_duration, (Date.now()-start)/1000 + " seconds total");
+		const total_duration = (Date.now()-start)/1000 + " seconds total"
+		log({prediction, the_question, best_score, best_answer_index, embedding_duration, total_duration});
 		return({best_answer_index,
 			    best_score,
 			    second_best_answer_index,
@@ -275,6 +276,8 @@ const use_model_to_respond_to_question = async (the_question) => {
 			    question_embedding});
 	});
 };
+
+
 
 const precision = (x, n) => Math.round(x*Math.pow(10, n))/Math.pow(10, n);
 
@@ -394,9 +397,6 @@ const setup = () => {
                             document.writeln("#" + answer_id_and_distance[0] + " = " + answer_id_and_distance[1] + "<br>");
                         });
                         document.writeln("<br>");
-                    }
-                    if (group_number === 15) {
-                        console.log(wrong);
                     }
 //                     console.log(distances[0][1]); // just to see what best distances look like
                 });
@@ -563,6 +563,42 @@ const load_mean_embeddings = (when_loaded_callback) => {
 	script.onload = when_loaded_callback;
 	document.head.appendChild(script);
 };
+
+let download_logs_button;
+	
+const update_download_button = () => {
+	const logs = window.localStorage.getItem(user_id_for_logs) || "";
+	const file = new Blob(["[" + logs + "]"], {type: 'text/plain;charset=UTF-8'});
+	download_logs_button.href = URL.createObjectURL(file);
+	download_logs_button.download = "logs-" + user_id_for_logs + "-" + new Date().getTime() + ".js";
+};
+
+const logging_interface = () => {
+	const create_anchor_that_looks_like_a_button = (label, listener) => {
+		let button = document.createElement('a');
+		button.innerHTML = label;
+		button.className = 'generic-button';
+		button.style.marginRight = "12px";
+		button.href = "#";
+		button.addEventListener('click', listener);
+		return button;
+	};
+	const reset_logs = () => {
+		if (confirm("Are you sure you want to delete the Snap! logs for " + user_id_for_logs + " stored in this browser?")) {
+			localStorage.removeItem(user_id_for_logs);
+			update_download_button();
+		}
+	};
+    download_logs_button = create_anchor_that_looks_like_a_button("Download logs for " + user_id_for_logs);
+    update_download_button();
+    document.body.appendChild(download_logs_button);
+    const clear_logs_button = document.createElement('button');
+    clear_logs_button.innerHTML = "Click to permanently remove the logs for " + user_id_for_logs + " from this browser";
+    clear_logs_button.addEventListener('click', reset_logs);
+    clear_logs_button.classList.add('generic-button');
+    document.body.appendChild(clear_logs_button);
+};
+
 const setup_interface =
 	() => {
 			let question_area = document.getElementById('question');
@@ -577,6 +613,7 @@ const setup_interface =
 			toggle_speech_recognition_label.innerHTML = turn_on_speech_recognition_label;
 			toggle_speech_recognition.appendChild(toggle_speech_recognition_label);
 			const respond_with_answer = (answer, question) => {
+				log({answer, question});
 				if (answer) {
 					answer_area.innerHTML = answer;
 					if (speech_recognition_on) {
@@ -639,7 +676,7 @@ const setup_interface =
 					} else if (typeof response === 'object' && two_possible_answers()) {
 						const start = Date.now();
 						best_answer_close_enough().then(closest_distance => {
-							console.log('closest distance', closest_distance);
+							log({closest_distance});
 							if (closest_distance < -.5) {
 								respond_with_answer("Unsure which of two answers to give. " +
 													"The probability that the following answers your question is " + Math.round(response.best_score*100) + '%: <b>"' + 
@@ -657,7 +694,7 @@ const setup_interface =
 						respond_with_answer(undefined, question);
 						question_embedding.dispose();
 					}
-					console.log(response);
+					log(response);
 				};
 				const old_handle_answer = (best_answer_index) => {
 					if (typeof best_answer_index === 'number') {
@@ -677,9 +714,10 @@ const setup_interface =
 												   answer_question(question_area.value);
 											   };
 										   });
-			const recognition_callback = (text) => {
-				question_area.value = text;
-				answer_question(text);
+			const recognition_callback = (spoken_text, ignore, confidence) => {
+				log({spoken_text, confidence});
+				question_area.value = spoken_text;
+				answer_question(spoken_text);
 				// and start listening to the next question
 				ecraft2learn.start_speech_recognition(recognition_callback, handle_recognition_error);
 			};
@@ -705,12 +743,36 @@ const setup_interface =
 				}
 			};
 			toggle_speech_recognition.addEventListener('click', toggle_speech);
+			if (user_id_for_logs) {
+				logging_interface();
+			}
 			// following would be nice but can't use speech without user action
 			// see https://www.chromestatus.com/feature/5687444770914304
 	//         if (is_mobile()) {
 	//             toggle_speech(); // start with it enabled
 	//         }
 			add_sample_questions();                           
+};
+
+const hash_parameters = new URLSearchParams(window.location.hash.slice(1));
+const search_parameters = new URLSearchParams(window.location.search);
+const user_id_for_logs = search_parameters.get('log') || hash_parameters.get('log');
+
+const log = (message) => {
+	if (user_id_for_logs) {
+		let logs = window.localStorage.getItem(user_id_for_logs);
+		const time_stamp = Date.now();
+		let json = JSON.stringify({message, time_stamp});
+		if (logs) {
+			logs += "," + json;
+		} else {
+			logs = json;
+		}
+		window.localStorage.setItem(user_id_for_logs, logs);
+		update_download_button();
+	} else {
+		console.log(message);
+	}
 };
 
 document.addEventListener('DOMContentLoaded',

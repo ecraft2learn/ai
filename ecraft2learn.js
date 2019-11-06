@@ -1922,7 +1922,7 @@ xhr.send();
                   // event breaks things for Snap! callbacks
                   invoke_callback(final ? final_spoken_callback : interim_spoken_callback, spoken);
               } else {
-                  invoke_callback(final ? final_spoken_callback : interim_spoken_callback, spoken, event);
+                  invoke_callback(final ? final_spoken_callback : interim_spoken_callback, spoken, event, event.results[event.resultIndex][0].confidence);
               }         
               if (debugging) {
                   console.log("Just invoked callback for " + spoken + ". isFinal is " + event.results[event.resultIndex].isFinal);
