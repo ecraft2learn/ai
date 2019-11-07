@@ -11,16 +11,17 @@
         Loading the model...
     </div>
     <p>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Wait until the camera image appears before returning to Snap!.
+        <b>Wait until the camera image appears before returning to Snap!.<br>
         Feel free to play around with this page first.</b>
     </p>
     <div id="main" style="display:none">
-        <video autoplay="true" id="video" style=" -moz-transform: scaleX(-1);
-        -o-transform: scaleX(-1);
-        -webkit-transform: scaleX(-1);
-        transform: scaleX(-1);
-        display: none;
-        ">
+        <video autoplay="true" 
+               id="video"
+               style=" -moz-transform: scaleX(-1);
+                       -o-transform: scaleX(-1);
+                       -webkit-transform: scaleX(-1);
+                       transform: scaleX(-1);
+                     display: none;">
         </video>
         <canvas id="output">
     </canvas></div>
@@ -35,26 +36,18 @@
 <script src="../js/load-scripts.js"></script>
 <script>
 load_local_or_remote_scripts(
-    ["stats.min.js",
+    ["../js/stats.min.js",
      "../js/tfjs.js",
      "../js/posenet.js",
      "../js/dat.gui.js",
      "demo_util.js",
      "camera.js",
      "../js/training-utilities.js",
-     "../js/translate.js"],
+     "../js/translate.js"]);
     // using the same locally cached version so nothing breaks when released versions are updated
-    ["stats.min.js",
-    "../js/tfjs.js",
-     "../js/posenet.js",
-     "../js/dat.gui.js",
 //      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs",
 //      "https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet",
 //      "https://cdn.jsdelivr.net/npm/dat.gui",
-     "demo_util.js",
-     "camera.js",
-     "../js/training-utilities.js",
-     "../js/translate.js"]);
 </script>
 </body>
 </html>

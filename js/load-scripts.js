@@ -28,6 +28,7 @@ function load_local_or_remote_scripts (local_URLs, remote_URLs, callback) {
         script.onload = load_URLs;
         script.src = next_URL;
         script.charset = "UTF-8";
+//         script.type = "module";
         document.head.appendChild(script);
     };
     let scripts_remaining = (window.location.hostname === "localhost" || window.location.protocol === "file") ?
