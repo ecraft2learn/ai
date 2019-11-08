@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Running Snap! and AI blocks locally</title>
+    <link href="./css/ai-teacher-guide.css" rel="stylesheet">
+</head>
+<body>
+<h2>Running Snap! and AI blocks locally</h2>
+<h3>Running everything on http:localhost</h3>
+<p>
+<a href="https://snap.berkeley.edu/">Snap!</a> and the <a href="./index.html">AI blocks</a> developed as part of the <a href="http://project.ecraft2learn.eu/">eCraft2Learn Project</a>
+can be run locally so that the majority of the functionality will work without an Internet connection.
+After cloning or downloading <a href="https://github.com/ecraft2learn/localhost">all the needed files</a>
+one can simply open the <code>htdocs/ai/index.html</code> file 
+but most browsers will not permit access to the microphone, camera, and some other services.
+The solution is to run a local web server.
+When a local web server is running then <a href="http:localhost:8000/ai/">localhost:8000/ai/</a> will launch the AI home page
+providing access to libraries, guides, and sample projects.
+</p>
+<p>We provide a tiny server for Windows machines.
+Simply launch <code>miniweb.exe</code> after booting up the computer.
+<a href="https://discussions.apple.com/docs/DOC-3083">MacOs has a builtin web server</a>.
+There are also <a href="https://chrome.google.com/webstore/detail/web-server-for-chrome/ofhbbkphhbklhfoeikjpcbhemlocgigb?hl=en">Chrome extensions</a>
+for running a local web server on ChromeBooks.
+</p>
+<h3>What parts rely upon an Internet connection</h3>
+<p>
+If you are running this without an Internet connection the following blocks will not function: speech recognition, speech synthesis, 
+and image recognition that uses cloud services from Google, IBM, and Microsoft. Very limited speech recognition is available via the
+<span class='block-name'>Audio label confidences</span> and somewhat limited speech recognition is available via
+<span class='block-name'>Analyze costume</span> and <span class='block-name'>labels for costume</span>.
+</p>
+<h3>Creating logs of user events</h3>
+<p>
+Web page shortcuts are provided for quick access to pages for logging into the AI home page (localhost:8000/ai/login.html)
+and to Snap! (localhost:8000/ai/login-snap.html). Logs are kept locally in the browser and can be downloaded using localhost:8000/ai/fetch-logs.html.
+</p>
+<h3>Support</h3>
+<p>
+Please report any problems to Ken Kahn (toontalk@gmail.com).
+</p>
+</body>
+</html>
