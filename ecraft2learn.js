@@ -194,7 +194,7 @@ window.ecraft2learn =
           if (typeof value ===  'string') {
               return value;
           }
-          return value.contents;
+          return value.asArray();
     };
     const record_callbacks = function () {
         Array.from(arguments).forEach(function (callback) {
@@ -426,7 +426,7 @@ window.ecraft2learn =
         var voice_number;
         if (!Array.isArray(name_parts) && typeof name_parts !== 'string') {
             // convert from a Snap list to a JavaScript array
-            name_parts = name_parts.contents;
+            name_parts = name_parts.asArray();
         }
         name_parts = name_parts.map(function (part) {
                                         return part.toLowerCase();
@@ -764,7 +764,7 @@ window.ecraft2learn =
       let together_url = options.together_url; // another Snap! (or NetsBlox) wants to collaborate using this URL
       let iframe_in_new_tab = options.iframe_in_new_tab; // if not true then iframe is either full size covering up Snap! or a single pixel
       let training_name = options.training_name; // used by audio training 
-      let buckets = buckets_as_snap_list.contents;
+      let buckets = buckets_as_snap_list.asArray();
       if (source === 'training using microphone' && buckets.indexOf('_background_noise_') < 0) {
           buckets.push('_background_noise_');
       }
@@ -1617,8 +1617,9 @@ window.ecraft2learn =
         return result;
     };
     const verify_features = (features) => {
-        const contents = features && features.contents; // should be an array of numbers
-        if (Array.isArray(contents)) {
+        // should be an array of numbers
+        if (features.asArray) {
+            const contents = features.asArray();
             if (contents.length === 0) {
                 throw new Error("No features provided. Perhaps from an unknown word.");
             }
@@ -1796,7 +1797,7 @@ xhr.send();
                   ecraft2learn.setup_camera(640, 
                                             480, 
                                             function () {
-                                                ecraft2learn[function_name].apply(null, parameters.contents);
+                                                ecraft2learn[function_name].apply(null, parameters.asArray());
                                             });
                   return;
               } else if (function_name === "stop_speech_recognition") {
@@ -1806,7 +1807,7 @@ xhr.send();
                      "eCraft2learn library does not have a function named '" + function_name + "'.");
               return;
           }
-          return ecraft2learn[function_name].apply(null, (parameters.contents || [parameters]));
+          return ecraft2learn[function_name].apply(null, (parameters.asArray() || [parameters]));
       },
 
       read_url: function (url, callback, error_callback, access_token, json_format) {
@@ -2455,7 +2456,7 @@ xhr.send();
       }
       if (!Array.isArray(property_name_or_names) && typeof property_name_or_names !== 'string') {
           // convert from a Snap list to a JavaScript array
-          property_name_or_names = property_name_or_names.contents;
+          property_name_or_names = property_name_or_names.asArray();
       }
       return javascript_to_snap(get_property(recognition.response, property_name_or_names));
   },
