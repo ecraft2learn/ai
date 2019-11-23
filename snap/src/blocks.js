@@ -148,7 +148,7 @@ CustomCommandBlockMorph, SymbolMorph, ToggleButtonMorph, DialMorph*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.blocks = '2019-August-07';
+modules.blocks = '2019-November-12';
 
 var SyntaxElementMorph;
 var BlockMorph;
@@ -618,7 +618,7 @@ SyntaxElementMorph.prototype.getVarNamesDict = function () {
         if (block.selector === 'doSetVar') {
             // add settable object attributes
             dict['~'] = null;
-            dict.my = {
+            dict.my = [{// wrap the submenu into a 1-item array to translate it
                 'anchor' : ['anchor'],
                 'parent' : ['parent'],
                 'name' : ['name'],
@@ -628,10 +628,10 @@ SyntaxElementMorph.prototype.getVarNamesDict = function () {
                 'rotation style' : ['rotation style'],
                 'rotation x' : ['rotation x'],
                 'rotation y' : ['rotation y']
-            };
+            }];
             if (this.world().currentKey === 16) { // shift
-                dict.my['~'] = null;
-                dict.my['microphone modifier'] = ['microphone modifier'];
+                dict.my[0]['~'] = null; // don't forget we're inside an array...
+                dict.my[0]['microphone modifier'] = ['microphone modifier'];
             }
         }
         return dict;
@@ -1138,6 +1138,16 @@ SyntaxElementMorph.prototype.labelPart = function (spec) {
                 }
             );
             part.setContents(1);
+            break;
+        case '%dim':
+            part = new InputSlotMorph(
+                null,
+                true,
+                {
+                    current : ['current']
+                }
+            );
+            // part.setContents( ['current']);
             break;
         case '%rel':
             part = new InputSlotMorph(
@@ -2372,6 +2382,7 @@ SyntaxElementMorph.prototype.endLayout = function () {
     %inst   - white roundish type-in slot with drop-down for instruments
     %ida    - white roundish type-in slot with drop-down for list indices
     %idx    - white roundish type-in slot for indices incl. "any"
+    %dim    - white roundish type-in slot for dimensinos incl. "current"
     %obj    - specially drawn slot for object reporters
     %rel    - chameleon colored rectangular drop-down for relation options
     %spr    - chameleon colored rectangular drop-down for object-names
@@ -6257,7 +6268,8 @@ RingMorph.prototype.vanishForSimilar = function () {
             || (this.parent instanceof RingCommandSlotMorph)) {
         return null;
     }
-    if (block.selector === 'reportGetVar' ||
+    if ((block.selector === 'reportGetVar' &&
+            !contains(this.inputNames(), block.blockSpec)) ||
         // block.selector === 'reportListItem' ||
         block.selector === 'reportJSFunction' ||
         block.selector === 'reportAttributeOf' ||
@@ -8680,7 +8692,7 @@ InputSlotMorph.prototype.menuFromDict = function (
     noEmptyOption,
     enableKeyboard)
 {
-    var key, dial,
+    var key, dial, flag,
     	myself = this,
         menu = new MenuMorph(
             this.userSetContents,
@@ -8722,12 +8734,43 @@ InputSlotMorph.prototype.menuFromDict = function (
        			menu.addLine();
 			    menu.items.push(dial);
             	menu.addLine();
+            } else if (key === '__shout__go__') {
+                // show the green flag symbol
+                flag = new SymbolMorph('flag');
+                flag.size = this.fontSize * 1.5;
+                flag.setColor(new Color(0, 200, 0));
+                menu.addItem(flag, ['__shout__go__']);
             } else if (choices[key] instanceof Object &&
                     !(choices[key] instanceof Array) &&
                     (typeof choices[key] !== 'function')) {
-                menu.addMenu(key, this.menuFromDict(choices[key], true));
+                menu.addMenu(
+                    key,
+                    this.menuFromDict(choices[key],true),
+                    null,  // indicator
+                    true   // verbatim? - don't translate
+                );
+            } else if (choices[key] instanceof Array &&
+                    choices[key][0] instanceof Object &&
+                    typeof choices[key][0] !== 'function') {
+                menu.addMenu(
+                    key,
+                    this.menuFromDict(choices[key][0],true),
+                    null,  // indicator
+                    false  // verbatim? - do translate, if inside an array
+                );
             } else {
-                menu.addItem(key, choices[key]);
+                menu.addItem(
+                    key,
+                    choices[key],
+                    null, // hint
+                    null, // color
+                    null, // bold
+                    null, // italic
+                    null, // doubleClickAction
+                    null, // shortcut
+                    !(choices[key] instanceof Array) &&
+                        typeof choices[key] !== 'function' // verbatim?
+                );
             }
         }
     }
@@ -8749,6 +8792,9 @@ InputSlotMorph.prototype.messagesMenu = function () {
     allNames.forEach(function (name) {
         dict[name] = name;
     });
+    if (this.world().currentKey === 16) { // shift
+        dict.__shout__go__ = ['__shout__go__'];
+    }
     if (allNames.length > 0) {
         dict['~'] = null;
     }
@@ -8780,7 +8826,9 @@ InputSlotMorph.prototype.messagesReceivedMenu = function () {
         }
     });
     allNames.forEach(function (name) {
-        dict[name] = name;
+        if (name !== '__shout__go__') {
+            dict[name] = name;
+        }
     });
     dict['~'] = null;
     dict['new...'] = function () {
@@ -8975,6 +9023,10 @@ InputSlotMorph.prototype.gettablesMenu = function () {
     dict['draggable?'] = ['draggable?'];
     dict.width = ['width'];
     dict.height = ['height'];
+    dict.left = ['left'];
+    dict.right = ['right'];
+    dict.top = ['top'];
+    dict.bottom = ['bottom'];
     dict['rotation style'] = ['rotation style'];
     dict['rotation x'] = ['rotation x'];
     dict['rotation y'] = ['rotation y'];
@@ -9015,6 +9067,10 @@ InputSlotMorph.prototype.attributesMenu = function () {
             'size' : ['size'],
             'width': ['width'],
             'height': ['height'],
+            'left' : ['left'],
+            'right' : ['right'],
+            'top' : ['top'],
+            'bottom' : ['bottom'],
             'volume' : ['volume'],
             'balance' : ['balance']
         };
@@ -9025,7 +9081,11 @@ InputSlotMorph.prototype.attributesMenu = function () {
             'volume' : ['volume'],
             'balance' : ['balance'],
             'width': ['width'],
-            'height': ['height']
+            'height': ['height'],
+            'left' : ['left'],
+            'right' : ['right'],
+            'top' : ['top'],
+            'bottom' : ['bottom']
         };
     }
     varNames = obj.variables.names();
@@ -9042,7 +9102,8 @@ InputSlotMorph.prototype.attributesMenu = function () {
 };
 
 InputSlotMorph.prototype.costumesMenu = function () {
-    var rcvr = this.parentThatIsA(BlockMorph).scriptTarget(),
+    var block = this.parentThatIsA(BlockMorph),
+        rcvr = block.scriptTarget(),
         dict,
         allNames = [];
     if (rcvr instanceof SpriteMorph) {
@@ -9050,7 +9111,9 @@ InputSlotMorph.prototype.costumesMenu = function () {
     } else { // stage
         dict = {Empty : ['Empty']};
     }
-    dict.current = ['current'];
+    if (block.selector !== 'doSwitchToCostume') {
+        dict.current = ['current'];
+    }
     rcvr.costumes.asArray().forEach(function (costume) {
         allNames = allNames.concat(costume.name);
     });
@@ -10979,8 +11042,9 @@ MultiArgMorph.prototype.fixArrowsLayout = function () {
         arrows = this.arrows(),
         leftArrow = arrows.children[0],
         rightArrow = arrows.children[1],
+        inpCount = this.inputs().length,
         dim = new Point(rightArrow.width() / 2, rightArrow.height());
-    if (this.inputs().length < (this.minInputs + 1)) {
+    if (inpCount < (this.minInputs + 1)) { // hide left arrow
         if (label) {
             label.hide();
         }
@@ -10989,11 +11053,15 @@ MultiArgMorph.prototype.fixArrowsLayout = function () {
             arrows.position().subtract(new Point(dim.x, 0))
         );
         arrows.setExtent(dim);
+    } else if (this.is3ArgRingInHOF() && inpCount > 2) { // hide right arrow
+        rightArrow.hide();
+        arrows.setExtent(dim);
     } else {
         if (label) {
             label.show();
         }
         leftArrow.show();
+        rightArrow.show();
         rightArrow.setPosition(leftArrow.topCenter());
         arrows.bounds.corner = rightArrow.bottomRight().copy();
     }
@@ -11017,7 +11085,6 @@ MultiArgMorph.prototype.addInput = function (contents) {
     var i, name,
         newPart = this.labelPart(this.slotSpec),
         idx = this.children.length - 1;
-    // newPart.alpha = this.alpha ? 1 : (1 - this.alpha) / 2;
     if (contents) {
         newPart.setContents(contents);
     } else if (this.elementSpec === '%scriptVars' ||
@@ -11034,7 +11101,15 @@ MultiArgMorph.prototype.addInput = function (contents) {
         }
         newPart.setContents(name);
     } else if (contains(['%parms', '%ringparms'], this.elementSpec)) {
-        newPart.setContents('#' + idx);
+        if (this.is3ArgRingInHOF() && idx < 4) {
+            newPart.setContents([
+                localize('value'),
+                localize('index'),
+                localize('list')
+            ][idx - 1]);
+        } else {
+            newPart.setContents('#' + idx);
+        }
     }
     newPart.parent = this;
     this.children.splice(idx, 0, newPart);
@@ -11056,6 +11131,33 @@ MultiArgMorph.prototype.removeInput = function () {
         }
     }
     this.fixLayout();
+};
+
+MultiArgMorph.prototype.is3ArgRingInHOF = function () {
+    // answer true if I am embedded into a ring inside a HOF block
+    // that supports 3 parameters ("item, idx, data")
+    // of which there are currently only MAP, KEEP and FIND
+    // and their atomic counterparts
+    var ring = this.parent,
+        block;
+    if (ring) {
+        block = ring.parent;
+        if (block instanceof ReporterBlockMorph) {
+            return block.inputs()[0] === ring &&
+                contains(
+                    [
+                        'reportMap',
+                        'reportAtomicMap',
+                        'reportKeep',
+                        'reportAtomicKeep',
+                        'reportFindFirst',
+                        'reportAtomicFindFirst'
+                    ],
+                    block.selector
+                );
+        }
+    }
+    return false;
 };
 
 // MultiArgMorph events:

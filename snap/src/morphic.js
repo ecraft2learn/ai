@@ -760,12 +760,23 @@
     events:
 
     Whenever the user presses a key on the keyboard while a text element
-    is being edited, a
+    is being edited, first a
 
         reactToKeystroke(event)
 
     is escalated up its parent chain, the "event" parameter being the
     original one received by the World.
+
+    Whenever the input changes, by adding or removing one or more characters,
+    an additional
+
+        reactToInput(event)
+
+    is escalated up its parent chain, the "event" parameter again being the
+    original one received by the World or by the IME element.
+
+    Note that the "reactToKeystroke" event gets triggered before the input
+    changes, and thus befgore the "reactToInput" event fires.
 
     Once the user has completed the edit, the following events are
     dispatched:
@@ -1158,6 +1169,7 @@
     Michael Ball found and fixed a longstanding scrolling bug.
     Brian Harvey contributed to the design and implementation of submenus.
     Ken Kahn contributed to Chinese keboard entry and Android support.
+    Brian Broll contributed clickable URLs in text elements.
 
     - Jens Mönig
 */
@@ -1166,7 +1178,7 @@
 
 /*global window, HTMLCanvasElement, FileReader, Audio, FileList, Map*/
 
-var morphicVersion = '2019-August-06';
+var morphicVersion = '2019-November-12';
 var modules = {}; // keep track of additional loaded modules
 var useBlurredShadows = getBlurredShadowSupport(); // check for Chrome-bug
 
@@ -1311,19 +1323,52 @@ function isWordChar(aCharacter) {
     return aCharacter.match(/[A-zÀ-ÿ0-9]/);
 }
 
-function newCanvas(extentPoint, nonRetina) {
+function isURLChar(aCharacter) {
+    return aCharacter.match(/[A-z0-9./:?&_+%-]/);
+}
+
+function isURL(text) {
+    return /^https?:\/\//.test(text);
+}
+
+function newCanvas(extentPoint, nonRetina, recycleMe) {
     // answer a new empty instance of Canvas, don't display anywhere
     // nonRetina - optional Boolean "false"
     // by default retina support is automatic
+    // optional existing canvas to be used again
     var canvas, ext;
-    ext = extentPoint || {x: 0, y: 0};
-    canvas = document.createElement('canvas');
-    canvas.width = ext.x;
-    canvas.height = ext.y;
+    nonRetina = nonRetina || false;
+    ext = (extentPoint ||
+            (recycleMe ? new Point(recycleMe.width, recycleMe.height)
+                : new Point(0, 0))).floor();
+    if (recycleMe && (recycleMe.isRetinaEnabled || false) !== nonRetina &&
+            ext.x === recycleMe.width && ext.y === recycleMe.height) {
+        canvas = recycleMe;
+        canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+        return canvas;
+    } else {
+        canvas = document.createElement('canvas');
+        canvas.width = ext.x;
+        canvas.height = ext.y;
+    }
     if (nonRetina && canvas.isRetinaEnabled) {
         canvas.isRetinaEnabled = false;
     }
     return canvas;
+}
+
+function copyCanvas(aCanvas) {
+    // answer a deep copy of a canvas element respecting its retina status
+    var c;
+    if (aCanvas && aCanvas.width && aCanvas.height) {
+        c = newCanvas(
+            new Point(aCanvas.width, aCanvas.height),
+            !aCanvas.isRetinaEnabled
+        );
+        c.getContext("2d").drawImage(aCanvas, 0, 0);
+        return c;
+    }
+    return aCanvas;
 }
 
 function getMinimumFontHeight() {
@@ -4475,42 +4520,50 @@ Morph.prototype.evaluateString = function (code) {
 // Morph collision detection:
 
 Morph.prototype.isTouching = function (otherMorph) {
-    var oImg = this.overlappingImage(otherMorph),
-        data, len, i;
-    if (!oImg.width || !oImg.height) {
-        return false;
-    }
-    data = oImg.getContext('2d')
-        .getImageData(1, 1, oImg.width, oImg.height)
-        .data;
-    len = data.length;
-    for(i = 3; i < len; i += 4) {
-        if (data[i] !== 0) {return true; }
+    var data = this.overlappingPixels(otherMorph),
+        len, i;
+
+    if (!data) {return false; }
+    len = data[0].length;
+    for (i = 3; i < len; i += 4) {
+        if (data[0][i] && data[1][i]) {return true; }
     }
     return false;
 };
 
-Morph.prototype.overlappingImage = function (otherMorph) {
+Morph.prototype.overlappingPixels = function (otherMorph) {
     var fb = this.fullBounds(),
         otherFb = otherMorph.fullBounds(),
         oRect = fb.intersect(otherFb),
-        oImg = newCanvas(oRect.extent()),
-        ctx = oImg.getContext('2d');
-    if (oRect.width() < 1 || oRect.height() < 1) {
-        return newCanvas(new Point(1, 1));
+        thisImg, thatImg;
+
+    if (oRect.width() < 1 || oRect.height() < 1 ||
+        !this.image || !otherMorph.image ||
+        !this.image.width || !this.image.height ||
+        !otherMorph.image.width || !otherMorph.image.height
+    ) {
+        return false;
     }
-    ctx.drawImage(
-        this.fullImage(),
-        oRect.origin.x - fb.origin.x,
-        oRect.origin.y - fb.origin.y
-    );
-    ctx.globalCompositeOperation = 'source-in';
-    ctx.drawImage(
-        otherMorph.fullImage(),
-        otherFb.origin.x - oRect.origin.x,
-        otherFb.origin.y - oRect.origin.y
-    );
-    return oImg;
+    thisImg = this.fullImage();
+    thatImg = otherMorph.fullImage();
+    if (thisImg.isRetinaEnabled !== thatImg.isRetinaEnabled) {
+        thisImg = normalizeCanvas(thisImg, true);
+        thatImg = normalizeCanvas(thatImg, true);
+    }
+    return [
+        thisImg.getContext("2d").getImageData(
+            oRect.left() - this.left(),
+            oRect.top() - this.top(),
+            oRect.width(),
+            oRect.height()
+        ).data,
+        thatImg.getContext("2d").getImageData(
+            oRect.left() - otherMorph.left(),
+            oRect.top() - otherMorph.top(),
+            oRect.width(),
+            oRect.height()
+        ).data
+    ];
 };
 
 // ShadowMorph /////////////////////////////////////////////////////////
@@ -4864,9 +4917,11 @@ PenMorph.prototype.changed = function () {
 
 // PenMorph display:
 
-PenMorph.prototype.drawNew = function (facing) {
+PenMorph.prototype.drawNew = function (facing, recycleImage) {
     // my orientation can be overridden with the "facing" parameter to
     // implement Scratch-style rotation styles
+    // if a recycleImage canvas is given, it will be reused
+    // instead of creating a new one
 
     var context, start, dest, left, right, len,
         direction = facing || this.heading;
@@ -4875,7 +4930,8 @@ PenMorph.prototype.drawNew = function (facing) {
         this.wantsRedraw = true;
         return;
     }
-    this.image = newCanvas(this.extent());
+
+    this.image = newCanvas(this.extent(), null, recycleImage);
     context = this.image.getContext('2d');
     len = this.width() / 2;
     start = this.center().subtract(this.bounds.origin);
@@ -5534,6 +5590,10 @@ CursorMorph.prototype.initializeTextarea = function () {
         myself.gotoSlot(textarea.selectionStart);
 
         myself.updateTextAreaPosition();
+
+        // the "reactToInput" event gets triggered AFTER "reactToKeystroke"
+        myself.target.escalateEvent('reactToInput', event);
+
     });
 
     this.textarea.addEventListener('keyup', function (event) {
@@ -8134,7 +8194,8 @@ MenuMorph.prototype.addItem = function (
     bold, // bool
     italic, // bool
     doubleClickAction, // optional, when used as list contents
-    shortcut // optional string, icon (Morph or Canvas) or tuple [icon, string]
+    shortcut, // optional string, icon (Morph or Canvas) or tuple [icon, string]
+    verbatim // optional bool, don't translate if true
 ) {
     /*
     labelString is normally a single-line string. But it can also be one
@@ -8145,22 +8206,45 @@ MenuMorph.prototype.addItem = function (
         * a tuple of format: [icon, string]
     */
     this.items.push([
-        localize(labelString || 'close'),
+        verbatim ? labelString || 'close' : localize(labelString || 'close'),
         action || nop,
         hint,
         color,
         bold || false,
         italic || false,
         doubleClickAction,
-        shortcut]);
+        shortcut,
+        verbatim]);
 };
 
-MenuMorph.prototype.addMenu = function (label, aMenu, indicator) {
-    this.addPair(label, aMenu, isNil(indicator) ? '\u25ba' : indicator);
+MenuMorph.prototype.addMenu = function (label, aMenu, indicator, verbatim) {
+    this.addPair(
+        label,
+        aMenu,
+        isNil(indicator) ? '\u25ba' : indicator,
+        null,
+        verbatim // don't translate
+    );
 };
 
-MenuMorph.prototype.addPair = function (label, action, shortcut, hint) {
-    this.addItem(label, action, hint, null, null, null, null, shortcut);
+MenuMorph.prototype.addPair = function (
+    label,
+    action,
+    shortcut,
+    hint,
+    verbatim // don't translate
+) {
+    this.addItem(
+        label,
+        action,
+        hint,
+        null,
+        null,
+        null,
+        null,
+        shortcut,
+        verbatim
+    );
 };
 
 MenuMorph.prototype.addLine = function (width) {
@@ -8637,6 +8721,7 @@ StringMorph.prototype.init = function (
     this.isBold = bold || false;
     this.isItalic = italic || false;
     this.isEditable = false;
+    this.enableLinks = false; // set to "true" if I can contain clickable URLs
     this.isNumeric = isNumeric || false;
     this.isPassword = false;
     this.shadowOffset = shadowOffset || new Point(0, 0);
@@ -9150,6 +9235,33 @@ StringMorph.prototype.mouseClickLeft = function (pos) {
             cursor.gotoPos(pos);
         }
         this.currentlySelecting = true;
+    } else if (this.enableLinks) {
+        var slot = this.slotAt(pos),
+            clickedText,
+            startMark,
+            endMark;
+
+        if (slot === this.text.length) {
+            slot -= 1;
+        }
+
+        startMark = slot;
+        while (startMark > 1 && isURLChar(this.text[startMark-1])) {
+            startMark -= 1;
+        }
+
+        endMark = slot;
+        while (endMark < this.text.length - 1 &&
+                isURLChar(this.text[endMark + 1])) {
+            endMark += 1;
+        }
+
+        clickedText = this.text.substring(startMark, endMark + 1);
+        if (isURL(clickedText)) {
+            window.open(clickedText, '_blank');
+        } else {
+            this.escalateEvent('mouseClickLeft', pos);
+        }
     } else {
         this.escalateEvent('mouseClickLeft', pos);
     }
@@ -9320,6 +9432,7 @@ TextMorph.prototype.init = function (
     this.maxLineWidth = 0;
     this.backgroundColor = null;
     this.isEditable = false;
+    this.enableLinks = false; // set to "true" if I can contain clickable URLs
 
     //additional properties for ad-hoc evaluation:
     this.receiver = null;
@@ -9557,11 +9670,13 @@ TextMorph.prototype.slotAt = function (aPoint) {
     // in account how far from the middle of the character it is,
     // so the cursor can be moved accordingly
 
-    var charX = 0,
+    var charX,
         row = 0,
         col = 0,
+        columnLength,
         shadowHeight = Math.abs(this.shadowOffset.y),
-        context = this.image.getContext('2d');
+        context = this.image.getContext('2d'),
+        textWidth;
 
     while (aPoint.y - this.top() >
             ((fontHeight(this.fontSize) + shadowHeight) * row)) {
@@ -9569,7 +9684,16 @@ TextMorph.prototype.slotAt = function (aPoint) {
     }
     row = Math.max(row, 1);
 
-    while (aPoint.x - this.left() > charX) {
+    textWidth = context.measureText(this.lines[row - 1]).width;
+    if (this.alignment === 'right') {
+        charX = this.width() - textWidth;
+    } else if (this.alignment === 'center') {
+        charX = (this.width() - textWidth) / 2;
+    } else { // 'left'
+        charX = 0;
+    }
+    columnLength = this.lines[row - 1].length;
+    while (col < columnLength - 2 && aPoint.x - this.left() > charX) {
         charX += context.measureText(this.lines[row - 1][col]).width;
         col += 1;
     }

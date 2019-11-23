@@ -46,6 +46,7 @@
         StageHandleMorph
         PaletteHandleMorph
         CamSnapshotDialogMorph
+        SoundRecorderDialogMorph
 
 
     credits
@@ -55,12 +56,14 @@
     Ian Reynolds contributed handling and visualization of sounds
     Michael Ball contributed the LibraryImportDialogMorph and countless
     utilities to load libraries from relative urls
+    Bernat Romagosa contributed more things than I can mention,
+    including interfacing to the camera and microphone
 
 */
 
 /*global modules, Morph, SpriteMorph, SyntaxElementMorph, Color, Cloud,
 ListWatcherMorph, TextMorph, newCanvas, useBlurredShadows, VariableFrame,
-StringMorph, Point, MenuMorph, morphicVersion, DialogBoxMorph,normalizeCanvas,
+StringMorph, Point, MenuMorph, morphicVersion, DialogBoxMorph, normalizeCanvas,
 ToggleButtonMorph, contains, ScrollFrameMorph, StageMorph, PushButtonMorph, sb,
 InputFieldMorph, FrameMorph, Process, nop, SnapSerializer, ListMorph, detect,
 AlignmentMorph, TabMorph, Costume, MorphicPreferences, Sound, BlockMorph,
@@ -71,11 +74,12 @@ CommentMorph, CommandBlockMorph, BooleanSlotMorph, RingReporterSlotMorph,
 BlockLabelPlaceHolderMorph, Audio, SpeechBubbleMorph, ScriptFocusMorph,
 XML_Element, WatcherMorph, BlockRemovalDialogMorph, saveAs, TableMorph,
 isSnapObject, isRetinaEnabled, disableRetinaSupport, enableRetinaSupport,
-isRetinaSupported, SliderMorph, Animation, BoxMorph, MediaRecorder*/
+isRetinaSupported, SliderMorph, Animation, BoxMorph, MediaRecorder,
+BlockEditorMorph, BlockDialogMorph*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.gui = '2019-August-08';
+modules.gui = '2019-November-19';
 
 // Declarations
 
@@ -91,6 +95,7 @@ var JukeboxMorph;
 var StageHandleMorph;
 var PaletteHandleMorph;
 var CamSnapshotDialogMorph;
+var SoundRecorderDialogMorph;
 
 // IDE_Morph ///////////////////////////////////////////////////////////
 
@@ -455,7 +460,6 @@ IDE_Morph.prototype.openIn = function (world) {
                         function () {
                             msg = myself.showMessage('Opening project...');
                         },
-                        function () {nop(); }, // yield (bug in Chrome)
                         function () {
                             if (projectData.indexOf('<snapdata') === 0) {
                                 myself.rawOpenCloudDataString(projectData);
@@ -495,7 +499,6 @@ IDE_Morph.prototype.openIn = function (world) {
                         function () {
                             msg = myself.showMessage('Opening project...');
                         },
-                        function () {nop(); }, // yield (bug in Chrome)
                         function () {
                             if (projectData.indexOf('<snapdata') === 0) {
                                 myself.rawOpenCloudDataString(projectData);
@@ -551,6 +554,8 @@ IDE_Morph.prototype.openIn = function (world) {
     } else {
         interpretUrlAnchors.call(this);
     }
+
+    this.warnAboutIE();
 };
 
 // IDE_Morph construction
@@ -2151,6 +2156,19 @@ IDE_Morph.prototype.stopAllScripts = function () {
 };
 
 IDE_Morph.prototype.selectSprite = function (sprite) {
+    // prevent switching to another sprite if a block editor is open
+    // so local blocks of different sprites don't mix
+    if (
+        detect(
+            this.world().children,
+            function (morph) {
+                return morph instanceof BlockEditorMorph ||
+                    morph instanceof BlockDialogMorph;
+            }
+        )
+    ) {
+        return;
+    }
     if (this.currentSprite && this.currentSprite.scripts.focus) {
         this.currentSprite.scripts.focus.stopEditing();
     }
@@ -2637,6 +2655,21 @@ IDE_Morph.prototype.cloudMenu = function () {
             'changeCloudPassword'
         );
     }
+    if (this.hasCloudProject()) {
+        menu.addLine();
+        menu.addItem(
+            'Open in Community Site',
+            function () {
+                var dict = myself.urlParameters();
+                window.open(
+                    myself.cloud.showProjectPath(
+                        dict.Username, dict.ProjectName
+                    ),
+                    '_blank'
+                );
+            }
+        );
+    }
     if (shiftClicked) {
         menu.addLine();
         menu.addItem(
@@ -2706,15 +2739,12 @@ IDE_Morph.prototype.cloudMenu = function () {
                                             'Opening project...'
                                         );
                                     },
-                                    function () {nop(); }, // yield (Chrome)
                                     function () {
                                         myself.rawOpenCloudDataString(
                                             projectData
                                         );
-                                    },
-                                    function () {
                                         msg.destroy();
-                                    }
+                                    },
                                 ]);
                             },
                             myself.cloudError()
@@ -3596,7 +3626,7 @@ IDE_Morph.prototype.aboutSnap = function () {
         module, btn1, btn2, btn3, btn4, licenseBtn, translatorsBtn,
         world = this.world();
 
-    aboutTxt = 'Snap! 5.1.0\nBuild Your Own Blocks\n\n'
+    aboutTxt = 'Snap! 5.3.7\nBuild Your Own Blocks\n\n'
         + 'Copyright \u24B8 2019 Jens M\u00F6nig and '
         + 'Brian Harvey\n'
         + 'jens@moenig.org, bh@cs.berkeley.edu\n\n'
@@ -4304,13 +4334,10 @@ IDE_Morph.prototype.openProjectString = function (str) {
         function () {
             msg = myself.showMessage('Opening project...');
         },
-        function () {nop(); }, // yield (bug in Chrome)
         function () {
             myself.rawOpenProjectString(str);
-        },
-        function () {
             msg.destroy();
-        }
+        },
     ]);
 };
 
@@ -4350,11 +4377,8 @@ IDE_Morph.prototype.openCloudDataString = function (str) {
         function () {
             msg = myself.showMessage('Opening project\n' + size + ' KB...');
         },
-        function () {nop(); }, // yield (bug in Chrome)
         function () {
             myself.rawOpenCloudDataString(str);
-        },
-        function () {
             msg.destroy();
         }
     ]);
@@ -4406,13 +4430,10 @@ IDE_Morph.prototype.openBlocksString = function (str, name, silently) {
         function () {
             msg = myself.showMessage('Opening blocks...');
         },
-        function () {nop(); }, // yield (bug in Chrome)
         function () {
             myself.rawOpenBlocksString(str, name, silently);
-        },
-        function () {
             msg.destroy();
-        }
+        },
     ]);
 };
 
@@ -4453,13 +4474,10 @@ IDE_Morph.prototype.openSpritesString = function (str) {
         function () {
             msg = myself.showMessage('Opening sprite...');
         },
-        function () {nop(); }, // yield (bug in Chrome)
         function () {
             myself.rawOpenSpritesString(str);
-        },
-        function () {
             msg.destroy();
-        }
+        },
     ]);
 };
 
@@ -4495,13 +4513,10 @@ IDE_Morph.prototype.openScriptString = function (str) {
         function () {
             msg = myself.showMessage('Opening script...');
         },
-        function () {nop(); }, // yield (bug in Chrome)
         function () {
             myself.rawOpenScriptString(str);
-        },
-        function () {
             msg.destroy();
-        }
+        },
     ]);
 };
 
@@ -4544,13 +4559,10 @@ IDE_Morph.prototype.openDataString = function (str, name, type) {
         function () {
             msg = myself.showMessage('Opening data...');
         },
-        function () {nop(); }, // yield (bug in Chrome)
         function () {
             myself.rawOpenDataString(str, name, type);
-        },
-        function () {
             msg.destroy();
-        }
+        },
     ]);
 };
 
@@ -5891,6 +5903,19 @@ IDE_Morph.prototype.setCloudURL = function () {
     );
 };
 
+IDE_Morph.prototype.urlParameters = function () {
+    var parameters = location.hash.slice(location.hash.indexOf(':') + 1);
+
+    return this.cloud.parseDict(parameters);
+};
+
+IDE_Morph.prototype.hasCloudProject = function () {
+    var params = this.urlParameters();
+
+    return params.hasOwnProperty('Username') &&
+        params.hasOwnProperty('ProjectName');
+};
+
 // IDE_Morph HTTP data fetching
 
 IDE_Morph.prototype.getURL = function (url, callback, responseType) {
@@ -5981,6 +6006,42 @@ IDE_Morph.prototype.prompt = function (message, callback, choices, key) {
         null,
         choices
     );
+};
+
+// IDE_Morph bracing against IE
+
+IDE_Morph.prototype.warnAboutIE = function () {
+    var dlg, txt;
+    if (this.isIE()) {
+        dlg = new DialogBoxMorph();
+        txt = new TextMorph(
+            'Please do not use Internet Explorer.\n' +
+                'Snap! runs best in a web-standards\n' +
+                'compliant browser',
+            dlg.fontSize,
+            dlg.fontStyle,
+            true,
+            false,
+            'center',
+            null,
+            null,
+            MorphicPreferences.isFlat ? null : new Point(1, 1),
+            new Color(255, 255, 255)
+        );
+
+        dlg.key = 'IE-Warning';
+        dlg.labelString = "Internet Explorer";
+        dlg.createLabel();
+        dlg.addBody(txt);
+        dlg.drawNew();
+        dlg.fixLayout();
+        dlg.popUp(this.world());
+    }
+};
+
+IDE_Morph.prototype.isIE = function () {
+    var ua = navigator.userAgent;
+    return ua.indexOf("MSIE ") > -1 || ua.indexOf("Trident/") > -1;
 };
 
 // ProjectDialogMorph ////////////////////////////////////////////////////
@@ -6393,7 +6454,7 @@ ProjectDialogMorph.prototype.buildFilterField = function () {
     this.body.add(this.magnifyingGlass);
     this.body.add(this.filterField);
 
-    this.filterField.reactToKeystroke = function (evt) {
+    this.filterField.reactToInput = function (evt) {
         var text = this.getValue();
 
         myself.listField.elements =

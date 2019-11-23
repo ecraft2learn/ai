@@ -185,7 +185,7 @@ SnapTranslator.dict.de = {
     'translator_e-mail':
         'jens@moenig.org, jadga.huegle@sap.com', // optional
     'last_changed':
-        '2019-08-07', // this, too, will appear in the Translators tab
+        '2019-11-02', // this, too, will appear in the Translators tab
 
     // GUI
     // control bar:
@@ -353,6 +353,8 @@ SnapTranslator.dict.de = {
         'Hmm...',
     '%img of costume %cst':
         '%img von Kostüm %cst',
+    'new costume %l width %dim height %dim':
+        'neues Kostüm %l Breite %dim Höhe %dim',
     'stretch %cst x: %n y: %n %':
         'strecke %cst x: %n y: %n %',
     'change %eff effect by %n':
@@ -415,6 +417,8 @@ SnapTranslator.dict.de = {
         'Länge',
     'number of channels':
         'Anzahl Kanäle',
+    'new sound %l rate %rate Hz':
+        'neuer Klang %l Abtastrate %rate Hz',
     'play note %note for %n beats':
         'spiele Note %note f\u00fcr %n Schl\u00e4ge',
     'set instrument to %inst':
@@ -811,6 +815,10 @@ SnapTranslator.dict.de = {
         'für jedes %upvar von %l %cla',
     'item':
         'Element',
+    'value':
+        'Wert',
+    'index':
+        'Index',
     'add %s to %l':
         'f\u00fcge %s zu %l hinzu',
     'delete %ida of %l':
@@ -964,6 +972,8 @@ SnapTranslator.dict.de = {
         'Passwort zurücksetzen...',
     'Resend Verification Email...':
         'Bestätigungsmail nochmal senden...',
+    'Open in Community Site':
+        'Projektseite anzeigen',
 
     // settings menu
     'Language...':
@@ -1741,6 +1751,8 @@ SnapTranslator.dict.de = {
     // messages
     'new...':
         'Neu...',
+    '__shout__go__':
+        'grüne Flagge angeklickt',
 
     // math functions
     'abs':
@@ -1863,6 +1875,14 @@ SnapTranslator.dict.de = {
         'Breite',
     'height':
         'Höhe',
+    'left':
+        'Rand links',
+    'right':
+        'Rand rechts',
+    'top':
+        'Rand oben',
+    'bottom':
+        'Rand unten',
 
     // inheritance
     'inherited':

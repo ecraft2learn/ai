@@ -61,7 +61,7 @@ StageMorph, SpriteMorph, StagePrompterMorph, Note, modules, isString, copy,
 isNil, WatcherMorph, List, ListWatcherMorph, alert, console, TableMorph, Color,
 TableFrameMorph, ColorSlotMorph, isSnapObject, Map, newCanvas, Symbol*/
 
-modules.threads = '2019-August-07';
+modules.threads = '2019-November-19';
 
 var ThreadManager;
 var Process;
@@ -727,6 +727,9 @@ Process.prototype.evaluateContext = function () {
     if (isString(exp)) {
         return this[exp].apply(this, this.context.inputs);
     }
+    if (exp instanceof Variable) { // special case for empty reporter rings
+        this.returnValueToParentContext(exp.value);
+    }
     this.popContext(); // default: just ignore it
 };
 
@@ -1048,7 +1051,6 @@ Process.prototype.reify = function (topBlock, parameterNames, isCustomBlock) {
             // and remember the number of detected empty slots
             context.emptySlots = i;
         }
-
     } else {
         context.expression = this.enableLiveCoding ||
             this.enableSingleStepping ? [this.context.expression]
@@ -1116,6 +1118,7 @@ Process.prototype.evaluate = function (
         caller = this.context.parentContext,
         exit,
         runnable,
+        expr,
         parms = args.asArray(),
         i,
         value;
@@ -1158,10 +1161,24 @@ Process.prototype.evaluate = function (
         // assign implicit parameters if there are no formal ones
         if (context.inputs.length === 0) {
             // in case there is only one input
-            // assign it to all empty slots
+            // assign it to all empty slots...
             if (parms.length === 1) {
-                for (i = 1; i <= context.emptySlots; i += 1) {
-                    outer.variables.addVar(i, parms[0]);
+                // ... unless it's an empty reporter ring,
+                // in which special case it gets treated as the ID-function;
+                // experimental feature jens is not at all comfortable with
+                if (!context.emptySlots) {
+                    expr = context.expression;
+                    if (expr instanceof Array &&
+                            expr.length === 1 &&
+                            expr[0].selector &&
+                            expr[0].selector === 'reifyReporter' &&
+                            !expr[0].contents()) {
+                        runnable.expression = new Variable(parms[0]);
+                    }
+                } else {
+                    for (i = 1; i <= context.emptySlots; i += 1) {
+                        outer.variables.addVar(i, parms[0]);
+                    }
                 }
 
             // if the number of inputs matches the number
@@ -1832,26 +1849,27 @@ Process.prototype.reportNumbers = function (start, end) {
     // without blocking the UI
 
     var dta;
-    this.assertType(+start, 'number');
-    this.assertType(+end, 'number');
     if (this.context.accumulator === null) {
+        this.assertType(start, 'number');
+        this.assertType(end, 'number');
         this.context.accumulator = {
             target : new List(),
             end : null,
-            idx : +start
+            idx : +start,
+            step: +end > +start ? +1 : -1
         };
         this.context.accumulator.target.isLinked = true;
         this.context.accumulator.end = this.context.accumulator.target;
     }
     dta = this.context.accumulator;
-    if (dta.idx > +end) {
+    if (dta.step === 1 ? dta.idx > +end : dta.idx < +end) {
         dta.end.rest = new List();
         this.returnValueToParentContext(dta.target.cdr());
         return;
     }
     dta.end.rest = dta.target.cons(dta.idx);
     dta.end = dta.end.rest;
-    dta.idx += 1;
+    dta.idx += dta.step;
     this.pushContext();
 };
 
@@ -1924,6 +1942,12 @@ Process.prototype.doStopAll = function () {
     if (this.homeContext.receiver) {
         stage = this.homeContext.receiver.parentThatIsA(StageMorph);
         if (stage) {
+            if (stage.enableCustomHatBlocks) {
+                stage.threads.pauseCustomHatBlocks =
+                    !stage.threads.pauseCustomHatBlocks;
+            } else {
+                stage.threads.pauseCustomHatBlocks = false;
+            }
             stage.stopAllActiveSounds();
             stage.threads.resumeAll(stage);
             stage.keysPressed = {};
@@ -1942,10 +1966,7 @@ Process.prototype.doStopAll = function () {
         ide = stage.parentThatIsA(IDE_Morph);
         if (ide) {
             ide.controlBar.pauseButton.refresh();
-            ide.nextSteps([ // catch forever loops
-                nop,
-                function () {stage.stopAllActiveSounds(); }
-            ]);
+            ide.controlBar.stopButton.refresh();
         }
     }
 };
@@ -2058,7 +2079,7 @@ Process.prototype.doSetGlobalFlag = function (name, bool) {
         break;
     case 'video capture':
         if (bool) {
-            stage.startVideo();
+            this.startVideo(stage);
         } else {
             stage.stopProjection();
         }
@@ -2078,7 +2099,11 @@ Process.prototype.reportGlobalFlag = function (name) {
     case 'flat line ends':
         return SpriteMorph.prototype.useFlatLineEnds;
     case 'video capture':
-        return !isNil(stage.projectionSource);
+        return !isNil(stage.projectionSource) &&
+            stage.projectionLayer()
+                .getContext('2d')
+                .getImageData(0, 0, 1, 1)
+                .data[3] > 0;
     case 'mirror video':
         return stage.mirrorVideo;
     default:
@@ -2180,16 +2205,16 @@ Process.prototype.doForEach = function (upvar, list, script) {
     // Distinguish between linked and arrayed lists.
 
     var next;
-    this.assertType(list, 'list');
     if (this.context.accumulator === null) {
-	this.context.accumulator = {
-	    source : list,
-	    remaining : list.length(),
+        this.assertType(list, 'list');
+        this.context.accumulator = {
+            source : list,
+            remaining : list.length(),
             idx : 0
-	};
+        };
     }
     if (this.context.accumulator.remaining === 0) {
-	return;
+        return;
     }
     this.context.accumulator.remaining -= 1;
     if (this.context.accumulator.source.isLinked) {
@@ -2213,22 +2238,24 @@ Process.prototype.doFor = function (upvar, start, end, script) {
     // name specified in the "upvar" parameter, so it can be referenced
     // within the script.
 
-    var dta;
-    if (this.context.accumulator === null) {
-        this.context.accumulator = {
-            idx : Math.floor(start),
-            test : start < end ?
-                function () {return this.idx > end; }
-                    : function () {return this.idx < end; },
-            step : start < end ? 1 : -1,
+    var vars = this.context.outerContext.variables,
+        dta = this.context.accumulator;
+    if (dta === null) {
+        this.assertType(start, 'number');
+        this.assertType(end, 'number');
+        dta = this.context.accumulator = {
+            test : +start < +end ?
+                function () {return vars.getVar(upvar) > +end; }
+                    : function () {return vars.getVar(upvar) < +end; },
+            step : +start < +end ? 1 : -1,
             parms : new List() // empty parameters, reusable to avoid GC
         };
+        vars.addVar(upvar);
+        vars.setVar(upvar, Math.floor(+start));
+    } else {
+        vars.changeVar(upvar, dta.step);
     }
-    dta = this.context.accumulator;
-    this.context.outerContext.variables.addVar(upvar);
-    this.context.outerContext.variables.setVar(upvar, dta.idx);
     if (dta.test()) {return; }
-    dta.idx += dta.step;
     this.pushContext('doYield');
     this.pushContext();
     this.evaluate(script, dta.parms, true);
@@ -2262,9 +2289,9 @@ Process.prototype.reportMap = function (reporter, list) {
     // #3 - optional | source list
 
     var next, index, parms;
-    this.assertType(list, 'list');
     if (list.isLinked) {
         if (this.context.accumulator === null) {
+            this.assertType(list, 'list');
             this.context.accumulator = {
                 source : list,
                 idx : 1,
@@ -2296,6 +2323,7 @@ Process.prototype.reportMap = function (reporter, list) {
         this.context.accumulator.source = this.context.accumulator.source.cdr();
     } else { // arrayed
         if (this.context.accumulator === null) {
+            this.assertType(list, 'list');
             this.context.accumulator = [];
         } else if (this.context.inputs.length > 2) {
             this.context.accumulator.push(this.context.inputs.pop());
@@ -2331,9 +2359,9 @@ Process.prototype.reportKeep = function (predicate, list) {
     // #3 - optional | source list
 
     var next, index, parms;
-    this.assertType(list, 'list');
     if (list.isLinked) {
         if (this.context.accumulator === null) {
+            this.assertType(list, 'list');
             this.context.accumulator = {
                 source : list,
                 idx: 1,
@@ -2367,6 +2395,7 @@ Process.prototype.reportKeep = function (predicate, list) {
         next = this.context.accumulator.source.at(1);
     } else { // arrayed
         if (this.context.accumulator === null) {
+            this.assertType(list, 'list');
             this.context.accumulator = {
                 idx : 0,
                 target : []
@@ -2410,9 +2439,9 @@ Process.prototype.reportFindFirst = function (predicate, list) {
     // #3 - optional | source list
 
     var next, index, parms;
-    this.assertType(list, 'list');
     if (list.isLinked) {
         if (this.context.accumulator === null) {
+            this.assertType(list, 'list');
             this.context.accumulator = {
                 source : list,
                 idx : 1,
@@ -2438,6 +2467,7 @@ Process.prototype.reportFindFirst = function (predicate, list) {
         next = this.context.accumulator.source.at(1);
     } else { // arrayed
         if (this.context.accumulator === null) {
+            this.assertType(list, 'list');
             this.context.accumulator = {
                 idx : 0,
                 current : null
@@ -2813,6 +2843,135 @@ Process.prototype.encodeSound = function (samples, rate) {
     return source;
 };
 
+// Process first-class sound creation from samples, interpolated
+
+Process.prototype.reportNewSoundFromSamples = function (samples, rate) {
+    // this method inspired by: https://github.com/Jam3/audiobuffer-to-wav
+    // https://www.russellgood.com/how-to-convert-audiobuffer-to-audio-file
+
+    var audio, blob, reader,
+        myself = this;
+
+    if (isNil(this.context.accumulator)) {
+        this.assertType(samples, 'list'); // check only the first time
+        this.context.accumulator = {
+            audio: null
+        };
+        audio = new Audio();
+        blob = new Blob(
+            [
+                this.audioBufferToWav(
+                    this.encodeSound(samples, rate || 44100).audioBuffer
+                )
+            ],
+            {type: "audio/wav"}
+        );
+        reader = new FileReader();
+        reader.onload = function () {
+            audio.src = reader.result;
+            myself.context.accumulator.audio = audio;
+        };
+        reader.readAsDataURL(blob);
+    }
+    if (this.context.accumulator.audio) {
+        return new Sound(
+            this.context.accumulator.audio,
+            this.blockReceiver().newSoundName(localize('sound'))
+        );
+    }
+    this.pushContext('doYield');
+    this.pushContext();
+};
+
+Process.prototype.audioBufferToWav = function (buffer, opt) {
+    var numChannels = buffer.numberOfChannels,
+        sampleRate = buffer.sampleRate,
+        format = (opt || {}).float32 ? 3 : 1,
+        bitDepth = format === 3 ? 32 : 16,
+        result;
+
+    function interleave(inputL, inputR) {
+        var length = inputL.length + inputR.length,
+            result = new Float32Array(length),
+            index = 0,
+            inputIndex = 0;
+
+        while (index < length) {
+            result[index++] = inputL[inputIndex];
+            result[index++] = inputR[inputIndex];
+            inputIndex += 1;
+        }
+        return result;
+    }
+
+    if (numChannels === 2) {
+        result = interleave(
+            buffer.getChannelData(0),
+            buffer.getChannelData(1)
+        );
+    } else {
+        result = buffer.getChannelData(0);
+    }
+    return this.encodeWAV(result, format, sampleRate, numChannels, bitDepth);
+};
+
+Process.prototype.encodeWAV = function (
+    samples,
+    format,
+    sampleRate,
+    numChannels,
+    bitDepth
+) {
+    var bytesPerSample = bitDepth / 8,
+        blockAlign = numChannels * bytesPerSample,
+        buffer = new ArrayBuffer(44 + samples.length * bytesPerSample),
+        view = new DataView(buffer);
+
+    function writeFloat32(output, offset, input) {
+        for (var i = 0; i < input.length; i += 1, offset += 4) {
+            output.setFloat32(offset, input[i], true);
+        }
+    }
+
+    function floatTo16BitPCM(output, offset, input) {
+        var i, s;
+        for (i = 0; i < input.length; i += 1, offset += 2) {
+            s = Math.max(-1, Math.min(1, input[i]));
+            output.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+        }
+    }
+
+    function writeString(view, offset, string) {
+        for (var i = 0; i < string.length; i += 1) {
+            view.setUint8(offset + i, string.charCodeAt(i));
+        }
+    }
+
+    writeString(view, 0, 'RIFF'); // RIFF identifier
+    // RIFF chunk length:
+    view.setUint32(4, 36 + samples.length * bytesPerSample, true);
+    writeString(view, 8, 'WAVE'); // RIFF type
+    writeString(view, 12, 'fmt '); // format chunk identifier
+    view.setUint32(16, 16, true); // format chunk length
+    view.setUint16(20, format, true); // sample format (raw)
+    view.setUint16(22, numChannels, true); // channel count
+    view.setUint32(24, sampleRate, true); // sample rate
+    // byte rate (sample rate * block align):
+    view.setUint32(28, sampleRate * blockAlign, true);
+    // block align (channel count * bytes per sample):
+    view.setUint16(32, blockAlign, true);
+    view.setUint16(34, bitDepth, true); // bits per sample
+    writeString(view, 36, 'data'); // data chunk identifier
+    // data chunk length:
+    view.setUint32(40, samples.length * bytesPerSample, true);
+    if (format === 1) { // Raw PCM
+        floatTo16BitPCM(view, 44, samples);
+    } else {
+        writeFloat32(view, 44, samples);
+    }
+    return buffer;
+};
+
 // Process audio input (interpolated)
 
 Process.prototype.reportAudio = function (choice) {
@@ -2968,7 +3127,7 @@ Process.prototype.doBroadcast = function (message) {
 
     var stage = this.homeContext.receiver.parentThatIsA(StageMorph),
         thisObj,
-        msg = message,
+        msg = this.inputOption(message),
         trg,
         rcvrs,
         myself = this,
@@ -4267,6 +4426,14 @@ Process.prototype.reportAttributeOf = function (attribute, name) {
                 }
                 this.assertType(thatObj, 'sprite');
                 return thatObj.height() / stage.scale;
+            case 'left':
+                return thatObj.xLeft();
+            case 'right':
+                return thatObj.xRight();
+            case 'top':
+                return thatObj.yTop();
+            case 'bottom':
+                return thatObj.yBottom();
             }
         }
     }
@@ -4293,8 +4460,9 @@ Process.prototype.reportGet = function (query) {
                         each !== thisObj;
                 })
             );
-        case 'parts':
-            return new List(thisObj.parts || []);
+        case 'parts': // shallow copy to disable side-effects
+            return new List((thisObj.parts || [])
+                .map(function (each) {return each; }));
         case 'anchor':
             return thisObj.anchor || '';
         case 'parent':
@@ -4343,6 +4511,14 @@ Process.prototype.reportGet = function (query) {
             return thisObj.xCenter();
         case 'center y':
             return thisObj.yCenter();
+        case 'left':
+            return thisObj.xLeft();
+        case 'right':
+            return thisObj.xRight();
+        case 'top':
+            return thisObj.yTop();
+        case 'bottom':
+            return thisObj.yBottom();
         case 'name':
             return thisObj.name;
         case 'stage':
@@ -4690,6 +4866,20 @@ Process.prototype.reportVideo = function(attribute, name) {
     return -1;
 };
 
+Process.prototype.startVideo = function(stage) {
+    // interpolated
+    if (this.reportGlobalFlag('video capture')) {return; }
+    if (!stage.projectionSource || !stage.projectionSource.stream) {
+        // wait until video is turned on
+        if (!this.context.accumulator) {
+            this.context.accumulator = true; // started video
+            stage.startVideo();
+        }
+    }
+    this.pushContext('doYield');
+    this.pushContext();
+};
+
 // Process code mapping
 
 /*
@@ -4910,6 +5100,11 @@ Process.prototype.reportNewCostumeStretched = function (name, xP, yP) {
     if (!cst) {
         return new Costume();
     }
+    if (!isFinite(+xP * +yP) || isNaN(+xP * +yP)) {
+        throw new Error(
+            'expecting a finite number\nbut getting Infinity or NaN'
+        );
+    }
     return cst.stretched(
         Math.round(cst.width() * +xP / 100),
         Math.round(cst.height() * +yP / 100)
@@ -4933,17 +5128,35 @@ Process.prototype.costumeNamed = function (name) {
     );
 };
 
-Process.prototype.reportNewCostume = function (pixels, width, height) {
-    // private
+Process.prototype.reportNewCostume = function (pixels, width, height, name) {
+    var rcvr, stage, canvas, ctx, src, dta, i, k, px;
+
+    this.assertType(pixels, 'list');
+    if (this.inputOption(width) === 'current') {
+        rcvr = this.blockReceiver();
+        stage = rcvr.parentThatIsA(StageMorph);
+        width = rcvr.costume ? rcvr.costume.width() : stage.dimensions.x;
+    }
+    if (this.inputOption(height) === 'current') {
+        rcvr = rcvr || this.blockReceiver();
+        stage = stage || rcvr.parentThatIsA(StageMorph);
+        height = rcvr.costume ? rcvr.costume.height() : stage.dimensions.y;
+    }
     width = Math.abs(Math.floor(+width));
     height = Math.abs(Math.floor(+height));
+    if (width <= 0 || height <= 0) {
+        return new Costume();
+    }
+    if (!isFinite(width * height) || isNaN(width * height)) {
+       throw new Error(
+           'expecting a finite number\nbut getting Infinity or NaN'
+       );
+    }
 
-    var canvas = newCanvas(new Point(width, height), true),
-        ctx = canvas.getContext('2d'),
-        src = pixels.asArray(),
-        dta = ctx.createImageData(width, height),
-        i, k, px;
-
+    canvas = newCanvas(new Point(width, height), true);
+    ctx = canvas.getContext('2d');
+    src = pixels.asArray();
+    dta = ctx.createImageData(width, height);
     for (i = 0; i < src.length; i += 1) {
         px = src[i].asArray();
         for (k = 0; k < 4; k += 1) {
@@ -4953,7 +5166,9 @@ Process.prototype.reportNewCostume = function (pixels, width, height) {
     ctx.putImageData(dta, 0, 0);
     return new Costume(
         canvas,
-        this.blockReceiver().newCostumeName(localize('snap'))
+        name || (rcvr || this.blockReceiver()).newCostumeName(
+            localize('costume')
+        )
     );
 };
 
@@ -5707,10 +5922,8 @@ VariableFrame.prototype.root = function () {
 };
 
 VariableFrame.prototype.find = function (name) {
-/*
-    answer the closest variable frame containing
-    the specified variable. otherwise throw an exception.
-*/
+    // answer the closest variable frame containing
+    // the specified variable. otherwise throw an exception.
     var frame = this.silentFind(name);
     if (frame) {return frame; }
     throw new Error(
@@ -5721,11 +5934,9 @@ VariableFrame.prototype.find = function (name) {
 };
 
 VariableFrame.prototype.silentFind = function (name) {
-/*
-    answer the closest variable frame containing
-    the specified variable. Otherwise return null.
-*/
-    if (this.vars[name] !== undefined) {
+    // answer the closest variable frame containing
+    // the specified variable. Otherwise return null.
+    if (this.vars[name] instanceof Variable) {
         return this;
     }
     if (this.parentFrame) {
