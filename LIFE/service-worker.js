@@ -10,6 +10,7 @@ const files_to_cache = [
 "/ai/ecraft2learn.js",
 "/ai/js/tfjs.js",
 "/ai/js/train.js",
+"/ai/js/invoke_callback.js",
 "/ai/js/train-report-results.js",
 "/ai/js/load-scripts.js",
 "/ai/LIFE/encoder/universal-sentence-encoder.js",

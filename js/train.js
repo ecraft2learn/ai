@@ -671,37 +671,6 @@ const shape_of_data = (data) => {
       return [data.length].concat(shape_of_data(data[0]));
    }
 };
- 
-let outstanding_callbacks = [];
-
-const record_callbacks = (...args) => {
-    args.forEach(function (callback) {
-        if (typeof callback === 'function' && outstanding_callbacks.indexOf(callback) < 0) {
-            outstanding_callbacks.push(callback);
-        }
-    });
-};
-
-const invoke_callback = (callback, ...args) => { // any number of additional arguments
-    if (callback && callback.stopped_prematurely) {
-        return;
-    }
-    if (typeof callback === 'function') { 
-        callback.apply(this, args);
-        const index = outstanding_callbacks.indexOf(callback);
-        if (index >= 0) {
-            outstanding_callbacks.splice(index, 1);
-        }
-    }
-    // otherwise no callback provided so ignore it
-};
-
-const stop_all = () => {
-    outstanding_callbacks.forEach(function (callback) {
-        callback.stopped_prematurely = true;
-    });
-    outstanding_callbacks = [];
-};
 
 const hyperparameter_search = (options, datasets, success_callback, error_callback) => {
     let experiment_number = 0;
