@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Realtime communication with WebRTC</title>
+  <meta charset='utf-8'>
+</head>
+
+<body>
+
+  <h1>Realtime communication with WebRTC</h1>
+<p>
+Test using <br>window.webrtc.create_connection_offer(console.log, console.log);
+</p>
+<button id="startButton">Create offer</button>
+<br>
+<p>
+Then in another browser paste this into the 'accept offer' area:
+<br>
+<textarea id="accept-offer" placeholder="Paste offer"></textarea>
+<button id="accept-offer-button">Send</button>
+</p>
+<p>
+Then in the browser that created the offer paste the answer:
+<br>
+<textarea id="accept-answer" placeholder="Paste answer"></textarea>
+<button id="accept-answer-button">Send</button>
+</p>
+<script>
+window.addEventListener('DOMContentLoaded',
+  () => {
+      const startButton = document.querySelector('button#startButton');
+      startButton.onclick = () => {
+        window.webrtc.create_connection_offer(console.log, console.log);
+      };    
+  });
+const accept_offer = document.querySelector('textarea#accept-offer');
+const accept_offer_button = document.querySelector('button#accept-offer-button');
+accept_offer_button.addEventListener('click',
+                                     () => {
+                                         webrtc.accept_connection_offer(accept_offer.value, console.log, console.log);
+                                     });
+const accept_answer = document.querySelector('textarea#accept-answer');
+const accept_answer_button = document.querySelector('button#accept-answer-button');
+accept_answer_button.addEventListener('click',
+                                      () => {
+                                          webrtc.accept_answer(accept_answer.value, console.log, console.log);
+                                      });
+</script>
+<p>
+Then both can set listener to messages:
+<br>
+webrtc.on_message(<listener>);
+</p>
+<p>
+Then<br>
+webrtc.send_data("hello", console.log, console.log);
+</p>
+
+  <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+  <script src="/ai/js/invoke_callback.js"></script>
+  <script src="/ai/js/webrtc.js"></script>
+
+</body>
+
+</html>
