@@ -39,7 +39,7 @@ if (parameters.has('answer')) { // also the default
 const pneumonia = parameters.has('pneumonia');
 let model_name;
 if (pneumonia) {
-	model_name = (mode === 'create model' || mode === 'search') ? "26-11-2019a-pneumonia" : "25-11-2019a-pneumonia";
+	model_name = (mode === 'create model' || mode === 'search') ? "26-11-2019b-pneumonia" : "26-11-2019a-pneumonia";
 } else {
 	model_name = (mode === 'create model' || mode === 'search') ? "27-10-2019a" : "26-10-2019b";
 }
@@ -52,7 +52,7 @@ const model_options = {
     dropout_rate: .5,
     batch_normalization: false,
     shuffle: true,
-    epochs: 5000,
+    epochs: 10000,
     optimizer: (i) => tf.train.rmsprop(2e-4), // tf.train.adamax(1e-5), tf.train.adadelta(),
     regularizer: (i) => tf.regularizers.l2({l2: 1e-3}),
     layer_initializer: (index) => tf.initializers.varianceScaling({}),
@@ -63,7 +63,7 @@ const model_options = {
     testing_fraction: 0,
     validation_fraction: .3,
     stop_if_no_progress_for_n_epochs: 100,
-    number_of_training_repeats: 2,
+    number_of_training_repeats: 10,
     split_data_on_each_experiment: true,
     search: {type: 'randomSearch', // or 'gridSearch' but it triggers an exception
              number_of_experiments: 100,
