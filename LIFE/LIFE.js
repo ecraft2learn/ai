@@ -89,6 +89,9 @@ const respond_to_question = async (the_question, distance_threshold) => {
 };
 
 const setup = () => {
+	const group_of_questions_and_answers = LIFE.sentences_and_answers();
+	group_of_questions = group_of_questions_and_answers.group_of_questions;
+	answers = group_of_questions_and_answers.answers;
     const do_when_group_of_questions_mean_embeddings_available = () => {
     	if (mode === 'old test') {
     		console.log(group_of_questions_mean_embeddings);
@@ -216,9 +219,6 @@ const setup = () => {
 //     	};
 //     	next_question();
 //     };
-    const group_of_questions_and_answers = sentences_and_answers();
-    group_of_questions = group_of_questions_and_answers.group_of_questions;
-    answers = group_of_questions_and_answers.answers;
     use.load().then((model) => {
         embedding_model = model;
 		const test_loss_message = document.createElement('p');
@@ -315,7 +315,7 @@ const add_paragraph = (text) => {
 const add_sample_questions = () => {  
     add_paragraph("<b><i>Here are some sample questions. Try paraphrasing them.</i></b>");
     group_of_questions.forEach((group) => {
-        add_paragraph(group[0]);
+        add_paragraph(group[Math.floor(Math.random()*group.length)]);
     });
 };
 
@@ -532,7 +532,7 @@ const setup_interface =
 const hash_parameters = new URLSearchParams(window.location.hash.slice(1));
 const search_parameters = new URLSearchParams(window.location.search);
 const user_id_for_logs = search_parameters.get('log') || hash_parameters.get('log');
-const pneumonia_questions = search_parameters.get('pneumonia') || hash_parameters.get('pneumonia');
+const pneumonia_questions = search_parameters.has('pneumonia') || hash_parameters.has('pneumonia');
 
 const log = (message) => {
 	if (user_id_for_logs) {
@@ -568,11 +568,7 @@ const initialize = () => {
 
 document.addEventListener('DOMContentLoaded',
 	() => {
-		if (pneumonia_questions) {
-
-		} else {
 			load_local_or_remote_scripts([pneumonia_questions ? "./pneumonia-qa.js" : "./neonatal-qa.js"], null, initialize);
-		}
 	});
 
 return {respond_to_question: respond_to_question};

@@ -4,7 +4,7 @@
 
 "use strict";
 
-const sentences_and_answers = () => {
+LIFE.sentences_and_answers = () => {
     let group_of_questions = [];
     let answers = [];
     group_of_questions.push([ // 0
