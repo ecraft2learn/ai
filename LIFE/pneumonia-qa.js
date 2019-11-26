@@ -143,34 +143,35 @@ LIFE.sentences_and_answers = () => {
     answers.push("Grunting is noisy breathing usually indicating very high effort to get air in the lungs (increased work of breathing). " +
                  "It’s characteristics are different from stridor and wheezing. ");
 
-    group_of_questions.push(["How rapid is rapid breathing? ", // 9
-                             "What rate is considered rapid breathing?",
-                             'How many breaths per minute is considered "rapid"?',
-                             "What is a fast rate of breathing?",
-                             "How do I determine if there is rapid breathing?",
-                             'How often should there be breaths to be treated as "rapid breathing"',
-                             'What is the definition of "rapid breathing"?',
-                             'What rate is considered to be "rapid breathing"?',
-                             'How quick is "rapid breathing"?',
-                             'What is the cut-off rate for "rapid breathing"?']);
-    answers.push("This is age specific. Breathing is considered fast if it is greater than or equal to 50 breaths/minute (infants up to 11 months) " + 
-                 "and 40 breaths/minute (older children 12months to 5 years). " +
-                 "One has to count for a whole minute the number of breaths.");
+    // too much confusion about rapid versus slow breathing so combined
 
-    group_of_questions.push(["How slow is very slow breathing? ", // 10
+    group_of_questions.push(["How fast is rapid breathing? ", // 9
+                             "What rate is considered rapid breathing?",
+                             'How many breaths per minute is considered fast?',
+                             "What is a fast rate of breathing?",
+                             "How do I determine if there is fast breathing?",
+                             'How often should there be breaths to be treated as fast breathing',
+                             'What is the definition of rapid breathing?',
+                             'What rate is considered to be "rapid breathing"?',
+                             'How quick is fast breathing?',
+                             'What is the cut-off rate for rapid breathing?',
+                             "How slow is very slow breathing? ",
                              "What rate is very slow breathing?",
                              'What is considered to be "very slow breathing"?',
                              'How many breaths per minutes counts as "very slow breathing"?',
-                             'How should I determine there is an indication of "very slow breathing"?',
+                             'How should I determine if there is an indication of "very slow breathing"?',
                              '"Very slow breathing" is how many breaths per minute?',
                              'How can I tell if the breathing is so slow to be classified as "very slow breathing"?',
                              'Does "very slow breathing" have a maximum breathing rate?',
                              'What exactly is meant be "very slow breathing"?',
                              'What counts as "very slow breathing"?']);
-    answers.push("Very slow breathing in all children less than 5 years is breathing less than 12 breaths per minute " + 
-                 "(which requires that artificial/assisted ventilation is performed with a bag/mask device).");
+    answers.push("Breathing is considered fast if it is greater than or equal to 50 breaths/minute (infants up to 11 months) " + 
+                 "and 40 breaths/minute (older children 12 months to 5 years). " +
+                 "Very slow breathing in all children less than 5 years is breathing less than 12 breaths per minute " + 
+                 "(which requires that artificial/assisted ventilation is performed with a bag/mask device). " +
+                 "One has to count for a whole minute the number of breaths.");
 
-    group_of_questions.push(["What is indrawing? ", // 11
+    group_of_questions.push(["What is indrawing? ", // 10
                              "Can you tell me what indrawing is please?",
                              "How can I assess indrawing?",
                              "Please remind me about indrawing.",
@@ -189,7 +190,7 @@ LIFE.sentences_and_answers = () => {
                  "Sometimes there may also be indrawing in between the ribs (intercostal recession) during breathing in. " + 
                  "Both lower chest and intercostal indrawing are abnormal, and are signs of difficulty in breathing/increased work of breathing.");
 
-    group_of_questions.push(["How can I tell if breathing is deep? ", // 12
+    group_of_questions.push(["How can I tell if breathing is deep? ", // 11
                              "What should I look for to determine if the breathing is deep?",
                              "How can I tell if there's deep breathing?",
                              'How am I able to tell if there is "deep breathing"?',
@@ -203,7 +204,8 @@ LIFE.sentences_and_answers = () => {
                  "is interpreted as excessive chest wall movement (inspiration). " + 
                  "A better way to put it is how one breaths after running for a 100 meters. ");
 
-    group_of_questions.push(["How fast is a very fast large pulse? ", // 13
+    // fast and slow pulse rates were confused so combined
+    group_of_questions.push(["How fast is a very fast large pulse? ", // 12
                              "What rate is considered a very fast large pulse?",
                              'How many pulses per minute is considered "a very fast large pulse"?',
                              'How should I determine if there is a very fast large pulse?',
@@ -212,11 +214,8 @@ LIFE.sentences_and_answers = () => {
                              '"A very fast large pulse" has what rate?',
                              'What rate cut-off should I use to decide if there is a very fast large pulse?',
                              'When should I decide that a child has "a very fast large pulse"?',
-                             "What decides whether a rate is a very fast large pulse?"]);
-    answers.push("This is age specific. For infants, this is a pulse rate of equal to or greater than 180/minute " + 
-                 "and for children 1-5 years of greater than 160/minute");
-
-    group_of_questions.push(["How slow is a very slow large pulse? ", // 14
+                             "What decides whether a rate is a very fast large pulse?",
+                             "How slow is a very slow large pulse? ",
                              "What rate is considered a very slow large pulse?",
                              'How many pulses per minute is considered "a very slow large pulse"?',
                              'How should I determine if there is a very slow large pulse?',
@@ -226,9 +225,11 @@ LIFE.sentences_and_answers = () => {
                              'What rate cut-off should I use to decide if there is a very slow large pulse?',
                              'When should I decide that a child has "a very slow large pulse"?',
                              "What decides whether a rate is a very slow large pulse?"]);
-    answers.push("For infants and children (up to the beginning of puberty), this is a pulse of less than 60 beats/minute");
+    answers.push("This is age specific. For infants a pulse rate of more than 180/minute " + 
+                 "and for children 1-5 years of greater than 160/minute is considered very fast. " +
+                 "For infants and children (up to the beginning of puberty), a very slow pulse is less than 60 beats/minute.");
 
-    group_of_questions.push(["How to tell if the peripheral pulse is weak? ", // 15
+    group_of_questions.push(["How to tell if the peripheral pulse is weak? ", // 13
                              "How can I tell if the peripheral pulse is weak?",
                              "What constitutes a weak peripheral pulse?",
                              "How do I know if the peripheral pulse is weak?",
@@ -241,7 +242,7 @@ LIFE.sentences_and_answers = () => {
     answers.push("The examiner has to compare the peripheral (usually radial pulse) and central pulse (either carotid or brachial/femoral) " + 
                  "and subjectively interpret if the peripheral pulse as not easy to feel, thready, weak or sometimes absent. ");
 
-    group_of_questions.push(["How can I be sure a pulse is not palpable? ", // 16
+    group_of_questions.push(["How can I be sure a pulse is not palpable? ", // 14
                              "What is a palpable pulse like?",
                              "What is the indication of a palpable pulse?",
                              "What does it means for a pulse to be palpable?",
@@ -253,7 +254,7 @@ LIFE.sentences_and_answers = () => {
                              "How should a palpable pulse feel?"]);
     answers.push("When placing firmly one’s fingers on where the artery passes, e.g. the carotid pulse, one is unable to feel the pulsation. ");
 
-    group_of_questions.push(["What are the signs of severe dehydration? ", // 17
+    group_of_questions.push(["What are the signs of severe dehydration? ", // 15
                              "How can I tell if there is severe dehydration?",
                              "What are the severe dehydration signs?",
                              "When is dehydration considered severe?",
@@ -266,7 +267,7 @@ LIFE.sentences_and_answers = () => {
     answers.push("These include lethargy, irritability, delayed skin turgor and sunken eyes. " + 
                  "Other signs include rapid pulses and cold extremities. ");
 
-    group_of_questions.push(["What are the signs of severe pallor? ", // 18
+    group_of_questions.push(["What are the signs of severe pallor? ", // 16
                              "What should I look for to determine if there is severe pallor?",
                              "What are the severe pallor signs?",
                              "How should one determine if there is severe pallor?",
@@ -278,7 +279,7 @@ LIFE.sentences_and_answers = () => {
                              'What does severe pallor look like?']);
     answers.push("Clinically identified as pale/white discoloration of hands and mucous membranes. ");
 
-    group_of_questions.push(["What are the signs of severe malnutrition? ", // 19
+    group_of_questions.push(["What are the signs of severe malnutrition? ", // 17
                              "How can I tell if there is severe malnutrition?",
                              "What are the severe malnutrition signs?",
                              "How should one determine if there is severe malnutrition?",
@@ -291,7 +292,7 @@ LIFE.sentences_and_answers = () => {
     answers.push("Identified as low weight for height/length of ≤3 Z score or visible severe muscle wasting. " + 
                  "Or a Mid Upper Arm Circumference MUAC of <11.5cm.");
 
-    group_of_questions.push(["How long is a prolonged skin pinch? ", // 20
+    group_of_questions.push(["How long is a prolonged skin pinch? ", // 18
                              "How long should I do a prolonged skin pinch?",
                              "How long should a skin pinch be?",
                              "What length of skin pinch is considered 'prolonged'?",
@@ -303,7 +304,7 @@ LIFE.sentences_and_answers = () => {
                              "How long should one prolong a skin pitch?"]);
     answers.push("≥2 seconds");
 
-    group_of_questions.push(['How should I "position" a child? ', // 21
+    group_of_questions.push(['How should I "position" a child? ', // 19
                              'What is "positioning"?',
                              'Tell me about "positioning"?',
                              'How does one position a child?',
@@ -316,7 +317,7 @@ LIFE.sentences_and_answers = () => {
     answers.push("Positioning commonly refers to an aspect of airway management for children with reduced level of consciousness, less than alert. " + 
                  "For a child, the correct position of the airway is placing the head into a sniffing position.");
 
-    group_of_questions.push(["How can I get a child to open their mouth? ", // 22
+    group_of_questions.push(["How can I get a child to open their mouth? ", // 20
                              "What is a good way get a child to open his or her mouth?",
                              "What do you recommend for getting a child to open their mouth?",
                              "How should one get a child to open their mouth?",
@@ -330,7 +331,7 @@ LIFE.sentences_and_answers = () => {
                  "If they are non-verbal (young children and infants or are not alert), you will have to open it by pulling the chin down. " + 
                  "Alternatively, when they cry, their mouth will open.");
 
-    group_of_questions.push(["What should I expect to see when I look in the mouth? ", // 23
+    group_of_questions.push(["What should I expect to see when I look in the mouth? ", // 21
                              "What should I look for in the child's mouth?",
                              "If I look in the mouth, what should I hope to see?",
                              "When I look into a child's mouth, what should I look for?",
@@ -343,7 +344,7 @@ LIFE.sentences_and_answers = () => {
     answers.push("Normally you will see the normal organs such as the tongue and teeth. " + 
                  "There might however be foreign material such as vomitus, food particles or other residue. ");
 
-    group_of_questions.push(['How should I decide if there is a "history of a cough"? How often? How long? ', // 24
+    group_of_questions.push(['How should I decide if there is a "history of a cough"? How often? How long? ', // 22
                              'How do I elicit a history of cough?',
                              'How should I decide whether there is a cough history? How often does this happen? How long does it take?',
                              "How do I find out the child's history of a cough?",
@@ -356,7 +357,7 @@ LIFE.sentences_and_answers = () => {
     answers.push("History of cough is elicited by asking the parent/caretaker. " + 
                  "E.g. has your baby been coughing, for how many days now, and is it related to e.g. time of the day/night or crying?");
 
-    group_of_questions.push(["How do I know if a child is unable to drink? ", // 25
+    group_of_questions.push(["How do I know if a child is unable to drink? ", // 23
                              "How can I determine if a child cannot drink?",
                              "How do I know if it is impossible for a child to drink?",
                              "How can one find out if a child is unable to drink?",
@@ -371,7 +372,7 @@ LIFE.sentences_and_answers = () => {
                  "If they are not able to e.g. due to looking tired, limp or the severity of the illness, " + 
                  "then one says there is inability to drink/breastfeed/feed.");
 
-    group_of_questions.push(["How do I know if a child has difficulty with breathing? ", // 26
+    group_of_questions.push(["How do I know if a child has difficulty with breathing? ", // 24
                              "What are the signs of a child having difficulty breathing?",
                              "How do I know if a child is having trouble breathing?",
                              "What are the signs of respiratory distress?",
@@ -385,7 +386,7 @@ LIFE.sentences_and_answers = () => {
                  "and include fast breathing, chest indrawing, head bobbing, deep breathing, grunting respirations, wheezing. " + 
                  "Any of these signs indicates difficulty in breathing.");
 
-    group_of_questions.push(["When should I give O2? ", // 27
+    group_of_questions.push(["When should I give O2? ", // 25
                              "Under what conditions should I give a child oxygen?",
                              "How should I decide whether to give O2 or not?",
                              "What are the signs that oxygen is required?",
@@ -400,7 +401,7 @@ LIFE.sentences_and_answers = () => {
                  "grunting respirations, wheezing and fast breathing associated with fatigue. " + 
                  "Children whose oxygen saturation is less than 90% and/or who have central cyanosis are also a high priority for being given oxygen");
 
-    group_of_questions.push(["What is a septic screen and when should I do it? ", // 28
+    group_of_questions.push(["What is a septic screen and when should I do it? ", // 26
                              "How should I use a septic screen?",
                              "When is a septic screen recommended?",
                              "Under what circumstances should one do a septic screen?",
