@@ -255,7 +255,6 @@ const setup = () => {
 			test_loss_message.innerHTML += response["Spreadsheet values"] + "<br>";
 			responses.push(response);
 			const label = "Save model #" + model_options.training_number;
-			// note that by providing buttons for each experiment the models are not disposed
 			add_save_model_button(label, response.model, model_name);
 			if (responses.length === number_of_training_repeats) {
 				report_averages(responses, number_of_training_repeats);
@@ -275,7 +274,9 @@ const setup = () => {
 			tf.loadLayersModel("models/" + model_options.model_name + ".json").then((model) => {
 				loaded_model = model;
 				if (mode === 'answer questions') {
-					use_model_to_respond_to_question("Warm up GPU");   
+					use_model_to_respond_to_question("Warm up GPU").then(() => {
+						display_message("Ready to answer questions. Answers will appear here.");
+					});
 				} else if (mode === 'test') {
 					document.body.innerHTML = "Testing started";
 					test_all_questions();
@@ -381,7 +382,6 @@ const setup_interface =
 			let question_area = document.getElementById('question');
 			let toggle_speech_recognition = document.getElementById('speech-recognition');
 			let sound_effect = document.getElementById('sound');
-			let answer_area = document.getElementById('answer');
 			let speech_recognition_on = false;
 			let first_cant_answer = true;
 			const toggle_speech_recognition_label = document.createElement('span');
@@ -529,6 +529,14 @@ const setup_interface =
 	//             toggle_speech(); // start with it enabled
 	//         }
 			add_sample_questions();                           
+};
+
+let answer_area;
+const display_message = (message) => {
+	if (!answer_area) {
+		answer_area = document.getElementById('answer');
+	}
+	answer_area.innerHTML = message;
 };
 
 const hash_parameters = new URLSearchParams(window.location.hash.slice(1));
