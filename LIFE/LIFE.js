@@ -189,9 +189,10 @@ const setup = () => {
             	outputs.push(group_number);
             });
     	});
+    	const ys = tf.oneHot(tf.tensor1d(outputs, 'int32'), number_of_groups);
     	embedding_model.embed(questions).then((embeddings) => {
 			callback({xs: embeddings,
-					  ys: tf.oneHot(tf.tensor1d(outputs, 'int32'), number_of_groups)});
+					  ys: ys});
     	});
     };    	
 //     	let group_number = 0;
