@@ -50,21 +50,23 @@ LIFE.sentences_and_answers = () => {
                              "What the meaning of AVPU?",
                              "I forget what AVPU means.",
                              "What is AVPU again?"]);
-    answers.push("AVPU is an acronym for Alert, responds to Verbal stimulus, responds to Painful stimulus and " + 
-                 "Unresponsive to (or inappropriately responds to) painful stimulus. " + 
+    answers.push("<span style='color:red'>AVPU</span> is an acronym for <span style='color:red'>A</span>lert, " + 
+                 "responds to <span style='color:red'>V</span>erbal stimulus, " + 
+                 "responds to <span style='color:red'>P</span>ainful stimulus and " + 
+                 "<span style='color:red'>U</span>nresponsive to (or inappropriately responds to) painful stimulus. " + 
                  "When sick children are clinically assessed for their neurological status (level of consciousness and wakefulness), " + 
                  "they will be graded on AVPU scale as either at A, V, P or U. ");
 
     group_of_questions.push(["The ‘P’ is for pain but how should one access pain? ", // 3
-                             "How should I tell how much pain there is?",
-                             "How ought I tell what quantity pain there is?",
-                             "How should I measure pain?",
-                             "How much pain is usually associated with pneumonia?",
-                             "How should I assess the level of pain?",
-                             "What pain should be expected if the child has pneumonia?",
-                             "What should I look for to determine the pain level?",
-                             "What should I do to assess the level of pain?",
-                             "What do I do to measure pain?"]);
+                             "How should I tell what the response to pain is?",
+                             "How do I assess the pain stimulus response?",
+                             "How should I measure pain stimulus response?",
+                             "What is an appropriate pain stimulus?",
+                             "What pain stimulus should I apply to test the response?",
+                             "How do I go about finding out the response to pain stimulus?",
+                             "What pain stimulus is appropriate?",
+                             "What response should I expect from pain stimulus?",
+                             "To assess pain stimulus response what should I do?"]);
     answers.push("A painful stimulus is applied by rubbing one’s knuckles/exerting firm pressure on the child’s sternum (breast bone). " + 
                  "If the infant/child (usually over 9 months of age) responds by pushing away the examiner’s hand, " + 
                  "this is considered an appropriate response and the infant/child is graded at P. " + 
