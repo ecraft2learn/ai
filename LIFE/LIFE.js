@@ -255,6 +255,7 @@ const setup = () => {
 			test_loss_message.innerHTML += response["Spreadsheet values"] + "<br>";
 			responses.push(response);
 			const label = "Save model #" + model_options.training_number;
+			// note that by providing buttons for each experiment the models are not disposed
 			add_save_model_button(label, response.model, model_name);
 			if (responses.length === number_of_training_repeats) {
 				report_averages(responses, number_of_training_repeats);
