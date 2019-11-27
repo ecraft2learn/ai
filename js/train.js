@@ -497,7 +497,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
               "Name, Layer1,Layer2,Layer3,layer4,layer5, Batch size, Dropout rate, Normalizer, Epochs, Optimizer, Initializer, Regularizer," +
               "Testing fraction, Validation fraction, Fraction kept, " +
               Object.keys(response) + ", seed, ";
-          if (confusion_matrix) {
+          if (confusion_matrix && model_options.add_confusion_to_csv) {
               let confusion_labels = [];
               confusion_matrix.forEach((row, i) => {
                   row.forEach((item, j) => {
@@ -553,7 +553,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
           csv_values += (highest_accuracy_epoch && highest_accuracy_epoch) + ", ";
           csv_values += response["Duration in seconds"] +", ";
           csv_values += options.current_seed + ", ";               
-          if (confusion_matrix) {
+          if (confusion_matrix && model_options.add_confusion_to_csv) {
               confusion_matrix.forEach(row => {
                   csv_values += row.map(percentage_of_tests) + ', '; 
               });      
