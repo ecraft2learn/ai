@@ -8,13 +8,13 @@
 window.webrtc = 
   (function () {
        const connection_settings = 
-           {iceServers: [{urls: 'stun:stun.l.google.com:19302'}]};
+           {iceServers: [{urls: ['stun:stun.l.google.com:19302']}]};
       let connection = new RTCPeerConnection(connection_settings);
       const on_ice_candidate = (event) => {
             // following https://jameshfisher.com/2017/01/16/tiny-serverless-webrtc/
-            if (!event.candidate) {
-                  console.log(JSON.stringify(connection.localDescription));
-            }
+//             if (!event.candidate) {
+//                   console.log(JSON.stringify(connection.localDescription));
+//             }
 //           if (event.candidate) {
 //               connection.addIceCandidate(event.candidate).then(
 //                   () => {
@@ -25,10 +25,16 @@ window.webrtc =
 //                   });
 //           };
       };
+      const create_key = (description) => {
+          const connection_key = encodeURIComponent(JSON.stringify(description));
+          console.log(connection_key);
+          // commented out since causes FireFox exception
+//           navigator.clipboard.writeText(connection_key);    
+      };
       const create_connection_offer = (success_callback, error_callback) => {
           const got_description = (description) => {
               connection.setLocalDescription(description);
-              navigator.clipboard.writeText(encodeURIComponent(JSON.stringify(description)));
+              create_key(description);
               invoke_callback(success_callback, "Connection information on your clipboard. Send it to your collaborator.");
 //               connection.onicecandidate = on_ice_candidate;
           };
@@ -43,7 +49,7 @@ window.webrtc =
           const description = JSON.parse(decodeURIComponent(encoded_description_json));
           const got_answer = (description) => {
               connection.setLocalDescription(description);
-              navigator.clipboard.writeText(encodeURIComponent(JSON.stringify(description)));
+              create_key(description);
               invoke_callback(success_callback, "Clipboard has connection information. ...");
           };
           const accept_offer_error = (error) => {
@@ -66,7 +72,7 @@ window.webrtc =
                   invoke_callback(error_callback, "Failed to set remote connection: " + error.toString());
               });
       }
-      let send_channel = connection.createDataChannel('sendDataChannel');
+      let send_channel = connection.createDataChannel('data channel');
       send_channel.onopen = () => {
           console.log("Send channel opened.");
       };
@@ -77,7 +83,7 @@ window.webrtc =
       let receive_channel;
       let data_listener = console.log; // default if nothing provided
       const on_message = (listener) => {
-            data_listener = listener;
+          data_listener = listener;
       };
       const on_receive_data = (event) => {
           receive_channel = event.channel;
