@@ -11,15 +11,19 @@ window.webrtc =
            {iceServers: [{urls: 'stun:stun.l.google.com:19302'}]};
       let connection = new RTCPeerConnection(connection_settings);
       const on_ice_candidate = (event) => {
-          if (event.candidate) {
-              connection.addIceCandidate(event.candidate).then(
-                  () => {
-                      console.log("addIceCandidate succeeded");
-                  },
-                  (error) => {
-                      throw new Error('Failed to add Ice Candidate: ' + error.toString());
-                  });
-          };
+            // following https://jameshfisher.com/2017/01/16/tiny-serverless-webrtc/
+            if (!event.candidate) {
+                  console.log(JSON.stringify(connection.localDescription));
+            }
+//           if (event.candidate) {
+//               connection.addIceCandidate(event.candidate).then(
+//                   () => {
+//                       console.log("addIceCandidate succeeded");
+//                   },
+//                   (error) => {
+//                       throw new Error('Failed to add Ice Candidate: ' + error.toString());
+//                   });
+//           };
       };
       const create_connection_offer = (success_callback, error_callback) => {
           const got_description = (description) => {
@@ -33,9 +37,9 @@ window.webrtc =
           };
           connection.createOffer().then(got_description, create_session_error);
       };
-//       connection.onicecandidate = on_ice_candidate;
+      connection.onicecandidate = on_ice_candidate;
       const accept_connection_offer = (encoded_description_json, success_callback, error_callback) => {
-          connection.onicecandidate = on_ice_candidate;
+//           connection.onicecandidate = on_ice_candidate;
           const description = JSON.parse(decodeURIComponent(encoded_description_json));
           const got_answer = (description) => {
               connection.setLocalDescription(description);
@@ -52,7 +56,7 @@ window.webrtc =
           connection.setRemoteDescription(description_object).then(create_answer, error_callback);
       };
       const accept_answer = (encoded_description_json, success_callback, error_callback) => {
-          connection.onicecandidate = on_ice_candidate;
+//           connection.onicecandidate = on_ice_candidate;
           const description = JSON.parse(decodeURIComponent(encoded_description_json));
           connection.setRemoteDescription(description).then(
               () => {
