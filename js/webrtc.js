@@ -6,51 +6,44 @@
 
 'use strict';
 window.webrtc = 
-  (function () {
-       const connection_settings = 
+ (function () {
+      const connection_settings = // useful if need to go through NATs to get IP addresses
            {iceServers: [{urls: ['stun:stun.l.google.com:19302']}]};
       let connection = new RTCPeerConnection(connection_settings);
+      let connection_key;
+      let callback_when_connection_key;
       const on_ice_candidate = (event) => {
-            // following https://jameshfisher.com/2017/01/16/tiny-serverless-webrtc/
-//             if (!event.candidate) {
-//                   console.log(JSON.stringify(connection.localDescription));
-//             }
-//           if (event.candidate) {
-//               connection.addIceCandidate(event.candidate).then(
-//                   () => {
-//                       console.log("addIceCandidate succeeded");
-//                   },
-//                   (error) => {
-//                       throw new Error('Failed to add Ice Candidate: ' + error.toString());
-//                   });
-//           };
+            if (!event.candidate) {
+                create_key(connection.localDescription);
+            }
       };
       const create_key = (description) => {
-          const connection_key = encodeURIComponent(JSON.stringify(description));
-          console.log(connection_key);
-          // commented out since causes FireFox exception
-//           navigator.clipboard.writeText(connection_key);    
+          connection_key = encodeURIComponent(JSON.stringify(description));
+//           console.log(connection_key);
+          // commented out since causes FireFox exception - since not DIRECTLY triggered by user
+//           navigator.clipboard.writeText(connection_key);
+          invoke_callback(callback_when_connection_key, connection_key);  
       };
       const create_connection_offer = (success_callback, error_callback) => {
+          callback_when_connection_key = success_callback;
           const got_description = (description) => {
               connection.setLocalDescription(description);
-              create_key(description);
-              invoke_callback(success_callback, "Connection information on your clipboard. Send it to your collaborator.");
-//               connection.onicecandidate = on_ice_candidate;
           };
           const create_session_error = (error) => {
               invoke_callback(error_callback, 'Failed to create session description: ' + error.toString());
           };
           connection.createOffer().then(got_description, create_session_error);
       };
+      const on_ice_candidate_state_change = () => {
+          console.log("iceConnectionState is " + connection.iceConnectionState);
+      }
       connection.onicecandidate = on_ice_candidate;
+      connection.oniceconnectionstatechange  = on_ice_candidate_state_change;
       const accept_connection_offer = (encoded_description_json, success_callback, error_callback) => {
-//           connection.onicecandidate = on_ice_candidate;
+          callback_when_connection_key = success_callback;
           const description = JSON.parse(decodeURIComponent(encoded_description_json));
           const got_answer = (description) => {
               connection.setLocalDescription(description);
-              create_key(description);
-              invoke_callback(success_callback, "Clipboard has connection information. ...");
           };
           const accept_offer_error = (error) => {
               invoke_callback(error_callback, 'Failed to accept offer: ' + error.toString());
@@ -62,7 +55,6 @@ window.webrtc =
           connection.setRemoteDescription(description_object).then(create_answer, error_callback);
       };
       const accept_answer = (encoded_description_json, success_callback, error_callback) => {
-//           connection.onicecandidate = on_ice_candidate;
           const description = JSON.parse(decodeURIComponent(encoded_description_json));
           connection.setRemoteDescription(description).then(
               () => {
@@ -107,7 +99,7 @@ window.webrtc =
               send_data,
               on_message,
               close_connection,
-              test: () => { connection.onicecandidate = on_ice_candidate;}};
+              test: () => connection};
 
   } ());
 
