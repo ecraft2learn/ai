@@ -99,8 +99,12 @@ window.webrtc =
       };
       let receive_channel;
       let data_listener = console.log; // default if nothing provided
+      let process_parsed_message;
       const on_message = (listener) => {
           data_listener = listener;
+      };
+      const set_process_parsed_message = (f) => {
+          process_parsed_message = f;
       };
       let remaining_message_parts;
       let message_so_far = null;
@@ -127,7 +131,11 @@ window.webrtc =
                   }
               } // else single part message
               try {
-                  invoke_callback(data_listener, JSON.parse(message));
+                  let parsed_message = JSON.parse(message);
+                  if (process_parsed_message) {
+                      parsed_message = process_parsed_message(parsed_message);
+                  }
+                  invoke_callback(data_listener, parsed_message);
               } catch (error) {
                   invoke_callback(data_listener, message); 
               }
@@ -149,7 +157,7 @@ window.webrtc =
               send_data,
               on_message,
               close_connection,
-              test: () => connection};
+              set_process_parsed_message};
 
   } ());
 
