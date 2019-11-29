@@ -8,14 +8,14 @@
 window.webrtc = 
  (function () {
       const connection_settings = // useful if need to go through NATs to get IP addresses
-           {iceServers: [{urls: ['stun:stun.l.google.com:19302']}]};
+          {iceServers: [{urls: ['stun:stun.l.google.com:19302']}]};
       let connection = new RTCPeerConnection(connection_settings);
       let connection_key;
       let callback_when_connection_key;
       const on_ice_candidate = (event) => {
-            if (!event.candidate) {
-                create_key(connection.localDescription);
-            }
+          if (!event.candidate) {
+              create_key(connection.localDescription);
+          }
       };
       const create_key = (description) => {
           connection_key = encodeURIComponent(JSON.stringify(description));
@@ -41,7 +41,13 @@ window.webrtc =
       connection.oniceconnectionstatechange  = on_ice_candidate_state_change;
       const accept_connection_offer = (encoded_description_json, success_callback, error_callback) => {
           callback_when_connection_key = success_callback;
-          const description = JSON.parse(decodeURIComponent(encoded_description_json));
+          let description;
+          try {
+              description = JSON.parse(decodeURIComponent(encoded_description_json));
+          } catch (error) {
+              invoke_callback(error_callback, "It seems this isn't a connection key offer: " + encoded_description_json);
+              return;
+          }
           const got_answer = (description) => {
               connection.setLocalDescription(description);
           };
@@ -55,22 +61,31 @@ window.webrtc =
           connection.setRemoteDescription(description_object).then(create_answer, error_callback);
       };
       const accept_answer = (encoded_description_json, success_callback, error_callback) => {
-          const description = JSON.parse(decodeURIComponent(encoded_description_json));
+          let description;
+          try {
+              description = JSON.parse(decodeURIComponent(encoded_description_json));
+          } catch (error) {
+              invoke_callback(error_callback, "It seems this isn't a connection key response: " + encoded_description_json);
+          }
           connection.setRemoteDescription(description).then(
               () => {
                   invoke_callback(success_callback, "Connection ready");
               },
               (error) => {
                   invoke_callback(error_callback, "Failed to set remote connection: " + error.toString());
-              });
+              });                
       }
       let send_channel = connection.createDataChannel('data channel');
       send_channel.onopen = () => {
           console.log("Send channel opened.");
       };
-      const send_data = (data, success_callback, error_callback) => {
+      const send_data = (data, error_callback) => {
           // deal with maximum size message? connection.sctp.maxMessageSize
-          send_channel.send(data);
+          try {
+              send_channel.send(data);
+          } catch (error) {
+              invoke_callback(error_callback, error.toString());
+          }
       };
       let receive_channel;
       let data_listener = console.log; // default if nothing provided

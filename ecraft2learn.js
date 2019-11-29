@@ -2922,6 +2922,7 @@ xhr.send();
   image_class,
   inform,
   show_message,
+  invoke_callback,
   stop_all_scripts,
   load_camera_training_from_file: (callback) => {
       load_transfer_training_from_file('camera', callback);
