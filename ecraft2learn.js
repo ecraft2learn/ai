@@ -2924,6 +2924,8 @@ xhr.send();
   show_message,
   invoke_callback,
   stop_all_scripts,
+  snap_to_javascript,
+  javascript_to_snap,
   load_camera_training_from_file: (callback) => {
       load_transfer_training_from_file('camera', callback);
   },

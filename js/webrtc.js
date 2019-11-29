@@ -82,7 +82,7 @@ window.webrtc =
       const send_data = (data, error_callback) => {
           // deal with maximum size message? connection.sctp.maxMessageSize
           try {
-              send_channel.send(data);
+              send_channel.send(typeof data === 'string' ? data : JSON.stringify(data));
           } catch (error) {
               invoke_callback(error_callback, error.toString());
           }
@@ -95,7 +95,11 @@ window.webrtc =
       const on_receive_data = (event) => {
           receive_channel = event.channel;
           receive_channel.onmessage = (event) => {
-              invoke_callback(data_listener, event.data);
+              try {
+                  invoke_callback(data_listener, JSON.parse(event.data));
+              } catch (error) {
+                  invoke_callback(data_listener, event.data); 
+              }
           };
       };
       connection.ondatachannel = on_receive_data;
