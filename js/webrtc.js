@@ -79,10 +79,20 @@ window.webrtc =
       send_channel.onopen = () => {
           console.log("Send channel opened.");
       };
+      const multi_part_message_token = "***multi-part message***";
       const send_data = (data, error_callback) => {
-          // deal with maximum size message? connection.sctp.maxMessageSize
           try {
-              send_channel.send(typeof data === 'string' ? data : JSON.stringify(data));
+              const message = typeof data === 'string' ? data : JSON.stringify(data);
+              const maximum_message_size = 3; // connection.sctp.maxMessageSize;
+              const number_of_parts = Math.ceil(message.length/maximum_message_size);
+              if (number_of_parts > 1) {
+                  send_channel.send(multi_part_message_token + number_of_parts);
+                  for (let i = 0; i < number_of_parts; i++) {
+                      send_channel.send(message.slice(i*maximum_message_size, (i+1)*maximum_message_size));
+                  }
+              } else {
+                  send_channel.send(message);
+              }
           } catch (error) {
               invoke_callback(error_callback, error.toString());
           }
@@ -92,13 +102,34 @@ window.webrtc =
       const on_message = (listener) => {
           data_listener = listener;
       };
+      let remaining_message_parts;
+      let message_so_far = null;
       const on_receive_data = (event) => {
           receive_channel = event.channel;
           receive_channel.onmessage = (event) => {
+              let message = event.data;
+              const maximum_message_size = 3; // connection.sctp.maxMessageSize;
+              const is_multi_part_message = message.indexOf(multi_part_message_token) === 0;
+              if (is_multi_part_message && message_so_far === null) {
+                  // start of multi-part message
+                  message_so_far = "";
+                  remaining_message_parts = +message.slice(multi_part_message_token.length);
+                  return;                      
+              }
+              if (message_so_far !== null) { 
+                  remaining_message_parts--;
+                  message_so_far += message;
+                  if (remaining_message_parts === 0) {
+                      message = message_so_far;
+                      message_so_far = null; 
+                  } else {
+                      return; // do nothing until rest of message arrives
+                  }
+              } // else single part message
               try {
-                  invoke_callback(data_listener, JSON.parse(event.data));
+                  invoke_callback(data_listener, JSON.parse(message));
               } catch (error) {
-                  invoke_callback(data_listener, event.data); 
+                  invoke_callback(data_listener, message); 
               }
           };
       };
