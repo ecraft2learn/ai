@@ -83,7 +83,7 @@ window.webrtc =
       const send_data = (data, error_callback) => {
           try {
               const message = typeof data === 'string' ? data : JSON.stringify(data);
-              const maximum_message_size = 3; // connection.sctp.maxMessageSize;
+              const maximum_message_size = connection.sctp.maxMessageSize;
               const number_of_parts = Math.ceil(message.length/maximum_message_size);
               if (number_of_parts > 1) {
                   send_channel.send(multi_part_message_token + number_of_parts);
@@ -112,7 +112,7 @@ window.webrtc =
           receive_channel = event.channel;
           receive_channel.onmessage = (event) => {
               let message = event.data;
-              const maximum_message_size = 3; // connection.sctp.maxMessageSize;
+              const maximum_message_size = connection.sctp.maxMessageSize;
               const is_multi_part_message = message.indexOf(multi_part_message_token) === 0;
               if (is_multi_part_message && message_so_far === null) {
                   // start of multi-part message
