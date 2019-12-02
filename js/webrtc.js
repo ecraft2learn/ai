@@ -81,6 +81,14 @@ window.webrtc =
       };
       const multi_part_message_token = "***multi-part message***";
       const send_data = (data, error_callback) => {
+          if (send_channel.readyState === "connecting") {
+                // try again in a second
+              setTimeout(() => {
+                  send_data(data, error_callback);
+              },
+              1000);
+              return;
+          }
           try {
               const message = typeof data === 'string' ? data : JSON.stringify(data);
               const maximum_message_size = connection.sctp.maxMessageSize;
@@ -160,7 +168,3 @@ window.webrtc =
               set_process_parsed_message};
 
   } ());
-
-  
-
-
