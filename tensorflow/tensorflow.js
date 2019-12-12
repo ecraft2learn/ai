@@ -1568,10 +1568,11 @@ const receive_message =
                     event.source.postMessage({data_received: message.time_stamp}, "*"); 
                 };
                 if (message.ignore_old_dataset) {
-                    set_data(model_name, kind, message.data, callback);
+                    set_data(model_name, kind, message.data);
                 } else {
-                    set_data(model_name, kind, add_to_data(message.data, model_name, kind, callback));
+                    set_data(model_name, kind, add_to_data(message.data, model_name, kind));
                 }
+                invoke_callback(callback);
             } catch (error) {
                 event.source.postMessage({data_message_failed: message.data,
                                           error_message: error.message}, "*");
