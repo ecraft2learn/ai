@@ -116,7 +116,7 @@ const create_model = (options, failure_callback) => {
                 return;
             }
             if (typeof fun === 'string') {
-                return function_table[fun]();
+                return function_table[fun]({});
             }
             return fun(layer_index);
         };
@@ -133,10 +133,10 @@ const create_model = (options, failure_callback) => {
             }
         }
         hidden_layer_sizes.forEach((size, index) => {
-            const kernelRegularizer = tfjs_function(regularizer, tf.regularizers, index);
-            const kernelInitializer = tfjs_function(layer_initializer, tf.initializers, index);
-            const activation_function = (typeof activation === 'string' ? activation : tfjs_function(activation, tf.layers, index)) || 'relu';
             const last_layer = index === hidden_layer_sizes.length-1;
+            const kernelRegularizer = last_layer ? undefined : tfjs_function(regularizer, tf.regularizers, index);
+            const kernelInitializer = last_layer ? undefined : tfjs_function(layer_initializer, tf.initializers, index);
+            const activation_function = (typeof activation === 'string' ? activation : tfjs_function(activation, tf.layers, index)) || 'relu';
             const configuration = {inputShape: index === 0 ? input_shape : undefined,
                                    units: last_layer && class_names ? class_names.length : +size,
                                    activation: last_layer ? last_activation || (class_names && 'softmax') : activation_function,
@@ -611,7 +611,11 @@ let last_prediction;
 
 const predict = (model, inputs, success_callback, error_callback, categories) => {
     if (!model) {
-        invoke_callback(error_callback, "No model named " + model_name);
+        invoke_callback(error_callback, "No model provided for prediction. Maybe the name is wrong.");
+        return;
+    }
+    if (!inputs || inputs.length === 0) {
+        invoke_callback(error_callback, "No input for prediction");
         return;
     }
     record_callbacks(success_callback, error_callback);
