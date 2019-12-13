@@ -1095,7 +1095,11 @@ window.ecraft2learn =
                                                            loss_function,
                                                            dropout_rate,
                                                            tfvis_options: {display_layers_after_creation: true},
-                                                           time_stamp: time_stamp};
+                                                           time_stamp,
+                                                           // regularizers seem like a good default but should enable overriding this
+                                                           regularizer : 'l2',
+                                                           layer_initializer: 'varianceScaling'
+                                                           };
                                       // if no size is provided then it will be computed from the training data
                                       if (typeof input_shape === 'number') {
                                           configuration.input_shape = [input_shape];
