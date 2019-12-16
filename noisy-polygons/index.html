@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+<head>
+	<title>Machine Learning for 'Noisy Polygons'</title>
+	<meta charset='utf-8'>
+	<link href="/ai/css/ai-teacher-guide.css" rel="stylesheet">
+	<link rel="icon" type="image/png" href="/ai/images/eCraft2Learn-Favicon.png" />
+	</head>
+<body style="background-color: white;font-size: 1.0em;">
+<script src="/ai/js/translate.js"></script>
+<h4>Noisy Polygons</h4>
+<p>
+A noisy polygon repeatedly goes forward a random amount, turns a random amount, sets the red, green, and blue parts of the pen colour to random values,
+and sets the pen size to a random value. All random numbers are given by a minimum and maximum value. So there are 12 numbers which control each image:
+minimum step, maximum step, minimum turn, maximum turn, minimum red, maximum red, minimum green, maximum green, minimum blue, maximum blue,
+minimum pen size, and maximum pen size. They are called <i>noisy</i> because "noise" (or randomness) is added to the average value for steps, turns, and
+pen characteristics.
+</p>
+<h4>Machine learning</h4>
+<p>
+After you have rated several images (100 works well, maybe less)
+you can train the computer to predict how you would rate a new noisy polygon you've never seen.
+See these <a href="project-ideas.html" target="_blank">project ideas</a> to explore this further.
+</p>
+<h4>Keyboard shortcuts</h4>
+<ul>
+<li>
+<b style="color:red;">L</b>earning (when are first starting or want to start over again)
+</li>
+<li>
+<b style="color:red;">A</b>dditional learning (when you have already done 'Learning' but want to do more)
+</li>
+<li>
+<b style="color:red;">R</b>ating (after learning you rate either the best or worst of a collection of noisy polygons)
+</li>
+<li>
+<b style="color:red;">S</b>earch (repeats learning with different size models and techniques)
+</li>
+<li>
+<b style="color:red;">I</b>nspect (opens interface where you see training progress, do experiments, and save your model)
+</ul>
+<div style='display: flex; align-items: center; justify-content: center;'>
+<button class='generic-button'
+        onclick='window.remove_me()'>
+  <b style='font-size: 24px'>CLOSE</b>
+</button>
+</div>
+<script>
+window.remove_me = () => {
+	const me = window.parent.document.getElementById('noisy-polygon-help');
+	me.remove();
+};
+</script>
+</body>
+</html>
+
