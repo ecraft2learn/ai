@@ -163,6 +163,41 @@ The <span class="block-name">Name this color ...</span> in the above sample proj
 sorts the list by the probability scores and multiplies by 100 to convert to percentages.
 </p>
 </span>
+<h3 class="instructions-white" id="noisy-polygons">Training a model to predict how you would rate abstract "art"</h3>
+<p class="instructions">
+One way to draw a polygon is to repeatedly go forward and turn.
+E.g. a pentagon is
+</p>
+<figure class="how-it-works-white">
+<img src="/ai/images/pentagon.png" class="center">
+<figcaption>A pentagon drawn by repeatedly going forward and turning</figcaption>
+</figure>
+<p class="instructions">
+If we add a little "noise" to the amount that the sprite goes forward or turns we get a bit more interesting result.
+</p>
+<figure class="how-it-works-white">
+<img src="/ai/images/noisy pentagon.png" class="center">
+<figcaption>Noisy pentagons drawn by repeatedly going forward and turning with some random noise</figcaption>
+</figure>
+<p class="instructions">
+If we change the pen colour and size each time we can get some very pretty results. And some very ugly ones.
+</p>
+<p class="instructions">
+Maybe we can train a neural network to rate how nice noisy polygons look.
+In the following after giving some random noisy polygons ratings you can train it to predict ratings.
+Each noisy polygon is defined by just 12 numbers: 
+minimum step, maximum step, minimum turn, maximum turn, minimum red, maximum red, minimum green, maximum green, minimum blue, maximum blue,
+minimum pen size, and maximum pen size.
+The neural net will be trained with a collection of these 12 numbers as input and a rating number as output.
+<figure class = "snap-iframe"
+        id = "noisy polygons"
+        full_screen = "true"
+        edit_mode = "true"
+        stage_ratio = "1"
+        container_style = "width: 900px; height: 700px" 
+        caption = "Train a model to match how you rate <i>Noisy Polygons</i>!">
+</figure>
+</p>
 <h3 class="how-it-works-white">A brief introduction to deep neural nets</h3>
 <p class="how-it-works">
 A deep neural net consists of an input layer, some number of hidden layers, and an output layer.
