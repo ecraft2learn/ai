@@ -47,8 +47,7 @@ See these <a href="project-ideas.html" target="_blank">project ideas</a> to expl
 </div>
 <script>
 window.remove_me = () => {
-	const me = window.parent.document.getElementById('noisy-polygon-help');
-	me.remove();
+	window.parent.postMessage('Remove noisy-polygon-help', '*');
 };
 </script>
 </body>
