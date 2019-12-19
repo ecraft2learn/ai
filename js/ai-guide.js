@@ -241,7 +241,7 @@ window.addEventListener(
              const path_to_projects = element.getAttribute('path_to_projects');
              const snap_url = element.getAttribute('snap_url');
              if (path_to_images) {
-                img.src = path_to_images + name + ".png"; 
+                 img.src = path_to_images + name + ".png"; 
              } else {
                  img.src = path_to_ai_folder + "/ai/AI-Teacher-Guide/images/" + name + ".png";    
              }             
