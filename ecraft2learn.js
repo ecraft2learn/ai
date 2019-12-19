@@ -865,7 +865,7 @@ window.ecraft2learn =
           } else if (source === 'tensorflow.js') {
               URL = "/tensorflow/index.html";
           }
-          if (window.location.hostname === "localhost" || window.location.protocol === 'file') {
+          if (window.location.hostname === "localhost" || window.location.protocol === 'file:') {
               URL = ".." + URL;
           } else {
               URL = "https://ecraft2learn.github.io/ai" + URL;
