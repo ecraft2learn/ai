@@ -237,7 +237,14 @@ window.addEventListener(
              let iframe     = document.createElement('iframe');
              let figcaption = document.createElement('figcaption');
              let img        = document.createElement('img');
-             img.src = path_to_ai_folder + "/ai/AI-Teacher-Guide/images/" + name + ".png";
+             const path_to_images = element.getAttribute('path_to_images');
+             const path_to_projects = element.getAttribute('path_to_projects');
+             const snap_url = element.getAttribute('snap_url');
+             if (path_to_images) {
+                img.src = path_to_images + name + ".png"; 
+             } else {
+                 img.src = path_to_ai_folder + "/ai/AI-Teacher-Guide/images/" + name + ".png";    
+             }             
              img.className = "image-of-iframe";
              let replace_with_iframe = function () {
                  // add a loading div message for a few seconds...
@@ -250,7 +257,11 @@ window.addEventListener(
                  if (new URLSearchParams(search).has('log')) {
                      search += "&assignment=" + name;
                  }
-                 iframe.src = path_to_ai_folder + "/ai/snap/snap.html" + search + window.location.hash;
+                 if (snap_url) {
+                     iframe.src = snap_url + search + window.location.hash;
+                 } else {
+                     iframe.src = path_to_ai_folder + "/ai/snap/snap.html" + search + window.location.hash;      
+                 }
                  iframe.setAttribute('scrolling', 'no');
                  // remove loading message 1 second after Snap! loads
                  // since project loading takes time too
@@ -261,7 +272,7 @@ window.addEventListener(
                                              },
                                              1000);
                                          });
-                 project_folder = path_to_ai_folder + "/ai/projects/";
+                 project_folder = path_to_projects || path_to_ai_folder + "/ai/projects/";
                  if (full_screen) {
                      if (full_screen === 'true') {
                          iframe.setAttribute('full_screen', 'true');
