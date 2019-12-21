@@ -858,6 +858,7 @@ const confidences = ({prediction, mobilenet_classifications}, full_description, 
     }
     const low_threshold = 1/4;
     const high_threshold = 1/2;
+    const top_score_threshold = 3/4;
     const mobilenet_classifications_threshold = traffic_light_class === 'gray-light' ? low_threshold : high_threshold;
     let top_n_probability = 0;
     let top_n_class_names = "";
@@ -867,12 +868,14 @@ const confidences = ({prediction, mobilenet_classifications}, full_description, 
             if (index === mobilenet_classifications.length-1) { // last one
                 top_n_class_names += " or "; 
             } else if (index > 0) {
-               top_n_class_names += ", ";
+                top_n_class_names += ", ";
             }
             top_n_class_names += '"' + classification.className + '"';            
         }
     });
-    if (typeof correct_class_index === 'undefined' && top_n_probability >= low_threshold) {
+    if (typeof correct_class_index === 'undefined' && // not a labelled image
+        scores[0].score < top_score_threshold && // not very certain about what sort of nail it is
+        top_n_probability >= low_threshold) { // and pretty confident with non-nail classifications
         let not_nail_message = "If this isn't a nail then the probability that instead it is ";
         if (top_n_class_names.length > 1) {
             not_nail_message += "either ";
@@ -889,7 +892,7 @@ const confidences = ({prediction, mobilenet_classifications}, full_description, 
             message = not_nail_message;
         }
     }
-    if (top_n_probability > high_threshold) {
+    if (top_n_probability > high_threshold && scores[0].score < top_score_threshold) {
         traffic_light_class = 'gray-light';
     }
     return "<span class=" + traffic_light_class + ">" + message + "</span>";
