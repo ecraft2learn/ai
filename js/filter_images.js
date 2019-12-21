@@ -35,7 +35,10 @@ handle_click = () => {
     canvas.getContext('2d').drawImage(images[image_index], 0, 0);
     button.href = canvas.toDataURL('image/png');
     button.style.fontSize = "30px";
-    button.download = "onychomycosis-" + image_index + ".png";
+    const full_name = images[image_index].src;
+    const short_name = images[image_index].src.substring(full_name.lastIndexOf('/')+1, full_name.indexOf('_'));
+    button.download =  short_name;
+//     button.download = "onychomycosis-" + image_index + ".png";
     if (image_index < images.length) {
         image_index++;
         setTimeout(() => button.click(), 1000);
