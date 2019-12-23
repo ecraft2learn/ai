@@ -4,7 +4,6 @@
  * License: New BSD
  */
 
-"use strict";
 add_button = () => {
 filtered_images = (filter) => {
     const all_images = document.getElementsByTagName('img');
@@ -36,12 +35,20 @@ handle_click = () => {
     button.href = canvas.toDataURL('image/png');
     button.style.fontSize = "30px";
     const full_name = images[image_index].src;
-    const short_name = images[image_index].src.substring(full_name.lastIndexOf('/')+1, full_name.indexOf('_'));
+//     const short_name = images[image_index].src.substring(full_name.lastIndexOf('/')+1, full_name.indexOf('_'));
+    const sibling = images[image_index].parentElement.nextElementSibling;
+    let short_name;
+    if (sibling) {
+        short_name = sibling.textContent.trim();
+    } else {
+        console.log(image_index, images[image_index].src);
+        short_name = images[image_index].src.substring(full_name.lastIndexOf('/')+1, full_name.indexOf('_'));
+    }
     button.download =  short_name;
 //     button.download = "onychomycosis-" + image_index + ".png";
     if (image_index < images.length) {
         image_index++;
-        setTimeout(() => button.click(), 1000);
+        setTimeout(() => button.click(), 2000);
     }
 };
 
