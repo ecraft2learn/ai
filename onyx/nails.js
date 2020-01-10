@@ -50,7 +50,8 @@ const minimum_confidence = 60;
 const confusion_matrix = [];
 
 const class_names = typeof class_names_of_saved_tensors === 'undefined' ?
-                    Object.keys(images) : 
+// hack to do this in 3 pieces to avoid running out of memory
+                    ["warrants second opinion"] : //Object.keys(images) : 
                     class_names_of_saved_tensors;
 
 const class_colors = ["green",
@@ -1822,8 +1823,8 @@ const save_tensors = () => {
     const [next_image, reset_next_image] = create_next_image_generator();
     const when_finished = () => {
         add_download_button(xs + "]", ys + "]", sources + "]");
-         console.log(image_counts_per_class);
-    }
+        console.log(image_counts_per_class);
+    };
     const next = (image_or_canvas, class_index, image_index, image_count, thumbnail_index) => {
         const logits = infer(image_or_canvas);
         const shorten_weight = (x) => {
@@ -1842,21 +1843,21 @@ const save_tensors = () => {
         const file_name = typeof file_name_or_description === 'string' ?
                           file_name_or_description :
                           file_name_or_description.file_name;
-        if (xs.indexOf(logits_as_string) < 0) {
+//         if (xs.indexOf(logits_as_string) < 0) {
             xs += logits_as_string + ",\n";  
             ys += class_index + ",";
             image_counter++;
             image_counts_per_class[class_index]++;
-            if (image_counter === stop) {
-                when_finished();
-                return;
-            }
+//             if (image_counter === stop) {
+//                 when_finished();
+//                 return;
+//             }
             sources += "'" + file_name + "#" + thumbnail_index + "',\n";   // new line since huge lines cause editors to hang
-        } else {
-            console.log(file_name, thumbnail_index);
-        }
+//         } else {
+//             console.log(file_name, thumbnail_index);
+//         }
         next_image(next, when_finished);
-    }
+    };
     next_image(next, when_finished);
 };
 
