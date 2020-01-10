@@ -40,7 +40,12 @@
                 additional_js = ["korean-tests-80-each.js"];
             } else if (option === 'save tensors') {
                 // both Korean training thumbnails and their test images
-                additional_js = ["korean-big.js", "korean-tests.js"]; // "originals-normal-serious-non-serious.js"];  
+                additional_js = ["korean-big.js"]; 
+//                 additional_js.push("korean-tests.js"); // "originals-normal-serious-non-serious.js"]; 
+                additional_js.push("danderm.js");
+                additional_js.push("dermnet.js");
+                additional_js.push("TTND.js");
+                additional_js.push("hackduke.js");
             } else if (option === 'create model' || option === 'de-duplicate' || option === 'equalize' || option === 'search') {
                 additional_js = [saved_tensor_file_name];
             } else {
@@ -52,7 +57,7 @@
             const projector_data = false;
             // whether we want to generate files to visualising the data
             const model_name = option !== 'diagnose' ? 
-                               (option === 'create model' || option === 'search' ? "18-10-2019a" : "15-08-2019b") : 
+                               (option === 'create model' || option === 'search' ? "10-01-20a" : "15-08-2019b") : 
                                "19-08-2019b";
             const model_options = {
                 seed: (number) => number,
@@ -62,7 +67,7 @@
                 dropout_rate: .5,
                 batch_normalization: false,
                 shuffle: true,
-                epochs: 200,
+                epochs: 1000,
                 optimizer: (i) => tf.train.rmsprop(2e-4), // tf.train.adamax(1e-5), tf.train.adadelta(),
                 regularizer: (i) => tf.regularizers.l2({l2: 5e-4}),
                 layer_initializer: (index) => tf.initializers.varianceScaling({}), // {seed: SEED}
