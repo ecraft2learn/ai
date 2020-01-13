@@ -51,7 +51,7 @@ const confusion_matrix = [];
 
 const class_names = typeof class_names_of_saved_tensors === 'undefined' ?
 // hack to do this in 3 pieces to avoid running out of memory
-                    ["warrants second opinion"] : //Object.keys(images) : 
+                    ["warrants second opinion"] : //Object.keys(images) : ["normal", "non-serious", "warrants second opinion"]
                     class_names_of_saved_tensors;
 
 const class_colors = ["green",
