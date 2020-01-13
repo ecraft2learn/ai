@@ -428,7 +428,6 @@ add_to_dataset({
     "images/dermnet/misc serious/pyogenic-granuloma-013-v2.png",
     "images/dermnet/misc serious/Ragged cuticles-b.png",
     "images/dermnet/misc serious/Ragged cuticles.png",
-    "images/dermnet/misc serious/readme.txt",
     "images/dermnet/misc serious/red longitudinal streak or erythronychia is often due to onychopapilloma.png",
     "images/dermnet/misc serious/Red lunula.png",
     "images/dermnet/misc serious/Resorption of distal phalanx.png",
