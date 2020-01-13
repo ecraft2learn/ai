@@ -240,7 +240,7 @@ const split_data = (datasets, options) => {
         }
     };
     let starts = [];
-    const output_size = datasets.ys ? datasets.ys.shape[1] : datasets.ys_array.length;
+    const output_size = datasets.ys ? datasets.ys.shape[1] : datasets.ys_array[0].length;
     for (let i = 0; i < output_size; i++) {
         starts.push(find_start(i));
     }
