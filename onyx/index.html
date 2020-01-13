@@ -78,15 +78,15 @@
                 testing_fraction: 0,
                 validation_fraction: .15,
                 fraction_kept: 1, // for exploring how well it works with less data
-                stop_if_no_progress_for_n_epochs: 20,
+                stop_if_no_progress_for_n_epochs: 50,
                 number_of_training_repeats: 3,
                 split_data_on_each_experiment: true,
                 search: {type: 'randomSearch', // or 'gridSearch' but it triggers an exception
-                         number_of_experiments: 2,
+                         number_of_experiments: 10,
                          space: {// epochs: [50, 100, 200, 500, 1000],
 //                                  dropout_rate: [0.25, .5,],
 //                                  batch_normalization: [true, false],
-                                 validation_fraction: [.1, .2, .3], 
+//                                  validation_fraction: [.1, .2, .3], 
 //                                  batch_size: [128, 256],
 //                                  optimizer: [(i) => tf.train.rmsprop(2e-4),
 //                                              (i) => tf.train.adamax(1e-5),
@@ -98,7 +98,7 @@
 //                                                (i) => tf.regularizers.l2({l2: 1e-4}),
 //                                                (i) => tf.regularizers.l2({l2: 1e-2}),
 //                                                (i) => null],
-//                                  hidden_layer_sizes: [[1280, 64], [2560, 128], [2560, 128, 16]]
+                                 hidden_layer_sizes: [[1280, 64], [2560, 128], [2560, 128, 16]]
                                  }}
             };
             let images;
