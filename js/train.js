@@ -58,7 +58,7 @@ const collapse_confusion_matrix = (matrix, indices) => {
 
 const set_random_number_seed = (options) => {
      if (options.seed) {
-        options.current_seed = options.seed(options.training_number);
+        options.current_seed = options.seed(options.training_number || 1);
         Math.seedrandom(options.current_seed);
     }   
 };
