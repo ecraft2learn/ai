@@ -319,7 +319,24 @@ In <a href="../snap/snap.html?project=draw%20word%bias&editMode&noRun" target="_
 this implementation of the scoring reporter</a> one can see that "mathematics" has a higher "maleness" score than "art".
 And "art" has a higher "pleasantness" score than "mathematics".
 </p>
-
+<h4 class="sample-program-white" id="codenames">Generating clues for the Codenames board game</h4>
+<p class="sample-program">
+<a href=""target="_blank">Codenames</a> is an award-winning board game.
+Each team has a spymaster who provides a single word clue to his or her teammates.
+The teammates see 25 words (initially) and need to guess which ones the spymaster is hinting should be guessed.
+By using the <span class="block-name">closest words to</span> reporter one can find a word that is "close"
+to the team's words and "far" from the words of the other team or the codeword of the assassin.
+</p>
+<p class="instructions">
+Here is
+<a href="../snap/snap.html?project=codenames" target="_blank">a program that partially implements a spymaster</a>.
+Given a list of words it finds the best clue for two of those words.
+Starting with this program you can make a program for playing <i>Codenames</i>.
+Try enhancing it to search for clues for more than two words at a time.
+Enhance it to make sure that none of the possible clues suggest the other team's codenames
+or the assassin's codename.
+</p>
+</h4>
 <h4 class="how-it-works-white">How does this work?</h4>
 <p class="how-it-works">
 While we don't really know what the numbers mean, they must be encoding lots of things about words such as
@@ -455,6 +472,9 @@ E.g. the relationships of 'tall', 'taller', 'tallest', 'short', 'shorter', 'shor
 Or 'run', 'ran', 'running' (and 'runny' and 'runnier').
 Can you find some general patterns?
 Do they generalise to other languages?
+</li>
+<li>
+Implement a spymaster for the <a href="#codenames">Codenames</a> game.
 </li>
 <li>
 Be creative! Word embeddings are new and there is much that remains to discover.
