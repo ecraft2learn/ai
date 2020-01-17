@@ -213,10 +213,19 @@ window.ecraft2learn =
                   callback.expression instanceof ReporterBlockMorph)) {
                 return;
             }
+            // callback.emptySlots+1 is in case callback is passed more arguments than callback has empty slots
+            let parameters = callback.emptySlots > 0 ?
+                             Array.prototype.slice.call(arguments, 1, callback.emptySlots+1) :
+                             Array.prototype.slice.call(arguments, 1);
             // invoke the callback with the argments (other than the callback itself)
             // if BlockMorph then needs a receiver -- apparently callback is good enough
-//             return invoke(callback, new List(Array.prototype.slice.call(arguments, 1)), (callback instanceof BlockMorph && callback)); 
-            var stage = world.children[0].stage; // this.parentThatIsA(StageMorph);
+            if (callback.receiver.isWarped) {
+                // this fixes a problem with callbacks invoked within a wrap block
+                // where wait for never proceeds
+                callback.receiver.endWarp();
+                return invoke(callback, new List(parameters), (callback instanceof BlockMorph && callback));
+            }
+            const stage = world.children[0].stage; // this.parentThatIsA(StageMorph);
 //             var process = stage.threads.startProcess(callback.expression,
 //                                                      callback.receiver,
 //                                                      stage.isThreadSafe,
@@ -226,11 +235,7 @@ window.ecraft2learn =
 //                                                      },
 //                                                      false,
 //                                                      false);
-            var process = new Process(null, callback.receiver, null, true);
-            // callback.emptySlots+1 is in case callback is passed more arguments than callback has empty slots
-            let parameters = callback.emptySlots > 0 ?
-                             Array.prototype.slice.call(arguments, 1, callback.emptySlots+1) :
-                             Array.prototype.slice.call(arguments, 1);
+            const process = new Process(null, callback.receiver, null, true);
             process.initializeFor(callback, new List(parameters));
             stage.threads.processes.push(process);
             return process;
