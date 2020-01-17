@@ -53,15 +53,15 @@
 
 // Global stuff ////////////////////////////////////////////////////////
 
-/*global ArgMorph, BlockMorph, CommandBlockMorph, CommandSlotMorph, Morph,
+/*global ArgMorph, BlockMorph, CommandBlockMorph, CommandSlotMorph, Morph, Map,
 MultiArgMorph, Point, ReporterBlockMorph, SyntaxElementMorph, contains, Costume,
 degrees, detect, nop, radians, ReporterSlotMorph, CSlotMorph, RingMorph, Sound,
 IDE_Morph, ArgLabelMorph, localize, XML_Element, hex_sha512, TableDialogMorph,
 StageMorph, SpriteMorph, StagePrompterMorph, Note, modules, isString, copy,
 isNil, WatcherMorph, List, ListWatcherMorph, alert, console, TableMorph, Color,
-TableFrameMorph, ColorSlotMorph, isSnapObject, Map, newCanvas, Symbol*/
+TableFrameMorph, ColorSlotMorph, isSnapObject, newCanvas, Symbol, SVG_Costume*/
 
-modules.threads = '2019-November-19';
+modules.threads = '2019-December-19';
 
 var ThreadManager;
 var Process;
@@ -398,6 +398,8 @@ ThreadManager.prototype.removeTerminatedProcesses = function () {
                         );
                     }
                 }
+            } else if (proc.onComplete instanceof Function) {
+                proc.onComplete();
             }
         } else {
             remaining.push(proc);
@@ -2077,6 +2079,9 @@ Process.prototype.doSetGlobalFlag = function (name, bool) {
     case 'flat line ends':
         SpriteMorph.prototype.useFlatLineEnds = bool;
         break;
+    case 'log pen vectors':
+        StageMorph.prototype.enablePenLogging = bool;
+        break;
     case 'video capture':
         if (bool) {
             this.startVideo(stage);
@@ -2098,6 +2103,8 @@ Process.prototype.reportGlobalFlag = function (name) {
         return this.reportIsFastTracking();
     case 'flat line ends':
         return SpriteMorph.prototype.useFlatLineEnds;
+    case 'log pen vectors':
+        return StageMorph.prototype.enablePenLogging;
     case 'video capture':
         return !isNil(stage.projectionSource) &&
             stage.projectionLayer()
@@ -3173,6 +3180,12 @@ Process.prototype.doBroadcast = function (message) {
                 });
             }
         });
+        (stage.messageCallbacks[''] || []).forEach(function (callback) {
+            callback(msg); // for "any" message, pass it along as argument
+        });
+        (stage.messageCallbacks[msg] || []).forEach(function (callback) {
+            callback(); // for a particular message
+        });
     }
     return procs;
 };
@@ -4053,66 +4066,6 @@ Process.prototype.objectTouchingObject = function (thisObj, name) {
     );
 };
 
-Process.prototype.reportTouchingColor = function (aColor, tolerance) {
-    // also check for any parts (subsprites)
-    var thisObj = this.blockReceiver(),
-        stage;
-
-    if (thisObj) {
-        stage = thisObj.parentThatIsA(StageMorph);
-        if (stage) {
-            if (thisObj.isTouching(
-                stage.colorFiltered(aColor, thisObj, tolerance))
-            ) {
-                return true;
-            }
-            return thisObj.parts.some(
-                function (any) {
-                    return any.isTouching(
-                        stage.colorFiltered(aColor, any, tolerance)
-                    );
-                }
-            );
-        }
-    }
-    return false;
-};
-
-Process.prototype.reportFuzzyTouchingColor =
-    Process.prototype.reportTouchingColor;
-
-Process.prototype.reportColorIsTouchingColor = function (
-    color1,
-    color2,
-    tolerance
-) {
-    // also check for any parts (subsprites)
-    var thisObj = this.blockReceiver(),
-        stage;
-
-    if (thisObj) {
-        stage = thisObj.parentThatIsA(StageMorph);
-        if (stage) {
-            if (thisObj.colorFiltered(color1, tolerance).isTouching(
-                    stage.colorFiltered(color2, thisObj, tolerance)
-                )) {
-                return true;
-            }
-            return thisObj.parts.some(
-                function (any) {
-                    return any.colorFiltered(color1, tolerance).isTouching(
-                        stage.colorFiltered(color2, any, tolerance)
-                    );
-                }
-            );
-        }
-    }
-    return false;
-};
-
-Process.prototype.reportFuzzyColorIsTouchingColor =
-    Process.prototype.reportColorIsTouchingColor;
-
 Process.prototype.reportAspect = function (aspect, location) {
     // sense colors and sprites anywhere,
     // use sprites to read/write data encoded in colors.
@@ -4601,8 +4554,7 @@ Process.prototype.doSet = function (attribute, value) {
     case 'parent':
         this.assertType(rcvr, 'sprite');
         value = value instanceof SpriteMorph ? value : null;
-        // needed: circularity avoidance
-        rcvr.setExemplar(value);
+        rcvr.setExemplar(value, true); // throw an error in case of circularity
         break;
     case 'temporary?':
         this.assertType(rcvr, 'sprite');
@@ -5170,6 +5122,47 @@ Process.prototype.reportNewCostume = function (pixels, width, height, name) {
             localize('costume')
         )
     );
+};
+
+Process.prototype.reportPentrailsAsSVG = function () {
+    // interpolated
+    var rcvr, stage, svg, acc, offset;
+
+    if (!this.context.accumulator) {
+        stage = this.homeContext.receiver.parentThatIsA(StageMorph);
+        if (!stage.trailsLog.length) {
+            throw new Error (localize(
+                'there are currently no\nvectorizable pen trail segments'
+            ));
+        }
+        svg = stage.trailsLogAsSVG();
+        this.context.accumulator = {
+            img : new Image(),
+            rot : svg.rot,
+            ready : false
+        };
+        acc = this.context.accumulator;
+        acc.img.onload = function () {
+            acc.ready = true;
+        };
+        acc.img.src = 'data:image/svg+xml,' + svg.src;
+        acc.img.rot = svg.rotationShift;
+    } else if (this.context.accumulator.ready) {
+        offset = new Point(0, 0);
+        rcvr = this.blockReceiver();
+        if (rcvr instanceof SpriteMorph) {
+            offset = new Point(rcvr.xPosition(), -rcvr.yPosition());
+        }
+        this.returnValueToParentContext(
+            new SVG_Costume(
+                this.context.accumulator.img,
+                this.blockReceiver().newCostumeName(localize('Costume')),
+                this.context.accumulator.rot.translateBy(offset)
+            )
+        );
+        return;
+    }
+    this.pushContext();
 };
 
 // Process constant input options

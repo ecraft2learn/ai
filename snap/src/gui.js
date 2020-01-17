@@ -9,7 +9,7 @@
     written by Jens Mönig
     jens@moenig.org
 
-    Copyright (C) 2019 by Jens Mönig
+    Copyright (C) 2020 by Jens Mönig
 
     This file is part of Snap!.
 
@@ -61,25 +61,24 @@
 
 */
 
-/*global modules, Morph, SpriteMorph, SyntaxElementMorph, Color, Cloud,
-ListWatcherMorph, TextMorph, newCanvas, useBlurredShadows, VariableFrame,
+/*global modules, Morph, SpriteMorph, SyntaxElementMorph, Color, Cloud, Audio,
+ListWatcherMorph, TextMorph, newCanvas, useBlurredShadows, VariableFrame, Sound,
 StringMorph, Point, MenuMorph, morphicVersion, DialogBoxMorph, normalizeCanvas,
 ToggleButtonMorph, contains, ScrollFrameMorph, StageMorph, PushButtonMorph, sb,
 InputFieldMorph, FrameMorph, Process, nop, SnapSerializer, ListMorph, detect,
-AlignmentMorph, TabMorph, Costume, MorphicPreferences, Sound, BlockMorph,
-ToggleMorph, InputSlotDialogMorph, ScriptsMorph, isNil, SymbolMorph, fontHeight,
-BlockExportDialogMorph, BlockImportDialogMorph, SnapTranslator, localize,
-List, ArgMorph, Uint8Array, HandleMorph, SVG_Costume, TableDialogMorph,
-CommentMorph, CommandBlockMorph, BooleanSlotMorph, RingReporterSlotMorph,
-BlockLabelPlaceHolderMorph, Audio, SpeechBubbleMorph, ScriptFocusMorph,
-XML_Element, WatcherMorph, BlockRemovalDialogMorph, saveAs, TableMorph,
-isSnapObject, isRetinaEnabled, disableRetinaSupport, enableRetinaSupport,
-isRetinaSupported, SliderMorph, Animation, BoxMorph, MediaRecorder,
-BlockEditorMorph, BlockDialogMorph*/
+AlignmentMorph, TabMorph, Costume, MorphicPreferences,BlockMorph, ToggleMorph,
+InputSlotDialogMorph, ScriptsMorph, isNil, SymbolMorph, fontHeight,  localize,
+BlockExportDialogMorph, BlockImportDialogMorph, SnapTranslator, List, ArgMorph,
+Uint8Array, HandleMorph, SVG_Costume, TableDialogMorph, CommentMorph, saveAs,
+CommandBlockMorph, BooleanSlotMorph, RingReporterSlotMorph, ScriptFocusMorph,
+BlockLabelPlaceHolderMorph, SpeechBubbleMorph, XML_Element, WatcherMorph,
+BlockRemovalDialogMorph,TableMorph, isSnapObject, isRetinaEnabled, SliderMorph,
+disableRetinaSupport, enableRetinaSupport, isRetinaSupported, MediaRecorder,
+Animation, BoxMorph, BlockEditorMorph, BlockDialogMorph*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.gui = '2019-November-19';
+modules.gui = '2020-January-11';
 
 // Declarations
 
@@ -582,7 +581,7 @@ IDE_Morph.prototype.createLogo = function () {
     this.logo = new Morph();
     this.logo.texture = this.logoURL;
     this.logo.drawNew = function () {
-        this.image = newCanvas(this.extent());
+        this.image = newCanvas(this.extent(), false, this.image);
         var context = this.image.getContext('2d'),
             gradient = context.createLinearGradient(
                 0,
@@ -2869,6 +2868,17 @@ IDE_Morph.prototype.settingsMenu = function () {
         false
     );
     addPreference(
+        'Log pen vectors',
+        function () {
+            StageMorph.prototype.enablePenLogging =
+                !StageMorph.prototype.enablePenLogging;
+        },
+        StageMorph.prototype.enablePenLogging,
+        'uncheck to turn off\nlogging pen vectors',
+        'check to turn on\nlogging pen vectors',
+        false
+    );
+    addPreference(
         'Ternary Boolean slots',
         function () {
         	BooleanSlotMorph.prototype.isTernary =
@@ -3626,8 +3636,8 @@ IDE_Morph.prototype.aboutSnap = function () {
         module, btn1, btn2, btn3, btn4, licenseBtn, translatorsBtn,
         world = this.world();
 
-    aboutTxt = 'Snap! 5.3.7\nBuild Your Own Blocks\n\n'
-        + 'Copyright \u24B8 2019 Jens M\u00F6nig and '
+    aboutTxt = 'Snap! 5.4.4\nBuild Your Own Blocks\n\n'
+        + 'Copyright \u24B8 2008-2020 Jens M\u00F6nig and '
         + 'Brian Harvey\n'
         + 'jens@moenig.org, bh@cs.berkeley.edu\n\n'
 
@@ -3863,6 +3873,7 @@ IDE_Morph.prototype.newProject = function () {
     StageMorph.prototype.enableCodeMapping = false;
     StageMorph.prototype.enableInheritance = true;
     StageMorph.prototype.enableSublistIDs = false;
+    StageMorph.prototype.enablePenLogging = false;
     SpriteMorph.prototype.useFlatLineEnds = false;
     Process.prototype.enableLiveCoding = false;
     this.setProjectName('');
@@ -4350,6 +4361,7 @@ IDE_Morph.prototype.rawOpenProjectString = function (str) {
     StageMorph.prototype.enableCodeMapping = false;
     StageMorph.prototype.enableInheritance = true;
     StageMorph.prototype.enableSublistIDs = false;
+    StageMorph.prototype.enablePenLogging = false;
     Process.prototype.enableLiveCoding = false;
     if (Process.prototype.isCatchingErrors) {
         try {
@@ -4392,6 +4404,7 @@ IDE_Morph.prototype.rawOpenCloudDataString = function (str) {
     StageMorph.prototype.enableCodeMapping = false;
     StageMorph.prototype.enableInheritance = true;
     StageMorph.prototype.enableSublistIDs = false;
+    StageMorph.prototype.enablePenLogging = false;
     Process.prototype.enableLiveCoding = false;
     if (Process.prototype.isCatchingErrors) {
         try {
@@ -8020,6 +8033,13 @@ SpriteIconMorph.prototype.userMenu = function () {
             },
             'open a new window\nwith a picture of the stage'
         );
+        if (this.object.trailsLog.length) {
+            menu.addItem(
+                'svg...',
+                function () {myself.object.exportTrailsLogAsSVG(); },
+                'export pen trails\nline segments as SVG'
+            );
+        }
         return menu;
     }
     if (!(this.object instanceof SpriteMorph)) {return null; }
@@ -8127,15 +8147,15 @@ SpriteIconMorph.prototype.createBackgrounds = function () {
         return null;
     }
 
-    this.normalImage = newCanvas(ext);
+    this.normalImage = newCanvas(ext, false, this.normalImage);
     context = this.normalImage.getContext('2d');
     this.drawBackground(context, this.color);
 
-    this.highlightImage = newCanvas(ext);
+    this.highlightImage = newCanvas(ext, false, this.highlightImage);
     context = this.highlightImage.getContext('2d');
     this.drawBackground(context, this.highlightColor);
 
-    this.pressImage = newCanvas(ext);
+    this.pressImage = newCanvas(ext, false, this.pressImage);
     context = this.pressImage.getContext('2d');
     this.drawOutline(context);
     this.drawBackground(context, this.pressColor);
@@ -9321,8 +9341,8 @@ StageHandleMorph.prototype.init = function (target) {
 // StageHandleMorph drawing:
 
 StageHandleMorph.prototype.drawNew = function () {
-    this.normalImage = newCanvas(this.extent());
-    this.highlightImage = newCanvas(this.extent());
+    this.normalImage = newCanvas(this.extent(), false, this.normalImage);
+    this.highlightImage = newCanvas(this.extent(), false, this.highlightImage);
     this.drawOnCanvas(
         this.normalImage,
         this.color
@@ -9614,7 +9634,11 @@ CamSnapshotDialogMorph.prototype.buildContents = function () {
     }
 
     this.videoView.setExtent(stage.dimensions);
-    this.videoView.image = newCanvas(stage.dimensions);
+    this.videoView.image = newCanvas(
+        stage.dimensions,
+        true, // retina, maybe overkill here
+        this.videoView.image
+    );
 
     this.videoView.drawOn = function (aCanvas) {
         var context = aCanvas.getContext('2d'),

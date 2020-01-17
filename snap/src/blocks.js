@@ -9,7 +9,7 @@
     written by Jens Mönig
     jens@moenig.org
 
-    Copyright (C) 2019 by Jens Mönig
+    Copyright (C) 2020 by Jens Mönig
 
     This file is part of Snap!.
 
@@ -148,7 +148,7 @@ CustomCommandBlockMorph, SymbolMorph, ToggleButtonMorph, DialMorph*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.blocks = '2019-November-12';
+modules.blocks = '2020-January-06';
 
 var SyntaxElementMorph;
 var BlockMorph;
@@ -1464,6 +1464,7 @@ SyntaxElementMorph.prototype.labelPart = function (spec) {
                 {
                     'turbo mode' : ['turbo mode'],
                     'flat line ends' : ['flat line ends'],
+                    'log pen vectors' : ['log pen vectors'],
                     'video capture' : ['video capture'],
                     'mirror video' : ['mirror video']
                 },
@@ -2850,7 +2851,9 @@ BlockMorph.prototype.userMenu = function () {
         }
     }
 
-    // JIT-compile HOFs - experimental
+    // direct relabelling:
+    // - JIT-compile HOFs - experimental
+    // - vector pen trails
     if (
         contains(
             ['reportMap', 'reportKeep', 'reportFindFirst', 'reportCombine'],
@@ -2891,6 +2894,27 @@ BlockMorph.prototype.userMenu = function () {
         };
         menu.addItem(
             'uncompile',
+            function () {
+                myself.setSelector(alternatives[myself.selector]);
+                myself.changed();
+            }
+        );
+    } else if (
+        contains(
+            ['reportPenTrailsAsCostume', 'reportPentrailsAsSVG'],
+            this.selector
+        )
+    ) {
+        alternatives = {
+            reportPenTrailsAsCostume : 'reportPentrailsAsSVG',
+            reportPentrailsAsSVG : 'reportPenTrailsAsCostume'
+        };
+        menu.addItem(
+            localize(
+                SpriteMorph.prototype.blocks[
+                    alternatives[myself.selector]
+                ].spec
+            ),
             function () {
                 myself.setSelector(alternatives[myself.selector]);
                 myself.changed();
@@ -5016,7 +5040,7 @@ CommandBlockMorph.prototype.drawNew = function () {
     this.cachedClr = this.color.toString();
     this.cachedClrBright = this.bright();
     this.cachedClrDark = this.dark();
-    this.image = newCanvas(this.extent());
+    this.image = newCanvas(this.extent(), false, this.image);
     context = this.image.getContext('2d');
     context.fillStyle = this.cachedClr;
 
@@ -5809,7 +5833,7 @@ ReporterBlockMorph.prototype.drawNew = function () {
     this.cachedClr = this.color.toString();
     this.cachedClrBright = this.bright();
     this.cachedClrDark = this.dark();
-    this.image = newCanvas(this.extent());
+    this.image = newCanvas(this.extent(), false, this.image);
     context = this.image.getContext('2d');
     context.fillStyle = this.cachedClr;
 
@@ -7647,7 +7671,7 @@ CommandSlotMorph.prototype.drawNew = function () {
     this.cachedClr = this.color.toString();
     this.cachedClrBright = this.bright();
     this.cachedClrDark = this.dark();
-    this.image = newCanvas(this.extent());
+    this.image = newCanvas(this.extent(), false, this.image);
     context = this.image.getContext('2d');
     context.fillStyle = this.cachedClr;
     context.fillRect(0, 0, this.width(), this.height());
@@ -7976,7 +8000,7 @@ RingCommandSlotMorph.prototype.drawNew = function () {
     this.cachedClr = this.color.toString();
     this.cachedClrBright = this.bright();
     this.cachedClrDark = this.dark();
-    this.image = newCanvas(this.extent());
+    this.image = newCanvas(this.extent(), false, this.image);
     context = this.image.getContext('2d');
     context.fillStyle = this.cachedClr;
 
@@ -8210,7 +8234,7 @@ CSlotMorph.prototype.drawNew = function () {
     this.cachedClr = this.color.toString();
     this.cachedClrBright = this.bright();
     this.cachedClrDark = this.dark();
-    this.image = newCanvas(this.extent());
+    this.image = newCanvas(this.extent(), false, this.image);
     context = this.image.getContext('2d');
     context.fillStyle = this.cachedClr;
 
@@ -9513,7 +9537,7 @@ InputSlotMorph.prototype.drawNew = function () {
     var context, borderColor, r;
 
     // initialize my surface property
-    this.image = newCanvas(this.extent());
+    this.image = newCanvas(this.extent(), false, this.image);
     context = this.image.getContext('2d');
     if (this.cachedNormalColor) { // if flashing
         borderColor = this.color;
@@ -9877,7 +9901,7 @@ TemplateSlotMorph.prototype.drawNew = function () {
     this.cachedClr = this.color.toString();
     this.cachedClrBright = this.bright();
     this.cachedClrDark = this.dark();
-    this.image = newCanvas(this.extent());
+    this.image = newCanvas(this.extent(), false, this.image);
     context = this.image.getContext('2d');
     context.fillStyle = this.cachedClr;
     this.drawRounded(context);
@@ -10131,7 +10155,7 @@ BooleanSlotMorph.prototype.drawNew = function (progress) {
     this.cachedClr = this.color.toString();
     this.cachedClrBright = this.bright();
     this.cachedClrDark = this.dark();
-    this.image = newCanvas(this.extent());
+    this.image = newCanvas(this.extent(), false, this.image);
     context = this.image.getContext('2d');
     this.drawDiamond(context, progress);
     this.drawLabel(context, textLabel);
@@ -10395,7 +10419,10 @@ BooleanSlotMorph.prototype.drawKnob = function (context, progress) {
     context.closePath();
     context.fill();
 
-    if (MorphicPreferences.isFlat) {return; }
+    if (MorphicPreferences.isFlat) {
+        context.globalAlpha = 1;
+        return;
+    }
 
     // add 3D-Effect
     // outline:
@@ -10459,6 +10486,7 @@ BooleanSlotMorph.prototype.drawKnob = function (context, progress) {
         false
     );
     context.stroke();
+    context.globalAlpha = 1;
 };
 
 BooleanSlotMorph.prototype.textLabel = function () {
@@ -10537,7 +10565,7 @@ ArrowMorph.prototype.setSize = function (size) {
 
 ArrowMorph.prototype.drawNew = function () {
     // initialize my surface property
-    this.image = newCanvas(this.extent());
+    this.image = newCanvas(this.extent(), false, this.image);
     var context = this.image.getContext('2d'),
         pad = this.padding,
         h = this.height(),
@@ -10743,7 +10771,7 @@ ColorSlotMorph.prototype.drawNew = function () {
     this.silentSetExtent(new Point(side, side));
 
     // initialize my surface property
-    this.image = newCanvas(this.extent());
+    this.image = newCanvas(this.extent(), false, this.image);
     context = this.image.getContext('2d');
     if (this.parent) {
         borderColor = this.parent.color;
@@ -11494,7 +11522,7 @@ FunctionSlotMorph.prototype.drawNew = function () {
     var context, borderColor;
 
     // initialize my surface property
-    this.image = newCanvas(this.extent());
+    this.image = newCanvas(this.extent(), false, this.image);
     context = this.image.getContext('2d');
     if (this.parent) {
         borderColor = this.parent.color;

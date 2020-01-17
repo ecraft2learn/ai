@@ -6,6 +6,135 @@
 * **Notable Fixes:**
 * **Translation Updates:**
 
+## 5.4.4:
+* **Notable Fixes**
+    * fixed strings library format
+    * automatically remove orphaned variable watchers
+
+### 2020-01-11
+* objects: automatically remove orphaned variable watchers
+* prepared patch
+
+### 2020-01-10
+* fixed strings library format
+
+## 5.4.3:
+* **Notable Fix**
+    * render Boolean slots correctly after mouse-over
+
+### 2020-01-06
+* blocks: reset BooleanSlotMorph canvas context's global alpha after rendering the slider button 
+* prepared patch
+
+## 5.4.2:
+* **Notable Fix:**
+    * prevent Morphs from sharing canvasses when rerendering
+
+### 2020-01-04
+* morphic: fixed tagging of shared Canvasses
+* prepared patch
+
+## 5.4.1:
+* **Notable Change:**
+    * optimized loading projects
+* **Notable Fix:**
+    * reduced distortion and clicks when playing notes
+* **Translation Update:**
+    * Catalan
+
+### 2020-01-03
+* new dev version
+* morphic: recycle cached Canvasses
+* gui: recycle cached Canvasses
+* objects: recycle cached Canvasses
+* blocks: recycle cached Canvasses
+* widgets: recycle cached Canvasses
+* byob: recycle cached Canvasses
+* symbols: recycle cached Canvasses
+* symbols: recycle cached Canvasses
+* Catalan translation update
+* objects: tweaked notes to reduce distortion and clicks
+* prepared minor release
+
+## 5.4.0:
+* **New Features:**
+    * log pen vectors
+    * export pen trails as SVG
+    * access pen trails as SVG_Costume: new "pen vectors" reporter variant of "pen trails"
+    * new Snap! API: broadcast and react to messages, access global variables from outside Snap!
+* **Notable Change:**
+    * when creating a costume from pen trails (raster or vector) make its rotation center the position of the sprite
+* **Notable Fixes:**
+    * support null-serialization in list-csv conversions
+    * avoid circular inheritance when using blocks to set sprites' parents
+* **Translation Updates:**
+    * NEW Slovak translation, thanks, Peter Lukacovic
+    * German
+
+### 2019-12-19
+* objects, threads: refactored inheritance circularity avoidance
+* prepared release
+
+### 2019-12-18
+* gui, api: rearranged Snap! API into its own file
+* added API documentation
+* threads: avoid circular inheritance when using blocks to set sprites' parents
+
+### 2019-12-16
+* gui, objects: added ability to add general message listeners for "any" message
+* gui: added IDE >> getMessages() to Snap! API
+* gui: refactored IDE >> addMessageListenerForAll(callback)
+
+### 2019-12-15
+* gui, threads:  new Snap! API: programmatically broadcast messages and optionally wait from outside Snap!
+* gui: added global variable access methods to the new Snap! API
+* gui, objects: added ability to add message listeners to broadcasts
+
+### 2019-12-13
+* added direct relabelling option to pen trails blocks' context menus
+
+### 2019-12-10
+* NEW Slovak translation, thanks, Peter Lukacovic
+
+### 2019-12-09
+* store: save and restore "log pen trails" setting in project file
+
+### 2019-12-08
+* lists: support null-serialization in list-csv conversions
+
+### 2019-12-07
+* threads: turn "log pen trails" off when loading or creating a new project
+
+### 2019-12-05
+* threads: set the rotation point of "pen vectors" costumes to the position of the sprite that creates them
+* objects: set the rotation point of "pen trails" costumes to the position of the sprite that creates them
+
+### 2019-12-03
+* objects, blocks, threads, gui: added "log pen vectors" session setting
+* updated German translation
+
+### 2019-12-02
+* new dev version
+* objects: export pen trails as SVG (under construction)
+* threads: new "pen trails (SVG)" reporter (experimental, hidden in dev)
+* objects, threads: adjusted rotation center of SVG-pen-trails
+* objects: added aspect racio governance and generator tags to trails SVGs
+* threads: catch empty trails log when trying to generate a vector trails costume
+* objects: support relabelling "pen trails" to "pen trails (SVG)" and vice-versa
+* gui: added "svg" entry to the stage icon's context menu
+* objects: renamed "pen trails (SVG)" to "pen vectors"
+* German translation update
+* cleaned up change markers
+
+## v5.3.8:
+* **Notable Change:**
+    * optimized color collision detection
+
+### 2019-11-29
+* new dev version
+* objects, threads: optimized color collision detection
+* prepared release
+
 ## v5.3.7:
 * **Notable Fixes:**
     * wait until the camera actually records something when turning video capture "on"
