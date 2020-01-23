@@ -390,7 +390,8 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                 if (isNaN(data_loss)) {
                     throw new Error(not_a_number_error_message);
                 }
-                validation_loss = history.val_loss;
+                // if there is no validation data then use the training dataset loss instead
+                validation_loss = typeof history.val_loss === 'undefined' ? history.loss : history.val_loss;
                 data_accuracy = history.acc;
                 validation_accuracy = history.val_acc;
                 if (typeof lowest_data_loss === 'undefined' || data_loss < lowest_data_loss) {
