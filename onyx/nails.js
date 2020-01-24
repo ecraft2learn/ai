@@ -539,10 +539,49 @@ const infer = (image) => {
 };
 
 const load_mobilenet = (callback) => {
-    mobilenet.load({version: 2, alpha: 1}).then((model) => {
-        mobilenet_model = model;
-        return callback();
-    });  
+    if (option === 'transfer') {
+        // find v2 version...
+        const mobilenet_url = 'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json';
+//         'https://storage.googleapis.com/tfjs-models/savedmodel/mobilenet_v2_1.0_224/model.json'
+        tf.loadLayersModel(mobilenet_url)
+            .then((model) => {
+                mobilenet_model = model;
+//                 mobilenet_model.summary();
+                const last_layer_name = 'conv_pw_13_relu';
+                const last_layer = mobilenet_model.getLayer(last_layer_name);
+                const flatten_layer = tf.layers.flatten({inputShape: last_layer.output.shape.slice(1)});
+                let new_output = flatten_layer.apply(last_layer.output);
+                const new_layers = [256, 32];
+                const configuration = {
+                                   activation: 'relu',
+//                                    kernelInitializer,
+//                                    kernelRegularizer,
+                                   useBias: true,  
+                                  };
+                const first_trainable_layer_name = 'first_trainable_layer';
+                new_layers.forEach((size, index) => {
+                    configuration.units = size;
+                    configuration.name = index === 0 ? first_trainable_layer_name : undefined,
+                    new_output = tf.layers.dense(configuration).apply(new_output);
+                });
+                new_output = tf.layers.dense({units: 3,
+                                              activation: 'softmax'}).apply(new_output);
+                const new_model = tf.model({inputs: mobilenet_model.inputs, outputs: new_output});
+                let trainable = false;
+                new_model.layers.forEach(layer => {
+                    layer.trainable = trainable;
+                    trainable = layer.name === first_trainable_layer_name;
+                });
+                new_model.summary();
+                // freeze layers and compile
+            });        
+    } else {
+        mobilenet.load({version: 2, alpha: 1}).then((model) => {
+            mobilenet_model = model;
+            return callback();
+        });     
+    }
+
 };
 
 const initialise_page = () => {

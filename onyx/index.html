@@ -18,6 +18,8 @@
             let option = 'diagnose';
             if (parameters.has('train')) {
                 option = 'create model';
+            } else if (parameters.has('transfer')) {
+                option = 'transfer';
             } else if (parameters.has('experiment')) {
                 option = 'experiment';
             } else if (parameters.has('save-tensors')) {
