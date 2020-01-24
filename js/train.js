@@ -74,7 +74,7 @@ const create_model = (options, failure_callback) => {
     record_callbacks(failure_callback);
     try {
         const {model_name, hidden_layer_sizes, dropout_rate, optimizer, layer_initializer, batch_normalization, regularizer, learning_rate,
-               loss_function, activation, last_activation, seed, datasets} = options;
+               loss_function, activation, last_activation, seed, datasets, custom_model_builder} = options;
         const tfvis_options = typeof tfvis === 'object' ? options.tfvis_options || {} : {}; // ignore options if tfvis not loaded
         training_number = options.training_number;
         let class_names = options.class_names;
@@ -110,7 +110,6 @@ const create_model = (options, failure_callback) => {
                                     });
             }
         }
-        let model = tf.sequential({name: model_name});
         const tfjs_function = (fun, function_table, layer_index) => {
             if (!fun) {
                 return;
@@ -132,47 +131,55 @@ const create_model = (options, failure_callback) => {
                 hidden_layer_sizes.push(output_size);
             }
         }
-        hidden_layer_sizes.forEach((size, index) => {
-            const last_layer = index === hidden_layer_sizes.length-1;
-            const kernelRegularizer = last_layer ? undefined : tfjs_function(regularizer, tf.regularizers, index);
-            const kernelInitializer = last_layer ? undefined : tfjs_function(layer_initializer, tf.initializers, index);
-            const activation_function = (typeof activation === 'string' ? activation : tfjs_function(activation, tf.layers, index)) || 'relu';
-            const configuration = {inputShape: index === 0 ? input_shape : undefined,
-                                   units: last_layer && class_names ? class_names.length : +size,
-                                   activation: last_layer ? last_activation || (class_names && 'softmax') : activation_function,
-                                   kernelInitializer,
-                                   kernelRegularizer,
-                                   useBias: !last_layer, // last one has no bias 
-                                  };
-            model.add(tf.layers.dense(configuration));
-            if (!last_layer) {
-                if (dropout_rate > 0) {
-                    model.add(tf.layers.dropout({rate: dropout_rate}));
+        const build_model = () => {
+            let model = tf.sequential({name: model_name});
+            hidden_layer_sizes.forEach((size, index) => {
+                const last_layer = index === hidden_layer_sizes.length-1;
+                const kernelRegularizer = last_layer ? undefined : tfjs_function(regularizer, tf.regularizers, index);
+                const kernelInitializer = last_layer ? undefined : tfjs_function(layer_initializer, tf.initializers, index);
+                const activation_function = (typeof activation === 'string' ? activation : tfjs_function(activation, tf.layers, index)) || 'relu';
+                const configuration = {inputShape: index === 0 ? input_shape : undefined,
+                                       units: last_layer && class_names ? class_names.length : +size,
+                                       activation: last_layer ? last_activation || (class_names && 'softmax') : activation_function,
+                                       kernelInitializer,
+                                       kernelRegularizer,
+                                       useBias: !last_layer, // last one has no bias 
+                                      };
+                model.add(tf.layers.dense(configuration));
+                if (!last_layer) {
+                    if (dropout_rate > 0) {
+                        model.add(tf.layers.dropout({rate: dropout_rate}));
+                    }
+                    if (batch_normalization) {
+                        const args = typeof batch_normalization === 'boolean' ? undefined : batch_normalization;
+                        model.add(tf.layers.batchNormalization(args));
+                    }
                 }
-                if (batch_normalization) {
-                    const args = typeof batch_normalization === 'boolean' ? undefined : batch_normalization;
-                    model.add(tf.layers.batchNormalization(args));
-                }
-            }
-       });
-       // We use categoricalCrossentropy which is the loss function we use for
-       // categorical classification which measures the error between our predicted
-       // probability distribution over classes (probability that an input is of each
-       // class), versus the label (100% probability in the true class)
-       const optimizer_function = ['Momentum', 'momentum'].includes(optimizer) ? 
-                                  tf.train.momentum((typeof learning_rate === 'undefined' ? .001 : learning_rate), .9) :
-                                  (typeof optimizer === 'string' ? tf.train[optimizer]() : 
-                                  (typeof optimizer === 'object' ? optimizer : optimizer()));
-       const loss = (typeof loss_function === 'string' ?  tf.losses[loss_function] : loss_function) || 
-                    (class_names ? 'categoricalCrossentropy' : 'meanSquaredError');
-       const compile_options = {optimizer: optimizer_function,
-                               loss,
-                               metrics: class_names && ['accuracy']};
-       model.compile(compile_options);
-       if (tfvis_options.display_layers_after_creation) {
-           show_layers(model, 'Model after creation');
-       }
-       return model;
+           });
+           return model;
+        };
+        const compile_model = (model) => {
+           // We use categoricalCrossentropy which is the loss function we use for
+           // categorical classification which measures the error between our predicted
+           // probability distribution over classes (probability that an input is of each
+           // class), versus the label (100% probability in the true class)
+           const optimizer_function = ['Momentum', 'momentum'].includes(optimizer) ? 
+                                      tf.train.momentum((typeof learning_rate === 'undefined' ? .001 : learning_rate), .9) :
+                                      (typeof optimizer === 'string' ? tf.train[optimizer]() : 
+                                      (typeof optimizer === 'object' ? optimizer : optimizer()));
+           const loss = (typeof loss_function === 'string' ?  tf.losses[loss_function] : loss_function) || 
+                        (class_names ? 'categoricalCrossentropy' : 'meanSquaredError');
+           const compile_options = {optimizer: optimizer_function,
+                                   loss,
+                                   metrics: class_names && ['accuracy']};
+           model.compile(compile_options);
+        };
+        const model = custom_model_builder ? custom_model_builder() : build_model();
+        compile_model(model);
+        if (tfvis_options.display_layers_after_creation) {
+            show_layers(model, 'Model after creation');
+        }
+        return model;
   } catch (error) {
       if (failure_callback) {
           invoke_callback(failure_callback, error);

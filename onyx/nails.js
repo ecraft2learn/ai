@@ -2,11 +2,15 @@
 // copyright not yet determined but will be some sort of open source
 'use strict';
 
-let xs_validation = option === 'create model' ? [] : undefined;
-let ys_validation = option === 'create model' ? [] : undefined;
-let xs_test = option === 'create model' || option === 'experiment' ? [] : undefined;
-let ys_test = option === 'create model' || option === 'experiment' ? [] : undefined;
-let load_model_named = option !== 'create model' && model_name;
+const are_training = () => option === 'create model' || option === 'transfer';
+
+let xs = are_training() ? [] : undefined;
+let ys = are_training() ? [] : undefined;
+let xs_validation = are_training() ? [] : undefined;
+let ys_validation = are_training() ? [] : undefined;
+let xs_test = are_training() || option === 'experiment' ? [] : undefined;
+let ys_test = are_training() || option === 'experiment' ? [] : undefined;
+let load_model_named = !are_training() && model_name;
 let loaded_model;
 
 // if tensor_tsv is defined then collect all the logits of each image into a TSV string (tab-separated values)
@@ -49,10 +53,9 @@ const minimum_confidence = 60;
 
 const confusion_matrix = [];
 
-const class_names = typeof class_names_of_saved_tensors === 'undefined' ?
-// hack to do this in 3 pieces to avoid running out of memory
-                    ["warrants second opinion"] : //Object.keys(images) : ["normal", "non-serious", "warrants second opinion"]
-                    class_names_of_saved_tensors;
+const class_names = option === 'save tensors' ?
+                    ["warrants second opinion"] : // hack to do this in 2 goes to avoid running out of memory
+                    ["normal", "non-serious", "warrants second opinion"]; // class_names_of_saved_tensors;
 
 const class_colors = ["green",
                       "red",
@@ -450,6 +453,23 @@ const start_training = () => {
 };
 
 const collect_datasets = () => {
+    if (option === 'transfer') {
+        const images_to_tensor = (images) => tf.data.array(images.map(tf.browser.fromPixels));
+        const dataset = {xs: images_to_tensor(xs),
+                         ys: tf.oneHot(ys, class_names.length),
+                         xs_validation: images_to_tensor(xs_validation),
+                         ys_validation: tf.oneHot(ys_validation, class_names.length),
+                         xs_test: images_to_tensor(xs_test),
+                         ys_test: tf.oneHot(ys_test, class_names.length)};
+         // release data
+         xs = [];
+         ys = [];
+         xs_validation = [];
+         ys_validation = [];
+         xs_test = [];
+         ys_test = [];
+         return dataset;
+    }
     return {xs_array: xs,
             ys_array: one_hot(ys, class_names.length),
             xs_validation_array: xs_validation,
@@ -540,48 +560,46 @@ const infer = (image) => {
 
 const load_mobilenet = (callback) => {
     if (option === 'transfer') {
-        // find v2 version...
-        const mobilenet_url = 'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json';
-//         'https://storage.googleapis.com/tfjs-models/savedmodel/mobilenet_v2_1.0_224/model.json'
-        tf.loadLayersModel(mobilenet_url)
-            .then((model) => {
-                mobilenet_model = model;
-//                 mobilenet_model.summary();
+        model_options.custom_model_builder = () => {
+            // find 0.25 version...
+            const mobilenet_url = 'https://storage.googleapis.com/tfjs-models/savedmodel/mobilenet_v2_1.0_224/model.json';
+            // 'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json';
+            // 'https://storage.googleapis.com/tfjs-models/savedmodel/mobilenet_v2_1.0_224/model.json'
+            tf.loadLayersModel(mobilenet_url).then((original_model) => {
                 const last_layer_name = 'conv_pw_13_relu';
-                const last_layer = mobilenet_model.getLayer(last_layer_name);
+                const last_layer = original_model.getLayer(last_layer_name);
                 const flatten_layer = tf.layers.flatten({inputShape: last_layer.output.shape.slice(1)});
                 let new_output = flatten_layer.apply(last_layer.output);
                 const new_layers = [256, 32];
-                const configuration = {
-                                   activation: 'relu',
-//                                    kernelInitializer,
-//                                    kernelRegularizer,
-                                   useBias: true,  
-                                  };
+                const configuration = {activation: 'relu',
+                                       useBias: true};
                 const first_trainable_layer_name = 'first_trainable_layer';
                 new_layers.forEach((size, index) => {
                     configuration.units = size;
                     configuration.name = index === 0 ? first_trainable_layer_name : undefined,
+                    configuration.kernelRegularizer = tfjs_function(options.regularizer, tf.regularizers, index);
+                    configuration.kernelInitializer = tfjs_function(options.layer_initializer, tf.initializers, index);
                     new_output = tf.layers.dense(configuration).apply(new_output);
                 });
-                new_output = tf.layers.dense({units: 3,
+                new_output = tf.layers.dense({units: class_names.length,
                                               activation: 'softmax'}).apply(new_output);
-                const new_model = tf.model({inputs: mobilenet_model.inputs, outputs: new_output});
+                mobilenet_model = tf.model({inputs: original_model.inputs, outputs: new_output});
                 let trainable = false;
-                new_model.layers.forEach(layer => {
+                mobilenet_model.layers.forEach(layer => {
                     layer.trainable = trainable;
                     trainable = layer.name === first_trainable_layer_name;
                 });
-                new_model.summary();
-                // freeze layers and compile
-            });        
+                mobilenet_model.summary();
+                return mobilenet_model;
+            });
+        };
+        load_all_images(model_options, callback);    
     } else {
         mobilenet.load({version: 2, alpha: 1}).then((model) => {
             mobilenet_model = model;
             return callback();
         });     
     }
-
 };
 
 const initialise_page = () => {
@@ -720,7 +738,7 @@ const add_download_button = (xs_string, ys_string, sources_string) => {
 };
 
 const start_up = () => {
-    if (option === 'create model') {
+    if (are_training()) {
         document.body.innerHTML = "Training started";
         start_training();
         return;
@@ -1895,6 +1913,26 @@ const save_tensors = () => {
 //         } else {
 //             console.log(file_name, thumbnail_index);
 //         }
+        next_image(next, when_finished);
+    };
+    next_image(next, when_finished);
+};
+
+const load_all_images = (options, when_finished) => {
+    const {validation_fraction, testing_fraction} = options;
+    const [next_image, reset_next_image] = create_next_image_generator();
+    const next = (image, class_index) => {
+        const random = Math.random();
+        if (random <= validation_fraction) {
+            xs_validation.push(image);
+            ys_validation.push(class_index);
+        } else if (random <= validation_fraction+testing_fraction) {
+            xs_test.push(image);
+            ys_test.push(class_index);
+        } else {
+            xs.push(image);
+            ys.push(class_index);
+        }
         next_image(next, when_finished);
     };
     next_image(next, when_finished);
