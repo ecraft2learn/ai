@@ -4,11 +4,11 @@
 
 const are_training = () => option === 'create model' || option === 'transfer';
 
-let xs = are_training() ? [] : undefined;
+let xs = option === 'create model' ? [] : undefined;
 let ys = are_training() ? [] : undefined;
-let xs_validation = are_training() ? [] : undefined;
+let xs_validation = option === 'create model' ? [] : undefined;
 let ys_validation = are_training() ? [] : undefined;
-let xs_test = are_training() || option === 'experiment' ? [] : undefined;
+let xs_test = option === 'create model' || option === 'experiment' ? [] : undefined;
 let ys_test = are_training() || option === 'experiment' ? [] : undefined;
 let load_model_named = !are_training() && model_name;
 let loaded_model;
@@ -453,29 +453,19 @@ const start_training = () => {
 };
 
 const collect_datasets = () => {
+    let datasets;
+    tf.tidy(() => {
+        datasets = {xs_array: xs,
+                    ys_array: tf.oneHot(ys, class_names.length).arraySync(),
+                    xs_validation_array: xs_validation,
+                    ys_validation_array: tf.oneHot(ys_validation, class_names.length).arraySync(),
+                    xs_test_array: xs_test,
+                    ys_test_array: tf.oneHot(ys_test, class_names.length).arraySync()};
+    });
     if (option === 'transfer') {
-        const images_to_tensor = (images) => tf.data.array(images.map(tf.browser.fromPixels));
-        const dataset = {xs: images_to_tensor(xs),
-                         ys: tf.oneHot(ys, class_names.length),
-                         xs_validation: images_to_tensor(xs_validation),
-                         ys_validation: tf.oneHot(ys_validation, class_names.length),
-                         xs_test: images_to_tensor(xs_test),
-                         ys_test: tf.oneHot(ys_test, class_names.length)};
-         // release data
-         xs = [];
-         ys = [];
-         xs_validation = [];
-         ys_validation = [];
-         xs_test = [];
-         ys_test = [];
-         return dataset;
-    }
-    return {xs_array: xs,
-            ys_array: one_hot(ys, class_names.length),
-            xs_validation_array: xs_validation,
-            ys_validation_array: one_hot(ys_validation, class_names.length),
-            xs_test_array: xs_test,
-            ys_test_array: one_hot(ys_test, class_names.length)};
+        datasets.use_tf_datasets = true;
+    }        
+    return datasets;
 };
 
 const one_hot = (array_of_class_indices, n) => {
@@ -560,40 +550,45 @@ const infer = (image) => {
 
 const load_mobilenet = (callback) => {
     if (option === 'transfer') {
+        let original_model;
         model_options.custom_model_builder = () => {
-            // find 0.25 version...
-            const mobilenet_url = 'https://storage.googleapis.com/tfjs-models/savedmodel/mobilenet_v2_1.0_224/model.json';
-            // 'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json';
-            // 'https://storage.googleapis.com/tfjs-models/savedmodel/mobilenet_v2_1.0_224/model.json'
-            tf.loadLayersModel(mobilenet_url).then((original_model) => {
-                const last_layer_name = 'conv_pw_13_relu';
-                const last_layer = original_model.getLayer(last_layer_name);
-                const flatten_layer = tf.layers.flatten({inputShape: last_layer.output.shape.slice(1)});
-                let new_output = flatten_layer.apply(last_layer.output);
-                const new_layers = [256, 32];
-                const configuration = {activation: 'relu',
-                                       useBias: true};
-                const first_trainable_layer_name = 'first_trainable_layer';
-                new_layers.forEach((size, index) => {
-                    configuration.units = size;
-                    configuration.name = index === 0 ? first_trainable_layer_name : undefined,
-                    configuration.kernelRegularizer = tfjs_function(options.regularizer, tf.regularizers, index);
-                    configuration.kernelInitializer = tfjs_function(options.layer_initializer, tf.initializers, index);
-                    new_output = tf.layers.dense(configuration).apply(new_output);
-                });
-                new_output = tf.layers.dense({units: class_names.length,
-                                              activation: 'softmax'}).apply(new_output);
-                mobilenet_model = tf.model({inputs: original_model.inputs, outputs: new_output});
-                let trainable = false;
-                mobilenet_model.layers.forEach(layer => {
-                    layer.trainable = trainable;
-                    trainable = layer.name === first_trainable_layer_name;
-                });
-                mobilenet_model.summary();
-                return mobilenet_model;
+            const last_layer_name = 'conv_pw_13_relu';
+            const last_layer = original_model.getLayer(last_layer_name);
+            const flatten_layer = tf.layers.flatten({inputShape: last_layer.output.shape.slice(1)});
+            let new_output = flatten_layer.apply(last_layer.output);
+            const new_layers = [256, 32];
+            const configuration = {activation: 'relu',
+                                   useBias: true};
+            const first_trainable_layer_name = 'first_trainable_layer';
+            new_layers.forEach((size, index) => {
+                configuration.units = size;
+                configuration.name = index === 0 ? first_trainable_layer_name : undefined,
+                configuration.kernelRegularizer = tfjs_function(model_options.regularizer, tf.regularizers, index);
+                configuration.kernelInitializer = tfjs_function(model_options.layer_initializer, tf.initializers, index);
+                new_output = tf.layers.dense(configuration).apply(new_output);
             });
+            new_output = tf.layers.dense({units: class_names.length,
+                                          activation: 'softmax'}).apply(new_output);
+            mobilenet_model = tf.model({inputs: original_model.inputs, outputs: new_output});
+            let trainable = false;
+            mobilenet_model.layers.forEach(layer => {
+                layer.trainable = trainable;
+                trainable = layer.name === first_trainable_layer_name;
+            });
+            mobilenet_model.summary();
+//             original_model.dispose(); -- seems it was already done
+            return mobilenet_model;
         };
-        load_all_images(model_options, callback);    
+        // find version 2 
+        const mobilenet_url = 'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_1.0_224/model.json';
+        // 'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json';
+        // 'https://storage.googleapis.com/tfjs-models/savedmodel/mobilenet_v2_1.0_224/model.json'
+        // 'https://storage.googleapis.com/tfjs-models/savedmodel/mobilenet_v2_1.0_224/model.json'
+        tf.loadLayersModel(mobilenet_url).then((model) => {
+            original_model = model;
+            model.summary();
+            load_all_images(model_options, callback);
+        });
     } else {
         mobilenet.load({version: 2, alpha: 1}).then((model) => {
             mobilenet_model = model;
@@ -1919,19 +1914,45 @@ const save_tensors = () => {
 };
 
 const load_all_images = (options, when_finished) => {
-    const {validation_fraction, testing_fraction} = options;
+    document.body.innerHTML = 'Loading images';
+    const concat_tensor = (new_tensor, old_tensors) => {
+        // experiment with using JavaScript arrays and tf.datasets
+        const new_tensor_array = new_tensor.arraySync();
+        new_tensor.dispose();
+        let new_tensors;
+        if (old_tensors) {
+            new_tensors = old_tensors.concat(new_tensor_array);
+        } else {
+            new_tensors = new_tensor_array;
+        }
+        return new_tensors;
+//         let new_tensors;
+//         if (old_tensors) {
+//             new_tensors = old_tensors.concat(new_tensor);
+//             old_tensors.dispose();
+//             new_tensor.dispose();
+//         } else {
+//             new_tensors = new_tensor;
+//         }
+//         return new_tensors;
+    };
+    const {fraction_kept, validation_fraction, testing_fraction} = options;
     const [next_image, reset_next_image] = create_next_image_generator();
     const next = (image, class_index) => {
-        const random = Math.random();
-        if (random <= validation_fraction) {
-            xs_validation.push(image);
-            ys_validation.push(class_index);
-        } else if (random <= validation_fraction+testing_fraction) {
-            xs_test.push(image);
-            ys_test.push(class_index);
-        } else {
-            xs.push(image);
-            ys.push(class_index);
+        if (Math.random() < fraction_kept) {
+            // resize and normalize color values
+            const new_tensor = tf.image.resizeBilinear(tf.browser.fromPixels(image), [224, 224]).div(255).expandDims();
+            const random = Math.random();
+            if (random <= validation_fraction) {
+                xs_validation = concat_tensor(new_tensor, xs_validation);
+                ys_validation.push(class_index);
+            } else if (random <= validation_fraction+testing_fraction) {
+                xs_test = concat_tensor(new_tensor, xs_test);
+                ys_test.push(class_index);
+            } else {
+                xs = concat_tensor(new_tensor, xs);
+                ys.push(class_index);
+            }     
         }
         next_image(next, when_finished);
     };

@@ -110,15 +110,6 @@ const create_model = (options, failure_callback) => {
                                     });
             }
         }
-        const tfjs_function = (fun, function_table, layer_index) => {
-            if (!fun) {
-                return;
-            }
-            if (typeof fun === 'string') {
-                return function_table[fun]({});
-            }
-            return fun(layer_index);
-        };
         if (datasets) {
             let output_size;
             if (datasets.ys_array) {
@@ -189,6 +180,16 @@ const create_model = (options, failure_callback) => {
   }
 };
 
+const tfjs_function = (fun, function_table, layer_index) => {
+    if (!fun) {
+        return;
+    }
+    if (typeof fun === 'string') {
+        return function_table[fun]({});
+    }
+    return fun(layer_index);
+};
+
 const show_layers = (model, tab_name) => {
     const surface = {name: 'Layers', tab: tab_label(tab_name)};
     tfvis.show.modelSummary(surface, model);
@@ -201,20 +202,29 @@ const show_layers = (model, tab_name) => {
 let training_number;
 const tab_label = (label) => label + (typeof training_number === 'undefined' ? '' : '#' + training_number);
 
-const update_tensors = (datasets) => {
+const update_tensors = (datasets, batch_size) => {
     let {xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array} = datasets;
-    tf.dispose(datasets.xs);
-    datasets.xs = tf.tensor(xs_array);
-    tf.dispose(datasets.ys);
-    datasets.ys = tf.tensor(ys_array);
-    tf.dispose(datasets.xs_validation);
-    datasets.xs_validation = xs_validation_array && xs_validation_array.length > 0 && tf.tensor(xs_validation_array);
-    tf.dispose(datasets.ys_validation);
-    datasets.ys_validation = ys_validation_array && ys_validation_array.length > 0 && tf.tensor(ys_validation_array);
-    tf.dispose(datasets.xs_test);
-    datasets.xs_test = xs_test_array && xs_test_array.length > 0 && tf.tensor(xs_test_array);
-    tf.dispose(datasets.ys_test);
-    datasets.ys_test = ys_test_array && ys_test_array.length > 0 && tf.tensor(ys_test_array);
+    if (datasets.use_tf_datasets) {
+        // could add batch and/or shuffle here
+        datasets.train = tf.data.zip({xs: tf.data.array(xs_array), 
+                                      ys: tf.data.array(ys_array)}).batch(batch_size);
+        datasets.validation = tf.data.zip({xs: tf.data.array(xs_validation_array), 
+                                           ys: tf.data.array(ys_validation_array)}).batch(batch_size);
+    } else {
+        tf.dispose(datasets.xs);
+        datasets.xs = tf.tensor(xs_array);
+        tf.dispose(datasets.ys);
+        datasets.ys = tf.tensor(ys_array);
+        tf.dispose(datasets.xs_validation);
+        datasets.xs_validation = xs_validation_array && xs_validation_array.length > 0 && tf.tensor(xs_validation_array);
+        tf.dispose(datasets.ys_validation);
+        datasets.ys_validation = ys_validation_array && ys_validation_array.length > 0 && tf.tensor(ys_validation_array);
+        // not sure the tests need to become tensors
+        tf.dispose(datasets.xs_test);
+        datasets.xs_test = xs_test_array && xs_test_array.length > 0 && tf.tensor(xs_test_array);
+        tf.dispose(datasets.ys_test);
+        datasets.ys_test = ys_test_array && ys_test_array.length > 0 && tf.tensor(ys_test_array);
+    }
 };
 
 const split_data = (datasets, options) => {
@@ -354,7 +364,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
     const create_tensors = !!datasets.xs_array;
     if (create_tensors) {
         // datasets are JavaScript arrays (prior to possible splitting) so compute tensor version
-        update_tensors(datasets);
+        update_tensors(datasets, batch_size);
     }
     try {
         training_number = options.training_number;
@@ -604,8 +614,13 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
        };
        record_callbacks(after_fit_callback);
        const start = Date.now();
-       model.fit(datasets.xs, datasets.ys, configuration)
-           .then((full_history) => invoke_callback(after_fit_callback, full_history), fit_error_handler);
+       const then = (full_history) => invoke_callback(after_fit_callback, full_history);
+       if (datasets.use_tf_datasets) {
+           configuration.validationData = datasets.validation;
+           model.fitDataset(datasets.train, configuration).then(then, fit_error_handler);
+       } else {
+           model.fit(datasets.xs, datasets.ys, configuration).then(then, fit_error_handler);
+       }
      } catch(error) {
          if (failure_callback) {
              invoke_callback(failure_callback, error);
@@ -692,7 +707,7 @@ const hyperparameter_search = (options, datasets, success_callback, error_callba
     options.datasets = datasets; // in case needed to compute input_shape
     if (!!datasets.xs_array) {
         // datasets are JavaScript arrays (prior to possible splitting) so compute tensor version
-        update_tensors(datasets);
+        update_tensors(datasets, options.batch_size);
     }
     const create_and_train = async (search_options) => {
         console.log(search_options);

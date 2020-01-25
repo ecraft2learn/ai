@@ -79,9 +79,9 @@
                 layer_initializer_name: 'varianceScaling', 
                 testing_fraction: 0,
                 validation_fraction: .25,
-                fraction_kept: 1, // for exploring how well it works with less data
+                fraction_kept: 0.1, // for exploring how well it works with less data
                 stop_if_no_progress_for_n_epochs: 50,
-                number_of_training_repeats: 3,
+                number_of_training_repeats: 2,
                 split_data_on_each_experiment: true,
                 search: {type: 'randomSearch', // or 'gridSearch' but it triggers an exception
                          number_of_experiments: 10,
