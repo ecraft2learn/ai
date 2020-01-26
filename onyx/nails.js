@@ -413,7 +413,7 @@ const start_training = () => {
         model_options.categorical = true;
         model_options.tfvis_options =
             {callbacks: ['onEpochEnd'],
-             yAxisDomain: [.3, .8],
+             yAxisDomain: [0, 1],
              width: 500,
              height: 300,
              measure_accuracy: true,
@@ -556,7 +556,7 @@ const load_mobilenet = (callback) => {
             const last_layer = original_model.getLayer(last_layer_name);
             const flatten_layer = tf.layers.flatten({inputShape: last_layer.output.shape.slice(1)});
             let new_output = flatten_layer.apply(last_layer.output);
-            const new_layers = [256, 32];
+            const new_layers = model_options.hidden_layer_sizes;
             const configuration = {activation: 'relu',
                                    useBias: true};
             const first_trainable_layer_name = 'first_trainable_layer';
@@ -569,24 +569,36 @@ const load_mobilenet = (callback) => {
             });
             new_output = tf.layers.dense({units: class_names.length,
                                           activation: 'softmax'}).apply(new_output);
-            mobilenet_model = tf.model({inputs: original_model.inputs, outputs: new_output});
+            const new_model = tf.model({inputs: original_model.inputs, outputs: new_output});
+            let first_trainable_layer_index = 0;
+            for (let index = 0; index < new_model.layers.length; index++) {
+                if (new_model.layers[index].name === first_trainable_layer_name) {
+                    first_trainable_layer_index = index;
+                    break;
+                }
+            };
+            if (model_options.fine_tune_layer_count) {
+                first_trainable_layer_index -= model_options.fine_tune_layer_count;
+            }
             let trainable = false;
-            mobilenet_model.layers.forEach(layer => {
+            new_model.layers.forEach((layer, index) => {
                 layer.trainable = trainable;
-                trainable = layer.name === first_trainable_layer_name;
+                trainable = index >= first_trainable_layer_index;
             });
-            mobilenet_model.summary();
+            new_model.name = model_options.model_name;
+            new_model.summary();
 //             original_model.dispose(); -- seems it was already done
-            return mobilenet_model;
+            return new_model;
         };
         // find version 2 
-        const mobilenet_url = 'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_1.0_224/model.json';
+        const mobilenet_url = 'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json';
+        // 'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_1.0_224/model.json'
         // 'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json';
         // 'https://storage.googleapis.com/tfjs-models/savedmodel/mobilenet_v2_1.0_224/model.json'
         // 'https://storage.googleapis.com/tfjs-models/savedmodel/mobilenet_v2_1.0_224/model.json'
         tf.loadLayersModel(mobilenet_url).then((model) => {
             original_model = model;
-            model.summary();
+//             model.summary();
             load_all_images(model_options, callback);
         });
     } else {
@@ -1915,17 +1927,13 @@ const save_tensors = () => {
 
 const load_all_images = (options, when_finished) => {
     document.body.innerHTML = 'Loading images';
-    const concat_tensor = (new_tensor, old_tensors) => {
-        // experiment with using JavaScript arrays and tf.datasets
-        const new_tensor_array = new_tensor.arraySync();
-        new_tensor.dispose();
-        let new_tensors;
-        if (old_tensors) {
-            new_tensors = old_tensors.concat(new_tensor_array);
+    const concat_data = (new_data, old_array) => {
+        // using JavaScript arrays and tf.datasets instead of tensors which cause out of memory problems
+        if (old_array) {
+            return old_array.concat(new_data);
         } else {
-            new_tensors = new_tensor_array;
+            return new_data;
         }
-        return new_tensors;
 //         let new_tensors;
 //         if (old_tensors) {
 //             new_tensors = old_tensors.concat(new_tensor);
@@ -1941,18 +1949,21 @@ const load_all_images = (options, when_finished) => {
     const next = (image, class_index) => {
         if (Math.random() < fraction_kept) {
             // resize and normalize color values
-            const new_tensor = tf.image.resizeBilinear(tf.browser.fromPixels(image), [224, 224]).div(255).expandDims();
+            const image_data = 
+                tf.tidy(() => {
+                    return tf.image.resizeBilinear(tf.browser.fromPixels(image), [224, 224]).div(255).expandDims().arraySync();
+                });
             const random = Math.random();
             if (random <= validation_fraction) {
-                xs_validation = concat_tensor(new_tensor, xs_validation);
+                xs_validation = concat_data(image_data, xs_validation);
                 ys_validation.push(class_index);
             } else if (random <= validation_fraction+testing_fraction) {
-                xs_test = concat_tensor(new_tensor, xs_test);
+                xs_test = concat_data(image_data, xs_test);
                 ys_test.push(class_index);
             } else {
-                xs = concat_tensor(new_tensor, xs);
+                xs = concat_data(image_data, xs);
                 ys.push(class_index);
-            }     
+            }  
         }
         next_image(next, when_finished);
     };
@@ -1996,6 +2007,7 @@ window.addEventListener('DOMContentLoaded',
                         (event) => {
                             update_page();
                             load_mobilenet(() => {
+                                console.log(tf.memory(), {xs, xs_validation});
                                 if (option === 'save tensors') {
                                     save_tensors();
                                     return;

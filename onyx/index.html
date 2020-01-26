@@ -59,17 +59,17 @@
             const projector_data = false;
             // whether we want to generate files to visualising the data
             const model_name = option !== 'diagnose' ? 
-                               (option === 'create model' || option === 'search' ? "14-01-20a" : "10-01-20a") : 
+                               ((option === 'create model' || option === 'search' || option === 'transfer')? "26-01-20a-transfer-5" : "10-01-20a") : 
                                "10-01-20a";
             const model_options = {
                 seed: (number) => number,
                 model_name: model_name,
-                hidden_layer_sizes: [1280, 64],
-                batch_size: 256,
+                hidden_layer_sizes: [256, 32],
+                batch_size: 16,
                 dropout_rate: .5,
                 batch_normalization: false,
                 shuffle: true,
-                epochs: 1000,
+                epochs: 500,
                 optimizer: (i) => tf.train.rmsprop(2e-4), // tf.train.adamax(1e-5), tf.train.adadelta(),
                 regularizer: (i) => tf.regularizers.l2({l2: 5e-4}),
                 layer_initializer: (index) => tf.initializers.varianceScaling({}), // {seed: SEED}
@@ -79,10 +79,11 @@
                 layer_initializer_name: 'varianceScaling', 
                 testing_fraction: 0,
                 validation_fraction: .25,
-                fraction_kept: 0.1, // for exploring how well it works with less data
+                fraction_kept: .2, // for exploring how well it works with less data
                 stop_if_no_progress_for_n_epochs: 50,
                 number_of_training_repeats: 2,
                 split_data_on_each_experiment: true,
+                fine_tune_layer_count: 5,
                 search: {type: 'randomSearch', // or 'gridSearch' but it triggers an exception
                          number_of_experiments: 10,
                          space: {// epochs: [50, 100, 200, 500, 1000],

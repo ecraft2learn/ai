@@ -350,9 +350,10 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                        loss: 'meanSquaredError'});
     }
     const {class_names, batch_size, shuffle, epochs, validation_split, learning_rate, dropout_rate, batch_normalization, optimizer,
-           layer_initializer, regularizer, seed, stop_if_no_progress_for_n_epochs,
+           layer_initializer, regularizer, seed, stop_if_no_progress_for_n_epochs, 
            testing_fraction, validation_fraction, fraction_kept, split_data_on_each_experiment} 
           = options;
+    const use_tf_datasets = datasets.use_tf_datasets;
     const tfvis_options = typeof tfvis === 'object' ? options.tfvis_options || {} : {}; // ignore options if tfvis not loaded
     const model_name = model.name;
     const splitting_data = split_data_on_each_experiment ||
@@ -457,7 +458,8 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                     abort("User stopped hyperparameter search at epoch " + epoch);
                 }
             }};
-      const {xs, ys, xs_validation, ys_validation, xs_test, ys_test} = datasets;
+      const {xs, ys, xs_validation, ys_validation, xs_test, ys_test,
+             xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array} = datasets;
       const configuration = {batchSize: batch_size,
                              epochs,
                              validationData: xs_validation && [xs_validation, ys_validation],
@@ -466,7 +468,8 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                              callbacks: stats_callback};
       const after_fit_callback = (full_history) => {
 //           console.log(full_history);
-          const {xs, ys, xs_validation, ys_validation, xs_test, ys_test} = datasets;
+          const {xs, ys, xs_validation, ys_validation, xs_test, ys_test,
+                 xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array} = datasets;
           model.ready_for_prediction = true;
           const number_of_tests = xs_test && xs_test.shape[0];
           const percentage_of_tests = (x) => +(100*x/number_of_tests).toFixed(2);
@@ -484,16 +487,16 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                                  compute_confusion_matrix(predictions.dataSync(), ys_test.dataSync(), number_of_classes);
               predictions.dispose();
               tf.dispose(test_loss_tensor); // both of them 
-              if (create_tensors) {
+              if (create_tensors && !use_tf_datasets) {
                   xs_test.dispose();
                   ys_test.dispose();
               }
           }
-          if (create_tensors) {
+          if (create_tensors && !use_tf_datasets) {
               xs.dispose();
               ys.dispose();
           }
-          if (create_tensors && xs_validation) {
+          if (create_tensors && xs_validation && !use_tf_datasets) {
               xs_validation.dispose();
               ys_validation.dispose();
           }
@@ -557,13 +560,16 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
           csv_values += (data_accuracy && data_accuracy.toFixed(4)) + ", ";
           csv_values += (validation_accuracy && validation_accuracy.toFixed(4)) + ", ";
           csv_values += (test_accuracy && test_accuracy.toFixed(4)) + ", ";
+          const x_length = xs ? xs.shape[0] : xs_array.length;
+          const x_validation_length = xs_validation ? xs_validation.shape[0] : xs_validation_array.length;
+          const x_test_length = xs_test ? xs_test.shape[0] : xs_test_array.length;
           if (!xs_validation) {
               // what about validation_split????
-              csv_values += xs.shape[0] + ", ";
+              csv_values += x_length + ", ";
           } else if (!xs_test || datasets.test_and_validation_identical) {
-              csv_values += xs.shape[0] + xs_validation.shape[0] + ", ";
+              csv_values += x_length + x_validation_length + ", ";
           } else {
-              csv_values += xs.shape[0] + xs_validation.shape[0] + xs_test.shape[0] + ", ";
+              csv_values += x_length + x_validation_length + x_test_length + ", ";
           }
           csv_values += (lowest_validation_loss && lowest_validation_loss.toFixed(4)) + ", ";
           csv_values += (lowest_validation_loss_epoch && lowest_validation_loss_epoch) + ", ";
