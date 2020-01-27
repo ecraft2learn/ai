@@ -4,8 +4,8 @@
 
 const are_training = () => option === 'create model' || option === 'transfer';
 
-let xs = option === 'create model' ? [] : undefined;
-let ys = are_training() ? [] : undefined;
+// let xs = option === 'create model' ? [] : undefined;
+// let ys = are_training() ? [] : undefined;
 let xs_validation = option === 'create model' ? [] : undefined;
 let ys_validation = are_training() ? [] : undefined;
 let xs_test = option === 'create model' || option === 'experiment' ? [] : undefined;
@@ -424,6 +424,7 @@ const start_training = () => {
              display_layers_after_training: true,
              display_graphs: true};
         const error_callback = (error) => {
+            console.error(error);
             report_error("Internal error: " + error.message);
         };
         model_options.datasets = collect_datasets();
@@ -552,20 +553,33 @@ const load_mobilenet = (callback) => {
     if (option === 'transfer') {
         let original_model;
         model_options.custom_model_builder = () => {
-            const last_layer_name = 'conv_pw_13_relu';
+            const {hidden_layer_sizes, regularizer, layer_initializer, dropout_rate, batch_normalization, fine_tune_layer_count, model_name} 
+                = model_options;
+            const last_layer_name = 'global_average_pooling2d_1'; // 'conv_pw_13_relu';
             const last_layer = original_model.getLayer(last_layer_name);
-            const flatten_layer = tf.layers.flatten({inputShape: last_layer.output.shape.slice(1)});
-            let new_output = flatten_layer.apply(last_layer.output);
-            const new_layers = model_options.hidden_layer_sizes;
+//             const flatten_layer = tf.layers.flatten({inputShape: last_layer.output.shape.slice(1)});
+            let new_output; // = flatten_layer.apply(last_layer.output);
             const configuration = {activation: 'relu',
                                    useBias: true};
-            const first_trainable_layer_name = 'first_trainable_layer';
-            new_layers.forEach((size, index) => {
+            const first_trainable_layer_name = 'first_new_custom_layer';
+            hidden_layer_sizes.slice(0, hidden_layer_sizes.length-1).forEach((size, index) => {
+                // last layer treated specially below
                 configuration.units = size;
                 configuration.name = index === 0 ? first_trainable_layer_name : undefined,
-                configuration.kernelRegularizer = tfjs_function(model_options.regularizer, tf.regularizers, index);
-                configuration.kernelInitializer = tfjs_function(model_options.layer_initializer, tf.initializers, index);
-                new_output = tf.layers.dense(configuration).apply(new_output);
+                configuration.kernelRegularizer = tfjs_function(regularizer, tf.regularizers, index);
+                configuration.kernelInitializer = tfjs_function(layer_initializer, tf.initializers, index);
+                if (new_output) {
+                    new_output = tf.layers.dense(configuration).apply(new_output);
+                } else {
+                    new_output = tf.layers.dense(configuration).apply(last_layer.output);
+                }
+                if (dropout_rate > 0) {
+                    new_output = tf.layers.dropout({rate: dropout_rate}).apply(new_output);
+                }
+                if (batch_normalization) {
+                    const args = typeof batch_normalization === 'boolean' ? undefined : batch_normalization;
+                    new_output = tf.layers.batchNormalization(args).apply(new_output);
+                }               
             });
             new_output = tf.layers.dense({units: class_names.length,
                                           activation: 'softmax'}).apply(new_output);
@@ -577,29 +591,34 @@ const load_mobilenet = (callback) => {
                     break;
                 }
             };
-            if (model_options.fine_tune_layer_count) {
-                first_trainable_layer_index -= model_options.fine_tune_layer_count;
+            if (fine_tune_layer_count) {
+                first_trainable_layer_index -= fine_tune_layer_count;
             }
             let trainable = false;
             new_model.layers.forEach((layer, index) => {
                 layer.trainable = trainable;
                 trainable = index >= first_trainable_layer_index;
             });
-            new_model.name = model_options.model_name;
+            new_model.name = model_name;
             new_model.summary();
 //             original_model.dispose(); -- seems it was already done
             return new_model;
         };
         // find version 2 
-        const mobilenet_url = 'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json';
+        const mobilenet_url = 'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_1.0_224/model.json';
         // 'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_1.0_224/model.json'
         // 'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json';
         // 'https://storage.googleapis.com/tfjs-models/savedmodel/mobilenet_v2_1.0_224/model.json'
         // 'https://storage.googleapis.com/tfjs-models/savedmodel/mobilenet_v2_1.0_224/model.json'
         tf.loadLayersModel(mobilenet_url).then((model) => {
             original_model = model;
-//             model.summary();
-            load_all_images(model_options, callback);
+            model.summary();
+            load_all_images(model_options, 
+                            () => {
+                                model_options.fraction_kept = 1; // already cut out that fraction
+                                split_data(collect_datasets(), model_options);
+                                callback()
+                                });
         });
     } else {
         mobilenet.load({version: 2, alpha: 1}).then((model) => {
@@ -1934,6 +1953,7 @@ const load_all_images = (options, when_finished) => {
         } else {
             return new_data;
         }
+        // a way to generate tensors for .fit not .fitDataset but quickly used up all the GPU memory
 //         let new_tensors;
 //         if (old_tensors) {
 //             new_tensors = old_tensors.concat(new_tensor);
@@ -1953,17 +1973,22 @@ const load_all_images = (options, when_finished) => {
                 tf.tidy(() => {
                     return tf.image.resizeBilinear(tf.browser.fromPixels(image), [224, 224]).div(255).expandDims().arraySync();
                 });
-            const random = Math.random();
-            if (random <= validation_fraction) {
-                xs_validation = concat_data(image_data, xs_validation);
-                ys_validation.push(class_index);
-            } else if (random <= validation_fraction+testing_fraction) {
-                xs_test = concat_data(image_data, xs_test);
-                ys_test.push(class_index);
-            } else {
+//             const random = Math.random();
+//             if (random <= validation_fraction) {
+//                 xs_validation = concat_data(image_data, xs_validation);
+//                 ys_validation.push(class_index);
+//             } else if (random <= validation_fraction+testing_fraction) {
+//                 xs_test = concat_data(image_data, xs_test);
+//                 ys_test.push(class_index);
+//             } else {
+                if (option === 'transfer' && typeof xs === 'undefined') {
+                    // since loading saved tensors defines xs and ys they are defined in this file 
+                    window.xs = [];
+                    window.ys = [];
+                }
                 xs = concat_data(image_data, xs);
                 ys.push(class_index);
-            }  
+//             }  
         }
         next_image(next, when_finished);
     };

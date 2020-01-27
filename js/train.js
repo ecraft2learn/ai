@@ -111,6 +111,7 @@ const create_model = (options, failure_callback) => {
             }
         }
         if (datasets) {
+            // transfer treats last layer with custom code
             let output_size;
             if (datasets.ys_array) {
                 output_size = typeof datasets.ys_array[0] === 'number' ? 1 : datasets.ys_array[0].length;
@@ -244,7 +245,7 @@ const split_data = (datasets, options) => {
     let xs_ys = original_xs.map((x,index) => [x, original_ys[index]]);
     tf.util.shuffle(xs_ys);
     if (fraction_kept < 1) {
-        xs_ys.splice(Math.round((1 - fraction_kept) * xs_ys.length));
+        xs_ys.splice(Math.round(fraction_kept * xs_ys.length));
     }
     xs_ys = xs_ys.sort((a,b) => a[1].indexOf(1) - b[1].indexOf(1));
     // sort by class to make equal quantities
