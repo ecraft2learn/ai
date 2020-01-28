@@ -67,7 +67,7 @@
                 hidden_layer_sizes: [1024, 64],
                 batch_size: 16,
                 dropout_rate: .5,
-                batch_normalization: false,
+                batch_normalization: true,
                 shuffle: true,
                 epochs: 500,
                 optimizer: (i) => tf.train.rmsprop(2e-4), // tf.train.adamax(1e-5), tf.train.adadelta(),
@@ -121,7 +121,7 @@
             load_local_or_remote_scripts(
                 ["../js/tfjs.js", 
                  "../js/tfjs-vis.js",
-                 "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet", //"../js/mobilenet.js", 
+                 "../js/mobilenet.js", 
                  ...additional_js,
                  "../js/user-agent.js",
                  "nails.js", 

@@ -609,7 +609,6 @@ const load_mobilenet = (callback) => {
         // 'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_1.0_224/model.json'
         // 'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json';
         // 'https://storage.googleapis.com/tfjs-models/savedmodel/mobilenet_v2_1.0_224/model.json'
-        // 'https://storage.googleapis.com/tfjs-models/savedmodel/mobilenet_v2_1.0_224/model.json'
         tf.loadLayersModel(mobilenet_url).then((model) => {
             original_model = model;
             model.summary();
@@ -1966,8 +1965,10 @@ const load_all_images = (options, when_finished) => {
     };
     const {fraction_kept, validation_fraction, testing_fraction} = options;
     const [next_image, reset_next_image] = create_next_image_generator();
+    const keep_every = Math.round(1/fraction_kept);
+    let count = 0;
     const next = (image, class_index) => {
-        if (Math.random() < fraction_kept) {
+        if (count%keep_every === 0) {
             // resize and normalize color values
             const image_data = 
                 tf.tidy(() => {
@@ -1990,6 +1991,7 @@ const load_all_images = (options, when_finished) => {
                 ys.push(class_index);
 //             }  
         }
+        count++;
         next_image(next, when_finished);
     };
     next_image(next, when_finished);
