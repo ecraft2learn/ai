@@ -406,6 +406,7 @@ const shuffle = (a, seed) => {
 const start_training = () => {
     model_options.class_names = class_names.map(better_name); // for displaying confusion matrix
     model_options.model_name = model_name;
+    model_options.replace_datasets = load_all_images;
     let responses = [];
     const number_of_training_repeats = model_options.number_of_training_repeats;
     const next_training = () => {
@@ -427,7 +428,6 @@ const start_training = () => {
             console.error(error);
             report_error("Internal error: " + error.message);
         };
-        model_options.datasets = collect_datasets();
         create_and_train_model(model_options,
                                model_callback,
                                error_callback);
@@ -444,7 +444,7 @@ const start_training = () => {
         responses.push(response);
         const label = "Save model #" + model_options.training_number;
         add_save_model_button(label, response.model, model_name);
-        if (responses.length === number_of_training_repeats) {
+        if (responses.length >= number_of_training_repeats) {
             report_averages(responses, number_of_training_repeats);
         } else {
             next_training();
@@ -463,6 +463,16 @@ const collect_datasets = () => {
                     xs_test_array: xs_test,
                     ys_test_array: tf.oneHot(ys_test, class_names.length).arraySync()};
     });
+    xs = [];
+    ys = [];
+    if (xs_validation) {
+        xs_validation = [];
+        ys_validation = [];        
+    }
+    if (xs_test) {
+        xs_test = [];
+        ys_test = [];
+    }
     if (option === 'transfer') {
         datasets.use_tf_datasets = true;
     }        
@@ -600,7 +610,7 @@ const load_mobilenet = (callback) => {
                 trainable = index >= first_trainable_layer_index;
             });
             new_model.name = model_name;
-            new_model.summary();
+//             new_model.summary();
 //             original_model.dispose(); -- seems it was already done
             return new_model;
         };
@@ -611,13 +621,13 @@ const load_mobilenet = (callback) => {
         // 'https://storage.googleapis.com/tfjs-models/savedmodel/mobilenet_v2_1.0_224/model.json'
         tf.loadLayersModel(mobilenet_url).then((model) => {
             original_model = model;
-            model.summary();
+//             model.summary();
             load_all_images(model_options, 
                             () => {
-                                model_options.fraction_kept = 1; // already cut out that fraction
-                                split_data(collect_datasets(), model_options);
+                                model_options.datasets = collect_datasets();
+                                split_data(model_options.datasets, model_options, 1); // 1 because already cut out fraction_kept
                                 callback()
-                                });
+                            });
         });
     } else {
         mobilenet.load({version: 2, alpha: 1}).then((model) => {
@@ -1944,7 +1954,11 @@ const save_tensors = () => {
 };
 
 const load_all_images = (options, when_finished) => {
-    document.body.innerHTML = 'Loading images';
+    if (options.slice_number) {
+        console.log(tf.memory(), options.slice_number);
+    } else {
+        document.body.innerHTML = 'Loading images';
+    }
     const concat_data = (new_data, old_array) => {
         // using JavaScript arrays and tf.datasets instead of tensors which cause out of memory problems
         if (old_array) {
@@ -1963,12 +1977,16 @@ const load_all_images = (options, when_finished) => {
 //         }
 //         return new_tensors;
     };
-    const {fraction_kept, validation_fraction, testing_fraction} = options;
+    // slice number is so can train with 1/n and then the next 1/n, etc.
+    if (!options.slice_number) {
+        options.slice_number = 0;
+    }
+    const {fraction_kept, validation_fraction, testing_fraction, slice_number} = options;
     const [next_image, reset_next_image] = create_next_image_generator();
     const keep_every = Math.round(1/fraction_kept);
     let count = 0;
     const next = (image, class_index) => {
-        if (count%keep_every === 0) {
+        if (count%keep_every === slice_number%keep_every) {
             // resize and normalize color values
             const image_data = 
                 tf.tidy(() => {
@@ -2034,7 +2052,7 @@ window.addEventListener('DOMContentLoaded',
                         (event) => {
                             update_page();
                             load_mobilenet(() => {
-                                console.log(tf.memory(), {xs, xs_validation});
+                                console.log(tf.memory(), model_options.datasets);
                                 if (option === 'save tensors') {
                                     save_tensors();
                                     return;
