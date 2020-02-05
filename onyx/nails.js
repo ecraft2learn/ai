@@ -424,10 +424,6 @@ const start_training = () => {
              display_layers_after_creation: true,
              display_layers_after_training: true,
              display_graphs: true};
-        const error_callback = (error) => {
-            console.error(error);
-            report_error("Internal error: " + error.message);
-        };
         create_and_train_model(model_options,
                                model_callback,
                                error_callback);
@@ -435,7 +431,7 @@ const start_training = () => {
     const test_loss_message = document.createElement('p');
     let first_time = true;
     document.body.appendChild(test_loss_message);
-    const model_callback = (response) => {
+    const model_callback = (response, callback) => {
         if (first_time) {
             test_loss_message.innerHTML = response["Column labels for saving results in a spreadsheet"] + "<br>";
             first_time = false;
@@ -448,6 +444,9 @@ const start_training = () => {
             report_averages(responses, number_of_training_repeats);
         } else {
             next_training();
+        }
+        if (callback) {
+            callback();
         }
     };
     next_training();
@@ -474,7 +473,7 @@ const collect_datasets = () => {
         ys_test = [];
     }
     if (option === 'transfer') {
-        datasets.use_tf_datasets = true;
+        datasets.use_tf_datasets = model_options.use_tf_datasets;
     }        
     return datasets;
 };
@@ -535,8 +534,16 @@ const add_images = (when_finished, just_one_class, only_class_index, except_imag
     next_image(image_callback, when_all_finished);
 };
 
-let current_logits;
 const make_prediction = async (image, callback) => {
+    if (model_options.use_mobilenet) {
+        make_prediction_using_mobilenet(image, callback);
+    } else {
+        make_prediction_with_loaded_model_only(image, callback);
+    }
+};
+
+let current_logits;
+const make_prediction_using_mobilenet = async (image, callback) => {
     const logits = infer(image);
     if (current_logits) {
         current_logits.dispose(); // no longer needed
@@ -549,6 +556,15 @@ const make_prediction = async (image, callback) => {
     const mobilenet_classifications = await mobilenet_model.classify(image, 5); // top 5 classifications
     console.log(mobilenet_classifications, "Best MobileNet classifications");
     callback({prediction, mobilenet_classifications}, logits_data);
+};
+
+const make_prediction_with_loaded_model_only = (image, callback) => {
+    const image_tensor = image_to_tensor(image);
+    const prediction_tensor = loaded_model.predict([image_tensor]);
+    image_tensor.dispose();
+    const prediction = prediction_tensor.dataSync();
+    prediction_tensor.dispose();
+    callback({prediction});
 };
 
 // 'conv_preds' is the logits activation of MobileNet.
@@ -573,7 +589,7 @@ const load_mobilenet = (callback) => {
                                    useBias: true};
             const first_trainable_layer_name = 'first_new_custom_layer';
             hidden_layer_sizes.slice(0, hidden_layer_sizes.length-1).forEach((size, index) => {
-                // last layer treated specially below
+                // last layer (added automatically) treated specially below
                 configuration.units = size;
                 configuration.name = index === 0 ? first_trainable_layer_name : undefined,
                 configuration.kernelRegularizer = tfjs_function(regularizer, tf.regularizers, index);
@@ -591,8 +607,14 @@ const load_mobilenet = (callback) => {
                     new_output = tf.layers.batchNormalization(args).apply(new_output);
                 }               
             });
-            new_output = tf.layers.dense({units: class_names.length,
-                                          activation: 'softmax'}).apply(new_output);
+            const final_layer = tf.layers.dense({units: class_names.length,
+                                                 activation: 'softmax'});
+            if (new_output) {
+                new_output = final_layer.apply(new_output);
+            } else {
+                final_layer.name = first_trainable_layer_name; // only new layer so is first and last
+                new_output = final_layer.apply(last_layer.output);
+            }
             const new_model = tf.model({inputs: original_model.inputs, outputs: new_output});
             let first_trainable_layer_index = 0;
             for (let index = 0; index < new_model.layers.length; index++) {
@@ -614,7 +636,7 @@ const load_mobilenet = (callback) => {
 //             original_model.dispose(); -- seems it was already done
             return new_model;
         };
-        // find version 2 
+        // version 2 is a graph not layered so harder to fine tune 
         const mobilenet_url = 'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_1.0_224/model.json';
         // 'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_1.0_224/model.json'
         // 'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json';
@@ -622,6 +644,7 @@ const load_mobilenet = (callback) => {
         tf.loadLayersModel(mobilenet_url).then((model) => {
             original_model = model;
 //             model.summary();
+            next_slice_number(model_options);
             load_all_images(model_options, 
                             () => {
                                 model_options.datasets = collect_datasets();
@@ -655,6 +678,11 @@ const initialise_page = () => {
    } catch (error) {
         unable_to_access_camera(error);
    };
+};
+
+const error_callback = (error) => {
+    console.error(error);
+    report_error("Internal error: " + error.message);
 };
 
 const report_error = (message) => {
@@ -955,34 +983,36 @@ const confidences = ({prediction, mobilenet_classifications}, full_description, 
     const mobilenet_classifications_threshold = traffic_light_class === 'gray-light' ? low_threshold : high_threshold;
     let top_n_probability = 0;
     let top_n_class_names = "";
-    mobilenet_classifications.forEach((classification, index) => {
-        if (classification.probability > .02) {
-            top_n_probability += classification.probability;
-            if (index === mobilenet_classifications.length-1) { // last one
-                top_n_class_names += " or "; 
-            } else if (index > 0) {
-                top_n_class_names += ", ";
+    if (mobilenet_classifications) {
+        mobilenet_classifications.forEach((classification, index) => {
+            if (classification.probability > .02) {
+                top_n_probability += classification.probability;
+                if (index === mobilenet_classifications.length-1) { // last one
+                    top_n_class_names += " or "; 
+                } else if (index > 0) {
+                    top_n_class_names += ", ";
+                }
+                top_n_class_names += '"' + classification.className + '"';            
             }
-            top_n_class_names += '"' + classification.className + '"';            
-        }
-    });
-    if (typeof correct_class_index === 'undefined' && // not a labelled image
-        scores[0].score < top_score_threshold && // not very certain about what sort of nail it is
-        top_n_probability >= low_threshold) { // and pretty confident with non-nail classifications
-        let not_nail_message = "If this isn't a nail then the probability that instead it is ";
-        if (top_n_class_names.length > 1) {
-            not_nail_message += "either ";
-        }
-        not_nail_message += top_n_class_names + " is " + Math.round(100*top_n_probability) + "%.";
-        if (full_description) {
-            if (top_n_probability > mobilenet_classifications_threshold) {
-                message = not_nail_message + "<br>Assuming it is a nail, it is classified as: " + message;
-            } else {
-                // not so likely so mention it second
-                message += "<br>" + not_nail_message;
-            }   
-        } else if (top_n_probability > mobilenet_classifications_threshold) {
-            message = not_nail_message;
+        });
+        if (typeof correct_class_index === 'undefined' && // not a labelled image
+            scores[0].score < top_score_threshold && // not very certain about what sort of nail it is
+            top_n_probability >= low_threshold) { // and pretty confident with non-nail classifications
+            let not_nail_message = "If this isn't a nail then the probability that instead it is ";
+            if (top_n_class_names.length > 1) {
+                not_nail_message += "either ";
+            }
+            not_nail_message += top_n_class_names + " is " + Math.round(100*top_n_probability) + "%.";
+            if (full_description) {
+                if (top_n_probability > mobilenet_classifications_threshold) {
+                    message = not_nail_message + "<br>Assuming it is a nail, it is classified as: " + message;
+                } else {
+                    // not so likely so mention it second
+                    message += "<br>" + not_nail_message;
+                }   
+            } else if (top_n_probability > mobilenet_classifications_threshold) {
+                message = not_nail_message;
+            }
         }
     }
     if (top_n_probability > high_threshold && scores[0].score < top_score_threshold) {
@@ -1977,10 +2007,6 @@ const load_all_images = (options, when_finished) => {
 //         }
 //         return new_tensors;
     };
-    // slice number is so can train with 1/n and then the next 1/n, etc.
-    if (!options.slice_number) {
-        options.slice_number = 0;
-    }
     const {fraction_kept, validation_fraction, testing_fraction, slice_number} = options;
     const [next_image, reset_next_image] = create_next_image_generator();
     const keep_every = Math.round(1/fraction_kept);
@@ -1988,10 +2014,10 @@ const load_all_images = (options, when_finished) => {
     const next = (image, class_index) => {
         if (count%keep_every === slice_number%keep_every) {
             // resize and normalize color values
-            const image_data = 
-                tf.tidy(() => {
-                    return tf.image.resizeBilinear(tf.browser.fromPixels(image), [224, 224]).div(255).expandDims().arraySync();
-                });
+            const image_data = tf.tidy(() => {
+                return image_to_tensor(image).arraySync();
+            });
+            console.log(tf.memory(), 'image', count);
 //             const random = Math.random();
 //             if (random <= validation_fraction) {
 //                 xs_validation = concat_data(image_data, xs_validation);
@@ -2000,19 +2026,22 @@ const load_all_images = (options, when_finished) => {
 //                 xs_test = concat_data(image_data, xs_test);
 //                 ys_test.push(class_index);
 //             } else {
-                if (option === 'transfer' && typeof xs === 'undefined') {
-                    // since loading saved tensors defines xs and ys they are defined in this file 
-                    window.xs = [];
-                    window.ys = [];
-                }
-                xs = concat_data(image_data, xs);
-                ys.push(class_index);
-//             }  
+            if (option === 'transfer' && typeof xs === 'undefined') {
+                // since loading saved tensors defines xs and ys they are defined in this file 
+                window.xs = [];
+                window.ys = [];
+            }
+            xs = concat_data(image_data, xs);
+            ys.push(class_index);
         }
         count++;
         next_image(next, when_finished);
     };
     next_image(next, when_finished);
+};
+
+const image_to_tensor = (image) => {
+    return tf.image.resizeBilinear(tf.browser.fromPixels(image), [224, 224]).div(255).expandDims();
 };
 
 const show_closest_images = (n, image_logits, callback) => {
@@ -2052,7 +2081,7 @@ window.addEventListener('DOMContentLoaded',
                         (event) => {
                             update_page();
                             load_mobilenet(() => {
-                                console.log(tf.memory(), model_options.datasets);
+                                console.log(tf.memory());
                                 if (option === 'save tensors') {
                                     save_tensors();
                                     return;
