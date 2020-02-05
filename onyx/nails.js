@@ -576,7 +576,7 @@ const infer = (image) => {
 };
 
 const load_mobilenet = (callback) => {
-    if (option === 'transfer') {
+    if (option === 'transfer' || !model_options.use_mobilenet) {
         let original_model;
         model_options.custom_model_builder = () => {
             const {hidden_layer_sizes, regularizer, layer_initializer, dropout_rate, batch_normalization, fine_tune_layer_count, model_name} 
@@ -644,13 +644,17 @@ const load_mobilenet = (callback) => {
         tf.loadLayersModel(mobilenet_url).then((model) => {
             original_model = model;
 //             model.summary();
-            next_slice_number(model_options);
-            load_all_images(model_options, 
-                            () => {
-                                model_options.datasets = collect_datasets();
-                                split_data(model_options.datasets, model_options, 1); // 1 because already cut out fraction_kept
-                                callback()
-                            });
+            if (option === 'transfer') {
+                next_slice_number(model_options);
+                load_all_images(model_options, 
+                                () => {
+                                    model_options.datasets = collect_datasets();
+                                    split_data(model_options.datasets, model_options, 1); // 1 because already cut out fraction_kept
+                                    callback();
+                                });
+             } else {
+                 callback();
+             }
         });
     } else {
         mobilenet.load({version: 2, alpha: 1}).then((model) => {
@@ -1569,25 +1573,23 @@ const run_experiments = () => {
     };
     const next = (image, class_index, image_index, image_count) => {
         image_counter++;
-        const logits = infer(image);
-        const prediction_tensor = loaded_model.predict([logits]);
-        const prediction = prediction_tensor.dataSync();
-        logits.dispose();
-        prediction_tensor.dispose();
-        const confidence = prediction[class_index];
-        const class_name = class_names[class_index];
-        const image_description = images[class_name][image_index];
-        image.title = typeof image_description === 'string' ?
-                      image_description :
-                      image_description.file_name + "#" + image_count;
-        let message = process_prediction({prediction}, image, class_index, image_index, image_count);
-        confidences[class_name].push([confidence, message]);
-        if (long_experimental_results) {
-            csv[class_name] += "https://ecraft2learn.github.io/ai/onyx/"
-                               + images[class_name][image_index] + ","
-                               + image_count + "," + confidence + "\n";                
-        }
-        next_image(next, when_finished);
+        make_prediction(image,
+                        (prediction) => {
+                            const confidence = prediction[class_index];
+                            const class_name = class_names[class_index];
+                            const image_description = images[class_name][image_index];
+                            image.title = typeof image_description === 'string' ?
+                                          image_description :
+                                          image_description.file_name + "#" + image_count;
+                            let message = process_prediction(prediction, image, class_index, image_index, image_count);
+                            confidences[class_name].push([confidence, message]);
+                            if (long_experimental_results) {
+                                csv[class_name] += "https://ecraft2learn.github.io/ai/onyx/"
+                                                   + images[class_name][image_index] + ","
+                                                   + image_count + "," + confidence + "\n";                
+                            }
+                            next_image(next, when_finished);                
+                        });
     };
     next_image(next);
 };
@@ -1699,7 +1701,10 @@ const process_prediction = (result, image_or_canvas, class_index, image_index, i
             csv[class_name] += "\n";
         }        
     }
-    message = response_element(message + more_details_html);
+    if (message) {
+        message += more_details_html;
+    }
+    message = response_element(message);
     if (is_mobile()) {
         // saves screen real estate while results are being displayed
         document.getElementById('go-to-tutorial').classList.add('back-to-tutorial-button');

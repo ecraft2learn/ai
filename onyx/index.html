@@ -58,10 +58,9 @@
             }
             const projector_data = false;
             const beta = parameters.has('beta');
+            const prediction_model_name = beta ? "02-02-20a-transfer-5" : "10-01-20a"
             // whether we want to generate files to visualising the data
-            const model_name = option !== 'diagnose' ? 
-                               ((option === 'create model' || option === 'search' || option === 'transfer')? "05-02-20a-transfer-5" : "10-01-20a") : 
-                               beta ? "02-02-20a-transfer-5" : "10-01-20a";
+            const model_name = ((option === 'create model' || option === 'search' || option === 'transfer')? "05-02-20a-transfer-5" : prediction_model_name);
             const model_options = {
                 seed: (number) => number,
                 model_name,
