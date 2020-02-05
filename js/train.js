@@ -65,9 +65,35 @@ const set_random_number_seed = (options) => {
 
 const create_and_train_model = (options, success_callback, failure_callback) => {
 //     record_callbacks(success_callback, failure_callback); // this isn't meant to be called by Snap!
+    options.success_callback = success_callback;
     set_random_number_seed(options);
     const model = create_model(options, failure_callback);
-    return train_model(model, options.datasets, options, success_callback, failure_callback);
+    let new_success_callback;
+    if (options.slices_to_use) { 
+        new_success_callback = (results) => {
+            success_callback(results,
+                             () => {
+                                 next_slice_number(options);
+                                 load_slice(options,
+                                            () => {
+                                                redo_training(model, options, success_callback, failure_callback);
+                                            });
+                             });
+        };
+    }
+    return train_model(model, options.datasets, options, (new_success_callback || success_callback), failure_callback);
+};
+
+const next_slice_number = (options) => {
+    // slice number is so can train with 1/n and then the next 1/n, etc.
+    if (options.slices_to_use) {
+        options.slice_number = options.slices_to_use[0];
+        options.slices_to_use = options.slices_to_use.slice(1);
+    } else {
+        if (!options.slice_number) {
+            options.slice_number = 0;
+        }
+    }
 };
 
 const create_model = (options, failure_callback) => {
@@ -163,7 +189,7 @@ const create_model = (options, failure_callback) => {
                         (class_names ? 'categoricalCrossentropy' : 'meanSquaredError');
            const compile_options = {optimizer: optimizer_function,
                                    loss,
-                                   metrics: class_names && ['accuracy']};
+                                   metrics: class_names && ['accuracy','crossentropy']};
            model.compile(compile_options);
         };
         const model = custom_model_builder ? custom_model_builder() : build_model();
@@ -331,6 +357,8 @@ const set_model_weights = (model, best_weights) => {
 
 const not_a_number_error_message = "Training loss has become 'not-a-number'.";
 
+const reload_datasets_label = "Replace datasets";
+
 const train_model = (model, datasets, options, success_callback, failure_callback) => {
     let error_message;
     if (!model) {
@@ -354,14 +382,14 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                        loss: 'meanSquaredError'});
     }
     const {class_names, batch_size, shuffle, epochs, validation_split, learning_rate, dropout_rate, batch_normalization, optimizer,
-           layer_initializer, regularizer, seed, stop_if_no_progress_for_n_epochs, initialEpoch,
-           testing_fraction, validation_fraction, fraction_kept, split_data_on_each_experiment} 
+           layer_initializer, regularizer, seed, stop_if_no_progress_for_n_epochs, initialEpoch, slices_to_use,
+           testing_fraction, validation_fraction, fraction_kept, split_data_on_each_experiment, compute_confusion_matrices} 
           = options;
     const number_of_training_epochs = epochs;
     const use_tf_datasets = datasets.use_tf_datasets;
     const tfvis_options = typeof tfvis === 'object' ? options.tfvis_options || {} : {}; // ignore options if tfvis not loaded
     const model_name = model.name;
-    const splitting_data = (split_data_on_each_experiment && !initialEpoch) || // not doing addition training
+    const splitting_data = (split_data_on_each_experiment && !initialEpoch) || // not doing additional training
                            ((typeof datasets.xs_validation_array === 'undefined' || datasets.xs_validation_array.length === 0) && // no validation data provided
                             typeof datasets.train === 'undefined' &&
                             typeof validation_fraction === 'number' && 
@@ -374,28 +402,17 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
         const draw_area = surface.drawArea;
         train_again_button = document.createElement('button');
         train_again_button.innerHTML = "Do more training";
-        const redo_training = () => {
-            options.initialEpoch = number_of_training_epochs + (options.initialEpoch || 0);
-            options.epochs = options.initialEpoch + number_of_training_epochs; // epochs is really the stop epoch
-            train_model(model, datasets, options, success_callback, failure_callback);
-        };
-        train_again_button.addEventListener('click', redo_training);
+        train_again_button.addEventListener('click', 
+                                            () => {
+                                                redo_training(model, options, success_callback, failure_callback);
+                                            });
         draw_area.appendChild(train_again_button);
         if (options.replace_datasets) {
-            const reload_datasets_button = document.createElement('button');
-            const reload_datasets_label = "Replace datasets";
             reload_datasets_button.innerHTML = reload_datasets_label;
             reload_datasets_button.addEventListener('click',
                 () => {
                     model_options.slice_number++;
-                    model_options.datasets = undefined; // release all this memory
-                    reload_datasets_button.innerHTML = "Loading slice #" + model_options.slice_number;
-                    options.replace_datasets(model_options,
-                                             () => {
-                                                 model_options.datasets = collect_datasets();
-                                                 split_data(model_options.datasets, model_options, 1); // 1 because already cut out fraction_kept
-                                                 reload_datasets_button.innerHTML = reload_datasets_label;
-                                             });
+                    load_slice(model_options);
                 });
             draw_area.appendChild(reload_datasets_button);
         }
@@ -539,7 +556,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
 //                   ys_test = tf.tensor(ys_test_array);
 //               }
 //           }
-          if (xs_test && class_names) {
+          if (compute_confusion_matrices && xs_test && class_names) {
               const test_loss_tensor = model.evaluate(xs_test, ys_test);
               test_loss = test_loss_tensor[0].dataSync()[0];
               test_accuracy = test_loss_tensor[1].dataSync()[0];
@@ -688,7 +705,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
            model.fitDataset(datasets.train, configuration).then(then, fit_error_handler);
        } else {
            model.fit(datasets.xs, datasets.ys, configuration).then(then, fit_error_handler);
-       }
+       }           
      } catch(error) {
          if (failure_callback) {
              invoke_callback(failure_callback, error);
@@ -696,6 +713,39 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
              throw error;
          }
      } 
+};
+
+const reload_datasets_button = document.createElement('button');
+
+const load_slice = (options, callback) => {
+    const datasets = options.datasets;
+    tf.dispose(datasets.xs);
+    tf.dispose(datasets.ys);
+    tf.dispose(datasets.xs_validation);
+    tf.dispose(datasets.ys_validation);
+    tf.dispose(datasets.xs_test);
+    tf.dispose(datasets.ys_test);
+    options.datasets = undefined; 
+    reload_datasets_button.innerHTML = "Loading slice #" + options.slice_number;
+    options.replace_datasets(options,
+                             () => {
+                                 options.datasets = collect_datasets(options);
+                                 split_data(model_options.datasets, options, 1); // 1 because already cut out fraction_kept
+                                 reload_datasets_button.innerHTML = reload_datasets_label;
+                                 if (callback) {
+                                     callback();
+                                 }
+                             });
+};
+
+const redo_training = (model, options, callback, failure_callback) => {
+    options.initialEpoch = options.number_of_training_epochs + (options.initialEpoch || 0);
+    options.epochs = options.initialEpoch + options.number_of_training_epochs; // epochs is really the stop epoch
+    train_model(model, options.datasets, options,
+                (results) => {
+                    options.success_callback(results, callback);
+                },
+                failure_callback);
 };
 
 let last_prediction;
@@ -786,7 +836,7 @@ const hyperparameter_search = (options, datasets, success_callback, error_callba
             train_model(model,
                         datasets,
                         new_options,
-                        (results) => {
+                        (results, callback) => {
                             experiment_number++;
                             previous_model = model;
                             let loss = results["Highest accuracy"] && -results["Highest accuracy"] || // minimize negative accuracy
@@ -809,6 +859,9 @@ const hyperparameter_search = (options, datasets, success_callback, error_callba
                                      results,
                                      best_model,
                                      status: hpjs.STATUS_OK});
+                            if (callback) {
+                                callback();
+                            }
                         },
                         (error) => {
                             if (error.message !== not_a_number_error_message) {
