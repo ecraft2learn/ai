@@ -1,6 +1,12 @@
-<input type="file" accept="image/*" id="file-input" capture="environment">
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.0/dist/tf.min.js"></script>
 <script>
-  const fileInput = document.getElementById('file-input');
-
-  fileInput.addEventListener('change', (e) => alert(e.target.files.length + " files"));
+console.log("started");
+const model = tf.sequential({
+    layers: [tf.layers.dense({units: 1, inputShape: [10]})]
+});
+model.compile({optimizer: 'sgd', loss: 'meanSquaredError'});
+model.fit(tf.ones([8, 10]), tf.ones([8, 1]), {
+      batchSize: 4,
+      epochs: 100
+}).then(info => console.log(info))
 </script>
