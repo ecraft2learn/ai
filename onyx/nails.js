@@ -559,11 +559,11 @@ const make_prediction_using_mobilenet = async (image, callback) => {
 };
 
 const make_prediction_with_loaded_model_only = (image, callback) => {
-    const image_tensor = image_to_tensor(image);
-    const prediction_tensor = loaded_model.predict([image_tensor]);
-    image_tensor.dispose();
-    const prediction = prediction_tensor.dataSync();
-    prediction_tensor.dispose();
+    const prediction = tf.tidy(() => {
+        const image_tensor = image_to_tensor(image);
+        const prediction_tensor = loaded_model.predict([image_tensor]);
+        return prediction_tensor.dataSync();
+    });
     callback({prediction});
 };
 
@@ -1509,12 +1509,14 @@ const create_next_image_generator = () => {
                                        multi_nail_image_box(images_description, nails_remaining_in_multi_nail));
         const load_or_extract_image = () => {
             if (skip) {
+                image_callback();
                 return;
             }
             const class_name = class_names[class_index];
             const image_or_images_description = images[class_name][image_index];
             if (!image_or_images_description) {
                 // no images for this class since testing other things
+                next_image(image_callback, when_all_finished, skip);
                 return;
             }
             if (typeof image_or_images_description !== 'string') {
@@ -1791,17 +1793,23 @@ const add_full_message = (event, message_number) => {
         show_closest_images(number_of_close_images, current_logits, display_closest_images);
         why_button.remove();
     };
-    why_button.innerHTML = "Why?";
-    why_button.className = 'generic-button no-margin';
-    why_button.title = "Click to see the images used in training closest to this one."
-    why_button.addEventListener('click', explain_why);      
+    if (model_options.use_mobilenet) {
+        why_button.innerHTML = "Why?";
+        why_button.className = 'generic-button no-margin';
+        why_button.title = "Click to see the images used in training closest to this one."
+        why_button.addEventListener('click', explain_why); 
+    }    
     const row = more_button.closest('tr');
     // copy of photo not in the row if mobile since there is only one row
     const short_response_element_index = is_mobile() ? 0 : 1; 
     const short_response_element = row.children[short_response_element_index];
     row.replaceChild(full_response_element, short_response_element);       
     full_response_element.innerHTML = window.full_popup_messages[message_number];
-    more_button.parentElement.replaceChild(why_button, more_button); 
+    if (model_options.use_mobilenet) {
+        more_button.parentElement.replaceChild(why_button, more_button);
+    } else {
+        more_button.remove();
+    }
 };
 
 const response_element = (message) => {
@@ -2016,8 +2024,9 @@ const load_all_images = (options, when_finished) => {
     const [next_image, reset_next_image] = create_next_image_generator();
     const keep_every = Math.round(1/fraction_kept);
     let count = 0;
+    const skip = () => count%keep_every !== slice_number%keep_every;
     const next = (image, class_index) => {
-        if (count%keep_every === slice_number%keep_every) {
+        if (image) { // if undefined then skipping this one
             // resize and normalize color values
             const image_data = tf.tidy(() => {
                 return image_to_tensor(image).arraySync();
@@ -2040,13 +2049,13 @@ const load_all_images = (options, when_finished) => {
             ys.push(class_index);
         }
         count++;
-        next_image(next, when_finished);
+        next_image(next, when_finished, skip());
     };
-    next_image(next, when_finished);
+    next_image(next, when_finished, skip());
 };
 
 const image_to_tensor = (image) => {
-    return tf.image.resizeBilinear(tf.browser.fromPixels(image), [224, 224]).div(255).expandDims();
+    return tf.tidy(() => tf.image.resizeBilinear(tf.browser.fromPixels(image), [224, 224]).div(255).expandDims());
 };
 
 const show_closest_images = (n, image_logits, callback) => {

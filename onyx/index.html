@@ -15,6 +15,7 @@
             }
             const parameters = new URLSearchParams(window.location.hash.slice(1));
             // choices are diagnose, create model, experiment, search, ...
+            const beta = parameters.has('beta');
             let option = 'diagnose';
             if (parameters.has('train')) {
                 option = 'create model';
@@ -38,9 +39,7 @@
             if (option === 'diagnose') {
                 // 166 random images from each class
                 additional_js = ["korean-tests-80-each.js"];
-            } else if (option === 'experiment') {
-                additional_js = ["korean-tests-80-each.js"];
-            } else if (option === 'save tensors' || option === 'transfer') {
+            } else if (option === 'save tensors' || option === 'transfer' || beta) {
                 // both Korean training thumbnails and their test images
                 additional_js = ["korean-big.js"]; 
 //                 additional_js.push("korean-tests.js"); // "originals-normal-serious-non-serious.js"]; 
@@ -48,6 +47,8 @@
                 additional_js.push("dermnet.js");
                 additional_js.push("TTND.js");
                 additional_js.push("hackduke.js");
+            } else if (option === 'experiment') {
+                additional_js = ["korean-tests-80-each.js"];
             } else if (option === 'create model' || option === 'de-duplicate' || option === 'equalize' || option === 'search') {
                 additional_js = [saved_tensor_file_name];
             } else {
@@ -57,8 +58,7 @@
                 additional_js.push("../js/hyperparameters.js");
             }
             const projector_data = false;
-            const beta = parameters.has('beta');
-            const prediction_model_name = beta ? "02-02-20a-transfer-5" : "10-01-20a"
+            const prediction_model_name = beta ? "02-02-20a-transfer-5" : "10-01-20a";
             // whether we want to generate files to visualising the data
             const model_name = ((option === 'create model' || option === 'search' || option === 'transfer')? "05-02-20a-transfer-5" : prediction_model_name);
             const model_options = {

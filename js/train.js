@@ -63,23 +63,28 @@ const set_random_number_seed = (options) => {
     }   
 };
 
+let next_slice = () => {
+    console.log("next_slice not defined");
+};
+
 const create_and_train_model = (options, success_callback, failure_callback) => {
 //     record_callbacks(success_callback, failure_callback); // this isn't meant to be called by Snap!
     options.success_callback = success_callback;
     set_random_number_seed(options);
     const model = create_model(options, failure_callback);
     let new_success_callback;
-    if (options.slices_to_use) { 
-        new_success_callback = (results) => {
-            success_callback(results,
-                             () => {
-                                 next_slice_number(options);
-                                 load_slice(options,
-                                            () => {
-                                                redo_training(model, options, success_callback, failure_callback);
-                                            });
-                             });
+    if (options.slices_to_use) {
+        next_slice = () => {
+            next_slice_number(options);
+            load_slice(options,
+                       () => {
+                           redo_training(model, options, success_callback, failure_callback);
+                       });
         };
+        // following led to out-of-memory errors - so running next_slice manually
+//         new_success_callback = (results) => {
+//             success_callback(results, next_slice);
+//         };
     }
     return train_model(model, options.datasets, options, (new_success_callback || success_callback), failure_callback);
 };
