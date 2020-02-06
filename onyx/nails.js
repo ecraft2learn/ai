@@ -311,7 +311,7 @@ const add_image_or_canvas = (parent, image_or_canvas, class_name, image_to_repla
                     image_element.hidden = false;                    
                 }
                 let message = process_prediction(result, image_or_canvas, class_index);
-                display_message(message, 'random-image-response', true);
+                display_message(message, 'random-image-response', false);
                 add_random_image(null, image_or_canvas); // replaces self with new random image                      
         };
         make_prediction(image_or_canvas, analyse_image_and_replace_self);
@@ -499,7 +499,7 @@ const add_images = (when_finished, just_one_class, only_class_index, except_imag
     if (image_sprite_canvas) {
         document.body.appendChild(image_sprite_canvas);
     }
-    const [next_image, reset_next_image] = create_next_image_generator();
+    const next_image = create_next_image_generator();
     const when_all_finished = () => {
         when_finished();
         if (image_sprite_canvas) {
@@ -632,7 +632,7 @@ const load_mobilenet = (callback) => {
                 trainable = index >= first_trainable_layer_index;
             });
             new_model.name = model_name;
-//             new_model.summary();
+            new_model.summary();
 //             original_model.dispose(); -- seems it was already done
             return new_model;
         };
@@ -1508,10 +1508,6 @@ const create_next_image_generator = () => {
             canvas_of_multi_nail_image(multi_nail_image,
                                        multi_nail_image_box(images_description, nails_remaining_in_multi_nail));
         const load_or_extract_image = () => {
-            if (skip) {
-                image_callback();
-                return;
-            }
             const class_name = class_names[class_index];
             const image_or_images_description = images[class_name][image_index];
             if (!image_or_images_description) {
@@ -1521,10 +1517,15 @@ const create_next_image_generator = () => {
             }
             if (typeof image_or_images_description !== 'string') {
                 if (multi_nail_image) {
-                    // no need to load it again
-                    image_callback(canvas_of_next_nail_in_multi_nail_image(image_or_images_description),
-                                   class_index, image_index, image_count, nails_remaining_in_multi_nail);
-                    return;
+                    if (skip) {
+                        image_callback();
+                        return;
+                    } else {
+                        // no need to load it again
+                        image_callback(canvas_of_next_nail_in_multi_nail_image(image_or_images_description),
+                                       class_index, image_index, image_count, nails_remaining_in_multi_nail);
+                        return;
+                    }
                 }
                 load_image(image_or_images_description.file_name,
                            (image) => {
@@ -1540,22 +1541,26 @@ const create_next_image_generator = () => {
                            });
                 return;
             }
-            load_image(image_or_images_description, 
-                       (image) => {
-                           image_callback(image, class_index, image_index, image_count);
-                       },
-                       (error) => {
-                           console.error(image_or_images_description);
-                           next_image(image_callback, when_all_finished, skip);
-                       });
+            if (skip) {
+                image_callback();
+            } else {
+                load_image(image_or_images_description, 
+                           (image) => {
+                               image_callback(image, class_index, image_index, image_count);
+                           },
+                           (error) => {
+                               console.error(image_or_images_description);
+                               next_image(image_callback, when_all_finished, skip);
+                           });               
+            }
         };
         load_or_extract_image();
     };
-    return [next_image, reset_next_image];
+    return next_image;
 };
 
 const run_experiments = () => {
-    const [next_image, reset_next_image] = create_next_image_generator();
+    const next_image = create_next_image_generator();
     let image_counter = 0;
     let confidences = {};
     class_names.forEach((class_name) => {
@@ -1955,7 +1960,7 @@ const save_tensors = () => {
     let sources = "[";
     let image_counter = 0;
     const image_counts_per_class = class_names.map(() => 0);
-    const [next_image, reset_next_image] = create_next_image_generator();
+    const next_image = create_next_image_generator();
     const when_finished = () => {
         add_download_button(xs + "]", ys + "]", sources + "]");
         console.log(image_counts_per_class);
@@ -2021,7 +2026,7 @@ const load_all_images = (options, when_finished) => {
 //         return new_tensors;
     };
     const {fraction_kept, validation_fraction, testing_fraction, slice_number} = options;
-    const [next_image, reset_next_image] = create_next_image_generator();
+    const next_image = create_next_image_generator();
     const keep_every = Math.round(1/fraction_kept);
     let count = 0;
     const skip = () => count%keep_every !== slice_number%keep_every;
@@ -2031,7 +2036,7 @@ const load_all_images = (options, when_finished) => {
             const image_data = tf.tidy(() => {
                 return image_to_tensor(image).arraySync();
             });
-            console.log(tf.memory(), 'image', count);
+//             console.log(tf.memory(), 'image', count);
 //             const random = Math.random();
 //             if (random <= validation_fraction) {
 //                 xs_validation = concat_data(image_data, xs_validation);
