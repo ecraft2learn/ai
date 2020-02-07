@@ -105,7 +105,7 @@ const create_model = (options, failure_callback) => {
     record_callbacks(failure_callback);
     try {
         const {model_name, hidden_layer_sizes, dropout_rate, optimizer, layer_initializer, batch_normalization, regularizer, learning_rate,
-               loss_function, activation, last_activation, seed, datasets, custom_model_builder} = options;
+               loss_function, activation, last_activation, seed, datasets, custom_model_builder, load_model_for_further_training} = options;
         const tfvis_options = typeof tfvis === 'object' ? options.tfvis_options || {} : {}; // ignore options if tfvis not loaded
         training_number = options.training_number;
         let class_names = options.class_names;
@@ -197,7 +197,7 @@ const create_model = (options, failure_callback) => {
                                    metrics: class_names && ['accuracy','crossentropy']};
            model.compile(compile_options);
         };
-        const model = custom_model_builder ? custom_model_builder() : build_model();
+        const model = loaded_model || (custom_model_builder ? custom_model_builder() : build_model());
         compile_model(model);
         if (tfvis_options.display_layers_after_creation) {
             show_layers(model, 'Model after creation');

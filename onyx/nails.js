@@ -665,23 +665,19 @@ const load_mobilenet = (callback) => {
 };
 
 const initialise_page = () => {
-  try {
-      setup_camera(
-          (camera) => {
-              if (!camera) {
-                  start_up();
-                  return;
-              }
-              video = camera;
-              video.play();
-              start_up();
-            },
+    setup_camera(
+        (camera) => {
+            if (!camera) {
+                start_up();
+                return;
+            }
+            video = camera;
+            video.play();
+            start_up();
+         },
          (error) => {
              unable_to_access_camera(error);       
          });
-   } catch (error) {
-        unable_to_access_camera(error);
-   };
 };
 
 const error_callback = (error) => {
@@ -806,8 +802,18 @@ const add_download_button = (xs_string, ys_string, sources_string) => {
 
 const start_up = () => {
     if (are_training()) {
-        document.body.innerHTML = "Training started";
-        start_training();
+        const continuation = () => {
+            document.body.innerHTML = "Training started";
+            start_training();
+        };
+        if (model_options.load_model_for_further_training) {
+            tf.loadLayersModel("models/" + model_options.model_name + ".json").then((model) => {
+                loaded_model = model;
+                continuation();
+            });
+        } else {
+            continuation();
+        }
         return;
     } 
     if (option === 'de-duplicate') {
@@ -2002,11 +2008,11 @@ const save_tensors = () => {
 };
 
 const load_all_images = (options, when_finished) => {
+    let message = 'Loading images';
     if (options.slice_number) {
-        console.log(tf.memory(), options.slice_number);
-    } else {
-        document.body.innerHTML = 'Loading images';
+        message += '; slice = ' + options.slice_number;
     }
+    document.getElementById('info').innerHTML = message;
     const concat_data = (new_data, old_array) => {
         // using JavaScript arrays and tf.datasets instead of tensors which cause out of memory problems
         if (old_array) {

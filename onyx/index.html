@@ -60,7 +60,7 @@
             const projector_data = false;
             const prediction_model_name = beta ? "06-02-20a-transfer-4" : "10-01-20a";
             // whether we want to generate files to visualising the data
-            const model_name = ((option === 'create model' || option === 'search' || option === 'transfer')? "06-02-20a-transfer-5" : prediction_model_name);
+            const model_name = ((option === 'create model' || option === 'search' || option === 'transfer')? "06-02-20a-transfer-4" : prediction_model_name);
             const model_options = {
                 seed: (number) => number,
                 model_name,
@@ -87,7 +87,8 @@
                 split_data_on_each_experiment: true,
                 fine_tune_layer_count: 5,
                 compute_confusion_matrices: false,
-                slices_to_use: [3, 7, 13],
+                slices_to_use: [10],
+                load_model_for_further_training: true,
                 search: {type: 'randomSearch', // or 'gridSearch' but it triggers an exception
                          number_of_experiments: 10,
                          space: {// epochs: [50, 100, 200, 500, 1000],
