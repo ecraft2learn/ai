@@ -579,7 +579,8 @@ const load_mobilenet = (callback) => {
     if (option === 'transfer' || !model_options.use_mobilenet) {
         let original_model;
         model_options.custom_model_builder = () => {
-            const {hidden_layer_sizes, regularizer, layer_initializer, dropout_rate, batch_normalization, fine_tune_layer_count, model_name} 
+            const {hidden_layer_sizes, regularizer, layer_initializer, dropout_rate, batch_normalization,
+                   fine_tune_layer_count, dropout_rate_after_first_fine_tuning_layer, model_name} 
                 = model_options;
             const last_layer_name = 'global_average_pooling2d_1'; // 'conv_pw_13_relu';
             const last_layer = original_model.getLayer(last_layer_name);
@@ -587,11 +588,17 @@ const load_mobilenet = (callback) => {
             let new_output; // = flatten_layer.apply(last_layer.output);
             const configuration = {activation: 'relu',
                                    useBias: true};
-            const first_trainable_layer_name = 'first_new_custom_layer';
+            let first_trainable_layer_name = 'first_new_custom_layer';
+            let first_trainable_layer_name_used = false;
+            if (dropout_rate_after_first_fine_tuning_layer > 0) {
+                new_output = tf.layers.dropout({rate: dropout_rate_after_first_fine_tuning_layer,
+                                                name: first_trainable_layer_name}).apply(last_layer.output);
+                first_trainable_layer_name_used = true;
+            }
             hidden_layer_sizes.slice(0, hidden_layer_sizes.length-1).forEach((size, index) => {
                 // last layer (added automatically) treated specially below
                 configuration.units = size;
-                configuration.name = index === 0 ? first_trainable_layer_name : undefined,
+                configuration.name = index === 0 && !first_trainable_layer_name_used ? first_trainable_layer_name : undefined;
                 configuration.kernelRegularizer = tfjs_function(regularizer, tf.regularizers, index);
                 configuration.kernelInitializer = tfjs_function(layer_initializer, tf.initializers, index);
                 if (new_output) {
