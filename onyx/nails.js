@@ -2118,6 +2118,9 @@ window.addEventListener('DOMContentLoaded',
                                     save_tensors();
                                     return;
                                 }
+                                if (option === 'create model') {
+                                    model_options.datasets = collect_datasets();
+                                }
                                 initialise_page();
                                 if (option === 'diagnose') {
                                     add_random_images(() => {
