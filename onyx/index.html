@@ -70,7 +70,7 @@
                 dropout_rate: .5,
                 batch_normalization: false,
                 shuffle: true,
-                epochs: 100,
+                epochs: 2,
                 optimizer: (i) =>  tf.train.rmsprop(2e-4), // tf.train.adamax(1e-5), tf.train.adadelta(),
                 regularizer: (i) => tf.regularizers.l2({l2: 5e-4}),
                 layer_initializer: (index) => tf.initializers.varianceScaling({}), // {seed: SEED}
@@ -81,15 +81,15 @@
                 testing_fraction: 0,
                 validation_fraction: .25,
                 use_tf_datasets: false,
-                fraction_kept: .05, // for exploring how well it works with less data
+                fraction_kept: 1, // for exploring how well it works with less data
                 stop_if_no_progress_for_n_epochs: 50,
                 number_of_training_repeats: 1,
                 split_data_on_each_experiment: true,
-                fine_tune_layer_count: 5, 
-                dropout_rate_after_first_fine_tuning_layer: .5,
-                compute_confusion_matrices: false,
-                slices_to_use: [0],
-                load_model_for_further_training: false,
+//                 fine_tune_layer_count: 5, 
+//                 dropout_rate_after_first_fine_tuning_layer: .75,
+                compute_confusion_matrices: true,
+                slices_to_use: [1],
+                load_model_for_further_training: true,
                 search: {type: 'randomSearch', // or 'gridSearch' but it triggers an exception
                          number_of_experiments: 10,
                          space: {// epochs: [50, 100, 200, 500, 1000],
