@@ -197,7 +197,7 @@ const create_model = (options, failure_callback) => {
                                    metrics: class_names && ['accuracy','crossentropy']};
            model.compile(compile_options);
         };
-        const model = loaded_model || (custom_model_builder ? custom_model_builder() : build_model());
+        const model = (typeof loaded_model !== 'undefined' && loaded_model) || (custom_model_builder ? custom_model_builder() : build_model());
         compile_model(model);
         if (tfvis_options.display_layers_after_creation) {
             show_layers(model, 'Model after creation');
@@ -468,7 +468,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
         let last_epoch = 0;
         const stats_callback = 
             {onEpochEnd: async (epoch, history) => {
-                console.log(history, epoch);
+//                 console.log(history, epoch);
                 epoch_history.push(history);
                 last_epoch = epoch;
                 data_loss = history.loss;
@@ -645,8 +645,8 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
           csv_values += (validation_accuracy && validation_accuracy.toFixed(4)) + ", ";
           csv_values += (test_accuracy && test_accuracy.toFixed(4)) + ", ";
           const x_length = xs ? xs.shape[0] : xs_array.length;
-          const x_validation_length = xs_validation ? xs_validation.shape[0] : xs_validation_array.length;
-          const x_test_length = xs_test ? xs_test.shape[0] : xs_test_array.length;
+          const x_validation_length = xs_validation ? xs_validation.shape[0] : (xs_validation_array ? xs_validation_array.length : 0);
+          const x_test_length = xs_test ? xs_test.shape[0] : (xs_test_array ? xs_test_array.length : 0);
           if (!x_validation_length) {
               // what about validation_split????
               csv_values += x_length + ", ";
