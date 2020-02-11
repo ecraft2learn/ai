@@ -71,7 +71,7 @@ const create_and_train_model = (options, success_callback, failure_callback) => 
 //     record_callbacks(success_callback, failure_callback); // this isn't meant to be called by Snap!
     options.success_callback = success_callback;
     set_random_number_seed(options);
-    const model = create_model(options, failure_callback);
+    let model = create_model(options, failure_callback);
     let new_success_callback;
     if (options.slices_to_use) {
         next_slice = () => {
@@ -197,7 +197,7 @@ const create_model = (options, failure_callback) => {
                                    metrics: class_names && ['accuracy','crossentropy']};
            model.compile(compile_options);
         };
-        const model = (typeof loaded_model !== 'undefined' && loaded_model) || (custom_model_builder ? custom_model_builder() : build_model());
+        let model = (typeof loaded_model !== 'undefined' && loaded_model) || (custom_model_builder ? custom_model_builder() : build_model());
         compile_model(model);
         if (tfvis_options.display_layers_after_creation) {
             show_layers(model, 'Model after creation');
@@ -836,7 +836,7 @@ const hyperparameter_search = (options, datasets, success_callback, error_callba
         console.log(search_options);
         const new_options = Object.assign({}, options, search_options);
         set_random_number_seed(new_options);
-        const model = create_model(new_options);
+        let model = create_model(new_options);
         return new Promise((resolve) => {
             train_model(model,
                         datasets,
