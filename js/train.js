@@ -449,7 +449,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                                             tfvis_options.container_height : 
                                             tfvis_options.measure_accuracy ? 800 : 400}}; 
         const tfvis_callbacks = tfvis_options.display_graphs && tfvis.show.fitCallbacks(container, metrics, tfvis_options);
-        if (!train_again_button) {
+        if (!train_again_button && slices_to_use) {
             add_train_again_button();
         }
         // auto_stop replaced by the more controllable stop_if_no_progress_for_n_epochs
