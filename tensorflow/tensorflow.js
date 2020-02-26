@@ -1115,7 +1115,7 @@ const train_with_parameters = async function (surface_name) {
             message.innerHTML += "Training failed because some numbers became too large for the system. " +
                                  "This can be caused by many different things. " +
                                  "Try different optimization methods, loss functions, or convert the input data to numbers between -1 and 1. " +
-                                 "Often the problem is due to <a href='https://en.wikipedia.org/wiki/Vanishing_gradient_problem' target='_blank'>vanishing gradiants</a>.";
+                                 "Often the problem is due to <a href='https://en.wikipedia.org/wiki/Vanishing_gradient_problem' target='_blank'>vanishing gradients</a>.";
         } else {
             if (final_epoch < epochs-1) {
                 message.innerHTML += "<br>There was no progress for " + stop_if_no_progress_for_n_epochs + " cycles so training stopped.";
