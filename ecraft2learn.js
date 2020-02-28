@@ -2916,6 +2916,11 @@ xhr.send();
       };
       yahoo_weather(place, element_name, units_code, yahoo_callback, yahoo_error_callback, key, secret);
   },
+  device_orientation_changes: (callback) => {
+      window.ondeviceorientation = (event) => {
+          invoke_callback(callback, event.beta, event.gamma, event.alpha); // x, y, z axes
+      };
+  },
   create_costume_with_style,
   get_image_features,
   create_tensorflow_model,
