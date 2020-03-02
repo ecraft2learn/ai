@@ -1839,6 +1839,12 @@ SyntaxElementMorph.prototype.isObjInputFragment = function () {
 // SyntaxElementMorph layout:
 
 SyntaxElementMorph.prototype.fixLayout = function (silently) {
+    if (!(new URL(location.href).searchParams.has('noSource'))) {
+        this.real_fixLayout(silently);
+    }
+};
+
+SyntaxElementMorph.prototype.real_fixLayout = function (silently) {
     var nb,
         parts = this.parts(),
         myself = this,
