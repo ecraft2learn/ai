@@ -1838,13 +1838,11 @@ SyntaxElementMorph.prototype.isObjInputFragment = function () {
 
 // SyntaxElementMorph layout:
 
-SyntaxElementMorph.prototype.fixLayout = function (silently) {
-    if (!(new URL(location.href).searchParams.has('noSource'))) {
-        this.real_fixLayout(silently);
-    }
-};
 
-SyntaxElementMorph.prototype.real_fixLayout = function (silently) {
+SyntaxElementMorph.prototype.fixLayout = function (silently) {
+    if (new URL(location.href).searchParams.has('noSource')) {
+        return;
+    }
     var nb,
         parts = this.parts(),
         myself = this,
@@ -7605,6 +7603,9 @@ CommandSlotMorph.prototype.attachTargets = function () {
 // CommandSlotMorph layout:
 
 CommandSlotMorph.prototype.fixLayout = function () {
+    if (new URL(location.href).searchParams.has('noSource')) {
+        return;
+    }
     var nb = this.nestedBlock();
     if (this.parent) {
         if (!this.color.eq(this.parent.color)) {
@@ -8181,6 +8182,9 @@ CSlotMorph.prototype.mappedCode = function (definitions) {
 // CSlotMorph layout:
 
 CSlotMorph.prototype.fixLayout = function () {
+    if (new URL(location.href).searchParams.has('noSource')) {
+        return;
+    }
     var nb = this.nestedBlock();
     if (nb) {
         nb.setPosition(
@@ -9276,13 +9280,11 @@ InputSlotMorph.prototype.setChoices = function (dict, readonly) {
 };
 
 // InputSlotMorph layout:
-InputSlotMorph.prototype.fixLayout = function () {
-    if (!(new URL(location.href).searchParams.has('noSource'))) {
-        InputSlotMorph.prototype.real_fixLayout ();
-    }
-};
 
-InputSlotMorph.prototype.real_fixLayout = function () {
+InputSlotMorph.prototype.fixLayout = function () {
+    if (new URL(location.href).searchParams.has('noSource')) {
+        return;
+    }
     var width, height, arrowWidth,
         contents = this.contents(),
         arrow = this.arrow();
@@ -9880,6 +9882,9 @@ TemplateSlotMorph.prototype.evaluate = function () {
 // TemplateSlotMorph layout:
 
 TemplateSlotMorph.prototype.fixLayout = function () {
+    if (new URL(location.href).searchParams.has('noSource')) {
+        return;
+    }
     var template = this.template();
     this.setExtent(template.extent().add(this.edge * 2 + 2));
     template.setPosition(this.position().add(this.edge + 1));
@@ -11048,6 +11053,9 @@ MultiArgMorph.prototype.setLabelColor = function (
 // MultiArgMorph layout:
 
 MultiArgMorph.prototype.fixLayout = function () {
+    if (new URL(location.href).searchParams.has('noSource')) {
+        return;
+    }
     var label, shadowColor, shadowOffset;
     if (this.slotSpec === '%t') {
         this.isStatic = true; // in this case I cannot be exchanged
@@ -11412,6 +11420,9 @@ ArgLabelMorph.prototype.argMorph = function () {
 // ArgLabelMorph layout:
 
 ArgLabelMorph.prototype.fixLayout = function () {
+    if (new URL(location.href).searchParams.has('noSource')) {
+        return;
+    }
     var label = this.label(),
         shadowColor,
         shadowOffset;
@@ -11940,6 +11951,9 @@ ReporterSlotMorph.prototype.isEmptySlot = function () {
 // ReporterSlotMorph layout:
 
 ReporterSlotMorph.prototype.fixLayout = function () {
+    if (new URL(location.href).searchParams.has('noSource')) {
+        return;
+    }
     var contents = this.contents();
     this.setExtent(contents.extent().add(
         this.edge * 2 + this.rfBorder * 2
@@ -12051,6 +12065,9 @@ RingReporterSlotMorph.prototype.nestedBlock = function (block) {
 // RingReporterSlotMorph layout:
 
 RingReporterSlotMorph.prototype.fixLayout = function () {
+    if (new URL(location.href).searchParams.has('noSource')) {
+        return;
+    }
     if (this.contents() instanceof CommandBlockMorph) {
         CommandSlotMorph.prototype.fixLayout.call(this);
     } else {
@@ -12523,6 +12540,9 @@ CommentMorph.prototype.layoutChanged = function () {
 };
 
 CommentMorph.prototype.fixLayout = function () {
+    if (new URL(location.href).searchParams.has('noSource')) {
+        return;
+    }
     var label,
         tw = this.contents.width() + 2 * this.padding,
         myself = this,
@@ -12879,6 +12899,9 @@ ScriptFocusMorph.prototype.getFocus = function (world) {
 // ScriptFocusMorph layout:
 
 ScriptFocusMorph.prototype.fixLayout = function () {
+    if (new URL(location.href).searchParams.has('noSource')) {
+        return;
+    }
     this.changed();
     if (this.element instanceof CommandBlockMorph ||
             this.element instanceof CommandSlotMorph ||
