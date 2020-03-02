@@ -9276,8 +9276,13 @@ InputSlotMorph.prototype.setChoices = function (dict, readonly) {
 };
 
 // InputSlotMorph layout:
-
 InputSlotMorph.prototype.fixLayout = function () {
+    if (!(new URL(location.href).searchParams.has('noSource'))) {
+        InputSlotMorph.prototype.real_fixLayout ();
+    }
+};
+
+InputSlotMorph.prototype.real_fixLayout = function () {
     var width, height, arrowWidth,
         contents = this.contents(),
         arrow = this.arrow();
