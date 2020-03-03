@@ -3135,6 +3135,51 @@ xhr.send();
           return invoke_callback(callback, javascript_to_snap(sorted_words_and_cosines.map(word_and_cosine => word_and_cosine[0])));
       }
   },
+  load_universal_sentence_encoder: (callback) => {
+      if (typeof ecraft2learn.universal_sentence_encoder_module === 'undefined') {
+          load_script('js/universal-sentence-encoder.js',
+                      () => {
+                          ecraft2learn.universal_sentence_encoder_module = use;
+                          invoke_callback(callback);
+                      });
+      } else {
+          invoke_callback(callback);
+      }
+  },
+  sentence_features: (sentences, callback) => {
+      const embed = () => {
+          ecraft2learn.universal_sentence_encoder.embed(sentences.asArray()).then(embeddings_tensor => {
+              const embeddings = embeddings_tensor.arraySync();
+              embeddings_tensor.dispose();
+              invoke_callback(callback, javascript_to_snap(embeddings));   
+          });
+      };
+      if (ecraft2learn.universal_sentence_encoder) {
+          embed();
+      } else {
+          ecraft2learn.load_universal_sentence_encoder(() => {
+              ecraft2learn.universal_sentence_encoder_module.load().then(model => {
+                  ecraft2learn.universal_sentence_encoder = model;
+                  embed();
+              });
+          });
+      };     
+  },
+  tokenize_sentence: (sentence, callback) => {
+      const tokenize = () => {
+          invoke_callback(callback, javascript_to_snap(ecraft2learn.universal_sentence_encoder_tokenizer.encode(sentence)));
+      };
+      if (ecraft2learn.universal_sentence_encoder_tokenizer) {
+          tokenize();
+      } else {
+          ecraft2learn.load_universal_sentence_encoder(() => {
+              ecraft2learn.universal_sentence_encoder_module.loadTokenizer().then(tokenizer => {
+                  ecraft2learn.universal_sentence_encoder_tokenizer = tokenizer;
+                  tokenize();
+              });
+          });
+      };
+  },
   initialise_all: function () {
       Object.values(ecraft2learn.support_window).forEach(function (support_window) {
           support_window.close();
