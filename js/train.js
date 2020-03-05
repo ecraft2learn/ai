@@ -535,7 +535,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                              shuffle,
                              callbacks: stats_callback};
       const after_fit_callback = (full_history) => {
-          console.log(tf.memory());
+//           console.log(tf.memory());
 //           console.log(full_history);
           const {xs, ys, xs_validation, ys_validation, 
                  xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array,
