@@ -3157,9 +3157,11 @@ xhr.send();
       if (ecraft2learn.universal_sentence_encoder) {
           embed();
       } else {
+          show_message("Loading the Universal Sentence Encoder ...");
           ecraft2learn.load_universal_sentence_encoder(() => {
               ecraft2learn.universal_sentence_encoder_module.load().then(model => {
                   ecraft2learn.universal_sentence_encoder = model;
+                  show_message();
                   embed();
               });
           });
@@ -3172,9 +3174,11 @@ xhr.send();
       if (ecraft2learn.universal_sentence_encoder_tokenizer) {
           tokenize();
       } else {
+          show_message("Loading the Tokenizer ...");
           ecraft2learn.load_universal_sentence_encoder(() => {
               ecraft2learn.universal_sentence_encoder_module.loadTokenizer().then(tokenizer => {
                   ecraft2learn.universal_sentence_encoder_tokenizer = tokenizer;
+                  show_message();
                   tokenize();
               });
           });
