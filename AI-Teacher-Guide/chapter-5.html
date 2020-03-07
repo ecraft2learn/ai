@@ -166,6 +166,30 @@ seeing how many of the nearest 100 or 500 words of each are in common.
 Think up other uses for this reporter.
 </p>
 
+<h4 class="instructions-white">Sentence embeddings</h4>
+<p class="background-information">
+Google released the <a href="https://research.google/pubs/pub46808/">Universal Sentence Encoder</a> that works on whole sentences.
+It can be used to measure how similar two sentences are.
+Consider
+<br>
+A. How are you?
+<br>
+B. How old are you?
+<br>
+C. What is your age?
+<br>
+A and B have many words in common but it is B and C that have similar meanings.
+</p>
+<p class="instructions">
+The <span class="block-name">get sentence features</span> block accepts multi-word texts and
+reports a list of 512 numbers.
+</p>
+<figure class = "snap-iframe"
+        id = "sentence embedding"
+        container_style = "width: 900px; height: 500px"
+        caption = "Here's a way to compare sentences. TRY IT!">
+</figure>
+
 <h4 class="instructions-white">Drawing word embeddings</h4>
 <p class="instructions">
 It would be nice to visualise the 300 numbers associated with a word.
@@ -177,10 +201,7 @@ One way is to draw a sucession of vertical lines, one for each feature.
         container_style = "width: 1000px; height: 500px"
         caption = "Here's a way to see the features of a word. TRY IT!">
 </figure>
-<p class="instructions">
-A full screen version of this program can be
-<a href="../snap/snap.html?project=draw%20word%20embedding&editMode&noRun" target="_blank">found here</a>.
-</p>
+
 <h4 class="background-information-white">Mapping 300 dimensional points to two-dimensional points</h4>
 <p class="background-information">
 No one can visualise 300-dimensional space.
