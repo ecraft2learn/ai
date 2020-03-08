@@ -170,23 +170,23 @@ window.addEventListener(
              } else {
                  new_search = search;
              }
-             if (href.length > 0 && href.indexOf('snap') >= 0) {
-                 // combine hashes if being passed to Snap!
+             if (window.location.hash.indexOf('#&') === 0 && href.indexOf('#') < 0) {
+                 // combine hashes if current URL is #& and href doesn't not have a hash
                  if (new_hash) {
                      if (hash) {
                          new_hash += "&" + hash.substring(1);
-                     } else {
-                         new_hash = hash;
                      }
-                 }
-                 if (new_hash && new_hash.indexOf(window.location.hash.substring(1)) < 0) {
-                     new_hash += window.location.hash;
+                     if (new_hash.indexOf(window.location.hash.substring(1)) < 0) {
+                         new_hash += window.location.hash;
+                     }
+                 } else {
+                     new_hash = hash;
                  }
              }
              if (new_search.indexOf(window.location.search.substring(1)) < 0) { // substring(1) to ignore the #
                  new_search += window.location.search;    
              }
-             element.setAttribute('href', url + new_search + new_hash);
+             element.setAttribute('href', url + (new_search || "") + (new_hash || ""));
          };
          Array.prototype.forEach.call(elements, add_search_and_hash);
          Array.prototype.forEach.call(document.getElementsByTagName('a'), add_search_and_hash);
