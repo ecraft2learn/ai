@@ -1110,6 +1110,7 @@ const train_with_parameters = async function (surface_name) {
         const validation_loss = training_statistics["Validation loss"];
         const lowest_validation_loss = training_statistics["Lowest validation loss"];
         const validation_accuracy = training_statistics["Validation accuracy"];
+        const highest_validation_accuracy = training_statistics["Highest validation accuracy"];
         message.innerHTML = "<br>Training " + model_name + " took " + training_statistics["Duration in seconds"].toFixed(2) + " seconds. ";
         if (isNaN(loss)) {
             message.innerHTML += "Training failed because some numbers became too large for the system. " +
@@ -1137,9 +1138,9 @@ const train_with_parameters = async function (surface_name) {
             }
             if (validation_accuracy) {
                 message.innerHTML += "<br>Validation data accuracy is " + validation_accuracy.toFixed(3) + ".";
-                if (validation_accuracy !== lowest_validation_accuracy) {
-                    message.innerHTML += " The lowest validation accuracy was " + lowest_validation_accuracy.toFixed(3) +  "." +
-                                         " Using the trained model from cycle " + training_statistics["Lowest validation accuracy epoch"] +  ".";
+                if (validation_accuracy !== highest_validation_accuracy) {
+                    message.innerHTML += " The highest validation accuracy was " + highest_validation_accuracy.toFixed(3) +  "." +
+                                         " Using the trained model from cycle " + training_statistics["Highest validation accuracy epoch"] +  ".";
                 }
             }
         }
