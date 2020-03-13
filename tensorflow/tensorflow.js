@@ -124,7 +124,7 @@ const non_categorical_loss_functions =
 const categorical_loss_functions =
     {//"Sigmoid Cross Entropy": "sigmoidCrossEntropy", - requires more arguments - could supply them
     // and what about tf.metrics.binaryCrossentropy
-     "Softmax Cross Entropy": "softmaxCrossEntropy"};
+     "Softmax Cross Entropy": "categoricalCrossentropy"};
 
 const loss_functions = (categories) => categories ? categorical_loss_functions : non_categorical_loss_functions;
 
@@ -467,7 +467,7 @@ const normalize = (tensor) => {
 //     return message_to_user;
 // };
 
-const default_loss_function = (categories) => categories ? 'softmaxCrossEntropy' : 'meanSquaredError';
+const default_loss_function = (categories) => categories ? 'categoricalCrossentropy' : 'meanSquaredError';
 
 const get_tensors = (model_name, kind) => {
     let data = get_data(model_name, kind);
@@ -789,8 +789,7 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
 //                             }
                             previous_model = model;
 //                             tf.disposeVariables();
-                            let loss = results['Lowest validation loss'] || results['Validation loss'] || 
-                                       results['Lowest training loss'] || results['Training loss'];
+                            let loss = loss_measure(results);
                             if (isNaN(loss)) {
                                 loss = Number.MAX_VALUE;
                             }
@@ -1110,7 +1109,6 @@ const train_with_parameters = async function (surface_name) {
         const validation_loss = training_statistics["Validation loss"];
         const lowest_validation_loss = training_statistics["Lowest validation loss"];
         const validation_accuracy = training_statistics["Validation accuracy"];
-        const highest_validation_accuracy = training_statistics["Highest validation accuracy"];
         message.innerHTML = "<br>Training " + model_name + " took " + training_statistics["Duration in seconds"].toFixed(2) + " seconds. ";
         if (isNaN(loss)) {
             message.innerHTML += "Training failed because some numbers became too large for the system. " +
@@ -1138,9 +1136,9 @@ const train_with_parameters = async function (surface_name) {
             }
             if (validation_accuracy) {
                 message.innerHTML += "<br>Validation data accuracy is " + validation_accuracy.toFixed(3) + ".";
-                if (validation_accuracy !== highest_validation_accuracy) {
-                    message.innerHTML += " The highest validation accuracy was " + highest_validation_accuracy.toFixed(3) +  "." +
-                                         " Using the trained model from cycle " + training_statistics["Highest validation accuracy epoch"] +  ".";
+                if (validation_accuracy !== training_statistics["Highest validation accuracy"]) {
+                    message.innerHTML += " The highest validation accuracy was " + training_statistics["Highest accuracy"] +  "." +
+                                         " Using the trained model from cycle " + training_statistics["Highest accuracy epoch"] +  ".";
                 }
             }
         }
@@ -1582,10 +1580,14 @@ const receive_message =
             try {
                 const options = message.create_model;
                 const model_name = message.create_model.model_name;
+                options.class_names = get_data(model_name, 'categories');
+                if (options.loss_function === true) {
+                    options.loss_function = default_loss_function(options.class_names);
+                }
                 options.loss_function = loss_function_named(options.loss_function);
                 options.optimizer = optimizer_named(options.optimizer);
                 options.datasets = get_data(model_name, 'datasets');
-                options.class_names = get_data(model_name, 'categories');
+                
                 const model = create_model(options);
                 install_settings(options);
                 tensorflow.add_to_models(model);
@@ -1626,9 +1628,13 @@ const receive_message =
             record_callbacks(success_callback, error_callback);
             let model_name = message.train.model_name;
             install_settings(message.train);
+            const options = message.train;
+            if (get_data(model_name, 'categories')) {
+                options.tfvis_options.measure_accuracy = true;
+            }
             train_model(get_model(model_name),
                         get_data(model_name, 'datasets'),
-                        message.train,                         
+                        options,                         
                         success_callback,
                         error_callback);
         } else if (typeof message.predict !== 'undefined') {

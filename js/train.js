@@ -190,11 +190,22 @@ const create_model = (options, failure_callback) => {
                                       tf.train.momentum((typeof learning_rate === 'undefined' ? .001 : learning_rate), .9) :
                                       (typeof optimizer === 'string' ? tf.train[optimizer]() : 
                                       (typeof optimizer === 'object' ? optimizer : optimizer()));
-           const loss = (typeof loss_function === 'string' ?  tf.losses[loss_function] : loss_function) || 
-                        (class_names ? 'categoricalCrossentropy' : 'meanSquaredError');
+           let loss;
+           if (typeof loss_function === 'object') {
+               loss = loss_function;
+           } else if (class_names) {
+               loss = 'categoricalCrossentropy';
+               if (typeof loss_function === 'string') {
+                   console.log("Ignoring loss function '" + loss_function + "' and using instead '" + loss + "'");
+               }
+           } else if (typeof loss_function === 'string') {
+               loss = tf.losses[loss_function] || loss_function;
+           } else {
+               loss = 'meanSquaredError';
+           }
            const compile_options = {optimizer: optimizer_function,
-                                   loss,
-                                   metrics: class_names && ['accuracy','crossentropy']};
+                                    loss,
+                                    metrics: class_names && ['accuracy','crossentropy']};
            model.compile(compile_options);
         };
         let model = (typeof loaded_model !== 'undefined' && loaded_model) || (custom_model_builder ? custom_model_builder() : build_model());
@@ -822,6 +833,13 @@ const shape_of_data = (data) => {
    }
 };
 
+const loss_measure = (results) =>
+    results["Highest accuracy"] && -results["Highest accuracy"] || // minimize negative accuracy
+    results['Lowest validation loss'] || 
+    results['Validation loss'] || 
+    results['Lowest training loss'] || 
+    results['Training loss'];
+
 const hyperparameter_search = (options, datasets, success_callback, error_callback) => {
     let experiment_number = 0;
     let previous_model;
@@ -844,11 +862,7 @@ const hyperparameter_search = (options, datasets, success_callback, error_callba
                         (results, callback) => {
                             experiment_number++;
                             previous_model = model;
-                            let loss = results["Highest accuracy"] && -results["Highest accuracy"] || // minimize negative accuracy
-                                       results['Lowest validation loss'] || 
-                                       results['Validation loss'] || 
-                                       results['Lowest training loss'] || 
-                                       results['Training loss'];
+                            let loss = loss_measure(results);
                             if (isNaN(loss)) {
                                 loss = Number.MAX_VALUE;
                             }
