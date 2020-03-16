@@ -359,7 +359,7 @@ const update_best_weights = (model, best_weights) => {
 };
 
 const set_model_weights = (model, best_weights) => {
-    if (best_weights) {
+    if (best_weights && best_weights.length === model.layers) {
         try {
             model.layers.forEach((layer, index) => {
                 layer.setWeights(best_weights[index]);
