@@ -521,6 +521,15 @@ const create_hyperparamter_optimization_tab = (model) => {
     parameters_interface(create_parameters_interface).optimize.open();
 };
 
+const loss_or_accuracy = (x, best) => {
+    const prefix = best ? "Best loss so far = " : "Best accuracy so far = ";
+    if (x >= 0) {
+        return prefix + x.toPrecision(5);
+    } else {
+        return prefix + (-loss).toPrecision(5);
+    }
+};
+
 const optimize_hyperparameters_with_parameters = (draw_area, model) => {
     draw_area.appendChild(optimize_hyperparameters_messages);
     lowest_loss = Number.MAX_VALUE;
@@ -571,15 +580,17 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
     };
     let onExperimentEnd = (i, trial) => {
         const loss = trial.result.loss;
+        let message = "";
         if (loss === Number.MAX_VALUE) {
-            optimize_hyperparameters_messages.innerHTML += "Training failed and reported a loss that is not a number.<br>";
+            message = "Training failed and reported a loss that is not a number.<br>";
         } else if (loss <= lowest_loss) {
             // tried toFixed(...) but error can be 1e-12 and shows up as just zeroes
-            optimize_hyperparameters_messages.innerHTML += "<b>Best loss so far = " + loss + "</b>";
-            lowest_loss = loss;
+             message = "<b>" + loss_or_accuracy(loss, true) + "</b>";
+             lowest_loss = loss;
         } else {
-            optimize_hyperparameters_messages.innerHTML += "Loss = " + loss + "<br>";
-        }                            
+            message = loss_or_accuracy(loss, false);   
+        }
+        optimize_hyperparameters_messages.innerHTML += message  + "</b>";                          
     };
 //     optimize_hyperparameters_messages.innerHTML = "<b>Searching for good parameter values. Please wait.</b>";
     const error_handler = (error) => {
