@@ -526,7 +526,7 @@ const loss_or_accuracy = (x, best) => {
     if (x >= 0) {
         return prefix + x.toPrecision(5);
     } else {
-        return prefix + (-loss).toPrecision(5);
+        return prefix + (-x).toPrecision(5);
     }
 };
 
@@ -617,7 +617,8 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
                 install_settings_button.className = "support-window-button";
                 draw_area.appendChild(install_settings_button);
                 const model_name = best_model.name;
-                install_settings_button.innerHTML = "Click to set '" + model_name + "' to best one found (loss = " + lowest_loss + ")<br>";
+                install_settings_button.innerHTML = "Click to set '" + model_name + "' to best one found (" +
+                                                    loss_or_accuracy(lowest_loss, true) + ")<br>";
                 display_trial(result.argmin, install_settings_button);
                 const settings = result.argmin;
                 settings.model_name = model_name;
@@ -829,6 +830,7 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
     };
     record_callbacks(create_and_train_model, error_callback);
     best_model = undefined; // to be found
+    lowest_loss = undefined; // starting over 
     const space = {};
     const categories = get_data(model_name, 'categories');
     if (to_boolean(gui_state["Optimize"]["Search for best Optimization method"])) {
@@ -1751,12 +1753,17 @@ const receive_message =
                 best_parameters.loss_function       = inverse_lookup(best_parameters.loss_function, loss_functions(categories));
                 // So validation data is used when creating and training the model with the best parameters.
                 best_parameters.used_validation_data = !!get_data(model_name, 'validation');
+                if (lowest_loss > 0) {
+                    best_parameters.lowest_loss = lowest_loss;
+                } else {
+                    best_parameters.highest_accuracy = -lowest_loss;
+                }
                 const model = get_model(model_name);
                 model.best_model = best_model;
                 model.best_parameters = best_parameters;
                 event.source.postMessage({optimize_hyperparameters_time_stamp: time_stamp,
                                           final_optimize_hyperparameters: best_parameters},
-                                          "*");
+                                         "*");
             };
             const experiment_end_callback = (n, trial) => {
                 let parameters = trial.args;
