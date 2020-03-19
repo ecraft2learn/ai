@@ -683,6 +683,9 @@ const install_settings = (parameters) => {
     gui.training.__controllers.forEach((controller) => {
         controller.updateDisplay();
     });
+    gui.optimize.__controllers.forEach((controller) => {
+        controller.updateDisplay();
+    });
 };
 
 const inverse_lookup = (value, table) => {
@@ -701,14 +704,18 @@ const inverse_lookup = (value, table) => {
 let previous_model;
 
 const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
-                                  experiment_end_callback, success_callback, error_callback) => {
+                                  experiment_end_callback, success_callback, error_callback,
+                                  what_to_optimize,
+                                  how_to_compare) => {
    // this is meant to be called when messages are received from a client page (e.g. Snap!)
    record_callbacks(success_callback, error_callback);
    try {   
        const [xs, ys] = get_tensors(model_name, 'training');
        const validation_tensors = get_tensors(model_name, 'validation'); // undefined if no validation data
            optimize(model_name, xs, ys, validation_tensors, number_of_experiments, epochs, 
-                    undefined, experiment_end_callback, error_callback)
+                    undefined, experiment_end_callback, error_callback, 
+                    what_to_optimize,
+                    how_to_compare)
               .then((result) => {
                   invoke_callback(success_callback, result);
                   if (previous_model && !previous_model.disposed && previous_model !== best_model) {
@@ -738,7 +745,9 @@ const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
 };
 
 const optimize = async (model_name, xs, ys, validation_tensors, number_of_experiments, epochs,
-                        onExperimentBegin, onExperimentEnd, error_callback) => {
+                        onExperimentBegin, onExperimentEnd, error_callback,
+                        what_to_optimize,
+                        how_to_compare) => {
     const create_and_train_model = async ({layers, optimization_method, loss_function, epochs, learning_rate,
                                            dropout_rate, validation_split, activation, shuffle}, 
                                           {xs, ys}) => {
@@ -833,6 +842,20 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
     lowest_loss = undefined; // starting over 
     const space = {};
     const categories = get_data(model_name, 'categories');
+    if (what_to_optimize) {
+        const descriptions = [
+            "Search for best Optimization method",
+            "Search for best loss function",
+            "Search for best activation function",
+            "Search for best shuffle data setting",
+            "Search for best number of training iterations",
+            "Search for best validation split",
+            "Search for best dropout rate",
+            "Search for best number of layers"];
+        what_to_optimize.forEach((use, index) => {
+            gui_state["Optimize"][descriptions[index]] = use;
+        });
+    }
     if (to_boolean(gui_state["Optimize"]["Search for best Optimization method"])) {
         space.optimization_method = hpjs.choice(Object.values(optimization_methods));
     }
@@ -1784,7 +1807,9 @@ const receive_message =
             };
             record_callbacks(success_callback, error_callback, experiment_end_callback);
             optimize_hyperparameters(model_name, number_of_experiments, epochs,
-                                     experiment_end_callback, success_callback, error_callback);
+                                     experiment_end_callback, success_callback, error_callback,
+                                     message.what_to_optimize,
+                                     message.how_to_compare);
         } else if (typeof message.replace_with_best_model !== 'undefined') {
             const model_name = message.replace_with_best_model;
             replace_with_best_model(model_name,

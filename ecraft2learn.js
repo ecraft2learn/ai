@@ -1289,7 +1289,9 @@ window.ecraft2learn =
                                   });
     };
     const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
-                                      trial_end_callback, success_callback, error_callback) => {
+                                      trial_end_callback, success_callback, error_callback,
+                                      what_to_optimize,
+                                      how_to_compare) => {
         if (typeof epochs !== 'number') {
             epochs = 0; // so it will use default in tensorflow.js support_window
         }
@@ -1299,10 +1301,12 @@ window.ecraft2learn =
                                   'Loaded',
                                   () => {
                                       return {optimize_hyperparameters: true,
-                                              model_name: model_name,
-                                              number_of_experiments: number_of_experiments,
-                                              epochs: epochs,
-                                              time_stamp: time_stamp};
+                                              model_name,
+                                              number_of_experiments,
+                                              epochs,
+                                              time_stamp,
+                                              what_to_optimize: snap_to_javascript(what_to_optimize),
+                                              how_to_compare};
                                   },
                                   (message) => {
                                       return message.optimize_hyperparameters_time_stamp === time_stamp;
