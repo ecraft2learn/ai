@@ -676,6 +676,10 @@ const install_settings = (parameters) => {
     if (typeof parameters.shuffle === 'boolean') {
         gui_state["Training"]["Shuffle data"] = parameters.shuffle;
     }
+    update_gui();
+};
+
+const update_gui = () => {
     const gui = parameters_interface(create_parameters_interface);
     gui.model.__controllers.forEach((controller) => {
         controller.updateDisplay();
@@ -855,6 +859,7 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
         what_to_optimize.forEach((use, index) => {
             gui_state["Optimize"][descriptions[index]] = use;
         });
+        update_gui();
     }
     if (to_boolean(gui_state["Optimize"]["Search for best Optimization method"])) {
         space.optimization_method = hpjs.choice(Object.values(optimization_methods));
