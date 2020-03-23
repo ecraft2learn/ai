@@ -490,6 +490,8 @@ const get_tensors = (model_name, kind) => {
 
 let optimize_hyperparameters_messages; // only need one even if called multiple times
 let lowest_loss;
+let highest_accuracy;
+let highest_score;
 let best_model;
 let stop_on_next_experiment = false;
 let hyperparameter_searching = false;
@@ -521,18 +523,11 @@ const create_hyperparamter_optimization_tab = (model) => {
     parameters_interface(create_parameters_interface).optimize.open();
 };
 
-const loss_or_accuracy = (x, best) => {
-    const prefix = best ? "Best loss so far = " : "Best accuracy so far = ";
-    if (x >= 0) {
-        return prefix + x.toPrecision(5);
-    } else {
-        return prefix + (-x).toPrecision(5);
-    }
-};
-
 const optimize_hyperparameters_with_parameters = (draw_area, model) => {
     draw_area.appendChild(optimize_hyperparameters_messages);
     lowest_loss = Number.MAX_VALUE;
+    highest_accuracy = 0;
+    highest_score = 0;
     const name_element = document.getElementById('name_element');
     const model_name = name_element ? name_element.value : model ? model.name : 'my-model';
     const categories = get_data(model_name, 'categories');
@@ -580,15 +575,30 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
     };
     let onExperimentEnd = (i, trial) => {
         const loss = trial.result.loss;
+        const accuracy = trial.result.accuracy;
         let message = "";
         if (loss === Number.MAX_VALUE) {
             message = "Training failed and reported a loss that is not a number.<br>";
-        } else if (loss <= lowest_loss) {
-            // tried toFixed(...) but error can be 1e-12 and shows up as just zeroes
-             message = "<b>" + loss_or_accuracy(loss, true) + "</b>";
-             lowest_loss = loss;
         } else {
-            message = loss_or_accuracy(loss, false);   
+            const best_loss = loss <= lowest_loss;
+            const best_accuary = accuracy >= highest_accuracy;
+            if (best_loss) {
+                lowest_loss = loss;
+            }
+            if (best_accuary) {
+                best_accuary = accuracy;
+            }
+            if (best_loss || best_accuary) {
+                message = "<b>Best so far. ";
+            }
+            // tried toFixed(...) but error can be 1e-12 and shows up as just zeroes
+            message += "Loss = " + loss;
+            if (accuracy) {
+                message += "; Accuracy = " + accuracy;
+            }
+            if (best_loss || best_accuary) {
+                message += "</b>";
+            }
         }
         optimize_hyperparameters_messages.innerHTML += message  + "</b>";                          
     };
@@ -618,7 +628,7 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
                 draw_area.appendChild(install_settings_button);
                 const model_name = best_model.name;
                 install_settings_button.innerHTML = "Click to set '" + model_name + "' to best one found (" +
-                                                    loss_or_accuracy(lowest_loss, true) + ")<br>";
+                                                    "Loss = " + lowest_loss + (highest_accuracy? "; Accuracy = " + highest_accuracy : "");
                 display_trial(result.argmin, install_settings_button);
                 const settings = result.argmin;
                 settings.model_name = model_name;
@@ -710,7 +720,7 @@ let previous_model;
 const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
                                   experiment_end_callback, success_callback, error_callback,
                                   what_to_optimize,
-                                  how_to_compare) => {
+                                  scoring_weights) => {
    // this is meant to be called when messages are received from a client page (e.g. Snap!)
    record_callbacks(success_callback, error_callback);
    try {   
@@ -719,7 +729,7 @@ const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
            optimize(model_name, xs, ys, validation_tensors, number_of_experiments, epochs, 
                     undefined, experiment_end_callback, error_callback, 
                     what_to_optimize,
-                    how_to_compare)
+                    scoring_weights)
               .then((result) => {
                   invoke_callback(success_callback, result);
                   if (previous_model && !previous_model.disposed && previous_model !== best_model) {
@@ -751,7 +761,7 @@ const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
 const optimize = async (model_name, xs, ys, validation_tensors, number_of_experiments, epochs,
                         onExperimentBegin, onExperimentEnd, error_callback,
                         what_to_optimize,
-                        how_to_compare) => {
+                        scoring_weights) => {
     const create_and_train_model = async ({layers, optimization_method, loss_function, epochs, learning_rate,
                                            dropout_rate, validation_split, activation, shuffle}, 
                                           {xs, ys}) => {
@@ -814,19 +824,30 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
 //                             }
                             previous_model = model;
 //                             tf.disposeVariables();
-                            let loss = loss_measure(results);
+                            let loss = results["Lowest validation loss"];
                             if (isNaN(loss)) {
                                 loss = Number.MAX_VALUE;
                             }
-                            if (loss < lowest_loss || typeof lowest_loss === 'undefined') {
-                                lowest_loss = loss;
+                            const accuracy = results["Highest accuracy"];
+                            const duration = results["Duration in seconds"];
+                            const size = model.countParams();
+                            let score;
+                            if (scoring_weights) {
+                                score = compute_score(cannonicalise_weights(scoring_weights), loss, accuracy, duration, size);
+                            } else if (accuracy) {
+                                score = accuracy;
+                            } else {
+                                score = -loss;
+                            }
+                            if (score > highest_score || typeof highest_score === 'undefined') {
+                                highest_score = score;
                                 if (best_model) {
                                     best_model.dispose();
                                     best_model.disposed = true;
                                 }
                                 best_model = model;
                             }
-                            resolve({loss,
+                            resolve({loss: -score,
                                      results,
                                      best_model,
                                      status: hpjs.STATUS_OK});
@@ -843,7 +864,9 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
     };
     record_callbacks(create_and_train_model, error_callback);
     best_model = undefined; // to be found
-    lowest_loss = undefined; // starting over 
+    lowest_loss = undefined; // starting override
+    highest_accuracy = undefined;
+    highest_score = undefined;
     const space = {};
     const categories = get_data(model_name, 'categories');
     if (what_to_optimize) {
@@ -939,6 +962,14 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
         }
     }
 };
+
+const cannonicalise_weights = (weights) => {
+    const sum = weights.reduce((a, b) => a+b, 0);
+    return weights.map(x => x/sum);
+};
+
+const compute_score = (weights, loss, accuracy, duration, size) => 
+    -Math.log(loss)*weights[0]+10*accuracy*weights[1]-Math.log(duration)*weights[2]-Math.log(size)*weights[3];
 
 let report_error = function (error) {
     console.log(error); // for now
@@ -1783,8 +1814,12 @@ const receive_message =
                 best_parameters.used_validation_data = !!get_data(model_name, 'validation');
                 if (lowest_loss > 0) {
                     best_parameters.lowest_loss = lowest_loss;
-                } else {
-                    best_parameters.highest_accuracy = -lowest_loss;
+                }
+                if (highest_accuracy > 0) {
+                    best_parameters.highest_accuracy = highest_accuracy;
+                }
+                if (highest_score > 0) {
+                    best_parameters.highest_score = highest_score;
                 }
                 const model = get_model(model_name);
                 model.best_model = best_model;
@@ -1800,7 +1835,7 @@ const receive_message =
                 event.source.postMessage({optimize_hyperparameters_time_stamp: time_stamp,
                                           trial_number: n,
                                           trial_optimize_hyperparameters: parameters,
-                                          trial_loss: trial.result.loss},
+                                          trial_score: trial.result.loss},
                                           "*");
             }
             const error_callback = (error) => {
@@ -1814,7 +1849,7 @@ const receive_message =
             optimize_hyperparameters(model_name, number_of_experiments, epochs,
                                      experiment_end_callback, success_callback, error_callback,
                                      message.what_to_optimize,
-                                     message.how_to_compare);
+                                     message.scoring_weights);
         } else if (typeof message.replace_with_best_model !== 'undefined') {
             const model_name = message.replace_with_best_model;
             replace_with_best_model(model_name,

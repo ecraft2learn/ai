@@ -1291,7 +1291,7 @@ window.ecraft2learn =
     const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
                                       trial_end_callback, success_callback, error_callback,
                                       what_to_optimize,
-                                      how_to_compare) => {
+                                      scoring_weights) => {
         if (typeof epochs !== 'number') {
             epochs = 0; // so it will use default in tensorflow.js support_window
         }
@@ -1306,7 +1306,7 @@ window.ecraft2learn =
                                               epochs,
                                               time_stamp,
                                               what_to_optimize: snap_to_javascript(what_to_optimize),
-                                              how_to_compare};
+                                              scoring_weights: snap_to_javascript(scoring_weights)};
                                   },
                                   (message) => {
                                       return message.optimize_hyperparameters_time_stamp === time_stamp;
@@ -1314,12 +1314,7 @@ window.ecraft2learn =
                                   (message) => {
                                       if (message.trial_optimize_hyperparameters) {
                                           message.trial_optimize_hyperparameters.trial_number = message.trial_number;
-                                          if (message.trial_loss < 0) {
-                                              message.trial_optimize_hyperparameters.accuracy = -message.trial_loss;
-                                          } else {
-                                              message.trial_optimize_hyperparameters.loss = message.trial_loss;
-                                          }
-                                          
+                                          message.trial_optimize_hyperparameters.score = message.trial_score;
                                           invoke_callback(trial_end_callback,
                                                           javascript_to_snap(message.trial_optimize_hyperparameters),
                                                           message.trial_number);

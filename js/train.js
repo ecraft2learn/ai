@@ -195,7 +195,7 @@ const create_model = (options, failure_callback) => {
                loss = loss_function;
            } else if (class_names) {
                loss = 'categoricalCrossentropy';
-               if (typeof loss_function === 'string' && loss_function !== loss) {
+               if (typeof loss_function === 'string' && loss_function !== loss && loss_function !== 'Softmax Cross Entropy') {
                    console.log("Ignoring loss function '" + loss_function + "' and using instead '" + loss + "'");
                }
            } else if (typeof loss_function === 'string') {
