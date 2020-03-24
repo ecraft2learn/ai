@@ -725,6 +725,7 @@ const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
                                   scoring_weights) => {
    // this is meant to be called when messages are received from a client page (e.g. Snap!)
    record_callbacks(success_callback, error_callback);
+   gui_state["Training"]["Number of iterations"] = epochs;
    try {   
        const [xs, ys] = get_tensors(model_name, 'training');
        const validation_tensors = get_tensors(model_name, 'validation'); // undefined if no validation data
