@@ -1342,7 +1342,7 @@ window.ecraft2learn =
                                   },
                                   (message) => {
                                       if (message.model_replaced === model_name) {
-                                          invoke_callback(success_callback, javascript_to_snap(model_name));
+                                          invoke_callback(success_callback, javascript_to_snap(message.parameters));
                                       } else if (error_callback) {
                                           console.log(message.error_message);
                                           invoke_callback(error_callback, javascript_to_snap(message.error_message));

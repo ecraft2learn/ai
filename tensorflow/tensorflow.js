@@ -1867,8 +1867,9 @@ const receive_message =
         } else if (typeof message.replace_with_best_model !== 'undefined') {
             const model_name = message.replace_with_best_model;
             replace_with_best_model(model_name,
-                                    () => {
-                                        event.source.postMessage({model_replaced: model_name});
+                                    (parameters) => {
+                                        event.source.postMessage({model_replaced: model_name,
+                                                                  parameters});
                                     },
                                     (error_message) => {
                                         event.source.postMessage({error_replacing_model: model_name,
@@ -1898,7 +1899,7 @@ const replace_with_best_model = (name_of_model_used_in_search, success_callback,
     install_settings(model.best_parameters);
     show_layers(model.best_model, 'Model found by parameter search');
     if (success_callback) {
-        invoke_callback(success_callback);
+        invoke_callback(success_callback, model.best_parameters);
     }
 };
 
