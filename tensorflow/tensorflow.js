@@ -492,6 +492,8 @@ let optimize_hyperparameters_messages; // only need one even if called multiple 
 let lowest_loss;
 let highest_accuracy;
 let highest_score;
+let metrics_of_highest_score;
+let is_best_so_far;
 let best_model;
 let stop_on_next_experiment = false;
 let hyperparameter_searching = false;
@@ -839,8 +841,10 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
                             } else {
                                 score = -loss;
                             }
-                            if (score > highest_score || typeof highest_score === 'undefined') {
+                            is_best_so_far = score > highest_score || typeof highest_score === 'undefined';
+                            if (is_best_so_far) {
                                 highest_score = score;
+                                metrics_of_highest_score = {loss, accuracy, duration, size};
                                 if (best_model) {
                                     best_model.dispose();
                                     best_model.disposed = true;
@@ -867,6 +871,8 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
     lowest_loss = undefined; // starting override
     highest_accuracy = undefined;
     highest_score = undefined;
+    metrics_of_highest_score = undefined;
+    is_best_so_far = false;
     const space = {};
     const categories = get_data(model_name, 'categories');
     if (what_to_optimize) {
@@ -882,6 +888,7 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
         what_to_optimize.forEach((use, index) => {
             gui_state["Optimize"][descriptions[index]] = use;
         });
+        gui_state["Optimize"]["Number of experiments"] = number_of_experiments;
         update_gui();
     }
     if (to_boolean(gui_state["Optimize"]["Search for best Optimization method"])) {
@@ -1806,6 +1813,10 @@ const receive_message =
             const categories = get_data(model_name, 'categories');
             let time_stamp = message.time_stamp;
             const success_callback = (result) => {
+                if (!result) {
+                    error_callback(new Error("No results from search."));
+                    return;
+                }
                 const best_parameters = result.argmin;
                 best_parameters.input_shape = shape_of_data((get_data(model_name, 'training') || get_data(model_name, 'validation')).input[0]);
                 best_parameters.optimization_method = inverse_lookup(best_parameters.optimization_method, optimization_methods);
@@ -1820,6 +1831,7 @@ const receive_message =
                 }
                 if (highest_score > 0) {
                     best_parameters.highest_score = highest_score;
+                    best_parameters.metrics = metrics_of_highest_score;
                 }
                 const model = get_model(model_name);
                 model.best_model = best_model;
@@ -1832,10 +1844,12 @@ const receive_message =
                 let parameters = trial.args;
                 parameters.optimization_method = inverse_lookup(parameters.optimization_method, optimization_methods);
                 parameters.loss_function       = inverse_lookup(parameters.loss_function, loss_functions(categories));
+                parameters.is_best_so_far      = is_best_so_far;
                 event.source.postMessage({optimize_hyperparameters_time_stamp: time_stamp,
                                           trial_number: n,
                                           trial_optimize_hyperparameters: parameters,
-                                          trial_score: trial.result.loss},
+                                          trial_score: trial.result.loss,
+                                          is_best_so_far},
                                           "*");
             }
             const error_callback = (error) => {
