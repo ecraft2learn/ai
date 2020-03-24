@@ -969,7 +969,7 @@ const cannonicalise_weights = (weights) => {
 };
 
 const compute_score = (weights, loss, accuracy, duration, size) => 
-    -Math.log(loss)*weights[0]+10*accuracy*weights[1]-Math.log(duration)*weights[2]-Math.log(size)*weights[3];
+    -Math.log(loss)*weights[0]+10*accuracy*weights[1]-Math.log(duration)*weights[2]-Math.log(size/1000)*weights[3];
 
 let report_error = function (error) {
     console.log(error); // for now
