@@ -1,0 +1,200 @@
+﻿optimization_method,Stochastic Gradient Descent,epochs,1650,learning_rate,0.0019,layers,120.3,loss_function,,is_best_so_far,false,trial_number,0,score,1.7976931348623157e+308
+optimization_method,Adaptive Moment Estimation Max,epochs,1950,learning_rate,0.0023,layers,100.3,loss_function,,is_best_so_far,true,trial_number,1,score,-5.291139724101178
+optimization_method,Adaptive Stochastic Gradient Descent,epochs,1050,learning_rate,0.0004,layers,164.100.3,loss_function,,is_best_so_far,false,trial_number,2,score,0.4826488987941451
+optimization_method,Adaptive Moment Estimation Max,epochs,1950,learning_rate,0.0012000000000000001,layers,100.100.3,loss_function,,is_best_so_far,false,trial_number,3,score,-4.525087196248367
+optimization_method,Root Mean Squared Prop,epochs,600,learning_rate,0.0007,layers,100.100.3,loss_function,,is_best_so_far,false,trial_number,4,score,-4.594171024194062
+optimization_method,Adaptive Moment Estimation,epochs,1500,learning_rate,0.0009000000000000001,layers,120.3,loss_function,,is_best_so_far,true,trial_number,5,score,-5.2920146492641855
+optimization_method,Momentum,epochs,750,learning_rate,0.0004,layers,80.3,loss_function,,is_best_so_far,false,trial_number,6,score,-3.163399807264857
+optimization_method,Adaptive Moment Estimation Max,epochs,1350,learning_rate,0.0022,layers,100.3,loss_function,,is_best_so_far,true,trial_number,7,score,-5.337179637558869
+optimization_method,Adaptive Moment Estimation,epochs,900,learning_rate,0.0011,layers,100.100.3,loss_function,,is_best_so_far,false,trial_number,8,score,-4.655800621492469
+optimization_method,Adaptive Moment Estimation Max,epochs,1350,learning_rate,0.0004,layers,164.100.3,loss_function,,is_best_so_far,false,trial_number,9,score,-4.545893882592637
+optimization_method,Adaptive Moment Estimation,epochs,450,learning_rate,0.0018000000000000002,layers,80.3,loss_function,,is_best_so_far,true,trial_number,10,score,-5.522314889409912
+optimization_method,Adaptive Moment Estimation Max,epochs,750,learning_rate,0.0011,layers,164.100.3,loss_function,,is_best_so_far,false,trial_number,11,score,-4.6580751102083156
+optimization_method,Adaptive Learning Rate Gradiant Descent,epochs,1950,learning_rate,0.0006000000000000001,layers,80.3,loss_function,,is_best_so_far,false,trial_number,12,score,-3.045127700687316
+optimization_method,Adaptive Moment Estimation,epochs,600,learning_rate,0.0015,layers,120.3,loss_function,,is_best_so_far,false,trial_number,13,score,-4.694151674525345
+optimization_method,Adaptive Learning Rate Gradiant Descent,epochs,1050,learning_rate,0.001,layers,100.100.3,loss_function,,is_best_so_far,false,trial_number,14,score,-3.028223790667287
+optimization_method,Momentum,epochs,1500,learning_rate,0.0019,layers,80.3,loss_function,,is_best_so_far,false,trial_number,15,score,-4.576928727137984
+optimization_method,Root Mean Squared Prop,epochs,1050,learning_rate,0.0008,layers,164.100.3,loss_function,,is_best_so_far,false,trial_number,16,score,-5.2678884802567305
+optimization_method,Stochastic Gradient Descent,epochs,1200,learning_rate,0.0026000000000000003,layers,100.3,loss_function,,is_best_so_far,false,trial_number,17,score,1.7976931348623157e+308
+optimization_method,Root Mean Squared Prop,epochs,1950,learning_rate,0.0009000000000000001,layers,164.100.3,loss_function,,is_best_so_far,false,trial_number,18,score,-5.224806978232748
+optimization_method,Momentum,epochs,750,learning_rate,0.002,layers,164.100.3,loss_function,,is_best_so_far,false,trial_number,19,score,-4.54218084697578
+optimization_method,Momentum,epochs,340,learning_rate,0.00126,layers,116.3,loss_function,,is_best_so_far,true,trial_number,0,score,-5.3257696979389735
+optimization_method,Momentum,epochs,748,learning_rate,0.00108,layers,116.3,loss_function,,is_best_so_far,false,trial_number,1,score,-5.2359724240578425
+optimization_method,Adaptive Moment Estimation Max,epochs,816,learning_rate,0.00288,layers,84.80.3,loss_function,,is_best_so_far,true,trial_number,2,score,-5.384990797752027
+optimization_method,Adaptive Learning Rate Gradiant Descent,epochs,748,learning_rate,0.0016200000000000001,layers,84.80.3,loss_function,,is_best_so_far,false,trial_number,3,score,-2.394424663298096
+optimization_method,Momentum,epochs,816,learning_rate,0.00108,layers,80.3,loss_function,,is_best_so_far,false,trial_number,4,score,-3.8691042101556152
+optimization_method,Adaptive Moment Estimation,epochs,340,learning_rate,0.00144,layers,80.3,loss_function,,is_best_so_far,true,trial_number,5,score,-5.509891462678555
+optimization_method,Adaptive Moment Estimation Max,epochs,884,learning_rate,0.0034200000000000003,layers,116.3,loss_function,,is_best_so_far,false,trial_number,6,score,-5.350394310971234
+optimization_method,Adaptive Moment Estimation Max,epochs,748,learning_rate,0.00234,layers,80.3,loss_function,,is_best_so_far,false,trial_number,7,score,-4.6985647608600996
+optimization_method,Root Mean Squared Prop,epochs,816,learning_rate,0.0009000000000000001,layers,116.3,loss_function,,is_best_so_far,false,trial_number,8,score,-4.625943511953453
+optimization_method,Adaptive Moment Estimation,epochs,680,learning_rate,0.00108,layers,80.3,loss_function,,is_best_so_far,false,trial_number,9,score,-5.430755354908687
+optimization_method,Adaptive Learning Rate Gradiant Descent,epochs,680,learning_rate,0.0034200000000000003,layers,80.80.3,loss_function,,is_best_so_far,false,trial_number,10,score,-3.840650300695834
+optimization_method,Adaptive Moment Estimation Max,epochs,476,learning_rate,0.00072,layers,80.80.3,loss_function,,is_best_so_far,false,trial_number,11,score,-4.778784523911986
+optimization_method,Adaptive Moment Estimation Max,epochs,612,learning_rate,0.0036000000000000003,layers,116.3,loss_function,,is_best_so_far,false,trial_number,12,score,-4.704891363136029
+optimization_method,Momentum,epochs,680,learning_rate,0.00252,layers,116.3,loss_function,,is_best_so_far,false,trial_number,13,score,-5.343629540536188
+optimization_method,Stochastic Gradient Descent,epochs,272,learning_rate,0.00072,layers,80.80.3,loss_function,,is_best_so_far,false,trial_number,14,score,1.7976931348623157e+308
+optimization_method,Stochastic Gradient Descent,epochs,340,learning_rate,0.0009000000000000001,layers,80.80.3,loss_function,,is_best_so_far,false,trial_number,15,score,1.7976931348623157e+308
+optimization_method,Stochastic Gradient Descent,epochs,680,learning_rate,0.00108,layers,116.3,loss_function,,is_best_so_far,false,trial_number,16,score,1.7976931348623157e+308
+optimization_method,Adaptive Learning Rate Gradiant Descent,epochs,748,learning_rate,0.0018000000000000002,layers,80.3,loss_function,,is_best_so_far,false,trial_number,17,score,-1.0736784344488948
+optimization_method,Adaptive Moment Estimation,epochs,340,learning_rate,0.00072,layers,116.3,loss_function,,is_best_so_far,false,trial_number,18,score,-4.740706943969683
+optimization_method,Momentum,epochs,680,learning_rate,0.0027,layers,80.3,loss_function,,is_best_so_far,false,trial_number,19,score,-4.6491412392306986
+optimization_method,Root Mean Squared Prop,epochs,544,learning_rate,0.00144,layers,80.80.3,loss_function,,is_best_so_far,true,trial_number,0,score,-4.664281724622012
+optimization_method,Adaptive Moment Estimation,epochs,544,learning_rate,0.00234,layers,80.80.3,loss_function,,is_best_so_far,true,trial_number,1,score,-5.545390371539588
+optimization_method,Momentum,epochs,476,learning_rate,0.00108,layers,123.80.3,loss_function,,is_best_so_far,false,trial_number,2,score,-4.577387126788887
+optimization_method,Adaptive Stochastic Gradient Descent,epochs,272,learning_rate,0.0018000000000000002,layers,40.3,loss_function,,is_best_so_far,false,trial_number,3,score,-2.7601771623689384
+optimization_method,Adaptive Moment Estimation Max,epochs,816,learning_rate,0.00144,layers,91.3,loss_function,,is_best_so_far,false,trial_number,4,score,-4.758366578485144
+optimization_method,Momentum,epochs,612,learning_rate,0.0009000000000000001,layers,80.3,loss_function,,is_best_so_far,false,trial_number,5,score,-2.6138880836031126
+optimization_method,Adaptive Moment Estimation,epochs,544,learning_rate,0.00288,layers,80.3,loss_function,,is_best_so_far,true,trial_number,6,score,-5.563371116444444
+optimization_method,Stochastic Gradient Descent,epochs,408,learning_rate,0.00252,layers,91.3,loss_function,,is_best_so_far,true,trial_number,7,score,1.7976931348623157e+308
+optimization_method,Stochastic Gradient Descent,epochs,748,learning_rate,0.00126,layers,40.3,loss_function,,is_best_so_far,true,trial_number,8,score,1.7976931348623157e+308
+optimization_method,Adaptive Stochastic Gradient Descent,epochs,476,learning_rate,0.0036000000000000003,layers,80.3,loss_function,,is_best_so_far,false,trial_number,9,score,-3.3357853179981176
+optimization_method,Momentum,epochs,340,learning_rate,0.00432,layers,80.3,loss_function,,is_best_so_far,false,trial_number,10,score,-4.807669133238599
+optimization_method,Stochastic Gradient Descent,epochs,612,learning_rate,0.00072,layers,91.3,loss_function,,is_best_so_far,false,trial_number,11,score,1.7976931348623157e+308
+optimization_method,Root Mean Squared Prop,epochs,340,learning_rate,0.00216,layers,80.80.3,loss_function,,is_best_so_far,false,trial_number,12,score,-4.869139282196526
+optimization_method,Stochastic Gradient Descent,epochs,204,learning_rate,0.00288,layers,123.80.3,loss_function,,is_best_so_far,false,trial_number,13,score,1.7976931348623157e+308
+optimization_method,Adaptive Moment Estimation,epochs,748,learning_rate,0.00216,layers,123.80.3,loss_function,,is_best_so_far,false,trial_number,14,score,-4.811172258543348
+optimization_method,Adaptive Moment Estimation,epochs,544,learning_rate,0.00396,layers,40.3,loss_function,,is_best_so_far,false,trial_number,15,score,-4.970266310678536
+optimization_method,Adaptive Stochastic Gradient Descent,epochs,544,learning_rate,0.00072,layers,40.3,loss_function,,is_best_so_far,false,trial_number,16,score,-2.742315213515423
+optimization_method,Root Mean Squared Prop,epochs,408,learning_rate,0.00072,layers,91.3,loss_function,,is_best_so_far,false,trial_number,17,score,-4.782966273328378
+optimization_method,Momentum,epochs,408,learning_rate,0.0009000000000000001,layers,91.3,loss_function,,is_best_so_far,false,trial_number,18,score,-3.317948013590757
+optimization_method,Root Mean Squared Prop,epochs,680,learning_rate,0.00108,layers,40.3,loss_function,,is_best_so_far,false,trial_number,19,score,-4.883736996207566
+optimization_method,Momentum,epochs,820,learning_rate,0.001728,layers,123.80.3,loss_function,,is_best_so_far,true,trial_number,0,score,-4.639464565075232
+optimization_method,Adaptive Stochastic Gradient Descent,epochs,738,learning_rate,0.004032,layers,80.80.3,loss_function,,is_best_so_far,false,trial_number,1,score,-3.3061599247562534
+optimization_method,Adaptive Moment Estimation Max,epochs,492,learning_rate,0.004608,layers,123.80.3,loss_function,,is_best_so_far,true,trial_number,2,score,-5.560364567469758
+optimization_method,Adaptive Stochastic Gradient Descent,epochs,984,learning_rate,0.006912,layers,80.80.3,loss_function,,is_best_so_far,false,trial_number,3,score,-4.005491592470119
+optimization_method,Root Mean Squared Prop,epochs,820,learning_rate,0.0063360000000000005,layers,80.3,loss_function,,is_best_so_far,false,trial_number,4,score,-5.558049853169221
+optimization_method,Adaptive Learning Rate Gradiant Descent,epochs,410,learning_rate,0.0072,layers,80.80.3,loss_function,,is_best_so_far,false,trial_number,5,score,-1.2513037722268292
+optimization_method,Adaptive Stochastic Gradient Descent,epochs,328,learning_rate,0.003744,layers,80.80.3,loss_function,,is_best_so_far,false,trial_number,6,score,-4.067954910915471
+optimization_method,Root Mean Squared Prop,epochs,902,learning_rate,0.0072,layers,123.80.3,loss_function,,is_best_so_far,false,trial_number,7,score,-4.7432958000922625
+optimization_method,Momentum,epochs,328,learning_rate,0.004896,layers,80.3,loss_function,,is_best_so_far,false,trial_number,8,score,-4.861099495644387
+optimization_method,Stochastic Gradient Descent,epochs,410,learning_rate,0.004032,layers,123.80.3,loss_function,,is_best_so_far,false,trial_number,9,score,1.7976931348623157e+308
+optimization_method,Adaptive Moment Estimation Max,epochs,410,learning_rate,0.004608,layers,80.3,loss_function,,is_best_so_far,false,trial_number,10,score,-4.921977042068382
+optimization_method,Adaptive Learning Rate Gradiant Descent,epochs,574,learning_rate,0.002304,layers,80.80.3,loss_function,,is_best_so_far,false,trial_number,11,score,-2.5900992151242392
+optimization_method,Root Mean Squared Prop,epochs,328,learning_rate,0.005184,layers,142.3,loss_function,,is_best_so_far,false,trial_number,12,score,-4.864008806423627
+optimization_method,Adaptive Stochastic Gradient Descent,epochs,574,learning_rate,0.002592,layers,49.3,loss_function,,is_best_so_far,false,trial_number,13,score,-3.3478563669031196
+optimization_method,Adaptive Learning Rate Gradiant Descent,epochs,656,learning_rate,0.004032,layers,80.3,loss_function,,is_best_so_far,false,trial_number,14,score,-3.9495110775204707
+optimization_method,Momentum,epochs,738,learning_rate,0.006912,layers,142.3,loss_function,,is_best_so_far,false,trial_number,15,score,-5.415308626182676
+optimization_method,Adaptive Learning Rate Gradiant Descent,epochs,902,learning_rate,0.002304,layers,123.80.3,loss_function,,is_best_so_far,false,trial_number,16,score,-1.7250911905405701
+optimization_method,Root Mean Squared Prop,epochs,820,learning_rate,0.001728,layers,49.3,loss_function,,is_best_so_far,true,trial_number,17,score,-5.566190128080063
+optimization_method,Adaptive Learning Rate Gradiant Descent,epochs,820,learning_rate,0.00432,layers,80.80.3,loss_function,,is_best_so_far,false,trial_number,18,score,-3.1921585275717814
+optimization_method,Momentum,epochs,410,learning_rate,0.005184,layers,142.3,loss_function,,is_best_so_far,false,trial_number,19,score,-4.747426819640731
+optimization_method,Adaptive Stochastic Gradient Descent,epochs,861,learning_rate,0.000864,layers,71.49.3,loss_function,,is_best_so_far,true,trial_number,0,score,-4.614859915796421
+optimization_method,Adaptive Learning Rate Gradiant Descent,epochs,1107,learning_rate,0.0015552,layers,61.3,loss_function,,is_best_so_far,false,trial_number,1,score,-4.603396265202167
+optimization_method,Stochastic Gradient Descent,epochs,984,learning_rate,0.0024192,layers,49.3,loss_function,,is_best_so_far,false,trial_number,2,score,1.7976931348623157e+308
+optimization_method,Adaptive Stochastic Gradient Descent,epochs,1476,learning_rate,0.0024192,layers,48.3,loss_function,,is_best_so_far,true,trial_number,3,score,-4.6793458303929105
+optimization_method,Root Mean Squared Prop,epochs,492,learning_rate,0.0024192,layers,71.49.3,loss_function,,is_best_so_far,true,trial_number,4,score,-5.694584855262464
+optimization_method,Adaptive Moment Estimation,epochs,1599,learning_rate,0.0012096,layers,48.3,loss_function,,is_best_so_far,false,trial_number,5,score,-4.84689525579857
+optimization_method,Stochastic Gradient Descent,epochs,1476,learning_rate,0.0012096,layers,71.49.3,loss_function,,is_best_so_far,false,trial_number,6,score,1.7976931348623157e+308
+optimization_method,Root Mean Squared Prop,epochs,861,learning_rate,0.0032832,layers,49.3,loss_function,,is_best_so_far,false,trial_number,7,score,-5.60074709593552
+optimization_method,Momentum,epochs,615,learning_rate,0.0006912,layers,48.3,loss_function,,is_best_so_far,false,trial_number,8,score,-2.7135933338988396
+optimization_method,Stochastic Gradient Descent,epochs,738,learning_rate,0.002592,layers,71.49.3,loss_function,,is_best_so_far,false,trial_number,9,score,1.7976931348623157e+308
+optimization_method,Adaptive Moment Estimation Max,epochs,1476,learning_rate,0.00432,layers,49.3,loss_function,,is_best_so_far,false,trial_number,10,score,-5.52388828258371
+optimization_method,Momentum,epochs,984,learning_rate,0.001728,layers,49.49.3,loss_function,,is_best_so_far,false,trial_number,11,score,-5.487424293741296
+optimization_method,Adaptive Stochastic Gradient Descent,epochs,615,learning_rate,0.0031104,layers,61.3,loss_function,,is_best_so_far,false,trial_number,12,score,-4.766113861978006
+optimization_method,Adaptive Moment Estimation,epochs,984,learning_rate,0.001728,layers,71.49.3,loss_function,,is_best_so_far,false,trial_number,13,score,-4.823331850751131
+optimization_method,Root Mean Squared Prop,epochs,1599,learning_rate,0.0013824,layers,71.49.3,loss_function,,is_best_so_far,false,trial_number,14,score,-5.496279114812577
+optimization_method,Adaptive Learning Rate Gradiant Descent,epochs,615,learning_rate,0.0022464,layers,48.3,loss_function,,is_best_so_far,false,trial_number,15,score,-2.686138725977815
+optimization_method,Adaptive Moment Estimation,epochs,1230,learning_rate,0.0006912,layers,49.3,loss_function,,is_best_so_far,false,trial_number,16,score,-5.537008914708753
+optimization_method,Adaptive Moment Estimation,epochs,1107,learning_rate,0.0010368,layers,49.49.3,loss_function,,is_best_so_far,false,trial_number,17,score,-4.889159326247172
+optimization_method,Root Mean Squared Prop,epochs,1476,learning_rate,0.000864,layers,49.3,loss_function,,is_best_so_far,false,trial_number,18,score,-4.822795593948643
+optimization_method,Momentum,epochs,1230,learning_rate,0.0015552,layers,61.3,loss_function,,is_best_so_far,false,trial_number,19,score,-4.742987968039239
+optimization_method,Adaptive Learning Rate Gradiant Descent,epochs,370,learning_rate,0.0043545599999999995,layers,50.28.3,loss_function,,is_best_so_far,true,trial_number,0,score,-4.073145664023444
+optimization_method,Adaptive Stochastic Gradient Descent,epochs,962,learning_rate,0.00145152,layers,49.3,loss_function,,is_best_so_far,false,trial_number,1,score,-4.000538857047689
+optimization_method,Adaptive Moment Estimation,epochs,444,learning_rate,0.0012096,layers,49.3,loss_function,,is_best_so_far,true,trial_number,2,score,-4.959486139982738
+optimization_method,Momentum,epochs,666,learning_rate,0.0021772799999999998,layers,71.49.3,loss_function,,is_best_so_far,false,trial_number,3,score,-4.758338075208157
+optimization_method,Adaptive Moment Estimation Max,epochs,444,learning_rate,0.00411264,layers,71.49.3,loss_function,,is_best_so_far,true,trial_number,4,score,-5.620503030695782
+optimization_method,Root Mean Squared Prop,epochs,296,learning_rate,0.0012096,layers,71.71.49.3,loss_function,,is_best_so_far,false,trial_number,5,score,-5.517955452601423
+optimization_method,Momentum,epochs,888,learning_rate,0.00193536,layers,75.83.3,loss_function,,is_best_so_far,false,trial_number,6,score,-4.694593063181377
+optimization_method,Adaptive Moment Estimation Max,epochs,518,learning_rate,0.0012096,layers,50.28.3,loss_function,,is_best_so_far,false,trial_number,7,score,-4.866677513880064
+optimization_method,Adaptive Stochastic Gradient Descent,epochs,888,learning_rate,0.00411264,layers,105.71.49.3,loss_function,,is_best_so_far,false,trial_number,8,score,-3.865708968115679
+optimization_method,Adaptive Stochastic Gradient Descent,epochs,518,learning_rate,0.00193536,layers,71.71.49.3,loss_function,,is_best_so_far,false,trial_number,9,score,-3.970768805872371
+optimization_method,Adaptive Moment Estimation,epochs,888,learning_rate,0.0012096,layers,71.49.3,loss_function,,is_best_so_far,false,trial_number,10,score,-4.776924477930283
+optimization_method,Root Mean Squared Prop,epochs,740,learning_rate,0.0016934399999999998,layers,50.28.3,loss_function,,is_best_so_far,false,trial_number,11,score,-4.834221192947949
+optimization_method,Adaptive Moment Estimation,epochs,888,learning_rate,0.00145152,layers,50.28.3,loss_function,,is_best_so_far,false,trial_number,12,score,-4.878142444378628
+optimization_method,Stochastic Gradient Descent,epochs,518,learning_rate,0.00314496,layers,50.28.3,loss_function,,is_best_so_far,false,trial_number,13,score,1.7976931348623157e+308
+optimization_method,Root Mean Squared Prop,epochs,592,learning_rate,0.0012096,layers,71.71.49.3,loss_function,,is_best_so_far,false,trial_number,14,score,-5.59062364025522
+optimization_method,Adaptive Stochastic Gradient Descent,epochs,888,learning_rate,0.0060479999999999996,layers,75.83.3,loss_function,,is_best_so_far,false,trial_number,15,score,-4.718858103472408
+optimization_method,Adaptive Stochastic Gradient Descent,epochs,814,learning_rate,0.00628992,layers,105.71.49.3,loss_function,,is_best_so_far,false,trial_number,16,score,-4.673300431911171
+optimization_method,Adaptive Moment Estimation Max,epochs,740,learning_rate,0.005564159999999999,layers,75.83.3,loss_function,,is_best_so_far,false,trial_number,17,score,-5.571723591532083
+optimization_method,Adaptive Learning Rate Gradiant Descent,epochs,592,learning_rate,0.0016934399999999998,layers,50.28.3,loss_function,,is_best_so_far,false,trial_number,18,score,-3.325919143398052
+optimization_method,Root Mean Squared Prop,epochs,666,learning_rate,0.0021772799999999998,layers,49.3,loss_function,,is_best_so_far,true,trial_number,19,score,-5.623136374172209
+optimization_method,Adaptive Moment Estimation,epochs,296,learning_rate,0.00290304,layers,71.49.3,loss_function,,is_best_so_far,true,trial_number,0,score,-4.989257536608738
+optimization_method,Root Mean Squared Prop,epochs,814,learning_rate,0.00145152,layers,71.49.3,loss_function,,is_best_so_far,true,trial_number,1,score,-5.573999754395746
+optimization_method,Stochastic Gradient Descent,epochs,592,learning_rate,0.00193536,layers,49.3,loss_function,,is_best_so_far,true,trial_number,2,score,1.7976931348623157e+308
+optimization_method,Momentum,epochs,962,learning_rate,0.00314496,layers,116.78.3,loss_function,,is_best_so_far,false,trial_number,3,score,-4.007416209292183
+optimization_method,Stochastic Gradient Descent,epochs,962,learning_rate,0.00653184,layers,71.49.3,loss_function,,is_best_so_far,false,trial_number,4,score,1.7976931348623157e+308
+optimization_method,Adaptive Moment Estimation,epochs,740,learning_rate,0.00459648,layers,116.78.3,loss_function,,is_best_so_far,false,trial_number,5,score,-5.523942682262815
+optimization_method,Adaptive Moment Estimation Max,epochs,222,learning_rate,0.0024192,layers,49.41.3,loss_function,,is_best_so_far,false,trial_number,6,score,-4.967987217293209
+optimization_method,Root Mean Squared Prop,epochs,740,learning_rate,0.0012096,layers,71.71.49.3,loss_function,,is_best_so_far,false,trial_number,7,score,-4.819454858356508
+optimization_method,Stochastic Gradient Descent,epochs,518,learning_rate,0.00193536,layers,73.71.49.3,loss_function,,is_best_so_far,false,trial_number,8,score,1.7976931348623157e+308
+optimization_method,Stochastic Gradient Descent,epochs,740,learning_rate,0.0016934399999999998,layers,71.71.49.3,loss_function,,is_best_so_far,false,trial_number,9,score,1.7976931348623157e+308
+optimization_method,Adaptive Learning Rate Gradiant Descent,epochs,444,learning_rate,0.0012096,layers,71.71.49.3,loss_function,,is_best_so_far,false,trial_number,10,score,-1.8762070476086805
+optimization_method,Adaptive Learning Rate Gradiant Descent,epochs,370,learning_rate,0.00290304,layers,49.41.3,loss_function,,is_best_so_far,false,trial_number,11,score,-2.690759652143244
+optimization_method,Root Mean Squared Prop,epochs,592,learning_rate,0.005564159999999999,layers,49.41.3,loss_function,,is_best_so_far,false,trial_number,12,score,-4.936545580865915
+optimization_method,Adaptive Moment Estimation,epochs,666,learning_rate,0.005564159999999999,layers,73.71.49.3,loss_function,,is_best_so_far,true,trial_number,13,score,-5.687962716618213
+optimization_method,Adaptive Moment Estimation Max,epochs,444,learning_rate,0.005564159999999999,layers,116.78.3,loss_function,,is_best_so_far,false,trial_number,14,score,-4.832278293093621
+optimization_method,Adaptive Moment Estimation Max,epochs,296,learning_rate,0.0016934399999999998,layers,49.3,loss_function,,is_best_so_far,false,trial_number,15,score,-4.978825019511772
+optimization_method,Stochastic Gradient Descent,epochs,444,learning_rate,0.00266112,layers,73.71.49.3,loss_function,,is_best_so_far,false,trial_number,16,score,1.7976931348623157e+308
+optimization_method,Adaptive Moment Estimation,epochs,962,learning_rate,0.0033868799999999997,layers,71.49.3,loss_function,,is_best_so_far,false,trial_number,17,score,-4.888763936006589
+optimization_method,Stochastic Gradient Descent,epochs,888,learning_rate,0.00096768,layers,73.71.49.3,loss_function,,is_best_so_far,false,trial_number,18,score,1.7976931348623157e+308
+optimization_method,Stochastic Gradient Descent,epochs,740,learning_rate,0.00314496,layers,73.71.49.3,loss_function,,is_best_so_far,false,trial_number,19,score,1.7976931348623157e+308
+optimization_method,Adaptive Learning Rate Gradiant Descent,epochs,370,learning_rate,0.00459648,layers,46.49.3,loss_function,,is_best_so_far,true,trial_number,0,score,-2.6581533086719644
+optimization_method,Root Mean Squared Prop,epochs,888,learning_rate,0.0043545599999999995,layers,49.3,loss_function,,is_best_so_far,true,trial_number,1,score,-5.565389196866153
+optimization_method,Adaptive Moment Estimation Max,epochs,888,learning_rate,0.0012096,layers,139.71.49.3,loss_function,,is_best_so_far,false,trial_number,2,score,-5.394759227849095
+optimization_method,Adaptive Moment Estimation,epochs,518,learning_rate,0.00266112,layers,49.3,loss_function,,is_best_so_far,true,trial_number,3,score,-5.63031727866971
+optimization_method,Momentum,epochs,518,learning_rate,0.00653184,layers,139.71.49.3,loss_function,,is_best_so_far,false,trial_number,4,score,-5.418928914844267
+optimization_method,Adaptive Learning Rate Gradiant Descent,epochs,740,learning_rate,0.00314496,layers,46.49.3,loss_function,,is_best_so_far,false,trial_number,5,score,-3.293325796546493
+optimization_method,Momentum,epochs,296,learning_rate,0.00532224,layers,71.71.49.3,loss_function,,is_best_so_far,false,trial_number,6,score,-4.083800929534693
+optimization_method,Stochastic Gradient Descent,epochs,740,learning_rate,0.00145152,layers,49.3,loss_function,,is_best_so_far,false,trial_number,7,score,1.7976931348623157e+308
+optimization_method,Adaptive Stochastic Gradient Descent,epochs,296,learning_rate,0.0012096,layers,49.3,loss_function,,is_best_so_far,false,trial_number,8,score,-2.7413711970683754
+optimization_method,Stochastic Gradient Descent,epochs,592,learning_rate,0.00387072,layers,49.3,loss_function,,is_best_so_far,false,trial_number,9,score,1.7976931348623157e+308
+optimization_method,Adaptive Learning Rate Gradiant Descent,epochs,962,learning_rate,0.00314496,layers,49.3,loss_function,,is_best_so_far,false,trial_number,10,score,-3.2515657223530696
+optimization_method,Root Mean Squared Prop,epochs,666,learning_rate,0.0024192,layers,139.71.49.3,loss_function,,is_best_so_far,false,trial_number,11,score,-4.6972787555065185
+optimization_method,Adaptive Moment Estimation Max,epochs,962,learning_rate,0.00145152,layers,71.49.3,loss_function,,is_best_so_far,false,trial_number,12,score,-5.550020463229937
+optimization_method,Adaptive Moment Estimation,epochs,888,learning_rate,0.0043545599999999995,layers,49.3,loss_function,,is_best_so_far,false,trial_number,13,score,-4.896233297538476
+optimization_method,Adaptive Learning Rate Gradiant Descent,epochs,814,learning_rate,0.00532224,layers,80.63.3,loss_function,,is_best_so_far,false,trial_number,14,score,-3.2392874938946834
+optimization_method,Adaptive Learning Rate Gradiant Descent,epochs,814,learning_rate,0.00314496,layers,49.3,loss_function,,is_best_so_far,false,trial_number,15,score,-1.945905783872752
+optimization_method,Adaptive Moment Estimation,epochs,814,learning_rate,0.00145152,layers,139.71.49.3,loss_function,,is_best_so_far,false,trial_number,16,score,-5.509686922021186
+optimization_method,Adaptive Moment Estimation,epochs,592,learning_rate,0.0060479999999999996,layers,80.63.3,loss_function,,is_best_so_far,true,trial_number,17,score,-5.669448034179684
+optimization_method,Root Mean Squared Prop,epochs,666,learning_rate,0.00532224,layers,71.49.3,loss_function,,is_best_so_far,false,trial_number,18,score,-5.609021348156698
+optimization_method,Adaptive Moment Estimation,epochs,370,learning_rate,0.0016934399999999998,layers,71.71.49.3,loss_function,,is_best_so_far,false,trial_number,19,score,-4.96121345831244
+optimization_method,Adaptive Stochastic Gradient Descent,epochs,666,learning_rate,0.0024192,layers,54.29.3,loss_function,,is_best_so_far,true,trial_number,0,score,-3.3157457251579414
+optimization_method,Stochastic Gradient Descent,epochs,444,learning_rate,0.0036287999999999997,layers,83.70.3,loss_function,,is_best_so_far,true,trial_number,1,score,1.7976931348623157e+308
+optimization_method,Momentum,epochs,296,learning_rate,0.00580608,layers,54.29.3,loss_function,,is_best_so_far,true,trial_number,2,score,-5.595409336122938
+optimization_method,Stochastic Gradient Descent,epochs,962,learning_rate,0.00145152,layers,54.29.3,loss_function,,is_best_so_far,true,trial_number,3,score,1.7976931348623157e+308
+optimization_method,Adaptive Learning Rate Gradiant Descent,epochs,814,learning_rate,0.00532224,layers,54.29.3,loss_function,,is_best_so_far,false,trial_number,4,score,-3.9935207269261195
+optimization_method,Root Mean Squared Prop,epochs,518,learning_rate,0.00266112,layers,83.70.3,loss_function,,is_best_so_far,true,trial_number,5,score,-5.619771661816188
+optimization_method,Root Mean Squared Prop,epochs,740,learning_rate,0.0021772799999999998,layers,71.49.3,loss_function,,is_best_so_far,false,trial_number,6,score,-4.8812471306974965
+optimization_method,Adaptive Learning Rate Gradiant Descent,epochs,962,learning_rate,0.0043545599999999995,layers,49.3,loss_function,,is_best_so_far,false,trial_number,7,score,-4.7122377264025
+optimization_method,Adaptive Learning Rate Gradiant Descent,epochs,814,learning_rate,0.00266112,layers,83.70.3,loss_function,,is_best_so_far,false,trial_number,8,score,-3.219466583796788
+optimization_method,Adaptive Stochastic Gradient Descent,epochs,962,learning_rate,0.00266112,layers,83.70.3,loss_function,,is_best_so_far,false,trial_number,9,score,-3.943489599568491
+optimization_method,Adaptive Learning Rate Gradiant Descent,epochs,296,learning_rate,0.00290304,layers,49.3,loss_function,,is_best_so_far,false,trial_number,10,score,-3.4701859522227667
+optimization_method,Root Mean Squared Prop,epochs,666,learning_rate,0.0036287999999999997,layers,49.3,loss_function,,is_best_so_far,false,trial_number,11,score,-4.965929999436641
+optimization_method,Adaptive Moment Estimation,epochs,888,learning_rate,0.0021772799999999998,layers,83.70.3,loss_function,,is_best_so_far,false,trial_number,12,score,-4.794684489690587
+optimization_method,Momentum,epochs,370,learning_rate,0.00096768,layers,71.71.49.3,loss_function,,is_best_so_far,false,trial_number,13,score,-4.056063147349921
+optimization_method,Momentum,epochs,814,learning_rate,0.0024192,layers,71.71.49.3,loss_function,,is_best_so_far,false,trial_number,14,score,-4.720951382986822
+optimization_method,Adaptive Learning Rate Gradiant Descent,epochs,444,learning_rate,0.00532224,layers,54.29.3,loss_function,,is_best_so_far,false,trial_number,15,score,-3.343531980466895
+optimization_method,Adaptive Moment Estimation Max,epochs,888,learning_rate,0.0016934399999999998,layers,49.3,loss_function,,is_best_so_far,false,trial_number,16,score,-5.558212808645024
+optimization_method,Adaptive Stochastic Gradient Descent,epochs,814,learning_rate,0.00628992,layers,71.71.49.3,loss_function,,is_best_so_far,false,trial_number,17,score,-3.2332631525780373
+optimization_method,Root Mean Squared Prop,epochs,962,learning_rate,0.0021772799999999998,layers,83.70.3,loss_function,,is_best_so_far,false,trial_number,18,score,-4.7490982934003565
+optimization_method,Adaptive Stochastic Gradient Descent,epochs,814,learning_rate,0.00096768,layers,71.49.3,loss_function,,is_best_so_far,false,trial_number,19,score,-1.1608922540314521
+optimization_method,Adaptive Learning Rate Gradiant Descent,epochs,296,learning_rate,0.00266112,layers,49.3,loss_function,,is_best_so_far,true,trial_number,0,score,-3.4288626773523565
+optimization_method,Adaptive Learning Rate Gradiant Descent,epochs,370,learning_rate,0.00096768,layers,71.49.3,loss_function,,is_best_so_far,false,trial_number,1,score,-2.6280885667148413
+optimization_method,Stochastic Gradient Descent,epochs,518,learning_rate,0.0036287999999999997,layers,71.49.3,loss_function,,is_best_so_far,false,trial_number,2,score,1.7976931348623157e+308
+optimization_method,Adaptive Stochastic Gradient Descent,epochs,444,learning_rate,0.00096768,layers,71.49.3,loss_function,,is_best_so_far,false,trial_number,3,score,-2.625785198668864
+optimization_method,Adaptive Stochastic Gradient Descent,epochs,518,learning_rate,0.0016934399999999998,layers,71.71.49.3,loss_function,,is_best_so_far,false,trial_number,4,score,-2.5691373303299345
+optimization_method,Adaptive Moment Estimation,epochs,370,learning_rate,0.00314496,layers,104.65.3,loss_function,,is_best_so_far,true,trial_number,5,score,-4.884953817479625
+optimization_method,Root Mean Squared Prop,epochs,370,learning_rate,0.0024192,layers,123.71.49.3,loss_function,,is_best_so_far,false,trial_number,6,score,-4.8221164475688045
+optimization_method,Momentum,epochs,814,learning_rate,0.00290304,layers,123.71.49.3,loss_function,,is_best_so_far,false,trial_number,7,score,-4.692294400400152
+optimization_method,Adaptive Moment Estimation Max,epochs,444,learning_rate,0.00145152,layers,71.49.3,loss_function,,is_best_so_far,true,trial_number,8,score,-4.9332779719280255
+optimization_method,Adaptive Moment Estimation Max,epochs,962,learning_rate,0.00387072,layers,71.49.3,loss_function,,is_best_so_far,false,trial_number,9,score,-4.761522880302362
+optimization_method,Stochastic Gradient Descent,epochs,962,learning_rate,0.0043545599999999995,layers,104.65.3,loss_function,,is_best_so_far,false,trial_number,10,score,1.7976931348623157e+308
+optimization_method,Adaptive Stochastic Gradient Descent,epochs,740,learning_rate,0.00096768,layers,104.65.3,loss_function,,is_best_so_far,false,trial_number,11,score,-1.8423722352876806
+optimization_method,Adaptive Stochastic Gradient Descent,epochs,370,learning_rate,0.0016934399999999998,layers,104.65.3,loss_function,,is_best_so_far,false,trial_number,12,score,-3.331713482250765
+optimization_method,Adaptive Moment Estimation,epochs,592,learning_rate,0.0012096,layers,71.49.3,loss_function,,is_best_so_far,false,trial_number,13,score,-4.895737481447194
+optimization_method,Stochastic Gradient Descent,epochs,666,learning_rate,0.00096768,layers,71.71.49.3,loss_function,,is_best_so_far,false,trial_number,14,score,1.7976931348623157e+308
+optimization_method,Adaptive Moment Estimation,epochs,814,learning_rate,0.0024192,layers,123.71.49.3,loss_function,,is_best_so_far,true,trial_number,15,score,-5.86677186686042
+optimization_method,Adaptive Moment Estimation,epochs,296,learning_rate,0.00387072,layers,71.71.49.3,loss_function,,is_best_so_far,true,trial_number,16,score,-5.914189199639096
+optimization_method,Momentum,epochs,444,learning_rate,0.00266112,layers,49.30.3,loss_function,,is_best_so_far,false,trial_number,17,score,-5.5391289772063015
+optimization_method,Root Mean Squared Prop,epochs,370,learning_rate,0.0024192,layers,71.71.49.3,loss_function,,is_best_so_far,false,trial_number,18,score,-5.672814929897671
+optimization_method,Adaptive Learning Rate Gradiant Descent,epochs,444,learning_rate,0.00145152,layers,71.71.49.3,loss_function,,is_best_so_far,false,trial_number,19,score,-2.5623494767363604
