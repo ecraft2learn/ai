@@ -1,20 +1,38 @@
-<!-- Make sure your page supports utf-8 characterset. -->
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<!-- Load TensorFlow.js. This is required to use the qna model. -->
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"> </script>
-<!-- Load the qna model. -->
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/qna"> </script>
-
-<!-- Place your code in the script tag below. You can also use an external .js file -->
+<textarea id="question" rows="4" cols="60">Loading. Please wait.</textarea>
+<textarea id="passage" rows="30" cols="100">Enter the passage here.</textarea>
+<div id="answer">Answer will appear here</div>
+<button id="answer-question" hidden>Answer the question</button>
 <script>
-  // Notice there is no 'import' statement. 'qna' and 'tf' is
-  // available on the index-page because of the script tag above.
-
+  const question = document.getElementById('question');
+  const passage = document.getElementById('passage');
+  const answer = document.getElementById('answer');
+  const button = document.getElementById('answer-question');
+  let model;
   // Load the model.
-  qna.load().then(model => {
-    // Find the answers
-    model.findAnswers(question, passage).then(answers => {
-      console.log('Answers: ', answers);
-    });
+  qna.load().then(m => {
+    model = m;
+    button.hidden = false;
+    question.innerHTML = "Enter your question here.";
   });
+  button.addEventListener('click',
+    (event) => {
+      answer.innerHTML = "...";
+      model.findAnswers(question.value, passage.value).then(answers => {
+        console.log('Question: ', question.value, 'Answers: ', answers);
+        if (answers.length === 0) {
+          answer.innerHTML = "Please rephrase your question.";
+        } else {
+          answer.innerHTML = answers[0].text + " (score: " + answers[0].score.toPrecision(3) + ")";
+//           let response = "";
+//           answers.forEach((answer, index) => {
+//             response += index + ". " + answer.text + " (" + answer.score.toPrecision(3) + ")<br>";
+//           });
+//           answer.innerHTML = response;
+//         }
+      };
+    });
+    });
 </script>
