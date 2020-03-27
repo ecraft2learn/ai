@@ -1,38 +1,56 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"> </script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/qna"> </script>
-<textarea id="question" rows="4" cols="60">Loading. Please wait.</textarea>
-<textarea id="passage" rows="30" cols="100">Enter the passage here.</textarea>
-<div id="answer">Answer will appear here</div>
-<button id="answer-question" hidden>Answer the question</button>
+<div id="question" style="background-color: #efef75a6; width: 45em; padding: 20px;">Loading. Please wait.</div>
+
+<textarea id="passage" rows="30" cols="100" style="background-color: #efff75a6; padding: 20px;">
+Logo is more than a programming language. It is a learning environment where children explore mathematical ideas and create projects of their own design. Logo, the first programming language explicitly designed for children, was invented by Seymour Papert, Wallace Feurzeig, Daniel Bobrow, and Cynthia Solomon in 1966 at Bolt, Beranek and Newman, Inc. (BBN). 
+
+Logo’s design drew upon two theoretical frameworks: Jean Piaget’s constructivism and Marvin Minsky’s artificial intelligence research at MIT. One of Logo’s foundational ideas was that children should have a powerful programming environment. Early Lisp served as a model with its symbolic computation, recursive functions, operations on linked lists, and dynamic scoping of variables. 
+
+Logo became a symbol for change in elementary mathematics education and in the nature of school itself.  The search for harnessing the computer’s potential to provide new ways of teaching and learning became a central focus and guiding principle in Logo language development. It encompassed a widening scope that included natural language, music, graphics, animation, story telling, turtle geometry, robots, and other physical devices.
+</textarea>
 <script>
-  const question = document.getElementById('question');
+  const questions_answers = document.getElementById('question');
   const passage = document.getElementById('passage');
-  const answer = document.getElementById('answer');
-  const button = document.getElementById('answer-question');
   let model;
-  // Load the model.
+  let question = "";
   qna.load().then(m => {
     model = m;
-    button.hidden = false;
-    question.innerHTML = "Enter your question here.";
+    questions_answers.innerHTML = "Type your questions followed by the Enter key.<br><br>";
+    questions_answers.focus();
   });
-  button.addEventListener('click',
+  document.addEventListener('keydown',
     (event) => {
-      answer.innerHTML = "...";
-      model.findAnswers(question.value, passage.value).then(answers => {
-        console.log('Question: ', question.value, 'Answers: ', answers);
+      if (!model) return;
+      if (event.key === 'Shift' || event.key === 'Control' || event.key === 'Delete') return;
+      if (event.key === 'Backspace') {
+        questions_answers.innerHTML = questions_answers.innerHTML.slice(0, questions_answers.innerHTML.length-1);
+        return;
+      }
+      if (event.key !== 'Enter') {
+        questions_answers.innerHTML += event.key;
+        question += event.key;
+        return;
+      }
+      let dialog = questions_answers.innerHTML;
+      questions_answers.innerHTML += "...";
+      model.findAnswers(question, passage.value).then(answers => {
+        console.log('Question: ', question, 'Answers: ', answers);
+        question = "";
         if (answers.length === 0) {
-          answer.innerHTML = "Please rephrase your question.";
+          dialog += "<br>Sorry can't answer that. Please try another question.<br>";
         } else {
-          answer.innerHTML = answers[0].text + " (score: " + answers[0].score.toPrecision(3) + ")";
+          dialog += "<br><b>" + answers[0].text + " (score: " + answers[0].score.toPrecision(3) + ")</b><br>";
+        }
+        questions_answers.innerHTML = dialog;
 //           let response = "";
 //           answers.forEach((answer, index) => {
 //             response += index + ". " + answer.text + " (" + answer.score.toPrecision(3) + ")<br>";
 //           });
 //           answer.innerHTML = response;
 //         }
-      };
-    });
+
+      });
     });
 </script>
