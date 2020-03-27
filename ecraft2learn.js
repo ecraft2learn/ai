@@ -3102,7 +3102,11 @@ xhr.send();
   load_tensorflow: (callback) => {
       if (typeof tf === 'undefined') {
           const script = document.createElement('script');
-          script.src = "/ai/js/tfjs.js";
+          if (window.location.hostname.indexOf('localhost') > 0) {
+              script.src = "/ai/js/tfjs.js";
+          } else {
+              script.src = "https:/ecraft2learn.github.io/ai/js/tfjs.js";
+          }
           script.onload = () => {
                               invoke_callback(callback);
           };
