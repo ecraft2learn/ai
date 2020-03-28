@@ -8,15 +8,19 @@
 window.ecraft2learn =
   (function () {
       let this_url = document.querySelector('script[src*="ecraft2learn.js"]').src; // the URL where this library lives
+      const relative_to_absolute_url = (url) => {
+          if (url.indexOf("//") < 0) {
+              // is relative to this_url
+              const last_slash_index = this_url.lastIndexOf('/');
+              return this_url.substring(0, last_slash_index+1) + url;
+          } else {
+              return url;
+          }
+      };
       let load_script = (url, when_loaded, if_error) => {
           const script = document.createElement("script");
           script.type = "text/javascript";
-          if (url.indexOf("//") < 0) {
-              // is relative to this_url
-              var last_slash_index = this_url.lastIndexOf('/');
-              url = this_url.substring(0, last_slash_index+1) + url;
-          }
-          script.src = url;
+          script.src = relative_to_absolute_url(url);
           if (when_loaded) {
               script.onload = when_loaded;
           }
@@ -2944,6 +2948,7 @@ xhr.send();
   stop_all_scripts,
   snap_to_javascript,
   javascript_to_snap,
+  relative_to_absolute_url,
   load_camera_training_from_file: (callback) => {
       load_transfer_training_from_file('camera', callback);
   },
@@ -3101,16 +3106,10 @@ xhr.send();
   },
   load_tensorflow: (callback) => {
       if (typeof tf === 'undefined') {
-          const script = document.createElement('script');
-          if (window.location.hostname.indexOf('localhost') > 0) {
-              script.src = "/ai/js/tfjs.js";
-          } else {
-              script.src = "https://ecraft2learn.github.io/ai/js/tfjs.js";
-          }
-          script.onload = () => {
-                              invoke_callback(callback);
-          };
-          document.body.appendChild(script);
+          load_script("js/tfjs.js",
+                      () => {
+                           invoke_callback(callback);
+                      });
       } else {
           invoke_callback(callback);
       }
