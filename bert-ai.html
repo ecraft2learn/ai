@@ -1,14 +1,15 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"> </script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/qna"> </script>
+<script src="js/tfjs.js"> </script>
+<script src="js/qna/qna.js"> </script>
 <div id="question" style="background-color: #efef75a6; width: 45em; padding: 20px;">Loading. Please wait.</div>
 
 <textarea id="passage" rows="30" cols="100" style="background-color: #efff75a6; padding: 20px;">
-Logo is more than a programming language. It is a learning environment where children explore mathematical ideas and create projects of their own design. Logo, the first programming language explicitly designed for children, was invented by Seymour Papert, Wallace Feurzeig, Daniel Bobrow, and Cynthia Solomon in 1966 at Bolt, Beranek and Newman, Inc. (BBN). 
-
-Logo’s design drew upon two theoretical frameworks: Jean Piaget’s constructivism and Marvin Minsky’s artificial intelligence research at MIT. One of Logo’s foundational ideas was that children should have a powerful programming environment. Early Lisp served as a model with its symbolic computation, recursive functions, operations on linked lists, and dynamic scoping of variables. 
-
-Logo became a symbol for change in elementary mathematics education and in the nature of school itself.  The search for harnessing the computer’s potential to provide new ways of teaching and learning became a central focus and guiding principle in Logo language development. It encompassed a widening scope that included natural language, music, graphics, animation, story telling, turtle geometry, robots, and other physical devices.
+What does the AI block library consist of?
+The library of Snap! blocks can be used for speaking, listening, and seeing. And there are blocks for doing natural language processing, transfer learning, and creating deep learning neural nets.
+What blocks are there for speaking?
+There is a speech synthesis block named "speak" that just says what you type as its input. And there a version that lets you choose the language, voice, volume, pitch, and speed of speaking. Different browsers and operating systems support different languages and voices. 
+How can I make my program hear what is said?
+There is a simple reporter called 'the next thing spoken' that listens for speech and reports the next thing spoken. THere are also full-featured blocks for doing more advanced things. The speech recognition blocks work best in Chrome where there is support for over 100 languages.
 </textarea>
 <script>
   const questions_answers = document.getElementById('question');
@@ -42,7 +43,7 @@ Logo became a symbol for change in elementary mathematics education and in the n
         console.log('Question: ', question, 'Answers: ', answers);
         question = "";
         if (answers.length === 0) {
-          dialog += "<br>Sorry can't answer that. Please try another question.<br>";
+          dialog += "<br><b>Sorry can't answer that. Please try another question.</b><br>";
         } else {
           dialog += "<br><b>" + answers[0].text + " (score: " + answers[0].score.toPrecision(3) + ")</b><br>";
         }
