@@ -3153,6 +3153,19 @@ xhr.send();
           invoke_callback(callback);
       }
   },
+  load_BERT: (callback) => {
+      if (typeof ecraft2learn.BERT === 'undefined') {
+          load_script('js/qna/qna.js',
+                      () => {
+                          qna.load().then(model => {
+                              ecraft2learn.BERT = model;
+                              invoke_callback(callback);
+                          }); 
+                      });
+      } else {
+          invoke_callback(callback);
+      }
+  },
   sentence_features: (sentences, callback) => {
       const embed = () => {
           ecraft2learn.universal_sentence_encoder.embed(sentences.asArray()).then(embeddings_tensor => {
@@ -3172,7 +3185,7 @@ xhr.send();
                   embed();
               });
           });
-      };     
+      };
   },
   tokenize_sentence: (sentence, callback) => {
       const tokenize = () => {
@@ -3190,6 +3203,29 @@ xhr.send();
               });
           });
       };
+  },
+  answer_question: (question, passage, callback, error_callback) => {
+      const answer = () => {
+          ecraft2learn.BERT.findAnswers(question, passage).then(
+            answers => {
+                invoke_callback(callback, javascript_to_snap(answers));
+            },
+            error => {
+                invoke_callback(error_callback, error.message);
+            });
+      };
+      if (ecraft2learn.BERT) {
+          answer();
+      } else {
+          show_message("Loading the Question Answering Model ...");
+          ecraft2learn.load_BERT(() => {
+              qna.load().then(model => {
+                  ecraft2learn.universal_sentence_encoder = model;
+                  show_message();
+                  answer();
+              });
+          });
+      };     
   },
   initialise_all: function () {
       Object.values(ecraft2learn.support_window).forEach(function (support_window) {
