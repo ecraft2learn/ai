@@ -3105,7 +3105,7 @@ xhr.send();
           if (window.location.hostname.indexOf('localhost') > 0) {
               script.src = "/ai/js/tfjs.js";
           } else {
-              script.src = "https:/ecraft2learn.github.io/ai/js/tfjs.js";
+              script.src = "https://ecraft2learn.github.io/ai/js/tfjs.js";
           }
           script.onload = () => {
                               invoke_callback(callback);
