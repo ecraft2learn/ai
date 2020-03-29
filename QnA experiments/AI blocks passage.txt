@@ -1,0 +1,6 @@
+What does the AI block library consist of?
+There are blocks for speaking, listening, and seeing. And there are blocks for doing natural language processing, transfer learning, and creating deep learning neural nets.
+What blocks are there for speaking?
+There is a speech synthesis block named "speak" that just says what you type as its input. And there a version that lets you choose the language, voice, volume, pitch, and speed of speaking. Different browsers and operating systems support different languages and voices. 
+How can I make my program hear what is said?
+There is a simple reporter called 'the next thing spoken' that listens for speech and reports the next thing spoken. THere are also full-featured blocks for doing more advanced things. The speech recognition blocks work best in Chrome where there is support for over 100 languages.
