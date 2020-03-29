@@ -10,6 +10,10 @@ window.ecraft2learn =
       let this_url = document.querySelector('script[src*="ecraft2learn.js"]').src; // the URL where this library lives
       const relative_to_absolute_url = (url) => {
           if (url.indexOf("//") < 0) {
+              if (url.indexOf('/ai') === 0) {
+                  const ai_index = this_url.indexOf('/ai');
+                  return this_url.substring(0, ai_index) + url;
+              }
               // is relative to this_url
               const last_slash_index = this_url.lastIndexOf('/');
               return this_url.substring(0, last_slash_index+1) + url;
@@ -1246,6 +1250,7 @@ window.ecraft2learn =
     };
     const load_tensorflow_model_from_URL = (URL, success_callback, error_callback) => {
         record_callbacks(success_callback, error_callback);
+        URL = relative_to_absolute_url(URL);
         request_of_support_window('tensorflow.js',
                                   'Loaded',
                                   () => {
