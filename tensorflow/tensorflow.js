@@ -1737,7 +1737,7 @@ const receive_message =
             predict(model, 
                     message.predict.input,
                     success_callback, error_callback,
-                    get_data(model_name, 'categories'));
+                    message.predict.categories || get_data(model_name, 'categories'));
         } else if (typeof message.is_model_ready_for_prediction !== 'undefined') {
             let name = message.is_model_ready_for_prediction.model_name;
             let model = models[name];
@@ -1745,7 +1745,7 @@ const receive_message =
             if (model) {
                 ready = !!model.ready_for_prediction; 
             } else {
-                event.source.postMessage({error: "Unknown model '" + name + "' asked if ready for predictions."}, "*");
+//                 event.source.postMessage({error: "Unknown model '" + name + "' asked if ready for predictions."}, "*");
                 ready = false; // unknown model is not ready
             }
             event.source.postMessage({ready_for_prediction: ready,

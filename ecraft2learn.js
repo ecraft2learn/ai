@@ -1223,7 +1223,9 @@ window.ecraft2learn =
                                       invoke_callback(callback, javascript_to_snap(message.ready_for_prediction));
                                   });
     };
-    const predictions_from_model = (model_name, inputs, success_callback, error_callback) => {
+    const predictions_from_model = (model_name, inputs, success_callback, error_callback,
+    // optional categories added after release - really should have used a single JavaScript object as input
+                                    categories) => {
         record_callbacks(success_callback, error_callback);
         const time_stamp = Date.now();
         request_of_support_window('tensorflow.js',
@@ -1231,6 +1233,7 @@ window.ecraft2learn =
                                   () => {
                                       return {predict: {model_name: model_name,
                                                         input: snap_to_javascript(inputs, true),
+                                                        categories: snap_to_javascript(categories),
                                                         time_stamp: time_stamp}};
                                   },
                                   (message) => {
@@ -1248,6 +1251,23 @@ window.ecraft2learn =
                                       }
                                   });
     };
+//     const get_available_models = (callback) => {
+//         request_of_support_window('tensorflow.js',
+//                                   'Loaded',
+//                                   () => {
+//                                       return {get_available_models: true};
+//                                   },
+//                                   (message) => {
+//                                       return true;
+//                                   },
+//                                   (message) => {
+//                                       if (message.available_models) {
+//                                           invoke_callback(callback, javascript_to_snap(message.available_models));
+//                                       } else {
+//                                           inform("Error in prediction", message.error_message);
+//                                       }
+//                                   });
+//     };
     const load_tensorflow_model_from_URL = (URL, success_callback, error_callback) => {
         record_callbacks(success_callback, error_callback);
         URL = relative_to_absolute_url(URL);
