@@ -764,8 +764,6 @@ const redo_training = (model, options, callback, failure_callback) => {
                 failure_callback);
 };
 
-let last_prediction;
-
 const predict = (model, inputs, success_callback, error_callback, categories) => {
     if (!model) {
         invoke_callback(error_callback, "No model provided for prediction. Maybe the name is wrong.");
@@ -788,7 +786,6 @@ const predict = (model, inputs, success_callback, error_callback, categories) =>
         record_callbacks(model.callback_when_ready_for_prediction);
         return;
     }
-    last_prediction = JSON.stringify(inputs);
     try {
         let input_tensor;
         if (typeof inputs[0] === 'number') {
