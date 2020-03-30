@@ -245,6 +245,11 @@ window.ecraft2learn =
 //                                                      false);
             const process = new Process(null, callback.receiver, null, true);
             process.initializeFor(callback, new List(parameters));
+            if (!process.topBlock.world()) {
+                // this is needed for error reporting - without it errors aren't repeated
+                // however they are displayed at the top of the "world"
+                process.topBlock.world = () => world;
+            };
             stage.threads.processes.push(process);
             return process;
         } else if (typeof callback === 'function') { // assume JavaScript callback
@@ -2642,8 +2647,12 @@ xhr.send();
   },
   open_help_page: function () {
       // this can be blocked as a popup (FireFox and Edge) but they offer to display the page anyway
-      // alternative is to use document.location.assign to replace current page but back to previous page restores thing
+      // alternative is to use document.location.assign to replace current page 
+      // user can press the back buttn to resotre the previous page  
       window.open("https://github.com/ecraft2learn/ai/wiki", "_blank");
+  },
+  open_web_page: (url) => {
+      window.open((relative_to_absolute_url(url)), "_blank");
   },
   re_open_full_window: () => {
       const project_path = window.frameElement ? window.frameElement.getAttribute('project_path') : window.location.href;
