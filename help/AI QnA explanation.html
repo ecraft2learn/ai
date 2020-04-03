@@ -1,0 +1,38 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>How the AI questions and answers project works</title>
+<link href="../css/ai-teacher-guide.css" rel="stylesheet">
+<!-- <link href="../css/oer-style.css" rel="stylesheet"> -->
+<link rel="icon" type="image/png" href="../images/eCraft2Learn-Favicon.png" />
+<script src="../js/ai-guide.js"></script>
+</head>
+<body>
+<script src="../js/translate.js"></script>
+<h2>An explanation of the how the AI Question and Answer Snap! project works</h2>
+<p>
+The project loads two similar models that were trained to produce one of six labels given a sentence.
+The models were generated with the same program but with a different split of the data between
+training and validation.
+The average of their confidences that each label is correct is used to answer questions.
+</p>
+<p>
+The models were the result of <a href="hyperparameter-search.html">five hyperparameter searches</a>.
+Each search explored twenty variants and then replaced the current model with the best one found
+if it is better.
+See the <span class="block-name">search and replace</span> block to see how this was implemented.
+</p>
+<p>
+The project splits the data into training, validation, and test datasets in such a way that they each contain
+the same number of each category of question.
+See the <span class="block-name">create training and validation data</span> block.
+</p>
+<p>
+The project turns sentences into lists of 512 numbers using the 
+<span class="block-name">features of sentence</span> block.
+This relies upon <a href="https://github.com/tensorflow/tfjs-models/tree/master/universal-sentence-encoder">the universal sentence encoder</a>.
+</p>
+<h3>See if you can do better</h3>
+<p>
+Or replace the data with your own.
+</p>
+</body>
+</html>
