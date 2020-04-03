@@ -1720,6 +1720,26 @@ const receive_message =
         } else if (typeof message.predict !== 'undefined') {
             let results = [];
             const average_results = () => {
+                if (typeof results[0] === 'number') {
+                    let average = 0;
+                    results.forEach(result => {
+                        average += result/results.length;
+                    });
+                    return average;
+                }
+                if (categories) {
+                    return average_categorical_results();
+                }
+                const averages = results[0].map(() => 0);
+                results.forEach((result) => {
+                    result.forEach((prediction, index) => {
+                        averages[index] += prediction/results.length;
+                    });                        
+                });
+                return averages;
+                
+            }
+            const average_categorical_results = () => {
                 const keys = Object.keys(results[0][0]);
                 const sums = results[0].map(scoring => {
                     const new_scoring = {};
@@ -1728,13 +1748,13 @@ const receive_message =
                     });
                     return new_scoring;
                 });
-                    results.forEach(result => {
-                        result.forEach((next_scoring, scoring_index) => {
-                            keys.forEach(key => {
-                                sums[scoring_index][key] += next_scoring[key]/results.length;
-                            });
-                        }) 
-                    });
+                results.forEach(result => {
+                    result.forEach((next_scoring, scoring_index) => {
+                        keys.forEach(key => {
+                            sums[scoring_index][key] += next_scoring[key]/results.length;
+                        });
+                    }) 
+                });
                 return sums;
             };
             const success_callback = (result) => {
@@ -1753,7 +1773,7 @@ const receive_message =
             if (typeof model_names === 'string') {
                 model_names = [model_names];
             }
-            const categories = message.predict.categories || get_data(model_name, 'categories');
+            const categories = message.predict.categories || get_data(model_names[0], 'categories');
             model_names.forEach(model_name => {
                 const model = get_model(model_name);
                 if (!model) {
