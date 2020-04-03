@@ -1718,26 +1718,55 @@ const receive_message =
                         success_callback,
                         error_callback);
         } else if (typeof message.predict !== 'undefined') {
+            let results = [];
+            const average_results = () => {
+                const keys = Object.keys(results[0][0]);
+                const sums = results[0].map(scoring => {
+                    const new_scoring = {};
+                    keys.map(key => {
+                        new_scoring[key] = 0;
+                    });
+                    return new_scoring;
+                });
+                    results.forEach(result => {
+                        result.forEach((next_scoring, scoring_index) => {
+                            keys.forEach(key => {
+                                sums[scoring_index][key] += next_scoring[key]/results.length;
+                            });
+                        }) 
+                    });
+                return sums;
+            };
             const success_callback = (result) => {
-                event.source.postMessage({prediction: message.predict.time_stamp,
-                                          result: result}, "*");
+                results.push(result);
+                if (results.length === model_names.length) {
+                    event.source.postMessage({prediction: message.predict.time_stamp,
+                                              result: average_results()}, "*");
+                }
             };
             const error_callback = (error_message) => {
                 event.source.postMessage({prediction_failed: message.predict.time_stamp, 
                                           error_message: error_message}, "*");
             };
             record_callbacks(success_callback, error_callback);
-            const model_name = message.predict.model_name;
-            const model = get_model(model_name);
-            if (!model) {
-                invoke_callback(error_callback, 
-                                "Prediction not possible since there is no model named '" + model_name + "'.");
-                return;
+            let model_names = message.predict.model_names;
+            if (typeof model_names === 'string') {
+                model_names = [model_names];
             }
-            predict(model, 
-                    message.predict.input,
-                    success_callback, error_callback,
-                    message.predict.categories || get_data(model_name, 'categories'));
+            const categories = message.predict.categories || get_data(model_name, 'categories');
+            model_names.forEach(model_name => {
+                const model = get_model(model_name);
+                if (!model) {
+                    invoke_callback(error_callback, 
+                                    "Prediction not possible since there is no model named '" + model_name + "'.");
+                    return;
+                }
+                predict(model, 
+                        message.predict.input,
+                        success_callback,
+                        error_callback,
+                        categories);
+            });
         } else if (typeof message.is_model_ready_for_prediction !== 'undefined') {
             let name = message.is_model_ready_for_prediction.model_name;
             let model = models[name];

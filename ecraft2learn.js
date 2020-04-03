@@ -1228,7 +1228,7 @@ window.ecraft2learn =
                                       invoke_callback(callback, javascript_to_snap(message.ready_for_prediction));
                                   });
     };
-    const predictions_from_model = (model_name, inputs, success_callback, error_callback,
+    const predictions_from_model = (model_names, inputs, success_callback, error_callback,
     // optional categories added after release - really should have used a single JavaScript object as input
                                     categories) => {
         record_callbacks(success_callback, error_callback);
@@ -1236,7 +1236,7 @@ window.ecraft2learn =
         request_of_support_window('tensorflow.js',
                                   'Loaded',
                                   () => {
-                                      return {predict: {model_name: model_name,
+                                      return {predict: {model_names: snap_to_javascript(model_names),
                                                         input: snap_to_javascript(inputs, true),
                                                         categories: snap_to_javascript(categories),
                                                         time_stamp: time_stamp}};
