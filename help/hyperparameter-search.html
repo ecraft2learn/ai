@@ -1,0 +1,110 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Hyperparameter Search</title>
+<link href="../css/ai-teacher-guide.css" rel="stylesheet">
+<!-- <link href="../css/oer-style.css" rel="stylesheet"> -->
+<link rel="icon" type="image/png" href="../images/eCraft2Learn-Favicon.png" />
+<script src="../js/ai-guide.js"></script>
+</head>
+<body>
+<script src="../js/translate.js"></script>
+<h2>Hyperparameter Search</h2>
+<p>
+There are two Snap! blocks for searching for a good architecture and choices for training methods and parameters.
+The full-featured version looks like:
+</p>
+<figure>
+<img src="images/hyperparameter-search.png" class="center" width="50%" height="50%">
+<figcaption>The full-featured blocks for searching for a good deep learning model/figcaption></figure>
+<p>
+The block repeatedly makes a copy of the current model with random changes.
+It keeps track of the one with the best score.
+When it completes you can either use the best parameters found in your model and its training or
+use the <span class="block-name">replace model named ...</span> block to change the current model
+to the best one found.
+</p>
+<p>
+There are many parameters for controlling what parameters are changed during the search:
+</p>
+<ul>
+<li>
+<b>Number of experiments.</b>
+This controls how many times a new model is created and trained.
+</li>
+<li>
+<b>Initial number of training cycles.</b>
+This controls how many learning steps to take for each experiment.
+Note that this is a parameter that can be changed during search by default.
+</li>
+<li>
+<b>Opimization method.</b>
+The optimization method controls how weights are adjusted during training.
+For more information see this <a href="https://en.wikipedia.org/wiki/Stochastic_gradient_descent">Wikipedia article</a>.
+</li>
+<li>
+<b>Loss function.</b>
+This is used during training to determine how to improve the neural net's weights.
+Note for categorial training (i.e. labelling things) the system picks the best one so no need to
+for it to consider variants.
+</li>
+<li>
+<b>Activation function.</b>
+This is a function that is applied to the output of each artificial neuron.
+Relu is often the best.
+Read this <a href="https://en.wikipedia.org/wiki/Activation_function">Wikipedia article</a> to learn more.
+</li>
+<li>
+<b>Shuffle data.</b>
+If true the data is re-ordered after each training cycle.
+</li>
+<li>
+<b>Number of training cycles.</b>
+If enabled the search will explore different numbers of training steps.
+</li>
+<li>
+<b>Validataion split.</b>
+If enabled the search will explore different fractions to split the data for training and for validation
+(and evaluation).
+Note that if instead validation data has been sent
+using the <span class="block-name">send validation data ...</span> block.
+</li>
+<li>
+<b>Dropout rate.</b>
+The dropout rate controls what fraction of the inputs to each artificial neuron are "dropped"
+(i.e. treated as zero).
+This helps prevent the model learning aspects of the data that specific to the training set.
+It helps make the model be more general.
+</li>
+<li>
+<b>Number of layers.</b>
+If enabled the search will consider both deeper and shallower models.
+It was also explore wider and narrower layers.
+</li>
+</ul>
+<p>
+The search needs to determine if one model variant is better than another.
+The following parameter control how different metrics are weighed.
+</p>
+<ul>
+<li>
+<b>Loss weight.</b>
+For non-categorial models this is typically the most important measure.
+The search algorithm uses the negative log of the validation loss.
+</li>
+<li>
+<b>Accuracy.</b>
+Only applies to categorial models and measures the fraction of times the model gave the right
+label to elements of the validation dataset.
+</li>
+<li>
+<b>Duration of training.</b>
+All else being equal we prefer models that train quickly.
+The search algorithm uses the log of the duration.
+</li>
+<li>
+<b>Size of model</b>
+Larger model take longer to load and to generate predictions.
+The log of the number of parameters is used by the algorithm.
+</li>
+</ul>
+</body>
+</html>
