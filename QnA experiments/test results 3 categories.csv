@@ -1,0 +1,18 @@
+Are there text-to-speech blocks?	Speech synthesis	Speech recognition	48
+How can I get my program to speak?	Speech synthesis	Speech synthesis	95
+Tell me about speech synthesis?	Speech synthesis	Speech synthesis	92
+What is in the library for speech recognition?	Speech recognition	Speech recognition	91
+Tell me about the speech-to-text blocks.	Speech recognition	Speech synthesis	62
+What blocks are there for turning speech to text?	Speech recognition	Speech recognition	95
+How can I recognize objects?	Image recognition	Image recognition	97
+I want to do image recognition.	Image recognition	Image recognition	92
+Can I do transfer learning for image recognition?	Image recognition	Image recognition	51
+How can I get an image embedding vector?	Pre-trained models	Pre-trained models	99
+How can I do style transfer?	Pre-trained models	Pre-trained models	79
+I want to make a costume look like it was painted by an artist. 	Pre-trained models	Image recognition	73
+Can I use word embeddings for translation?	Natural language	Natural language	100
+What good are sentence embeddings?	Natural language	Natural language	100
+What blocks are there for natural language processing?	Natural language	Speech synthesis	60
+I want to build a deep learning model to predict something.	Deep learning	Deep learning	98
+Are there blocks for deep machine learning?	Deep learning	Deep learning	91
+Is there a block for searching for good model parameters?	Deep learning	Pre-trained models	82
