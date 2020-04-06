@@ -173,7 +173,16 @@ Think up other uses for this reporter.
 
 <h4 class="instructions-white">Sentence embeddings</h4>
 <p class="background-information">
-Google released the <a href="https://research.google/pubs/pub46808/">Universal Sentence Encoder</a> that works on whole sentences.
+One can compute sentence embeddings by averaging all the words in a sentence.
+There is, however, a much better way that uses models that were trained to address
+sentence-level tasks. 
+The <a href="https://research.google/pubs/pub46808/" target="_blank">Universal Sentence Encoder</a> is one such model that
+is available in the browser.
+The reporters <span class="block-name">get features of sentence</span> and 
+<span class="block-name">get features of sentences</span> use this the Universal Sentence Encoder
+to produce 512 numbers for any sentence. (Really any sequence of words, it needn't be a grammatical sentence.)
+</p>
+<p class="background-information">
 It can be used to measure how similar two sentences are.
 Consider
 <br>
@@ -188,6 +197,12 @@ A and B have many words in common but it is B and C that have similar meanings.
 <p class="instructions">
 The <span class="block-name">get sentence features</span> block accepts multi-word texts and
 reports a list of 512 numbers.
+To compare sentences we use 
+<a href="https://en.wikipedia.org/wiki/Cosine_similarity" target="_blank">cosine similarity</a>
+that usually works better than Euclidean distance.
+(The JavaScript version is used because it is faster.)
+Using <a href="https://en.wikipedia.org/wiki/Inverse_trigonometric_functions" target="_blank">arc cosine</a>
+converts the cosine similarity to an angle for clarity.
 </p>
 <figure class = "snap-iframe"
         id = "sentence embedding"
@@ -321,6 +336,29 @@ See if you can!
         full_screen = "true"
         container_style = "width: 800px; height: 800px" 
         caption = "Click the green flag to play Guess My Word. TRY IT!">
+</figure>
+<h4 class="instructions-white">Question answering</h4>
+<p class="background-information">
+Natural language processing researchers have been training models to address
+sentence-level tasks such as question answering.
+They have Sesame Street names such as Elmo, Bert, and Ernie.
+<a href="https://blog.tensorflow.org/2020/03/exploring-helpful-uses-for-bert-in-your-browser-tensorflow-js.html"
+target="_blank">Bert</a> (really BERT which stands for Bidirectional Encoder Representations from Transformers)
+has been made available to browsers.
+</p>
+<p class="instructions">
+BERT is used in the implementation of the <span class="block-name">get up to 5 answers to question</span>
+and <span class="block-name">answer question ... using this passage</span> blocks.
+Given a passage of text (typically a page or less) they can answer questions about the contents.
+The <span class="block-name">get up to 5 answers to question</span> block reports a list whose elements
+are lists of answers and a score indicating how confident the model is.
+An easy way to import a passage into Snap! is to drag a file that contains the plain text onto the script area.
+</p>
+<figure class = "snap-iframe"
+        id = "question answer"
+        full_screen = "true"
+        container_style = "width: 800px; height: 800px" 
+        caption = "Ask questions of a passage of text describing Snap!. TRY IT!">
 </figure>
 
 <h4 class="societal-impact-white">Benefits and risks using word embeddings</h4>
@@ -513,7 +551,7 @@ Do they generalise to other languages?
 Implement a spymaster for the <a href="#codenames">Codenames</a> game.
 </li>
 <li>
-Try using word embeddings to explore the similarity of sentences.
+Try using embeddings to explore the similarity of sentences.
 Use the <span class="block-name">features of sentences ...</span> block to get the features of sentences.
 Create a project that decides if two sentences are paraphrases.
 </li>
@@ -524,7 +562,9 @@ You might want to start by improving <a href="chapter-6.html#ai-questions">
 the sample project that answers questions about Snap! AI blocks</a>
 </li>
 <li>
-Using the <span class="block-nam">
+Using the <span class="block-name">answer this question ... using this passage ...</span> block
+together with the <span class="block-name">Ask Wikipedia</span> block make a general question answering program.
+Consider adding speech input and output.
 </li>
 <li>
 Be creative! Word embeddings are new and there is much that remains to discover.
