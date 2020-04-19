@@ -851,13 +851,18 @@ window.ecraft2learn =
           train(options);
       }
   };
-  const open_support_window = function (source) {
+  const open_support_window = function (source, no_display) {
       if (!ecraft2learn.support_window[source] || ecraft2learn.support_window[source].closed) {
           create_machine_learning_window(source);
       }
-      ecraft2learn.support_iframe[source].style.width  = "100%";
-      ecraft2learn.support_iframe[source].style.height = "100%";
-      ecraft2learn.support_window[source].postMessage('Show support iframe', '*');
+      if (no_display) {
+          ecraft2learn.support_iframe[source].style.width  = "1px";
+          ecraft2learn.support_iframe[source].style.height = "1px"; 
+      } else {
+          ecraft2learn.support_iframe[source].style.width  = "100%";
+          ecraft2learn.support_iframe[source].style.height = "100%";
+          ecraft2learn.support_window[source].postMessage('Show support iframe', '*');
+      }
   };
   const create_machine_learning_window = function (source, iframe_in_new_tab, together_url, together, one_pixel_iframe) {
       let URL, support_window;
@@ -940,9 +945,9 @@ window.ecraft2learn =
           false);
       return support_window;
   };
-  const open_posenet_window = function () {
+  const open_posenet_window = function (no_display) {
       machine_learning_browser_warning();
-      return open_support_window('posenet');
+      return open_support_window('posenet',no_display);
   };
   const machine_learning_window_request = function (machine_learning_window, 
                                                     message_maker, 
@@ -2884,10 +2889,10 @@ xhr.send();
       }
       return ecraft2learn.support_iframe[source].style.width === "100%";
   },
-  poses: function (callback) {
+  poses: function (callback, no_display) {
       var ask_for_poses = function (window_just_created) {
           if (!ecraft2learn.support_window['posenet'] || ecraft2learn.support_window['posenet'].closed) {
-              open_posenet_window();
+              open_posenet_window(no_display);
               const listen_for_posenet_window_ready = function (event) {
                   if (event.data == "Ready") {
                       ask_for_poses(true);
