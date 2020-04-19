@@ -65,15 +65,6 @@ function create_return_to_snap_button(innerHTML, append_to_element_with_this_id)
                                                    child.style.opacity = 0;
                                                });
                                            });
-    window.addEventListener('message', function (event) {
-        if (event.data === 'Show support iframe') {
-            let children = document.body.children;
-            Array.from(children).forEach(function (child) {
-                child.style.opacity = 1;
-            });
-            window.postMessage('restart', "*");             
-        }
-    });
     if (append_to_element_with_this_id) {
         document.getElementById(append_to_element_with_this_id).appendChild(return_to_snap_button);
     } else {
@@ -182,6 +173,15 @@ function load_data_set(source_name, data_set, dataset_updater) {
 // tell Snap! this is loaded
 window.addEventListener('DOMContentLoaded', 
                         function (event) {
+                            window.addEventListener('message', function (event) {
+                                if (event.data === 'Show support iframe') {
+                                    let children = document.body.children;
+                                    Array.from(children).forEach(function (child) {
+                                        child.style.opacity = 1;
+                                    });
+                                    window.postMessage('restart', "*");             
+                                }
+                            });
                             if (window.opener) {
                                 window.opener.postMessage("Loaded", "*");
                             } else {

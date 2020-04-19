@@ -25,12 +25,15 @@ load_local_or_remote_scripts(
 //      "https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier",
      "../js/training-utilities.js",
      "train-mobilenet.js",
-     "../js/translate.js"]);
+     "../js/translate.js"],
+     () => {
+         create_return_to_snap_button(); // create this button after everything has loaded
+     }); 
 </script>
 </head>
 <body>
 <p id="please-wait">
-Please wait for this page to load and to receive the labels of what is to be trained.
+Please wait for this page to load and to receive the labels of what is to be trained using images or the camera.
 </p>
 <!-- Introduction is hidden until everything is loaded -->
 <div id="introduction" style="display:none">
