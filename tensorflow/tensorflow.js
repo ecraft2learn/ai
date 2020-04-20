@@ -46,17 +46,18 @@ const set_data = (model_name, kind, value, callback) => {
     }
     if (value.hasOwnProperty('output')) {
         if (value.output.length > 0 && isNaN(+value.output[0])) {
+            // values might be strings that represent numbers - only non-numeric strings can be category labels
             let labels;
-            [value.output, labels] = to_one_hot(value.output);
+            [value.output, labels] = to_one_hot(value.output, data[model_name].categories);
             data[model_name].categories = labels;
             if (model_name === 'all models') {
-               // recreate all models with for example softmax and one-hot created before this data was available
-               Object.keys(data).forEach((name) => {
-                   if (data[name].hasOwnProperty('recreate')) {
-                       data[name]['recreate'](callback);
-                       callback = undefined;
-                   }
-               })
+                // recreate all models with for example softmax and one-hot created before this data was available
+                Object.keys(data).forEach((name) => {
+                    if (data[name].hasOwnProperty('recreate')) {
+                        data[name]['recreate'](callback);
+                        callback = undefined;
+                    }
+                });
             } else if (data[model_name].hasOwnProperty('recreate')) {
                 data[model_name]['recreate'](callback);
                 callback = undefined;               
@@ -76,12 +77,13 @@ const set_data = (model_name, kind, value, callback) => {
     }
     invoke_callback(callback);
 };
-const to_one_hot = (labels) => {
-    const unique_labels = [];
+
+const to_one_hot = (labels, current_labels) => {
+    const unique_labels = current_labels || [];
     labels.forEach((label) => {
-      if (unique_labels.indexOf(label) < 0) {
-          unique_labels.push(label);
-      }
+        if (unique_labels.indexOf(label) < 0) {
+            unique_labels.push(label);
+        }
     });
     const one_hot = (index, n) => {
         let vector = [];
