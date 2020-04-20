@@ -1327,30 +1327,30 @@ const create_prediction_interface = () => {
         tfvis.visor().setActiveTab('Prediction');
         return;
     }
-    const input_input = document.createElement('input');
-    input_input.type = 'text';
-    input_input.id = "prediction-input";
-    input_input.name = "prediction-input";
-    input_input.value = (last_prediction || 1);
+    const input_element = document.createElement('input');
+    input_element.type = 'text';
+    input_element.id = "prediction-input";
+    input_element.name = "prediction-input";
+    input_element.value = 1;
     const label = document.createElement('label');
-    label.for = "input_input";
+    label.for = "input_element";
     label.innerHTML = "Input for prediction: ";
     const div = document.createElement('div');
     div.appendChild(label);
-    div.appendChild(input_input);
+    div.appendChild(input_element);
     draw_area.appendChild(div);
     const make_prediction = (model_name) => {
         const success_callback = (results) => {
             const categories = get_data(model_name, 'categories');
             if (categories) {
                 results = JSON.stringify(results);
-            } else if (input_input.value.indexOf('[') < 0) {
+            } else if (input_element.value.indexOf('[') < 0) {
                 results = results[0]; // only one number in inputs so only one result
             } else {
                 results = "[" + results + "]";
             }
             const message = create_message_element("<br>The " + model_name + " model predicts " + results + 
-                                                   "<br>for input " + input_input.value + ".");
+                                                   "<br>for input " + input_element.value + ".");
             draw_area.appendChild(message);
         };
         const error_callback = (error_message) => {
@@ -1358,7 +1358,7 @@ const create_prediction_interface = () => {
         };
         record_callbacks(success_callback, error_callback);
         try {
-            let inputs = +input_input.value || JSON.parse(input_input.value);
+            let inputs = +input_element.value || JSON.parse(input_element.value);
             if (typeof inputs === 'number') {
                 inputs = [inputs];
             }
