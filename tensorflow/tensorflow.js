@@ -532,6 +532,7 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
     lowest_loss = Number.MAX_VALUE;
     highest_accuracy = 0;
     highest_score = 0;
+    best_model = undefined;
     const name_element = document.getElementById('name_element');
     const model_name = name_element ? name_element.value : model ? model.name : 'my-model';
     const categories = get_data(model_name, 'categories');
@@ -578,33 +579,43 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
         display_trial(trial.args, optimize_hyperparameters_messages);
     };
     let onExperimentEnd = (i, trial) => {
-        const loss = trial.result.loss;
-        const accuracy = trial.result.accuracy;
-        let message = "";
-        if (loss === Number.MAX_VALUE) {
-            message = "Training failed and reported a loss that is not a number.<br>";
-        } else {
-            const best_loss = loss <= lowest_loss;
-            const best_accuary = accuracy >= highest_accuracy;
-            if (best_loss) {
-                lowest_loss = loss;
-            }
-            if (best_accuary) {
-                best_accuary = accuracy;
-            }
-            if (best_loss || best_accuary) {
-                message = "<b>Best so far. ";
-            }
-            // tried toFixed(...) but error can be 1e-12 and shows up as just zeroes
-            message += "Loss = " + loss;
-            if (accuracy) {
-                message += "; Accuracy = " + accuracy;
-            }
-            if (best_loss || best_accuary) {
-                message += "</b>";
-            }
+        const score = -trial.result.loss;
+        if (trial.result.loss === Number.MAX_VALUE) {
+            optimize_hyperparameters_messages.innerHTML += 
+                "Training failed and reported a loss that is not a number.<br></b>";
+            return;
         }
-        optimize_hyperparameters_messages.innerHTML += message  + "</b>";                          
+        const results = trial.result.results;
+        const loss = typeof results["Lowest validation loss"] === 'undefined' ?
+                     results["Training loss"] : results["Lowest validation loss"];
+        const accuracy = typeof results["Validation accuracy"] === 'undefined' ?
+                         results["Training accuracy"] : results["Validation accuracy"];
+        let message = "";
+        const best_score = score >= highest_score;
+        const best_loss = loss <= lowest_loss;
+        const best_accuracy = accuracy >= highest_accuracy;
+        if (best_score) {
+            highest_score = score;
+        }
+        if (best_loss) {
+            lowest_loss = loss;
+        }
+        if (best_accuracy) {
+            highest_accuracy = accuracy;
+        }
+        if (best_loss || best_accuracy) {
+            message = "<b>Best so far.<br>";
+        }
+        // tried toFixed(...) but error can be 1e-12 and shows up as just zeroes
+        message += "Score = " + score;
+        message += ";<br> Loss = " + loss;
+        if (accuracy) {
+            message += ";<br> Accuracy = " + accuracy;
+        }
+        if (best_loss || best_accuracy) {
+            message += "</b>";
+        }
+        optimize_hyperparameters_messages.innerHTML += message + "</b>";      
     };
 //     optimize_hyperparameters_messages.innerHTML = "<b>Searching for good parameter values. Please wait.</b>";
     const error_handler = (error) => {
@@ -632,7 +643,10 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
                 draw_area.appendChild(install_settings_button);
                 const model_name = best_model.name;
                 install_settings_button.innerHTML = "Click to set '" + model_name + "' to best one found (" +
-                                                    "Loss = " + lowest_loss + (highest_accuracy? "; Accuracy = " + highest_accuracy : "");
+                                                    "Loss = " + lowest_loss +
+                                                    (typeof highest_accuracy === 'undefined' ? 
+                                                     "" : "; Accuracy = " + highest_accuracy) + 
+                                                    ")<br>";
                 display_trial(result.argmin, install_settings_button);
                 const settings = result.argmin;
                 settings.model_name = model_name;
@@ -795,7 +809,7 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
             dropout_rate = gui_state["Model"]["Dropout rate"];
         }
         if (typeof validation_split === 'undefined') {
-            validation_split = gui_state["Model"]["Validation split"];
+            validation_split = gui_state["Training"]["Validation split"];
         }
         if (typeof shuffle !== 'boolean') {
             shuffle = to_boolean(gui_state["Training"]["Shuffle data"]);
@@ -871,13 +885,14 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
     };
     record_callbacks(create_and_train_model, error_callback);
     best_model = undefined; // to be found
-    lowest_loss = undefined; // starting override
-    highest_accuracy = undefined;
-    highest_score = undefined;
+//     lowest_loss = undefined; // starting over
+//     highest_accuracy = undefined;
+//     highest_score = undefined;
     metrics_of_highest_score = undefined;
     is_best_so_far = false;
     const space = {};
     const categories = get_data(model_name, 'categories');
+    gui_state["Optimize"]["Number of experiments"] = number_of_experiments;
     if (what_to_optimize) {
         const descriptions = [
             "Search for best Optimization method",
@@ -891,9 +906,8 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
         what_to_optimize.forEach((use, index) => {
             gui_state["Optimize"][descriptions[index]] = use;
         });
-        gui_state["Optimize"]["Number of experiments"] = number_of_experiments;
-        update_gui();
     }
+    update_gui();
     if (to_boolean(gui_state["Optimize"]["Search for best Optimization method"])) {
         space.optimization_method = hpjs.choice(Object.values(optimization_methods));
     }
