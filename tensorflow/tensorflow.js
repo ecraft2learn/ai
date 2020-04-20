@@ -753,7 +753,7 @@ const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
                error_message = "No training data sent to the model named '" + model_name + "'";
            } else {
                error_message = error.message;
-               console.log(tf.memory()); // in case is a GPU memory problem good know this
+               console.log(tf.memory()); // in case is a GPU memory problem good to know this
            }
            invoke_callback(error_callback, new Error(error_message));
        } else {
@@ -1367,7 +1367,7 @@ const create_prediction_interface = () => {
                     success_callback, error_callback,
                     get_data(model_name, 'categories'));
         } catch (error) {
-            invoke_callback(error_callback, error.message);
+            invoke_callback(error_callback, enhance_error_message(error.message));
         }
     };
     const choose_model_then_make_prediction = () => {
@@ -1738,8 +1738,7 @@ const receive_message =
                         averages[index] += prediction/results.length;
                     });                        
                 });
-                return averages;
-                
+                return averages;     
             }
             const average_categorical_results = () => {
                 const keys = Object.keys(results[0][0]);

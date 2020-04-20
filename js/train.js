@@ -807,8 +807,23 @@ const predict = (model, inputs, success_callback, error_callback, categories) =>
             invoke_callback(success_callback, results);
         }
     } catch (error) {
-        invoke_callback(error_callback, error.message);
+        invoke_callback(error_callback, enhance_error_message(error.message));
     }
+};
+
+const enhance_error_message = (error_message) => {
+    const expected_shape_error_fragment = 'to have shape [null,';
+    const expected_shape_error_index = error_message.indexOf(expected_shape_error_fragment);
+    let explanation = '';
+    if (expected_shape_error_index > 0) {
+        const opening_bracket_index = error_message.indexOf('[', expected_shape_error_index);
+        const closing_bracket_index = error_message.indexOf(']', opening_bracket_index);
+        explanation = ' What is meant by ' + 
+                      error_message.substring(opening_bracket_index, closing_bracket_index+1) +
+                      ' is that the system expected a LIST of values with the shape [' +
+                      error_message.substring(opening_bracket_index+'[null,'.length, closing_bracket_index+1);
+    }
+    return error_message + explanation;
 };
 
 const categorical_results = (results, categories) => 
