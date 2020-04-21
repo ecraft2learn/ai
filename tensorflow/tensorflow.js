@@ -527,6 +527,22 @@ const create_hyperparamter_optimization_tab = (model) => {
     parameters_interface(create_parameters_interface).optimize.open();
 };
 
+const search_descriptions = 
+    ["Search for best Optimization method",
+     "Search for best loss function",
+     "Search for best activation function",
+     "Search for best shuffle data setting",
+     "Search for best number of training iterations",
+     "Search for best validation split",
+     "Search for best dropout rate",
+     "Search for best number of layers"];
+
+const weight_descriptions =
+    ["How much loss contributes to score",
+     "How much accuracy contributes to score",
+     "How much training time contributes to score",
+     "How much size of model contributes to score"];
+
 const optimize_hyperparameters_with_parameters = (draw_area, model) => {
     draw_area.appendChild(optimize_hyperparameters_messages);
     lowest_loss = Number.MAX_VALUE;
@@ -626,7 +642,11 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
         stop_on_next_experiment = false;
     };
     const number_of_experiments = Math.round(gui_state["Optimize"]["Number of experiments"]);
-    optimize(model_name, xs, ys, validation_tensors, number_of_experiments, epochs, onExperimentBegin, onExperimentEnd, error_handler)
+    const what_to_optimize = search_descriptions.map(description => gui_state["Optimize"][description]);
+    const scoring_weights = weight_descriptions.map(description => gui_state["Optimize"][description]);
+    optimize(model_name, xs, ys, validation_tensors, number_of_experiments, epochs, 
+             onExperimentBegin, onExperimentEnd, error_handler, 
+             what_to_optimize, scoring_weights)
         .then((result) => {
             if (!result) {
                 // error has been handled
@@ -750,8 +770,9 @@ const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
                     what_to_optimize,
                     scoring_weights)
               .then((result) => {
+                  result.best_model = best_model || previous_model; // if no best model then previous had NaN loss
                   invoke_callback(success_callback, result);
-                  if (previous_model && !previous_model.disposed && previous_model !== best_model) {
+                  if (previous_model && !previous_model.disposed && best_model && previous_model !== best_model) {
                       previous_model.dispose();
                       previous_model.disposed = true;
                       previous_model = undefined;
@@ -894,17 +915,13 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
     const categories = get_data(model_name, 'categories');
     gui_state["Optimize"]["Number of experiments"] = number_of_experiments;
     if (what_to_optimize) {
-        const descriptions = [
-            "Search for best Optimization method",
-            "Search for best loss function",
-            "Search for best activation function",
-            "Search for best shuffle data setting",
-            "Search for best number of training iterations",
-            "Search for best validation split",
-            "Search for best dropout rate",
-            "Search for best number of layers"];
         what_to_optimize.forEach((use, index) => {
-            gui_state["Optimize"][descriptions[index]] = use;
+            gui_state["Optimize"][search_descriptions[index]] = use;
+        });
+    }
+    if (scoring_weights) {
+        scoring_weights.forEach((weight, index) => {
+            gui_state["Optimize"][weight_descriptions[index]] = weight;   
         });
     }
     update_gui();
@@ -1035,7 +1052,12 @@ const gui_state =
                 "Search for best number of layers": true,
                 "Search for best learning rate": true,
                 "Search for best validation split": true,
-                "Search for best shuffle data setting": true}
+                "Search for best shuffle data setting": true,
+                "How much loss contributes to score": 10,
+                "How much accuracy contributes to score": 10,
+                "How much training time contributes to score": 1,
+                "How much size of model contributes to score": 2,
+                }
 };
 
 const create_parameters_interface = function () {
@@ -1094,6 +1116,10 @@ const create_hyperparameter_optimize_parameters = (parameters_gui) => {
     optimize.add(gui_state["Optimize"], 'Search for best learning rate', [true, false]);
     optimize.add(gui_state["Optimize"], 'Search for best validation split', [true, false]);
     optimize.add(gui_state["Optimize"], 'Search for best shuffle data setting', [true, false]);
+    optimize.add(gui_state["Optimize"], "How much loss contributes to score");
+    optimize.add(gui_state["Optimize"], "How much accuracy contributes to score");
+    optimize.add(gui_state["Optimize"], "How much training time contributes to score");
+    optimize.add(gui_state["Optimize"], "How much size of model contributes to score");
     return optimize;
 };
 
@@ -1898,8 +1924,9 @@ const receive_message =
                     best_parameters.highest_score = highest_score;
                     best_parameters.metrics = metrics_of_highest_score;
                 }
-                const model = get_model(model_name);
-                model.best_model = best_model;
+                const model = result.best_model;
+                add_to_models(model);
+                model.best_model = model;
                 model.best_parameters = best_parameters;
                 event.source.postMessage({optimize_hyperparameters_time_stamp: time_stamp,
                                           final_optimize_hyperparameters: best_parameters},
