@@ -770,7 +770,9 @@ const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
                     what_to_optimize,
                     scoring_weights)
               .then((result) => {
-                  result.best_model = best_model || previous_model; // if no best model then previous had NaN loss
+                  if (result) {
+                      result.best_model = best_model || previous_model; // if no best model then previous had NaN loss
+                  }
                   invoke_callback(success_callback, result);
                   if (previous_model && !previous_model.disposed && best_model && previous_model !== best_model) {
                       previous_model.dispose();
@@ -812,10 +814,10 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
             layers = get_layers();
         }
         if (!optimization_method) {
-            optimization_method = gui_state["Model"]["Optimization method"];
+            optimization_method = optimizer_named(gui_state["Model"]["Optimization method"]);
         }
         if (!loss_function) {
-            loss_function = gui_state["Model"]["Loss function"];
+            loss_function = loss_function_named(gui_state["Model"]["Loss function"]);
         }
         if (!activation) {
             activation = gui_state["Model"]["Activation function"]
@@ -1010,7 +1012,7 @@ const cannonicalise_weights = (weights) => {
 };
 
 const compute_score = (weights, loss, accuracy, duration, size) => 
-    -Math.log(loss)*weights[0]+10*accuracy*weights[1]-Math.log(duration)*weights[2]-Math.log(size/1000)*weights[3];
+    -Math.log(loss)*weights[0]+10*(accuracy || 0)*weights[1]-Math.log(duration)*weights[2]-Math.log(size/1000)*weights[3];
 
 let report_error = function (error) {
     console.log(error); // for now
@@ -1708,8 +1710,7 @@ const receive_message =
                 }
                 options.loss_function = loss_function_named(options.loss_function);
                 options.optimizer = optimizer_named(options.optimizer);
-                options.datasets = get_data(model_name, 'datasets');
-                
+                options.datasets = get_data(model_name, 'datasets');   
                 const model = create_model(options);
                 install_settings(options);
                 tensorflow.add_to_models(model);
