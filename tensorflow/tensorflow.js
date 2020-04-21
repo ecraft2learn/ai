@@ -503,7 +503,7 @@ const optimize_hyperparameters_button = document.createElement('button');
 const search_button_label = "Search for good parameters using current settings";
 const stop_button_label = "Stop when next current experiment finishes";
 
-const create_hyperparamter_optimization_tab = (model) => {
+const create_hyperparameter_optimization_tab = (model, add_messages_now) => {
     const surface = tfvis.visor().surface({name: 'Tensorflow', tab: 'Optimize'});
     const draw_area = surface.drawArea;
     if (optimize_hyperparameters_messages) {
@@ -511,6 +511,9 @@ const create_hyperparamter_optimization_tab = (model) => {
         return; // already set up 
     }
     optimize_hyperparameters_messages = document.createElement('p');
+    if (add_messages_now) {
+        draw_area.appendChild(optimize_hyperparameters_messages);
+    }
     optimize_hyperparameters_button.innerHTML = search_button_label;
     optimize_hyperparameters_button.className = "support-window-button";
     optimize_hyperparameters_button.addEventListener('click', 
@@ -543,11 +546,83 @@ const weight_descriptions =
      "How much training time contributes to score",
      "How much size of model contributes to score"];
 
+const display_trial = (parameters, element) => {
+    if (parameters.layers) {
+        element.innerHTML += "Layers = " + parameters.layers + "<br>";
+    }
+    if (parameters.epochs) {
+        element.innerHTML += "Number of training iterations = " + parameters.epochs + "<br>";
+    }
+    if (parameters.learning_rate) {
+        element.innerHTML += "Learning rate = " + parameters.learning_rate.toFixed(5) + "<br>";
+    }
+    if (typeof parameters.dropout_rate !== 'undefined') {
+        element.innerHTML += "Dropout rate = " + parameters.dropout_rate.toFixed(3) + "<br>";
+    }
+    if (parameters.optimization_method) {
+        element.innerHTML += "Optimization method = " + inverse_lookup(parameters.optimization_method, optimization_methods) + "<br>";
+    }
+    if (parameters.activation) {
+        element.innerHTML += "Activation function = " + parameters.activation + "<br>";
+    }
+    if (parameters.loss_function) {
+        element.innerHTML += "Loss function = " + 
+                             inverse_lookup(parameters.loss_function,
+                                            loss_functions(get_data(parameters.model_name, 'categories'))) + "<br>";
+    }
+    if (typeof parameters.validation_split !== 'undefined') {
+        element.innerHTML += "Validation split = " + parameters.validation_split.toFixed(3) + "<br>";
+    }
+    if (typeof parameters.shuffle !== 'undefined') {
+        element.innerHTML += "Shuffle data = " + parameters.shuffle + "<br>";
+    }
+};
+
+const display_trial_results = (trial) => {
+    const score = -trial.result.loss;
+    if (trial.result.loss === Number.MAX_VALUE) {
+        optimize_hyperparameters_messages.innerHTML += 
+            "Training failed and reported a loss that is not a number.<br></b>";
+        return;
+    }
+    const results = trial.result.results;
+    const loss = typeof results["Lowest validation loss"] === 'undefined' ?
+             results["Training loss"] : results["Lowest validation loss"];
+    const accuracy = typeof results["Validation accuracy"] === 'undefined' ?
+                     results["Training accuracy"] : results["Validation accuracy"];
+    let message = "";
+    const best_score = score >= highest_score;
+    const best_loss = loss <= lowest_loss;
+    const best_accuracy = accuracy >= highest_accuracy;
+    if (best_score) {
+        highest_score = score;
+    }
+    if (best_loss) {
+        lowest_loss = loss;
+    }
+    if (best_accuracy) {
+        highest_accuracy = accuracy;
+    }
+    if (best_score) {
+        message = "<b>Best so far.<br>";
+    }
+    // tried toFixed(...) but error can be 1e-12 and shows up as just zeroes
+    message += "Score = " + score;
+    message += ";<br> Loss = " + loss;
+    if (accuracy) {
+        message += ";<br> Accuracy = " + accuracy;
+    }
+    if (best_score) {
+        message += "</b>";
+    }
+    optimize_hyperparameters_messages.innerHTML += message + "</b>";
+};
+
 const optimize_hyperparameters_with_parameters = (draw_area, model) => {
     draw_area.appendChild(optimize_hyperparameters_messages);
     lowest_loss = Number.MAX_VALUE;
     highest_accuracy = 0;
-    highest_score = 0;
+    highest_score = -Number.MAX_VALUE;
     best_model = undefined;
     const name_element = document.getElementById('name_element');
     const model_name = name_element ? name_element.value : model ? model.name : 'my-model';
@@ -555,35 +630,6 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
     const [xs, ys] = get_tensors(model_name, 'training');
     let validation_tensors = get_tensors(model_name, 'validation'); // undefined if no validation data
     let epochs = gui_state["Training"]["Number of iterations"];
-    const display_trial = (parameters, element) => {
-        if (parameters.layers) {
-            element.innerHTML += "Layers = " + parameters.layers + "<br>";
-        }
-        if (parameters.epochs) {
-            element.innerHTML += "Number of training iterations = " + parameters.epochs + "<br>";
-        }
-        if (parameters.learning_rate) {
-            element.innerHTML += "Learning rate = " + parameters.learning_rate.toFixed(5) + "<br>";
-        }
-        if (typeof parameters.dropout_rate !== 'undefined') {
-            element.innerHTML += "Dropout rate = " + parameters.dropout_rate.toFixed(3) + "<br>";
-        }
-        if (parameters.optimization_method) {
-            element.innerHTML += "Optimization method = " + inverse_lookup(parameters.optimization_method, optimization_methods) + "<br>";
-        }
-        if (parameters.activation) {
-            element.innerHTML += "Activation function = " + parameters.activation + "<br>";
-        }
-        if (parameters.loss_function) {
-            element.innerHTML += "Loss function = " + inverse_lookup(parameters.loss_function, loss_functions(categories)) + "<br>";
-        }
-        if (typeof parameters.validation_split !== 'undefined') {
-            element.innerHTML += "Validation split = " + parameters.validation_split.toFixed(3) + "<br>";
-        }
-        if (typeof parameters.shuffle !== 'undefined') {
-            element.innerHTML += "Shuffle data = " + parameters.shuffle + "<br>";
-        }
-    };
     let onExperimentBegin = (i, trial) => {
         if (stop_on_next_experiment) {
             stop_on_next_experiment = false;
@@ -594,44 +640,8 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
         optimize_hyperparameters_messages.innerHTML += "<br><br>Experiment " + (i+1) + ":<br>";
         display_trial(trial.args, optimize_hyperparameters_messages);
     };
-    let onExperimentEnd = (i, trial) => {
-        const score = -trial.result.loss;
-        if (trial.result.loss === Number.MAX_VALUE) {
-            optimize_hyperparameters_messages.innerHTML += 
-                "Training failed and reported a loss that is not a number.<br></b>";
-            return;
-        }
-        const results = trial.result.results;
-        const loss = typeof results["Lowest validation loss"] === 'undefined' ?
-                     results["Training loss"] : results["Lowest validation loss"];
-        const accuracy = typeof results["Validation accuracy"] === 'undefined' ?
-                         results["Training accuracy"] : results["Validation accuracy"];
-        let message = "";
-        const best_score = score >= highest_score;
-        const best_loss = loss <= lowest_loss;
-        const best_accuracy = accuracy >= highest_accuracy;
-        if (best_score) {
-            highest_score = score;
-        }
-        if (best_loss) {
-            lowest_loss = loss;
-        }
-        if (best_accuracy) {
-            highest_accuracy = accuracy;
-        }
-        if (best_loss || best_accuracy) {
-            message = "<b>Best so far.<br>";
-        }
-        // tried toFixed(...) but error can be 1e-12 and shows up as just zeroes
-        message += "Score = " + score;
-        message += ";<br> Loss = " + loss;
-        if (accuracy) {
-            message += ";<br> Accuracy = " + accuracy;
-        }
-        if (best_loss || best_accuracy) {
-            message += "</b>";
-        }
-        optimize_hyperparameters_messages.innerHTML += message + "</b>";      
+    const onExperimentEnd = (i, trial) => {
+        display_trial_results(trial);
     };
 //     optimize_hyperparameters_messages.innerHTML = "<b>Searching for good parameter values. Please wait.</b>";
     const error_handler = (error) => {
@@ -761,12 +771,23 @@ const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
                                   scoring_weights) => {
    // this is meant to be called when messages are received from a client page (e.g. Snap!)
    record_callbacks(success_callback, error_callback);
+   create_hyperparameter_optimization_tab(model, true);
+   const experiment_begin_callback = (i, trial) => {
+        optimize_hyperparameters_messages.innerHTML += "<br><br>Experiment " + (i+1) + ":<br>";
+        display_trial(trial.args, optimize_hyperparameters_messages);
+   };
+   const new_experiment_end_callback = (i, trial) => {
+       display_trial_results(trial);
+       if (experiment_end_callback) {
+           experiment_end_callback(i, trial);
+       }
+   }
    gui_state["Training"]["Number of iterations"] = epochs;
    try {   
        const [xs, ys] = get_tensors(model_name, 'training');
        const validation_tensors = get_tensors(model_name, 'validation'); // undefined if no validation data
            optimize(model_name, xs, ys, validation_tensors, number_of_experiments, epochs, 
-                    undefined, experiment_end_callback, error_callback, 
+                    experiment_begin_callback, new_experiment_end_callback, error_callback, 
                     what_to_optimize,
                     scoring_weights)
               .then((result) => {
@@ -1648,7 +1669,7 @@ window.addEventListener('DOMContentLoaded',
                                                           });
                             optimize_hyperparameters_interface_button.addEventListener('click',
                                                           () => {
-                                                              create_hyperparamter_optimization_tab(model);
+                                                              create_hyperparameter_optimization_tab(model);
                                                           });
                             evaluate_button.addEventListener('click', create_prediction_interface);
                             save_and_load_model_button.addEventListener('click', save_and_load);             
@@ -2014,7 +2035,7 @@ return {get_model: get_model,
         create_training_parameters: create_training_parameters,
         create_hyperparameter_optimize_parameters: create_hyperparameter_optimize_parameters,
         train_with_parameters: train_with_parameters,
-        create_hyperparamter_optimization_tab: create_hyperparamter_optimization_tab,
+        create_hyperparameter_optimization_tab: create_hyperparameter_optimization_tab,
         save_and_load: save_and_load,
         create_button: create_button,
         replace_with_best_model: replace_with_best_model,
