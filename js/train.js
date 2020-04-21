@@ -188,7 +188,7 @@ const create_model = (options, failure_callback) => {
            // class), versus the label (100% probability in the true class)
            const optimizer_function = ['Momentum', 'momentum'].includes(optimizer) ? 
                                       tf.train.momentum((typeof learning_rate === 'undefined' ? .001 : learning_rate), .9) :
-                                      (typeof optimizer === 'string' ? tf.train[optimizer]() : 
+                                      (typeof optimizer === 'string' ? optimizer : 
                                       (typeof optimizer === 'object' ? optimizer : optimizer()));
            let loss;
            if (typeof loss_function === 'object') {
