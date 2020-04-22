@@ -678,6 +678,7 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
                 settings.model_name = model_name;
                 install_settings_button.addEventListener('click',
                                                          () => {
+                                                             console.log("Installed", install_settings_button.innerHTML)
                                                              model = best_model;
                                                              add_to_models(model);
                                                              show_layers(model, 'Model after creation');
@@ -1030,9 +1031,9 @@ const cannonicalise_weights = (weights) => {
 };
 
 const compute_score = (weights, loss, accuracy, duration, size) => {
-console.log('score', -Math.log(loss)*weights[0]+10*(accuracy || 0)*weights[1]-Math.log(duration/100)*weights[2]-Math.log(size/1000)*weights[3],
-            'loss', -Math.log(loss)*weights[0], 'accuracy', 10*(accuracy || 0)*weights[1],
-            'duration', -Math.log(duration/100)*weights[2], 'size', -Math.log(size/1000)*weights[3]);
+// console.log('score', -Math.log(loss)*weights[0]+10*(accuracy || 0)*weights[1]-Math.log(duration/100)*weights[2]-Math.log(size/1000)*weights[3],
+//             'loss', -Math.log(loss)*weights[0], 'accuracy', 10*(accuracy || 0)*weights[1],
+//             'duration', -Math.log(duration/100)*weights[2], 'size', -Math.log(size/1000)*weights[3]);
     return -Math.log(loss)*weights[0]+10*(accuracy || 0)*weights[1]-Math.log(duration/100)*weights[2]-Math.log(size/1000)*weights[3];
 };
 
