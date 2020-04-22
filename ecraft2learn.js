@@ -1335,6 +1335,9 @@ window.ecraft2learn =
         if (typeof epochs !== 'number') {
             epochs = 0; // so it will use default in tensorflow.js support_window
         }
+        if (typeof number_of_samples !== 'number' || number_of_samples < 1) {
+            number_of_samples = 1;
+        }
         record_callbacks(trial_end_callback, success_callback, error_callback);
         const time_stamp = Date.now();
         request_of_support_window('tensorflow.js',
