@@ -620,10 +620,6 @@ const display_trial_results = (trial) => {
 
 const optimize_hyperparameters_with_parameters = (draw_area, model) => {
     draw_area.appendChild(optimize_hyperparameters_messages);
-    lowest_loss = Number.MAX_VALUE;
-    highest_accuracy = 0;
-    highest_score = -Number.MAX_VALUE;
-    best_model = undefined;
     const name_element = document.getElementById('name_element');
     const model_name = name_element ? name_element.value : model ? model.name : 'my-model';
     const categories = get_data(model_name, 'categories');
@@ -673,9 +669,9 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
                 draw_area.appendChild(install_settings_button);
                 const model_name = best_model.name;
                 install_settings_button.innerHTML = "Click to set '" + model_name + "' to best one found (" +
-                                                    "Loss = " + lowest_loss +
-                                                    (typeof highest_accuracy === 'undefined' ? 
-                                                     "" : "; Accuracy = " + highest_accuracy) + 
+                                                    "Loss = " + metrics_of_highest_score.loss +
+                                                    (typeof metrics_of_highest_score.accuracy === 'undefined' ? 
+                                                     "" : "; Accuracy = " + metrics_of_highest_score.accuracy) + 
                                                     ")<br>";
                 display_trial(result.argmin, install_settings_button);
                 const settings = result.argmin;
@@ -928,10 +924,11 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
             });
     };
     record_callbacks(create_and_train_model, error_callback);
+    optimize_hyperparameters_messages.innerHTML = ""; // starting anew
     best_model = undefined; // to be found
-//     lowest_loss = undefined; // starting over
-//     highest_accuracy = undefined;
-//     highest_score = undefined;
+    lowest_loss = Number.MAX_VALUE;
+    highest_accuracy = 0;
+    highest_score = -Number.MAX_VALUE;
     metrics_of_highest_score = undefined;
     is_best_so_far = false;
     const space = {};
@@ -1032,8 +1029,12 @@ const cannonicalise_weights = (weights) => {
     return weights.map(x => x/sum);
 };
 
-const compute_score = (weights, loss, accuracy, duration, size) => 
-    -Math.log(loss)*weights[0]+10*(accuracy || 0)*weights[1]-Math.log(duration)*weights[2]-Math.log(size/1000)*weights[3];
+const compute_score = (weights, loss, accuracy, duration, size) => {
+console.log('score', -Math.log(loss)*weights[0]+10*(accuracy || 0)*weights[1]-Math.log(duration/100)*weights[2]-Math.log(size/1000)*weights[3],
+            'loss', -Math.log(loss)*weights[0], 'accuracy', 10*(accuracy || 0)*weights[1],
+            'duration', -Math.log(duration/100)*weights[2], 'size', -Math.log(size/1000)*weights[3]);
+    return -Math.log(loss)*weights[0]+10*(accuracy || 0)*weights[1]-Math.log(duration/100)*weights[2]-Math.log(size/1000)*weights[3];
+};
 
 let report_error = function (error) {
     console.log(error); // for now
