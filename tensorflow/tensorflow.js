@@ -608,9 +608,21 @@ const display_trial_results = (trial) => {
     }
     // tried toFixed(...) but error can be 1e-12 and shows up as just zeroes
     message += "Score = " + score;
-    message += ";<br> Loss = " + loss;
+    const add_samples = (kind) => {
+        if (results.samples && results.samples.length > 1) {
+            message += "<br>(";
+            results.samples.forEach((sample) => {
+                message += sample[kind] + ", ";
+            });
+            message += ")";
+        }
+    };        
+    add_samples('score');
+    message += "<br>Loss = " + loss;
+    add_samples('loss');
     if (accuracy) {
-        message += ";<br> Accuracy = " + accuracy;
+        message += "<br>Accuracy = " + accuracy;
+        add_samples('accuracy');
     }
     if (best_score) {
         message += "</b>";
@@ -648,11 +660,12 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
         stop_on_next_experiment = false;
     };
     const number_of_experiments = Math.round(gui_state["Optimize"]["Number of experiments"]);
+    const number_of_samples = Math.round(gui_state["Optimize"]["Number of samples"]);
     const what_to_optimize = search_descriptions.map(description => gui_state["Optimize"][description]);
     const scoring_weights = weight_descriptions.map(description => gui_state["Optimize"][description]);
     optimize(model_name, xs, ys, validation_tensors, number_of_experiments, epochs, 
              onExperimentBegin, onExperimentEnd, error_handler, 
-             what_to_optimize, scoring_weights)
+             what_to_optimize, scoring_weights, number_of_samples)
         .then((result) => {
             if (!result) {
                 // error has been handled
@@ -669,9 +682,9 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
                 draw_area.appendChild(install_settings_button);
                 const model_name = best_model.name;
                 install_settings_button.innerHTML = "Click to set '" + model_name + "' to best one found (" +
-                                                    "Loss = " + metrics_of_highest_score.loss +
-                                                    (typeof metrics_of_highest_score.accuracy === 'undefined' ? 
-                                                     "" : "; Accuracy = " + metrics_of_highest_score.accuracy) + 
+                                                    "Loss = " + metrics_of_highest_score.average_loss +
+                                                    (typeof metrics_of_highest_score.average_accuracy === 'undefined' ? 
+                                                     "" : "; Accuracy = " + metrics_of_highest_score.average_accuracy) + 
                                                     ")<br>";
                 display_trial(result.argmin, install_settings_button);
                 const settings = result.argmin;
@@ -765,7 +778,8 @@ let previous_model;
 const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
                                   experiment_end_callback, success_callback, error_callback,
                                   what_to_optimize,
-                                  scoring_weights) => {
+                                  scoring_weights,
+                                  number_of_samples) => {
    // this is meant to be called when messages are received from a client page (e.g. Snap!)
    record_callbacks(success_callback, error_callback);
    create_hyperparameter_optimization_tab(model, true);
@@ -786,7 +800,8 @@ const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
            optimize(model_name, xs, ys, validation_tensors, number_of_experiments, epochs, 
                     experiment_begin_callback, new_experiment_end_callback, error_callback, 
                     what_to_optimize,
-                    scoring_weights)
+                    scoring_weights,
+                    number_of_samples)
               .then((result) => {
                   if (result) {
                       result.best_model = best_model || previous_model; // if no best model then previous had NaN loss
@@ -818,10 +833,14 @@ const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
    }
 };
 
-const optimize = async (model_name, xs, ys, validation_tensors, number_of_experiments, epochs,
+const optimize = async (model_name, xs, ys, validation_tensors, 
+                        number_of_experiments, // number of different parameters settings to explore
+                        epochs,
                         onExperimentBegin, onExperimentEnd, error_callback,
                         what_to_optimize,
-                        scoring_weights) => {
+                        scoring_weights,
+                        number_of_samples // how many times to repeat experiments on the same parameters
+                        ) => {
     const create_and_train_model = async ({layers, optimization_method, loss_function, epochs, learning_rate,
                                            dropout_rate, validation_split, activation, shuffle}, 
                                           {xs, ys}) => {
@@ -861,16 +880,80 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
                                  xs_validation: validation_tensors && validation_tensors[0],
                                  ys_validation: validation_tensors && validation_tensors[1],
                                 };
-        const model = create_model({model_name,
-                                    tensor_datasets,
-                                    input_shape,
-                                    hidden_layer_sizes: layers,
-                                    optimizer: optimization_method,
-                                    loss_function,
-                                    activation,
-                                    dropout_rate,
-                                    learning_rate});
-        return new Promise((resolve) => {
+        const make_model = () => {
+            return create_model({model_name,
+                                 tensor_datasets,
+                                 input_shape,
+                                 hidden_layer_sizes: layers,
+                                 optimizer: optimization_method,
+                                 loss_function,
+                                 activation,
+                                 dropout_rate,
+                                 learning_rate});            
+        };
+        let model = make_model();
+        let samples_remaining = number_of_samples;
+        let samples = [];
+        const sample_results = 
+            async (results, resolve) => {
+                previous_model = model;
+                let loss = results["Lowest validation loss"];
+                if (isNaN(loss)) {
+                    loss = Number.MAX_VALUE;
+                }
+                const accuracy = results["Highest accuracy"];
+                const duration = results["Duration in seconds"];
+                const size = model.countParams();
+                let score;
+                if (scoring_weights) {
+                    score = compute_score(cannonicalise_weights(scoring_weights), loss, accuracy, duration, size);
+                } else if (accuracy) {
+                    score = accuracy;
+                } else {
+                    score = -loss;
+                }
+                samples.push({score, loss, accuracy, duration, size});
+                next_sample(resolve);
+        };
+        const next_sample = (resolve) => {
+            samples_remaining--;
+            model = make_model(); // recreate model
+            train(resolve);
+        };
+        const final_results = 
+            async (results, resolve) => {
+                results.samples = samples;
+                let average_score = 0;
+                let average_loss = 0;
+                let average_accuracy = 0;
+                let average_duration = 0;
+                let average_size = 0;
+                samples.forEach(({score, loss, accuracy, duration, size}) => {
+                    average_score += score/samples.length;
+                    average_loss += loss/samples.length;
+                    average_accuracy += accuracy/samples.length;
+                    average_duration += duration/samples.length;
+                    average_size += size/samples.length;
+                });
+                samples = [];
+                samples_remaining = number_of_samples;
+                is_best_so_far = average_score > highest_score || typeof highest_score === 'undefined';
+                if (is_best_so_far) {
+                    highest_score = average_score;
+                    metrics_of_highest_score = {average_loss, average_accuracy, average_duration, average_size};
+                    if (best_model) {
+                        best_model.dispose();
+                        best_model.disposed = true;
+                    } else {
+                        best_model = model;
+                    }
+                    resolve({loss: -average_score,
+                             results,
+                             best_model,
+                             status: hpjs.STATUS_OK});
+                }
+        };
+        const train = (resolve) => {
             train_model(model,
                         tensor_datasets,
                         {epochs, 
@@ -878,41 +961,11 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
                          validation_split,
                          shuffle},
                         (results) => {
-//                             if (previous_model && !previous_model.disposed) {
-//                                 previous_model.dispose();
-//                                 previous_model.disposed = true;
-//                             }
-                            previous_model = model;
-//                             tf.disposeVariables();
-                            let loss = results["Lowest validation loss"];
-                            if (isNaN(loss)) {
-                                loss = Number.MAX_VALUE;
-                            }
-                            const accuracy = results["Highest accuracy"];
-                            const duration = results["Duration in seconds"];
-                            const size = model.countParams();
-                            let score;
-                            if (scoring_weights) {
-                                score = compute_score(cannonicalise_weights(scoring_weights), loss, accuracy, duration, size);
-                            } else if (accuracy) {
-                                score = accuracy;
+                            if (samples_remaining === 0) {
+                                final_results(results, resolve);
                             } else {
-                                score = -loss;
+                                sample_results(results, resolve);
                             }
-                            is_best_so_far = score > highest_score || typeof highest_score === 'undefined';
-                            if (is_best_so_far) {
-                                highest_score = score;
-                                metrics_of_highest_score = {loss, accuracy, duration, size};
-                                if (best_model) {
-                                    best_model.dispose();
-                                    best_model.disposed = true;
-                                }
-                                best_model = model;
-                            }
-                            resolve({loss: -score,
-                                     results,
-                                     best_model,
-                                     status: hpjs.STATUS_OK});
                         },
                         (error) => {
                             if (error.message === not_a_number_error_message) {
@@ -922,7 +975,8 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
                                 invoke_callback(error_callback, error);
                             }
                         });
-            });
+        };
+        return new Promise(train);
     };
     record_callbacks(create_and_train_model, error_callback);
     optimize_hyperparameters_messages.innerHTML = ""; // starting anew
@@ -935,6 +989,7 @@ const optimize = async (model_name, xs, ys, validation_tensors, number_of_experi
     const space = {};
     const categories = get_data(model_name, 'categories');
     gui_state["Optimize"]["Number of experiments"] = number_of_experiments;
+    gui_state["Optimize"]["Number of samples"] = number_of_samples;
     if (what_to_optimize) {
         what_to_optimize.forEach((use, index) => {
             gui_state["Optimize"][search_descriptions[index]] = use;
@@ -1069,6 +1124,7 @@ const gui_state =
                 },
    "Predictions": {},
    "Optimize": {"Number of experiments": 10,
+                "Number of samples": 3,
                 "Search for best Optimization method": true,
                 "Search for best loss function": true,
                 "Search for best dropout rate": true,
@@ -1132,6 +1188,7 @@ const create_training_parameters = (parameters_gui) => {
 const create_hyperparameter_optimize_parameters = (parameters_gui) => {
     const optimize = parameters_gui.addFolder("Optimize");
     optimize.add(gui_state["Optimize"], 'Number of experiments');
+    optimize.add(gui_state["Optimize"], 'Number of samples');
     optimize.add(gui_state["Optimize"], 'Search for best Optimization method', [true, false]);
     optimize.add(gui_state["Optimize"], 'Search for best loss function', [true, false]);
     optimize.add(gui_state["Optimize"], 'Search for best dropout rate', [true, false]);
@@ -1979,7 +2036,8 @@ const receive_message =
             optimize_hyperparameters(model_name, number_of_experiments, epochs,
                                      experiment_end_callback, success_callback, error_callback,
                                      message.what_to_optimize,
-                                     message.scoring_weights);
+                                     message.scoring_weights,
+                                     message.number_of_samples);
         } else if (typeof message.replace_with_best_model !== 'undefined') {
             const model_name = message.replace_with_best_model;
             replace_with_best_model(model_name,
