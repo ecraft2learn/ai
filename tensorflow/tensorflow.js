@@ -578,6 +578,13 @@ const display_trial = (parameters, element) => {
     }
 };
 
+const shorter_number = (number) => {
+    if (typeof number === 'number') {
+        return number.toFixed(4);
+    }
+    return number;
+};
+
 const display_trial_results = (trial) => {
     const score = -trial.result.loss;
     if (trial.result.loss === Number.MAX_VALUE) {
@@ -586,10 +593,8 @@ const display_trial_results = (trial) => {
         return;
     }
     const results = trial.result.results;
-    const loss = typeof results["Lowest validation loss"] === 'undefined' ?
-             results["Training loss"] : results["Lowest validation loss"];
-    const accuracy = typeof results["Validation accuracy"] === 'undefined' ?
-                     results["Training accuracy"] : results["Validation accuracy"];
+    const loss = metrics_of_highest_score.average_loss;;
+    const accuracy = metrics_of_highest_score.average_accuracy;
     let message = "";
     const best_score = score >= highest_score;
     const best_loss = loss <= lowest_loss;
@@ -606,22 +611,21 @@ const display_trial_results = (trial) => {
     if (best_score) {
         message = "<b>Best so far.<br>";
     }
-    // tried toFixed(...) but error can be 1e-12 and shows up as just zeroes
-    message += "Score = " + score;
+    message += "Score = " + shorter_number(score);
     const add_samples = (kind) => {
         if (results.samples && results.samples.length > 1) {
             message += "<br>(";
             results.samples.forEach((sample) => {
-                message += sample[kind] + ", ";
+                message += shorter_number(sample[kind]) + ", ";
             });
             message += ")";
         }
     };        
     add_samples('score');
-    message += "<br>Loss = " + loss;
+    message += "<br>Loss = " + loss; // toFixed may end up displaying 0 if small enough
     add_samples('loss');
     if (accuracy) {
-        message += "<br>Accuracy = " + accuracy;
+        message += "<br>Accuracy = " + shorter_number(accuracy);
         add_samples('accuracy');
     }
     if (best_score) {
@@ -651,7 +655,6 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
     const onExperimentEnd = (i, trial) => {
         display_trial_results(trial);
     };
-//     optimize_hyperparameters_messages.innerHTML = "<b>Searching for good parameter values. Please wait.</b>";
     const error_handler = (error) => {
         optimize_hyperparameters_messages.innerHTML = "Sorry but an error occured.<br>" + error.message;
         draw_area.appendChild(optimize_hyperparameters_messages);
@@ -681,11 +684,15 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
                 install_settings_button.className = "support-window-button";
                 draw_area.appendChild(install_settings_button);
                 const model_name = best_model.name;
-                install_settings_button.innerHTML = "Click to set '" + model_name + "' to best one found (" +
-                                                    "Loss = " + metrics_of_highest_score.average_loss +
-                                                    (typeof metrics_of_highest_score.average_accuracy === 'undefined' ? 
-                                                     "" : "; Accuracy = " + metrics_of_highest_score.average_accuracy) + 
-                                                    ")<br>";
+                const average_text = number_of_samples > 1 ? 'Average ' : '';
+                install_settings_button.innerHTML = 
+                    "Click to set '" + model_name + "' to best one found (" +
+                    average_text + "Loss = " + 
+                    shorter_number(metrics_of_highest_score.average_loss) +
+                    (typeof metrics_of_highest_score.average_accuracy === 'undefined' ? 
+                        "" : "; " + average_text + "Accuracy = " + 
+                    shorter_number(metrics_of_highest_score.average_accuracy)) + 
+                    ")<br>";
                 display_trial(result.argmin, install_settings_button);
                 const settings = result.argmin;
                 settings.model_name = model_name;
@@ -944,14 +951,13 @@ const optimize = async (model_name, xs, ys, validation_tensors,
                     if (best_model) {
                         best_model.dispose();
                         best_model.disposed = true;
-                    } else {
-                        best_model = model;
                     }
-                    resolve({loss: -average_score,
+                    best_model = model;
+                }
+                resolve({loss: -average_score,
                              results,
                              best_model,
                              status: hpjs.STATUS_OK});
-                }
         };
         const train = (resolve) => {
             train_model(model,

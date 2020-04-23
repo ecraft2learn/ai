@@ -503,7 +503,8 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                         update_weights = true;
                     }
                 }
-                if (validation_accuracy && (typeof highest_accuracy === 'undefined' || validation_accuracy > highest_accuracy)) {
+                if (typeof validation_accuracy === 'number' && 
+                    (typeof highest_accuracy === 'undefined' || validation_accuracy > highest_accuracy)) {
                     highest_accuracy = validation_accuracy;
                     highest_accuracy_epoch = epoch;
                     if (highest_accuracy_epoch) {
@@ -863,7 +864,6 @@ const hyperparameter_search = (options, datasets, success_callback, error_callba
         update_tensors(datasets, options.batch_size);
     }
     const create_and_train = async (search_options) => {
-        console.log(search_options);
         const new_options = Object.assign({}, options, search_options);
         set_random_number_seed(new_options);
         let model = create_model(new_options);
