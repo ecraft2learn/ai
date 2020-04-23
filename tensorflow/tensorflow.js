@@ -541,10 +541,11 @@ const search_descriptions =
      "Search for best number of layers"];
 
 const weight_descriptions =
-    ["How much loss contributes to score",
-     "How much accuracy contributes to score",
-     "How much training time contributes to score",
-     "How much size of model contributes to score"];
+    ["How much the loss detracts from the score",
+     "How much the accuracy contributes to the score",
+     "How much training time detracts from the score",
+     "How much the size of model detracts from the score",
+     "How much the variance of the score detracts from the score"];
 
 const display_trial = (parameters, element) => {
     if (parameters.layers) {
@@ -612,6 +613,9 @@ const display_trial_results = (trial) => {
         message = "<b>Best so far.<br>";
     }
     message += "Score = " + shorter_number(score);
+    if (results.samples && results.samples.length > 1) {
+        message += " (" + shorter_number(metrics_of_highest_score.score_standard_deviation) + " s.d.)";
+    }
     const add_samples = (kind) => {
         if (results.samples && results.samples.length > 1) {
             message += "<br>(";
@@ -840,6 +844,18 @@ const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
    }
 };
 
+const standard_deviation = (list) => {
+    let average = 0;
+    list.forEach(element => {
+        average += element/list.length;
+    });
+    let variance = 0;
+    list.forEach(element => {
+        variance += (element-average)**2;
+    });
+    return Math.sqrt(variance);
+};
+
 const optimize = async (model_name, xs, ys, validation_tensors, 
                         number_of_experiments, // number of different parameters settings to explore
                         epochs,
@@ -942,12 +958,22 @@ const optimize = async (model_name, xs, ys, validation_tensors,
                     average_duration += duration/samples.length;
                     average_size += size/samples.length;
                 });
+                const score_standard_deviation = standard_deviation(samples.map(({score}) => score));
+                // penalize high variance to mimimize relying upon luck
+                if (scoring_weights) {
+                    const score_change = score_standard_deviation*scoring_weights[4]
+                    average_score -= score_change;
+                    samples.forEach(sample => {
+                        sample.score -= score_change;
+                    });
+                }
                 samples = [];
                 samples_remaining = number_of_samples;
                 is_best_so_far = average_score > highest_score || typeof highest_score === 'undefined';
                 if (is_best_so_far) {
                     highest_score = average_score;
-                    metrics_of_highest_score = {average_loss, average_accuracy, average_duration, average_size};
+                    metrics_of_highest_score =
+                        {average_loss, average_accuracy, average_duration, average_size, score_standard_deviation};
                     if (best_model) {
                         best_model.dispose();
                         best_model.disposed = true;
@@ -1140,10 +1166,11 @@ const gui_state =
                 "Search for best learning rate": true,
                 "Search for best validation split": true,
                 "Search for best shuffle data setting": true,
-                "How much loss contributes to score": 10,
-                "How much accuracy contributes to score": 10,
-                "How much training time contributes to score": 1,
-                "How much size of model contributes to score": 2,
+                "How much the loss detracts from the score": 10,
+                "How much the accuracy contributes to the score": 10,
+                "How much training time detracts from the score": 1,
+                "How much the size of model detracts from the score": 2,
+                "How much the variance of the score detracts from the score": 3,
                 }
 };
 
@@ -1204,10 +1231,11 @@ const create_hyperparameter_optimize_parameters = (parameters_gui) => {
     optimize.add(gui_state["Optimize"], 'Search for best learning rate', [true, false]);
     optimize.add(gui_state["Optimize"], 'Search for best validation split', [true, false]);
     optimize.add(gui_state["Optimize"], 'Search for best shuffle data setting', [true, false]);
-    optimize.add(gui_state["Optimize"], "How much loss contributes to score");
-    optimize.add(gui_state["Optimize"], "How much accuracy contributes to score");
-    optimize.add(gui_state["Optimize"], "How much training time contributes to score");
-    optimize.add(gui_state["Optimize"], "How much size of model contributes to score");
+    optimize.add(gui_state["Optimize"], "How much the loss detracts from the score");
+    optimize.add(gui_state["Optimize"], "How much the accuracy contributes to the score");
+    optimize.add(gui_state["Optimize"], "How much training time detracts from the score");
+    optimize.add(gui_state["Optimize"], "How much the size of model detracts from the score");
+    optimize.add(gui_state["Optimize"], "How much the variance of the score detracts from the score");
     return optimize;
 };
 
