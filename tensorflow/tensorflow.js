@@ -981,9 +981,9 @@ const optimize = async (model_name, xs, ys, validation_tensors,
                     best_model = model;
                 }
                 resolve({loss: -average_score,
-                             results,
-                             best_model,
-                             status: hpjs.STATUS_OK});
+                         results,
+                         best_model,
+                         status: hpjs.STATUS_OK});
         };
         const train = (resolve) => {
             train_model(model,
@@ -2035,7 +2035,7 @@ const receive_message =
                 if (highest_accuracy > 0) {
                     best_parameters.highest_accuracy = highest_accuracy;
                 }
-                if (highest_score > 0) {
+                if (typeof highest_score ==='number') {
                     best_parameters.highest_score = highest_score;
                     best_parameters.metrics = metrics_of_highest_score;
                 }
