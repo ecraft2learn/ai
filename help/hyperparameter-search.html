@@ -30,6 +30,12 @@ There are many parameters for controlling what parameters are changed during the
 <b>Number of experiments.</b>
 This controls how many times a new model is created and trained.
 </li>
+<li id='number_of_samples'>
+<b>Number of samples.</b>
+This controls how many times each experiment is repeated.
+Due to the random initial weights in the neural network the exact same parameters can produce different results.
+The scores of each sample are averaged.
+</li>
 <li>
 <b>Initial number of training cycles.</b>
 This controls how many learning steps to take for each experiment.
@@ -82,7 +88,7 @@ It was also explore wider and narrower layers.
 </ul>
 <p>
 The search needs to determine if one model variant is better than another.
-The following parameter control how different metrics are weighed.
+The following parameters control how different metrics are weighed.
 </p>
 <ul>
 <li>
@@ -98,12 +104,18 @@ label to elements of the validation dataset.
 <li>
 <b>Duration of training.</b>
 All else being equal we prefer models that train quickly.
-The search algorithm uses the log of the duration.
+The search algorithm uses the negative log of the duration.
 </li>
 <li>
 <b>Size of model</b>
 Larger model take longer to load and to generate predictions.
-The log of the number of parameters is used by the algorithm.
+The negative log of the number of parameters is used by the algorithm.
+</li>
+<li>
+<b>Standard deviation of the score</b>
+If the <a href="#number_of_samples">number of samples</a> is greater than one the results of training a model
+with the same hyperparameters can differ. A good set of parameter values should consistently produce good results.
+The negative of the standard deviation is used to penalize parameters that lead to a range of outcomes.
 </li>
 </ul>
 </body>
