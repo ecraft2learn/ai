@@ -172,8 +172,8 @@ window.ecraft2learn =
           if (!inside_snap()) {
               return;
           }
-          var ide = get_snap_ide();
-          var original_stopAllScripts = ide.stopAllScripts.bind(ide);
+          const ide = get_snap_ide();
+          const original_stopAllScripts = ide.stopAllScripts.bind(ide);
           ide.stopAllScripts = function () {
               stop_all_scripts();
               original_stopAllScripts();
@@ -1587,6 +1587,7 @@ window.ecraft2learn =
         }
     };
     const inform = (title, message, callback, ok_to_repeat) => {
+        message = message + ""; // message must be a string
         if (!ok_to_repeat) {
             let title_and_message = title + "::::" + message;
             if (history_of_informs.indexOf(title_and_message) >= 0) {
