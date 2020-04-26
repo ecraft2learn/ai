@@ -2052,10 +2052,23 @@ const receive_message =
                 parameters.optimization_method = inverse_lookup(parameters.optimization_method, optimization_methods);
                 parameters.loss_function       = inverse_lookup(parameters.loss_function, loss_functions(categories));
                 parameters.is_best_so_far      = is_best_so_far;
+                // select just these entries from trial.result.results
+                const result_labels =
+                    ["Training loss", "Validation loss", "Test loss",
+                     "Training accuracy", "Validation accuracy", "Test accuracy",
+                     "Lowest validation loss", "Highest accuracy",
+                     "Last epoch",  "Duration in seconds",
+                     "Column labels for saving results in a spreadsheet",
+                     "Spreadsheet values"];
+                const results = {};
+                result_labels.forEach((label) => {
+                    results[label] = trial.result.results[label];
+                });
                 event.source.postMessage({optimize_hyperparameters_time_stamp: time_stamp,
                                           trial_number: n,
                                           trial_optimize_hyperparameters: parameters,
                                           trial_score: trial.result.loss,
+                                          results,
                                           is_best_so_far},
                                           "*");
             }

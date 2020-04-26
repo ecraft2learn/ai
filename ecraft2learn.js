@@ -1360,7 +1360,8 @@ window.ecraft2learn =
                                           message.trial_optimize_hyperparameters.trial_number = message.trial_number;
                                           message.trial_optimize_hyperparameters.score = message.trial_score;
                                           invoke_callback(trial_end_callback,
-                                                          javascript_to_snap(message.trial_optimize_hyperparameters),
+                                                          javascript_to_snap({...message.trial_optimize_hyperparameters,
+                                                                              ...message.results}),
                                                           message.trial_number);
                                           return true; // keep this message receiver for subsequent messages
                                       } else if (message.final_optimize_hyperparameters) {
