@@ -1,0 +1,18 @@
+﻿How can I add speech generation to my project?,Speech synthesis,Speech synthesis,46
+Tell me about how to generate speech.,Speech synthesis,Speech recognition,56
+What blocks are there for speaking?,Speech synthesis,Speech recognition,58
+What are the speech recognition blocks?,Speech recognition,Speech recognition,58
+What is in the library for speech recognition?,Speech recognition,Speech recognition,56
+What is available for turning speech into text?,Speech recognition,Speech recognition,45
+What blocks are there for recognizing objects?,Image recognition,Image recognition,59
+Can I add new categories for image labelling?,Image recognition,Image recognition,59
+Can I do transfer learning for image recognition?,Image recognition,Image recognition,46
+How can I get an image embedding vector?,Pre-trained models,Pre-trained models,58
+Do many blocks load pre-trained models?  Pre-trained models,Pre-trained models,Pre-trained models,58
+How can use the list of numbers from an image embedding?,Pre-trained models,Pre-trained models,58
+Can I use word embeddings for translation?,Natural language,Natural language,58
+I want to see if there is bias in the word embeddings.,Natural language,Natural language,58
+Is there a block for word embeddings?,Natural language,Natural language,58
+How can I add my own neural network to a project?,Deep learning,Deep learning,59
+Are there blocks for deep machine learning?,Deep learning,Deep learning,58
+Is there a block for searching for good model parameters?,Deep learning,Image recognition,58
