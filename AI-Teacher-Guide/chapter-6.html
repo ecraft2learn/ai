@@ -76,7 +76,7 @@ Note that the elements of the lists can be numbers or lists of numbers.
 <li>
 Train the model.
 You can control how much learning it does on each step and how many steps it should run.
-Very many small steps usually works but can take a very long time.
+Using very many small steps usually works, but can take a very long time.
 You can use advanced optimization methods to adjust the steps and improve the training.
 </li>
 <li>
@@ -97,7 +97,7 @@ Next you can use the <span class="block-name">Train model named ...</span> block
 This can take several seconds and you should finally see the remaining "error"
 (often called the "loss"), the accuracy, and how long it took.
 Smaller errors are better.
-Finally you can use the <span class="block-name">Get predictions from model ...</span> block
+Finally, you can use the <span class="block-name">Get predictions from model ...</span> block
 (the version that gets only one prediction at a time)
 to test how well the model has learned.
 </p>
@@ -170,7 +170,7 @@ It then uses a technique called <a href="https://en.wikipedia.org/wiki/One-hot" 
 If the colors were "red", "green", and "blue" they could be converted to 0, 1, and 2.
 But it wouldn't work well since the numbers imply that "red" is closer to "green" than "blue".
 Even if you think that is OK what about when one adds "white" or "black" to the list?
-With one hot red can be <1, 0, 0>, green <0, 1, 0> and blue <0, 0, 1>.
+With one hot, red can be <1, 0, 0>, green <0, 1, 0> and blue <0, 0, 1>.
 Each color is equally distant to any other this way.
 </p>
 <p class="how-it-works">
@@ -278,9 +278,10 @@ If it is too large then the error may bounce up and down rather than making prog
 </figure>
 <h3 class="instructions-white">Blocks for saving and loading models and data</h3>
 <p class="instructions">
-Models and data can be saved and loaded using the
+Models and data can be saved and loaded using the 'Saving and loading' button
+which can found by clicking the
 <span class="block-name">open support panel tensorflow.js</span> block
-to open an interface page with a Save/Load section.'Saving and loading' button.
+to open an interface page and navigating to the Save/Load section.
 Your projects can load models using the <span class="block-name">Load neural net from URL ...</span> block
 if you have copied your saved model files (both the JSON that defines the model and the learned weights file)
 to a web server.
@@ -496,13 +497,13 @@ And then we use that number to ensure that the odds of any move being chosen is 
 <h3 class="background-information-white">Strategies for training a good Tic Tac Toe player</h3>
 <p class="background-information">
 The best advice is to experiment!
-No one knows what is the best model architecture, the best way to generate good training data, how much training is required, etc..
+No one knows what is the best model architecture, the best way to generate good training data, how much training is required, etc.
 One way to search for a good architecture is to create two models with a different number of layers or differences in the sizes of their layers.
 After training them both with the same data have them play a large number of games and see if one wins more than another.
 Keep the good one.
 (You can save models after running the <span class="block-name">open support panel tensorflow.js</span> block.)
 Repeat with a different model architecture for the weaker player.
-Similarly you can explore different training parameters to see which optimizer or learning rate works best.
+Similarly, you can explore different training parameters to see which optimizer or learning rate works best.
 Try to discover the number of learning steps after which very little progress is made in reducing the loss so you don't waste time.
 One way to detect if a model benefits from additional training is to have an older version play against a newer version of the same model.
 </p>

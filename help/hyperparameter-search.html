@@ -42,14 +42,14 @@ This controls how many learning steps to take for each experiment.
 Note that this is a parameter that can be changed during search by default.
 </li>
 <li>
-<b>Opimization method.</b>
+<b>Optimization method.</b>
 The optimization method controls how weights are adjusted during training.
 For more information see this <a href="https://en.wikipedia.org/wiki/Stochastic_gradient_descent">Wikipedia article</a>.
 </li>
 <li>
 <b>Loss function.</b>
 This is used during training to determine how to improve the neural net's weights.
-Note for categorial training (i.e. labelling things) the system picks the best one so no need to
+Note for categorical training (i.e. labelling things) the system picks the best one so no need to
 for it to consider variants.
 </li>
 <li>
@@ -60,15 +60,15 @@ Read this <a href="https://en.wikipedia.org/wiki/Activation_function">Wikipedia 
 </li>
 <li>
 <b>Shuffle data.</b>
-If true the data is re-ordered after each training cycle.
+If true, the data is re-ordered after each training cycle.
 </li>
 <li>
 <b>Number of training cycles.</b>
-If enabled the search will explore different numbers of training steps.
+If enabled, the search will explore different numbers of training steps.
 </li>
 <li>
-<b>Validataion split.</b>
-If enabled the search will explore different fractions to split the data for training and for validation
+<b>Validation split.</b>
+If enabled, the search will explore different fractions to split the data for training and for validation
 (and evaluation).
 Note that if instead validation data has been sent
 using the <span class="block-name">send validation data ...</span> block.
@@ -82,8 +82,8 @@ It helps make the model be more general.
 </li>
 <li>
 <b>Number of layers.</b>
-If enabled the search will consider both deeper and shallower models.
-It was also explore wider and narrower layers.
+If enabled, the search will consider both deeper and shallower models.
+It will also explore wider and narrower layers.
 </li>
 </ul>
 <p>
@@ -93,12 +93,12 @@ The following parameters control how different metrics are weighed.
 <ul>
 <li>
 <b>Loss weight.</b>
-For non-categorial models this is typically the most important measure.
+For non-categorical models this is typically the most important measure.
 The search algorithm uses the negative log of the validation loss.
 </li>
 <li>
 <b>Accuracy.</b>
-Only applies to categorial models and measures the fraction of times the model gave the right
+Only applies to categorical models and measures the fraction of times the model gave the right
 label to elements of the validation dataset.
 </li>
 <li>

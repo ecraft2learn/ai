@@ -29,9 +29,9 @@ In this chapter you do the training.
 This training is done by a <a href="https://en.wikipedia.org/wiki/Deep_learning">deep learning</a> system.
 Deep learning is a very successful set of machine learning techniques.
 It is called "deep" because there are many layers of simulated neurons that do the processing.
-Typically the lowest layers pay attention to tiny details
+Typically, the lowest layers pay attention to tiny details
 but higher layers can use the output of lower layers that capture some aspect of the image such as texture or edges.
-Here is a very nice 5 minute video that introduces the big ideas behind machine learning:
+Here is a very nice 5-minute video that introduces the big ideas behind machine learning:
 </p>
 
 <iframe class="background-information-white"
@@ -138,8 +138,8 @@ whether your finger is pointing at the camera or to the right.
 While training move your hand around so it is trained to ignore where the hand is
 and just pay attention to which way the finger is pointing.
 When you return to Snap! the program will repeatedly check which way your finger is pointing.
-If it sees a finger pointing at the camera then the turtle goes forward.
-If not then it turns.
+If it sees a finger pointing at the camera, then the turtle goes forward.
+If not, then it turns.
 It always displays the latest confidence scores.
 </p>
 <p class="exercise">
@@ -212,7 +212,7 @@ Clicking it save a file where you want.
 <img src="images/save-your-training.png" class="center">
 <figcaption>A button to save all your training</figcaption></figure>
 <p class="instructions">
-To load saved training you can either load the file on the local file system or
+To load saved training, you can either load the file on the local file system or
 host the file on the web and use its URL to access it.
 </p>
 <figure class = "snap-iframe"
@@ -314,7 +314,7 @@ Much of the current success of machine learning system is a result of having tra
 Deep learning for machine translation, for example, didn't work well until they were trained with billions of sentences.
 So how could the examples in this chapter work with just dozens of examples for each label?
 Part of the answer is that big data is necessary for high accuracy.
-If you try the rock paper scissors game you'll see it sometimes makes mistakes.
+If you try the rock paper scissors game, you'll see it sometimes makes mistakes.
 See if you can improve its accuracy by adding more training images.
 </p>
 <p class="background-information non-essential">
@@ -367,11 +367,11 @@ speech command recognizer</a> created by Google.
 </figure>
 
 <p class="instructions">
-The <span class="block-name">Train with audio buckets...</span> block uses a Tensorflow.js deep learning model
+The <span class="block-name">Train with audio buckets...</span> block uses a TensorFlow.js deep learning model
 which without a GPU runs too slow to be useful.
 For running on small computers such as a Raspberry Pi there is also the similar
-<span class="block-name">Train (without Tensorflow) with audio buckets...</span> block and its accompanying
-<span class="block-name">Audio label confidences (without Tensorflow)</span> block.
+<span class="block-name">Train (without TensorFlow) with audio buckets...</span> block and its accompanying
+<span class="block-name">Audio label confidences (without TensorFlow)</span> block.
 </p>
 <h4 class="sample-program-white">An Example Program using the Microphone and Machine Learning</h4>
 <p class="sample-program">
