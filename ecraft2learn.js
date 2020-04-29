@@ -2627,7 +2627,7 @@ xhr.send();
          };
      };
      record_callbacks(finished_callback);
-     create_sound("http://localhost:59125");     
+     create_sound("http://mary.dfki.de:59125");     
   },
   get_mary_tts_voice_names: function () {
     return new List(mary_tts_voices.map(function (voice) { return voice[1]; }));
