@@ -711,7 +711,10 @@ window.ecraft2learn =
 //               var proxy_url = "https://toontalk.appspot.com/p/" + 
 //               encodeURIComponent("https://gateway-a.watsonplatform.net/visual-recognition/api/v3/classify?version=2016-05-19&api_key=" + key);
 //               XHR.open('POST', proxy_url);
-              XHR.open('POST', "https://apikey:" + key + "gateway.watsonplatform.net/visual-recognition/api/v3/classify?version=2018-03-19");
+              XHR.open('POST', 
+                       "https://gateway.watsonplatform.net/visual-recognition/api/v3/classify?version=2018-03-19",
+                       true,
+                       "apikey:" + key);
               XHR.send(formData);
               break;
           case "Google":
