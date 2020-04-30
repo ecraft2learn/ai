@@ -2389,6 +2389,13 @@ xhr.send();
       // snap_callback is called with the result of the image recognition
       // show_photo_or_costume if a boolean displays the photo when it is taken -- for backwards compatibility
       // the new normal use if that show_photo_or_costume is a costume to be sent to the services
+      if (!ecraft2learn.video) {
+          // setup must be asynchronous since it may involve asking permission to use the camera
+          ecraft2learn.setup_camera(undefined, undefined, () => {
+                ecraft2learn.take_picture_and_analyse(cloud_provider, show_photo_or_costume, snap_callback);
+          });
+          return;
+      }
       cloud_provider = cloud_provider.trim();
       if (cloud_provider === 'Watson') {
           cloud_provider = 'IBM Watson';
