@@ -671,7 +671,9 @@ window.ecraft2learn =
         if (!sprite) {
             sprite = ide.stage;
         }
-        sprite.addCostume(costume);
+        if (!sprite.costumes.contains(costume)) {
+            sprite.addCostume(costume);
+        }
         sprite.wearCostume(costume);
         ide.hasChangedMedia = true;
     };
@@ -2443,13 +2445,24 @@ xhr.send();
         let canvas = add_photo_to_canvas(ecraft2learn.video,
                                          2*ecraft2learn.video.videoWidth,
                                          2*ecraft2learn.video.videoHeight);
-        costume = create_costume(canvas);
+        if (ecraft2learn.costume_for_take_picture_and_analyse) {
+            // reuse the old costume since otherwise stage fills up with lots of costumes
+            costume = ecraft2learn.costume_for_take_picture_and_analyse;
+            costume.canvas = canvas;
+            costume.image = canvas;
+            costume.contents = canvas;
+            get_snap_ide().hasChangedMedia = true;
+        } else {
+            costume = create_costume(canvas);
+            ecraft2learn.costume_for_take_picture_and_analyse = costume;
+        }
         canvas_for_analysis = canvas;
     }
     if (show_photo_or_costume === true) {
+        costume.name = "recent photo";
         add_costume(costume);
     }
-    image_recognitions[cloud_provider] = {costume: create_costume(canvas_for_analysis)};
+    image_recognitions[cloud_provider] = {costume: costume}; // was create_costume(canvas_for_analysis)
     switch (cloud_provider) {
     case "IBM Watson":
     case "Microsoft":
