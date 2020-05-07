@@ -845,6 +845,9 @@ const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
 };
 
 const standard_deviation = (list) => {
+    if (list.length < 2) {
+        return 0;
+    }
     let average = 0;
     list.forEach(element => {
         average += element/list.length;
@@ -853,7 +856,7 @@ const standard_deviation = (list) => {
     list.forEach(element => {
         variance += (element-average)**2;
     });
-    return Math.sqrt(variance);
+    return Math.sqrt(variance/(list.length-1));
 };
 
 const optimize = async (model_name, xs, ys, validation_tensors, 
