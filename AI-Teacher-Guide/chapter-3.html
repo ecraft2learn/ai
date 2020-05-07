@@ -38,7 +38,7 @@ Hand-written and scanned text can also be recognised.
 <p class="advanced-information non-essential">
 A challenge in providing student-friendly programming blocks for image recognition is that
 different AI cloud services report different descriptions in different ways.
-We currently provide interfaces to image recognition services provided by Google, Microsoft, and IBM.
+We currently provide interfaces to image recognition services provided by Google and Microsoft.
 A further challenge is how to provide simple interfaces for simple tasks
 while still supporting more sophisticated uses and projects.
 </p>
@@ -54,10 +54,10 @@ Driverless cars rely heavily upon computer vision.
 <p class="background-information">
 Chrome has built-in support for speech synthesis and recognition.
 No browser, however, currently supports image recognition.
-To access vision recognition services from companies such as Google, Microsoft, or IBM
+To access vision recognition services from companies such as Google or Microsoft
 one needs to <a href="https://github.com/ecraft2learn../wiki" target="_blank">open an account</a>.
 Accounts are free and provide some degree of free usage.
-IBM permits 250 free vision queries per day, Microsoft 5000 per month, and Google 1000 per month.
+Microsoft permits 5000 queries per month, and Google 1000 per month.
 To try the vision blocks described here you need at least one account.
 Comparing and contrasting the results from different services are interesting ways
 to gain some insight into how these services work.
@@ -81,7 +81,6 @@ In projects there is a different way of providing keys to Snap!
 and they'll be passed to the services as you use example blocks.
 <br><label>Copy and paste your Google key here:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input id="Google image key" type="text"></label>
 <br><label>Copy and paste your Microsoft key here:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input id="Microsoft image key" type="text"></label>
-<br><label>Copy and paste your IBM Watson key here: <input id="IBM Watson image key" type="text"></label></p>
 
 <h4 class="instructions-white">A simple image recognition block</h4>
 <p class="instructions">
@@ -115,7 +114,7 @@ to take a new picture and add it as a costume to the current sprite.
 
 <h4 class="sample-program-white">A sample program using image recognition</h4>
 <p class="sample-program">
-Here is a program that can contact any of Google, Microsoft, or IBM and displays the tags returned.
+Here is a program that can contact any of Google or Microsoft and displays the tags returned.
 </p>
 
 <figure class = "snap-iframe"
@@ -127,7 +126,7 @@ Here is a program that can contact any of Google, Microsoft, or IBM and displays
 
 <h4 class="sample-program-white">A sample program combining image and speech recognition and speech output</h4>
 <p class="sample-program">
-This program is similar to the previous one except it is listening for the words "Google", "Microsoft", or "Watson".
+This program is similar to the previous one except it is listening for the words "Google"or "Microsoft".
 When it hears one of these words it contacts that service.
 When the response is received it turns it into speech.
 As a demo it is impressive if you say things like "Tell me Google what do you see?" and "What do you see Microsoft?".
@@ -140,7 +139,7 @@ Do you think this program <i>seems</i> intelligent? If so, why? Is it intelligen
         id = "camera, listen, and speak no keys"
         full_screen = "true"
         container_style = "width: 800px; height: 600px" 
-        caption = 'Click the green flag and then say a sentence containing "Google", "Microsoft", or "Watson"'>
+        caption = 'Click the green flag and then say a sentence containing "Google" or "Microsoft"'>
 </figure>
 
 <span class="non-essential">
@@ -182,18 +181,12 @@ This is because a project may need to access multiple pieces of a response.
 <p class="instructions">
 After having run <span class="block-name">Recognize new photo</span> block
 you should select the same AI cloud provider
-(currently Google, Microsoft, or IBM Watson)
+(currently Google or Microsoft)
 when you run the <span class="block-name">Current image property</span> block.
 The second argument can be a string or a list of strings specifying what information
 is desired from the image recognition.
 Each AI cloud provider supports different image properties:
 <ul class="instructions">
-<li>
-<b>IBM Watson.</b> Currently the only properties supported are
-<span class="block-name">class</span> and <span class="block-name">score</span>.
-More details
-<a href="https://www.ibm.com/watson/developercloud/visual-recognition/api/v3/#classify_an_image" target="_blank">here</a>.
-</li>
 <li>
 <b>Google.</b> It supports properties that are lists of the form <span class="block-name">[labelAnnotations description]</span>,
 <span class="block-name">[labelAnnotations score]</span> and <span class="block-name">[imagePropertiesAnnotation dominantColors colors]</span>.
@@ -216,7 +209,7 @@ More details
 </p>
 <p class="instructions">
 Common calls to the get property reporter are pre-defined.
-They are <span class="block-name">IBM Watson classes</span>, <span class="block-name">IBM Watson scores</span>,
+They are 
 <span class="block-name">Microsoft labels</span>, <span class="block-name">Microsoft first caption</span>,
 <span class="block-name">Google labels</span>, and <span class="block-name">Google label scores</span>.
 </p>
@@ -230,10 +223,9 @@ How might each one be useful?
 
 <p class="exercise"><b>Advanced Exercise.</b>
 Compare the documentation for the vision services from
-<a href="https://cloud.google.com/vision/" target="_blank">Google</a>,
-<a href="https://azure.microsoft.com/en-gb/services/cognitive-services/computer-vision/" target="_blank">Microsoft</a>,
-and
-<a href="https://www.ibm.com/watson/services/visual-recognition/" target="_blank">IBM Watson</a>.</p>
+<a href="https://cloud.google.com/vision/" target="_blank">Google</a> and
+<a href="https://azure.microsoft.com/en-gb/services/cognitive-services/computer-vision/" target="_blank">Microsoft</a>.
+</p>
 
 <figure class = "snap-iframe"
         id = "recognize new photo"
@@ -264,7 +256,6 @@ When constructing a project there are two ways to provide keys:
 <ol class="instructions">
 <li>Add extra information to the page's URL.
 Appending any (or all) of
-<span class="block-name">&IBM Watson image key=...</span> or
 <span class="block-name">&Google image key=...</span> or
 <span class="block-name">&Microsoft image key=...</span>
 to a shared project URL will
@@ -421,10 +412,8 @@ The app can then add know where to place glasses, moustaches, etc. to the image.
 <span class="advanced-topic-body">
 <h4 class="resources-white" id="additional-resources">Additional resources</h4>
 <p class="resources">
-<a href="https://cloud.google.com/vision/" target="_blank">Google</a>,
-<a href="https://azure.microsoft.com/en-gb/services/cognitive-services/computer-vision/" target="_blank">Microsoft</a>,
-and
-<a href="https://www.ibm.com/watson/services/visual-recognition/" target="_blank">IBM Watson</a>
+<a href="https://cloud.google.com/vision/" target="_blank">Google</a> and
+<a href="https://azure.microsoft.com/en-gb/services/cognitive-services/computer-vision/" target="_blank">Microsoft</a>
 document their AI vision services.
 There are many more vision services, see for example this
 <a href="https://www.upwork.com/hiring/data/comparing-image-recognition-apis/" target="_blank">image recognition services comparison page</a>.
