@@ -892,6 +892,8 @@ window.ecraft2learn =
               URL = "/mobilenet/index.html";
           } else if (source === 'tensorflow.js') {
               URL = "/tensorflow/index.html";
+          } else if (source === 'segmentation') {
+              URL = "/segmentation/index.html";
           }
           if (window.location.hostname === "localhost" || window.location.protocol === 'file:') {
               URL = ".." + URL;
@@ -2918,6 +2920,38 @@ xhr.send();
           source = 'training using camera';
       }
       return ecraft2learn.support_iframe[source].style.width === "100%";
+  },
+  segmentations_and_poses: (costume, callback, error_callback, config) => {
+      if (!config) {
+          config = {flipHorizontal: false,
+                    internalResolution: 'medium',
+                    segmentationThreshold: 0.7,
+                    maxDetections: 10,
+                    scoreThreshold: 0.2,
+                    nmsRadius: 20,
+                    minKeypointScore: 0.3,
+                    refineSteps: 10};
+      }
+      const time_stamp = Date.now();
+      request_of_support_window('segmentation',
+                                'Ready',
+                                () => {
+                                    return {segmentations_and_poses: {image_url: costume.contents.toDataURL(),
+                                                                      config,
+                                                                      time_stamp}};
+                                  },
+                                (message) => {
+                                    return typeof message.segmentation_response !== 'undefined' && 
+                                        // reponse received and it is for the same request (time stamps match)
+                                        message.time_stamp === time_stamp;
+                                },
+                                (message) => {
+                                    // responded with the data structure described in 
+                                    // https://github.com/tensorflow/tfjs-models/tree/master/body-pix
+                                    const response = message.segmentation_response;
+                                    invoke_callback(callback, 
+                                                    javascript_to_snap(response));
+                                });
   },
   poses: function (callback, no_display) {
       var ask_for_poses = function (window_just_created) {
