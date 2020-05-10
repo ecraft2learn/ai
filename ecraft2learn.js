@@ -2950,7 +2950,10 @@ xhr.send();
       request_of_support_window('segmentation',
                                 'Ready',
                                 () => {
-                                    show_message("Loading Body PIX model...", );
+                                    if (typeof ecraft2learn.loading_body_pix_message_presented === 'undefined') {
+                                        show_message("Loading Body PIX model...");
+                                        ecraft2learn.loading_body_pix_message_presented = true;
+                                    }
                                     return {segmentations_and_poses: {image_url: costume.contents.toDataURL(),
                                                                       options,
                                                                       time_stamp}};
@@ -2963,7 +2966,9 @@ xhr.send();
                                 (message) => {
                                     // responded with the data structure described in 
                                     // https://github.com/tensorflow/tfjs-models/tree/master/body-pix
-                                    show_message("");
+                                    if (ecraft2learn.loading_body_pix_message_presented){
+                                        show_message("");
+                                    }
                                     const response = message.segmentation_response;
                                     if (options["create costume"]) {
                                         // turn ImageData into a costume
