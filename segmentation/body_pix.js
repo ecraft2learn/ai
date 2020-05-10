@@ -25,9 +25,9 @@ const respond_to_messages =
             const config = options && options.config;
             const when_image_loaded =
                 async (image) => {
-                    console.time("segmentation");
+//                     console.time("segmentation");
                     const segmentations = await segmenter.segmentMultiPersonParts(image, config);
-                    console.timeLog("segmentation");
+//                     console.timeLog("segmentation");
                     let color_mappings = options["color mappings"];
                     let color_mapping;
                     if (color_mappings) {
@@ -54,7 +54,7 @@ const respond_to_messages =
                                 segmentation.mask = mask; // they all share the same mask
                             });
                         }
-                        console.timeLog("segmentation");
+//                         console.timeLog("segmentation");
                     } else if (color_mappings) {
                         segmentations.forEach((segmentation, index) => {
                             color_mapping = color_mappings.length > 1 ? color_mappings[index] : color_mappings[0];
@@ -62,10 +62,10 @@ const respond_to_messages =
                             segmentation.data.forEach((part_id) => {
                                 segmentation.pixels.push(color_mapping[part_id+1]); // +1 since -1 is "no body part"
                             });
-                            console.timeLog("segmentation");
+//                             console.timeLog("segmentation");
                         });
                     }
-                    console.timeEnd("segmentation");
+//                     console.timeEnd("segmentation");
                     event.source.postMessage({segmentation_response: segmentations,
                                               time_stamp: event.data.segmentations_and_poses.time_stamp}, "*");
                  };
