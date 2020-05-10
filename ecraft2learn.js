@@ -275,7 +275,7 @@ window.ecraft2learn =
             return new List(x.map(javascript_to_snap));
         }
         if (typeof x === 'object') {
-            if (x instanceof List) {
+            if (x instanceof List || x instanceof Costume) {
                 return x;
             }
             if (x === null) {
@@ -307,7 +307,7 @@ window.ecraft2learn =
     const array_to_object = (array) => {
         // array alternates between keys and values
         const object = {};
-        for (let i = 0; i < array.length/2; i += 2) {
+        for (let i = 0; i < array.length; i += 2) {
             object[array[i]] = array[i+1];
         };
         return object;
@@ -2950,6 +2950,7 @@ xhr.send();
       request_of_support_window('segmentation',
                                 'Ready',
                                 () => {
+                                    show_message("Loading Body PIX model...", );
                                     return {segmentations_and_poses: {image_url: costume.contents.toDataURL(),
                                                                       options,
                                                                       time_stamp}};
@@ -2962,7 +2963,24 @@ xhr.send();
                                 (message) => {
                                     // responded with the data structure described in 
                                     // https://github.com/tensorflow/tfjs-models/tree/master/body-pix
+                                    show_message("");
                                     const response = message.segmentation_response;
+                                    if (options["create costume"]) {
+                                        // turn ImageData into a costume
+                                        response.forEach((segmentation) => {
+                                            const canvas = document.createElement('canvas');
+                                            canvas.setAttribute('width',  segmentation.width);
+                                            canvas.setAttribute('height', segmentation.height);
+                                            canvas.getContext('2d').putImageData(segmentation.mask, 0, 0)
+                                            const costume = create_costume(canvas);
+                                            segmentation.costume = costume;
+                                            // the following takes up lots of resources and isn't needed if one is creating costumes
+                                            delete segmentation.mask;
+                                            delete segmentation.data;
+                                            delete segmentation.pixels;
+                                            delete segmentation.pose;
+                                        });
+                                    }
                                     invoke_callback(callback, 
                                                     javascript_to_snap(response));
                                 });
