@@ -304,6 +304,14 @@ window.ecraft2learn =
         }
         return x;       
     };
+    const array_to_object = (array) => {
+        // array alternates between keys and values
+        const object = {};
+        for (let i = 0; i < array.length/2; i += 2) {
+            object[array[i]] = array[i+1];
+        };
+        return object;
+    };
     let add_photo_to_canvas = function (image_or_video, new_width, new_height, mirrored) {
         // Capture a photo by fetching the current contents of the video
         // and drawing it into a canvas, then converting that to a PNG
@@ -2921,25 +2929,31 @@ xhr.send();
       }
       return ecraft2learn.support_iframe[source].style.width === "100%";
   },
-  segmentations_and_poses: (costume, callback, error_callback, config) => {
-      if (!config) {
-          config = {flipHorizontal: false,
-                    internalResolution: 'medium',
-                    segmentationThreshold: 0.7,
-                    maxDetections: 10,
-                    scoreThreshold: 0.2,
-                    nmsRadius: 20,
-                    minKeypointScore: 0.3,
-                    refineSteps: 10};
+  segmentations_and_poses: (costume, options, callback, error_callback, config) => {
+       const default_config = {flipHorizontal: false,
+                                internalResolution: 'medium',
+                                segmentationThreshold: 0.7,
+                                maxDetections: 10,
+                                scoreThreshold: 0.2,
+                                nmsRadius: 20,
+                                minKeypointScore: 0.3,
+                                refineSteps: 10};
+      if (options) {
+          options = array_to_object(snap_to_javascript(options));
+      } else {
+          options = {};
+      }
+      if (!options.config) {
+          options.config = default_config;
       }
       const time_stamp = Date.now();
       request_of_support_window('segmentation',
                                 'Ready',
                                 () => {
                                     return {segmentations_and_poses: {image_url: costume.contents.toDataURL(),
-                                                                      config,
+                                                                      options,
                                                                       time_stamp}};
-                                  },
+                                },
                                 (message) => {
                                     return typeof message.segmentation_response !== 'undefined' && 
                                         // reponse received and it is for the same request (time stamps match)
