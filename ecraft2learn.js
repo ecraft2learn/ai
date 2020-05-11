@@ -1075,7 +1075,7 @@ window.ecraft2learn =
         request_of_support_window('training using camera',
                                   'MobileNet loaded',
                                   () => {
-                                      return {get_image_features: {URL: costume_canvas.toDataURL(),
+                                      return {get_image_features: {image_data: get_image_data(costume_canvas),
                                                                    time_stamp: time_stamp}};
                                   },
                                   (message) => {

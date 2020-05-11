@@ -105,14 +105,11 @@ const load_image = function (image_url, callback) {
     };
 };
 
-const image_url_to_features_vector = function (image_url, time_stamp, post_to_tab) {
-    load_image(image_url,
-               async function (image) {
-                   logits = await infer(image);
-                   post_to_tab.postMessage({image_features: classifier.normalizeVectorToUnitLength(logits).dataSync(),
-                                            time_stamp: time_stamp},
-                                           '*');
-               });
+const image_data_to_features_vector = async (image_data, time_stamp, post_to_tab) => {
+    logits = await infer(image_data);
+    post_to_tab.postMessage({image_features: classifier.normalizeVectorToUnitLength(logits).dataSync(),
+                             time_stamp: time_stamp},
+                            '*');
 };
 
 const add_image_to_training = function (image_url, label_index, post_to_tab) {
@@ -229,11 +226,6 @@ const initialise_page = async function (incoming_training_class_names, source) {
 
   document.getElementById('main').style.display = 'block';
 
-// Setup the GUI
-//   setupGui();
-//   setupFPS();
-
-  // Setup the camera
   try {
     video = await setupCamera();
     video.play();
@@ -250,22 +242,22 @@ const initialise_page = async function (incoming_training_class_names, source) {
     info.style.display = 'block';
     throw e;
   }
-  load_mobilenet((model) => {
-      mobilenet_model = model;
-      window.parent.postMessage('MobileNet loaded', "*");
-      if (training_class_names) {
-          // fully initialised 
-          window.parent.postMessage('Ready', "*");
-      }
-      // following used to use addEventListener but Snap!'s drop listener interfered
-      // ecraft2learn.support_iframe['training using camera']
-    //                             window.parent.document.body.ondrop = receive_drop;
-      if (TOGETHER_JS) {
-          collaborate();
-      }
-      start();
-      source.postMessage("Ready", "*");
-   });
+//   load_mobilenet((model) => {
+//       mobilenet_model = model;
+//       window.parent.postMessage('MobileNet loaded', "*");
+//       if (training_class_names) {
+//           // fully initialised 
+//           window.parent.postMessage('Ready', "*");
+//       }
+//       // following used to use addEventListener but Snap!'s drop listener interfered
+//       // ecraft2learn.support_iframe['training using camera']
+//     //                             window.parent.document.body.ondrop = receive_drop;
+//       if (TOGETHER_JS) {
+//           collaborate();
+//       }
+//       start();
+//       source.postMessage("Ready", "*");
+//    });
 };
 
 // const receive_drop = function (event) {
@@ -396,7 +388,7 @@ const listen_for_messages = function (event) {
             add_image_to_training(image_url, label_index, event.source);
          }
     } else if (typeof event.data.get_image_features !== 'undefined') {
-        image_url_to_features_vector(event.data.get_image_features.URL, 
+        image_data_to_features_vector(event.data.get_image_features.image_data, 
                                      event.data.get_image_features.time_stamp,
                                      event.source);
     } else if (event.data === 'stop') {
@@ -415,9 +407,16 @@ const listen_for_messages = function (event) {
             if (data_set.labels) {
                 if (training_class_names) {
                     set_class_names(data_set.labels);
+                    // fully initialised 
+                    window.parent.postMessage('Ready', "*");
                 } else {
                     initialise_page(data_set.labels, event.source);
                 }
+                if (TOGETHER_JS) {
+                    collaborate();
+                }
+                start();
+                source.postMessage("Ready", "*");
             }
             if (data_set.html) {
                 let introduction = decodeURIComponent(data_set.html);
@@ -507,10 +506,14 @@ const collaborate = () => {
 window.addEventListener('message', listen_for_messages, false);
 // tell Snap! this is loaded
 window.addEventListener('DOMContentLoaded',
-                        async function (event) {
-                            if (window.opener) {
-                                // if collaboratively training only one has a Snap! window (just now)
-                                window.opener.postMessage("Loaded", "*");
-                            }
+                        (event) => {
+                            load_mobilenet((model) => {
+                                mobilenet_model = model;
+                                window.parent.postMessage('MobileNet loaded', "*");
+                                if (window.opener) {
+                                    // if collaboratively training only one has a Snap! window (just now)
+                                    window.opener.postMessage("Loaded", "*");
+                                }
+                            });
                         },
                         false);
