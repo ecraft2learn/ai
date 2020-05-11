@@ -17,18 +17,16 @@ const listen_for_messages = (event) => {
         return;
     }
     if (typeof event.data.classify !== 'undefined') {
-        let image = new Image();
-        image.src = event.data.classify.URL;
+        const image_data = event.data.classify.image_data;
         // timestamp used to resp0ond appropriately to multiple outstanding requests
         let time_stamp = event.data.classify.time_stamp;
         let top_k = event.data.classify.top_k; 
-        image.onload = function () {
-            model.classify(image, top_k).then(predictions => {
-                window.parent.postMessage({classify_response:
-                                           {classifications: predictions,
-                                            time_stamp: time_stamp}},
-                                          '*');
-        })};
+        model.classify(image_data, top_k).then(predictions => {
+            window.parent.postMessage({classify_response:
+                                       {classifications: predictions,
+                                        time_stamp}},
+                                     '*');
+        });
     }
 };
 

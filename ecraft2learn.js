@@ -1438,7 +1438,7 @@ window.ecraft2learn =
         request_of_support_window('image classifier',
                                   'Ready',                                  
                                   () => {
-                                      return {classify: {URL: canvas.toDataURL(),
+                                      return {classify: {image_data: get_image_data(canvas),
                                                          top_k: top_k,
                                                          time_stamp: time_stamp}};
                                   },
