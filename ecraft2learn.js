@@ -685,6 +685,7 @@ window.ecraft2learn =
         sprite.wearCostume(costume);
         ide.hasChangedMedia = true;
     };
+    const get_image_data = (canvas) => canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
     const post_image = function post_image(image, cloud_provider, callback, error_callback) {
         // based upon https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/Sending_forms_through_JavaScript
         cloud_provider = cloud_provider.trim();
@@ -1044,7 +1045,7 @@ window.ecraft2learn =
         request_of_support_window('style transfer',
                                   'Ready',
                                   () => {
-                                      return {style_transfer_request: {URL: costume_canvas.toDataURL(),
+                                      return {style_transfer_request: {image_data: get_image_data(costume.contents),
                                                                        style: style_to_folder_name[style.trim()],
                                                                        time_stamp: time_stamp}};
                                   },
@@ -1054,21 +1055,14 @@ window.ecraft2learn =
                                              message.style_transfer_response.time_stamp === time_stamp;
                                   },
                                   (message) => {
-                                      // support window has responded with a data URL
-                                      // need to create a canvas and draw the image on it
+                                      // support window has responded with image_data
+                                      // need to create a canvas and draw the image_data on it
                                       let new_canvas = document.createElement('canvas');
                                       new_canvas.height = costume_canvas.height;
                                       new_canvas.width  = costume_canvas.width;
-                                      let image = new Image();
-                                      image.src = event.data.style_transfer_response.URL;
-                                      // remove so this only runs once
-                                      // alternatively could use the {once: true} option to addEventListener 
-                                      // but not all browsers accept that
-                                      image.onload = function() {
-                                          new_canvas.getContext('2d').drawImage(image, 0, 0, costume_canvas.width, costume_canvas.height);
-                                          // create the costume and pass it to callback
-                                          invoke_callback(callback, create_costume(new_canvas, style + " of " + costume.name));
-                                      }
+                                      new_canvas.getContext('2d').putImageData(message.style_transfer_response.image_data, 0, 0);
+                                      // create the costume and pass it to callback
+                                      invoke_callback(callback, create_costume(new_canvas, style + " of " + costume.name));
                                    });
     };
     const get_image_features = function(costume, callback) {
@@ -2954,7 +2948,7 @@ xhr.send();
                                         show_message("Loading Body PIX model...");
                                         ecraft2learn.loading_body_pix_message_presented = true;
                                     }
-                                    const image_data = costume.contents.getContext('2d').getImageData(0, 0, costume.width(), costume.height());
+                                    const image_data = get_image_data(costume.contents);
                                     return {segmentations_and_poses: {image_data, options, time_stamp}};
                                 },
                                 (message) => {
