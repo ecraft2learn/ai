@@ -7,26 +7,16 @@
 "use strict";
 
 let segmenter;
-      
-const load_image = (image_url, callback) => {
-    let image = document.createElement('img');
-    image.src = image_url;
-    image.onload = function () {
-        callback(image);
-    };
-};                
 
 // listen for requests for segmentations and poses
 const respond_to_messages =
-    (event) => {              
+    async (event) => {              
         if (typeof event.data.segmentations_and_poses !== 'undefined') {
-            const image_url = event.data.segmentations_and_poses.image_url;
+            const image_data = event.data.segmentations_and_poses.image_data;
             const options = event.data.segmentations_and_poses.options;
             const config = options && options.config;
-            const when_image_loaded =
-                async (image) => {
 //                     console.time("segmentation");
-                    const segmentations = await segmenter.segmentMultiPersonParts(image, config);
+                    const segmentations = await segmenter.segmentMultiPersonParts(image_data, config);
 //                     console.timeLog("segmentation");
                     let color_mappings = options["color mappings"];
                     let color_mapping;
@@ -69,8 +59,6 @@ const respond_to_messages =
                     event.source.postMessage({segmentation_response: segmentations,
                                               time_stamp: event.data.segmentations_and_poses.time_stamp}, "*");
                  };
-             load_image(image_url, when_image_loaded);
-        }
     };
 
 window.addEventListener('DOMContentLoaded', 

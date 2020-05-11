@@ -2954,9 +2954,8 @@ xhr.send();
                                         show_message("Loading Body PIX model...");
                                         ecraft2learn.loading_body_pix_message_presented = true;
                                     }
-                                    return {segmentations_and_poses: {image_url: costume.contents.toDataURL(),
-                                                                      options,
-                                                                      time_stamp}};
+                                    const image_data = costume.contents.getContext('2d').getImageData(0, 0, costume.width(), costume.height());
+                                    return {segmentations_and_poses: {image_data, options, time_stamp}};
                                 },
                                 (message) => {
                                     return typeof message.segmentation_response !== 'undefined' && 
