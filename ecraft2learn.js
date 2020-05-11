@@ -2925,6 +2925,60 @@ xhr.send();
       }
       return ecraft2learn.support_iframe[source].style.width === "100%";
   },
+  segmentation_and_pose: (costume, options, callback, error_callback, config) => {
+       const default_config = {flipHorizontal: false,
+                               internalResolution: 'medium',
+                               segmentationThreshold: 0.7};
+      if (options) {
+          options = array_to_object(snap_to_javascript(options));
+      } else {
+          options = {};
+      }
+      if (!options.config) {
+          options.config = default_config;
+      }
+      const time_stamp = Date.now();
+      request_of_support_window('segmentation',
+                                'Ready',
+                                () => {
+                                    if (typeof ecraft2learn.loading_body_pix_message_presented === 'undefined') {
+                                        show_message("Loading Body PIX model...");
+                                        ecraft2learn.loading_body_pix_message_presented = true;
+                                    }
+                                    const image_data = get_image_data(costume.contents);
+                                    return {segmentation_and_pose: {image_data, options, time_stamp}};
+                                },
+                                (message) => {
+                                    return typeof message.segmentation_response !== 'undefined' && 
+                                           // reponse received and it is for the same request (time stamps match)
+                                           message.time_stamp === time_stamp;
+                                },
+                                (message) => {
+                                    // responded with the data structure described in 
+                                    // https://github.com/tensorflow/tfjs-models/tree/master/body-pix
+                                    if (ecraft2learn.loading_body_pix_message_presented){
+                                        show_message("");
+                                    }
+                                    const segmentation = message.segmentation_response;
+                                    if (options["just create a costume"]) {
+                                        // turn ImageData into a costume
+                                        const canvas = document.createElement('canvas');
+                                        canvas.setAttribute('width',  segmentation.width);
+                                        canvas.setAttribute('height', segmentation.height);
+                                        canvas.getContext('2d').putImageData(segmentation.mask, 0, 0)
+                                        const costume = create_costume(canvas);
+                                        segmentation.costume = costume;
+                                        // the following takes up lots of resources and isn't needed if one is creating costumes
+                                        delete segmentation.mask;
+                                        delete segmentation.data;
+                                        delete segmentation.pixels;
+                                        delete segmentation.pose;
+                                    }
+                                    invoke_callback(callback, 
+                                                    javascript_to_snap(segmentation));
+                                });
+  },
+  // multi-person version kept for now
   segmentations_and_poses: (costume, options, callback, error_callback, config) => {
        const default_config = {flipHorizontal: false,
                                 internalResolution: 'medium',

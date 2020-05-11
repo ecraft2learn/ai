@@ -11,7 +11,33 @@ let segmenter;
 // listen for requests for segmentations and poses
 const respond_to_messages =
     async (event) => {              
-        if (typeof event.data.segmentations_and_poses !== 'undefined') {
+        if (typeof event.data.segmentation_and_pose !== 'undefined') {
+            const image_data = event.data.segmentation_and_pose.image_data;
+            const options = event.data.segmentation_and_pose.options;
+            const config = options && options.config;
+//          console.time("segmentation");
+            const segmentation = await segmenter.segmentPersonParts(image_data, config);
+//          console.timeLog("segmentation");
+            let color_mapping = options["color mappings"];
+            if (color_mapping === '') {
+                color_mapping = undefined; // not specified
+            }
+            if (color_mapping) {
+                if (typeof color_mapping[0][0] === 'string') {
+                    // remove body part names
+                    color_mapping = color_mapping.map((mapping) => mapping[1]);
+                };
+                color_mapping = color_mapping.slice(1); // eCraft2Learn starts with the color for not a body part
+             }
+             if (options["just create a costume"]) {
+                 segmentation.mask = bodyPix.toColoredPartMask(segmentation, color_mapping);
+//               console.timeLog("segmentation");
+             }
+//           console.timeEnd("segmentation");
+             event.source.postMessage({segmentation_response: segmentation,
+                                       time_stamp: event.data.segmentation_and_pose.time_stamp}, "*");
+        // keeping the multi-person version just in case (and poses uses it now)
+        } else if (typeof event.data.segmentations_and_poses !== 'undefined') {
             const image_data = event.data.segmentations_and_poses.image_data;
             const options = event.data.segmentations_and_poses.options;
             const config = options && options.config;
