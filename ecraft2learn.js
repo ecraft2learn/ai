@@ -981,7 +981,9 @@ window.ecraft2learn =
           let canvas = add_photo_to_canvas(image || ecraft2learn.video, 
                                            training_image_width,
                                            training_image_height);
-          let image_URL = canvas.toDataURL('image/png');
+          // could be optimized to use ImageData instead but that would interfere with the option of training collaboratively
+          // could keep this for training but not for prediction/classification...
+          let image_URL = canvas.toDataURL('image/png'); 
           machine_learning_window.postMessage(message_maker(image_URL), "*");   
       }
       if (ecraft2learn.video) {
