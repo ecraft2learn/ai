@@ -397,7 +397,7 @@ const listen_for_messages = function (event) {
         restart();   
     } else if (typeof event.data.training_class_names !== 'undefined') {
         // receive class names
-        initialise_page(event.data.training_class_names, event.source);
+        initialise_page(event.data.training_class_names, event.source).then(start);
     } else if (typeof event.data.new_introduction !== 'undefined') {
         // update HTML of the page with custom introduction
         update_introduction(event.data.new_introduction);
