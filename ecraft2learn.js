@@ -2926,7 +2926,7 @@ xhr.send();
       return ecraft2learn.support_iframe[source].style.width === "100%";
   },
   segmentation_and_pose: (costume, options, callback, error_callback, config) => {
-       const default_config = {flipHorizontal: false,
+       const default_config = {flipHorizontal: true,
                                internalResolution: 'medium',
                                segmentationThreshold: 0.7};
       if (options) {
@@ -2980,7 +2980,7 @@ xhr.send();
   },
   // multi-person version kept for now
   segmentations_and_poses: (costume, options, callback, error_callback, config) => {
-       const default_config = {flipHorizontal: false,
+       const default_config = {flipHorizontal: true,
                                 internalResolution: 'medium',
                                 segmentationThreshold: 0.7,
                                 maxDetections: 10,
