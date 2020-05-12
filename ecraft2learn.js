@@ -271,7 +271,8 @@ window.ecraft2learn =
         if (!inside_snap()) {
             return x;
         }
-        if (Array.isArray(x) || x instanceof Float32Array) {
+        if (Array.isArray(x) || ArrayBuffer.isView(x) && !(x instanceof DataView)) {
+            // array or typed array
             return new List(x.map(javascript_to_snap));
         }
         if (typeof x === 'object') {
@@ -3021,10 +3022,10 @@ xhr.send();
                                     if (ecraft2learn.loading_body_pix_message_presented){
                                         show_message("");
                                     }
-                                    const response = message.segmentation_response;
-                                    if (options["create costume"]) {
+                                    const segmentations = message.segmentation_response;
+                                    if (options["create segmentation costume"]) {
                                         // turn ImageData into a costume
-                                        response.forEach((segmentation) => {
+                                        segmentations.forEach((segmentation) => {
                                             const canvas = document.createElement('canvas');
                                             canvas.setAttribute('width',  segmentation.width);
                                             canvas.setAttribute('height', segmentation.height);
@@ -3033,13 +3034,20 @@ xhr.send();
                                             segmentation.costume = costume;
                                             // the following takes up lots of resources and isn't needed if one is creating costumes
                                             delete segmentation.mask;
+                                        });
+                                    }
+                                    if (!options["create pixel codes"]) {
+                                        segmentations.forEach((segmentation) => {
                                             delete segmentation.data;
-                                            delete segmentation.pixels;
+                                        });
+                                    }
+                                    if (!options["create pose"]) {
+                                        segmentations.forEach((segmentation) => {
                                             delete segmentation.pose;
                                         });
                                     }
                                     invoke_callback(callback, 
-                                                    javascript_to_snap(response));
+                                                    javascript_to_snap(segmentations));
                                 });
   },
   poses: function (callback, no_display) {
