@@ -2960,7 +2960,7 @@ xhr.send();
                                         show_message("");
                                     }
                                     const segmentation = message.segmentation_response;
-                                    if (options["just create a costume"]) {
+                                    if (options["create segmentation costume"]) {
                                         // turn ImageData into a costume
                                         const canvas = document.createElement('canvas');
                                         canvas.setAttribute('width',  segmentation.width);
@@ -2969,10 +2969,13 @@ xhr.send();
                                         const costume = create_costume(canvas);
                                         segmentation.costume = costume;
                                         // the following takes up lots of resources and isn't needed if one is creating costumes
-                                        delete segmentation.mask;
-                                        delete segmentation.data;
-                                        delete segmentation.pixels;
+                                        delete segmentation.mask;                                       
+                                    }
+                                    if (!options["create pose"]) {
                                         delete segmentation.pose;
+                                    }
+                                    if (!options["create pixel codes"]) {
+                                        delete segmentation.data;
                                     }
                                     invoke_callback(callback, 
                                                     javascript_to_snap(segmentation));

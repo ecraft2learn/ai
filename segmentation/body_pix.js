@@ -29,7 +29,7 @@ const respond_to_messages =
                 };
                 color_mapping = color_mapping.slice(1); // eCraft2Learn starts with the color for not a body part
              }
-             if (options["just create a costume"]) {
+             if (options["create segmentation costume"]) {
                  segmentation.mask = bodyPix.toColoredPartMask(segmentation, color_mapping);
 //               console.timeLog("segmentation");
              }
@@ -71,15 +71,15 @@ const respond_to_messages =
                             });
                         }
 //                         console.timeLog("segmentation");
-                    } else if (color_mappings) {
-                        segmentations.forEach((segmentation, index) => {
-                            color_mapping = color_mappings.length > 1 ? color_mappings[index] : color_mappings[0];
-                            segmentation.pixels = [];
-                            segmentation.data.forEach((part_id) => {
-                                segmentation.pixels.push(color_mapping[part_id+1]); // +1 since -1 is "no body part"
-                            });
-//                             console.timeLog("segmentation");
-                        });
+                        // if one wanted the pixels one can get them from the costume using the pixel library block in Snap! for example
+//                     } else if (color_mappings) {
+//                         segmentations.forEach((segmentation, index) => {
+//                             color_mapping = color_mappings.length > 1 ? color_mappings[index] : color_mappings[0];
+//                             segmentation.pixels = [];
+//                             segmentation.data.forEach((part_id) => {
+//                                 segmentation.pixels.push(color_mapping[part_id+1]); // +1 since -1 is "no body part"
+//                             });
+//                         });
                     }
 //                     console.timeEnd("segmentation");
                     event.source.postMessage({segmentation_response: segmentations,
