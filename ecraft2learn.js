@@ -2967,8 +2967,7 @@ xhr.send();
                                         canvas.setAttribute('width',  segmentation.width);
                                         canvas.setAttribute('height', segmentation.height);
                                         canvas.getContext('2d').putImageData(segmentation.mask, 0, 0)
-                                        const costume = create_costume(canvas);
-                                        segmentation.costume = costume;
+                                        segmentation.costume = create_costume(canvas);
                                         // the following takes up lots of resources and isn't needed if one is creating costumes
                                         delete segmentation.mask;                                       
                                     }
