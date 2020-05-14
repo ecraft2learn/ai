@@ -3008,7 +3008,7 @@ xhr.send();
                                 'Ready',
                                 () => {
                                     if (typeof ecraft2learn.loading_body_pix_message_presented === 'undefined') {
-                                        show_message("Loading Body PIX model...");
+                                        show_message("Loading BodyPix model...");
                                         ecraft2learn.loading_body_pix_message_presented = true;
                                     }
                                     const image_data = get_image_data(costume.contents);
@@ -3016,8 +3016,8 @@ xhr.send();
                                 },
                                 (message) => {
                                     return typeof message.segmentation_response !== 'undefined' && 
-                                        // reponse received and it is for the same request (time stamps match)
-                                        message.time_stamp === time_stamp;
+                                           // reponse received and it is for the same request (time stamps match)
+                                           message.time_stamp === time_stamp;
                                 },
                                 (message) => {
                                     // responded with the data structure described in 
