@@ -7,8 +7,8 @@
 "use strict";
 
 const convert_color_mapping = (color_mapping) => {
-    if (color_mapping === '') {
-        // if no color_mappings then default rainbow is used
+    if (!Array.isArray(color_mapping)) {
+        // if no valid color_mappings provided then default rainbow is used
         color_mapping = undefined; // not specified
     }
     if (color_mapping) {
@@ -49,7 +49,7 @@ const respond_to_messages =
                     segmentation.mask = mask; // they all share the same mask
                 });
             }
-            if (options["create person bitmask"]) {
+            if (options["create person bitmasks"]) {
                 const person_segmentations = await segmenter.segmentMultiPerson(image_data, config);
                 segmentations.forEach((segmentation, index) => {
                     segmentation["person bitmap"] = person_segmentations[index].data;  

@@ -2971,12 +2971,16 @@ xhr.send();
                                         // the following takes up lots of resources and isn't needed if one is creating costumes
                                         delete segmentation.mask;                                       
                                     }
-                                    if (!options["create pose"]) {
-                                        delete segmentation.pose;
+                                    if (options["create poses"]) {
+                                        // a better name
+                                        segmentation["all poses"] = segmentation.allPoses;
                                     }
-                                    if (!options["create pixel codes"]) {
-                                        delete segmentation.data;
+                                    delete segmentation.allPoses;
+                                    if (options["create pixel codes"]) {
+                                        // a better name
+                                        segmentation["pixel codes"] = segmentation.data;
                                     }
+                                    delete segmentation.data;
                                     invoke_callback(callback, 
                                                     javascript_to_snap(segmentation));
                                 });
@@ -3035,12 +3039,16 @@ xhr.send();
                                             delete segmentation.mask;
                                         });
                                     }
-                                    if (!options["create pixel codes"]) {
+                                    if (options["create pixel codes"]) {
+                                        // a better name
                                         segmentations.forEach((segmentation) => {
-                                            delete segmentation.data;
+                                            segmentation["pixel codes"] = segmentation.data;
                                         });
                                     }
-                                    if (!options["create pose"]) {
+                                    segmentations.forEach((segmentation) => {
+                                        delete segmentation.data;
+                                    });
+                                    if (!options["create poses"]) {
                                         segmentations.forEach((segmentation) => {
                                             delete segmentation.pose;
                                         });
