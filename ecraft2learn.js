@@ -1650,6 +1650,102 @@ window.ecraft2learn =
             }   
         }
     };
+    let loading_body_pix_message_presented = false;
+    const segmentation_handler = (multi_person, costume, options, callback, error_callback, config, default_config) => {
+      if (options) {
+          options = array_to_object(snap_to_javascript(options));
+      } else {
+          options = {};
+      }
+      if (!options.config) {
+          options.config = default_config;
+      }
+      const time_stamp = Date.now();
+      request_of_support_window('segmentation',
+                                'Ready',
+                                () => {
+                                    if (!loading_body_pix_message_presented) {
+                                        show_message("Loading BodyPix model...");
+                                        loading_body_pix_message_presented = true;
+                                    }
+                                    const image_data = get_image_data(costume.contents);
+                                    return {segmentations_and_poses: {image_data, options, time_stamp, multi_person}};
+                                },
+                                (message) => {
+                                    return (message.segmentation_response && message.time_stamp === time_stamp) ||
+                                            // reponse received and it is for the same request (time stamps match)
+                                           message.error_message;
+                                },
+                                (message) => {
+                                    if (loading_body_pix_message_presented) {
+                                        show_message("");
+                                    }
+                                    if (message.error_message) {   
+                                        const title = "Error computing segmentations of a costume";
+                                        const full_message = title + ": " + message.error_message;
+                                        if (error_callback) {
+                                            console.log(full_message);
+                                            invoke_callback(error_callback, full_message);
+                                        } else {
+                                            inform(title, message.error_message);
+                                        }
+                                        return;
+                                    }
+                                    // responded with the data structure described in 
+                                    // https://github.com/tensorflow/tfjs-models/tree/master/body-pix
+                                    const segmentations = message.segmentation_response;
+                                    const create_segmentation_costume = (segmentation) => {
+                                        // turn ImageData into a costume
+                                        const canvas = document.createElement('canvas');
+                                        canvas.setAttribute('width',  segmentation.width);
+                                        canvas.setAttribute('height', segmentation.height);
+                                        canvas.getContext('2d').putImageData(segmentation.mask, 0, 0)
+                                        segmentation.costume = create_costume(canvas);
+                                        // the following takes up lots of resources and isn't needed if one is creating costumes
+                                        delete segmentation.mask; 
+                                    }
+                                    if (options["create segmentation costume"]) {
+                                        if (multi_person) {
+                                            segmentations.forEach(create_segmentation_costume);
+                                        } else {
+                                            create_segmentation_costume(segmentations); // there is only one
+                                        }                                  
+                                    }
+                                    if (options["create poses"]) {
+                                        if (!multi_person) {
+                                            // a better name
+                                            segmentations["all poses"] = segmentations.allPoses;
+                                        }
+                                    } else if (multi_person) {
+                                        // poses not requested so release them
+                                        segmentations.forEach((segmentation) => {
+                                            delete segmentation.pose;
+                                        });
+                                    }
+                                    if (options["create pixel codes"]) {
+                                        // a better name
+                                        if (multi_person)  {
+                                            segmentations.forEach((segmentation) => {
+                                                segmentation["pixel codes"] = segmentation.data;
+                                            });
+                                        } else {
+                                            segmentations["pixel codes"] = segmentations.data;
+                                        }
+                                    }
+                                    // no-ops if the following aren't defined
+                                    // if needed they've been moved to better names
+                                    delete segmentations.allPoses;
+                                    delete segmentations.data;
+                                    if (multi_person) {
+                                        segmentations.forEach((segmentation) => {
+                                            // if wanted has been moved to "pixel codes"
+                                            delete segmentation.data;
+                                        });
+                                    }
+                                    invoke_callback(callback, 
+                                                    javascript_to_snap(segmentations));
+                                });
+    };
     let magnitude = function (vector) {
         let sum_of_squares = 0;
         vector.forEach(function (element) {
@@ -2927,135 +3023,23 @@ xhr.send();
       return ecraft2learn.support_iframe[source].style.width === "100%";
   },
   segmentation_and_pose: (costume, options, callback, error_callback, config) => {
-       const default_config = {flipHorizontal: true,
-                               internalResolution: 'medium',
-                               segmentationThreshold: 0.7};
-      if (options) {
-          options = array_to_object(snap_to_javascript(options));
-      } else {
-          options = {};
-      }
-      if (!options.config) {
-          options.config = default_config;
-      }
-      const time_stamp = Date.now();
-      request_of_support_window('segmentation',
-                                'Ready',
-                                () => {
-                                    if (typeof ecraft2learn.loading_body_pix_message_presented === 'undefined') {
-                                        show_message("Loading Body PIX model...");
-                                        ecraft2learn.loading_body_pix_message_presented = true;
-                                    }
-                                    const image_data = get_image_data(costume.contents);
-                                    return {segmentation_and_pose: {image_data, options, time_stamp}};
-                                },
-                                (message) => {
-                                    return typeof message.segmentation_response !== 'undefined' && 
-                                           // reponse received and it is for the same request (time stamps match)
-                                           message.time_stamp === time_stamp;
-                                },
-                                (message) => {
-                                    // responded with the data structure described in 
-                                    // https://github.com/tensorflow/tfjs-models/tree/master/body-pix
-                                    if (ecraft2learn.loading_body_pix_message_presented){
-                                        show_message("");
-                                    }
-                                    const segmentation = message.segmentation_response;
-                                    if (options["create segmentation costume"]) {
-                                        // turn ImageData into a costume
-                                        const canvas = document.createElement('canvas');
-                                        canvas.setAttribute('width',  segmentation.width);
-                                        canvas.setAttribute('height', segmentation.height);
-                                        canvas.getContext('2d').putImageData(segmentation.mask, 0, 0)
-                                        segmentation.costume = create_costume(canvas);
-                                        // the following takes up lots of resources and isn't needed if one is creating costumes
-                                        delete segmentation.mask;                                       
-                                    }
-                                    if (options["create poses"]) {
-                                        // a better name
-                                        segmentation["all poses"] = segmentation.allPoses;
-                                    }
-                                    delete segmentation.allPoses;
-                                    if (options["create pixel codes"]) {
-                                        // a better name
-                                        segmentation["pixel codes"] = segmentation.data;
-                                    }
-                                    delete segmentation.data;
-                                    invoke_callback(callback, 
-                                                    javascript_to_snap(segmentation));
-                                });
+      // single person
+      const default_config = {flipHorizontal: true,
+                              internalResolution: 'medium',
+                              segmentationThreshold: 0.7};
+      segmentation_handler(false, costume, options, callback, error_callback, config, default_config);
   },
-  // multi-person version kept for now
   segmentations_and_poses: (costume, options, callback, error_callback, config) => {
-       const default_config = {flipHorizontal: true,
-                                internalResolution: 'medium',
-                                segmentationThreshold: 0.7,
-                                maxDetections: 10,
-                                scoreThreshold: 0.2,
-                                nmsRadius: 20,
-                                minKeypointScore: 0.3,
-                                refineSteps: 10};
-      if (options) {
-          options = array_to_object(snap_to_javascript(options));
-      } else {
-          options = {};
-      }
-      if (!options.config) {
-          options.config = default_config;
-      }
-      const time_stamp = Date.now();
-      request_of_support_window('segmentation',
-                                'Ready',
-                                () => {
-                                    if (typeof ecraft2learn.loading_body_pix_message_presented === 'undefined') {
-                                        show_message("Loading BodyPix model...");
-                                        ecraft2learn.loading_body_pix_message_presented = true;
-                                    }
-                                    const image_data = get_image_data(costume.contents);
-                                    return {segmentations_and_poses: {image_data, options, time_stamp}};
-                                },
-                                (message) => {
-                                    return typeof message.segmentation_response !== 'undefined' && 
-                                           // reponse received and it is for the same request (time stamps match)
-                                           message.time_stamp === time_stamp;
-                                },
-                                (message) => {
-                                    // responded with the data structure described in 
-                                    // https://github.com/tensorflow/tfjs-models/tree/master/body-pix
-                                    if (ecraft2learn.loading_body_pix_message_presented){
-                                        show_message("");
-                                    }
-                                    const segmentations = message.segmentation_response;
-                                    if (options["create segmentation costume"]) {
-                                        // turn ImageData into a costume
-                                        segmentations.forEach((segmentation) => {
-                                            const canvas = document.createElement('canvas');
-                                            canvas.setAttribute('width',  segmentation.width);
-                                            canvas.setAttribute('height', segmentation.height);
-                                            canvas.getContext('2d').putImageData(segmentation.mask, 0, 0)
-                                            const costume = create_costume(canvas);
-                                            segmentation.costume = costume;
-                                            // the following takes up lots of resources and isn't needed if one is creating costumes
-                                            delete segmentation.mask;
-                                        });
-                                    }
-                                    if (options["create pixel codes"]) {
-                                        // a better name
-                                        segmentations.forEach((segmentation) => {
-                                            segmentation["pixel codes"] = segmentation.data;
-                                        });
-                                    }
-                                    segmentations.forEach((segmentation) => {
-                                        delete segmentation.data;
-                                    });
-                                    if (!options["create poses"]) {
-                                        segmentations.forEach((segmentation) => {
-                                            delete segmentation.pose;
-                                        });
-                                    }
-                                    invoke_callback(callback, 
-                                                    javascript_to_snap(segmentations));
-                                });
+      // multiple people
+      const default_config = {flipHorizontal: true,
+                              internalResolution: 'medium',
+                              segmentationThreshold: 0.7,
+                              maxDetections: 10,
+                              scoreThreshold: 0.2,
+                              nmsRadius: 20,
+                              minKeypointScore: 0.3,
+                              refineSteps: 10};
+       segmentation_handler(true, costume, options, callback, error_callback, config, default_config);
   },
   poses: function (callback, no_display) {
       var ask_for_poses = function (window_just_created) {
