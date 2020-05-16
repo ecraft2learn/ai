@@ -16,7 +16,6 @@ const convert_color_mapping = (color_mapping) => {
             // remove body part names
             color_mapping = color_mapping.map((mapping) => mapping[1]);
         };
-        color_mapping = color_mapping.slice(1); // eCraft2Learn starts with the color for not a body part
     }
     return color_mapping;
 };
