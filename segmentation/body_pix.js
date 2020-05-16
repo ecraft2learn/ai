@@ -6,20 +6,6 @@
 
 "use strict";
 
-const convert_color_mapping = (color_mapping) => {
-    if (!Array.isArray(color_mapping)) {
-        // if no valid color_mappings provided then default rainbow is used
-        color_mapping = undefined; // not specified
-    }
-    if (color_mapping) {
-        if (typeof color_mapping[0][0] === 'string') {
-            // remove body part names
-            color_mapping = color_mapping.map((mapping) => mapping[1]);
-        };
-    }
-    return color_mapping;
-};
-
 let segmenter;
 
 // listen for requests for segmentations and poses
@@ -29,7 +15,11 @@ const respond_to_messages =
             const image_data = event.data.segmentations_and_poses.image_data;
             const options = event.data.segmentations_and_poses.options;
             const config = options && options.config;
-            const color_mapping = convert_color_mapping(options["color mappings"]);
+            let color_mapping = options["color mappings"];
+            if (!Array.isArray(color_mapping)) {
+                // if no valid color_mappings provided then default rainbow is used
+                color_mapping = undefined; // not specified
+            }
             let segmentations; // could be singular if !multi_person
             if (event.data.segmentations_and_poses.multi_person) {
                 segmentations = await segmenter.segmentMultiPersonParts(image_data, config);
