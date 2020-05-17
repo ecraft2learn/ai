@@ -444,6 +444,96 @@ can be enhanced in <a href="#simon-says-enhancements">many ways</a>.
 Be creative.
 </p>
 
+<h4 class="background-information-white" id="segmentation">Labelling body parts in images of people</h4>
+<p class="background-information">
+<a href="https://github.com/tensorflow/tfjs-models/tree/master/body-pix" target="_blank">BodyPix</a>
+is a deep learning segmentation model that classifies each pixel in a photo
+of people as to whether it is a part of body and if so what part.
+This is called segmentation since it segments the image into hands, arms, legs, etc.
+</p>
+<figure class="background-information-white">
+<img src="../images/segmentation demo.png" class="center">
+<figcaption>BodyPix has added different colours to different body parts</figcaption>
+</figure>
+<p class="instructions">
+There are two blocks for segmentation: 
+</p>
+<ol class="instructions">
+<li>
+<span class="block-name">segmentation and pose of <i>costume</i> ...</span> (best suited for analysing images of a single person)
+</li>
+<li>
+<span class="block-name">segmentations and poses of <i>costume</i> ...</span> (best suited for analysing images of multiple people)
+</li>
+</ol>
+<p class="instructions">
+Both blocks can be used with images of any number of people but each one is faster and more informative when used as indicated.
+</p>
+<p class="instructions">
+Both blocks take as an argument a list of options indicating what information is desired:
+<ul class="instructions">
+<li>
+<b>create segmentation costume</b> if true reports a new costume where each pixel is one of 24 colours
+</li>
+<li>
+<b>color mappings</b> if provided is a list of 24 lists indicating which colour to use for each body part.
+Each colour is a list of four numbers between 0 and 255 which specify the amount of red, green, blue, and opaqueness of the colours.
+The order of the elements is left face, right face, left upper arm front, left upper arm back, right upper arm front,
+right upper arm back, left lower arm front, left lower arm back, right lower arm front, right lower arm back, left hand,
+right hand, torso front, torso back, left upper leg front, left upper leg back, right upper leg front, right upper leg back,
+left lower leg front, left lower leg back, right lower leg front, right lower leg back, left feet, and right feet.
+If no list is provided a rainbow of colours is used. 
+</li>
+<li>
+<b>create pixel codes</b> if true reports a list of numbers from 0 to 23 corresponding to different body parts listed above for each pixel in the image.
+</li>
+<li>
+<b>create poses</b> if true reports <a href="#pose-detection">body poses</a>.
+</li>
+<li>
+<b>create person bitmasks</b> if true and using the multi-person <span class="block-name">segmentations and poses of <i>costume</i> ...</span> block
+then a list of zeros and ones is reported. One indicating that the pixel is part of a person and zero otherwise.
+</li>
+</ul>
+<p class="instructions">
+These blocks report a list of findings.
+The <span "block-name">get the <i>key</i> in <i>table</i></span> block provides a convenient way of retrieving a finding.
+The keys for the <span class="block-name">segmentation and pose of <i>costume</i> ...</span> block are
+<i>costume</i>, <i>pixel codes</i>, and <i>all poses</i>. 
+Often <i>all poses</i> contains more poses than there are people but the extra ones have very low confidence scores.
+The <span class="block-name">segmentations and poses of <i>costume</i> ...</span> block reports a list of findings, one for each person detected.
+Each person finding can have the keys <i>costume</i>, <i>pixel codes</i>, <i>pose</i>, and <i>person bitmap</i>.
+The <span class="block-name">get value at <i>x</i> and <i>y</i> from bitmap</span> can be used the read the value
+of either the <i>pixel codes</i> or the <i>person bitmap</i>.
+</p>
+<p class="instructions">
+Here you can explore the <span class="block-name">segmentation and pose of <i>costume</i> ...</span> block.
+</p>
+<figure class = "snap-iframe"
+        id = "segmentation single"
+        full_screen = "true"
+        edit_mode = "true"
+        stage_ratio = ".83"
+        container_style = "width: 1000px; height: 750px;"
+        caption = "See if the segmentation model can correctly find body parts.">
+</figure>
+<p class="instructions">
+Here you can explore the <span class="block-name">segmentations and poses of <i>costume</i> ...</span> block.
+</p>
+<figure class = "snap-iframe"
+        id = "segmentation multi"
+        full_screen = "true"
+        edit_mode = "true"
+        stage_ratio = ".83"
+        container_style = "width: 1000px; height: 750px;"
+        caption = "See if the segmentation model can correctly find each person.">
+</figure>
+</p>
+<p class="instructions">
+The <a href="../index.html#balloon-game">Balloon Game</a> is an example of how a project might use segmentation.
+Balloons slowly fall down and a point is awarded when popped by a hand or foot.
+Balloons that pop on someone's head losses a point.
+</p>
 <h4 class="instructions-white" id="style-transfer">Creating images in the style of famous paintings</h4>
 <p class="instructions">
 Recently researchers have invented a way to use two machine learning programs to take an image and turn it into one that 
