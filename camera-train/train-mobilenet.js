@@ -296,7 +296,7 @@ function start() {
     create_save_training_button('camera',
                                 () => classifier.getClassifierDataset(),
                                 () => training_class_names);
-    create_return_to_snap_button();
+//     create_return_to_snap_button();
     let please_wait = document.getElementById("please-wait");
     if (please_wait) {
         please_wait.remove(); // remove it if not already removed
