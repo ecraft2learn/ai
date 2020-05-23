@@ -98,6 +98,7 @@ When the training tab launches you'll see two buttons:
 <p class="instructions">
 The <span class="block-name">Train with image buckets ...</span> block only needs the first argument telling it the bucket labels.
 It has three additional optional arguments:
+</p>
 <ol class="instructions">
 <li>
 Whether to start fresh or continue with the current training if this block is run more than once in a session.
@@ -109,7 +110,6 @@ Text that will appear on the training page. Can be in HTML format.
 Blocks to run after returning from the training tab.
 </li>
 </ol>
-</p>
 </span>
 
 <p class="instructions">
@@ -392,10 +392,10 @@ and the program should work just fine.
 <figcaption>A demonstration of pose detection</figcaption>
 </figure>
 <p class="background-information">
-Google Creative Lab recently released browser-based software called <i>Posenet</i> for
+Google Creative Lab released browser-based software called <i>Posenet</i> for
 <a href="https://medium.com/tensorflow/real-time-human-pose-estimation-in-the-browser-with-tensorflow-js-7dd0bc881cd5" target="_blank">
 real-time human pose estimation</a>.
-This software can determine the locations of 17 different body parts:
+This software can determine the locations of 17 different face and body parts:
 noses, eyes, ears, shoulders, elbows, wrists, hips, knees, and ankles.
 Posenet was created using deep machine learning and makes use of<a href="https://js.tensorflow.org/" target="_blank">Tensorflow.js</a>.
 Many are familiar with how pose detection can be embedded in video games via
@@ -443,7 +443,25 @@ full screen version of the game</a>
 can be enhanced in <a href="#simon-says-enhancements">many ways</a>.
 Be creative.
 </p>
-
+<p class="advanced-topic">
+Click to read an advanced topic
+</p>
+<span class="advanced-topic-body">
+<h4 class="how-it-works-white">How does pose detection work?</h4>
+<p class="how-it-works">
+Google trained a deep learning model on over 64,000 images of people.
+Associated with each image was a mask showing which pixels were of a person (indicated by one or white) or not (zero or black).
+Also the locations of up to 17 face and body key points were provided.
+The trained model starts by first identifying the locations of body parts in a new image. 
+It then refines their positions by considering neighbouring key points (e.g. left elbow connects only with left wrist and left shoulder).
+If the image is of more than one person the model needs to separate the key points to different people. 
+The algorithm starts with the key point it has the most confidence rather than a favoured starting point such as the nose.
+It then considers body part locations connected to that key point, and then those connected to those parts, and so on.
+If, in addition, <a href="#segmentation">segmentation</a> is also required it assigns each pixel a code for each body part it belongs.
+Full details can be found in the paper <a href="https://arxiv.org/abs/1803.08225" target="_blank">
+PersonLab: Person Pose Estimation and Instance Segmentation with a Bottom-Up, Part-Based, Geometric Embedding Model</a>.
+</p>
+</span>
 <h4 class="background-information-white" id="segmentation">Labelling body parts in images of people</h4>
 <p class="background-information">
 <a href="https://github.com/tensorflow/tfjs-models/tree/master/body-pix" target="_blank">BodyPix</a>
