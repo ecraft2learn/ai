@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Detecting objects in images (using coco-ssd)</title>
+    <link href="../css/ai-teacher-guide.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="loading">
+        Loading the model...
+    </div>
+    <p>
+        You shouldn't see this.
+    </p> 
+<script src="../js/load-scripts.js"></script>
+<script>
+load_local_or_remote_scripts(
+    ["../js/tfjs.js",
+     "https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd", 
+     "detection.js",
+     "../js/translate.js"]);
+</script>
+</body>
+</html>
