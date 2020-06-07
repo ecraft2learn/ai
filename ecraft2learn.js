@@ -904,6 +904,8 @@ window.ecraft2learn =
               URL = "/tensorflow/index.html";
           } else if (source === 'segmentation') {
               URL = "/segmentation/index.html";
+          } else if (source === 'detection') {
+              URL = "/detection/index.html";
           }
           if (window.location.hostname === "localhost" || window.location.protocol === 'file:') {
               URL = ".." + URL;
@@ -1649,6 +1651,51 @@ window.ecraft2learn =
                 }
             }   
         }
+    };
+    let loading_coco_ssd_message_presented = false;
+    const detection_handler = (costume, options, callback, error_callback) => {
+        if (options) {
+            options = array_to_object(snap_to_javascript(options));
+        } else {
+            options = {};
+        }
+        const time_stamp = Date.now();
+        request_of_support_window(
+            'detection',
+            'Ready',
+            () => {
+                if (!loading_coco_ssd_message_presented) {
+                    show_message("Loading object detection model...");
+                    loading_coco_ssd_message_presented = true;
+                }
+                const image_data = get_image_data(costume.contents);
+                return {detect_objects: {image_data, options, time_stamp}};
+            },
+            (message) => {
+                return (message.detection_response && message.time_stamp === time_stamp) ||
+                        // reponse received and it is for the same request (time stamps match)
+                        message.error_message;
+            },
+            (message) => {
+                if (loading_coco_ssd_message_presented) {
+                    show_message("");
+                }
+                if (message.error_message) {   
+                    const title = "Error detecting images of objects in a costume";
+                    const full_message = title + ": " + message.error_message;
+                    if (error_callback) {
+                        console.log(full_message);
+                        invoke_callback(error_callback, full_message);
+                    } else {
+                        inform(title, message.error_message);
+                    }
+                    return;
+                }
+                // responded with the data structure described in 
+                // https://github.com/tensorflow/tfjs-models/tree/master/coco-ssd
+                invoke_callback(callback, 
+                                javascript_to_snap(message.detection_response));
+        });
     };
     let loading_body_pix_message_presented = false;
     const segmentation_handler = (multi_person, costume, options, callback, error_callback, config, default_config) => {
@@ -3022,6 +3069,7 @@ xhr.send();
       }
       return ecraft2learn.support_iframe[source].style.width === "100%";
   },
+  detect_objects: detection_handler,
   segmentation_and_pose: (costume, options, callback, error_callback, config) => {
       // single person
       const default_config = {flipHorizontal: true,

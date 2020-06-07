@@ -1,5 +1,5 @@
  /**
- * Implements JavaScript functions that extend Snap! to access AI cloud services and the machine learning library tensorflow.js
+ * Implements JavaScript functions that extend Snap! to use the bodyPix model in the machine learning library tensorflow.js
  * Authors: Ken Kahn
  * License: New BSD
  */
