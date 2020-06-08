@@ -546,12 +546,33 @@ Here you can explore the <span class="block-name">segmentations and poses of <i>
         container_style = "width: 1000px; height: 750px;"
         caption = "See if the segmentation model can correctly find each person.">
 </figure>
-</p>
 <p class="instructions">
 The <a href="../index.html#balloon-game">Balloon Game</a> is an example of how a project might use segmentation.
 Balloons slowly fall down and a point is awarded when popped by a hand or foot.
 Balloons that pop on someone's head losses a point.
 </p>
+
+<h4 class="background-information-white" id="detection">Detecting objects in an image</h4>
+<p class="background-information">
+<a href="https://github.com/tensorflow/tfjs-models/tree/master/coco-ssd" target="_blank">COCO-SSD</a>
+is a deep learning object detection model.
+COCO-SSD can detect up to 100 objects of 80 different kinds.
+It labels them and provides a "bounding box" for each object detected.
+A bounding box is the smallest rectangle that surrounds the object.
+</p>
+<p class="instructions">
+The <span class="block-name">objects in costume</span> block reports a list of descriptions of each object detected.
+You can experiment with it here.
+</p>
+<figure class = "snap-iframe"
+        id = "detect objects"
+        full_screen = "true"
+        edit_mode = "true"
+        stage_ratio = ".83"
+        container_style = "width: 1000px; height: 750px;"
+        caption = "This model can find objects in an image. TRY IT!">
+</figure>
+
 <h4 class="instructions-white" id="style-transfer">Creating images in the style of famous paintings</h4>
 <p class="instructions">
 Recently researchers have invented a way to use two machine learning programs to take an image and turn it into one that 
