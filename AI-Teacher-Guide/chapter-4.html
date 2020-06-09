@@ -556,13 +556,41 @@ Balloons that pop on someone's head losses a point.
 <p class="background-information">
 <a href="https://github.com/tensorflow/tfjs-models/tree/master/coco-ssd" target="_blank">COCO-SSD</a>
 is a deep learning object detection model.
-COCO-SSD can detect up to 100 objects of 80 different kinds.
+It can detect up to 100 objects of 80 different kinds.
 It labels them and provides a "bounding box" for each object detected.
 A bounding box is the smallest rectangle that surrounds the object.
 </p>
+<p class="background-information">
+COCO-SSD was trained using the <a href="http://cocodataset.org/" target="_blank">COCO dataset</a>
+which has labels and locattions of 1.5 million objects in over 200,000 images.
+SSD stands for Single Shot MultiBox Detection because COCO-SSD is a single model that in one go 
+has been trained to detect multiple bounding boxes of several objects in an image.
+</p>
 <p class="instructions">
 The <span class="block-name">objects in costume</span> block reports a list of descriptions of each object detected.
-You can experiment with it here.
+It optionally accepts a list of options.
+</p>
+<figure class="instructions-white">
+<img src="images/detect objects options.png" class="center">
+<figcaption>An example of options to the <span class="block-name">objects in costume</span> block</figcaption>
+</figure>
+<ul>
+<li>
+<b>load smaller, faster, but less accurate model</b> if true loads a model that is about one third the size
+of the default model. It is faster but less accurate.
+</li>
+<li>
+<b>maximum number of objects</b> if provided overrules the default value of 20. 100 is the largest
+number of objects the model can detect.
+</li>
+<li>
+<b>minimum confidence score</b> if provided overrules the default value of 0.5.
+The <span class="block-name">objects in costume</span> block will only report objects with
+a confidence score of at least this value.
+</li>
+</ul>
+<p>
+You can experiment with the <span class="block-name">objects in costume</span> block by clicking this image:
 </p>
 <figure class = "snap-iframe"
         id = "detect objects"
