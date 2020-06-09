@@ -6,6 +6,8 @@
 
 "use strict";
 
+// using https://github.com/tensorflow/tfjs-models/tree/master/coco-ssd
+
 let models = {mobilenet_v2: false,
               lite_mobilenet_v2: false};
 
