@@ -1704,7 +1704,9 @@ window.ecraft2learn =
       } else {
           options = {};
       }
-      if (!options.config) {
+      if (options.config) {
+          options.config = array_to_object(options.config);
+      } else {
           options.config = default_config;
       }
       const time_stamp = Date.now();
@@ -1785,7 +1787,7 @@ window.ecraft2learn =
                                     delete segmentations.data;
                                     if (multi_person) {
                                         segmentations.forEach((segmentation) => {
-                                            // if wanted has been moved to "pixel codes"
+                                            // if wanted data has been renamed to "pixel codes"
                                             delete segmentation.data;
                                         });
                                     }
