@@ -406,7 +406,7 @@ What is so impressive about Posenet is that it works in the browser without any 
 The <span class="block-name">poses</span> block reports a list of poses.
 One pose for each person in front of the camera.
 The system can be configured on the "poses" tab to be optimised for scenes with more than one person.
-Tradeoffs between speed and accuracy can also be made.
+Trade-offs between speed and accuracy can also be made.
 The "poses" tab is also a good place to explore pose detection.
 There are two kinds of <span class="block-name">pose property</span> blocks that can fetch information for a <i>pose</i>.
 They both can specify that one wants the confidence the system has that it has correctly identified a particular body part
@@ -454,7 +454,7 @@ Associated with each image was a mask showing which pixels were of a person (ind
 Also the locations of up to 17 face and body key points were provided.
 The trained model starts by first identifying the locations of body parts in a new image. 
 It then refines their positions by considering neighbouring key points (e.g. left elbow connects only with left wrist and left shoulder).
-If the image is of more than one person the model needs to separate the key points to different people. 
+If the image is of more than one person, the model needs to separate the key points to different people. 
 The algorithm starts with the key point it has the most confidence rather than a favoured starting point such as the nose.
 It then considers body part locations connected to that key point, and then those connected to those parts, and so on.
 If, in addition, <a href="#segmentation">segmentation</a> is also required it assigns each pixel a code for each body part it belongs.
@@ -567,7 +567,7 @@ A bounding box is the smallest rectangle that surrounds the object.
 </p>
 <p class="background-information">
 COCO-SSD was trained using the <a href="http://cocodataset.org/" target="_blank">COCO dataset</a>
-which has labels and locattions of 1.5 million objects in over 200,000 images.
+which has labels and locations of 1.5 million objects in over 200,000 images.
 SSD stands for Single Shot MultiBox Detection because COCO-SSD is a single model that in one go 
 has been trained to detect multiple bounding boxes of several objects in an image.
 </p>
@@ -804,7 +804,7 @@ interactive art, fitness, sport science, security, and more.
 </li>
 <li>
 The augmented reality <a href="../index.html#balloon-game" target="_blank">Balloon Game</a> can be improved in many ways.
-One idea is that addtional body parts can have colours that are used in the game to determine what happens when a coloured balloon comes into contact.
+One idea is that additional body parts can have colours that are used in the game to determine what happens when a coloured balloon comes into contact.
 </li>
 <li>
 The <a href="../index.html#dont-touch-your-face" target="_blank">Don't Touch your Face Game</a> could be improved in many ways including
