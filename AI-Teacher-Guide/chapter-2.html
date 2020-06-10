@@ -14,6 +14,7 @@ You can download the blocks presented here as a
 <a href="/ai/snap/snap.html?project=listening&editMode" target="_blank">project</a> or 
 a <a href="listening blocks.xml" download target="_blank">library</a>.
 </p>
+<div id="table-of-contents"></div>
 <h4 class="guide-to-guide-white">Browser compatibility</h4>
 <p class="guide-to-guide">
 This guide includes many interactive elements that currently only run well in the Chrome browser.
@@ -23,7 +24,7 @@ one may need to configure the system or the browser to know how to access the mi
 There is a <a href="troubleshooting.html" target="_blank">troubleshooting guide</a>
 that should be consulted if problems are encountered.
 </p>
-<h4 class="background-information-white">Introduction</h4>
+<h4 class="background-information-white" id="introduction">Introduction</h4>
 <p class="background-information">
 It is much easier to get a computer to start with text and end up with speech
 than to start with speech and end up with the corresponding text.
@@ -36,7 +37,7 @@ These vibrations are converted to numbers.
 Speech recognition begins with these numbers and attempts to determine what was said.
 As you'll see the process is not perfect, mistakes occur.
 </p>
-<h4 class="instructions-white">A simple speech recognition block</h4>
+<h4 class="instructions-white" id="simple-recognition-block">A simple speech recognition block</h4>
 <p class="instructions">
 Click on the following block, say something,
 then click on the <span class="block-name" translate=no>last thing heard</span> variable.
@@ -67,7 +68,7 @@ E.g., fr will be treated as fr-FR.
 </p>
 
 <span class="non-essential">
-<h4 class="instructions-white">Speech recognition errors</h4>
+<h4 class="instructions-white" id="speech-errors">Speech recognition errors</h4>
 <p class="instructions">
 Speech recognition can encounter errors such as the inability to access the microphone.
 The most common "error" is when after several seconds nothing is heard.
@@ -86,7 +87,7 @@ Try the following and then be quiet for a while.
 </figure>
 </span>
 
-<h4 class="sample-program-white">A sample program using speech recognition (and synthesis)</h4>
+<h4 class="sample-program-white" id="speech-recognition-sample-project">A sample program using speech recognition (and synthesis)</h4>
 <p class="sample-program">
 The following program uses the <span class="block-name">listen then ...</span> block to control a sprite.
 You can tell it to go forward or to the turn right.
@@ -124,7 +125,7 @@ How about doing animations in response to spoken commands?
 </p>
 
 <span class="non-essential">
-<h4 class="how-it-works-white">How the spoken command program works</h4>
+<h4 class="how-it-works-white" id="how-spoken-command-works">How the spoken command program works</h4>
 <p class="how-it-works">
 If you click on <img src="images/show-blocks.png"> you'll see the blocks behind the program.
 If you then right click on <span class="block-name">speak turtle commands</span>
@@ -174,7 +175,7 @@ cannot do so.</p>
 </span>
 </span>
 
-<h4 class="sample-program-white">An example project involving generating sentences using parts of speech concepts</h4>
+<h4 class="sample-program-white" id="sentence-generation-project">An example project involving generating sentences using parts of speech concepts</h4>
 <p class="sample-program">
 The following sentence generating program starts with a random sentence "template".
 The program considers any word starting with "?" to be a variable that is replaced by asking the user for something of that sort.
@@ -282,7 +283,7 @@ Try changing to have a different template story.
 If you click on <img src="images/show-blocks.png"> you'll see the blocks behind the program.
 </p>
 
-<h4 class="sample-program-white">A question answering demo</h4>
+<h4 class="sample-program-white" id="question-answering-demo">A question answering demo</h4>
 <p class="sample-program">
 The following demo is a bit like Alexa, Cortana, and Google Assistant.
 It asks the user to say something and then sends those words off to Wikipedia.
@@ -301,7 +302,7 @@ Typically, there are many matches so it picks one at random and says it.
 <figcaption>Screen shot of the entire 'Ask Wikipedia' program</figcaption>
 </figure>
 
-<h4 class="sample-program-white">A weather service demo</h4>
+<h4 class="sample-program-white" id="weather-service-demo">A weather service demo</h4>
 <p class="sample-program">
 The following demo is another one that is like Alexa, Cortana, and Google Assistant.
 It waits for the user to say a sentence containing a place name and words such as 'wind', 'forecast', or 'atmosphere'.
@@ -330,7 +331,7 @@ a table from the Yahoo! weather service</a>.
         caption = "Click the reporter and see what kinds of information it can access.">
 </figure>
 
-<h4 class="societal-impact-white">What is speech recognition good for?</h4>
+<h4 class="societal-impact-white" id="societal-impact">What is speech recognition good for?</h4>
 <p class="societal-impact">
 Speech recognition can be used to transcribe spoken speech.
 Those unable to type or write can use it to communicate textually and to generate notes and reports.
@@ -351,7 +352,7 @@ Assistants like Siri or Alexa can provide helpful responses to spoken queries.
 Verbal input and output can be the safest way to communicate in some circumstances such as when driving or piloting.
 </p>
 
-<h4 class="societal-impact-white">What are the dangers of speech recognition?</h4>
+<h4 class="societal-impact-white" id="dangers-of-speech-recognition">What are the dangers of speech recognition?</h4>
 <p class="societal-impact">
 Like many technologies speech recognition can be misused.
 It could be used for widespread spying on a population.
@@ -373,7 +374,7 @@ Do you think the benefits outweigh the dangers?
 Is there a way the dangers can be avoided?
 </p>
 
-<h4 class="non-essential">How does speech recognition work?</h4>
+<h4 class="non-essential" id="how-speech-recognition-works">How does speech recognition work?</h4>
 <p class="how-it-works">
 It begins with the microphone that converts vibrations in the air (i.e. sounds) to numbers
 (using something called an analog-to-digital converter).
@@ -450,7 +451,7 @@ This could be even more exciting if the two apps were placed into some physical 
 </ul>
 </p>
 
-<h4 class="non-essential">A full-featured speech recognition block</h4>
+<h4 class="non-essential" id="full-featured-block">A full-featured speech recognition block</h4>
 <p class="advanced-information non-essential">
 The speech recognition engines typically can do more than
 the basic <span class="block-name">listen then ...</span> block described above.
@@ -522,7 +523,7 @@ Try fractions and negative numbers.
 Try very big numbers.
 </p>
 
-<h4 class="resources-white">Additional resources</h4>
+<h4 class="resources-white" id="additional-resources">Additional resources</h4>
 <p class="resources">
 <a href="https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition" target="_blank">
 This documentation of speech recognition</a>
@@ -549,7 +550,7 @@ that discusses these Snap! speech synthesis and recognition blocks.</p>
 
 <script src="../js/where-to-get-library.js"></script>
 
-<h4 class="guide-to-guide-white">Learn about image input</h4>
+<h4 class="guide-to-guide-white" id="image-recognition">Learn about image input</h4>
 <p class="guide-to-guide">
 Go to 
 <a class="guide-link" href="chapter-3.html">the next chapter on image recognition</a>.

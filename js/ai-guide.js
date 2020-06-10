@@ -188,8 +188,31 @@ window.addEventListener(
              }
              element.setAttribute('href', url + (new_search || "") + (new_hash || ""));
          };
+         const table_of_contents_div = document.getElementById('table-of-contents');
+         if (table_of_contents_div) {
+             const p = document.createElement('p');
+             p.classList.add('table-of-contents-title');
+             p.innerHTML = 'Contents';
+             table_of_contents_div.appendChild(p);
+             const ul = document.createElement('ul');
+             table_of_contents_div.appendChild(ul);
+             const add_to_table_of_contents = (h4) => {
+                 const id = h4.id;
+                 if (id) {
+                     const li = document.createElement('li');
+                     const a = document.createElement('a');
+                     a.href = '#' + id;
+                     a.innerHTML = h4.innerHTML;
+                     li.appendChild(a);
+                     ul.appendChild(li);
+                 };
+             };
+             Array.prototype.forEach.call(document.getElementsByTagName('h3'), add_to_table_of_contents);
+             Array.prototype.forEach.call(document.getElementsByTagName('h4'), add_to_table_of_contents);
+         }
          Array.prototype.forEach.call(elements, add_search_and_hash);
          Array.prototype.forEach.call(document.getElementsByTagName('a'), add_search_and_hash);
+         
 });
 
 // hide the next sibling of advanced-topic elements until clicked
@@ -313,6 +336,9 @@ window.addEventListener(
          }
          Array.prototype.forEach.call(elements, snap_iframe);
      });
+
+
+//      <li><a href="#camera-training">Training using images</a></li>
 
 
  

@@ -326,3 +326,22 @@ background-color: buttonface;
   font-size: .8em;
   margin-top: -16px;
 }
+
+/* following based upon https://www.tipsandtricks-hq.com/simple-table-of-contents-toc-using-pure-html-and-css-code-9217 */
+
+#table-of-contents {
+    background: #f9f9f9 none repeat scroll 0 0;
+    border: 1px solid #aaa;
+    display: table;
+    font-size: 95%;
+    margin-bottom: 1em;
+    padding: 20px;
+    width: auto;
+}
+.table-of-contents-title {
+    font-weight: 700;
+    text-align: center;
+}
+#table-of-contents li, #table-of-contents ul, #table-of-contents ul li{
+    list-style: outside none none !important;
+}

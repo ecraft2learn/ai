@@ -15,13 +15,14 @@ You can download the blocks presented here as a
 <a href="../snap/snap.html?project=words&editMode" target="_blank">project</a> or 
 a <a href="words blocks.xml" download target="_blank">library</a>.
 </p>
-<h3 class="guide-to-guide-white" id="browser-compatibility">Browser compatibility</h3>
+<div id="table-of-contents"></div>
+<h4 class="guide-to-guide-white" id="browser-compatibility">Browser compatibility</h3>
 <p class="guide-to-guide">
 This chapter of the guide includes many interactive elements that currently run best in the Chrome browser.
 See the <a href="troubleshooting.html" target="_blank">troubleshooting guide</a>
 for how to deal with problems encountered.
 </p>
-<h3 class="background-information-white">Introduction</h3>
+<h4 class="background-information-white" id="introduction">Introduction</h3>
 <p class="background-information">
 AI programs can do many things with text.
 These include
@@ -48,7 +49,7 @@ Translating between languages.
 </li>
 </ol>
 
-<h4 class="background-information-white">Doing arithmetic with words and sentences</h4>
+<h4 class="background-information-white" id="arithmetic-with-words">Doing arithmetic with words and sentences</h4>
 <p class="background-information">
 While computers can deal with text as strings of characters, a technique called
 <a href="https://gist.github.com/aparrish/2f562e3737544cf29aaf1af30362f469" target="_blank">word embedding</a>
@@ -69,7 +70,7 @@ They created tables for each language of at least a million different words.
 The blocks described here provide the 20,000 most common words for 15 languages.
 (Larger tables and more languages can be added. Send requests to toontalk@gmail.com.)
 </p>
-<h4 class="instructions-white">Turning a word into lots of numbers</h4>
+<h4 class="instructions-white" id="words-to-numbers">Turning a word into lots of numbers</h4>
 <p class="instructions">
 We have created Snap! blocks for exploring how word embeddings can be used to find similar words, 
 words which are between other words, and most surprisingly solve word analogy problems.
@@ -89,7 +90,7 @@ are lower case (no proper nouns) and contain only letters (no punctuation or dig
         caption = "A block for converting words into lists of 300 numbers. TRY IT! (First time it may take some time to load.)">
 </figure>
 
-<h4 class="instructions-white">Finding the closest word to a list of feature numbers</h4>
+<h4 class="instructions-white" id="closest-word">Finding the closest word to a list of feature numbers</h4>
 <p class="instructions">
 A program can search through all the words to find the word that is closest to a list of numbers.
 The <span class="block-name">closest word to</span> reporter block does this.
@@ -97,7 +98,7 @@ The <span class="block-name">closest word to</span> reporter block does this.
 
 <p class="advanced-topic">Click to read an advanced topic</p>
 <span class="advanced-topic-body">
-<h4 class="advanced-information-white">Different ways of measuring distances in high dimensional spaces</h4>
+<h4 class="advanced-information-white" id="measuring-distance">Different ways of measuring distances in high dimensional spaces</h4>
 <p class="background-information advanced-information">
 There are two common ways of measuring distance in a high-dimensional space.
 One is <a href="https://en.wikipedia.org/wiki/Euclidean_distance" target="_blank">Euclidean distance</a>
@@ -117,7 +118,7 @@ For example, the third closest word to "dog" can be "canine" or "puppy" dependin
 </figure>
 </p>
 
-<h4 class="instructions-white">Finding the word half way between two other words</h4>
+<h4 class="instructions-white" id="averaging-words">Finding the word half way between two other words</h4>
 <p class="instructions">
 You can take two words and average their features by adding together corresponding numbers and dividing the result by 2.
 You can then use the <span class="block-name">closest word to</span> reporter to find the word closest to the average.
@@ -132,7 +133,7 @@ Try averaging more than two words.
 And see what word is the closest to somewhere between two words other than the halfway point.
 </p>
 
-<h4 class="instructions-white">Using word embeddings to solve word analogy problems</h4>
+<h4 class="instructions-white" id="word-analogy-problems">Using word embeddings to solve word analogy problems</h4>
 <p class="instructions">
 One of the most surprising thing about word embeddings is that with the right formula
 one can solve word analogy problems.
@@ -150,7 +151,7 @@ This use of word embeddings works for grammatical analogies as well.
 Try solving "slow is to slower as fast is to what?".
 You might need to add 'fast' as an exception.
 </p>
-<h4 class="instructions-white">Finding all the 'closest' words</h4>
+<h4 class="instructions-white" id="closest-words">Finding all the 'closest' words</h4>
 <p class="instructions">
 If you were to use the <span class="block-name">closest word to</span> reporter to sort all
 the words by distance to a list of features, it would take about a full day since it will have
@@ -172,7 +173,7 @@ seeing how many of the nearest 100 or 500 words of each are in common.
 Think up other uses for this reporter.
 </p>
 
-<h4 class="instructions-white">Sentence embeddings</h4>
+<h4 class="instructions-white" id="sentence-embeddings">Sentence embeddings</h4>
 <p class="background-information">
 One can compute sentence embeddings by averaging all the words in a sentence.
 There is, however, a much better way that uses models that were trained to address
@@ -227,7 +228,7 @@ A full screen version of this program can be
 The machine learning model used was trained in this
 <a href="chapter-6.html#confidences">project</a>.
 </p>
-<h4 class="instructions-white">Drawing word embeddings</h4>
+<h4 class="instructions-white" id="drawing-word-embeddings">Drawing word embeddings</h4>
 <p class="instructions">
 It would be nice to visualise the 300 numbers associated with a word.
 One way is to draw a succession of vertical lines, one for each feature.
@@ -242,7 +243,7 @@ One way is to draw a succession of vertical lines, one for each feature.
 A full screen version of this program can be
 <a href="../snap/snap.html?project=draw%20word%20embedding&editMode&noRun" target="_blank">found here</a>.
 </p>
-<h4 class="background-information-white">Mapping 300 dimensional points to two-dimensional points</h4>
+<h4 class="background-information-white" id="to-2d-points">Mapping 300 dimensional points to two-dimensional points</h4>
 <p class="background-information">
 No one can visualise 300-dimensional space.
 There are techniques for giving an impression of the relationships between very high-dimensional points
@@ -291,7 +292,7 @@ Here is a program that displays 50 random words at the location generated by t-S
 </figure>
 </p>
 
-<h4 class="instructions-white">Word embeddings can do translations</h4>
+<h4 class="instructions-white" id="translations">Word embeddings can do translations</h4>
 <p class="instructions">
 What would happen if you took, for example, the features of the English word 'dog' and 
 asked for the closest word in say French.
@@ -322,7 +323,7 @@ See if it makes a difference in which words are closest to the untranslated word
 It is possible to add word embeddings for more languages.
 The process is <a href="../word-embeddings/adding-more-languages.html" target="_blank">documented here</a>.
 </p>
-<h4 class="sample-program-white">A 'Guess My Word' game using word embeddings</h4>
+<h4 class="sample-program-white" id="guess-my-word">A 'Guess My Word' game using word embeddings</h4>
 <p class="sample-program">
 The following game picks a random word and gives the player warmer or colder feedback as the player makes guesses.
 This does so by comparing the distance to the secret word with the previous distance.
@@ -338,7 +339,7 @@ See if you can!
         container_style = "width: 800px; height: 800px" 
         caption = "Click the green flag to play Guess My Word. TRY IT!">
 </figure>
-<h4 class="instructions-white">Question answering</h4>
+<h4 class="instructions-white" id="question-answering">Question answering</h4>
 <p class="background-information">
 Natural language processing researchers have been training models to address
 sentence-level tasks such as question answering.
@@ -362,7 +363,7 @@ An easy way to import a passage into Snap! is to drag a file that contains the p
         caption = "Ask questions of a passage of text describing Snap!. TRY IT!">
 </figure>
 
-<h4 class="societal-impact-white">Benefits and risks using word embeddings</h4>
+<h4 class="societal-impact-white" id="benefits-and-risks">Benefits and risks using word embeddings</h4>
 <p class="societal-impact">
 Word embeddings can be used as a component in AI programs that do
 sentiment analysis, entity detection, recommendations, summarising text, translation, and question answering.
@@ -418,7 +419,7 @@ Enhance it to make sure that none of the possible clues suggest the other team's
 or the assassin's codename.
 </p>
 </h4>
-<h4 class="how-it-works-white">How does this work?</h4>
+<h4 class="how-it-works-white" id="how-do-word-embeddings-work">How does this work?</h4>
 <p class="how-it-works">
 While we don't really know what the numbers mean, they must be encoding lots of things about words such as
 gender, grammatical category, family relationships, and hundreds more things.
@@ -434,7 +435,7 @@ This is a problem researchers are working on.
 Another problem is that sometimes short phrases act like words.
 "Ice cream", for example, has no word embedding while "sherbet" and "sorbet" do.
 </p>
-<h4 class="sample-program-white">A sample project using word embeddings for translation</h4>
+<h4 class="sample-program-white" id="translation-sample-project">A sample project using word embeddings for translation</h4>
 <p class="sample-program">
 Here is
 <a href="../snap/snap.html?project=translate&noRun" target="_blank">a program that asks the user for two languages</a>,
@@ -443,7 +444,7 @@ and then displays several of the words closest to that feature vector.
 It places the words in the <a href="https://distill.pub/2016/misread-tsne/" target="_blank">t-SNE</a>
 two-dimensional approximation of where the 300-dimensional words really are.
 </p>
-<h4 class="how-it-works-white">How does translation using word embeddings work?</h4>
+<h4 class="how-it-works-white" id="how-does-translation-work">How does translation using word embeddings work?</h4>
 <p class="how-it-works">
 The word embeddings for each language were generated independently based upon text from Wikipedia and the web.
 The location in 300-dimensional space of the features for a word like 'dog' have no relationship 
@@ -572,7 +573,7 @@ Be creative! Word embeddings are new and there is much that remains to discover.
 </li>
 </ol>
 
-<h4 class="background-information-white">Future directions for this chapter</h4>
+<h4 class="background-information-white" id="future-directions">Future directions for this chapter</h4>
 <p class="background-information">
 New word embeddings blocks could be added.
 Currently the word embeddings blocks excludes all proper nouns.
@@ -595,7 +596,7 @@ and question answering.
 We plan to add more.
 </p>
 
-<h3 class="resources-white" id="additional-resources">Additional resources</h3>
+<h4 class="resources-white" id="additional-resources">Additional resources</h3>
 <p class="resources">
 Wikipedia's <a href="https://en.wikipedia.org/wiki/Word_embedding" target="_blank">word embedding</a> article is short and
 written for an advanced audience.
@@ -622,7 +623,7 @@ is a great website for interactively exploring different ways of visualising hig
 Here is a video of <a href="https://www.youtube.com/watch?v=RJVL80Gg3lA" target="_blank">
 a nice talk by Laurens van der Maaten</a> who invented the idea of t-SNE.
 </p>
-<h4 class="guide-to-guide-white">Learn about making and training neural nets</h4>
+<h4 class="guide-to-guide-white" id="making-neural-nets">Learn about making and training neural nets</h4>
 <p class="guide-to-guide">
 Go to
 <a class="guide-link" href="chapter-6.html">the next chapter on neural nets</a>

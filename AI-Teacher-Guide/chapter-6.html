@@ -7,20 +7,21 @@
 <body>
 <script src="../js/translate.js"></script>
 <h2>A guide to building AI apps and artefacts</h2>
-<h3>Chapter 6 - Making deep machine learning neural nets</h3>
+<h3>Chapter 6 - Making deep machine learning neural nets</h4>
 <h4>Ken Kahn, University of Oxford</h4>
 <p>
 You can download the blocks presented here as a
 <a href="/ai/snap/snap.html?project=neural nets&editMode" target="_blank">project</a> or 
 a <a href="neural nets blocks.xml" download target="_blank">library</a>.
 </p>
-<h3 class="guide-to-guide-white" id="browser-compatibility">Browser compatibility</h3>
+<div id="table-of-contents"></div>
+<h4 class="guide-to-guide-white" id="browser-compatibility">Browser compatibility</h4>
 <p class="guide-to-guide">
 This chapter of the guide relies upon a library for machine learning that currently runs best in the Chrome browser.
 See the <a href="troubleshooting.html#tensorflow" target="_blank">troubleshooting guide</a>
 for how to deal with problems encountered.
 </p>
-<h3 class="background-information-white">Introduction</h3>
+<h4 class="background-information-white" id="introduction">Introduction</h4>
 <p class="background-information">
 In previous chapters you used blocks that relied upon pre-trained machine learning models.
 In some cases, using transfer learning you were able to extend the models a little.
@@ -57,7 +58,7 @@ using these machine learning blocks.
 The trick is to turn game boards/positions into a list of numbers and the game outcome into a number
 so the model can be trained on records of previous games.
 </p>
-<h3 class="instructions-white">How to Use Machine Learning Blocks</h3>
+<h4 class="instructions-white" id="how-to-use-ml-blocks">How to Use Machine Learning Blocks</h4>
 <p class="instructions">
 To create and use a machine learning model you need these components:
 </p>
@@ -86,7 +87,7 @@ If it makes good predictions on the test data you can use it to predict things a
 solve mathematics puzzles, or play games.
 </li>
 </ol>
-<h3 class="instructions-white">A small example: Training a model to estimate square roots</h3>
+<h4 class="instructions-white" id="small-ml-example">A small example: Training a model to estimate square roots</h4>
 <p class="instructions">
 In the following you can use the <span class="block-name">Create a neural net model ...</span>
 block to create a model with four "hidden" layers.
@@ -137,7 +138,7 @@ A simple example is
 a model that estimates the distance a point is from the origin</a>.
 Given values for <i>x</i> and <i>y</i> it estimates the square root of the sum of the squares of each.
 </p>
-<h3 class="instructions-white">Training a model to label data</h3>
+<h4 class="instructions-white" id="training-to-label-data">Training a model to label data</h4>
 <p class="instructions">
 You can train a model to put a label on data.
 For example, here is a model trained to provide a name for a color.
@@ -184,7 +185,7 @@ The <span class="block-name">Name this color ...</span> in the above sample proj
 sorts the list by the probability scores and multiplies by 100 to convert to percentages.
 </p>
 </span>
-<h3 class="instructions-white" id="noisy-polygons">Training a model to predict how you would rate abstract "art"</h3>
+<h4 class="instructions-white" id="noisy-polygons">Training a model to predict how you would rate abstract "art"</h4>
 <p class="instructions">
 One way to draw a polygon is to repeatedly go forward and turn.
 E.g. a pentagon is
@@ -218,7 +219,7 @@ The neural net will be trained with a collection of these 12 numbers as input an
         caption = "Train a model to match how you rate <i>Noisy Polygons</i>!">
 </figure>
 </p>
-<h3 class="instructions-white" id="ai-questions">Training a model to answer questions</h3>
+<h4 class="instructions-white" id="ai-questions">Training a model to answer questions</h4>
 <p class="instructions">
 Questions can be associated with answers using the <span class="block-name">features of sentence</span> block.
 Here is a project for defining, training, and testing such as app:
@@ -230,7 +231,7 @@ Here is a project for defining, training, and testing such as app:
         caption = "Ask questions about the AI blocks. Try training better models!">
 </figure>
 </p>
-<h3 class="instructions-white" id="confidences">Training a model to predict whether a sentence is a sign of confidence</h3>
+<h4 class="instructions-white" id="confidences">Training a model to predict whether a sentence is a sign of confidence</h4>
 <p class="instructions">
 Using the <span class="block-name">features of sentence</span> block together with a few training examples
 we can create an app that will indicate the degree of confidence (or lack thereof) indicated by the input sentence.
@@ -242,7 +243,7 @@ Here is a project for defining, training, and testing such as app:
 </figure>
 Here is <a href="chapter-5.html#confidence-guesser">simple project that uses this model</a>.
 </p>
-<h3 class="how-it-works-white">A brief introduction to deep neural nets</h3>
+<h4 class="how-it-works-white" id="introduction-to-deep-neural-nets">A brief introduction to deep neural nets</h4>
 <p class="how-it-works">
 A deep neural net consists of an input layer, some number of hidden layers, and an output layer.
 The nets that the <span class="block-name">Create a neural net model ...</span> block creates
@@ -276,7 +277,7 @@ If it is too large then the error may bounce up and down rather than making prog
 <img src="images/xkcd-machine-learning.png" class="center">
 <figcaption>Models make predictions by using linear algebra to compute weighted sums</figcaption>
 </figure>
-<h3 class="instructions-white">Blocks for saving and loading models and data</h3>
+<h4 class="instructions-white" id="saving-and-loading-models">Blocks for saving and loading models and data</h4>
 <p class="instructions">
 Models and data can be saved and loaded using the 'Saving and loading' button
 which can found by clicking the
@@ -308,7 +309,7 @@ Note that one can save training data as validation data.
         container_style = "width: 1000px; height: 400px" 
         caption = "Loading training or validation data from the web">
 </figure>
-<h3 id="real-world-applications" class="instructions-white">Applying machine learning to real-world data</h3>
+<h4 id="real-world-applications" class="instructions-white">Applying machine learning to real-world data</h4>
 <p class="background-information">
 Every day there is news of new applications of machine learning to problems.
 Sometimes it is for entertainment as when <a href="https://www.youtube.com/watch?v=Pc2aJxnmzh0" target="_blank">
@@ -380,7 +381,7 @@ Maybe the precipitation measurements don't matter.
 Or maybe it doesn't need the full daily measurements of the previous week.
 Alternatively, try doing something similar with other available datasets.
 </p>
-<h3 id="tic-tac-toe" class="instructions-white">Learning to win at Tic Tac Toe</h3>
+<h4 id="tic-tac-toe" class="instructions-white">Learning to win at Tic Tac Toe</h4>
 <p class="background-information">
 <a href="https://en.wikipedia.org/wiki/Tic-tac-toe" target="_blank">Tic Tac Toe</a> (also known as Noughts and Crosses) is a simple game.
 A computer could have all <a href="https://www.jesperjuul.net/ludologist/2003/12/28/255168-ways-of-playing-tic-tac-toe/" target="_blank">
@@ -416,7 +417,7 @@ Here is a five-minute video where Donald Knuth tells stories of his Tic Tac Toe 
         allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
         allowfullscreen>
 </iframe>
-<h3 class="instructions-white">Training a neural net to play Tic Tac Toe</h3>
+<h4 class="instructions-white" id="training-tic-tac-toe">Training a neural net to play Tic Tac Toe</h4>
 <p class="instructions">
 Your challenge is to train a deep neural net to play well.
 You can start with this <a href="../snap/snap.html?project=tic tac toe&editMode" target="_blank">Snap! program for playing Tic Tac Toe</a> and add scripts
@@ -494,7 +495,7 @@ And then we use that number to ensure that the odds of any move being chosen is 
 </ol>
 </span>
 
-<h3 class="background-information-white">Strategies for training a good Tic Tac Toe player</h3>
+<h4 class="background-information-white" id="tic-tac-toe-training-strategies">Strategies for training a good Tic Tac Toe player</h4>
 <p class="background-information">
 The best advice is to experiment!
 No one knows what is the best model architecture, the best way to generate good training data, how much training is required, etc.
@@ -521,7 +522,7 @@ But it is easiest to generate.
 A human playing another human is likely to produce very good data.
 One way to generate lots of good data is to create a Snap! script for an expert player and use records of its games for training.
 </p>
-<h3 class="instructions-white" id="hyperparameters">Automating the search for good "hyperparameters"</h3>
+<h4 class="instructions-white" id="hyperparameters">Automating the search for good "hyperparameters"</h4>
 <p class="background-information">
 It is hard to know what parameters to use to define a neural net model and its training.
 How many layers?
@@ -555,7 +556,7 @@ Explore the following to see how well a model can be trained to estimate the len
         container_style = "width: 1000px; height: 900px" 
         caption = "Search for good hyperparameters. TRY IT!">
 </figure>
-<h3 class="project-ideas-white" id="project-ideas">Possible project ideas using machine learning</h3>
+<h4 class="project-ideas-white" id="project-ideas">Possible project ideas using machine learning</h4>
 <p class="project-ideas">
 Here are some project ideas:
 </p>
@@ -591,7 +592,7 @@ converting input sentences to the average of the embeddings of its words.
 The output could be a few numbers capturing the emotional content of the input sentences (e.g. angry, happy, excited).
 </li>
 </ol>
-<h3 class="guide-to-guide-white">Future directions for this chapter</h3>
+<h4 class="guide-to-guide-white" id="future-directions">Future directions for this chapter</h4>
 <p class="guide-to-guide">
 Several enhancements to this chapter are being considered.
 There are many model architectures that cannot be expressed.
@@ -600,7 +601,7 @@ Recursive neural nets handle well time-based data.
 Reinforcement learning enables unsupervised learning (using only input datasets and in-world or in-simulation rewards).
 </p>
 
-<h3 class="resources-white" id="additional-resources">Additional resources</h3>
+<h4 class="resources-white" id="additional-resources">Additional resources</h4>
 <p class="resources">
 This chapter provides a simplified interface to
 <a href="https://js.tensorflow.org/api/latest/" target="_blank">TensorFlow.js</a>

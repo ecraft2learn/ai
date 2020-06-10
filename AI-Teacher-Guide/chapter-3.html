@@ -14,6 +14,7 @@ You can download the blocks presented here as a
 <a href="/ai/snap/snap.html?project=seeing&editMode" target="_blank">project</a> or 
 a <a href="seeing blocks.xml" download target="_blank">library</a>.
 </p>
+<div id="table-of-contents"></div>
 <h4 class="guide-to-guide-white">Browser compatibility</h4>
 <p class="guide-to-guide">
 This chapter of the guide includes many interactive elements that currently only run well in the Chrome browser.
@@ -22,7 +23,7 @@ There is a <a href="troubleshooting.html" target="_blank">troubleshooting guide<
 that should be consulted if problems are encountered.
 </p>
 
-<h4 class="background-information-white">Introduction</h4>
+<h4 class="background-information-white" id="introduction">Introduction</h4>
 <p class="background-information">
 A camera connected to a computer can report the colour of each pixel in an image and not much else.
 A description of what is in front of the camera is returned when those pixels
@@ -82,7 +83,7 @@ and they'll be passed to the services as you use example blocks.
 <br><label>Copy and paste your Google key here:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input id="Google image key" type="text"></label>
 <br><label>Copy and paste your Microsoft key here:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input id="Microsoft image key" type="text"></label>
 
-<h4 class="instructions-white">A simple image recognition block</h4>
+<h4 class="instructions-white" id="simple-image-recognition-block">A simple image recognition block</h4>
 <p class="instructions">
 This block takes a picture, sends it to the AI vision cloud server provider, waits for a response, and then
 reports a list of labels of the photo.
@@ -95,7 +96,7 @@ The list is ordered by how confident the vision provider is that the label match
         caption = "A block for reporting the labels describing what the camera is showing. TRY IT">
 </figure>
 
-<h4 class="instructions-white">Displaying the image that was sent for recognition</h4>
+<h4 class="instructions-white" id="displaying-recognised-image">Displaying the image that was sent for recognition</h4>
 <p class="instructions">
 The <span class="block-name">show current photo</span> block will display
 the most recent image sent to the specified AI vision services
@@ -112,7 +113,7 @@ to take a new picture and add it as a costume to the current sprite.
         caption = "After sending a photo for analysis you can use a block to display the image. TRY IT">
 </figure>
 
-<h4 class="sample-program-white">A sample program using image recognition</h4>
+<h4 class="sample-program-white" id="sample-image-recognition-project">A sample program using image recognition</h4>
 <p class="sample-program">
 Here is a program that can contact any of Google or Microsoft and displays the tags returned.
 </p>
@@ -124,7 +125,7 @@ Here is a program that can contact any of Google or Microsoft and displays the t
         caption = "Click on the AI cloud provider logos and see what happens">
 </figure>
 
-<h4 class="sample-program-white">A sample program combining image and speech recognition and speech output</h4>
+<h4 class="sample-program-white" id="image-and-speech-recognition">A sample program combining image and speech recognition and speech output</h4>
 <p class="sample-program">
 This program is similar to the previous one except it is listening for the words "Google"or "Microsoft".
 When it hears one of these words it contacts that service.
@@ -370,7 +371,7 @@ software that figures out what images produce the greatest response from the dif
 </figure>
 
 <span class="non-essential">
-<h4 class="background-information-white">What about <i>video</i> recognition services?</h4>
+<h4 class="background-information-white" id="video-recognition-services">What about <i>video</i> recognition services?</h4>
 <p class="background-information">
 Some AI cloud providers such as
 <a href="https://cloud.google.com/video-intelligence/" target="_blank">Google</a>
@@ -429,7 +430,7 @@ good interview with a data scientist about machine learning</a>.
 
 <script src="../js/where-to-get-library.js"></script>
 
-<h4 class="guide-to-guide-white">Learn about machine learning</h4>
+<h4 class="guide-to-guide-white" id="machine-learning">Learn about machine learning</h4>
 <p class="guide-to-guide">
 The <a class="guide-link" href="chapter-4.html">next chapter</a>
 is about machine learning.

@@ -14,6 +14,7 @@ You can download the blocks presented here as a
 <a href="/ai/snap/snap.html?project=misc AI&editMode" target="_blank">project</a> or 
 a <a href="misc AI blocks.xml" download target="_blank">library</a>.
 </p>
+<div id="table-of-contents"></div>
 <h4 class="guide-to-guide-white" id="browser-compatibility">Browser compatibility</h4>
 <p class="guide-to-guide">
 This chapter of the guide includes many interactive elements that currently only run well in the Chrome browser.
@@ -21,7 +22,7 @@ This chapter relies upon there being a camera that the browser can access.
 Note that the blocks described here create a second browser window for "training" the system.
 Snap! and training window are both in the same browser tab but only one is visible at any time.
 </p>
-<h4 class="background-information-white">Introduction</h4>
+<h4 class="background-information-white" id="introduction">Introduction</h4>
 <p class="background-information">
 In the previous chapters the new Snap! blocks used services that had been trained to
 recognise speech and images.
@@ -60,7 +61,7 @@ You can experiment to answer questions such as
 how many examples of each label are needed to recognise them reliably and
 how does recognition degrade as more labels are introduced.
 </p>
-<h4 class="instructions-white">A block to start training to recognise images from a camera</h4>
+<h4 class="instructions-white" id="camera-training">A block to start training to recognise images from a camera</h4>
 <p class="instructions">
 The <span class="block-name">Train with image buckets ...</span> block
 opens a tab where you can train the system to label what is in front of the camera.
@@ -131,7 +132,7 @@ Change what is in front of the camera and try again.
 Note that when you return to the training tab it starts running and you can add more training samples.
 When you are finished with this close the training tab.
 </p>
-<h4 class="sample-program-white">A sample program training and using image labels</h4>
+<h4 class="sample-program-white" id="training-with-image-labels">A sample program training and using image labels</h4>
 <p class="sample-program">
 Here is a program that launches a training tab to determine
 whether your finger is pointing at the camera or to the right.
@@ -176,7 +177,7 @@ If you train with one person and then replace with another does the system get c
 Does it help to train with both people?
 </p>
 
-<h4 class="instructions-white">Using sprite costumes instead of the camera in training</h4>
+<h4 class="instructions-white" id="using-costumes">Using sprite costumes instead of the camera in training</h4>
 <p class="instructions">
 In Snap! each sprite can have any number of "costumes".
 Costumes can be drawings, photos, or imported images.
@@ -203,7 +204,7 @@ You can experiment with these costume-based training blocks in the following.
         caption = "Blocks for using sprite costumes for training and classification. TRY IT!">
 </figure>
 
-<h4 class="instructions-white">Saving and loading your training</h4>
+<h4 class="instructions-white" id="saving-loading-training">Saving and loading your training</h4>
 <p class="instructions">
 While in a training window you will see a button <b>Save your training</b>.
 Clicking it save a file where you want.
@@ -248,7 +249,7 @@ Note this will be slow to load but should run quickly thereafter.
         caption = "Blocks for image recognition on device without cloud services. TRY IT">
 </figure>
 
-<h4 class="societal-impact-white">Benefits and risks</h4>
+<h4 class="societal-impact-white" id="benefits-and-risks">Benefits and risks</h4>
 <p class="societal-impact">
 Most of the <a class="guide-link" href="chapter-3.html#image-recognition-good-for" target="_blank">
 things image recognition is good for</a>
@@ -283,7 +284,7 @@ reports a high confidence for the labels of those images.
 </p>
 </span>
 
-<h4 class="sample-program-white">A <i>Rock Paper Scissors</i> game using Machine Learning</h4>
+<h4 class="sample-program-white" id="rock-paper-scissors">A <i>Rock Paper Scissors</i> game using Machine Learning</h4>
 <p class="sample-program">
 Using machine learning one can make a <i>rock paper scissors</i> game that can be played
 by putting your hand into one of three configurations.
@@ -308,7 +309,7 @@ This example was inspired by the great set of machine learning project examples 
 <a href="https://machinelearningforkids.co.uk/#!/worksheets" target="_blank">machine learning for kids</a>
 </p>
 
-<h4 class="background-information-white">Doesn't machine learning require huge amounts of data?</h4>
+<h4 class="background-information-white" id="need-for-big-data">Doesn't machine learning require huge amounts of data?</h4>
 <p class="background-information">
 Much of the current success of machine learning system is a result of having trained them on <i>huge</i> data sets.
 Deep learning for machine translation, for example, didn't work well until they were trained with billions of sentences.
@@ -342,7 +343,7 @@ And AI vision services can do more than just
 <a href="chapter-3.html#advanced-image-recognition" target="_blank">choose a label</a> for an image.
 </p>
 
-<h4 class="background-information-white">Recognising sounds</h4>
+<h4 class="background-information-white" id="recognising-sounds">Recognising sounds</h4>
 <p class="background-information">
 Computers can be trained to distinguish different sounds including spoken speech.
 <a href="chapter-2.html">Chapter 3</a> describes how to use cloud services that do speech recognition.
@@ -373,7 +374,7 @@ For running on small computers such as a Raspberry Pi there is also the similar
 <span class="block-name">Train (without TensorFlow) with audio buckets...</span> block and its accompanying
 <span class="block-name">Audio label confidences (without TensorFlow)</span> block.
 </p>
-<h4 class="sample-program-white">An Example Program using the Microphone and Machine Learning</h4>
+<h4 class="sample-program-white" id="using-microphone">An Example Program using the Microphone and Machine Learning</h4>
 <p class="sample-program">
 An example using audio training is to tell a sprite to go "forward", turn "right", or "stop".
 Note that these labels are for us humans, you can for example make any sound or speak in another language
@@ -670,7 +671,7 @@ It uses Snap!'s "ghost effect" to dissolve in and out the styled images.
         container_style = "width: 800px; height: 600px" 
         caption = "Click the green flag, smile, wait, sit back and watch. TRY IT!">
 </figure>
-<h4 class="how-it-works-white">How style transfer works</h4>
+<h4 class="how-it-works-white" id="how-style-transfer-works">How style transfer works</h4>
 <p class="how-it-works">
 The <span class="block-name">Create costume in style ...</span> block relies upon the work done by
 <a href="https://ml5js.org/docs/StyleTransfer" target="_blank">students at the New York University Tisch School of the Arts</a>
@@ -836,7 +837,7 @@ And much more. Imagine art projects using style transfer or games using pose det
 The <a href="https://machinelearningforkids.co.uk/#!/worksheets" target="_blank">machine learning for kids site</a>
 also has sample projects that can be adapted.
 </p>
-<h4 class="guide-to-guide-white">Future directions for this chapter</h4>
+<h4 class="guide-to-guide-white" id="future-directions">Future directions for this chapter</h4>
 <p class="guide-to-guide">
 Several enhancements to this chapter are planned.
 These include support for other kinds of input such as text or numbers.
@@ -866,7 +867,7 @@ the idea of using deep learning models to transfer style while preserving conten
 Recently <a href="https://www.bbc.co.uk/programmes/p06pb9lm" target="_blank">
 a painting created by a machine learning program was sold at a major art auction</a> for the first time.
 </p>
-<h4 class="guide-to-guide-white">Learn about AI and language</h4>
+<h4 class="guide-to-guide-white" id="other-chapters">Learn about AI and language</h4>
 <p class="guide-to-guide">
 Go to
 <a class="guide-link" href="chapter-5.html">the next chapter on using AI on words and sentences</a>
