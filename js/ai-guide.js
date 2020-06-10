@@ -212,7 +212,6 @@ window.addEventListener(
          }
          Array.prototype.forEach.call(elements, add_search_and_hash);
          Array.prototype.forEach.call(document.getElementsByTagName('a'), add_search_and_hash);
-         
 });
 
 // hide the next sibling of advanced-topic elements until clicked
