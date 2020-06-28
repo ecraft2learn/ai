@@ -788,15 +788,17 @@ window.ecraft2learn =
     };
     let train = function (options) {
       // options can be
-      let source = options.source; // can be 'training using camera','training using microphone', "posenet", or more
-      let buckets_as_snap_list = options.buckets_as_snap_list; // list of labels (as Snap! object)
-      let add_to_previous_training = options.add_to_previous_training; // if false will throw away any current training
-      let page_introduction = options.page_introduction; // optional HTML that will appear in place of the default on training page
-      let callback = options.callback; // if defined will be called when training finished 
-      let together = options.together; // if true enable togetherJS collaboration
-      let together_url = options.together_url; // another Snap! (or NetsBlox) wants to collaborate using this URL
-      let iframe_in_new_tab = options.iframe_in_new_tab; // if not true then iframe is either full size covering up Snap! or a single pixel
-      let training_name = options.training_name; // used by audio training 
+      let {source, // can be 'training using camera','training using microphone', "posenet", or more
+           buckets_as_snap_list, // list of labels (as Snap! object)
+           add_to_previous_training, // if false will throw away any current training
+           page_introduction, // optional HTML that will appear in place of the default on training page
+           callback, // if defined will be called when training finished 
+           together, // if true enable togetherJS collaboration
+           together_url,  // another Snap! (or NetsBlox) wants to collaborate using this URL
+           iframe_in_new_tab, // if not true then iframe is either full size covering up Snap! or a single pixel
+           training_name,  // used by audio training 
+           no_display_of_support_window // when for example sending images programmatically
+           } = options;
       let buckets = buckets_as_snap_list.asArray();
       if (source === 'training using microphone' && buckets.indexOf('_background_noise_') < 0) {
           buckets.push('_background_noise_');
@@ -813,14 +815,18 @@ window.ecraft2learn =
       };
       record_callbacks(callback);
       if (!ecraft2learn.support_window[source] || ecraft2learn.support_window[source].closed) {
-          let machine_learning_window = create_machine_learning_window(source);
+          let machine_learning_window = create_machine_learning_window(source, undefined, undefined, undefined, no_display_of_support_window);
           ecraft2learn.training_buckets[source] = buckets;
           let receive_messages_from_iframe = 
               function (event) {
                   if (event.data === "MobileNet loaded") {
                       machine_learning_window.postMessage({training_class_names: buckets,
-                                                           training_name: training_name},
+                                                           training_name,
+                                                           no_display_of_support_window},
                                                           "*");
+                      if (no_display_of_support_window) {
+                         invoke_callback(callback);
+                      }
                   } else if (event.data === "Ready") {
                       if (page_introduction) {
                           machine_learning_window.postMessage({new_introduction: page_introduction}, "*");
@@ -828,7 +834,7 @@ window.ecraft2learn =
                       invoke_callback(callback, "Ready");
                   }
           };
-          window.addEventListener('message', receive_messages_from_iframe, false);               
+          window.addEventListener('message', receive_messages_from_iframe, false);         
           return;
       }           
       if (add_to_previous_training &&
@@ -845,7 +851,7 @@ window.ecraft2learn =
                       ecraft2learn.support_window[source].postMessage({new_introduction: page_introduction}, "*");
                   }
               }
-              open_support_window(source);
+              open_support_window(source, no_display_of_support_window);
           } else if (iframe_in_new_tab) {
               // would like to go to that window: ecraft2learn.support_window.focus[source]();
               // but browsers don't allow it unless clear the user initiated it
@@ -2878,24 +2884,26 @@ xhr.send();
           invoke_callback(callback_for_errors, error.message);
       }
   },
-  train_using_camera: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback, together, together_url) {
+  train_using_camera: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback, together, together_url, no_display_of_support_window) {
       train({source: 'training using camera', 
-             buckets_as_snap_list: buckets_as_snap_list, 
-             add_to_previous_training: add_to_previous_training,
-             page_introduction: page_introduction,
-             callback: callback,
-             together: together,
-             together_url: together_url});
+             buckets_as_snap_list, 
+             add_to_previous_training,
+             page_introduction,
+             callback,
+             together,
+             together_url,
+             no_display_of_support_window});
   },
-  train_using_images: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback, together, together_url) {
+  train_using_images: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback, together, together_url, no_display_of_support_window) {
       // old name kept for backwards compatibility
       train({source: 'training using camera', 
-             buckets_as_snap_list: buckets_as_snap_list, 
-             add_to_previous_training: add_to_previous_training,
-             page_introduction: page_introduction,
-             callback: callback,
-             together: together,
-             together_url: together_url});
+             buckets_as_snap_list, 
+             add_to_previous_training,
+             page_introduction,
+             callback,
+             together,
+             together_url,
+             no_display_of_support_window});
   },
   tensorflow_train_using_microphone: function (buckets_as_snap_list, add_to_previous_training, page_introduction, callback, training_name) {
       train({source: 'training using microphone', 
