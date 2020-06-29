@@ -1118,7 +1118,9 @@ window.ecraft2learn =
                 };
                 window.addEventListener('message', receive_message);            
             }
-            ecraft2learn.support_window[support_window_type].postMessage(request_generator(), '*');
+            if (ecraft2learn.support_window[support_window_type]) {
+                ecraft2learn.support_window[support_window_type].postMessage(request_generator(), '*');
+            } // else may have loaded another project into Snap! and the old window is gone now
         };
         send_request_when_support_window_is(window_ready_state, support_window_type, send_request);
     };
