@@ -419,8 +419,8 @@ const listen_for_messages = function (event) {
                 if (TOGETHER_JS) {
                     collaborate();
                 }
-                start();
-                source.postMessage("Ready", "*");
+//                 start();
+                window.parent.postMessage("Ready", "*");
             }
             if (data_set.html) {
                 let introduction = decodeURIComponent(data_set.html);
