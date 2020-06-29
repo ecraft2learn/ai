@@ -1005,6 +1005,7 @@ const optimize = async (model_name, xs, ys, validation_tensors,
                         (error) => {
                             if (error.message === not_a_number_error_message) {
                                 resolve({loss: Number.MAX_VALUE,
+                                         results: {not_a_number_error_message},
                                          status: hpjs.STATUS_OK});
                             } else if (error_callback) {
                                 invoke_callback(error_callback, error);
