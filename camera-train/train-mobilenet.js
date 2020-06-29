@@ -412,7 +412,7 @@ const listen_for_messages = function (event) {
                 if (training_class_names) {
                     set_class_names(data_set.labels);
                     // fully initialised 
-                    window.parent.postMessage('Ready', "*");
+//                  window.parent.postMessage('Ready', "*");
                 } else {
                     initialise_page(data_set.labels, event.source);
                 }

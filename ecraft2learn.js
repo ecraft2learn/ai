@@ -826,11 +826,13 @@ window.ecraft2learn =
                                                           "*");
                       if (no_display_of_support_window) {
                          invoke_callback(callback);
-                      }
-                  } else if (event.data === "Ready") {
-                      if (page_introduction) {
+                      } else if (page_introduction) {
                           machine_learning_window.postMessage({new_introduction: page_introduction}, "*");
                       }
+                  } else if (event.data === "Ready") {
+//                       if (page_introduction) {
+//                           machine_learning_window.postMessage({new_introduction: page_introduction}, "*");
+//                       }
                       invoke_callback(callback, "Ready");
                   }
           };
