@@ -320,8 +320,13 @@ function restart() {
     stopped = false;
     // video may be undefined because it is being created
     if (!timer && video) {
-        video.play();
-        timer = requestAnimationFrame(animate);
+        if (info_texts.length === 0) {
+            // could happen if training data loaded from file or URL
+            start();
+        } else {
+            video.play();
+            timer = requestAnimationFrame(animate);         
+        }
     }
 }
 
