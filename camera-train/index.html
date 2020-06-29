@@ -10,22 +10,14 @@
 <script src="../js/load-scripts.js"></script>
 <script>
 load_local_or_remote_scripts(
-    ["../js/tfjs.js",
-     "../js/mobilenet.js",
-     "../js/knn-classifier.js",
+    ["../js/tfjs.js", //      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs",
+     "../js/mobilenet.js", //      "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet",
+     "../js/knn-classifier.js", //      "https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier",
      "../js/training-utilities.js",
      "train-mobilenet.js",
      "../js/translate.js"],
      // using the same locally cached version so nothing breaks when released versions are updated
-    ["../js/tfjs.js",
-     "../js/mobilenet.js",
-     "../js/knn-classifier.js",
-//      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs",
-//      "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet",
-//      "https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier",
-     "../js/training-utilities.js",
-     "train-mobilenet.js",
-     "../js/translate.js"],
+     undefined,
      () => {
          create_return_to_snap_button(); // create this button after everything has loaded
      }); 
