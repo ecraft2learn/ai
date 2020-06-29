@@ -2038,6 +2038,7 @@ xhr.send();
           // calls callback with the contents of the 'url' unless an error occurs and then error_callback is called
           // ironically this is the rare function that may be useful when there is no Internet connection
           // since it can be used to communicate with localhost (e.g. to read/write Raspberry Pi or Arduino pins)
+          url = relative_to_absolute_url(url);
           var xhr = new XMLHttpRequest();
           record_callbacks(callback, error_callback);
           xhr.open('GET', url);
