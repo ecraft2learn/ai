@@ -75,7 +75,7 @@ function create_return_to_snap_button(innerHTML, append_to_element_with_this_id)
 function create_save_training_button(source_name, tensors_getter, training_class_names_getter, innerHTML) {
     let save_training_button = document.createElement('button');
     if (!innerHTML) {
-        innerHTML = "Save your training";
+        innerHTML = "Save your training (to load later using the 'Load " + source_name + " training data ...' block)";
     }
     save_training_button.innerHTML = innerHTML;
     save_training_button.className = "save-training-button";
