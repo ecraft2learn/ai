@@ -112,18 +112,26 @@ const image_data_to_features_vector = async (image_data, time_stamp, post_to_tab
                             '*');
 };
 
-const add_image_to_training = function (image_url, label_index, post_to_tab) {
-    load_image(image_url,
-               function (image) {
-                   logits = infer(image);
-                   // Add current image to classifier
-                   classifier.addExample(logits, label_index);
-                   logits.dispose();
-                   if (post_to_tab) {
-                       let response = classifier.getClassExampleCount()[label_index];
-                       post_to_tab.postMessage({confirmation: response}, "*");
-                   }         
-    });
+const add_image_to_training = function (image_url_or_data, label_index, post_to_tab) {
+    const add_example = (logits, label_index, post_to_tab) => {
+        // Add current image to classifier
+        classifier.addExample(logits, label_index);
+        logits.dispose();
+        if (post_to_tab) {
+            let response = classifier.getClassExampleCount()[label_index];
+            post_to_tab.postMessage({confirmation: response}, "*");
+        }  
+    };
+    if (typeof image_url_or_data === 'string') {
+        load_image(image_url_or_data,
+                   (image) => {
+                       const logits = infer(image);
+                       add_example(logits, label_index, post_to_tab);
+                   });
+    } else {
+        const logits = infer(image_url_or_data);
+        add_example(logits, label_index, post_to_tab);
+    }
 };
 
 // 'conv_preds' is the logits activation of MobileNet.
@@ -332,6 +340,8 @@ function restart() {
 
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
+const get_image_data = (canvas) => canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
+
 // listen for requests for predictions
 
 const listen_for_messages = function (event) {
@@ -360,23 +370,29 @@ const listen_for_messages = function (event) {
                                       "*");
             return;
         }
-        let image_url = event.data.predict;
-        load_image(image_url,
-                   function (image) {
-                       let canvas = create_canvas();
-                       copy_video_to_canvas(image, canvas);
-                       let image_as_tensor = tf.browser.fromPixels(canvas);
-                       logits = infer(image_as_tensor);
-                       classifier.predictClass(logits, TOPK).then(
-                           (results) => {
-                               event.source.postMessage({confidences: Object.values(results.confidences)}, "*");
-                               image_as_tensor.dispose();
-                               logits.dispose();
-                           },
-                           (error) => {
-                               event.source.postMessage({error: error.message}, "*");
-                           });
-        });
+        const predict = (logits) => {
+            classifier.predictClass(logits, TOPK).then(
+                (results) => {
+                    event.source.postMessage({confidences: Object.values(results.confidences)}, "*");
+                    logits.dispose();
+                 },
+                 (error) => {
+                     event.source.postMessage({error: error.message}, "*");
+                 });
+        }
+        let image_url_or_data = event.data.predict;
+        if (typeof image_url_or_data === 'string') {
+            load_image(image_url_or_data,
+                       (image) => {
+                           const canvas = create_canvas();
+                           copy_video_to_canvas(image, canvas);
+//                            const image_as_tensor = tf.browser.fromPixels(canvas);
+                           predict(infer(get_image_data(canvas))); 
+//                            image_as_tensor.dispose();      
+            });
+        } else {
+            predict(infer(image_url_or_data));
+        }
     } else if (typeof event.data.train !== 'undefined') {
         let image_url = event.data.train;
         let label_index = training_class_names.indexOf(event.data.label);

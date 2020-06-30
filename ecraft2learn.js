@@ -686,6 +686,7 @@ window.ecraft2learn =
         sprite.wearCostume(costume);
         ide.hasChangedMedia = true;
     };
+    const get_costume_data = (costume) => get_image_data(costume.contents);
     const get_image_data = (canvas) => canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
     const post_image = function post_image(image, cloud_provider, callback, error_callback) {
         // based upon https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/Sending_forms_through_JavaScript
@@ -1058,7 +1059,7 @@ window.ecraft2learn =
         request_of_support_window('style transfer',
                                   'Ready',
                                   () => {
-                                      return {style_transfer_request: {image_data: get_image_data(costume.contents),
+                                      return {style_transfer_request: {image_data: get_costume_data(costume),
                                                                        style: style_to_folder_name[style.trim()],
                                                                        time_stamp: time_stamp}};
                                   },
@@ -1084,11 +1085,11 @@ window.ecraft2learn =
             return;
         }
         let time_stamp = Date.now();
-        let costume_canvas = costume.contents;
+//         let costume_canvas = costume.contents;
         request_of_support_window('training using camera',
                                   'MobileNet loaded',
                                   () => {
-                                      return {get_image_features: {image_data: get_image_data(costume_canvas),
+                                      return {get_image_features: {image_data: get_costume_data(costume),
                                                                    time_stamp: time_stamp}};
                                   },
                                   (message) => {
@@ -1448,15 +1449,15 @@ window.ecraft2learn =
         if (not_a_costume(costume, 'Labels for costume', labels_callback, probabilities_callback)) {
             return;
         }
-        image_class_from_canvas(costume.contents, top_k, labels_callback, probabilities_callback);
+        image_class_from_costume(costume, top_k, labels_callback, probabilities_callback);
     };
-    const image_class_from_canvas = function(canvas, top_k, labels_callback, probabilities_callback) {
+    const image_class_from_costume = function(costume, top_k, labels_callback, probabilities_callback) {
         // timestamp used to respond appropriately to multiple outstanding requests
         let time_stamp = Date.now();
         request_of_support_window('image classifier',
                                   'Ready',                                  
                                   () => {
-                                      return {classify: {image_data: get_image_data(canvas),
+                                      return {classify: {image_data: get_costume_data(costume),
                                                          top_k: top_k,
                                                          time_stamp: time_stamp}};
                                   },
@@ -1681,7 +1682,7 @@ window.ecraft2learn =
                     show_message("Loading object detection model...");
                     loading_coco_ssd_message_presented = true;
                 }
-                const image_data = get_image_data(costume.contents);
+                const image_data = get_costume_data(costume);
                 return {detect_objects: {image_data, options, time_stamp}};
             },
             (message) => {
@@ -1730,7 +1731,7 @@ window.ecraft2learn =
                                         show_message("Loading BodyPix model...");
                                         loading_body_pix_message_presented = true;
                                     }
-                                    const image_data = get_image_data(costume.contents);
+                                    const image_data = get_costume_data(costume);
                                     return {segmentations_and_poses: {image_data, options, time_stamp, multi_person}};
                                 },
                                 (message) => {
@@ -2961,16 +2962,18 @@ xhr.send();
           return;
       }
       record_callbacks(callback);
-      costume_to_image(costume,
-                       function (image) {
-                           support_window_request("You need to train the system before using 'Image label confidences'.\n" +
-                                                  "Run the 'Add costume ...' block before this.", 
-                                                  (image_URL) => {return {predict: image_URL}},
-                                                  TRAINING_IMAGE_WIDTH,
-                                                  TRAINING_IMAGE_HEIGHT,
-                                                  image);
-                            window.addEventListener("message", receive_confidences);
-                        });                            
+      ecraft2learn.support_window['training using camera'].postMessage({predict: get_costume_data(costume)}, "*");
+      window.addEventListener("message", receive_confidences);
+//       costume_to_image(costume,
+//                        function (image) {
+//                            support_window_request("You need to train the system before using 'Image label confidences'.\n" +
+//                                                   "Run the 'Add costume ...' block before this.", 
+//                                                   (image_URL) => {return {predict: image_URL}},
+//                                                   TRAINING_IMAGE_WIDTH,
+//                                                   TRAINING_IMAGE_HEIGHT,
+//                                                   image);
+//                             window.addEventListener("message", receive_confidences);
+//                         });                            
   },
   microphone_confidences: function (builtin_recognizer, callback) {
       let receive_confidences = function (event) {
@@ -3051,20 +3054,25 @@ xhr.send();
                     costume_or_costume_number :
                     costume_of_sprite(costume_or_costume_number, sprite);
       record_callbacks(callback);
-      costume_to_image(costume,
-                       function (image) {
-                           support_window_request("You need to start training before using 'Add image to training'.\n" +
-                                                   "Run 'Train using camera ...' before this " +
-                                                   " so the system knows the list of possible labels.", 
-                                                   function (image_URL) {
-                                                       return {train: image_URL,
-                                                               label: label};
-                                                   },
-                                                   TRAINING_IMAGE_WIDTH,
-                                                   TRAINING_IMAGE_HEIGHT,
-                                                   image);
-                            window.addEventListener("message", receive_comfirmation);
-                       });
+      ecraft2learn.support_window['training using camera'].postMessage({train: get_costume_data(costume),
+                                                                        label: label},
+                                                                       "*");
+      window.addEventListener("message", receive_comfirmation);
+//       costume_to_image(costume,
+//                        function (image) {
+//                            support_window_request("You need to start training before using 'Add image to training'.\n" +
+//                                                    "Run 'Train using camera ...' or " +
+//                                                    "'Prepare to train images with these labels ...' before running this " +
+//                                                    " so the system knows the list of possible labels.", 
+//                                                    function (image_URL) {
+//                                                        return {train: image_URL,
+//                                                                label: label};
+//                                                    },
+//                                                    TRAINING_IMAGE_WIDTH,
+//                                                    TRAINING_IMAGE_HEIGHT,
+//                                                    image);
+//                             window.addEventListener("message", receive_comfirmation);
+//                        });
   },
   costume_count: function (sprite) {
       return get_costumes(sprite).length;
