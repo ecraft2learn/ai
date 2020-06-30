@@ -1383,9 +1383,12 @@ window.ecraft2learn =
                                       if (message.trial_optimize_hyperparameters) {
                                           message.trial_optimize_hyperparameters.trial_number = message.trial_number;
                                           message.trial_optimize_hyperparameters.score = message.trial_score;
+                                          const hyperparameters_and_results_combined =
+                                              Object.assign(message.trial_optimize_hyperparameters, message.results);
+                                          // not all browsers support this:
+                                          //  {...message.trial_optimize_hyperparameters, ...message.results}
                                           invoke_callback(trial_end_callback,
-                                                          javascript_to_snap({...message.trial_optimize_hyperparameters,
-                                                                              ...message.results}),
+                                                          javascript_to_snap(hyperparameters_and_results_combined),
                                                           message.trial_number);
                                           return true; // keep this message receiver for subsequent messages
                                       } else if (message.final_optimize_hyperparameters) {
@@ -3387,7 +3390,8 @@ xhr.send();
       // using tf.tidy instead of explicitly disposing of tensors caused Snap! to repeated call this
       target_tensor.dispose();
       cosines_tensor.dispose();
-      const cosines = new Array(...cosines_float32);
+      // some old browsers don't support the ... syntax
+      const cosines = Array.prototype.slice.call(cosines_float32); // new Array(...cosines_float32);
       const words_and_cosines = cosines.map((cosine, index) => [words[index], cosine]);
       const sorted_words_and_cosines = words_and_cosines.sort((a, b) => a[1]-b[1]); 
       if (distances_too) {
