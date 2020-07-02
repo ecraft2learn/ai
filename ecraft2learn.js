@@ -2178,7 +2178,7 @@ xhr.send();
               }
               invoke_callback(all_results_callback, javascript_to_snap(results));
           };
-          var handle_all_confidence_values = function (event) {
+          const handle_all_confidence_values = function (event) {
               var confidences = [];
               var result = event.results[event.resultIndex];
               for (var i = 0; i < result.length; i++) {
@@ -2186,12 +2186,21 @@ xhr.send();
               }
               invoke_callback(all_confidence_values_callback, javascript_to_snap(confidences));
           };
-          let handle_error = function (event) {
-              invoke_callback(error_callback, event.error);
+          const handle_error = function (event) {
+              // pass original message along in case a program wants to respond to each one.
+              invoke_callback(error_callback, improve_error_message(event.error), event.error);
               ecraft2learn.stop_speech_recognition();
               if (debugging) {
                   console.log("Recognition error: " + event.error);
               }
+          };
+          const improve_error_message = (message) => {
+              if (message === 'audio-capture') {
+                  return "Unable to access the microphone. Perhaps another program is using it or permission has not been granted.";
+              } else if (message === 'no-speech') {
+                  return "No speech heard for a while.";
+              }
+              return message;
           };
           var speech_recognition_stopped = false; // used to suspend listening when tab is hidden
           var speech_recognition;
