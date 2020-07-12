@@ -1012,6 +1012,7 @@ const optimize = async (model_name, xs, ys, validation_tensors,
                             }
                         });
         };
+        model.ready_for_prediction = true; // even if no training the weights have been randomly initialised
         return new Promise(train);
     };
     record_callbacks(create_and_train_model, error_callback);

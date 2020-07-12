@@ -207,12 +207,14 @@ const create_model = (options, failure_callback) => {
                                     loss,
                                     metrics: class_names && ['accuracy','crossentropy']};
            model.compile(compile_options);
+           model.compiled = true;
         };
         let model = (typeof loaded_model !== 'undefined' && loaded_model) || (custom_model_builder ? custom_model_builder() : build_model());
         compile_model(model);
         if (tfvis_options.display_layers_after_creation) {
             show_layers(model, 'Model after creation');
         }
+        model.ready_for_prediction = true;
         return model;
   } catch (error) {
       if (failure_callback) {
@@ -391,7 +393,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
         throw new Error(error_message);         
     }
     record_callbacks(success_callback, failure_callback);
-    if (!model.ready_for_training && model.ready_for_prediction) {
+    if (!model.ready_for_training && !model.compiled) {
         // been loaded but never compiled
         // not clear how to provide options to override the following defaults
         model.compile({optimizer: 'sgd',
