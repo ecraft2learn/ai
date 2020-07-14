@@ -7,7 +7,7 @@
     written by Jens Mönig
     jens@moenig.org
 
-    Copyright (C) 2019 by Jens Mönig
+    Copyright (C) 2020 by Jens Mönig
 
     This file is part of Snap!.
 
@@ -27,7 +27,7 @@
 
     prerequisites:
     --------------
-    needs gui.js and morphic.js
+    needs gui.js, lists.js and morphic.js
 
 
     documentation
@@ -53,6 +53,10 @@
             - IDE_Morph.prototype.getVarNames()
             - IDE_Morph.prototype.getVar()
             - IDE_Morph.prototype.setVar()
+
+        Create and Modify Lists
+
+            - IDE_Morph.prototype.newList()
 
     Getting hold of an ide can usually be achieved by
     evaluating:
@@ -192,11 +196,11 @@
 
 */
 
-/*global modules, IDE_Morph, isString, Map*/
+/*global modules, IDE_Morph, isString, Map, List*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.api = '2019-December-18';
+modules.api = '2020-July-06';
 
 // IDE_Morph external communication API - experimental
 /*
@@ -216,7 +220,7 @@ IDE_Morph.prototype.broadcast = function(message, callback) {
         procs = [];
 
     function wait() {
-        if (procs.some(function (any) {return any.isRunning(); })) {
+        if (procs.some(any => any.isRunning())) {
             return;
         }
         if (callback instanceof Function) {
@@ -231,23 +235,23 @@ IDE_Morph.prototype.broadcast = function(message, callback) {
         throw new Error('message must be a String');
     }
     this.stage.lastMessage = message;
-    rcvrs.forEach(function (sprite) {
-        sprite.allHatBlocksFor(message).forEach(function (block) {
-            procs.push(myself.stage.threads.startProcess(
+    rcvrs.forEach(sprite => {
+        sprite.allHatBlocksFor(message).forEach(block => {
+            procs.push(this.stage.threads.startProcess(
                 block,
                 sprite,
-                myself.stage.isThreadSafe,
+                this.stage.isThreadSafe,
                 false,
                 callback instanceof Function ? wait : null
             ));
         });
     });
-    (this.stage.messageCallbacks[''] || []).forEach(function (callback) {
-        callback(message);
-    });
-    (this.stage.messageCallbacks[message] || []).forEach(function (callback) {
-        callback();
-    });
+    (this.stage.messageCallbacks[''] || []).forEach(
+        callback => callback(message)
+    );
+    (this.stage.messageCallbacks[message] || []).forEach(
+        callback => callback()
+    );
 };
 
 IDE_Morph.prototype.addMessageListenerForAll = function (callback) {
@@ -280,12 +284,10 @@ IDE_Morph.prototype.getMessages = function () {
     // return an array of all broadcast messages in the current project
     var allNames = [],
         dict = new Map();
-    this.sprites.contents.concat(this.stage).forEach(function (sprite) {
+    this.sprites.contents.concat(this.stage).forEach(sprite => {
         allNames = allNames.concat(sprite.allMessageNames());
     });
-    allNames.forEach(function (name) {
-        dict.set(name);
-    });
+    allNames.forEach(name => dict.set(name));
     return Array.from(dict.keys());
 };
 
@@ -304,4 +306,10 @@ IDE_Morph.prototype.setVar = function (name, value) {
     // set the value of the global variable indicated by name to the given value
     // raise an error if no global variable of that name exists
     this.stage.globalVariables().setVar(name, value);
+};
+
+IDE_Morph.prototype.newList = function (array) {
+    // return a new Snap list the shape of the given array, if any
+    // nested array will not be automatically converted to nested lists
+    return new List(array);
 };

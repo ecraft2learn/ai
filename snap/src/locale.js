@@ -30,9 +30,13 @@
 
         lang-de.js
 
-    or to the separate file
+    or to the section titled
 
-        translating Snap.txt
+        Translating Snap!
+
+    in the file
+
+        Contributing.md
 
     (same contents) if you would like to contribute.
 
@@ -42,7 +46,7 @@
 
 /*global modules, contains*/
 
-modules.locale = '2020-January-03';
+modules.locale = '2020-July-07';
 
 // Global stuff
 
@@ -82,26 +86,24 @@ Localizer.prototype.languageName = function (lang) {
 };
 
 Localizer.prototype.credits = function () {
-    var txt = '',
-        myself = this;
-    this.languages().forEach(function (lang) {
+    var txt = '';
+    this.languages().forEach(lang => {
         txt = txt + '\n'
-            + myself.languageName(lang)
+            + this.languageName(lang)
             + ' (' + lang + ') - '
-            + myself.dict[lang].language_translator
-            + ' - ' + myself.dict[lang].last_changed;
+            + this.dict[lang].language_translator
+            + ' - ' + this.dict[lang].last_changed;
     });
     return txt;
 };
 
 Localizer.prototype.unload = function () {
     var dict,
-        keep = ['language_name', 'language_translator', 'last_changed'],
-        myself = this;
-    this.languages().forEach(function (lang) {
+        keep = ['language_name', 'language_translator', 'last_changed'];
+    this.languages().forEach(lang => {
         var key;
         if (lang !== 'en') {
-            dict = myself.dict[lang];
+            dict = this.dict[lang];
             for (key in dict) {
                 if (Object.prototype.hasOwnProperty.call(dict, key)
                         && !contains(keep, key)) {
@@ -164,7 +166,7 @@ SnapTranslator.dict.de = {
     'translator_e-mail':
         'jens@moenig.org, jadga.huegle@sap.com',
     'last_changed':
-        '2019-12-03'
+        '2020-06-08'
 };
 
 SnapTranslator.dict.it = {
@@ -186,7 +188,7 @@ SnapTranslator.dict.ja = {
     'translator_e-mail':
         'abee@squeakland.jp',
     'last_changed':
-        '2018-10-23'
+        '2020-07-03'
 };
 
 SnapTranslator.dict.ja_HIRA = {
@@ -219,7 +221,7 @@ SnapTranslator.dict.pt = {
     'translator_e-mail':
         'mmsequeira@gmail.com',
     'last_changed':
-        '2019-06-25'
+        '2020-04-06'
 };
 
 SnapTranslator.dict.cs = {
@@ -237,11 +239,11 @@ SnapTranslator.dict.zh_CN = {
     'language_name':
         '简体中文',
     'language_translator':
-        '五百刀/邓江华',
+        '五百刀/邓江华/曹儒林',
     'translator_e-mail':
         'ubertao@qq.com/djh@rhjxx.cn',
     'last_changed':
-        '2019-08-06'
+        '2020-07-03'
 };
 
 SnapTranslator.dict.eo = {
@@ -373,7 +375,7 @@ SnapTranslator.dict.ca = {
     'translator_e-mail':
         'bernat@snap4arduino.rocks, jguille2@xtec.cat',
     'last_changed':
-        '2020-01-03'
+        '2020-01-30'
 };
 
 SnapTranslator.dict.ca_VA = {
@@ -424,11 +426,11 @@ SnapTranslator.dict.bn = {
     'language_name':
         'বাংলা',
     'language_translator':
-        'Dr. Mokter Hossain',
+        'Dr. Mokter Hossain, Radman Siddiki',
     'translator_e-mail':
-        'mokter@gmail.com',
+        'mokter@gmail.com, radman.siddiki@outlook.com',
     'last_changed':
-        '2014-07-02'
+        '2020-07-04'
 };
 
 SnapTranslator.dict.kn = {
@@ -616,4 +618,15 @@ SnapTranslator.dict.sk = {
         'peter_lukacovic@outlook.com',
     'last_changed':
         '2019-12-10'
+};
+
+SnapTranslator.dict.he = {
+    'language_name':
+        'עברית',
+    'language_translator':
+        'יוסי כהן',
+    'translator_e-mail':
+        'cohenyossi81@gmail.com',
+    'last_changed':
+        '2020-04-21'
 };
