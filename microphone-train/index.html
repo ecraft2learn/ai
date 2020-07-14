@@ -10,21 +10,16 @@
     <script src="../js/load-scripts.js"></script>
 <script>
 load_local_or_remote_scripts(
-    ["../js/tfjs.js",
+    ["../js/tfjs.js", //"https://cdn.jsdelivr.net/npm/@tensorflow/tfjs",
      "../js/training-utilities.js",
      "speech-commands.js",
      "audio-train.js",
      "../js/translate.js"],
      // using the same locally cached version so nothing breaks when released versions are updated
-    ["../js/tfjs.js",
-     //"https://cdn.jsdelivr.net/npm/@tensorflow/tfjs",
-     "../js/training-utilities.js",
-     "speech-commands.js",
-     "audio-train.js",
-     "../js/translate.js"],
-     () => {
-         create_return_to_snap_button(); // create this button after everything has loaded
-     });
+    undefined,
+    () => {
+        create_return_to_snap_button(); // create this button after everything has loaded
+    });
 </script>
 </head>
 <body>

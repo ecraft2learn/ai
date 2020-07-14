@@ -820,7 +820,7 @@ window.ecraft2learn =
           ecraft2learn.training_buckets[source] = buckets;
           let receive_messages_from_iframe = 
               function (event) {
-                  if (event.data === "MobileNet loaded") {
+                  if (event.data === "MobileNet loaded" || event.data === "Audio support loaded") {
                       machine_learning_window.postMessage({training_class_names: buckets,
                                                            training_name,
                                                            no_display_of_support_window},

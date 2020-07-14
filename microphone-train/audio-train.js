@@ -230,7 +230,7 @@ const initialise = async function (training_class_names) {
                                    duration: 2},
                                    "*");
         window.parent.postMessage({data_set_loaded: training_classes}, "*");            
-            });
+    });
     // see https://developers.google.com/web/updates/2017/09/autoplay-policy-changes#webaudio
 //     if (speech_recognizer.audioCtx) {
 //         document.querySelectorAll('button').forEach(function (button) {
@@ -254,9 +254,8 @@ const report_error = function (error_message) {
     }
 };
 
-window.addEventListener(
-    "message", 
-    async function (event) {
+const message_receiver = 
+    async (event) => {
         if (typeof event.data.training_class_names !== 'undefined') {
             // received the names of the classes so ready to initialise
             await initialise(event.data.training_class_names);
@@ -297,7 +296,13 @@ window.addEventListener(
                               });
             }
         }
-    },
-    false);
+    };
+
+    window.addEventListener('DOMContentLoaded', 
+        (event) => {
+            window.addEventListener("message", message_receiver, false);
+            window.parent.postMessage("Audio support loaded", "*");     
+        });
+
 
 } ()));
