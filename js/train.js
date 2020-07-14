@@ -214,7 +214,7 @@ const create_model = (options, failure_callback) => {
         if (tfvis_options.display_layers_after_creation) {
             show_layers(model, 'Model after creation');
         }
-        model.ready_for_prediction = true;
+//         model.ready_for_prediction = true;
         return model;
   } catch (error) {
       if (failure_callback) {
@@ -393,11 +393,12 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
         throw new Error(error_message);         
     }
     record_callbacks(success_callback, failure_callback);
-    if (!model.ready_for_training && !model.compiled) {
+    if (!model.compiled) {
         // been loaded but never compiled
         // not clear how to provide options to override the following defaults
         model.compile({optimizer: 'sgd',
                        loss: 'meanSquaredError'});
+        model.compiled = true;
     }
     const {class_names, batch_size, shuffle, epochs, validation_split, learning_rate, dropout_rate, batch_normalization, optimizer,
            layer_initializer, regularizer, seed, stop_if_no_progress_for_n_epochs, initialEpoch, slices_to_use,
@@ -557,8 +558,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                  = datasets;
           let xs_test = datasets.xs_test; // not a constant - need to update below in some circumstances
           let ys_test = datasets.ys_test;
-          model.ready_for_training = true; // if there is further training
-          model.ready_for_prediction = true;
+//           model.ready_for_prediction = true;
           const number_of_tests = xs_test && xs_test.shape[0];
           const percentage_of_tests = (x) => +(100*x/number_of_tests).toFixed(2);
           if (tfvis_options.display_layers_after_training) {
@@ -698,10 +698,10 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                                                                               tfvis_options.display_collapsed_confusion_matrix.indices),
                                             tickLabels: tfvis_options.display_collapsed_confusion_matrix.labels});
           }
-          if (model.callback_when_ready_for_prediction) {
-              model.callback_when_ready_for_prediction();
-              model.callback_when_ready_for_prediction = undefined;
-          }
+//           if (model.callback_when_ready_for_prediction) {
+//               model.callback_when_ready_for_prediction();
+//               model.callback_when_ready_for_prediction = undefined;
+//           }
        };
        const fit_error_handler = (error) => {
            if (error.message.indexOf('No progress for ') >= 0 || 
@@ -777,18 +777,18 @@ const predict = (model, inputs, success_callback, error_callback, categories) =>
         return;
     }
     record_callbacks(success_callback, error_callback);
-    if (!model.ready_for_prediction) {
-        let previous_callback = model.callback_when_ready_for_prediction;
-        model.callback_when_ready_for_prediction = 
-            () => {
-                if (previous_callback) {
-                    invoke_callback(previous_callback);
-                }
-                predict(model, inputs, success_callback, error_callback, categories);
-        };
-        record_callbacks(model.callback_when_ready_for_prediction);
-        return;
-    }
+//     if (!model.ready_for_prediction) {
+//         let previous_callback = model.callback_when_ready_for_prediction;
+//         model.callback_when_ready_for_prediction = 
+//             () => {
+//                 if (previous_callback) {
+//                     invoke_callback(previous_callback);
+//                 }
+//                 predict(model, inputs, success_callback, error_callback, categories);
+//         };
+//         record_callbacks(model.callback_when_ready_for_prediction);
+//         return;
+//     }
     try {
         let input_tensor;
         if (typeof inputs[0] === 'number') {

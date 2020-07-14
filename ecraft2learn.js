@@ -1244,19 +1244,22 @@ window.ecraft2learn =
                                   });
     };
     const is_model_ready_for_prediction = (model_name, callback) => {
-        record_callbacks(callback);
-        request_of_support_window('tensorflow.js',
-                                  'Loaded',
-                                  () => {
-                                      return {is_model_ready_for_prediction: {model_name: model_name}};
-                                  },
-                                  (message) => {
-                                      return typeof message.ready_for_prediction === 'boolean' &&
-                                             message.model_name === model_name;
-                                  },
-                                  (message) => {
-                                      invoke_callback(callback, javascript_to_snap(message.ready_for_prediction));
-                                  });
+        // now if a model exists then it is ready for prediction
+        // if not yet trained the weights will be random but still capable of "predicting"
+        invoke_callback(callback, javascript_to_snap(true));
+//         record_callbacks(callback);
+//         request_of_support_window('tensorflow.js',
+//                                   'Loaded',
+//                                   () => {
+//                                       return {is_model_ready_for_prediction: {model_name: model_name}};
+//                                   },
+//                                   (message) => {
+//                                       return typeof message.ready_for_prediction === 'boolean' &&
+//                                              message.model_name === model_name;
+//                                   },
+//                                   (message) => {
+//                                       invoke_callback(callback, javascript_to_snap(message.ready_for_prediction));
+//                                   });
     };
     const predictions_from_model = (model_names, inputs, success_callback, error_callback,
     // optional categories added after release - really should have used a single JavaScript object as input
