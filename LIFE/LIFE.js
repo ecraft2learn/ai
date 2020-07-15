@@ -179,6 +179,20 @@ const setup = () => {
             });
         });
     };
+    const get_embeddings = (questions, callback) => {
+    	// do this in batches since too many at once causes WebGL compilation errors
+    	const batch_size = 100;
+    	if (questions.length < batch_size) {
+    		embedding_model.embed(questions).then(callback);
+    	} else {
+    		embedding_model.embed(questions.slice(0, batch_size)).then((first_embeddings) => {
+                get_embeddings(questions.slice(batch_size), (rest_of_embeddings) => {
+                	const combined_embeddings = tf.concat([first_embeddings, rest_of_embeddings], 0);
+                	callback(combined_embeddings);
+                });
+            });
+    	}
+    }
     const training_data = (callback) => {
     	let questions = [];
     	let outputs = [];
@@ -190,7 +204,7 @@ const setup = () => {
             });
     	});
     	const ys = tf.oneHot(tf.tensor1d(outputs, 'int32'), number_of_groups);
-    	embedding_model.embed(questions).then((embeddings) => {
+    	get_embeddings(questions, (embeddings) => {
 			callback({xs: embeddings,
 					  ys: ys});
     	});
@@ -379,156 +393,156 @@ const logging_interface = () => {
 
 const setup_interface =
 	() => {
-			let question_area = document.getElementById('question');
-			let toggle_speech_recognition = document.getElementById('speech-recognition');
-			let sound_effect = document.getElementById('sound');
-			let speech_recognition_on = false;
-			let first_cant_answer = true;
-			const toggle_speech_recognition_label = document.createElement('span');
-			const turn_on_speech_recognition_label = "Start listening";
-			const turn_off_speech_recognition_label = "Stop listening";
-			toggle_speech_recognition_label.innerHTML = turn_on_speech_recognition_label;
-			toggle_speech_recognition.appendChild(toggle_speech_recognition_label);
-			const respond_with_answer = (answer, question) => {
-				log({answer, question});
-				if (answer) {
-					answer_area.innerHTML = answer;
-					if (speech_recognition_on) {
-						let voices = window.speechSynthesis.getVoices();
-						ecraft2learn.speak(answer_area.textContent, undefined, undefined, 
-										   ecraft2learn.get_voice_number_matching(["uk", "female"], 0));
-					}          
-				} else {
-					answer_area.innerHTML = "<b style='color:red;'>Sorry I can't answer <i>\"" + question + "\"</i></b>";
-					if (speech_recognition_on) {
-						if (first_cant_answer) {
-							first_cant_answer = false;
-							ecraft2learn.speak("Sorry I can't answer '" + question + "'. Next time I can't answer you will only hear the following sound.", 
-											   undefined,
-											   undefined, 
-											   ecraft2learn.get_voice_number_matching(["uk", "female"], 0),
-											   undefined,
-											   undefined,
-											   () => {
-												   sound_effect.play(); 
-											   });
+        let question_area = document.getElementById('question');
+        let toggle_speech_recognition = document.getElementById('speech-recognition');
+        let sound_effect = document.getElementById('sound');
+        let speech_recognition_on = false;
+        let first_cant_answer = true;
+        const toggle_speech_recognition_label = document.createElement('span');
+        const turn_on_speech_recognition_label = "Start listening";
+        const turn_off_speech_recognition_label = "Stop listening";
+        toggle_speech_recognition_label.innerHTML = turn_on_speech_recognition_label;
+        toggle_speech_recognition.appendChild(toggle_speech_recognition_label);
+        const respond_with_answer = (answer, question) => {
+        	log({answer, question});
+        	if (answer) {
+        		answer_area.innerHTML = answer;
+        		if (speech_recognition_on) {
+        			let voices = window.speechSynthesis.getVoices();
+        			ecraft2learn.speak(answer_area.textContent, undefined, undefined, 
+        							   ecraft2learn.get_voice_number_matching(["uk", "female"], 0));
+        		}          
+        	} else {
+        		answer_area.innerHTML = "<b style='color:red;'>Sorry I can't answer <i>\"" + question + "\"</i></b>";
+        		if (speech_recognition_on) {
+        			if (first_cant_answer) {
+        				first_cant_answer = false;
+        				ecraft2learn.speak("Sorry I can't answer '" + question + "'. Next time I can't answer you will only hear the following sound.", 
+        								   undefined,
+        								   undefined, 
+        								   ecraft2learn.get_voice_number_matching(["uk", "female"], 0),
+        								   undefined,
+        								   undefined,
+        								   () => {
+        									   sound_effect.play(); 
+        								   });
+        			} else {
+        				sound_effect.play();
+        			}
+        		}
+        	}   
+        };
+        const answer_question = (question) => {
+        	answer_area.innerHTML = "Please wait...";
+        	const handle_answer = (response) => {
+        		const {best_score, best_answer_index, second_best_score, second_best_answer_index, question_embedding} = response;
+        		const two_possible_answers = () => 
+        		    // sum of top two exceeds threshold and they are less than 10% apart
+            	       best_score+second_best_score > model_options.score_threshold &&
+            		   best_score-second_best_score <= .1;	
+				const best_answer_close_enough = async () => {
+					const embeddings_tensor = await embedding_model.embed(group_of_questions[best_answer_index]);
+					const embeddings_for_top_match = embeddings_tensor.arraySync();
+					embeddings_tensor.dispose();
+					const distance = (array, tensor) => {
+						const another_tensor = tf.tensor(array);
+						const cosine_tensor = tf.metrics.cosineProximity(another_tensor, tensor);
+						const cosine = cosine_tensor.arraySync()[0];
+						another_tensor.dispose();
+						cosine_tensor.dispose();
+						return cosine;
+					};
+					let closest_distance = 1;
+					embeddings_for_top_match.forEach(embedding => {
+														const distance_to_possible_paraphrasing = distance(embedding, question_embedding);
+														if (distance_to_possible_paraphrasing < closest_distance) {
+															closest_distance = distance_to_possible_paraphrasing;
+														}
+													 });
+							return closest_distance;
+				};			
+				if (best_score >= model_options.score_threshold) {
+					respond_with_answer("<b>" + answers[best_answer_index] + "</b>", question);
+					question_embedding.dispose();
+				} else if (typeof response === 'object' && two_possible_answers()) {
+					const start = Date.now();
+					best_answer_close_enough().then(closest_distance => {
+						log({closest_distance});
+						if (closest_distance < -.5) {
+							respond_with_answer("Unsure which of two answers to give. " +
+												"The probability that the following answers your question is " + Math.round(response.best_score*100) + '%: <b>' + 
+												answers[response.best_answer_index] + '</b> ' +
+												"And the probability that the following answers your question is " + Math.round(response.second_best_score*100) + '%: <b>' + 
+												answers[response.second_best_answer_index] + '</b>', 
+												question);
 						} else {
-							sound_effect.play();
+							respond_with_answer(undefined, question);
 						}
-					}
-				}   
-			};
-			const answer_question = (question) => {
-				answer_area.innerHTML = "Please wait...";
-				const handle_answer = (response) => {
-					const {best_score, best_answer_index, second_best_score, second_best_answer_index, question_embedding} = response;
-					const two_possible_answers = () => 
-					    // sum of top two exceeds threshold and they are less than 10% apart
-						       best_score+second_best_score > model_options.score_threshold &&
-							   best_score-second_best_score <= .1;	
-					const best_answer_close_enough = async () => {
-						const embeddings_tensor = await embedding_model.embed(group_of_questions[best_answer_index]);
-						const embeddings_for_top_match = embeddings_tensor.arraySync();
-						embeddings_tensor.dispose();
-						const distance = (array, tensor) => {
-							const another_tensor = tf.tensor(array);
-							const cosine_tensor = tf.metrics.cosineProximity(another_tensor, tensor);
-							const cosine = cosine_tensor.arraySync()[0];
-							another_tensor.dispose();
-							cosine_tensor.dispose();
-							return cosine;
-						};
-						let closest_distance = 1;
-						embeddings_for_top_match.forEach(embedding => {
-															const distance_to_possible_paraphrasing = distance(embedding, question_embedding);
-															if (distance_to_possible_paraphrasing < closest_distance) {
-																closest_distance = distance_to_possible_paraphrasing;
-															}
-													     });
-	                    return closest_distance;
-					};			
-					if (best_score >= model_options.score_threshold) {
-						respond_with_answer("<b>" + answers[best_answer_index] + "</b>", question);
+						console.log((Date.now()-start)/1000 + " seconds to check distances");
 						question_embedding.dispose();
-					} else if (typeof response === 'object' && two_possible_answers()) {
-						const start = Date.now();
-						best_answer_close_enough().then(closest_distance => {
-							log({closest_distance});
-							if (closest_distance < -.5) {
-								respond_with_answer("Unsure which of two answers to give. " +
-													"The probability that the following answers your question is " + Math.round(response.best_score*100) + '%: <b>"' + 
-													answers[response.best_answer_index] + '"</b> ' +
-												    "And the probability that the following answers your question is " + Math.round(response.second_best_score*100) + '%: <b>"' + 
-													answers[response.second_best_answer_index] + '"</b>', 
-						                            question);
-							} else {
-								respond_with_answer(undefined, question);
-							}
-							console.log((Date.now()-start)/1000 + " seconds to check distances");
-							question_embedding.dispose();
-						})
-					} else {
-						respond_with_answer(undefined, question);
-						question_embedding.dispose();
-					}
-					log(response);
-				};
-				const old_handle_answer = (best_answer_index) => {
-					if (typeof best_answer_index === 'number') {
-						respond_with_answer("<b>" + answers[best_answer_index] + "</b>", question);
-					}
-				};
-				if (mode === 'answer questions') {
-					use_model_to_respond_to_question(question).then(handle_answer, record_error);
-				} else if (mode === 'old answer questions') {
-					LIFE.respond_to_question(question, -0.55).then(old_handle_answer, record_error);
-					// reasonable matches must be less than -0.55 cosineProximity
-				}
-			};
-			question_area.addEventListener('keypress',
-										   (event) => {
-											   if (event.keyCode === 13 || event.keyCode === 63) { // ? or new line
-												   answer_question(question_area.value);
-											   };
-										   });
-			const recognition_callback = (spoken_text, ignore, confidence) => {
-				log({spoken_text, confidence});
-				question_area.value = spoken_text;
-				answer_question(spoken_text);
-				// and start listening to the next question
-				ecraft2learn.start_speech_recognition(recognition_callback, handle_recognition_error);
-			};
-			const handle_recognition_error = (error) => {
-				if (error === "no-speech") {
-					// keep listening
-					ecraft2learn.start_speech_recognition(recognition_callback, handle_recognition_error);
+					})
 				} else {
-					toggle_speech_recognition_label.innerHTML = 
-						"Type your questions because speech recognition causes this error: " 
-						+ error;
+					respond_with_answer(undefined, question);
+					question_embedding.dispose();
 				}
+				log(response);
 			};
-			const toggle_speech = (event) => {
-				if (speech_recognition_on) {
-					speech_recognition_on = false;
-					toggle_speech_recognition_label.innerHTML = turn_on_speech_recognition_label;
-					ecraft2learn.stop_speech_recognition();
-				} else {
-					speech_recognition_on = true;
-					toggle_speech_recognition_label.innerHTML = turn_off_speech_recognition_label;
-					ecraft2learn.start_speech_recognition(recognition_callback, handle_recognition_error);                     
-				}
-			};
-			toggle_speech_recognition.addEventListener('click', toggle_speech);
-			if (user_id_for_logs) {
-				logging_interface();
-			}
-			// following would be nice but can't use speech without user action
-			// see https://www.chromestatus.com/feature/5687444770914304
+		    const old_handle_answer = (best_answer_index) => {
+            if (typeof best_answer_index === 'number') {
+            	respond_with_answer("<b>" + answers[best_answer_index] + "</b>", question);
+            }
+        };
+        if (mode === 'answer questions') {
+        	use_model_to_respond_to_question(question).then(handle_answer, record_error);
+        } else if (mode === 'old answer questions') {
+        	LIFE.respond_to_question(question, -0.55).then(old_handle_answer, record_error);
+        	// reasonable matches must be less than -0.55 cosineProximity
+        }
+    };
+    question_area.addEventListener('keypress',
+    							   (event) => {
+    								   if (event.keyCode === 13 || event.keyCode === 63) { // ? or new line
+    									   answer_question(question_area.value);
+    								   };
+    							   });
+    const recognition_callback = (spoken_text, ignore, confidence) => {
+    	log({spoken_text, confidence});
+    	question_area.value = spoken_text;
+    	answer_question(spoken_text);
+    	// and start listening to the next question
+    	ecraft2learn.start_speech_recognition(recognition_callback, handle_recognition_error);
+    };
+    const handle_recognition_error = (error) => {
+    	if (error === "no-speech") {
+    		// keep listening
+    		ecraft2learn.start_speech_recognition(recognition_callback, handle_recognition_error);
+    	} else {
+    		toggle_speech_recognition_label.innerHTML = 
+    			"Type your questions because speech recognition causes this error: " 
+    			+ error;
+    	}
+    };
+    const toggle_speech = (event) => {
+    	if (speech_recognition_on) {
+    		speech_recognition_on = false;
+    		toggle_speech_recognition_label.innerHTML = turn_on_speech_recognition_label;
+    		ecraft2learn.stop_speech_recognition();
+    	} else {
+    		speech_recognition_on = true;
+    		toggle_speech_recognition_label.innerHTML = turn_off_speech_recognition_label;
+    		ecraft2learn.start_speech_recognition(recognition_callback, handle_recognition_error);                     
+    	}
+    };
+    toggle_speech_recognition.addEventListener('click', toggle_speech);
+    if (user_id_for_logs) {
+    	logging_interface();
+    }
+    // following would be nice but can't use speech without user action
+    // see https://www.chromestatus.com/feature/5687444770914304
 	//         if (is_mobile()) {
 	//             toggle_speech(); // start with it enabled
 	//         }
-			add_sample_questions();                           
+    add_sample_questions();                           
 };
 
 let answer_area;
@@ -543,6 +557,7 @@ const hash_parameters = new URLSearchParams(window.location.hash.slice(1));
 const search_parameters = new URLSearchParams(window.location.search);
 const user_id_for_logs = search_parameters.get('log') || hash_parameters.get('log');
 const pneumonia_questions = search_parameters.has('pneumonia') || hash_parameters.has('pneumonia');
+const covid_questions = search_parameters.has('covid') || hash_parameters.has('covid');
 
 const log = (message) => {
 	if (user_id_for_logs) {
@@ -576,10 +591,85 @@ const initialize = () => {
     }
 };
 
-document.addEventListener('DOMContentLoaded',
+document.addEventListener('DOMContentLoaded',    
 	() => {
-			load_local_or_remote_scripts([pneumonia_questions ? "./pneumonia-qa.js" : "./neonatal-qa.js"], null, initialize);
+		let file_name;
+		if (pneumonia_questions) {
+			file_name = "./pneumonia-qa.js";
+		} else if (covid_questions) {
+			file_name = "./covid-qa.js";
+		} else {
+			file_name = "./neonatal-qa.js";
+		}
+		load_local_or_remote_scripts([file_name], null, initialize);
+// 		if (covid_questions) {
+// 			generate_covid_qa_js();
+// 		}
 	});
+
+const generate_covid_qa_js = () => {
+    const add_question_paraphrasings = () => {
+    	faq.forEach((qa) => {
+    	    qa.questions = [qa.question];
+    	    faq_similarity.forEach((similarity) => {
+			    if (similarity.similar === 1 && qa.question === similarity.question1 && qa.questions.indexOf(similarity.question2) < 0) {
+					qa.questions.push(similarity.question2);
+				}
+    	    });
+        });
+    };
+    const preamble = [
+"// Questions and answers for Covid scenario for LIFE game",
+"// Written by Ken Kahn ",
+"// Many questions and answers from https://github.com/deepset-ai/COVID-QA/blob/master/data/faqs/faq_covidbert.csv",
+"// License: New BSD",
+"",
+'"use strict";',
+"",
+"// Most paraphrases by Ken Kahn",
+"// a few from https://quillbot.com/",
+"",
+"LIFE.sentences_and_answers = () => {",
+"    let group_of_questions = [];",
+"    let answers = [];"
+];
+     const afterword = [
+"",
+"    return {group_of_questions, answers};",
+"",
+"};",
+];
+    const write_qa_js = () => {
+    	add_question_paraphrasings();
+    	let qa_js = "";
+    	const write = (line) => {
+    		// replace new lines with space
+    		// and replace bad characters with space as well
+    		// and links should open in a new tab
+    		qa_js += line.replace(/\n/g, " ").replace(/�/g, " ").replace(/<a /, '<a target="_blank" ') + "\n";
+    	};
+    	const quote_apostrophes = (string) => {
+    		return string.replace(/'/g, "\\'");
+    	};
+    	preamble.forEach((line) => {
+    		write(line);
+    	});
+    	faq.forEach((qa, index) => {
+    		write("group_of_questions.push([ // " + index);
+    		qa.questions.forEach((question) => {
+    			write("'" + quote_apostrophes(question) + "',")
+    		});
+    		write(']);');
+    		write('answers.push(');
+    		write("'" + quote_apostrophes(qa.answerhtml) + "');")
+    	});
+    	afterword.forEach((line) => {
+    		write(line);
+    	});
+    	console.log(qa_js);
+    };
+    load_local_or_remote_scripts(["./faq_covidbert_pruned.js", "eval_question_similarity_en.js"], undefined, write_qa_js);
+};
 
 return {respond_to_question: respond_to_question};
 

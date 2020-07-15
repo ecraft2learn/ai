@@ -7,8 +7,8 @@
 	<link rel="icon" type="image/png" href="icons/icon-32.png" />
 	<script src="../ecraft2learn.js"></script>
 <!-- 	<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script> -->
-	<script src="../js/tfjs.js"></script> 
-    <script src="encoder/universal-sentence-encoder.js"></script>
+	<script src="../js/tfjs.js"></script>
+    <script src="../js/universal-sentence-encoder.js"></script>
     <script src="../js/user-agent.js"></script>
     <script src="./LIFE.js"></script>
     <script src="../js/train.js"></script>
@@ -38,9 +38,12 @@ if (parameters.has('answer')) { // also the default
 	mode = 'answer questions'; // until new version working well
 }
 const pneumonia = parameters.has('pneumonia');
+const covid = parameters.has('covid');
 let model_name;
 if (pneumonia) {
 	model_name = (mode === 'create model' || mode === 'search') ? "27-11-2019b-pneumonia" : "27-11-2019a-pneumonia";
+} else if (covid) {
+	model_name = (mode === 'create model' || mode === 'search') ? "15-07-2020-covid" : "15-07-2020-covid";
 } else {
 	model_name = (mode === 'create model' || mode === 'search') ? "27-10-2019a" : "26-10-2019b";
 }
@@ -53,7 +56,7 @@ const model_options = {
     dropout_rate: .5,
     batch_normalization: false,
     shuffle: true,
-    epochs: 20000,
+    epochs: 2000,
     optimizer: (i) => tf.train.rmsprop(2e-4), // tf.train.adamax(1e-5), tf.train.adadelta(),
     regularizer: (i) => tf.regularizers.l2({l2: 1e-3}),
     layer_initializer: (index) => tf.initializers.varianceScaling({}),
@@ -68,7 +71,7 @@ const model_options = {
     split_data_on_each_experiment: true,
     add_confusion_to_csv: false,
     search: {type: 'randomSearch', // or 'gridSearch' but it triggers an exception
-             number_of_experiments: 100,
+             number_of_experiments: 1,
              space: {
 //              	     epochs: [1000, 2000],
 //          dropout_rate: [0.25, .5,],
