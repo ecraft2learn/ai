@@ -56,8 +56,8 @@ const model_options = {
     dropout_rate: .5,
     batch_normalization: false,
     shuffle: true,
-    epochs: 2000,
-    optimizer: (i) => tf.train.rmsprop(2e-4), // tf.train.adamax(1e-5), tf.train.adadelta(),
+    epochs: 10000,
+    optimizer: (i) => tf.train.rmsprop(2e-3), // tf.train.adamax(1e-5), tf.train.adadelta(),
     regularizer: (i) => tf.regularizers.l2({l2: 1e-3}),
     layer_initializer: (index) => tf.initializers.varianceScaling({}),
     // for reporting results
@@ -67,7 +67,7 @@ const model_options = {
     testing_fraction: 0,
     validation_fraction: .3,
     stop_if_no_progress_for_n_epochs: 100,
-    number_of_training_repeats: 5,
+    number_of_training_repeats: 3,
     split_data_on_each_experiment: true,
     add_confusion_to_csv: false,
     search: {type: 'randomSearch', // or 'gridSearch' but it triggers an exception

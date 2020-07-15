@@ -597,7 +597,7 @@ document.addEventListener('DOMContentLoaded',
 		if (pneumonia_questions) {
 			file_name = "./pneumonia-qa.js";
 		} else if (covid_questions) {
-			file_name = "./covid-qa.js";
+			file_name = "./covid-qa-50.js";
 		} else {
 			file_name = "./neonatal-qa.js";
 		}
