@@ -3896,7 +3896,11 @@ IDE_Morph.prototype.aboutSnap = function () {
         + 'from the Lifelong Kindergarten group at the MIT Media Lab\n\n'
 
         + 'for more information see https://snap.berkeley.edu\n'
-        + 'and http://scratch.mit.edu';
+        + 'and http://scratch.mit.edu\n\n'
+
+        + "This copy extends the official release\n"
+        + "with special support for embedding Snap! exercises on web pages.\n"
+        + "Details and source at https://github.com/ecraft2learn/ai/tree/master/snap";
 
     noticeTxt = localize('License')
         + '\n\n'
