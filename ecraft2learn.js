@@ -22,14 +22,27 @@ window.ecraft2learn =
           }
       };
       let load_script = (url, when_loaded, if_error) => {
+          record_callbacks(when_loaded, if_error);
+          if (typeof ecraft2learn.loaded_scripts === 'undefined') {
+              ecraft2learn.loaded_scripts = [];
+          }
+          if (ecraft2learn.loaded_scripts.indexOf(url) >= 0) {
+              invoke_callback(when_loaded);
+              return;
+          }
           const script = document.createElement("script");
           script.type = "text/javascript";
           script.src = relative_to_absolute_url(url);
           if (when_loaded) {
-              script.onload = when_loaded;
+              script.onload = () => {
+                  ecraft2learn.loaded_scripts.push(url);
+                  invoke_callback(when_loaded);
+              };
           }
           if (if_error) {
-              script.onerror = if_error;
+              script.onerror = (error) => {
+                  invoke_callback(if_error, error.message);
+              };
           }
           document.head.appendChild(script);
           return script;
@@ -1306,6 +1319,46 @@ window.ecraft2learn =
 //                                       }
 //                                   });
 //     };
+    const get_prediction_from_teachable_machine_image_model = (URL, costume, success_callback, error_callback) => {
+        // based on https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
+        record_callbacks(success_callback, error_callback);
+        const full_URL = relative_to_absolute_url(URL);
+        const modelURL = full_URL + "model.json";
+        const metadataURL = full_URL + "metadata.json";
+        const error_handler = (error) => {
+            if (error_callback) {
+                invoke_callback(error_callback, error.message);
+            } else {
+                console.error(error);
+            }
+        };
+        if (typeof ecraft2learn.teachable_machine_models === 'undefined') {
+            ecraft2learn.teachable_machine_models = {};
+        }
+        let model = ecraft2learn.teachable_machine_models[URL];
+        const predict = () => {
+            model.predict(costume.contents)
+            .then((prediction) => {
+                const class_names = model.getClassLabels();
+                const names_and_scores = prediction.map((score, index) => [class_names[index], score.probability]);
+                invoke_callback(success_callback, javascript_to_snap(names_and_scores));
+            })
+            .catch(error_handler);
+        };
+        if (model === undefined) {
+            // load the model and metadata
+            // Note: the pose library adds "tmImage" object to your window (window.tmImage)
+            tmImage.load(modelURL, metadataURL)
+            .then((loaded_model) => {
+                ecraft2learn.teachable_machine_models[URL] = loaded_model;
+                model = loaded_model;
+                predict();
+            })
+            .catch(error_handler);
+        } else {
+            predict();
+        }
+    };
     const load_tensorflow_model_from_URL = (URL, success_callback, error_callback) => {
         record_callbacks(success_callback, error_callback);
         URL = relative_to_absolute_url(URL);
@@ -3214,6 +3267,7 @@ xhr.send();
   is_model_ready_for_prediction,
   predictions_from_model,
   load_tensorflow_model_from_URL,
+  get_prediction_from_teachable_machine_image_model,
   load_data_from_URL,
   optimize_hyperparameters,
   replace_with_best_model,
@@ -3226,6 +3280,7 @@ xhr.send();
   snap_to_javascript,
   javascript_to_snap,
   relative_to_absolute_url,
+  load_script,
   load_camera_training_from_file: (callback) => {
       load_transfer_training_from_file('camera', callback);
   },
