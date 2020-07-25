@@ -1319,11 +1319,16 @@ window.ecraft2learn =
 //                                       }
 //                                   });
 //     };
-    const get_prediction_from_teachable_machine_image_model = (model_path, costume, success_callback, error_callback) => {
-        get_prediction_from_teachable_machine_model({type: 'image', costume}, model_path, success_callback, error_callback)
+    const get_prediction_from_teachable_machine_image_or_pose_model = (type, model_path, costume, success_callback, error_callback) => {
+        get_prediction_from_teachable_machine_model({type, costume}, model_path, success_callback, error_callback)
     };
+//     const get_prediction_from_teachable_machine_model = (model_path, costume, success_callback, error_callback) => {
+//         get_prediction_from_teachable_machine_model({type: 'pose', costume}, model_path, success_callback, error_callback)
+//     };
     const get_prediction_from_teachable_machine_model = (options, model_path, success_callback, error_callback) => {
         // based on https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
+        // based on https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/pose
+        // based on https://github.com/tensorflow/tfjs-models/tree/master/speech-commands
         record_callbacks(success_callback, error_callback);
         const full_model_path = relative_to_absolute_url(model_path);
         const model_URL = full_model_path + "model.json";
@@ -1340,13 +1345,14 @@ window.ecraft2learn =
             const names_and_scores = prediction.map((score, index) => [class_names[index], score.probability]);
             invoke_callback(success_callback, javascript_to_snap(names_and_scores));
         };
-        if (typeof ecraft2learn.teachable_machine_models === 'undefined') {
-            ecraft2learn.teachable_machine_models = {};
-        }
-        let model = ecraft2learn.teachable_machine_models[URL];
         const predict = () => {
             if (options.type === 'image') {
                 model.predict(options.costume.contents).then(report_predictions).catch(error_handler);
+            } else if (options.type === 'pose') {
+                model.estimatePose(options.costume.contents).then(({pose, posenet_output}) => {
+                    // run input through teachable machine classification model
+                    model.predict(posenet_output).then(report_predictions).catch(error_handler);
+                }).catch(error_handler);
             }
         };
         const when_loaded = (loaded_model) => {
@@ -1354,10 +1360,39 @@ window.ecraft2learn =
             model = loaded_model;
             predict();
         };
+//         const get_webcam = (callback) => {
+//             if (typeof ecraft2learn.posenet_webcam === 'undefined') {
+//                 const size = 200;
+//                 const webcam = new tmPose.Webcam(size, size, option.mirrored); // width, height, flip
+//                 webcam.setup() // request access to the webcam
+//                 .then(() => {
+//                           webcam.play().then(() => {
+//                                                  ecraft2learn.posenet_webcam = webcam;
+//                                                  callback(webcam);
+//                                              })
+//                                        .catch(error_handler)});               
+//             } else {
+//                 callback(ecraft2learn.posenet_webcam);
+//             }
+//         };
+        if (typeof ecraft2learn.teachable_machine_models === 'undefined') {
+            ecraft2learn.teachable_machine_models = {};
+        }
+        let model = ecraft2learn.teachable_machine_models[URL];
+        const api = options.type === 'image' ? tmImage : tmPose;
         if (model === undefined) {
-            if (options.type === 'image') {
-                // Note: the pose library adds "tmImage" object to your window (window.tmImage)
-                tmImage.load(model_URL, metadata_URL).then(when_loaded).catch(error_handler);                
+            if (options.type === 'audio') {
+                const recognizer = speechCommands.create("BROWSER_FFT", // fourier transform type, not useful to change
+                                                         undefined, // speech commands vocabulary feature, not useful for your models
+                                                         model_URL,
+                                                         metadata_URL);
+                // check that model and metadata are loaded via HTTPS requests.
+                const when_ensured_loaded = () => {
+                    when_loaded(recognizer);
+                };
+                recognizer.ensureModelLoaded().then(when_ensured_loaded).catch(error_handler);
+            } else {
+                api.load(model_URL, metadata_URL).then(when_loaded).catch(error_handler);                
             }
         } else {
             predict();
@@ -3271,7 +3306,7 @@ xhr.send();
   is_model_ready_for_prediction,
   predictions_from_model,
   load_tensorflow_model_from_URL,
-  get_prediction_from_teachable_machine_image_model,
+  get_prediction_from_teachable_machine_image_or_pose_model,
   load_data_from_URL,
   optimize_hyperparameters,
   replace_with_best_model,
