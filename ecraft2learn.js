@@ -1319,12 +1319,15 @@ window.ecraft2learn =
 //                                       }
 //                                   });
 //     };
-    const get_prediction_from_teachable_machine_image_model = (URL, costume, success_callback, error_callback) => {
+    const get_prediction_from_teachable_machine_image_model = (model_path, costume, success_callback, error_callback) => {
+        get_prediction_from_teachable_machine_model({type: 'image', costume}, model_path, success_callback, error_callback)
+    };
+    const get_prediction_from_teachable_machine_model = (options, model_path, success_callback, error_callback) => {
         // based on https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
         record_callbacks(success_callback, error_callback);
-        const full_URL = relative_to_absolute_url(URL);
-        const modelURL = full_URL + "model.json";
-        const metadataURL = full_URL + "metadata.json";
+        const full_model_path = relative_to_absolute_url(model_path);
+        const model_URL = full_model_path + "model.json";
+        const metadata_URL = full_model_path + "metadata.json";
         const error_handler = (error) => {
             if (error_callback) {
                 invoke_callback(error_callback, error.message);
@@ -1332,29 +1335,30 @@ window.ecraft2learn =
                 console.error(error);
             }
         };
+        const report_predictions = (prediction) => {
+            const class_names = model.getClassLabels();
+            const names_and_scores = prediction.map((score, index) => [class_names[index], score.probability]);
+            invoke_callback(success_callback, javascript_to_snap(names_and_scores));
+        };
         if (typeof ecraft2learn.teachable_machine_models === 'undefined') {
             ecraft2learn.teachable_machine_models = {};
         }
         let model = ecraft2learn.teachable_machine_models[URL];
         const predict = () => {
-            model.predict(costume.contents)
-            .then((prediction) => {
-                const class_names = model.getClassLabels();
-                const names_and_scores = prediction.map((score, index) => [class_names[index], score.probability]);
-                invoke_callback(success_callback, javascript_to_snap(names_and_scores));
-            })
-            .catch(error_handler);
+            if (options.type === 'image') {
+                model.predict(options.costume.contents).then(report_predictions).catch(error_handler);
+            }
+        };
+        const when_loaded = (loaded_model) => {
+            ecraft2learn.teachable_machine_models[URL] = loaded_model;
+            model = loaded_model;
+            predict();
         };
         if (model === undefined) {
-            // load the model and metadata
-            // Note: the pose library adds "tmImage" object to your window (window.tmImage)
-            tmImage.load(modelURL, metadataURL)
-            .then((loaded_model) => {
-                ecraft2learn.teachable_machine_models[URL] = loaded_model;
-                model = loaded_model;
-                predict();
-            })
-            .catch(error_handler);
+            if (options.type === 'image') {
+                // Note: the pose library adds "tmImage" object to your window (window.tmImage)
+                tmImage.load(model_URL, metadata_URL).then(when_loaded).catch(error_handler);                
+            }
         } else {
             predict();
         }
