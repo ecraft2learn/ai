@@ -30,17 +30,20 @@ window.ecraft2learn =
               invoke_callback(when_loaded);
               return;
           }
+          show_message("Loading...");
           const script = document.createElement("script");
           script.type = "text/javascript";
           script.src = relative_to_absolute_url(url);
           if (when_loaded) {
               script.onload = () => {
+                  show_message();
                   ecraft2learn.loaded_scripts.push(url);
                   invoke_callback(when_loaded);
               };
           }
           if (if_error) {
               script.onerror = (error) => {
+                  show_message();
                   invoke_callback(if_error, error.message);
               };
           }
@@ -171,6 +174,7 @@ window.ecraft2learn =
           if (ecraft2learn.stop_speech_recognition) {
               ecraft2learn.stop_speech_recognition();
           }
+          ecraft2learn.stop_audio_recognition();
           if (ecraft2learn.support_window) {
               Object.values(ecraft2learn.support_window).forEach(function (support_window) {
                   support_window.postMessage('stop', '*');
@@ -1322,9 +1326,13 @@ window.ecraft2learn =
     const get_prediction_from_teachable_machine_image_or_pose_model = (type, model_path, costume, success_callback, error_callback) => {
         get_prediction_from_teachable_machine_model({type, costume}, model_path, success_callback, error_callback)
     };
-//     const get_prediction_from_teachable_machine_model = (model_path, costume, success_callback, error_callback) => {
-//         get_prediction_from_teachable_machine_model({type: 'pose', costume}, model_path, success_callback, error_callback)
-//     };
+    const get_prediction_from_teachable_machine_audio_model = (model_path, options, success_callback, error_callback) => {
+        if (typeof options !== 'object') {
+            options = {};
+        }
+        options.type = 'audio';
+        get_prediction_from_teachable_machine_model(options, model_path, success_callback, error_callback)
+    };
     const get_prediction_from_teachable_machine_model = (options, model_path, success_callback, error_callback) => {
         // based on https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
         // based on https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/pose
@@ -1341,8 +1349,16 @@ window.ecraft2learn =
             }
         };
         const report_predictions = (prediction) => {
-            const class_names = model.getClassLabels();
-            const names_and_scores = prediction.map((score, index) => [class_names[index], score.probability]);
+            let class_names;
+            let names_and_scores;
+            if (model.type === 'audio') {
+                class_names = model.wordLabels();
+                // turn it from float32array to array with 'map'
+                names_and_scores = Array.prototype.slice.call(prediction.scores).map((score, index) => [class_names[index], score]);
+            } else {
+                class_names = model.getClassLabels();
+                names_and_scores = prediction.map((score, index) => [class_names[index], score.probability]); 
+            }
             invoke_callback(success_callback, javascript_to_snap(names_and_scores));
         };
         const predict = () => {
@@ -1353,33 +1369,22 @@ window.ecraft2learn =
                     // run input through teachable machine classification model
                     model.predict(posenet_output).then(report_predictions).catch(error_handler);
                 }).catch(error_handler);
+            } else if (options.type === 'audio' && typeof ecraft2learn.listening_model === 'undefined') {
+                ecraft2learn.listening_model = model;
+                model.listen(report_predictions, {invokeCallbackOnNoiseAndUnknown: true}); // could pass options in here
             }
         };
         const when_loaded = (loaded_model) => {
             ecraft2learn.teachable_machine_models[model_path] = loaded_model;
             model = loaded_model;
+            model.type = options.type;
             predict();
         };
-//         const get_webcam = (callback) => {
-//             if (typeof ecraft2learn.posenet_webcam === 'undefined') {
-//                 const size = 200;
-//                 const webcam = new tmPose.Webcam(size, size, option.mirrored); // width, height, flip
-//                 webcam.setup() // request access to the webcam
-//                 .then(() => {
-//                           webcam.play().then(() => {
-//                                                  ecraft2learn.posenet_webcam = webcam;
-//                                                  callback(webcam);
-//                                              })
-//                                        .catch(error_handler)});               
-//             } else {
-//                 callback(ecraft2learn.posenet_webcam);
-//             }
-//         };
         if (typeof ecraft2learn.teachable_machine_models === 'undefined') {
             ecraft2learn.teachable_machine_models = {};
         }
         let model = ecraft2learn.teachable_machine_models[model_path];
-        const api = options.type === 'image' ? tmImage : tmPose;
+        const api = options.type === 'image' ? tmImage : options.type == 'pose' && tmPose;
         if (model === undefined) {
             if (options.type === 'audio') {
                 // test this with https://teachablemachine.withgoogle.com/models/HnIjdQ-A3/ - It listens for "OK"
@@ -1399,6 +1404,21 @@ window.ecraft2learn =
             predict();
         }
     };
+//         const get_webcam = (callback) => {
+//             if (typeof ecraft2learn.posenet_webcam === 'undefined') {
+//                 const size = 200;
+//                 const webcam = new tmPose.Webcam(size, size, option.mirrored); // width, height, flip
+//                 webcam.setup() // request access to the webcam
+//                 .then(() => {
+//                           webcam.play().then(() => {
+//                                                  ecraft2learn.posenet_webcam = webcam;
+//                                                  callback(webcam);
+//                                              })
+//                                        .catch(error_handler)});               
+//             } else {
+//                 callback(ecraft2learn.posenet_webcam);
+//             }
+//         };
     const load_tensorflow_model_from_URL = (URL, success_callback, error_callback) => {
         record_callbacks(success_callback, error_callback);
         URL = relative_to_absolute_url(URL);
@@ -3145,6 +3165,10 @@ xhr.send();
       if (ecraft2learn.support_window['training using microphone']) {
           ecraft2learn.support_window['training using microphone'].postMessage('stop_recognising', "*");
       }
+      if (typeof ecraft2learn.listening_model !== 'undefined') {
+          ecraft2learn.listening_model.stopListening();
+          ecraft2learn.listening_model = undefined;
+      }
   },
   add_image_to_training: function (costume_or_costume_number, label, callback, sprite) {
       // costume_number supported for backwards compatibility
@@ -3308,6 +3332,7 @@ xhr.send();
   predictions_from_model,
   load_tensorflow_model_from_URL,
   get_prediction_from_teachable_machine_image_or_pose_model,
+  get_prediction_from_teachable_machine_audio_model,
   load_data_from_URL,
   optimize_hyperparameters,
   replace_with_best_model,
