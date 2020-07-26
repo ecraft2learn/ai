@@ -1356,7 +1356,7 @@ window.ecraft2learn =
             }
         };
         const when_loaded = (loaded_model) => {
-            ecraft2learn.teachable_machine_models[URL] = loaded_model;
+            ecraft2learn.teachable_machine_models[model_path] = loaded_model;
             model = loaded_model;
             predict();
         };
@@ -1378,10 +1378,11 @@ window.ecraft2learn =
         if (typeof ecraft2learn.teachable_machine_models === 'undefined') {
             ecraft2learn.teachable_machine_models = {};
         }
-        let model = ecraft2learn.teachable_machine_models[URL];
+        let model = ecraft2learn.teachable_machine_models[model_path];
         const api = options.type === 'image' ? tmImage : tmPose;
         if (model === undefined) {
             if (options.type === 'audio') {
+                // test this with https://teachablemachine.withgoogle.com/models/HnIjdQ-A3/ - It listens for "OK"
                 const recognizer = speechCommands.create("BROWSER_FFT", // fourier transform type, not useful to change
                                                          undefined, // speech commands vocabulary feature, not useful for your models
                                                          model_URL,
