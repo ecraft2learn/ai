@@ -23,21 +23,29 @@ window.ecraft2learn =
       };
       let load_script = (url, when_loaded, if_error) => {
           record_callbacks(when_loaded, if_error);
-          if (typeof ecraft2learn.loaded_scripts === 'undefined') {
-              ecraft2learn.loaded_scripts = [];
+          if (typeof ecraft2learn === 'object') {
+              // might be reloading ecraft2learn.js for example
+              if (typeof ecraft2learn.loaded_scripts === 'undefined') {
+                  ecraft2learn.loaded_scripts = [];
+              }
+              if (ecraft2learn.loaded_scripts.indexOf(url) >= 0) {
+                  invoke_callback(when_loaded);
+                  return;
+              }
+              show_message("Loading...");
           }
-          if (ecraft2learn.loaded_scripts.indexOf(url) >= 0) {
-              invoke_callback(when_loaded);
-              return;
-          }
-          show_message("Loading...");
           const script = document.createElement("script");
           script.type = "text/javascript";
           script.src = relative_to_absolute_url(url);
           if (when_loaded) {
               script.onload = () => {
-                  show_message();
-                  ecraft2learn.loaded_scripts.push(url);
+                  if (typeof ecraft2learn === 'object') {
+                      show_message();
+                      if (typeof ecraft2learn.loaded_scripts === 'undefined') {
+                          ecraft2learn.loaded_scripts = [];
+                      }
+                      ecraft2learn.loaded_scripts.push(url);
+                  }
                   invoke_callback(when_loaded);
               };
           }
