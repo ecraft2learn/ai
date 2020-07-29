@@ -75,6 +75,13 @@ to add a third bucket for "everything else".
 During training then produce images of lots of different things that aren't cats or dogs while pressing the
 button to train for the "everything else" bucket.
 </p>
+<p class="background-information">
+This block does the training completely on your device.
+There are no privacy issues that arise when relying upon third-party cloud services.
+It also means this and associated blocks will work even when there is no Internet.
+(See <a href="./localhost.html">instructions for how to download everything</a> and then run offline.)
+Blocks that use your trained model will typically run much faster than a web service request enabling more reponsive apps.
+</p>
 <p class="instructions">
 Here there are only two labels: "leaning to the left" and "leaning to the right".
 You can edit the list to instead recognise different facial expressions, different people's faces,
@@ -229,8 +236,34 @@ host the file on the web and use its URL to access it.
         container_style = "width: 1000px; height: 400px;"
         caption = "Blocks for loading saved trainings. TRY IT">
 </figure>
-
-<h4 class="instructions-white" id="image-recognition-without-cloud-services">Recognising images without cloud services</h4>
+<h4 class="instructions-white" id="camera-training">Blocks to use models trained in Google's Teachable Machine</h4>
+<p class="instructions">
+Google has developed <a href="https://teachablemachine.withgoogle.com/" target="_blank">The Teachable Machine</a> to
+introduce the process of training a model to categorise images, sounds, and poses.
+After training you can export your model to their server or download the files to your own web server.
+The <span class="block-name">Get prediction for costume ...</span> block reports the probabilities that the costume
+is in each of the categories for which it was trained.
+Note that while this block can use Teachable Machine <i>pose</i> as well as those trained on <i>images</i>,
+there is currently a mismatched version problem that causes errors.
+Check the <a href="https://github.com/googlecreativelab/teachablemachine-community/issues/125" target="_blank">issue report</a>
+to see if it has been resolved.
+</p>
+<p class="instructions">
+The <span class="block-name">Get predictions using Teachable Machine audio model ...</span> block is different since
+it runs a command block input whenever a word is recognised.
+You can try an example of its use in the following exercise.
+In addition to Snap!'s stop sign button, you can stop it from listening by using
+the <span class="block-name">Stop listening for audio label confidences</span> block.
+</p>
+<figure class = "snap-iframe"
+        id = "teachable machine exercise"
+        full_screen = "true"
+        edit_mode = "true"
+        stage_ratio = ".5"
+        container_style = "width: 1000px; height: 400px;"
+        caption = "Blocks for using Teachable Machine models. TRY THEM">
+</figure>
+<h4 class="instructions-white" id="image-recognition-without-cloud-services">Recognising images without training or cloud services</h4>
 <p class="instructions">
 In the <a href="chapter-3.html">previous chapter</a> many blocks were introduced that do image recognition.
 These rely upon AI cloud services from large companies.
