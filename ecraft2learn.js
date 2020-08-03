@@ -3000,7 +3000,7 @@ xhr.send();
           }
           window.open(url, "_blank");
       } else {
-          // report error 
+          window.open(window.location.href, "_blank"); 
       }
   },
   wikipedia_domain: function () {
