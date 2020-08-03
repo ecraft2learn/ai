@@ -3679,6 +3679,9 @@ xhr.send();
   training_buckets: {},
   snap_project_opened: false,
 }} ());
+if (window !== window.parent && inside_snap()) {
+    get_snap_ide().setBlocksScale(1);
+}
 window.speechSynthesis.getVoices(); // to avoid a possible long wait while voices are loaded
 ecraft2learn.chrome_languages =
 [
