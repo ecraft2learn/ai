@@ -125,7 +125,7 @@ window.ecraft2learn =
           var blockTemplate = allBlocks[index].templateInstance();
           return invoke_block_morph(blockTemplate);
       };
-      let get_snap_ide = function (start) {
+      const get_snap_ide = (start) => {
           // finds the Snap! IDE_Morph that is the element 'start' or one of its ancestors
           if (!inside_snap()) {
               return;
@@ -2138,7 +2138,8 @@ xhr.send();
     // the following are the ecraft2learn functions available via this library
 
     return {
-      inside_snap: inside_snap, // determine if this is still needed
+      inside_snap, // used below to fix block zoom within iframes
+      get_snap_ide, // this too
       url_for_collaboration: function () {
           return ecraft2learn.together_URL;
       },
@@ -3680,7 +3681,7 @@ xhr.send();
   snap_project_opened: false,
 }} ());
 if (window !== window.parent && ecraft2learn.inside_snap()) {
-    get_snap_ide().setBlocksScale(1);
+    ecraft2learn.get_snap_ide().setBlocksScale(1);
 }
 window.speechSynthesis.getVoices(); // to avoid a possible long wait while voices are loaded
 ecraft2learn.chrome_languages =
