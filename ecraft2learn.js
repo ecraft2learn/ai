@@ -3679,7 +3679,7 @@ xhr.send();
   training_buckets: {},
   snap_project_opened: false,
 }} ());
-if (window !== window.parent && inside_snap()) {
+if (window !== window.parent && ecraft2learn.inside_snap()) {
     get_snap_ide().setBlocksScale(1);
 }
 window.speechSynthesis.getVoices(); // to avoid a possible long wait while voices are loaded
