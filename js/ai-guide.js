@@ -282,11 +282,12 @@ window.addEventListener(
                  if (new URLSearchParams(search).has('log')) {
                      search += "&assignment=" + name;
                  }
-                 if (snap_url) {
-                     iframe.src = snap_url + search + window.location.hash;
-                 } else {
-                     iframe.src = path_to_ai_folder + "/ai/snap/snap.html" + search + window.location.hash;      
+                 let iframe_src = "https://snap.berkeley.edu/snap/snap.html#present:Username=toontalk&ProjectName=" + 
+                                  name + search + window.location.hash;
+                 if (full_screen !== 'true') {
+                     iframe_src += "&editMode";
                  }
+                 iframe.src = iframe_src;
                  iframe.setAttribute('scrolling', 'no');
                  // remove loading message 1 second after Snap! loads
                  // since project loading takes time too
@@ -336,8 +337,6 @@ window.addEventListener(
          Array.prototype.forEach.call(elements, snap_iframe);
      });
 
-
-//      <li><a href="#camera-training">Training using images</a></li>
 
 
  
