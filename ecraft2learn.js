@@ -3684,7 +3684,7 @@ if (window !== window.parent && ecraft2learn.inside_snap()) {
     const when_loaded = () => {
         const ide = ecraft2learn.get_snap_ide();
         ide.setBlocksScale(1);
-        if (window.frameElement && !window.frameElement.getAttribute("edit_mode")) {
+        if (window.location.href.indexOf('editMode') < 0) {
             ide.toggleAppMode(true);
         }
         // morphic.js does this.keyboardHandler.focus();
