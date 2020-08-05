@@ -3684,9 +3684,9 @@ if (window !== window.parent && ecraft2learn.inside_snap()) {
     const when_loaded = () => {
         const ide = ecraft2learn.get_snap_ide();
         ide.setBlocksScale(1);
-        if (window.location.href.indexOf('editMode') < 0) {
-            ide.toggleAppMode(true);
-        }
+//         if (window.location.href.indexOf('editMode') < 0) {
+//             ide.toggleAppMode(true);
+//         }
         // morphic.js does this.keyboardHandler.focus();
         // which breaks iframes the following dummies it out
         const dummy_next_step = () => {
