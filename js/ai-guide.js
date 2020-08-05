@@ -282,8 +282,12 @@ window.addEventListener(
                  if (new URLSearchParams(search).has('log')) {
                      search += "&assignment=" + name;
                  }
-                 let iframe_src = "https://snap.berkeley.edu/snap/snap.html#present:Username=toontalk&ProjectName=" + 
-                                  name + search + window.location.hash;
+                 const local_web_server = () =>
+                        // based on https://stackoverflow.com/questions/3920892/how-to-detect-if-a-web-page-is-running-from-a-website-or-local-file-system
+                        window.location.protocol == 'file:' || window.location.host.replace( /localhost|127\.0\.0\.1/i, '' );
+                 let domain = local_web_server() ? "/ai" : "https://snap.berkeley.edu";
+                 let iframe_src = domain + "/snap/snap.html#present:Username=toontalk&ProjectName=" + 
+                                  name + search; // + window.location.hash;
                  if (full_screen !== 'true') {
                      iframe_src += "&editMode";
                  }
