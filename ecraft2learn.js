@@ -61,7 +61,7 @@ window.ecraft2learn =
       const inside_snap = function () {
           // this library can be used directly in JavaScript or with other JavaScript-based languages
           // a small amount is Snap! specific and this is used to make those parts conditional on being inside Snap!
-          return typeof world === 'object' && typeof WorldMorph === 'function' && world instanceof WorldMorph;
+          return typeof IDE_Morph === 'function';
       };
       let get_key = function (key_name) {
           // API keys are provided by Snap! reporters
@@ -2991,18 +2991,18 @@ xhr.send();
       window.open((relative_to_absolute_url(url)), "_blank");
   },
   re_open_full_window: () => {
-      const project_path = window.frameElement ? window.frameElement.getAttribute('project_path') : window.location.href;
-      const project_name = window.frameElement ? project_path && project_path.substring(project_path.lastIndexOf('/')+1).slice(0, -4) : // remove .xml
-                           new URLSearchParams(window.location.search).get('project');
-      if (project_name) {
-          let url = project_path.substring(0, project_path.indexOf("/ai/")+4) + "snap/snap.html?project=" + project_name + "&noRun&editMode";
-          if (url.indexOf(window.location.search) < 0) {
-              url += "&" + window.location.search.substring(1);
-          }
-          window.open(url, "_blank");
-      } else {
+//       const project_path = window.frameElement ? window.frameElement.getAttribute('project_path') : window.location.href;
+//       const project_name = window.frameElement ? project_path && project_path.substring(project_path.lastIndexOf('/')+1).slice(0, -4) : // remove .xml
+//                            new URLSearchParams(window.location.search).get('project');
+//       if (project_name) {
+//           let url = project_path.substring(0, project_path.indexOf("/ai/")+4) + "snap/snap.html?project=" + project_name + "&noRun&editMode";
+//           if (url.indexOf(window.location.search) < 0) {
+//               url += "&" + window.location.search.substring(1);
+//           }
+//           window.open(url, "_blank");
+//       } else {
           window.open(window.location.href, "_blank"); 
-      }
+//       }
   },
   wikipedia_domain: function () {
       if (ecraft2learn.default_language) {
@@ -3681,7 +3681,20 @@ xhr.send();
   snap_project_opened: false,
 }} ());
 if (window !== window.parent && ecraft2learn.inside_snap()) {
-    ecraft2learn.get_snap_ide().setBlocksScale(1);
+    window.addEventListener('load', () => {
+        const ide = ecraft2learn.get_snap_ide();
+        ide.setBlocksScale(1);
+        if (!window.frameElement.getAttribute("edit_mode")) {
+            ide.toggleAppMode(true);
+        }
+        // morphic.js does this.keyboardHandler.focus();
+        // which breaks iframes the following dummies it out
+        const dummy_next_step = () => {
+            // keep the dummy version there
+            world.onNextStep = dummy_next_step;
+        };
+        world.onNextStep = dummy_next_step;       
+    });
 }
 window.speechSynthesis.getVoices(); // to avoid a possible long wait while voices are loaded
 ecraft2learn.chrome_languages =
