@@ -41,7 +41,7 @@
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.symbols = '2020-July-01';
+modules.symbols = '2020-July-21';
 
 var SymbolMorph;
 
@@ -73,7 +73,9 @@ SymbolMorph.prototype.names = [
     'gearBig',
     'file',
     'fullScreen',
+    'grow',
     'normalScreen',
+    'shrink',
     'smallStage',
     'normalStage',
     'turtle',
@@ -138,7 +140,9 @@ SymbolMorph.prototype.names = [
     'keyboardFilled',
     'globe',
     'globeBig',
-    'list'
+    'list',
+    'flipVertical',
+    'flipHorizontal'
 ];
 
 // SymbolMorph instance creation:
@@ -190,6 +194,13 @@ SymbolMorph.prototype.setLabelColor = function (
     this.setColor(textColor);
 };
 
+// SymbolMorph dynamic coloring:
+
+SymbolMorph.prototype.getShadowRenderColor = function () {
+    // answer the shadow rendering color, can be overridden for my children
+    return this.shadowColor;
+};
+
 // SymbolMorph layout:
 
 SymbolMorph.prototype.setExtent = function (aPoint) {
@@ -217,12 +228,12 @@ SymbolMorph.prototype.render = function (ctx) {
     if (this.shadowColor) {
         ctx.save();
         ctx.translate(sx, sy);
-        this.renderShape(ctx, this.shadowColor);
+        this.renderShape(ctx, this.getShadowRenderColor());
         ctx.restore();
     }
     ctx.save();
     ctx.translate(x, y);
-    this.renderShape(ctx, this.color);
+    this.renderShape(ctx, this.getRenderColor());
     ctx.restore();
 };
 
@@ -250,6 +261,9 @@ SymbolMorph.prototype.renderShape = function (ctx, aColor) {
     case 'fullScreen':
         this.renderSymbolFullScreen(ctx, aColor);
         break;
+    case 'grow':
+        this.renderSymbolGrow(ctx, aColor);
+        break;
     case 'normalScreen':
         this.renderSymbolNormalScreen(ctx, aColor);
         break;
@@ -258,6 +272,9 @@ SymbolMorph.prototype.renderShape = function (ctx, aColor) {
         break;
     case 'normalStage':
         this.renderSymbolNormalStage(ctx, aColor);
+        break;
+    case 'shrink':
+        this.renderSymbolShrink(ctx, aColor);
         break;
     case 'turtle':
         this.renderSymbolTurtle(ctx, aColor);
@@ -447,6 +464,12 @@ SymbolMorph.prototype.renderShape = function (ctx, aColor) {
         break;
     case 'list':
         this.renderSymbolList(ctx, aColor);
+        break;
+    case 'flipVertical':
+        this.renderSymbolFlipVertical(ctx, aColor);
+        break;
+    case 'flipHorizontal':
+        this.renderSymbolFlipHorizontal(ctx, aColor);
         break;
     default:
         throw new Error('unknown symbol name: "' + this.name + '"');
@@ -696,9 +719,56 @@ SymbolMorph.prototype.renderSymbolFullScreen = function (ctx, color) {
     ctx.fill();
 };
 
-SymbolMorph.prototype.renderSymbolNormalScreen = function (ctx, color) {
-    // draw two arrows pointing diagonally inwards
+SymbolMorph.prototype.renderSymbolGrow = function (ctx, color) {
+
     var h = this.size,
+        width = this.symbolWidth(),
+        c = width / 2,
+        off = width / 20,
+        w = width / 3;
+        
+    function arrows() {
+        ctx.strokeStyle = color.toString();
+        ctx.lineWidth = width / 7;
+        ctx.beginPath();
+        ctx.moveTo(c - off * 3, c + off * 3);
+        ctx.lineTo(off * 2, h - off * 2);
+        ctx.stroke();
+
+        ctx.strokeStyle = color.toString();
+        ctx.lineWidth = width / 7;
+        ctx.beginPath();
+        ctx.moveTo(c + off * 3 , c - off * 3);
+        ctx.lineTo(h - off * 2, off * 2);
+        ctx.stroke();
+
+        ctx.fillStyle = color.toString();
+        ctx.beginPath();
+        ctx.moveTo(0, h);
+        ctx.lineTo(0, h - w);
+        ctx.lineTo(w, h);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = color.toString();
+        ctx.beginPath();
+        ctx.moveTo(h, 0);
+        ctx.lineTo(h - w, 0);
+        ctx.lineTo(h, w);
+        ctx.closePath();
+        ctx.fill();
+    }
+    
+    // draw four arrows pointing diagonally outwards
+    arrows();
+    ctx.translate(this.size, 0);
+    ctx.rotate(radians(90));
+    arrows();
+};
+
+
+SymbolMorph.prototype.renderSymbolNormalScreen = function (ctx, color) {
+ var h = this.size,
         w = this.symbolWidth(),
         c = w / 2,
         off = w / 20;
@@ -732,6 +802,51 @@ SymbolMorph.prototype.renderSymbolNormalScreen = function (ctx, color) {
     ctx.lineTo(c - off, w);
     ctx.closePath();
     ctx.fill();
+};
+
+SymbolMorph.prototype.renderSymbolShrink = function (ctx, color) {
+    // draw 4 arrows pointing diagonally inwards
+    var h = this.size,
+        w = this.symbolWidth(),
+        c = w / 2,
+        off = w / 20;
+        
+    function arrows() {
+        ctx.strokeStyle = color.toString();
+        ctx.lineWidth = w / 8;
+        ctx.beginPath();
+        ctx.moveTo(c - off * 3, c + off * 3);
+        ctx.lineTo(off, h - off);
+        ctx.stroke();
+
+        ctx.strokeStyle = color.toString();
+        ctx.lineWidth = w / 8;
+        ctx.beginPath();
+        ctx.moveTo(c + off * 3, c - off * 3);
+        ctx.lineTo(h - off, off);
+        ctx.stroke();
+
+        ctx.fillStyle = color.toString();
+        ctx.beginPath();
+        ctx.moveTo(c + off * 2, c - off * 2);
+        ctx.lineTo(w - off, c - off * 2);
+        ctx.lineTo(c + off * 2, 0 + off);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = color.toString();
+        ctx.beginPath();
+        ctx.moveTo(c - off * 2, c + off * 2);
+        ctx.lineTo(0 + off, c + off * 2);
+        ctx.lineTo(c - off * 2, w - off);
+        ctx.closePath();
+        ctx.fill();
+    }
+    
+    arrows();
+    ctx.translate(this.size, 0);
+    ctx.rotate(radians(90));
+    arrows();
 };
 
 SymbolMorph.prototype.renderSymbolSmallStage = function (ctx, color) {
@@ -2065,6 +2180,39 @@ SymbolMorph.prototype.renderSymbolList = function (ctx, color) {
     ctx.clip('evenodd');
     ctx.fillRect(0, 0, w, h);
 };
+
+SymbolMorph.prototype.renderSymbolFlipHorizontal = function (ctx, color) {
+    var w = this.symbolWidth(),
+        h = this.size,
+        c = w / 2,
+        off = w / 15;
+    
+    ctx.strokeStyle = color.toString();
+    ctx.lineWidth = w / 15;
+    ctx.beginPath();
+    ctx.moveTo(0 + off, h - off / 2);
+    ctx.lineTo(c - off * 1.2, h - off / 2);
+    ctx.lineTo(c - off * 1.2, off * 2);
+    ctx.closePath();
+    ctx.stroke();
+    
+    ctx.fillStyle = color.toString();
+    ctx.lineWidth = w / 15;
+    ctx.beginPath();
+    ctx.moveTo(w - off, h - off / 2);
+    ctx.lineTo(c + off * 1.2, h - off / 2);
+    ctx.lineTo(c + off * 1.2, off * 2);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.fill();
+    };
+    
+SymbolMorph.prototype.renderSymbolFlipVertical = function (ctx, color) {
+    ctx.translate(0, this.size);
+    ctx.rotate(radians(-90));
+    this.renderSymbolFlipHorizontal(ctx, color);
+};
+
 
 /*
 // register examples with the World demo menu

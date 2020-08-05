@@ -71,17 +71,18 @@
 
     2020 Apr 14 - Morphic2 migration (Jens)
     2020 May 17 - Pipette alpha fix (Joan)
+    2020 July 13 - modified scale buttons (Jadga)
 */
 
 /*global Point, Rectangle, DialogBoxMorph, AlignmentMorph, PushButtonMorph,
-Color, SymbolMorph, newCanvas, Morph, TextMorph, Costume, SpriteMorph, nop,
+Color, SymbolMorph, newCanvas, Morph, StringMorph, Costume, SpriteMorph, nop,
 localize, InputFieldMorph, SliderMorph, ToggleMorph, ToggleButtonMorph,
 BoxMorph, modules, radians, MorphicPreferences, getDocumentPositionOf,
 StageMorph, isNil, SVG_Costume*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.paint = '2020-May-17';
+modules.paint = '2020-July-13';
 
 // Declarations
 
@@ -127,7 +128,7 @@ PaintEditorMorph.prototype.buildContents = function () {
 
     this.addBody(new AlignmentMorph('row', this.padding));
     this.controls = new AlignmentMorph('column', this.padding / 2);
-    this.controls.alignment = 'left';
+    this.controls.alignment = 'center';
 
     this.edits = new AlignmentMorph('row', this.padding / 2);
     this.buildEdits();
@@ -241,10 +242,9 @@ PaintEditorMorph.prototype.buildEdits = function () {
                     'This will erase your current drawing.\n' +
                     'Are you sure you want to continue?',
                     'Switch to vector editor?',
-                    function () {
-                        myself.switchToVector();
-                    },
-                    nop
+                    () => {
+                        setTimeout(() => {myself.switchToVector(); });
+                    }
                 );
             } else {
                 myself.switchToVector();
@@ -258,20 +258,24 @@ PaintEditorMorph.prototype.buildEdits = function () {
 PaintEditorMorph.prototype.buildScaleBox = function () {
     var paper = this.paper;
     this.scaleBox.add(this.pushButton(
-        "grow",
-        function () {paper.scale(0.05, 0.05); }
+        new SymbolMorph('grow', 18),
+        function () {paper.scale(0.05, 0.05); },
+        'grow'
     ));
     this.scaleBox.add(this.pushButton(
-        "shrink",
-        function () {paper.scale(-0.05, -0.05); }
+        new SymbolMorph('shrink', 18),
+        function () {paper.scale(-0.05, -0.05); },
+        'shrink'
     ));
     this.scaleBox.add(this.pushButton(
-        "flip ↔",
-        function () {paper.scale(-2, 0); }
+        new SymbolMorph('flipHorizontal', 18),
+        function () {paper.scale(-2, 0); },
+        'flip horizontal'
     ));
     this.scaleBox.add(this.pushButton(
-        "flip ↕",
-        function () {paper.scale(0, -2); }
+        new SymbolMorph('flipVertical', 18),
+        function () {paper.scale(0, -2); },
+        'flip vertical'
     ));
     this.scaleBox.fixLayout();
 };
@@ -283,21 +287,21 @@ PaintEditorMorph.prototype.openIn = function (
     callback,
     anIDE
 ) {
+    var myself = this;
     // Open the editor in a world with an optional image to edit
     this.oldim = oldim;
     this.callback = callback || nop;
     this.ide = anIDE;
 
     this.processKeyUp = function () {
-        this.shift = false;
-        this.propertiesControls.constrain.refresh();
+        myself.shift = false;
+        myself.propertiesControls.constrain.refresh();
     };
 
     this.processKeyDown = function () {
-        this.shift = this.world().currentKey === 16;
-        this.propertiesControls.constrain.refresh();
+        myself.shift = myself.world().currentKey === 16;
+        myself.propertiesControls.constrain.refresh();
     };
-
     //merge oldim:
     if (this.oldim) {
         this.paper.automaticCrosshairs = isNil(oldrc);
@@ -349,16 +353,12 @@ PaintEditorMorph.prototype.cancel = function () {
 };
 
 PaintEditorMorph.prototype.switchToVector = function () {
-    var myself = this;
+
     this.object = new SVG_Costume(new Image(), '', new Point(0,0));
     this.object.edit(
         this.world(),
         this.ide,
-        true,
-        this.oncancel,
-        function() {
-            myself.ide.currentSprite.changed();
-        }
+        true
     );
 };
 
@@ -366,7 +366,10 @@ PaintEditorMorph.prototype.populatePropertiesMenu = function () {
     var c = this.controls,
         myself = this,
         pc = this.propertiesControls,
-        alpen = new AlignmentMorph("row", this.padding);
+        alpen = new AlignmentMorph("row", this.padding),
+        brushControl = new AlignmentMorph("column", 3);
+        
+    brushControl.alignment = "left";
 
     pc.primaryColorViewer = new Morph();
     pc.primaryColorViewer.isCachingImage = true;
@@ -399,7 +402,7 @@ PaintEditorMorph.prototype.populatePropertiesMenu = function () {
         ctx.stroke();
     };
 
-    pc.primaryColorViewer.setExtent(new Point(180, 50));
+    pc.primaryColorViewer.setExtent(new Point(180, 40));
     pc.primaryColorViewer.color = new Color(0, 0, 0);
 
     pc.colorpicker = new PaintColorPickerMorph(
@@ -450,13 +453,18 @@ PaintEditorMorph.prototype.populatePropertiesMenu = function () {
         "Constrain proportions of shapes?\n(you can also hold shift)",
         function () {return myself.shift; }
     );
+    pc.constrain.label.isBold = false;
 
     c.add(pc.colorpicker);
     //c.add(pc.primaryColorButton);
     c.add(pc.primaryColorViewer);
-    c.add(new TextMorph(localize("Brush size")));
-    c.add(alpen);
-    c.add(pc.constrain);
+    brushControl.add(
+        new StringMorph(localize("Brush size") + ":", 10, null, true)
+    );
+    brushControl.add(alpen);
+    brushControl.add(pc.constrain);
+    brushControl.fixLayout();
+    c.add(brushControl);
 };
 
 PaintEditorMorph.prototype.toolButton = function (icon, hint) {
@@ -719,6 +727,7 @@ PaintCanvasMorph.prototype.centermerge = function (a, b) {
 
 PaintCanvasMorph.prototype.clearCanvas = function () {
     this.buildContents();
+    this.drawNew();
     this.changed();
 };
 

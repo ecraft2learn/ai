@@ -1,3 +1,0 @@
-gui.js:
-
-if (this.userLanguage && this.userLanguage !== 'null') { // Ken Kahn added 'null' condition since localhost produces it 

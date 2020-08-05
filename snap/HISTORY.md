@@ -1,10 +1,190 @@
 # Snap! (BYOB) History
 
 ## in development:
+
+## 6.1.2:
+* fixed variable scope for ASK/TELL
+
+### 2020-08-01
+* threads: fixed variable scope for ASK/TELL
+
+## 6.1.1:
+* rolled back scope binding change
+
+### 2020-07-31
+* rolled back scope binding change
+
+## 6.1.0:
 * **New Features:**
+    * fade blocks
+* **Documentation Updates:**
+    * added migration guide for Morphic2/Snap!6
 * **Notable Changes:**
+    * changed label of green "length of" reporter to "length of text"
+    * new iconic buttons for grow, shrink and flip actions in the paint editor, thanks, Jadga!
+    * UI: automatically switch to scripts tab when dragging a block into the editor pane
+    * slightly darker default (non-flat) IDE colors, more cotrast
+    * enabled grouping the libraries dialog, thanks, Brian!
+    * cleaned up, grouped and annotated libraries, thanks, Brian!
+    * updated "About Snap!" dialog box
 * **Notable Fixes:**
+    * fixed FOR EACH for hybrid lists, thanks, Brian!
+    * fixed script execution behavior when turning turbo mode off programmatically, thanks, Jadga, for reporting it.
+    * fixed keyboard shortcuts for saving projects (ctrl + s), finding blocks (ctrl + f) etc..
+    * fixed shift-key constrain mode and "clear" in paint and vector editors, thanks, Joan!
+    * made remaining synchronous http requests asynch (url: #open, #run)
+    * update the Hand's position on mouse-down - avoid triggering at the origin point if clicking before the mouse has been moved
+    * fixed a list-watcher direct-editing index offset bug
+    * fixed input slider target update rendering
+    * fixed sprite speech balloon display for sounds
+    * library browser: import selected library on pressing enter
+    * fixed binding contexts to other receivers (variable scope for ASK / TELL)
+    * fixed numeric input fields in dialog boxes
+    * fixed reacting to keyboard input in dialog boxes
+    * fixed zoom blocks type-in dialog
+    * made stack-highlights un-touchable
 * **Translation Updates:**
+    * German
+
+### 2020-07-30
+* gui: updated Jadga as contributor in credits
+* prepared release
+
+### 2020-07-29
+* blocks: made stack-highlights un-touchable
+
+### 2020-07-28
+* blocks: tweaked stack-highlight for (partially) faded blocks
+
+### 2020-07-27
+* threads: fixed binding contexts to other receivers (variable scope for ASK / TELL)
+* gui: updated "About Snap!" dialog box
+* gui: library browser: import selected library on pressing enter
+* widgets: fixed numeric input fields in dialog boxes
+* widgets: fixed reacting to keyboard input in dialog boxes
+* blocks: fixed zoom blocks type-in dialog
+
+### 2020-07-26
+* objects: fixed sprite speech balloon display for sounds
+* cleaned up, grouped and annotated libraries, thanks, Brian!
+
+### 2020-07-24
+* gui: cleaned up block-fading pre-sets
+* updated German translation
+* gui: tweaked IDE colors for block-fading
+* blocks, threads, byob, widgets: tweaked block representations in widgets for fading
+* blocks, byob: tweaked more block representations in widgets for fading
+
+### 2020-07-23
+* morphic: fixed mouseDown events for touch devices
+* morphic, gui: added separators to list morphs, '~' for the libraries dialog
+* blocks: tweaked block-fading coloring 
+
+### 2020-07-22
+* morphic, blocks, gui: tweaked block-fading mouse-over
+* blocks, threads: tweaked context visualizations to be alpha-independent
+* gui: save block-transparency in  settings 
+* morphic: fixed input slider target update rendering
+
+### 2020-07-21
+* blocks: tweaked block highlights for fade-out
+* widgets, gui: tweaked scripts tab for fade-out
+* blocks, gui: tweaked default mode colors to slightly darker
+
+### 2020-07-20
+* objects: fixed a list-watcher direct-editing offset bug
+* morphic: update the Hand's position on mouse-down - avoid triggering at the origin point
+* symbols: added hooks for dynamic coloring
+* blocks: added blocks-fading support for symbols (under construction)
+* morphic: tweaked transparency of grabbed morphs
+
+### 2020-07-19
+* blocks: blocks-fade-out support for label arrows (under construction)
+* blocks: blocks-fade-out support for multi-line inputs (under construction)
+
+### 2020-07-17
+* morphic, blocks: blocks-fadeout (under construction)
+
+### 2020-07-15
+* morphic: made keyboard handler (more) invisible, thanks, Bernat!
+* gui: made remaining synchronous http requests asynch (url: #open, #run)
+* morphic, gui: switch to scripts tab when dragging a block into the editor pane
+* blocks: refactored transparency handling for syntax elements
+
+### 2020-07-13
+* paint, symbols: new iconic buttons for grow, shrink and flip actions, thanks, Jadga!
+* sketch: tweaked layout to match the paint editor's
+* fixed shift-key constrain mode and "clear" in paint and vector editors, thanks, Joan!
+
+### 2020-07-10
+* morphic: prevent the browser from hijacking cmd-d/f/i/p/s key events
+* added migration guide for Morphic2/Snap!6
+* updated Eisenbergification library, thanks, Brian!
+
+### 2020-07-09
+* new dev version
+* threads: fixed FOR EACH for hybrid lists, thanks, Brian!
+* threads: fixed script execution behavior when turning turbo mode off programmatically, thanks, Jadga, for reporting it.
+* locale: added English translation for 'length of %s' to 'length of text %s' to avoid confusion among both blocks
+* updated German translation for 'length of %s'
+
+## 6.0.0:
+* **New Features:**
+    * new Morphic architecture, faster loading, smaller memory footprint, mobile-friendly
+    * hyper-blocks
+    * new "send msg to sprite" primitive in control
+    * new  "index of" primitive in lists
+    * new fast "append" reporter in lists
+    * show login status in the cloud button (outline = logged out, solid = logged in)
+    * custom drop-downs (experimental, uses JS)
+    * blockify lists / tables with atomic values in watchers
+    * extended libraries (APL, thanks, Brian) and programmatic handling of variables (thanks, Joan)
+    * "result pic..." context menu entry for reporters (used to be hidden "script pic with result..." option)
+    * more block relabelling options, e.g. for loops
+    * prefix keys in custom drop-down menus with '§_' to only show them if the shift-key is pressed
+    * new "id" option in the monadic function reporter primitive (hyperizable to support deep copies of nested lists)
+    * new api for creating new lists for embedded Snap sessions
+* **Notable Changes:**
+    * repeated WARPs inside loops have been sped up
+    * duplicated blocks / scripts are grabbed by their top-left corner rather than their center
+    * close all widgets when opening a new project
+    * scan first ten rows of a list to determine the number of columns to show in table views
+    * give duplicated custom block definitions unique names
+    * sort sound and message names in drop-down menus alphabetically
+    * changed result for FIND to empty instead of false if none is found
+    * new flat design
+    * increased contrast in dark mode
+    * toggling Retina support has been hidden (because it no longer works the same)
+* **Notable Fixes:**
+    * multi-c slots embedding reporters has been disabled
+    * programmatically changing a clone from "permanent" to "temporary" now works in presentation mode
+    * costumes and sounds of clones are now properly shadowed when modifying them programmatically
+    * fixed editing cells in multi-page list watchers
+    * recursive calls to "broadcast and wait" execute smoothly again
+    * expanding a collapsed comment or clicking on it now brings it to the front
+    * long project titles no longer overlap other buttons in the control bar
+    * "empty" continuations referring to the end of a script no longer throw an error.
+* **Translation Updates:**
+    * New Hebrew translation
+    * Ukranian
+    * Catalan
+    * Portuguese
+    * Chinese
+    * Japanese
+    * Bengali
+    * German
+
+## 5.4.5:
+* **Notable Change:**
+    * always record audio in mono
+* **Translation Update:**
+    * German, thanks, Sven!
+
+### 2020-01-28
+* new dev version
+* gui: record sounds in mono
+* gui, objects: force stereo audio recordings to mono
+* Germans translation tweak, thanks, Sven!
 
 ## 5.4.4:
 * **Notable Fixes**
