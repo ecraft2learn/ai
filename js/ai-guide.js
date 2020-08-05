@@ -282,11 +282,11 @@ window.addEventListener(
                  if (new URLSearchParams(search).has('log')) {
                      search += "&assignment=" + name;
                  }
-                 const local_web_server = () =>
-                        window.location.protocol == 'file:' || 
-                        window.location.host  === 'localhost' ||
-                        window.location.host  === '127.0.0.1';
-                 let domain = local_web_server() ? "/ai" : "https://snap.berkeley.edu";
+                 const local_web_server = 
+                      window.location.protocol == 'file:' || 
+                      window.location.hostname  === 'localhost' ||
+                      window.location.hostname  === '127.0.0.1';
+                 let domain = local_web_server ? "/ai" : "https://snap.berkeley.edu";
                  let iframe_src = domain + "/snap/snap.html#present:Username=toontalk&ProjectName=" + 
                                   name + search; // + window.location.hash;
                  if (full_screen !== 'true') {
