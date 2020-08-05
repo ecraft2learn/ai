@@ -3681,7 +3681,7 @@ xhr.send();
   snap_project_opened: false,
 }} ());
 if (window !== window.parent && ecraft2learn.inside_snap()) {
-    window.addEventListener('load', () => {
+    const when_loaded = () => {
         const ide = ecraft2learn.get_snap_ide();
         ide.setBlocksScale(1);
         if (!window.frameElement.getAttribute("edit_mode")) {
@@ -3694,7 +3694,12 @@ if (window !== window.parent && ecraft2learn.inside_snap()) {
             world.onNextStep = dummy_next_step;
         };
         world.onNextStep = dummy_next_step;       
-    });
+     };
+     if (typeof world === 'undefined') {
+         window.addEventListener('load', when_loaded);
+     } else {
+         when_loaded();
+     }
 }
 window.speechSynthesis.getVoices(); // to avoid a possible long wait while voices are loaded
 ecraft2learn.chrome_languages =
