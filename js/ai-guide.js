@@ -283,8 +283,9 @@ window.addEventListener(
                      search += "&assignment=" + name;
                  }
                  const local_web_server = () =>
-                        // based on https://stackoverflow.com/questions/3920892/how-to-detect-if-a-web-page-is-running-from-a-website-or-local-file-system
-                        window.location.protocol == 'file:' || window.location.host.replace( /localhost|127\.0\.0\.1/i, '' );
+                        window.location.protocol == 'file:' || 
+                        window.location.host  === 'localhost' ||
+                        window.location.host  === '127.0.0.1';
                  let domain = local_web_server() ? "/ai" : "https://snap.berkeley.edu";
                  let iframe_src = domain + "/snap/snap.html#present:Username=toontalk&ProjectName=" + 
                                   name + search; // + window.location.hash;
@@ -340,8 +341,3 @@ window.addEventListener(
          }
          Array.prototype.forEach.call(elements, snap_iframe);
      });
-
-
-
- 
-
