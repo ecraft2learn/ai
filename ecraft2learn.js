@@ -3682,24 +3682,19 @@ xhr.send();
 }} ());
 if (window !== window.parent && ecraft2learn.inside_snap()) {
     const when_loaded = () => {
-        const ide = ecraft2learn.get_snap_ide();
-        ide.setBlocksScale(1);
-//         if (window.location.href.indexOf('editMode') < 0) {
-//             ide.toggleAppMode(true);
-//         }
-        // morphic.js does this.keyboardHandler.focus();
-        // which breaks iframes the following dummies it out
-        const dummy_next_step = () => {
-            // keep the dummy version there
-            world.onNextStep = dummy_next_step;
-        };
-        world.onNextStep = dummy_next_step;       
-     };
-     if (typeof world === 'undefined') {
-         window.addEventListener('load', when_loaded);
-     } else {
-         when_loaded();
-     }
+       // morphic.js does this.keyboardHandler.focus();
+       // which breaks iframes the following dummies it out
+       const dummy_next_step = () => {
+           // keep the dummy version there
+           world.onNextStep = dummy_next_step;
+       };
+       world.onNextStep = dummy_next_step;       
+    };
+    if (typeof world === 'undefined') {
+        window.addEventListener('load', when_loaded);
+    } else {
+        when_loaded();
+    }
 }
 window.speechSynthesis.getVoices(); // to avoid a possible long wait while voices are loaded
 ecraft2learn.chrome_languages =

@@ -324,7 +324,21 @@ window.addEventListener(
                      }
                      let div = document.createElement('div');
                      div.className = "iframe-container";
+                     const zoom = +(localStorage && localStorage['-snap-setting-zoom']);
                      div.style = style;
+                     if (zoom > 1) {
+                         // need to adjust width and height for zoom
+                         const multiply = (measure, factor) => {
+                             if (+measure > 0) {
+                                  return +measure * factor;
+                             }
+                             const number = +measure.match(/\d+/g)[0];
+                             const units = measure.match(/[a-zA-Z]+/g)[0];
+                             return number * zoom + units;
+                         };
+                         div.style.width = multiply(div.style.width, zoom);
+                         div.style.height = multiply(div.style.height, zoom);
+                     }
                      div.appendChild(iframe);
                      figure.insertBefore(div, figcaption);
                  }
