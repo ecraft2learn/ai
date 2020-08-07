@@ -25,19 +25,9 @@
         <script src="src/api.js?version=2020-07-06"></script>
         <script src="src/sha512.js?version=2019-06-27"></script>
         <script src="src/FileSaver.min.js?version=2019-06-27"></script>
-        <script>
-            var world;
-            window.onload = function () {
-                world = new WorldMorph(document.getElementById('world'));
-                new IDE_Morph().openIn(world);
-                loop();
-			};
-            function loop() {
-                requestAnimationFrame(loop);
-                world.doOneCycle();
-            }
-        </script>
-        <script src="/ai/ecraft2learn.js"></script>
+        <!-- following two scripts added by Ken Kahn -->
+            <script type="text/javascript" src="/ai/js/onload.js"></script>
+            <script src="/ai/ecraft2learn.js"></script>
     </head>
     <body style="margin: 0;">
         <canvas id="world" tabindex="1" style="position: absolute;"></canvas>

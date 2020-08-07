@@ -286,9 +286,9 @@ window.addEventListener(
                       window.location.protocol == 'file:' || 
                       window.location.hostname  === 'localhost' ||
                       window.location.hostname  === '127.0.0.1';
-                 let domain = local_web_server ? "/ai" : "https://snap.berkeley.edu";
-                 let iframe_src = domain + "/snap/snap.html#present:Username=toontalk&ProjectName=" + 
-                                  name + search; // + window.location.hash;
+                 let iframe_src = local_web_server ? 
+                                  window.location.origin + "/ai/snap/snap.html?project=" + name + search + window.location.hash : 
+                                  "https://snap.berkeley.edu/snap/snap.html#present:Username=toontalk&ProjectName=" + name + search;                
                  if (full_screen !== 'true') {
                      iframe_src += "&editMode";
                  }
