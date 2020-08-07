@@ -2138,7 +2138,7 @@ xhr.send();
     // the following are the ecraft2learn functions available via this library
 
     return {
-      inside_snap, // used below to fix block zoom within iframes
+      inside_snap,
       get_snap_ide, // this too
       url_for_collaboration: function () {
           return ecraft2learn.together_URL;
@@ -3688,7 +3688,11 @@ if (window !== window.parent && ecraft2learn.inside_snap()) {
            // keep the dummy version there
            world.onNextStep = dummy_next_step;
        };
-       world.onNextStep = dummy_next_step;       
+       world.onNextStep = dummy_next_step;
+       const keyboard_element = document.getElementById('morphic_keyboard');
+       if (keyboard_element) {
+           keyboard_element.focus();
+       }      
     };
     if (typeof world === 'undefined') {
         window.addEventListener('load', when_loaded);

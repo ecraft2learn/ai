@@ -255,7 +255,8 @@ window.addEventListener(
              let name = element.id;
              let style = element.getAttribute('container_style');
              let caption = element.getAttribute('caption');
-             let full_screen = element.getAttribute('full_screen');
+             let run_full_screen = element.getAttribute('run_full_screen');
+             let full_screen = run_full_screen || element.getAttribute('full_screen');
              let edit_mode = element.getAttribute('edit_mode');
              let stage_ratio = element.getAttribute('stage_ratio');
              let figure     = document.getElementById(name);

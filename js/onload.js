@@ -13,8 +13,8 @@ window.addEventListener('load', function () {
 		world.doOneCycle();
 	};
 	let full_screen = true;
-	let run_full_screen = new URL(location.href).searchParams.get('noRun') !== "";
-	let edit_mode = new URL(location.href).searchParams.get('editMode') !== "";
+	let run_full_screen = !(new URL(location.href).searchParams.get('noRun'));
+	let edit_mode = !!(new URL(location.href).searchParams.get('editMode'));
 	let project_path;
 	let show_palette = true; // unless in an iframe where the default is to hide it for space reasons
 	const load_project_string = 
@@ -31,15 +31,14 @@ window.addEventListener('load', function () {
 				           	   // Snap uses _ instead of - in two part language code names
 				           	   ide_morph.setLanguage(parameters.get('locale').replace('-', '_'));
 				           }
-						   ide_morph.rawOpenProjectString(project_text);
+				           ide_morph.rawOpenProjectString(project_text);
 						   if (full_screen) {
 							   ide_morph.toggleAppMode(true);
-						   } 
+						   } else if (edit_mode) {
+						   	   ide_morph.toggleAppMode(false);
+						   }
 						   if (run_full_screen) {
 							   ide_morph.runScripts();
-						   }
-						   if (edit_mode) {
-						   	   ide_morph.toggleAppMode(false);
 						   }
 						   ide_morph.showMessage(""); // remove message
 						   if (!show_palette && full_screen && edit_mode) {
@@ -70,9 +69,9 @@ window.addEventListener('load', function () {
 	    	return;
 	    }
 		project_path = window.frameElement.getAttribute("project_path");
-		run_full_screen = window.frameElement.getAttribute("run_full_screen");
-		full_screen = run_full_screen || window.frameElement.getAttribute("full_screen");
-		edit_mode = window.frameElement.getAttribute("edit_mode");
+		run_full_screen = run_full_screen || window.frameElement.getAttribute("run_full_screen");
+		full_screen = run_full_screen || full_screen || window.frameElement.getAttribute("full_screen");
+		edit_mode = edit_mode || window.frameElement.getAttribute("edit_mode");
 		show_palette = window.frameElement.getAttribute("show_palette");
 		let stage_scale = window.frameElement.getAttribute("stage_ratio");
 		if (project_path) {
