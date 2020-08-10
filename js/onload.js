@@ -13,8 +13,7 @@ window.addEventListener('load', function () {
 		world.doOneCycle();
 	};
 	let full_screen = true;
-	let run_full_screen = !(new URL(location.href).searchParams.get('noRun'));
-	let edit_mode = !!(new URL(location.href).searchParams.get('editMode'));
+	let run_full_screen = window.location.href.indexOf('noRun') < 0;
 	let project_path;
 	let show_palette = true; // unless in an iframe where the default is to hide it for space reasons
 	const load_project_string = 
@@ -32,13 +31,13 @@ window.addEventListener('load', function () {
 				           	   ide_morph.setLanguage(parameters.get('locale').replace('-', '_'));
 				           }
 				           ide_morph.rawOpenProjectString(project_text);
-						   if (full_screen) {
-							   ide_morph.toggleAppMode(true);
-						   } else if (edit_mode) {
-						   	   ide_morph.toggleAppMode(false);
-						   }
-						   if (run_full_screen) {
-							   ide_morph.runScripts();
+						   if (window.location.href.indexOf('editMode') >= 0) {
+							   ide_morph.toggleAppMode(false);
+						   } else if (full_screen) {
+						   	   ide_morph.toggleAppMode(true);
+						   	   if (run_full_screen) {
+								   ide_morph.runScripts();
+							   }
 						   }
 						   ide_morph.showMessage(""); // remove message
 						   if (!show_palette && full_screen && edit_mode) {
