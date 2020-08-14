@@ -13,6 +13,7 @@ window.addEventListener('load', function () {
 		world.doOneCycle();
 	};
 	let full_screen = true;
+	let edit_mode = window.location.href.indexOf('editMode') >= 0;
 	let run_full_screen = window.location.href.indexOf('noRun') < 0;
 	let project_path;
 	let show_palette = true; // unless in an iframe where the default is to hide it for space reasons
@@ -40,9 +41,9 @@ window.addEventListener('load', function () {
 							   }
 						   }
 						   ide_morph.showMessage(""); // remove message
-						   if (!show_palette && full_screen && edit_mode) {
-                               ide_morph.setPaletteWidth(0);
-                           }
+// 						   if (!show_palette && full_screen && edit_mode) {
+//                                ide_morph.setPaletteWidth(0);
+//                            }
 					   },
 					   1000);
 	};
