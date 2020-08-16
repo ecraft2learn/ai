@@ -149,6 +149,9 @@ window.addEventListener(
          var search = window.location.search;
          var add_search_and_hash = function (element) {
              var href = element.getAttribute('href');
+             if (!href) {
+                 return;
+             }
              var search_start = href.indexOf("?");
              var hash_start   = href.indexOf("#");
              var new_search = search_start >= 0 &&
