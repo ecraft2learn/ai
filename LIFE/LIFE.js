@@ -9,6 +9,10 @@
 window.LIFE =
   ((() => {
 
+Math.seedrandom(45); // so can shuffle paraphrases and then set aside a subset for testing.
+
+const number_of_test_questions_per_group = 2;
+
 let group_of_questions = [];
 let answers = [];
 
@@ -207,7 +211,7 @@ const setup = () => {
     	let both_wrong = 0;
     	let votes_right_if_either_wrong = 0;
     	const threshold = model_options.score_threshold;
-        group_of_questions.forEach((group, group_number) => {
+        group_of_questions_test.forEach((group, group_number) => {
             group.forEach((question, question_number) => {
             	use_model_and_knn_to_respond_to_question(question).then(response => {
             		const {best_score, best_answer_index, second_best_score, second_best_answer_index, question_embedding, knn_prediction} = response;
@@ -774,6 +778,8 @@ const create_download_anchor = (contents, file_name) => {
     anchor.remove();
 };
 
+let group_of_questions_test = [];
+
 const initialize = () => {
     try {
 		setup();
@@ -786,6 +792,13 @@ const initialize = () => {
     	setup_interface();
     } else if (mode === 'create model') {
     	document.body.innerHTML = "Training started";
+    }
+    if (mode === 'test' || mode === 'create model') {
+    	group_of_questions.forEach((group, group_number) => {
+    		tf.util.shuffle(group);
+    		group_of_questions_test[group_number] = group.slice(0, number_of_test_questions_per_group);
+    		group_of_questions[group_number] = group.slice(number_of_test_questions_per_group);
+    	});
     }
 };
 
