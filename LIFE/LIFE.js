@@ -36,7 +36,6 @@ const use_model_and_knn_to_respond_to_question = async (the_question) => {
 };
 
 const use_model_to_respond_to_question = async (the_question) => {
-	const start = Date.now();
 	return embedding_model.embed([the_question]).then((question_embedding) => {
 		const embedding_duration = (Date.now()-start)/1000 + " seconds for embedding";
 		const prediction_tensor = loaded_model.predict([question_embedding]);
@@ -57,8 +56,7 @@ const use_model_to_respond_to_question = async (the_question) => {
 				second_best_answer_index = index;
 			}
 		});
-		const total_duration = (Date.now()-start)/1000 + " seconds total"
-		log({prediction, the_question, best_score, best_answer_index, embedding_duration, total_duration});
+		log({prediction, the_question, best_score, best_answer_index, embedding_duration});
         return({best_answer_index,
 			    best_score,
 				second_best_answer_index,
@@ -161,12 +159,12 @@ const setup = () => {
     		const [best_knn_index, second_best_knn_index] = top_two_indices(knn_prediction);
     		document.writeln(group_number + ":" + question_number + " (Group number: question number)<br>");
     		document.writeln("model: " + best_answer_index + ", " + second_best_answer_index + "<br>");
-    		document.writeln("KNN  : " + best_knn_index + ", " + second_best_knn_index + "<br");
+    		document.writeln("KNN  : " + best_knn_index + ", " + second_best_knn_index + "<br>");
     		if (best_answer_index !== group_number) {
     			document.writeln("Best model answer is <b>wrong</b>. ");
     		}
     		if (best_knn_index !== group_number) {
-    			document.write("KNN's best answer is <b>wrong</b>.");
+    			document.writeln("KNN's best answer is <b>wrong</b>.");
     		}
     		document.writeln("<br>");
     		if (best_answer_index !== best_knn_index) {
@@ -177,9 +175,9 @@ const setup = () => {
     		}
     		document.writeln("Best model answer has a model second best score of " + second_best_score.toFixed(4));
     		if (knn_prediction) {
-    			document.write(" and that answer has a KNN score of " + knn_prediction[second_best_answer_index].toFixed(4));
+    			document.writeln(" and that answer has a KNN score of " + knn_prediction[second_best_answer_index].toFixed(4));
     			if (second_best_answer_index !== second_best_knn_index && second_best_knn_index >= 0) {
-    				document.write(". And KNN's second best answer's score is " + knn_prediction[second_best_knn_index].toFixed(4))
+    				document.writeln(". And KNN's second best answer's score is " + knn_prediction[second_best_knn_index].toFixed(4))
     			}							
 			}
 			document.writeln(".<br>");
