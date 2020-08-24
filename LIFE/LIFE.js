@@ -24,7 +24,7 @@ let knn_dataset;
 const use_model_and_knn_to_respond_to_question = async (the_question) => {
     return use_model_to_respond_to_question(the_question).then((result) => {
         if (knn_classifier) {
-		 	return knn_classifier.predictClass(result.question_embedding).then(prediction => { // {input: result.question_embedding, k: 3}
+		 	return knn_classifier.predictClass(result.question_embedding, 1).then(prediction => {
 		 		const knn_prediction = Object.values(prediction.confidences);
 		 		return({...result,
 						knn_prediction});
@@ -37,7 +37,6 @@ const use_model_and_knn_to_respond_to_question = async (the_question) => {
 
 const use_model_to_respond_to_question = async (the_question) => {
 	return embedding_model.embed([the_question]).then((question_embedding) => {
-		const embedding_duration = (Date.now()-start)/1000 + " seconds for embedding";
 		const prediction_tensor = loaded_model.predict([question_embedding]);
 		const prediction = prediction_tensor.arraySync()[0];
 		prediction_tensor.dispose();
@@ -56,7 +55,7 @@ const use_model_to_respond_to_question = async (the_question) => {
 				second_best_answer_index = index;
 			}
 		});
-		log({prediction, the_question, best_score, best_answer_index, embedding_duration});
+		log({prediction, the_question, best_score, best_answer_index});
         return({best_answer_index,
 			    best_score,
 				second_best_answer_index,
@@ -199,19 +198,103 @@ const setup = () => {
         document.writeln("Good answer: <blockquote>" + good + "</blockquote><br><br>");
     };
     const test_all_questions = () => {
+    	let total = 0;
+    	let both_right = 0;
+    	let model_right_knn_second_right = 0;
+    	let knn_right_model_second_right = 0;
+    	let model_only_right = 0;
+    	let knn_only_right = 0;
+    	let both_wrong = 0;
+    	let votes_right_if_either_wrong = 0;
+    	const threshold = model_options.score_threshold;
         group_of_questions.forEach((group, group_number) => {
             group.forEach((question, question_number) => {
             	use_model_and_knn_to_respond_to_question(question).then(response => {
-            		const {best_score, best_answer_index, question_embedding, knn_prediction} = response;
-					if (best_score < model_options.score_threshold || 
+            		const {best_score, best_answer_index, second_best_score, second_best_answer_index, question_embedding, knn_prediction} = response;
+            		if (knn_prediction) {
+            			const [best_knn_index, second_best_knn_index] = top_two_indices(knn_prediction);
+						total++;
+						if (best_answer_index === group_number) {
+							if (best_knn_index === group_number) {
+								both_right++;
+							} else {
+								model_only_right++;
+							}
+							if (second_best_knn_index === group_number) {
+								model_right_knn_second_right++;
+							}
+						} else if (best_knn_index === group_number) {
+							knn_only_right++;
+							if (second_best_answer_index === group_number) {
+								knn_right_model_second_right++;
+							}
+						} else {
+							both_wrong++;
+						}
+						if (group_number === group_of_questions.length-1 && question_number === group.length-1) {
+							console.log({total, both_right, model_only_right, knn_only_right, both_wrong, 
+									     model_right_knn_second_right, knn_right_model_second_right,
+									     votes_right_if_either_wrong});
+						}
+						if (best_answer_index !== group_number || best_knn_index !== group_number) {
+							// at least one is wrong
+							const votes = {};
+							const model_weight = 0.5;
+							const knn_weight = 1-model_weight;
+							votes[best_answer_index] = model_weight*best_score +
+							                           (second_best_knn_index === best_answer_index ? 
+							                            knn_weight*knn_prediction[second_best_knn_index] : 
+							                            0);
+							votes[second_best_answer_index] = model_weight*second_best_score +
+							                                  (best_knn_index === second_best_answer_index ? 
+							                                   knn_weight*knn_prediction[best_knn_index] :
+							                                   (second_best_knn_index === second_best_answer_index ?
+							                                    knn_weight*knn_prediction[second_best_knn_index] :
+							                                    0));
+						    if (best_knn_index !== best_answer_index && best_knn_index !== second_best_answer_index) {
+						    	votes[best_knn_index] = knn_weight*knn_prediction[best_knn_index];
+						    }
+						    if (second_best_knn_index !== best_answer_index && 
+						        second_best_knn_index !== second_best_answer_index &&
+						        second_best_knn_index >= 0) {
+						    	votes[second_best_knn_index] = knn_weight*knn_prediction[second_best_knn_index];
+						    }
+						    const winner = (votes) => {
+						    	let best_so_far = Number.MIN_VALUE;
+						    	let best_index;
+						    	Object.entries(votes).forEach((entry) => {
+						    		if (entry[1] > best_so_far) {
+						    			best_so_far = entry[1];
+						    			best_index = entry[0];
+						    		}
+						    	});
+						    	return +best_index;
+						    };
+						    if (winner(votes) === group_number) {
+						    	votes_right_if_either_wrong++;
+						    } else {
+						    	// neither unanimous nor did voting work
+						    	const best_knn_score = knn_prediction[best_knn_index];
+						    	const second_best_knn_score = knn_prediction[second_best_knn_index];
+								console.log({group_number, best_answer_index, second_best_answer_index,
+								             best_score, second_best_score,
+											 best_knn_index, second_best_knn_index,
+											 best_knn_score, second_best_knn_score,
+											 votes,
+											 question_number});						    	
+						    }
+						}
+            		}
+					if (best_score < threshold || 
 					    best_answer_index !== group_number ||
-					    knn_prediction[group_number] < model_options.score_threshold) {
+					    (knn_prediction && knn_prediction[group_number] < threshold)) {
 						write_good_and_bad(question, response, answers[group_number], group_number, question_number);
 					}
 					question_embedding.dispose();
             	});
             }); 
-        }); 	
+        });
+        
     };
     const old_test_all_questions = () => {
         group_of_questions.forEach((group, group_number) => {
@@ -572,7 +655,6 @@ const setup_interface =
 					respond_with_answer("<b>" + answers[best_answer_index] + "</b>", question);
 					question_embedding.dispose();
 				} else if (typeof response === 'object' && two_possible_answers()) {
-					const start = Date.now();
 					best_answer_close_enough().then(closest_distance => {
 						log({closest_distance});
 						if (closest_distance < -.5) {
@@ -585,7 +667,6 @@ const setup_interface =
 						} else {
 							respond_with_answer(undefined, question);
 						}
-						console.log((Date.now()-start)/1000 + " seconds to check distances");
 						question_embedding.dispose();
 					})
 				} else {
