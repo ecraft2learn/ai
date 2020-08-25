@@ -159,25 +159,27 @@ const setup = () => {
     		document.writeln("Bad answer: " + answers[response] + "<br>");
     	} else if (typeof response === 'object') {
     		const {best_score, best_answer_index, second_best_answer_index, second_best_score, question_embedding, knn_prediction} = response;
-    		const [best_knn_index, second_best_knn_index] = top_two_indices(knn_prediction);
+    		const [best_knn_index, second_best_knn_index] = knn_prediction ? top_two_indices(knn_prediction) : [-1, -1];
     		document.writeln(group_number + ":" + question_number + " (Group number: question number)<br>");
     		document.writeln("model: " + best_answer_index + ", " + second_best_answer_index + "<br>");
-    		document.writeln("KNN  : " + best_knn_index + ", " + second_best_knn_index + "<br>");
+    		if (best_knn_index >= 0) {
+    			document.writeln("KNN  : " + best_knn_index + ", " + second_best_knn_index + "<br>");
+    		}
     		if (best_answer_index !== group_number) {
     			document.writeln("Best model answer is <b>wrong</b>. ");
     		}
-    		if (best_knn_index !== group_number) {
+    		if (best_knn_index >= 0 && best_knn_index !== group_number) {
     			document.writeln("KNN's best answer is <b>wrong</b>.");
     		}
     		document.writeln("<br>");
-    		if (best_answer_index !== best_knn_index) {
+    		if (best_knn_index >= 0 && best_answer_index !== best_knn_index) {
     			document.writeln("Model (" + best_answer_index + ") and KNN (" + best_knn_index + ") <b>disagree</b> on best answer.<br>");
     		}
-    		if (second_best_answer_index !== second_best_knn_index && second_best_knn_index >= 0) {
+    		if (best_knn_index >= 0 && second_best_answer_index !== second_best_knn_index && second_best_knn_index >= 0) {
     			document.writeln("Model (" + second_best_answer_index + ") and KNN (" + second_best_knn_index + ") disagree on second best answer.<br>");
     		}
     		document.writeln("Best model answer has a model second best score of " + second_best_score.toFixed(4));
-    		if (knn_prediction) {
+    		if (best_knn_index >= 0) {
     			document.writeln(" and that answer has a KNN score of " + knn_prediction[second_best_answer_index].toFixed(4));
     			if (second_best_answer_index !== second_best_knn_index && second_best_knn_index >= 0) {
     				document.writeln(". And KNN's second best answer's score is " + knn_prediction[second_best_knn_index].toFixed(4))
@@ -188,10 +190,10 @@ const setup = () => {
     		document.writeln("And the second best model answer is <b>" + 
     			             (second_best_answer_index === group_number ? 'correct' : 'wrong') +
     					     "</b> with a score of " + second_best_score.toFixed(4) + ".<br>");
-    		if (knn_prediction) {
+    		if (best_knn_index >= 0) {
     			document.writeln("KNN confidence of second best is " + knn_prediction[second_best_answer_index].toFixed(4) + ".<br>");								
 			}
-    		if (second_best_knn_index !== group_number && second_best_answer_index !== second_best_knn_index && second_best_knn_index >= 0) {
+    		if (best_knn_index >= 0 && second_best_knn_index !== group_number && second_best_answer_index !== second_best_knn_index && second_best_knn_index >= 0) {
     			document.writeln("Second best model (" + second_best_answer_index + ") and KNN (" + second_best_knn_index + ") <b>disagree</b>.<br>");
     		}
     		if (second_best_answer_index !== group_number) {
@@ -432,12 +434,30 @@ const setup = () => {
         	    callback(datasets);
 			});
 		};
+		const create_classifier_dataset = (callback) => {
+        	const group_of_questions_and_answers = LIFE.sentences_and_answers();
+        	const group_of_questions = group_of_questions_and_answers.group_of_questions;
+        	let dataset_javascript = "// Automatically generated sentence embeddings of " + questions_file_name + "\n";
+        	dataset_javascript += "LIFE.knn_dataset = {\n";
+        	const fill_dataset = (group_number) => {
+        		if (group_number < group_of_questions.length) {
+					embedding_model.embed(group_of_questions[group_number]).then((embeddings) => {
+						// 'embeddings' is a 2D tensor consisting of the 512-dimensional embeddings for each sentence.
+						dataset_javascript += group_number + ": tf.tensor(" + JSON.stringify(embeddings.arraySync()) + "),\n";
+						embeddings.dispose();
+						fill_dataset(group_number+1);
+					});      			
+        		} else {
+        			dataset_javascript += "}\n";
+        			callback(dataset_javascript);
+        		}
+            };
+            fill_dataset(0);
+        };
 		if (save_knn_data) {
-        	if (save_knn_data) {
-        	    create_classifier_dataset((dataset_javascript) => {
-        	    	create_download_anchor(dataset_javascript, "knn-dataset.js");
-        	    });
-        	}
+			create_classifier_dataset((dataset_javascript) => {
+				create_download_anchor(dataset_javascript, "knn-dataset-" + questions_name + ".js");
+			});
         }
         const process_mode = () => {
 			if (mode === 'answer questions' || mode === 'test') {
@@ -479,7 +499,7 @@ const setup = () => {
         };
         if (use_knn_classifier) {
         	load_local_or_remote_scripts(["../js/knn-classifier.js", // "https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier",
-        	                              "knn-dataset.js"], 
+        	                              "knn-dataset-" + questions_name + ".js"], 
         	                             undefined,
         	                             () => {
         	                             	 knn_classifier = knnClassifier.create();
@@ -489,26 +509,6 @@ const setup = () => {
         } else {
         	process_mode();
         }
-        const create_classifier_dataset = (callback) => {
-        	const group_of_questions_and_answers = LIFE.sentences_and_answers();
-        	const group_of_questions = group_of_questions_and_answers.group_of_questions;
-        	let dataset_javascript = "// Automatically generated sentence embeddings of " + questions_file_name + "\n";
-        	dataset_javascript += "LIFE.knn_dataset = {\n";
-        	const fill_dataset = (group_number) => {
-        		if (group_number < group_of_questions.length) {
-					embedding_model.embed(group_of_questions[group_number]).then((embeddings) => {
-						// 'embeddings' is a 2D tensor consisting of the 512-dimensional embeddings for each sentence.
-						dataset_javascript += group_number + ": tf.tensor(" + JSON.stringify(embeddings.arraySync()) + "),\n";
-						embeddings.dispose();
-						fill_dataset(group_number+1);
-					});      			
-        		} else {
-        			dataset_javascript += "}\n";
-        			callback(dataset_javascript);
-        		}
-            };
-            fill_dataset(0);
-        };
     });
 };
 
@@ -654,6 +654,9 @@ const setup_interface =
 				};
 				if (knn_prediction) {
 					console.log("knn confidence is " + knn_prediction[best_answer_index].toFixed(4) + " while the model's is " + best_score.toFixed(4));
+					const cosine_similarity = tf.dot(LIFE.knn_dataset[best_answer_index], tf.transpose(question_embedding));
+					console.log("Distance to best model answer is ");
+					tf.print(cosine_similarity);
 				}		
 				if (best_score >= model_options.score_threshold) {
 					respond_with_answer("<b>" + answers[best_answer_index] + "</b>", question);
@@ -763,7 +766,7 @@ const log = (message) => {
 		}
 		window.localStorage.setItem(user_id_for_logs, logs);
 		update_download_button();
-	} else {
+	} else if (log_each_prediction) {
 		console.log(message);
 	}
 };
@@ -802,17 +805,19 @@ const initialize = () => {
     }
 };
 
+let questions_name;
 let questions_file_name;
 
 document.addEventListener('DOMContentLoaded',    
 	() => {
 		if (pneumonia_questions) {
-			questions_file_name = "./pneumonia-qa.js";
+			questions_name = "pneumonia-qa";
 		} else if (covid_questions) {
-			questions_file_name = "./covid-qa-50.js";
+			questions_name = "covid-qa-50";
 		} else {
-			questions_file_name = "./neonatal-qa.js";
+			questions_name = "neonatal-qa";
 		}
+		questions_file_name = "./" + questions_name + ".js";
 		load_local_or_remote_scripts([questions_file_name], null, initialize);
 // 		if (covid_questions) {
 // 			generate_covid_qa_js();

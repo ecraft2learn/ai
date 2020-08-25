@@ -51,6 +51,8 @@ if (pneumonia) {
 const use_knn_classifier = parameters.has('knn');
 const save_knn_data = parameters.has('save-knn-data');
 
+const log_each_prediction = false;
+
 const model_options = {
     seed: (number) => Math.round((number+Math.random())*1000000),
     model_name: model_name,
