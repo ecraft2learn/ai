@@ -68,52 +68,12 @@ const use_model_to_respond_to_question = async (the_question) => {
 	});
 };
 
-const precision = (x, n) => Math.round(x*Math.pow(10, n))/Math.pow(10, n);
-
-const respond_to_question = async (the_question, distance_threshold) => {
-    return embedding_model.embed([the_question]).then((embedding) => {
-        let best_answer;
-        let best_answer_distance = 1;
-        let second_best_answer;
-        let second_best_answer_distance;
-//         console.log(the_question);
-//         embedding.print(true /* verbose */);
-        group_of_questions_mean_embeddings.forEach((group_mean, mean_number) => {
-            let distance = tf.metrics.cosineProximity(embedding.flatten(), group_mean).dataSync()[0];
-            if (distance < best_answer_distance) {
-                if (best_answer) {
-                    second_best_answer = best_answer;
-                    second_best_answer_distance = best_answer_distance;
-                }
-                best_answer = mean_number;
-                best_answer_distance = distance;
-            }
-        });
-        if (best_answer_distance > distance_threshold) {
-            console.log("No question close enough. Closest question is " + precision(1+best_answer_distance, 3) 
-                        + " units away. It is '" + group_of_questions[best_answer][0] + "'");
-            return; // no answer 
-        }
-        console.log("Closest question is " + precision(1+best_answer_distance, 3) 
-                    + " units away. It is '" + group_of_questions[best_answer][0] + "'");
-        if (second_best_answer) {
-            console.log("The second closest question is " + precision(1+second_best_answer_distance, 3) 
-                        + " units away. It is '" + group_of_questions[second_best_answer][0] + "'");
-        }
-        return best_answer;
-    });
-};
+// const precision = (x, n) => Math.round(x*Math.pow(10, n))/Math.pow(10, n);
 
 const setup = () => {
 	const group_of_questions_and_answers = LIFE.sentences_and_answers();
 	group_of_questions = group_of_questions_and_answers.group_of_questions;
 	answers = group_of_questions_and_answers.answers;
-    const do_when_group_of_questions_mean_embeddings_available = () => {
-    	if (mode === 'old test') {
-    		console.log(group_of_questions_mean_embeddings);
-        	old_test_all_questions();
-    	}
-    };
     const obtain_embeddings = (group_number) => {
         embedding_model.embed(group_of_questions[group_number]).then((embeddings) => {
             // 'embeddings' is a 2D tensor consisting of the 512-dimensional embeddings for each sentence.
@@ -121,14 +81,14 @@ const setup = () => {
             group_of_questions_mean_embeddings.push(embeddings.mean(0));
             if (group_number+1 < group_of_questions.length) {
                 obtain_embeddings(group_number+1);
-            } else {
-                let define_group_of_questions_mean_embeddings = "group_of_questions_mean_embeddings = [\n";
-                group_of_questions_mean_embeddings.forEach((embedding) => {
-                    define_group_of_questions_mean_embeddings += "tf.tensor1d([" + embedding.dataSync() + "])\n,"                     
-                });
-                define_group_of_questions_mean_embeddings += "];";
-                console.log(define_group_of_questions_mean_embeddings);
-                do_when_group_of_questions_mean_embeddings_available();
+//             } else {
+//                 let define_group_of_questions_mean_embeddings = "group_of_questions_mean_embeddings = [\n";
+//                 group_of_questions_mean_embeddings.forEach((embedding) => {
+//                     define_group_of_questions_mean_embeddings += "tf.tensor1d([" + embedding.dataSync() + "])\n,"                     
+//                 });
+//                 define_group_of_questions_mean_embeddings += "];";
+//                 console.log(define_group_of_questions_mean_embeddings);
+//                 do_when_group_of_questions_mean_embeddings_available();
             }
         });        
     };
@@ -302,33 +262,6 @@ const setup = () => {
         });
         
     };
-    const old_test_all_questions = () => {
-        group_of_questions.forEach((group, group_number) => {
-            group.forEach((question, question_number) => {
-                embedding_model.embed([question]).then((embedding) => {
-                    let distances = [];
-                    group_of_questions_mean_embeddings.forEach((group_mean, mean_number) => {
-                        let distance = tf.metrics.cosineProximity(embedding.flatten(), group_mean);
-                        distances.push([mean_number, distance.dataSync()[0]]);
-                    });
-                    distances.sort((a, b) => a[1] - b[1]);
-                    if (group_number !== distances[0][0]) {
-                        wrong.push([question,
-                                    "bad answer: " + answers[distances[0][0]],
-                                    "good answer:" + answers[group_number],
-                                    group_number + ":" + question_number,
-                                    distances]);
-                        write_good_and_bad(question, distances[0][0], answers[group_number], group_number, question_number);
-                        distances.forEach((answer_id_and_distance) => {
-                            document.writeln("#" + answer_id_and_distance[0] + " = " + answer_id_and_distance[1] + "<br>");
-                        });
-                        document.writeln("<br>");
-                    }
-//                     console.log(distances[0][1]); // just to see what best distances look like
-                });
-            });
-        });
-    };
     const get_embeddings = (questions, callback) => {
     	// do this in batches since too many at once causes WebGL compilation errors
     	const batch_size = 100;
@@ -471,13 +404,7 @@ const setup = () => {
 						document.body.innerHTML = "Testing started";
 						test_all_questions();
 					}
-				});
-			} else if (mode === 'old test' || mode === 'old answer questions') {
-				if (group_of_questions_mean_embeddings.length === 0) {
-					obtain_embeddings(0);
-				} else {
-					do_when_group_of_questions_mean_embeddings_available();
-				}        	
+				});       	
 			} else if (mode === 'create model') {
 				load_local_or_remote_scripts(["../js/tfjs-vis.js"],
 											 undefined,
@@ -534,17 +461,17 @@ const record_error = (error) => {
     console.error(error);
 };
 
-const load_mean_embeddings = (when_loaded_callback) => {
-    const android = (navigator.userAgent.toLowerCase().indexOf('android') >= 0);
-	const script = document.createElement('script');
-	if (android) {
-		script.src = "./mean-embeddings-android.js";
-	} else {
-		script.src = "./mean-embeddings.js";
-	}
-	script.onload = when_loaded_callback;
-	document.head.appendChild(script);
-};
+// const load_mean_embeddings = (when_loaded_callback) => {
+//     const android = (navigator.userAgent.toLowerCase().indexOf('android') >= 0);
+// 	const script = document.createElement('script');
+// 	if (android) {
+// 		script.src = "./mean-embeddings-android.js";
+// 	} else {
+// 		script.src = "./mean-embeddings.js";
+// 	}
+// 	script.onload = when_loaded_callback;
+// 	document.head.appendChild(script);
+// };
 
 let download_logs_button;
 	
@@ -682,16 +609,13 @@ const setup_interface =
 				}
 				log(response);
 			};
-		    const old_handle_answer = (best_answer_index) => {
+		const old_handle_answer = (best_answer_index) => {
             if (typeof best_answer_index === 'number') {
             	respond_with_answer("<b>" + answers[best_answer_index] + "</b>", question);
             }
         };
         if (mode === 'answer questions') {
         	use_model_and_knn_to_respond_to_question(question).then(handle_answer, record_error);
-        } else if (mode === 'old answer questions') {
-        	LIFE.respond_to_question(question, -0.55).then(old_handle_answer, record_error);
-        	// reasonable matches must be less than -0.55 cosineProximity
         }
     };
     question_area.addEventListener('keypress',
@@ -789,9 +713,7 @@ const initialize = () => {
 	} catch (error) {
 		record_error(error);
 	}
-    if (mode === 'old answer questions' || mode === 'old test') {
-    	load_mean_embeddings(setup_interface);
-    } else if (mode === 'answer questions') {
+    if (mode === 'answer questions') {
     	setup_interface();
     } else if (mode === 'create model') {
     	document.body.innerHTML = "Training started";
