@@ -810,6 +810,6 @@ const generate_covid_qa_js = () => {
     load_local_or_remote_scripts(["./faq_covidbert_pruned.js", "eval_question_similarity_en.js"], undefined, write_qa_js);
 };
 
-return {respond_to_question: respond_to_question};
+return {};
 
 })());
