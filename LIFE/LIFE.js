@@ -23,15 +23,50 @@ let group_of_questions_embeddings = [];
 let group_of_questions_mean_embeddings = [];
 
 let knn_classifier; // will be bound if 'knn' is a URL option
-let knn_dataset;
+
+const cosine_similarity = (embedding1, embedding2) => {
+	const cosine_similarity_tensor = tf.dot(embedding1, tf.transpose(embedding2));
+	const similarity = cosine_similarity_tensor.arraySync()[0];
+	cosine_similarity_tensor.dispose();
+	return Math.max(...similarity);
+};
+
+let model_confidence_threshold = .3;
+let similarity_threshold = .5;
+let similarity_difference_threshold = .1;
 
 const use_model_and_knn_to_respond_to_question = async (the_question) => {
-    return use_model_to_respond_to_question(the_question).then((result) => {
+    return use_model_to_respond_to_question(the_question).then((model_result) => {
         if (knn_classifier) {
-		 	return knn_classifier.predictClass(result.question_embedding, 1).then(prediction => {
-		 		const knn_prediction = Object.values(prediction.confidences);
-		 		return({...result,
-						knn_prediction});
+        	const {model_predictions, question_embedding} = model_result;
+		 	return knn_classifier.predictClass(question_embedding, 1).then(prediction => {
+		 		const knn_predictions = Object.values(prediction.confidences);
+		 		const combined_result = {...model_result, knn_predictions};
+		 		const knn_indices = best_indices(knn_predictions);
+		 		const indices_passing_thresholds = [];
+		 		knn_indices.forEach(knn_index => {
+		 			if (model_predictions[knn_index] >= model_confidence_threshold) {
+		 				const similarity = cosine_similarity(question_embedding, LIFE.knn_dataset[knn_index]);
+		 				if (similarity >= similarity_threshold) {
+		 					indices_passing_thresholds.push({knn_index, similarity});
+		 				}
+		 			}
+		 		});
+		 		if (indices_passing_thresholds.length > 0) {
+					combined_result.best_indices = [indices_passing_thresholds[0].knn_index]; // top index always reported
+					if (indices_passing_thresholds.length > 1) {
+						// see if it is a close race and eliminate those not close 
+						for (i = 1; i < indices_passing_thresholds.length; i++) {
+							if (indices_passing_thresholds[i-1].similarity-indices_passing_thresholds[i].similarity < similarity_difference_threshold) {
+								combined_result.best_indices.push(indices_passing_thresholds[i-1].knn_index);
+							}
+						}
+					}		 			
+		 		} else {
+		 			combined_result.best_indices = []; // no good matches
+		 			console.log({knn_predictions, model_predictions});
+		 		}		 		
+		 		return(combined_result);
 		 	});
         } else {
         	return result;
@@ -42,13 +77,13 @@ const use_model_and_knn_to_respond_to_question = async (the_question) => {
 const use_model_to_respond_to_question = async (the_question) => {
 	return embedding_model.embed([the_question]).then((question_embedding) => {
 		const prediction_tensor = loaded_model.predict([question_embedding]);
-		const prediction = prediction_tensor.arraySync()[0];
+		const model_predictions = prediction_tensor.arraySync()[0];
 		prediction_tensor.dispose();
 		let best_score = 0;
 		let second_best_score;
 		let best_answer_index;
 		let second_best_answer_index;
-		prediction.forEach((score, index) => {
+		model_predictions.forEach((score, index) => {
 			if (score > best_score) {
 				second_best_score = best_score;
 				second_best_answer_index = best_answer_index;
@@ -59,13 +94,26 @@ const use_model_to_respond_to_question = async (the_question) => {
 				second_best_answer_index = index;
 			}
 		});
-		log({prediction, the_question, best_score, best_answer_index});
+		log({model_predictions, the_question, best_score, best_answer_index});
         return({best_answer_index,
 			    best_score,
 				second_best_answer_index,
 				second_best_score,
+				model_predictions,
 				question_embedding});			
 	});
+};
+
+const best_indices = (list) => {
+	const list_and_indices = list.map((element, index) => [element, index]);
+    list_and_indices.sort((a, b) => b[0]-a[0]);
+    const indices_of_non_zero_values = [];
+    list_and_indices.forEach(element_and_index => {
+    	if (element_and_index[0] !== 0) {
+    		indices_of_non_zero_values.push(element_and_index[1]);
+    	}
+    });
+    return indices_of_non_zero_values;
 };
 
 // const precision = (x, n) => Math.round(x*Math.pow(10, n))/Math.pow(10, n);
@@ -93,7 +141,7 @@ const setup = () => {
         });        
     };
     let wrong = [];
-    const top_two_indices = (list) => {
+    const top_two_indices = (list) => { // obsolete????
     	let best = Number.MIN_VALUE;
     	let best_index = -1;
     	let second_best = Number.MIN_VALUE;
@@ -118,8 +166,8 @@ const setup = () => {
     	if (typeof response === 'number') {
     		document.writeln("Bad answer: " + answers[response] + "<br>");
     	} else if (typeof response === 'object') {
-    		const {best_score, best_answer_index, second_best_answer_index, second_best_score, question_embedding, knn_prediction} = response;
-    		const [best_knn_index, second_best_knn_index] = knn_prediction ? top_two_indices(knn_prediction) : [-1, -1];
+    		const {best_score, best_answer_index, second_best_answer_index, second_best_score, question_embedding, knn_predictions} = response;
+    		const [best_knn_index, second_best_knn_index] = knn_predictions ? top_two_indices(knn_predictions) : [-1, -1];
     		document.writeln(group_number + ":" + question_number + " (Group number: question number)<br>");
     		document.writeln("model: " + best_answer_index + ", " + second_best_answer_index + "<br>");
     		if (best_knn_index >= 0) {
@@ -140,9 +188,9 @@ const setup = () => {
     		}
     		document.writeln("Best model answer has a model second best score of " + second_best_score.toFixed(4));
     		if (best_knn_index >= 0) {
-    			document.writeln(" and that answer has a KNN score of " + knn_prediction[second_best_answer_index].toFixed(4));
+    			document.writeln(" and that answer has a KNN score of " + knn_predictions[second_best_answer_index].toFixed(4));
     			if (second_best_answer_index !== second_best_knn_index && second_best_knn_index >= 0) {
-    				document.writeln(". And KNN's second best answer's score is " + knn_prediction[second_best_knn_index].toFixed(4))
+    				document.writeln(". And KNN's second best answer's score is " + knn_predictions[second_best_knn_index].toFixed(4))
     			}							
 			}
 			document.writeln(".<br>");
@@ -151,7 +199,7 @@ const setup = () => {
     			             (second_best_answer_index === group_number ? 'correct' : 'wrong') +
     					     "</b> with a score of " + second_best_score.toFixed(4) + ".<br>");
     		if (best_knn_index >= 0) {
-    			document.writeln("KNN confidence of second best is " + knn_prediction[second_best_answer_index].toFixed(4) + ".<br>");								
+    			document.writeln("KNN confidence of second best is " + knn_predictions[second_best_answer_index].toFixed(4) + ".<br>");								
 			}
     		if (best_knn_index >= 0 && second_best_knn_index !== group_number && second_best_answer_index !== second_best_knn_index && second_best_knn_index >= 0) {
     			document.writeln("Second best model (" + second_best_answer_index + ") and KNN (" + second_best_knn_index + ") <b>disagree</b>.<br>");
@@ -176,9 +224,9 @@ const setup = () => {
         group_of_questions_test.forEach((group, group_number) => {
             group.forEach((question, question_number) => {
             	use_model_and_knn_to_respond_to_question(question).then(response => {
-            		const {best_score, best_answer_index, second_best_score, second_best_answer_index, question_embedding, knn_prediction} = response;
-            		if (knn_prediction) {
-            			const [best_knn_index, second_best_knn_index] = top_two_indices(knn_prediction);
+            		const {best_score, best_answer_index, second_best_score, second_best_answer_index, question_embedding, knn_predictions} = response;
+            		if (knn_predictions) {
+            			const [best_knn_index, second_best_knn_index] = top_two_indices(knn_predictions);
 						total++;
 						if (best_answer_index === group_number) {
 							if (best_knn_index === group_number) {
@@ -209,21 +257,21 @@ const setup = () => {
 // 							const knn_weight = 1-model_weight;
 // 							votes[best_answer_index] = model_weight*best_score +
 // 							                           (second_best_knn_index === best_answer_index ? 
-// 							                            knn_weight*knn_prediction[second_best_knn_index] : 
+// 							                            knn_weight*knn_predictions[second_best_knn_index] : 
 // 							                            0);
 // 							votes[second_best_answer_index] = model_weight*second_best_score +
 // 							                                  (best_knn_index === second_best_answer_index ? 
-// 							                                   knn_weight*knn_prediction[best_knn_index] :
+// 							                                   knn_weight*knn_predictions[best_knn_index] :
 // 							                                   (second_best_knn_index === second_best_answer_index ?
-// 							                                    knn_weight*knn_prediction[second_best_knn_index] :
+// 							                                    knn_weight*knn_predictions[second_best_knn_index] :
 // 							                                    0));
 // 						    if (best_knn_index !== best_answer_index && best_knn_index !== second_best_answer_index) {
-// 						    	votes[best_knn_index] = knn_weight*knn_prediction[best_knn_index];
+// 						    	votes[best_knn_index] = knn_weight*knn_predictions[best_knn_index];
 // 						    }
 // 						    if (second_best_knn_index !== best_answer_index && 
 // 						        second_best_knn_index !== second_best_answer_index &&
 // 						        second_best_knn_index >= 0) {
-// 						    	votes[second_best_knn_index] = knn_weight*knn_prediction[second_best_knn_index];
+// 						    	votes[second_best_knn_index] = knn_weight*knn_predictions[second_best_knn_index];
 // 						    }
 // 						    const winner = (votes) => {
 // 						    	let best_so_far = Number.MIN_VALUE;
@@ -240,8 +288,8 @@ const setup = () => {
 // 						    	votes_right_if_either_wrong++;
 // 						    } else {
 // 						    	// neither unanimous nor did voting work
-// 						    	const best_knn_score = knn_prediction[best_knn_index];
-// 						    	const second_best_knn_score = knn_prediction[second_best_knn_index];
+// 						    	const best_knn_score = knn_predictions[best_knn_index];
+// 						    	const second_best_knn_score = knn_predictions[second_best_knn_index];
 // 								console.log({group_number, best_answer_index, second_best_answer_index,
 // 								             best_score, second_best_score,
 // 											 best_knn_index, second_best_knn_index,
@@ -250,10 +298,10 @@ const setup = () => {
 // 											 question_number});						    	
 // 						    }
 // 						}
-//             		}
+            		}
 					if (best_score < threshold || 
 					    best_answer_index !== group_number ||
-					    (knn_prediction && knn_prediction[group_number] < threshold)) {
+					    (knn_predictions && knn_predictions[group_number] < threshold)) {
 						write_good_and_bad(question, response, answers[group_number], group_number, question_number);
 					}
 					question_embedding.dispose();
@@ -552,68 +600,55 @@ const setup_interface =
         const answer_question = (question) => {
         	answer_area.innerHTML = "Please wait...";
         	const handle_answer = (response) => {
-        		const {best_score, best_answer_index, second_best_score, second_best_answer_index, question_embedding, knn_prediction} = response;
-        		const two_possible_answers = () => 
-        		    // sum of top two exceeds threshold and they are less than 10% apart
-            	       best_score+second_best_score > model_options.score_threshold &&
-            		   best_score-second_best_score <= .1;	
-				const best_answer_close_enough = async () => {
-					const embeddings_tensor = await embedding_model.embed(group_of_questions[best_answer_index]);
-					const embeddings_for_top_match = embeddings_tensor.arraySync();
-					embeddings_tensor.dispose();
-					const distance = (array, tensor) => {
-						const another_tensor = tf.tensor(array);
-						// both tensors have a norm of 1 so can just do a dot product instead
-						const cosine_tensor = tf.metrics.cosineProximity(another_tensor, tensor);
-						const cosine = cosine_tensor.arraySync()[0];
-						another_tensor.dispose();
-						cosine_tensor.dispose();
-						return cosine;
-					};
-					let closest_distance = 1;
-					embeddings_for_top_match.forEach(embedding => {
-														const distance_to_possible_paraphrasing = distance(embedding, question_embedding);
-														if (distance_to_possible_paraphrasing < closest_distance) {
-															closest_distance = distance_to_possible_paraphrasing;
-														}
-													 });
-							return closest_distance;
-				};
-				if (knn_prediction) {
-					console.log("knn confidence is " + knn_prediction[best_answer_index].toFixed(4) + " while the model's is " + best_score.toFixed(4));
-					const cosine_similarity = tf.dot(LIFE.knn_dataset[best_answer_index], tf.transpose(question_embedding));
-					console.log("Distance to best model answer is ");
-					tf.print(cosine_similarity);
-				}		
-				if (best_score >= model_options.score_threshold) {
-					respond_with_answer("<b>" + answers[best_answer_index] + "</b>", question);
-					question_embedding.dispose();
-				} else if (typeof response === 'object' && two_possible_answers()) {
-					best_answer_close_enough().then(closest_distance => {
-						log({closest_distance});
-						if (closest_distance < -.5) {
-							respond_with_answer("Unsure which of two answers to give. " +
-												"The probability that the following answers your question is " + Math.round(response.best_score*100) + '%: <b>' + 
-												answers[response.best_answer_index] + '</b> ' +
-												"And the probability that the following answers your question is " + Math.round(response.second_best_score*100) + '%: <b>' + 
-												answers[response.second_best_answer_index] + '</b>', 
-												question);
-						} else {
-							respond_with_answer(undefined, question);
-						}
-						question_embedding.dispose();
-					})
+        		const {best_indices, best_score, best_answer_index, second_best_score, second_best_answer_index, question_embedding, knn_predictions} = response;
+//         		const two_possible_answers = () => 
+//         		    // sum of top two exceeds threshold and they are less than 10% apart
+//             	       best_score+second_best_score > model_options.score_threshold &&
+//             		   best_score-second_best_score <= .1;	
+// 				const best_answer_close_enough = async () => {
+// 					const embeddings_tensor = await embedding_model.embed(group_of_questions[best_answer_index]);
+// 					const embeddings_for_top_match = embeddings_tensor.arraySync();
+// 					embeddings_tensor.dispose();
+// 					const distance = (array, tensor) => {
+// 						const another_tensor = tf.tensor(array);
+// 						// both tensors have a norm of 1 so can just do a dot product instead
+// 						const cosine_tensor = tf.metrics.cosineProximity(another_tensor, tensor);
+// 						const cosine = cosine_tensor.arraySync()[0];
+// 						another_tensor.dispose();
+// 						cosine_tensor.dispose();
+// 						return cosine;
+// 					};
+// 					let closest_distance = 1;
+// 					embeddings_for_top_match.forEach(embedding => {
+// 														const distance_to_possible_paraphrasing = distance(embedding, question_embedding);
+// 														if (distance_to_possible_paraphrasing < closest_distance) {
+// 															closest_distance = distance_to_possible_paraphrasing;
+// 														}
+// 													 });
+// 							return closest_distance;
+// 				};
+// 				if (knn_predictions) {
+// 					console.log("knn confidence is " + knn_predictions[best_answer_index].toFixed(4) + " while the model's is " + best_score.toFixed(4));
+// 					const cosine_similarity = tf.dot(LIFE.knn_dataset[best_answer_index], tf.transpose(question_embedding));
+// 					console.log("Distance to best model answer is ");
+// 					tf.print(cosine_similarity);
+// 				}		
+				if (best_indices.length === 1) {
+					respond_with_answer("<b>" + answers[best_indices[0]] + "</b>", question);
+				} else if (best_indices.length > 1) {
+					// ignoring more than 2 answers for now
+					respond_with_answer("Unsure which of two answers to give. " +
+										"The probability that the following answers your question is " + Math.round(response.best_score*100) + '%: <b>' + 
+										answers[response.best_answer_index] + '</b> ' +
+										"And the probability that the following answers your question is " + Math.round(response.second_best_score*100) + '%: <b>' + 
+										answers[response.second_best_answer_index] + '</b>', 
+										question);
 				} else {
 					respond_with_answer(undefined, question);
-					question_embedding.dispose();
 				}
+				question_embedding.dispose();
 				log(response);
 			};
-		const old_handle_answer = (best_answer_index) => {
-            if (typeof best_answer_index === 'number') {
-            	respond_with_answer("<b>" + answers[best_answer_index] + "</b>", question);
-            }
-        };
         if (mode === 'answer questions') {
         	use_model_and_knn_to_respond_to_question(question).then(handle_answer, record_error);
         }
