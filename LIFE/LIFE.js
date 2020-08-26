@@ -202,55 +202,55 @@ const setup = () => {
 									     model_right_knn_second_right, knn_right_model_second_right,
 									     votes_right_if_either_wrong});
 						}
-						if (best_answer_index !== group_number || best_knn_index !== group_number) {
-							// at least one is wrong
-							const votes = {};
-							const model_weight = 0.5;
-							const knn_weight = 1-model_weight;
-							votes[best_answer_index] = model_weight*best_score +
-							                           (second_best_knn_index === best_answer_index ? 
-							                            knn_weight*knn_prediction[second_best_knn_index] : 
-							                            0);
-							votes[second_best_answer_index] = model_weight*second_best_score +
-							                                  (best_knn_index === second_best_answer_index ? 
-							                                   knn_weight*knn_prediction[best_knn_index] :
-							                                   (second_best_knn_index === second_best_answer_index ?
-							                                    knn_weight*knn_prediction[second_best_knn_index] :
-							                                    0));
-						    if (best_knn_index !== best_answer_index && best_knn_index !== second_best_answer_index) {
-						    	votes[best_knn_index] = knn_weight*knn_prediction[best_knn_index];
-						    }
-						    if (second_best_knn_index !== best_answer_index && 
-						        second_best_knn_index !== second_best_answer_index &&
-						        second_best_knn_index >= 0) {
-						    	votes[second_best_knn_index] = knn_weight*knn_prediction[second_best_knn_index];
-						    }
-						    const winner = (votes) => {
-						    	let best_so_far = Number.MIN_VALUE;
-						    	let best_index;
-						    	Object.entries(votes).forEach((entry) => {
-						    		if (entry[1] > best_so_far) {
-						    			best_so_far = entry[1];
-						    			best_index = entry[0];
-						    		}
-						    	});
-						    	return +best_index;
-						    };
-						    if (winner(votes) === group_number) {
-						    	votes_right_if_either_wrong++;
-						    } else {
-						    	// neither unanimous nor did voting work
-						    	const best_knn_score = knn_prediction[best_knn_index];
-						    	const second_best_knn_score = knn_prediction[second_best_knn_index];
-								console.log({group_number, best_answer_index, second_best_answer_index,
-								             best_score, second_best_score,
-											 best_knn_index, second_best_knn_index,
-											 best_knn_score, second_best_knn_score,
-											 votes,
-											 question_number});						    	
-						    }
-						}
-            		}
+// 						if (best_answer_index !== group_number || best_knn_index !== group_number) {
+// 							// at least one is wrong
+// 							const votes = {};
+// 							const model_weight = 0.5;
+// 							const knn_weight = 1-model_weight;
+// 							votes[best_answer_index] = model_weight*best_score +
+// 							                           (second_best_knn_index === best_answer_index ? 
+// 							                            knn_weight*knn_prediction[second_best_knn_index] : 
+// 							                            0);
+// 							votes[second_best_answer_index] = model_weight*second_best_score +
+// 							                                  (best_knn_index === second_best_answer_index ? 
+// 							                                   knn_weight*knn_prediction[best_knn_index] :
+// 							                                   (second_best_knn_index === second_best_answer_index ?
+// 							                                    knn_weight*knn_prediction[second_best_knn_index] :
+// 							                                    0));
+// 						    if (best_knn_index !== best_answer_index && best_knn_index !== second_best_answer_index) {
+// 						    	votes[best_knn_index] = knn_weight*knn_prediction[best_knn_index];
+// 						    }
+// 						    if (second_best_knn_index !== best_answer_index && 
+// 						        second_best_knn_index !== second_best_answer_index &&
+// 						        second_best_knn_index >= 0) {
+// 						    	votes[second_best_knn_index] = knn_weight*knn_prediction[second_best_knn_index];
+// 						    }
+// 						    const winner = (votes) => {
+// 						    	let best_so_far = Number.MIN_VALUE;
+// 						    	let best_index;
+// 						    	Object.entries(votes).forEach((entry) => {
+// 						    		if (entry[1] > best_so_far) {
+// 						    			best_so_far = entry[1];
+// 						    			best_index = entry[0];
+// 						    		}
+// 						    	});
+// 						    	return +best_index;
+// 						    };
+// 						    if (winner(votes) === group_number) {
+// 						    	votes_right_if_either_wrong++;
+// 						    } else {
+// 						    	// neither unanimous nor did voting work
+// 						    	const best_knn_score = knn_prediction[best_knn_index];
+// 						    	const second_best_knn_score = knn_prediction[second_best_knn_index];
+// 								console.log({group_number, best_answer_index, second_best_answer_index,
+// 								             best_score, second_best_score,
+// 											 best_knn_index, second_best_knn_index,
+// 											 best_knn_score, second_best_knn_score,
+// 											 votes,
+// 											 question_number});						    	
+// 						    }
+// 						}
+//             		}
 					if (best_score < threshold || 
 					    best_answer_index !== group_number ||
 					    (knn_prediction && knn_prediction[group_number] < threshold)) {
