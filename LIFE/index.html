@@ -10,42 +10,62 @@
 	<script src="../js/tfjs.js"></script>
     <script src="../js/universal-sentence-encoder.js"></script>
     <script src="../js/user-agent.js"></script>
-    <script src="./LIFE.js"></script>
     <script src="../js/train.js"></script>
     <script src="../js/invoke_callback.js"></script>
     <script src="../js/train-report-results.js"></script>
     <script src="../js/load-scripts.js"></script>
+<!--     following needs updating -->
     <link rel="manifest" href="/ai/LIFE/LIFE.webmanifest">
 <script>
 if ('serviceWorker' in navigator && window.location.hostname !== 'localhost') {
     navigator.serviceWorker.register('service-worker.js');
 }
-const parameters = new URLSearchParams(window.location.hash.slice(1));
+const hash_parameters = new URLSearchParams(window.location.hash.slice(1));
+const search_parameters = new URLSearchParams(window.location.search.slice(1));
+
+const parameter_option = (key) => hash_parameters.has(key) || search_parameters.has(key);
+
 let mode;
-if (parameters.has('answer')) { // also the default
+if (parameter_option('answer')) { // also the default
 	mode = 'answer questions'; // until new version working well
-} else if (parameters.has('train')) {
+} else if (parameter_option('train')) {
 	mode = 'create model';
-} else if (parameters.has('test')) {
+} else if (parameter_option('test')) {
 	mode = 'test';
-} else if (parameters.has('search')) {
+} else if (parameter_option('search')) {
 	mode = 'search';
 } else {
 	mode = 'answer questions'; // until new version working well
 }
-const pneumonia = parameters.has('pneumonia');
-const covid = parameters.has('covid');
-let model_name;
-if (pneumonia) {
-	model_name = (mode === 'create model' || mode === 'search') ? "27-11-2019b-pneumonia" : "27-11-2019a-pneumonia";
-} else if (covid) {
-	model_name = (mode === 'create model' || mode === 'search') ? "15-07-2020-covid" : "15-07-2020-covid";
-} else {
-	model_name = (mode === 'create model' || mode === 'search') ? "27-10-2019a" : "26-10-2019b";
-}
 
-const use_knn_classifier = parameters.has('knn');
-const save_knn_data = parameters.has('save-knn-data');
+const negative_test = parameter_option('negative-test');
+
+const topics = ['pneumonia', 'covid', 'neonatal'];
+const topic_to_questions_name = {pneumonia: "pneumonia-qa", 
+							     covid: "covid-qa-50", 
+								 neonatal: "neonatal-qa"};
+let topic = 'neonatal'; // default
+topics.forEach(topic_name => {
+	if (parameter_option(topic_name)) {
+	    topic = topic_name;
+	}
+});
+
+const report_model_name = (topic) => {
+	// this can be called to generate "negative" sample questions
+	if (topic === 'pneumonia') {
+		return (mode === 'create model' || mode === 'search') ? "27-11-2019b-pneumonia" : "27-11-2019a-pneumonia";
+	} else if (topic === 'covid') {
+		return (mode === 'create model' || mode === 'search') ? "15-07-2020-covid" : "15-07-2020-covid";
+	} else if (topic === 'neonatal'){
+		return (mode === 'create model' || mode === 'search') ? "27-10-2019a" : "26-10-2019b";
+	}
+};
+
+let model_name = report_model_name(topic);
+
+const use_knn_classifier = parameter_option('knn');
+const save_knn_data = parameter_option('save-knn-data');
 
 const log_each_prediction = false;
 
@@ -117,4 +137,5 @@ Loading. Please wait...
 <hr></hr>
 <audio src="type.mp3" id="sound"></audio>
 </body>
+<script src="./LIFE.js"></script>
 </html>
