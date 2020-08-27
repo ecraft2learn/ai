@@ -9,7 +9,7 @@
 window.LIFE =
   ((() => {
 
-Math.seedrandom(45); // so can shuffle paraphrases and then set aside a subset for testing.
+Math.seedrandom(42); // so can shuffle paraphrases and then set aside a subset for testing.
 
 const number_of_test_questions_per_group = 2;
 
@@ -392,32 +392,36 @@ const setup = () => {
     	const test_negative_questions = () => {
     		const group_of_questions_and_answers = LIFE.sentences_and_answers();
 	        const negative_group_of_questions = group_of_questions_and_answers.group_of_questions;
-	        let answers_when_there_are_none = 0;
-    		negative_group_of_questions.forEach((group, group_number) => {
-				group.forEach((question, question_number) => {
-					use_model_and_knn_to_respond_to_question(question, false).then(response => {
-						const {best_indices, best_answer_index, model_predictions, knn_predictions, question_embedding} = response;
-						if (best_indices.length > 0) {
-							answers_when_there_are_none++;
-							const similarity = cosine_similarity(question_embedding, LIFE.knn_dataset[best_indices[0]]);
-							const closest_question_knn = group_of_questions[best_indices[0]];
-							const closest_question_model = group_of_questions[best_answer_index];
-							console.log({similarity, response, question, closest_question_knn, closest_question_model});
-						}
-						question_embedding.dispose();
-					});
-					if (group_number === group_of_questions.length-1 && question_number === group.length-1) { // last one
-					    console.log({answers_when_there_are_none});
+	        const answer = (group_of_questions, group_number, question_number, answers_when_there_are_none) => {
+	        	const group = group_of_questions[group_number];
+	        	const question = group[question_number];
+				use_model_and_knn_to_respond_to_question(question, false).then(response => {
+					const {best_indices, best_answer_index, model_predictions, knn_predictions, question_embedding} = response;
+					if (best_indices.length > 0) {
+						answers_when_there_are_none++;
+						const similarity = cosine_similarity(question_embedding, LIFE.knn_dataset[best_indices[0]]);
+						const closest_question_knn = group_of_questions[best_indices[0]];
+						const closest_question_model = group_of_questions[best_answer_index];
+						console.log({similarity, response, question, closest_question_knn, closest_question_model});
+					}
+					question_embedding.dispose();
+					if (question_number < group.length-1) {
+						answer(group_of_questions, group_number, question_number+1, answers_when_there_are_none);
+					} else if (group_number < group_of_questions-1) {
+						answer(group_of_questions, group_number+1, 0, answers_when_there_are_none);
+					} else {
+						console.log({answers_when_there_are_none});
 						topic_index++;
 						load_and_test_negative_questions();
 					}
-				});
-    		});
+				});	
+			};
+    		answer(negative_group_of_questions, 0, 0, 0);
     	};
     	if (topics[topic_index] === topic) { // skip the positive one
     		topic_index++
     	}
-    	if (topic_index >= topics.length-1) {
+    	if (topic_index > topics.length-1) {
     		return;
     	}
     	let questions_name = topic_to_questions_name[topics[topic_index]];
