@@ -236,12 +236,12 @@ group_of_questions.push([ // 30
 'What shall I do if I feel sick after traveling?',
 ]);
 answers.push(
-'<p><a target="_blank" href="https://www.cdc.gov/coronavirus/2019-ncov/about/steps-when-sick.html">See CDC s website about what to do if you get sick</a>.</p>');
+'<p><a target="_blank" href="https://www.cdc.gov/coronavirus/2019-ncov/about/steps-when-sick.html">See CDC\'s website about what to do if you get sick</a>.</p>');
 group_of_questions.push([ // 31
 'How can my family and I prepare for COVID-19?',
 'How can I prepare myself?',
-'What can I do to reduce the risk for me and my family?',
-// 'How can I prepare for corona?',
+// 'What can I do to reduce the risk for me and my family?', // duplicate with the following
+'How can I prepare for corona?',
 ]);
 answers.push(
 '<p>Create a household plan of action to help protect your health and the health of those you care about in the event of an outbreak of COVID-19 in your community:</p> <ul> <li>Talk with the people who need to be included in your plan, and discuss <a target="_blank" href="https://www.cdc.gov/coronavirus/2019-nCoV/summary.html">what to do if a COVID-19 outbreak occurs in your community</a>.</li> <li>Plan ways to care for those who might be at greater risk for serious complications, particularly <a href="https://www.cdc.gov/coronavirus/2019-ncov/specific-groups/high-risk-complications.html">older adults and those with severe chronic medical</a> conditions like heart, lung or kidney disease. <ul> <li>Make sure they have access to several weeks of medications and supplies in case you need to stay home for prolonged periods of time.</li> </ul> </li> <li>Get to know your neighbors and find out if your neighborhood has a website or social media page to stay connected.</li> <li>Create a list of local organizations that you and your household can contact in the event you need access to information, healthcare services, support, and resources.</li> <li>Create an emergency contact list of family, friends, neighbors, carpool drivers, health care providers, teachers, employers, the local public health department, and other community resources.</li> </ul>');
