@@ -96,18 +96,22 @@ A program can search through all the words to find the word that is closest to a
 The <span class="block-name">closest word to</span> reporter block does this.
 </p>
 
+<h4 class="advanced-information-white" id="measuring-distance">Different ways of measuring distances in high dimensional spaces</h4>
 <p class="advanced-topic">Click to read an advanced topic</p>
 <span class="advanced-topic-body">
-<h4 class="advanced-information-white" id="measuring-distance">Different ways of measuring distances in high dimensional spaces</h4>
 <p class="background-information advanced-information">
 There are two common ways of measuring distance in a high-dimensional space.
 One is <a href="https://en.wikipedia.org/wiki/Euclidean_distance" target="_blank">Euclidean distance</a>
 which is a generalisation of how distance is computed in 2 and 3 dimensional space.
 The idea is to take the sum of the squares of the differences along each of the 300 dimensions and then report the square root of that.
 The other measure is called <a href="https://en.wikipedia.org/wiki/Cosine_similarity" target="_blank">cosine similarity</a>.
-Both work pretty well in the <span class="block-name">closest word to</span> reporter which lets you choose which to use.
+Both work pretty well in the <i>full-featured version</i> of the <span class="block-name">closest word to</span> reporter
+that lets you choose which to use.
 While they usually agree sometimes small differences can be observed.
 For example, the third closest word to "dog" can be "canine" or "puppy" depending on the measure.
+The default is cosine similarity because researchers have found it works a little better in high-dimensional spaces.
+Using the <span class="block-name">acos of</span> block on the <span class="block-name">cosine similarity</span> reporter
+produces the angle between the inputs which is easier to understand.
 </p>
 </span>
 
