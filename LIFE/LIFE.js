@@ -879,7 +879,11 @@ const initialize = () => {
 	} catch (error) {
 		record_error(error);
 	}
-    if (mode === 'answer questions') {
+	if (mode === 'covid scenario') {
+		load_local_or_remote_scripts("covid-scenario-" + covid_scenario_number + ".js",
+		                             undefined,
+		                             run_covid_scenario);		                             
+	} else if (mode === 'answer questions') {
     	setup_interface();
     } else if (mode === 'create model') {
     	document.body.innerHTML = "Training started";
@@ -887,6 +891,25 @@ const initialize = () => {
     if (mode === 'test' || mode === 'create model') {
     	split_into_train_and_test_datasets();
     }
+};
+
+const step_types = {1: 'display info',
+                    2: 'menu',
+                    3: 'info', // ??
+                    5: 'finished', // needed?
+                    7: 'video',};
+
+const run_covid_scenario = (step_number) => {
+	if (typeof step_number !== 'number') {
+		document.getElementById('scenario interface').hidden = false;
+		document.getElementById('question answering interface').hidden = true;
+		step_number = 0;
+	}
+	const step = LIFE.scenarios[covid_scenario_number][step_number];
+	const step_type = step_types[step.type];
+	if (step_type === 'display info') {
+		document.getElementById('scenario info').innerHTML = step.text;
+	}
 };
 
 const split_into_train_and_test_datasets = () => {

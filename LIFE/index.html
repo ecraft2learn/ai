@@ -20,19 +20,7 @@ const hash_parameters = new URLSearchParams(window.location.hash.slice(1));
 const search_parameters = new URLSearchParams(window.location.search.slice(1));
 
 const parameter_option = (key) => hash_parameters.has(key) || search_parameters.has(key);
-
-let mode;
-if (parameter_option('answer')) { // also the default
-	mode = 'answer questions'; 
-} else if (parameter_option('train')) {
-	mode = 'create model';
-} else if (parameter_option('test')) {
-	mode = 'test';
-} else if (parameter_option('search')) {
-	mode = 'search';
-} else {
-	mode = 'answer questions';
-}
+const get_parameter_option = (key) => hash_parameters.get(key) || search_parameters.get(key);
 
 const negative_test = parameter_option('negative-test');
 
@@ -46,6 +34,24 @@ topics.forEach(topic_name => {
 	    topic = topic_name;
 	}
 });
+
+let mode;
+let covid_scenario_number;
+if (parameter_option('answer')) { // also the default
+	mode = 'answer questions'; 
+} else if (parameter_option('train')) {
+	mode = 'create model';
+} else if (parameter_option('test')) {
+	mode = 'test';
+} else if (parameter_option('search')) {
+	mode = 'search';
+} else if (parameter_option('covid-scenario') ) {
+	mode = "covid scenario";
+	covid_scenario_number = +get_parameter_option('covid-scenario');
+	topic = 'covid';
+} else {
+	mode = 'answer questions';
+}
 
 const report_model_name = (topic) => {
 	// this can be called to generate "negative" sample questions
@@ -117,6 +123,8 @@ p {
 </style>
 </head>
 <body>
+
+<div id="question answering interface">
 <p>
 <input id="question"
        type="text"
@@ -131,6 +139,13 @@ p {
 Loading. Please wait...
 </p>
 <hr></hr>
+</div>
+
+<div id="scenario interface" hidden>
+<img src="images/DOC_FEMALE_MASK_1.png"></img>
+<p id="scenario info" class="scenario info"></p>
+</div>
+
 <audio src="type.mp3" id="sound"></audio>
 </body>
 <script src="./LIFE.js"></script>
