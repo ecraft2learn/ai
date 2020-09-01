@@ -898,24 +898,107 @@ const step_types = {1: 'display info',
                     2: 'menu',
                     3: 'info', // ??
                     5: 'finished', // needed?
-                    7: 'video',};
+                    6: 'display algorithm',
+                    7: 'video'};
+
+let next_item_button_action = () => {};
+let previous_item_button_action = () => {};
+const next_item_button = document.getElementById('next-item-button');
+const previous_item_button = document.getElementById('previous-item-button');
+
+const scenario_interface = document.getElementById('scenario interface');
+const doctor_image = document.getElementById('doctor-image');
+const algorithm = document.getElementById('algorithm');
+
+const initialize_covid_scenario = () => {
+	scenario_interface.hidden = false;
+	previous_item_button.addEventListener('click', () => previous_item_button_action());
+	next_item_button.addEventListener('click', () => next_item_button_action());
+	blink_doctor_image();	
+};
+
+const hide_previous_item_button = () => {
+	previous_item_button.style.opacity = 0;
+};
+
+const show_previous_item_button = () => {
+	previous_item_button.style.opacity = 1;
+};
+
+const text_piece_length = 120;
+
+const split_text = (text) => {
+	const pieces = [];
+	while (true) {
+		if (text.length < text_piece_length) {
+			pieces.push(text);
+			return pieces;
+		} else {
+			const index_of_last_space_in_piece = text.lastIndexOf(' ', text_piece_length);
+			const index_of_last_period_in_piece = text.lastIndexOf('.', text_piece_length);
+			const end_with_a_sentence = (index_of_last_space_in_piece - index_of_last_period_in_piece) < 30;
+			const piece_length = end_with_a_sentence ?
+			                     index_of_last_period_in_piece+1 : // end with a sentence
+			                     index_of_last_space_in_piece;
+			const ellipsis = end_with_a_sentence ? ".." : "..."; // already has one period if ends with a sentence
+			pieces.push(text.slice(0, piece_length) + ellipsis);
+			text = text.slice(piece_length);
+		}	
+	}
+};
+
+let text_piece_index = 0;
 
 const run_covid_scenario = (step_number) => {
 	if (typeof step_number !== 'number') {
-		document.getElementById('scenario interface').hidden = false;
+        initialize_covid_scenario();
 		step_number = 0;
-		blink_doctor_image();
 	}
 	const step = LIFE.scenarios[covid_scenario_number][step_number];
 	const step_type = step_types[step.type];
-	if (step_type === 'display info') {
-		document.getElementById('scenario info').innerHTML = step.text;
+	if (step_type === 'display info' || step_type === 'display algorithm') {
+		const text_pieces = split_text(step.text);
+		text_piece_index = 0;
+		next_item_button_action = () => {
+			if (text_piece_index === 0 && step_number === 0) {
+				hide_previous_item_button();
+			} else {
+				show_previous_item_button();
+			}
+			if (text_piece_index === text_pieces.length) {
+				run_covid_scenario(step_number+1);
+			} else {
+				document.getElementById('scenario info').innerHTML = text_pieces[text_piece_index];
+				text_piece_index++;				
+			}
+		};
+		next_item_button_action();
+		previous_item_button_action = () => {
+			if (text_piece_index === 0) {
+				if (step_number === 0) {
+					hide_previous_item_button();
+				} else {
+					run_covid_scenario(step_number-1);
+				}
+			} else {
+				text_piece_index--;	
+				document.getElementById('scenario info').innerHTML = text_pieces[text_piece_index];
+			}
+		};
+		if (step_type === 'display algorithm') {
+			doctor_image.hidden = true;
+			algorithm.hidden = false;
+// 			document.getElementById('algorithm-container').style.width = scenario_interface.offsetWidth/2;
+//             algorithm.innerHTML = "Algorithm will appear here";
+            next_item_button_action = () => {
+            	run_covid_scenario(step_number+1);
+            };
+		}	
 	}
 };
 
 const blink_doctor_image = () => {
 	let eyes_open = true;
-	const doctor_image = document.getElementById('doctor-image');
 	const open_eyes_duration = 4000;
 	const blink_duration = 200;
 	const one_cycle = () => {
@@ -924,7 +1007,6 @@ const blink_doctor_image = () => {
 		}, open_eyes_duration);
 		window.setTimeout(() => {
 			doctor_image.src = 'images/DOC_FEMALE_MASK_1.png';
-// 			one_cycle();
 		}, open_eyes_duration+blink_duration);
 	};
 	one_cycle();

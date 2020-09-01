@@ -12,6 +12,7 @@ p {
   border-radius: 8px;
   padding: 8px;
   width: fit-content;
+  min: 512;
 }
 ol {
   border-radius: 8px;
@@ -261,4 +262,14 @@ background-color: buttonface;
   display:inline-block;
   font-size: .8em;
   margin-top: -16px;
+}
+.next-or-previous-item-button {
+  padding: 30px;
+  margin-right: 100px;
+  font-size: 3em;
+  border-radius: 100%;
+  vertical-align: bottom;
+}
+.algorithm {
+    border: 0px none;
 }
