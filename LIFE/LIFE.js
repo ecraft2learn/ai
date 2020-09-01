@@ -486,6 +486,11 @@ const setup = () => {
 //     	};
 //     	next_question();
 //     };
+    const training_scripts =
+        ["../ecraft2learn.js",
+        "../js/train.js",
+        "../js/invoke_callback.js",
+        "../js/train-report-results.js"];
     use.load().then((model) => {
         embedding_model = model;
 		const test_loss_message = document.createElement('p');
@@ -580,18 +585,20 @@ const setup = () => {
 					}
 				});       	
 			} else if (mode === 'create model') {
-				load_local_or_remote_scripts(["../js/tfjs-vis.js"],
+				load_local_or_remote_scripts([...training_scripts,
+				                              "../js/tfjs-vis.js"],
 											 undefined,
 											 () => {
-												setup_data(next_training);
-												});
+												 setup_data(next_training);
+											 });
 			} else if (mode === 'search') {
 				document.body.innerHTML = "Hyperparameter search started. <span id='experiment-number'>0</span>";
 				model_options.on_experiment_end = () => {
 					document.getElementById('experiment-number').innerHTML =
 						+document.getElementById('experiment-number').innerHTML + 1;
 				}
-				load_local_or_remote_scripts("../js/hyperparameters.js",
+				load_local_or_remote_scripts(...training_scripts,
+				                             "../js/hyperparameters.js",
 											 undefined,
 											 () => {
 												setup_data(search);

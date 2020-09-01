@@ -5,14 +5,10 @@
 	<meta charset='utf-8'>
 	<link href="../css/ai-teacher-guide.css" rel="stylesheet">
 	<link rel="icon" type="image/png" href="icons/icon-32.png" />
-	<script src="../ecraft2learn.js"></script>
 <!-- 	<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script> -->
 	<script src="../js/tfjs.js"></script>
     <script src="../js/universal-sentence-encoder.js"></script>
     <script src="../js/user-agent.js"></script>
-    <script src="../js/train.js"></script>
-    <script src="../js/invoke_callback.js"></script>
-    <script src="../js/train-report-results.js"></script>
     <script src="../js/load-scripts.js"></script>
 <!--     following needs updating -->
     <link rel="manifest" href="/ai/LIFE/LIFE.webmanifest">
@@ -27,7 +23,7 @@ const parameter_option = (key) => hash_parameters.has(key) || search_parameters.
 
 let mode;
 if (parameter_option('answer')) { // also the default
-	mode = 'answer questions'; // until new version working well
+	mode = 'answer questions'; 
 } else if (parameter_option('train')) {
 	mode = 'create model';
 } else if (parameter_option('test')) {
@@ -35,7 +31,7 @@ if (parameter_option('answer')) { // also the default
 } else if (parameter_option('search')) {
 	mode = 'search';
 } else {
-	mode = 'answer questions'; // until new version working well
+	mode = 'answer questions';
 }
 
 const negative_test = parameter_option('negative-test');
