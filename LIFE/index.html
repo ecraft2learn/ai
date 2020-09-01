@@ -3,7 +3,7 @@
 <head>
 	<title>Intelligent support for LIFE game</title>
 	<meta charset='utf-8'>
-	<link href="../css/ai-teacher-guide.css" rel="stylesheet">
+	<link href="../css/LIFE.css" rel="stylesheet">
 	<link rel="icon" type="image/png" href="icons/icon-32.png" />
 <!-- 	<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script> -->
 	<script src="../js/tfjs.js"></script>
@@ -124,7 +124,7 @@ p {
 </head>
 <body>
 
-<div id="question answering interface">
+<div id="question answering interface" hidden>
 <p>
 <input id="question"
        type="text"
@@ -142,8 +142,12 @@ Loading. Please wait...
 </div>
 
 <div id="scenario interface" hidden>
-<img src="images/DOC_FEMALE_MASK_1.png"></img>
-<p id="scenario info" class="scenario info"></p>
+<table>
+<tr>
+<td><img id="doctor-image" src="images/DOC_FEMALE_MASK_1.png"></img></td>
+<td><p id="scenario info" class="scenario-info flow-row-child"></p></td>
+</tr>
+</table>
 </div>
 
 <audio src="type.mp3" id="sound"></audio>
