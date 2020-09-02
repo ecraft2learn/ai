@@ -12,7 +12,6 @@ LIFE.scenarios[1] = [
 [ "9_Text", "You are ready to attend to Gin. Assess his Airway and Breathing now.","Choices","type",1,"Total_Choices",0,"Correct_Choices",1,"text_black",true,"correct_feedback","","incorrect_feedback","","incorrect_more_than_2_feedback","","more_info","","flowchart_poster_area",5,"comments_2","","quiz_identifier_titles_for_final_feedback",""],
 [ "10_Text", "Choose 3 ways to assess his Airway and Breathing.","Choices","Pneumonia-COVID19", "Choices_Index0", "Examine on the grandmother’s lap","Pneumonia-COVID19", "Choices_Index1", "Assess breathing adequacy","Pneumonia-COVID19", "Choices_Index2", "Assess the airway for secretions and listen for stridor","Pneumonia-COVID19", "Choices_Index3", "Move the child to the examination couch","Pneumonia-COVID19", "Choices_Index4", "Closely Listen and Feel for evidence of breathing","Pneumonia-COVID19", "Choices_Index5", "Admit and assess in the ward","type",2,"Total_Choices",6,"Correct_Choices",3,"text_black",true,"correct_feedback","Pneumonia-COVID19", "Correct_Feedback", "This is correct.","incorrect_feedback","Pneumonia-COVID19", "Incorrect_Feedback 2", "That\'s not right. Try again.","incorrect_more_than_2_feedback","Pneumonia-COVID19", "Incorrect_more than 2_Feedback 2", "Incorrect. The Correct answers are:\n1 Examine on the grandmother\'s lap.\n2 Assess the airway for secretions and listen for stridor.\n3 Assess breathing adequacy.","more_info","Pneumonia-COVID19", "More_Info 2", "Do not listen or feel for breathing by placing your ear and cheek close to the patient’s mouth AND\nDo not routinely move the patient within the hospital departments \nBoth these actions increase the risk of  aerosol spread of corona virus.","flowchart_poster_area",5,"comments","Pneumonia-COVID19", "More comments", "Keep algorithm visible","quiz_identifier_titles_for_final_feedback","Pneumonia-COVID19", "Quiz_identifier_titles_for_final_feedback", "Three 3 ways to assess Airway and Breathing."],
 [ "11_Text", "Gin is grunting, has lower chest in-drawing and shallow breathing at a rate of 65 breaths per minute.","Choices","type",1,"Total_Choices",0,"Correct_Choices",0,"text_black",true,"correct_feedback","","incorrect_feedback","","incorrect_more_than_2_feedback","","more_info","","flowchart_poster_area",1,"comments_2","","quiz_identifier_titles_for_final_feedback",""],
-[ "11_Text", "Gin is grunting, has lower chest in-drawing and shallow breathing at a rate of 65 breaths per minute.","Choices","type",1,"Total_Choices",0,"Correct_Choices",0,"text_black",true,"correct_feedback","","incorrect_feedback","","incorrect_more_than_2_feedback","","more_info","","flowchart_poster_area",1,"comments_2","","quiz_identifier_titles_for_final_feedback",""],
 [ "13_Text", "How else do you wish to assess his breathing? Choose 3 actions.","Choices","Pneumonia-COVID19", "Choices_Index0", "Listen for wheeze/crackles using a stethoscope","Pneumonia-COVID19", "Choices_Index1", "Check oxygen saturation","Pneumonia-COVID19", "Choices_Index2", "Look for nasal flaring and head nodding","Pneumonia-COVID19", "Choices_Index3", "Assess for cyanosis on hands","Pneumonia-COVID19", "Choices_Index4", "Assess heart rate","Pneumonia-COVID19", "Choices_Index5", "Put on oxygen therapy","type",2,"Total_Choices",6,"Correct_Choices",3,"text_black",true,"correct_feedback","Pneumonia-COVID19", "Correct_Feedback", "This is correct, well done!","incorrect_feedback","Pneumonia-COVID19", "Incorrect_Feedback 2", "Not quite - try again.","incorrect_more_than_2_feedback","Pneumonia-COVID19", "Incorrect_more than 2_Feedback 2", "Incorrect. The most important additional signs to assess are:1 Listen for wheeze/crackes using a stethoscope.2 Check oxygen saturation.3 Look for nasal flaring and head nodding.","more_info","Pneumonia-COVID19", "More_Info 2", "These are additional signs that help guide your interventions. Heart rate and peripheral cyanosis are circulatory signs. \nRemember to disinfect equipment (such as stethoscope, thermometer) in-between patients.","flowchart_poster_area",6,"comments_2","","quiz_identifier_titles_for_final_feedback","Pneumonia-COVID19", "Quiz_identifier_titles_for_final_feedback", "Three additional signs to assess in breathing"],
 [ "14_Text", "Now watch carefully to identify central cyanosis: This is best assessed on the inner gums and the tongue.","Choices","Pneumonia-COVID19", "Choices_Index0", "Animation of central cyanosis","type",3,"Total_Choices",0,"Correct_Choices",1,"text_black",false,"correct_feedback","","incorrect_feedback","","incorrect_more_than_2_feedback","","more_info","","flowchart_poster_area",1,"comments","Pneumonia-COVID19", "More comments", "Watch the inside of the mouth, gums and tongue for central cyanosis","quiz_identifier_titles_for_final_feedback",""],
 [ "15_Text", "Gin has widespread crackles and wheeze, has SPO2 of 86% and head nodding.","Choices","type",1,"Total_Choices",0,"Correct_Choices",1,"text_black",true,"correct_feedback","","incorrect_feedback","","incorrect_more_than_2_feedback","","more_info","Pneumonia-COVID19", "More_Info 2", "This child is very sick and requires immediate action.","flowchart_poster_area",6,"comments","Pneumonia-COVID19", "More comments", "Pic of a sick looking child. I will shop for sample pics. ","quiz_identifier_titles_for_final_feedback",""],
@@ -64,4 +63,28 @@ LIFE.scenarios[1][12].choices = ["Listen for wheeze/crackles using a stethoscope
                                  "Look for nasal flaring and head nodding",
                                  "Assess for cyanosis on hands",
                                  "Assess heart rate",
-                                 "Put on oxygen therapy"];                   
+                                 "Put on oxygen therapy"];
+LIFE.scenarios[1][15].choices = ["YES", "NOT SURE", "NO"];
+LIFE.scenarios[1][16].choices = ["Prop up the head in sniffing position",
+                                 "Start Oxygen via non-re-breather mask",
+                                 "Give inhaled bronchodilator",
+                                 "Give systemic steroids",
+                                 "Start bag-mask-ventilation",
+                                 "Give oxygen via nasopharyngeal airway"];
+LIFE.scenarios[1][18].choices = ["via Metered Dose Inhaler/Spacer",
+                                 "via nebulisation"];
+LIFE.scenarios[1][20].choices = ["Monitor pulse rate and signs of circulatory compromise",
+                                 "Manage circulatory impairement with IV fluid bolus",
+                                 "Give oral antibiotics as Gin is stable"];
+LIFE.scenarios[1][21].choices = ["Check level of consciousness (AVPU)",
+                                 "Assess ability to feed/drink",
+                                 "Check blood sugar and other relevant tests",
+                                 "Assess the need for tracheal intubation",
+                                 "Assess eligibility for CPAP treatment",
+                                 "Plan for a Chest X-ray"];
+LIFE.scenarios[1][23].choices = ["Give Paracetamol",
+                                 "Admit for broad-spectrum parenteral antibiotics",
+                                 "Start on IV maintenance fluid",
+                                 "Start oro/nasogastric feeding",
+                                 "Give oral antibiotics and send home for isolation",
+                                 "Give oral steroids"];
