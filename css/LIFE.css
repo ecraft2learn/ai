@@ -277,8 +277,8 @@ background-color: buttonface;
   margin-right: 50pt;
   margin-left: 50pt;
   margin-bottom: 10pt;
-  padding: 10pt;
-  border-radius: 30%;
+  padding: 16pt;
+  border-radius: 50%;
   box-shadow: none;
   cursor: pointer;
   text-decoration: none;
@@ -287,7 +287,7 @@ background-color: buttonface;
   outline: 0;
 }
 .choice-selected {
-  background-color: darkgray;
+  background-color: black;
   color: white; 
 }
 .center {

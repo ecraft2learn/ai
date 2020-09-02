@@ -999,6 +999,8 @@ const run_covid_scenario = (step_number) => {
         quiz_question.innerHTML = step.text;
         remove_all_children(quiz_options);
         const buttons = [];
+        const correct_answers = step.choices.slice(0, step.Correct_Choices);
+        tf.util.shuffle(step.choices)
         step.choices.forEach((choice) => {
         	const button = document.createElement('button');
         	button.innerHTML = choice;
@@ -1008,6 +1010,15 @@ const run_covid_scenario = (step_number) => {
 			quiz_options.appendChild(button);
         });
         step.buttons = buttons;
+        submit_button.onclick = () => {
+        	const selections = [];
+        	step.buttons.forEach((button, index) => {
+        		if (button.classList.contains('choice-selected')) {
+        			selections.push(index);
+        		}
+        	});
+        	console.log(selections, step);
+        }
 	}
 };
 
