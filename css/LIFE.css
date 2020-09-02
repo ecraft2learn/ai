@@ -47,7 +47,8 @@ figcaption {
 }
 
 .scenario-info {
-  font-size: 1.5em;
+  font-size: 1.3em;
+  width: 100%;
 }
 .generic-button {
 /* originally copied from jquery-ui many subsequent edits */

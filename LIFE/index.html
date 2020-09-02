@@ -149,9 +149,15 @@ Loading. Please wait...
 <iframe class="algorithm" id="algorithm" width=512 height=256 src="algorithm.html" hidden></iframe>
 </td>
 <td>
-<p id="scenario info" class="scenario-info">
+<table style="margin-top: -30px;">
+<tr>
+<!-- <td> -->
+<div class="scenario-info">
+<p id="scenario info">
 </p>
-<!-- <table> -->
+</div>
+<!-- </td> -->
+</tr>
 <tr>
 <!-- want the buttons to be in the second row and column where second row first column is empty -->
 <td></td> 
@@ -164,10 +170,20 @@ Loading. Please wait...
 </div>
 </td>
 </tr>
-<!-- </table>
-</td>
-</tr> -->
 </table>
+</td>
+</tr>
+</table>
+</div>
+
+<div id="quiz-interface" hidden>
+<p id="quiz-question">
+</p>
+<div id="quiz-options">
+</div>
+<button id= "submit-button" class="generic-button">
+Submit
+</button>
 </div>
 
 <audio src="type.mp3" id="sound"></audio>

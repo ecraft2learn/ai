@@ -907,8 +907,12 @@ const next_item_button = document.getElementById('next-item-button');
 const previous_item_button = document.getElementById('previous-item-button');
 
 const scenario_interface = document.getElementById('scenario interface');
+const scenario_info = document.getElementById('scenario info');
 const doctor_image = document.getElementById('doctor-image');
 const algorithm = document.getElementById('algorithm');
+const quiz_interface = document.getElementById('quiz-interface');
+const quiz_question = document.getElementById('quiz-question');
+const quiz_options = document.getElementById('quiz-options');
 
 const initialize_covid_scenario = () => {
 	scenario_interface.hidden = false;
@@ -925,7 +929,7 @@ const show_previous_item_button = () => {
 	previous_item_button.style.opacity = 1;
 };
 
-const text_piece_length = 200;
+const text_piece_length = 180;
 
 const split_text = (text) => {
 	const pieces = [];
@@ -936,7 +940,7 @@ const split_text = (text) => {
 		} else {
 			const index_of_last_space_in_piece = text.lastIndexOf(' ', text_piece_length);
 			const index_of_last_period_in_piece = text.lastIndexOf('.', text_piece_length);
-			const end_with_a_sentence = (index_of_last_space_in_piece - index_of_last_period_in_piece) < 30;
+			const end_with_a_sentence = (index_of_last_space_in_piece-index_of_last_period_in_piece) < 30;
 			const piece_length = end_with_a_sentence ?
 			                     index_of_last_period_in_piece+1 : // end with a sentence
 			                     index_of_last_space_in_piece;
@@ -958,8 +962,9 @@ const run_covid_scenario = (step_number) => {
 	const step_type = step_types[step.type];
 	if (step_type === 'display info' || step_type === 'display algorithm') {
 		const text_pieces = split_text(step.text);
-		text_piece_index = 0;
+		text_piece_index = -1;
 		next_item_button_action = () => {
+			text_piece_index++;	
 			if (text_piece_index === 0 && step_number === 0) {
 				hide_previous_item_button();
 			} else {
@@ -968,8 +973,7 @@ const run_covid_scenario = (step_number) => {
 			if (text_piece_index === text_pieces.length) {
 				run_covid_scenario(step_number+1);
 			} else {
-				document.getElementById('scenario info').innerHTML = text_pieces[text_piece_index];
-				text_piece_index++;				
+				scenario_info.innerHTML = text_pieces[text_piece_index];			
 			}
 		};
 		next_item_button_action();
@@ -982,18 +986,14 @@ const run_covid_scenario = (step_number) => {
 				}
 			} else {
 				text_piece_index--;	
-				document.getElementById('scenario info').innerHTML = text_pieces[text_piece_index];
+				scenario_info.innerHTML = text_pieces[text_piece_index];
 			}
 		};
-		if (step_type === 'display algorithm') {
-			doctor_image.hidden = true;
-			algorithm.hidden = false;
-// 			document.getElementById('algorithm-container').style.width = scenario_interface.offsetWidth/2;
-//             algorithm.innerHTML = "Algorithm will appear here";
-            next_item_button_action = () => {
-            	run_covid_scenario(step_number+1);
-            };
-		}	
+		doctor_image.hidden = (step_type === 'display algorithm');
+		algorithm.hidden = !doctor_image.hidden;
+	} else if (step_type === 'menu') {
+        quiz_interface.hidden = false;
+        scenario_interface.hidden = true;
 	}
 };
 
