@@ -913,6 +913,7 @@ const algorithm = document.getElementById('algorithm');
 const quiz_interface = document.getElementById('quiz-interface');
 const quiz_question = document.getElementById('quiz-question');
 const quiz_options = document.getElementById('quiz-options');
+const submit_button = document.getElementById('submit-button');
 
 const initialize_covid_scenario = () => {
 	scenario_interface.hidden = false;
@@ -952,11 +953,12 @@ const split_text = (text) => {
 };
 
 let text_piece_index = 0;
+const initial_step_number = 3; // should be 0 except while debugging
 
 const run_covid_scenario = (step_number) => {
 	if (typeof step_number !== 'number') {
         initialize_covid_scenario();
-		step_number = 0;
+		step_number = initial_step_number;
 	}
 	const step = LIFE.scenarios[covid_scenario_number][step_number];
 	const step_type = step_types[step.type];
@@ -994,6 +996,40 @@ const run_covid_scenario = (step_number) => {
 	} else if (step_type === 'menu') {
         quiz_interface.hidden = false;
         scenario_interface.hidden = true;
+        quiz_question.innerHTML = step.text;
+        remove_all_children(quiz_options);
+        const buttons = [];
+        step.choices.forEach((choice) => {
+        	const button = document.createElement('button');
+        	button.innerHTML = choice;
+		    button.classList.add('choice-button');
+			button.addEventListener('click', () => toggle_choice_selection(button, step));
+			buttons.push(button);
+			quiz_options.appendChild(button);
+        });
+        step.buttons = buttons;
+	}
+};
+
+const remove_all_children = (element) => {
+	while (element.firstChild) {
+		element.removeChild(element.firstChild);
+	}
+};
+
+const toggle_choice_selection = (button, step) => {
+	if (button.classList.contains('choice-selected')) {
+		button.classList.remove('choice-selected');
+	} else {
+		button.classList.add('choice-selected');
+		if (step.Correct_Choices === 1) {
+			step.buttons.forEach((sibling_button) => {
+				// make sure the others are no longer selected
+				if (sibling_button !== button) {
+					sibling_button.classList.remove('choice-selected');
+				}
+			});
+		}
 	}
 };
 

@@ -41,3 +41,27 @@ LIFE.scenarios[1] = LIFE.scenarios[1].map(x => {
     return element;
 });
 
+// following weren't captured during copying and pasting from Unreal Engine
+LIFE.scenarios[1][3].choices = ["COVID-19 Emergency Isolation cubicle", 
+                                "Out-patient common emergency room"];
+LIFE.scenarios[1][4].choices = ["Wash hands with water and soap",
+                                "Put on gown, cap, eye protection, mask and gloves",
+                                "Assess the airway",
+                                "Start on oxygen therapy"];
+LIFE.scenarios[1][6].video_URL = "./movies/How to fit check guidance 360p.mp4";
+LIFE.scenarios[1][7].choices = ["Offer her alcohol hand sanitizer",
+                                "Give her a face mask to put on",
+                                "Give her a gown and face mask",
+                                "Ask her to stay out of the examination room"];
+LIFE.scenarios[1][9].choices = ["Examine on the grandmother’s lap",
+                                "Assess breathing adequacy",
+                                "Assess the airway for secretions and listen for stridor",
+                                "Move the child to the examination couch",
+                                "Closely Listen and Feel for evidence of breathing",
+                                "Admit and assess in the ward"];
+LIFE.scenarios[1][12].choices = ["Listen for wheeze/crackles using a stethoscope",
+                                 "Check oxygen saturation",
+                                 "Look for nasal flaring and head nodding",
+                                 "Assess for cyanosis on hands",
+                                 "Assess heart rate",
+                                 "Put on oxygen therapy"];                   

@@ -75,9 +75,6 @@ text-decoration: none;
 width: fit-content;
 background-color: buttonface;
 }
-.center-contents {
- text-align: center; 
-}
 .no-margin {
   margin-top: 0px;
   margin-bottom: 0px;
@@ -273,4 +270,26 @@ background-color: buttonface;
 }
 .algorithm {
     border: 0px none;
+}
+.choice-button {
+  display: inline-block;
+  font-size: 1.5em;
+  margin-right: 50pt;
+  margin-left: 50pt;
+  margin-bottom: 10pt;
+  padding: 10pt;
+  border-radius: 30%;
+  box-shadow: none;
+  cursor: pointer;
+  text-decoration: none;
+  width: fit-content;
+  background-color: white;
+  outline: 0;
+}
+.choice-selected {
+  background-color: darkgray;
+  color: white; 
+}
+.center {
+  text-align: center;
 }
