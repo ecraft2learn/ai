@@ -925,7 +925,7 @@ const show_previous_item_button = () => {
 	previous_item_button.style.opacity = 1;
 };
 
-const text_piece_length = 120;
+const text_piece_length = 200;
 
 const split_text = (text) => {
 	const pieces = [];
