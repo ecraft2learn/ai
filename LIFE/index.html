@@ -145,7 +145,10 @@ Loading. Please wait...
 <table>
 <tr>
 <td>
-<img id="doctor-image" src="images/DOC_FEMALE_MASK_1.png" height=256 width=256></img>
+<div id="doctor-image">
+<img id="doctor-image-eyes-open" src="images/DOC_FEMALE_MASK_1.png" height=256 width=256></img>
+<img id="doctor-image-eyes-closed" src="images/DOC_FEMALE_MASK_2.png" height=256 width=256 hidden></img>
+</div>
 <iframe class="algorithm" id="algorithm" width=512 height=256 src="algorithm.html" hidden></iframe>
 </td>
 <td>
@@ -162,10 +165,10 @@ Loading. Please wait...
 <!-- want the buttons to be in the second row and column where second row first column is empty -->
 <td></td> 
 <td>
-<div id="previous-item-button" class="generic-button next-or-previous-item-button">
+<div id="previous-item-button" class="generic-button next-or-previous-item-button" style="margin-left: 250px;">
 <
 </div>
-<div id="next-item-button" class="generic-button next-or-previous-item-button" style="margin-left: 300px;">
+<div id="next-item-button" class="generic-button next-or-previous-item-button"> 
 >
 </div>
 </td>

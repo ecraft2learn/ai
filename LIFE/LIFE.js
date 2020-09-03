@@ -908,7 +908,9 @@ const previous_item_button = document.getElementById('previous-item-button');
 
 const scenario_interface = document.getElementById('scenario interface');
 const scenario_info = document.getElementById('scenario info');
-const doctor_image = document.getElementById('doctor-image');
+const doctor_image = document.getElementById('doctor-image'); // container of the following
+const doctor_image_eyes_open = document.getElementById('doctor-image-eyes-open');
+const doctor_image_eyes_closed = document.getElementById('doctor-image-eyes-closed');
 const algorithm = document.getElementById('algorithm');
 const quiz_interface = document.getElementById('quiz-interface');
 const quiz_question = document.getElementById('quiz-question');
@@ -953,7 +955,7 @@ const split_text = (text) => {
 };
 
 let text_piece_index = 0;
-const initial_step_number = 3; // should be 0 except while debugging
+const initial_step_number = 0; // should be 0 except while debugging
 
 const run_covid_scenario = (step_number) => {
 	if (typeof step_number !== 'number') {
@@ -1050,10 +1052,12 @@ const blink_doctor_image = () => {
 	const blink_duration = 200;
 	const one_cycle = () => {
 		window.setTimeout(() => {
-			doctor_image.src = 'images/DOC_FEMALE_MASK_2.png';
+			doctor_image_eyes_closed.hidden = false;
+			doctor_image_eyes_open.hidden = true;
 		}, open_eyes_duration);
 		window.setTimeout(() => {
-			doctor_image.src = 'images/DOC_FEMALE_MASK_1.png';
+			doctor_image_eyes_closed.hidden = true;
+			doctor_image_eyes_open.hidden = false;
 		}, open_eyes_duration+blink_duration);
 	};
 	one_cycle();
