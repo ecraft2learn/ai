@@ -996,6 +996,7 @@ const run_covid_scenario = (step_number) => {
 		doctor_image.hidden = (step_type === 'display algorithm');
 		algorithm.hidden = !doctor_image.hidden;
 	} else if (step_type === 'menu') {
+		submit_button.disabled = true;
         quiz_interface.hidden = false;
         scenario_interface.hidden = true;
         quiz_question.innerHTML = step.text;
@@ -1052,6 +1053,17 @@ const toggle_choice_selection = (button, buttons, step) => {
 			});
 		}
 	}
+	submit_button.disabled = count_selected(buttons) !== step.Correct_Choices;
+};
+
+const count_selected = (buttons) => {
+	let count = 0;
+	buttons.forEach(button => {
+		if (button.classList.contains('choice-selected')) {
+			count++;
+		}
+	});
+	return count;
 };
 
 const blink_doctor_image = () => {
