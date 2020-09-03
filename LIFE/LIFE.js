@@ -955,7 +955,7 @@ const split_text = (text) => {
 };
 
 let text_piece_index = 0;
-const initial_step_number = 0; // should be 0 except while debugging
+const initial_step_number = 3; // should be 0 except while debugging
 
 const run_covid_scenario = (step_number) => {
 	if (typeof step_number !== 'number') {
@@ -1001,27 +1001,35 @@ const run_covid_scenario = (step_number) => {
         quiz_question.innerHTML = step.text;
         remove_all_children(quiz_options);
         const buttons = [];
-        const correct_answers = step.choices.slice(0, step.Correct_Choices);
-        tf.util.shuffle(step.choices)
         step.choices.forEach((choice) => {
         	const button = document.createElement('button');
         	button.innerHTML = choice;
 		    button.classList.add('choice-button');
-			button.addEventListener('click', () => toggle_choice_selection(button, step));
+			button.addEventListener('click', () => toggle_choice_selection(button, buttons, step));
 			buttons.push(button);
-			quiz_options.appendChild(button);
         });
-        step.buttons = buttons;
+        const correct_buttons = buttons.slice(0, step.Correct_Choices);
+        tf.util.shuffle(buttons);
+        buttons.forEach(button => {
+        	quiz_options.appendChild(button);
+        });
+        let submission_count = 0;      
         submit_button.onclick = () => {
-        	const selections = [];
-        	step.buttons.forEach((button, index) => {
-        		if (button.classList.contains('choice-selected')) {
-        			selections.push(index);
-        		}
-        	});
-        	console.log(selections, step);
+        	submission_count++;
+        	const correct = correct_buttons.every(button => button.classList.contains('choice-selected'))
+            if (correct) {
+            	display_response(step['Correct_Feedback']);
+            } else if (submission_count === 1) {
+            	display_response(step['Incorrect_Feedback 2']);
+            } else {
+            	display_response(step['Incorrect_more than 2_Feedback 2']);
+            }
         }
 	}
+};
+
+const display_response = (response) => {
+	console.log(response); // for now
 };
 
 const remove_all_children = (element) => {
@@ -1030,13 +1038,13 @@ const remove_all_children = (element) => {
 	}
 };
 
-const toggle_choice_selection = (button, step) => {
+const toggle_choice_selection = (button, buttons, step) => {
 	if (button.classList.contains('choice-selected')) {
 		button.classList.remove('choice-selected');
 	} else {
 		button.classList.add('choice-selected');
 		if (step.Correct_Choices === 1) {
-			step.buttons.forEach((sibling_button) => {
+			buttons.forEach((sibling_button) => {
 				// make sure the others are no longer selected
 				if (sibling_button !== button) {
 					sibling_button.classList.remove('choice-selected');
