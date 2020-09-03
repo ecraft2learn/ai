@@ -896,18 +896,17 @@ const initialize = () => {
 
 const step_types = {1: 'display info',
                     2: 'menu',
-                    3: 'info', // ??
+                    3: 'info', // skipped
                     5: 'finished', // needed?
                     6: 'display algorithm',
                     7: 'video'};
 
-let next_item_button_action = () => {};
-let previous_item_button_action = () => {};
 const next_item_button = document.getElementById('next-item-button');
 const previous_item_button = document.getElementById('previous-item-button');
-
-const scenario_interface = document.getElementById('scenario interface');
-const scenario_info = document.getElementById('scenario info');
+const previous_item_button_in_quiz = document.getElementById('previous-item-button-in-quiz');
+const more_info_button = document.getElementById('more-info-button');
+const scenario_interface = document.getElementById('scenario-interface');
+const scenario_info = document.getElementById('scenario-info');
 const doctor_image = document.getElementById('doctor-image'); // container of the following
 const doctor_image_eyes_open = document.getElementById('doctor-image-eyes-open');
 const doctor_image_eyes_closed = document.getElementById('doctor-image-eyes-closed');
@@ -915,27 +914,38 @@ const algorithm = document.getElementById('algorithm');
 const quiz_interface = document.getElementById('quiz-interface');
 const quiz_question = document.getElementById('quiz-question');
 const quiz_options = document.getElementById('quiz-options');
+const video_interface = document.getElementById('video-interface');
+const video = document.getElementById('video');
 const submit_button = document.getElementById('submit-button');
+
 
 const initialize_covid_scenario = () => {
 	scenario_interface.hidden = false;
-	previous_item_button.addEventListener('click', () => previous_item_button_action());
-	next_item_button.addEventListener('click', () => next_item_button_action());
+	previous_item_button.addEventListener('click', previous_item_button_action);
+	previous_item_button_in_quiz.addEventListener('click', previous_item_button_action);
+	next_item_button.addEventListener('click', next_item_button_action);
+	hide_button(more_info_button);
+	more_info_button.addEventListener('click', display_more_info);
 	blink_doctor_image();	
 };
 
-const hide_previous_item_button = () => {
-	previous_item_button.style.opacity = 0;
+const display_more_info = () => {
+	const step = LIFE.scenarios[covid_scenario_number][step_number];
+	display_response(step['More_Info 2'], also_display_algorithm(step['more_info']));
+	hide_button(more_info_button);
 };
 
-const show_previous_item_button = () => {
-	previous_item_button.style.opacity = 1;
+const hide_button = (button) => {
+	button.style.opacity = 0;
 };
 
-const text_piece_length = 180;
+const show_button = (button) => {
+	button.style.opacity = 100;
+};
 
 const split_text = (text) => {
 	const pieces = [];
+	let text_piece_length = doctor_displayed() ? 200 : 140;
 	while (true) {
 		if (text.length < text_piece_length) {
 			pieces.push(text);
@@ -955,9 +965,11 @@ const split_text = (text) => {
 };
 
 let text_piece_index = 0;
-const initial_step_number = 3; // should be 0 except while debugging
+let text_pieces;
+let step_number;
+const initial_step_number = 6; // should be 0 except while debugging
 
-const run_covid_scenario = (step_number) => {
+const run_covid_scenario = () => {
 	if (typeof step_number !== 'number') {
         initialize_covid_scenario();
 		step_number = initial_step_number;
@@ -965,40 +977,15 @@ const run_covid_scenario = (step_number) => {
 	const step = LIFE.scenarios[covid_scenario_number][step_number];
 	const step_type = step_types[step.type];
 	if (step_type === 'display info' || step_type === 'display algorithm') {
-		const text_pieces = split_text(step.text);
+		show_interface('info');
+		text_pieces = split_text(step.text);
 		text_piece_index = -1;
-		next_item_button_action = () => {
-			text_piece_index++;	
-			if (text_piece_index === 0 && step_number === 0) {
-				hide_previous_item_button();
-			} else {
-				show_previous_item_button();
-			}
-			if (text_piece_index === text_pieces.length) {
-				run_covid_scenario(step_number+1);
-			} else {
-				scenario_info.innerHTML = text_pieces[text_piece_index];			
-			}
-		};
 		next_item_button_action();
-		previous_item_button_action = () => {
-			if (text_piece_index === 0) {
-				if (step_number === 0) {
-					hide_previous_item_button();
-				} else {
-					run_covid_scenario(step_number-1);
-				}
-			} else {
-				text_piece_index--;	
-				scenario_info.innerHTML = text_pieces[text_piece_index];
-			}
-		};
-		doctor_image.hidden = (step_type === 'display algorithm');
-		algorithm.hidden = !doctor_image.hidden;
+		display_algorithm_on_left_side(step_type === 'display algorithm');
 	} else if (step_type === 'menu') {
+		text_pieces = undefined;
 		submit_button.disabled = true;
-        quiz_interface.hidden = false;
-        scenario_interface.hidden = true;
+		show_interface('quiz');
         quiz_question.innerHTML = step.text;
         remove_all_children(quiz_options);
         const buttons = [];
@@ -1013,24 +1000,100 @@ const run_covid_scenario = (step_number) => {
         tf.util.shuffle(buttons);
         buttons.forEach(button => {
         	quiz_options.appendChild(button);
+        	quiz_options.appendChild(document.createElement('br'));
         });
         let submission_count = 0;      
         submit_button.onclick = () => {
         	submission_count++;
-        	const correct = correct_buttons.every(button => button.classList.contains('choice-selected'))
+        	const correct = correct_buttons.every(button => button.classList.contains('choice-selected'));
             if (correct) {
-            	display_response(step['Correct_Feedback']);
-            } else if (submission_count === 1) {
-            	display_response(step['Incorrect_Feedback 2']);
+            	show_button(next_item_button);
+            	display_response(step['Correct_Feedback'], also_display_algorithm(step['correct_feedback']));
             } else {
-            	display_response(step['Incorrect_more than 2_Feedback 2']);
+            	hide_button(next_item_button);
+            	if (submission_count === 1) {
+					display_response(step['Incorrect_Feedback 2'], also_display_algorithm(step['incorrect_feedback']));
+				} else {
+					display_response(step['Incorrect_more than 2_Feedback 2'], also_display_algorithm(step['incorrect_more_than_2_feedback']));
+				}
             }
         }
+	} else if (step_type === 'video') {
+		video.src = step.video_URL;
+        show_interface('video');
+	} else {
+		console.log('unknown step type', step_type);
 	}
 };
 
-const display_response = (response) => {
-	console.log(response); // for now
+const next_item_button_action = () => {
+	if (text_pieces) {
+		text_piece_index++;
+	}
+	if ((text_piece_index === 0 || !text_pieces) && step_number === 0) {
+		hide_button(previous_item_button);
+	} else {
+		show_button(previous_item_button);
+	}
+	if (!text_pieces || text_piece_index >= text_pieces.length) {
+		step_number++;
+		run_covid_scenario();
+	} else {
+		display_info(text_pieces[text_piece_index]);
+	}
+};
+
+const previous_item_button_action = () => {
+	if (text_piece_index === 0 || !text_pieces) {
+		if (step_number === 0) {
+			hide_previous_item_button();
+		} else {
+			step_number--;
+			run_covid_scenario();
+		}
+	} else if (text_pieces) {
+		text_piece_index--;	
+		scenario_info.innerHTML = text_pieces[text_piece_index];
+	}
+};
+
+const also_display_algorithm = (value => value === 'Pneumonia-COVID19');
+
+const show_interface = (name) => {
+	if (name === 'quiz') {
+		quiz_interface.hidden = false;
+        scenario_interface.hidden = true;
+        video_interface.hidden = true;
+	} else if (name === 'info') {
+	    quiz_interface.hidden = true;
+	    video_interface.hidden = true;
+        scenario_interface.hidden = false;
+	} else if (name === 'video') {
+	    quiz_interface.hidden = true;
+        scenario_interface.hidden = true;
+        video_interface.hidden = false;		
+	}
+};
+
+const display_algorithm_on_left_side = (display) => {
+	doctor_image.hidden = display;
+	algorithm.hidden = !display;
+};
+
+const doctor_displayed = () => !doctor_image.hidden;
+
+const display_info = (message) => {
+	scenario_info.innerHTML = message;
+};
+
+const display_response = (response, also_display_algorithm) => {
+	text_pieces = split_text(response);
+	text_piece_index = 0;
+	show_interface('info');
+	display_algorithm_on_left_side(also_display_algorithm);
+	display_info(text_pieces[0]);
+	hide_button(previous_item_button);
+    show_button(more_info_button);
 };
 
 const remove_all_children = (element) => {
