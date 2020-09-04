@@ -895,7 +895,7 @@ const initialize = () => {
 };
 
 const step_types = {1: 'display info',
-                    2: 'menu',
+                    2: 'quiz',
                     3: 'info', // skipped
                     5: 'finished', // needed?
                     6: 'display algorithm',
@@ -920,8 +920,10 @@ const video_interface = document.getElementById('video-interface');
 const video = document.getElementById('video');
 const submit_button = document.getElementById('submit-button');
 
+let scenario;
 
 const initialize_covid_scenario = () => {
+	scenario = LIFE.scenarios[covid_scenario_number]; // set this once scenario file has loaded 
 	scenario_interface.hidden = false;
 	previous_item_button.addEventListener('click', previous_item_button_action);
 	previous_item_button_in_quiz.addEventListener('click', previous_item_button_action);
@@ -934,7 +936,7 @@ const initialize_covid_scenario = () => {
 };
 
 const display_more_info = () => {
-	const step = LIFE.scenarios[covid_scenario_number][step_number];
+	const step = scenario[step_number];
 	display_response(step['More_Info 2'], also_display_algorithm(step['more_info']));
 	hide_button(more_info_button);
 };
@@ -972,14 +974,20 @@ const split_text = (text) => {
 let text_piece_index = 0;
 let text_pieces;
 let step_number;
-const initial_step_number = 0; // should be 0 except while debugging
+let submission_count = 0;
+const initial_step_number = 3; // should be 0 except while debugging
 
-const run_covid_scenario = () => {
+const run_covid_scenario = (current_submission_count) => {
 	if (typeof step_number !== 'number') {
         initialize_covid_scenario();
 		step_number = initial_step_number;
 	}
-	const step = LIFE.scenarios[covid_scenario_number][step_number];
+	if (typeof current_submission_count === 'number') {
+		submission_count = current_submission_count; 
+	} else {
+		submission_count = 0;
+	}
+	const step = scenario[step_number];
 	const step_type = step_types[step.type];
 	if (step_type === 'display info' || step_type === 'display algorithm') {
 		show_interface('info');
@@ -987,7 +995,7 @@ const run_covid_scenario = () => {
 		text_piece_index = -1;
 		next_item_button_action();
 		display_algorithm_on_left_side(step_type === 'display algorithm');
-	} else if (step_type === 'menu') {
+	} else if (step_type === 'quiz') {
 		text_pieces = undefined;
 		submit_button.disabled = true;
 		show_interface('quiz');
@@ -1006,10 +1014,10 @@ const run_covid_scenario = () => {
         buttons.forEach(button => {
         	quiz_options.appendChild(button);
         	quiz_options.appendChild(document.createElement('br'));
-        });
-        let submission_count = 0;      
+        });     
         submit_button.onclick = () => {
         	submission_count++;
+        	show_button(previous_item_button);
         	const correct = correct_buttons.every(button => button.classList.contains('choice-selected'));
             if (correct) {
             	show_button(next_item_button);
@@ -1053,8 +1061,12 @@ const previous_item_button_action = () => {
 		if (step_number === 0) {
 			hide_previous_item_button();
 		} else {
-			step_number--;
-			run_covid_scenario();
+			if (step_types[scenario[step_number].type] !== 'quiz') {
+				// quizzes don't have back buttons but feedback from submit does
+				step_number--;
+				submission_count = 0;
+			}
+			run_covid_scenario(submission_count);
 		}
 	} else if (text_pieces) {
 		text_piece_index--;	
@@ -1097,7 +1109,7 @@ const display_response = (response, also_display_algorithm) => {
 	show_interface('info');
 	display_algorithm_on_left_side(also_display_algorithm);
 	display_info(text_pieces[0]);
-	hide_button(previous_item_button);
+// 	hide_button(previous_item_button);
     show_button(more_info_button);
 };
 
