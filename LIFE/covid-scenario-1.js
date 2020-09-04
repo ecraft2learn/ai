@@ -58,14 +58,14 @@ LIFE.scenarios[1][9].choices = ["Examine on the grandmother’s lap",
                                 "Move the child to the examination couch",
                                 "Closely Listen and Feel for evidence of breathing",
                                 "Admit and assess in the ward"];
-LIFE.scenarios[1][12].choices = ["Listen for wheeze/crackles using a stethoscope",
+LIFE.scenarios[1][11].choices = ["Listen for wheeze/crackles using a stethoscope",
                                  "Check oxygen saturation",
                                  "Look for nasal flaring and head nodding",
                                  "Assess for cyanosis on hands",
                                  "Assess heart rate",
                                  "Put on oxygen therapy"];
-LIFE.scenarios[1][15].choices = ["YES", "NOT SURE", "NO"];
-LIFE.scenarios[1][16].choices = ["Prop up the head in sniffing position",
+LIFE.scenarios[1][14].choices = ["YES", "NOT SURE", "NO"];
+LIFE.scenarios[1][15].choices = ["Prop up the head in sniffing position",
                                  "Start Oxygen via non-re-breather mask",
                                  "Give inhaled bronchodilator",
                                  "Give systemic steroids",
@@ -73,16 +73,16 @@ LIFE.scenarios[1][16].choices = ["Prop up the head in sniffing position",
                                  "Give oxygen via nasopharyngeal airway"];
 LIFE.scenarios[1][18].choices = ["via Metered Dose Inhaler/Spacer",
                                  "via nebulisation"];
-LIFE.scenarios[1][20].choices = ["Monitor pulse rate and signs of circulatory compromise",
+LIFE.scenarios[1][19].choices = ["Monitor pulse rate and signs of circulatory compromise",
                                  "Manage circulatory impairement with IV fluid bolus",
                                  "Give oral antibiotics as Gin is stable"];
-LIFE.scenarios[1][21].choices = ["Check level of consciousness (AVPU)",
+LIFE.scenarios[1][20].choices = ["Check level of consciousness (AVPU)",
                                  "Assess ability to feed/drink",
                                  "Check blood sugar and other relevant tests",
                                  "Assess the need for tracheal intubation",
                                  "Assess eligibility for CPAP treatment",
                                  "Plan for a Chest X-ray"];
-LIFE.scenarios[1][23].choices = ["Give Paracetamol",
+LIFE.scenarios[1][22].choices = ["Give Paracetamol",
                                  "Admit for broad-spectrum parenteral antibiotics",
                                  "Start on IV maintenance fluid",
                                  "Start oro/nasogastric feeding",
