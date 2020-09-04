@@ -1054,6 +1054,9 @@ const next_item_button_action = () => {
 	} else {
 		display_info(text_pieces[text_piece_index]);
 	}
+	if (step_number > 1 && document.getElementById('landscape-warning-message')) {
+		document.getElementById('landscape-warning-message').remove();
+	}
 };
 
 const previous_item_button_action = () => {
