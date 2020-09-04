@@ -696,9 +696,11 @@ const create_sound_element = (url) => {
 	return sound;
 };
 
+let question_area; // there may not be one
+
 const setup_interface =
 	() => {
-        let question_area = document.getElementById('question');
+        question_area = document.getElementById('question');
         let toggle_speech_recognition = document.getElementById('speech-recognition');
         let sound_effect = create_sound_element('./sounds/12 bad.WAV'); // used when question heard but no answer forthcoming
         let speech_recognition_on = false;
@@ -714,8 +716,7 @@ const setup_interface =
         		answer_area.innerHTML = answer;
         		if (speech_recognition_on) {
         			let voices = window.speechSynthesis.getVoices();
-        			ecraft2learn.speak(answer_area.textContent, undefined, undefined, 
-        							   ecraft2learn.get_voice_number_matching(["uk", "female"], 0));
+        			ecraft2learn.speak(answer_area.textContent);
         		}          
         	} else {
         		answer_area.innerHTML = "<b style='color:red;'>Sorry I can't answer <i>\"" + question + "\"</i></b>";
@@ -740,39 +741,7 @@ const setup_interface =
         const answer_question = (question) => {
         	answer_area.innerHTML = "Please wait...";
         	const handle_answer = (response) => {
-        		const {best_indices, best_score, best_answer_index, second_best_score, second_best_answer_index, question_embedding, knn_predictions} = response;
-//         		const two_possible_answers = () => 
-//         		    // sum of top two exceeds threshold and they are less than 10% apart
-//             	       best_score+second_best_score > model_options.score_threshold &&
-//             		   best_score-second_best_score <= .1;	
-// 				const best_answer_close_enough = async () => {
-// 					const embeddings_tensor = await embedding_model.embed(group_of_questions[best_answer_index]);
-// 					const embeddings_for_top_match = embeddings_tensor.arraySync();
-// 					embeddings_tensor.dispose();
-// 					const distance = (array, tensor) => {
-// 						const another_tensor = tf.tensor(array);
-// 						// both tensors have a norm of 1 so can just do a dot product instead
-// 						const cosine_tensor = tf.metrics.cosineProximity(another_tensor, tensor);
-// 						const cosine = cosine_tensor.arraySync()[0];
-// 						another_tensor.dispose();
-// 						cosine_tensor.dispose();
-// 						return cosine;
-// 					};
-// 					let closest_distance = 1;
-// 					embeddings_for_top_match.forEach(embedding => {
-// 														const distance_to_possible_paraphrasing = distance(embedding, question_embedding);
-// 														if (distance_to_possible_paraphrasing < closest_distance) {
-// 															closest_distance = distance_to_possible_paraphrasing;
-// 														}
-// 													 });
-// 							return closest_distance;
-// 				};
-// 				if (knn_predictions) {
-// 					console.log("knn confidence is " + knn_predictions[best_answer_index].toFixed(4) + " while the model's is " + best_score.toFixed(4));
-// 					const cosine_similarity = tf.dot(LIFE.knn_dataset[best_answer_index], tf.transpose(question_embedding));
-// 					console.log("Distance to best model answer is ");
-// 					tf.print(cosine_similarity);
-// 				}		
+        		const {best_indices, best_score, best_answer_index, second_best_score, second_best_answer_index, question_embedding, knn_predictions} = response;	
 				if (best_indices.length === 1) {
 					respond_with_answer("<b>" + answers[best_indices[0]] + "</b>", question);
 				} else if (best_indices.length > 1) {
@@ -887,9 +856,17 @@ const initialize = () => {
 		record_error(error);
 	}
 	if (mode === 'covid scenario') {
-		load_local_or_remote_scripts("covid-scenario-" + covid_scenario_number + ".js",
-		                             undefined,
-		                             run_covid_scenario);		                             
+		const files = ["covid-scenario-" + covid_scenario_number + ".js"];
+		if (listen_and_speak) {
+			// for convenience in using speech recognition and synthesis
+			files.push("../ecraft2learn.js");
+			files.push("../js/invoke_callback.js");
+			files.push("../js/knn-classifier.js"); // "https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier",
+        	files.push("knn-dataset-" + topic_to_questions_name[topic] + ".js");
+		}
+		load_local_or_remote_scripts(files, 
+									 undefined,
+									 run_covid_scenario);				                             
 	} else if (mode === 'answer questions') {
 		document.getElementById('question answering interface').hidden = false;
     	setup_interface();
@@ -899,6 +876,19 @@ const initialize = () => {
     if (mode === 'test' || mode === 'create model') {
     	split_into_train_and_test_datasets();
     }
+};
+
+const load_question_answering_model = (callback) => {
+    use.load().then((model) => {
+		embedding_model = model;
+		knn_classifier = knnClassifier.create();
+		knn_classifier.setClassifierDataset(LIFE.knn_dataset);
+		tf.loadLayersModel("models/" + model_options.model_name + ".json").then((model) => {
+			loaded_model = model;
+			use_model_to_respond_to_question("Warm up GPU").then(() => {});
+			callback();
+		});
+	});
 };
 
 const step_types = {1: 'display info',
@@ -946,6 +936,61 @@ const initialize_covid_scenario = () => {
     sounds.back = create_sound_element('./sounds/pop2.WAV');
     sounds.next = create_sound_element('./sounds/pop3.WAV');
     sounds.more_info = create_sound_element('./sounds/pop5.WAV');
+    if (listen_and_speak) {
+    	load_question_answering_model(() => {
+    		ecraft2learn.start_speech_recognition(speaking_recognition_callback, handle_recognition_error);
+    		speak("Ready to listen to your questions. You'll hear this noise if I can't answer the question.",
+    		      () => {
+                      sounds.more_info.play();
+    		      });
+    	});
+    }
+};
+
+const plain_text = (html) => {
+	const div = document.createElement('div');
+	div.innerHTML = html;
+	return div.textContent;
+};
+
+const speak = (message, callback) => {
+	ecraft2learn.speak(message,
+			           undefined,
+			           undefined, 
+			           ecraft2learn.get_voice_number_matching(["uk", "female"], 0),
+			           undefined,
+			           undefined,
+			           callback);
+};
+
+const speaking_recognition_callback = (question, ignore, confidence) => {
+    const handle_answer = (response) => {
+	    const {best_indices, question_embedding} = response;
+	    let answer;	
+		if (best_indices.length === 1) {
+			answer = answers[best_indices[0]];
+			speak(plain_text(answer));
+			console.log({question});
+		} else {
+			sounds.more_info.play();
+		}
+		question_embedding.dispose();
+		console.log(response); // for now
+    };
+    if (confidence >= .5) {
+   		use_model_and_knn_to_respond_to_question(question, true).then(handle_answer);
+   	}
+    // and start listening to the next question
+    ecraft2learn.start_speech_recognition(speaking_recognition_callback, handle_recognition_error);
+};
+
+const handle_recognition_error = (error) => {
+	if (error === "no-speech" || error === "No speech heard for a while.") {
+    	// keep listening
+    	ecraft2learn.start_speech_recognition(speaking_recognition_callback, handle_recognition_error);
+    } else {
+    	console.log("recognition error", error);
+    }
 };
 
 const display_more_info = () => {
