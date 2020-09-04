@@ -1,3 +1,14 @@
+/* Display a warning if in portrait mode */
+#landscape-warning-message {
+  display: none;
+}
+@media only screen and (orientation:portrait) {
+  #landscape-warning-message { display:block; }
+}
+@media only screen and (orientation:landscape){
+  #landscape-warning-message { display:none; }
+}
+
 body {
   font-family: "Tahoma", "Trebuchet MS";
   font-size: 1.1em;
