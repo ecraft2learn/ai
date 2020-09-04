@@ -904,6 +904,8 @@ const step_types = {1: 'display info',
 const next_item_button = document.getElementById('next-item-button');
 const previous_item_button = document.getElementById('previous-item-button');
 const previous_item_button_in_quiz = document.getElementById('previous-item-button-in-quiz');
+const previous_item_button_video = document.getElementById('previous-item-button-video');
+const next_item_button_video = document.getElementById('next-item-button-video');
 const more_info_button = document.getElementById('more-info-button');
 const scenario_interface = document.getElementById('scenario-interface');
 const scenario_info = document.getElementById('scenario-info');
@@ -923,7 +925,9 @@ const initialize_covid_scenario = () => {
 	scenario_interface.hidden = false;
 	previous_item_button.addEventListener('click', previous_item_button_action);
 	previous_item_button_in_quiz.addEventListener('click', previous_item_button_action);
+	previous_item_button_video.addEventListener('click', previous_item_button_action);
 	next_item_button.addEventListener('click', next_item_button_action);
+	next_item_button_video.addEventListener('click', next_item_button_action);
 	hide_button(more_info_button);
 	more_info_button.addEventListener('click', display_more_info);
 	blink_doctor_image();	
@@ -953,7 +957,8 @@ const split_text = (text) => {
 		} else {
 			const index_of_last_space_in_piece = text.lastIndexOf(' ', text_piece_length);
 			const index_of_last_period_in_piece = text.lastIndexOf('.', text_piece_length);
-			const end_with_a_sentence = (index_of_last_space_in_piece-index_of_last_period_in_piece) < 30;
+			const end_with_a_sentence = ((index_of_last_space_in_piece-index_of_last_period_in_piece) < 30) || // include little bit of sentence that is left
+			                            ((text.length-index_of_last_space_in_piece) < 30) ; // include little bit that is left overall
 			const piece_length = end_with_a_sentence ?
 			                     index_of_last_period_in_piece+1 : // end with a sentence
 			                     index_of_last_space_in_piece;
@@ -967,7 +972,7 @@ const split_text = (text) => {
 let text_piece_index = 0;
 let text_pieces;
 let step_number;
-const initial_step_number = 6; // should be 0 except while debugging
+const initial_step_number = 0; // should be 0 except while debugging
 
 const run_covid_scenario = () => {
 	if (typeof step_number !== 'number') {
