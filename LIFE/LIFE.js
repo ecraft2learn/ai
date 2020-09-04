@@ -939,6 +939,7 @@ const display_more_info = () => {
 	const step = scenario[step_number];
 	display_response(step['More_Info 2'], also_display_algorithm(step['more_info']));
 	hide_button(more_info_button);
+	show_button(next_item_button);
 };
 
 const hide_button = (button) => {
@@ -951,7 +952,7 @@ const show_button = (button) => {
 
 const split_text = (text) => {
 	const pieces = [];
-	let text_piece_length = doctor_displayed() ? 200 : 140;
+	let text_piece_length = 250;
 	while (true) {
 		if (text.length < text_piece_length) {
 			pieces.push(text);
