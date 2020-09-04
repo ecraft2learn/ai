@@ -301,3 +301,35 @@ padding: 20px;
 .center {
   text-align: center;
 }
+.in-box {
+  border: black solid;
+  padding: 10pt;
+  margin: 6pt;
+  text-align: left;
+}
+.white-box {
+  border: black solid;
+  padding: 10pt;
+  margin: 6pt;
+}
+.pink {
+  background-color: lightpink;
+}
+.dark-pink {
+  background-color: pink
+}
+.light-yellow {
+  background-color: lightyellow;
+}
+.light-green {
+  background-color: lightgreen;
+}
+.light-blue {
+  background-color: lightblue;
+}
+.down-arrow {
+  margin-bottom: 10pt;
+  font-size: 5em;
+  color: darkgray;
+  margin-top: -16pt;
+}
