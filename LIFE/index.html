@@ -123,7 +123,10 @@ p {
 </style>
 </head>
 <body>
-
+<div id="landscape-warning-message">
+<h2>We recommend you view this web app in landscape mode.</h2>
+</div>
+<div id="entire-page">
 <div id="question answering interface" hidden>
 <p>
 <input id="question"
@@ -145,11 +148,11 @@ Loading. Please wait...
 <table>
 <tr>
 <td>
-<div id="doctor-image">
-<img id="doctor-image-eyes-open" src="images/DOC_FEMALE_MASK_1.png" height=256 width=256></img>
-<img id="doctor-image-eyes-closed" src="images/DOC_FEMALE_MASK_2.png" height=256 width=256 hidden></img>
+<div id="doctor-image" class="center" style="width:512px;">
+<img id="doctor-image-eyes-open" src="images/DOC_FEMALE_MASK_1.png" height=384 width=384></img>
+<img id="doctor-image-eyes-closed" src="images/DOC_FEMALE_MASK_2.png" height=384 width=384 hidden></img>
 </div>
-<iframe class="algorithm" id="algorithm" width=512 height=256 src="algorithm.html" hidden></iframe>
+<iframe class="algorithm" id="algorithm" width=512 height=384 src="algorithm.html" hidden></iframe>
 </td>
 <td>
 <table style="margin-top: -30px;">
@@ -207,7 +210,7 @@ Submit
 >
 </div>
 </div>
-
+</div>
 <audio src="type.mp3" id="sound"></audio>
 </body>
 <script src="./LIFE.js"></script>
