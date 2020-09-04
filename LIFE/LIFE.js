@@ -689,11 +689,18 @@ const logging_interface = () => {
     document.body.appendChild(clear_logs_button);
 };
 
+const create_sound_element = (url) => {
+	const sound = document.createElement('audio');
+	sound.src = url;
+	document.body.appendChild(sound);
+	return sound;
+};
+
 const setup_interface =
 	() => {
         let question_area = document.getElementById('question');
         let toggle_speech_recognition = document.getElementById('speech-recognition');
-        let sound_effect = document.getElementById('sound');
+        let sound_effect = create_sound_element('./sounds/12 bad.WAV'); // used when question heard but no answer forthcoming
         let speech_recognition_on = false;
         let first_cant_answer = true;
         const toggle_speech_recognition_label = document.createElement('span');
@@ -920,6 +927,7 @@ const video_interface = document.getElementById('video-interface');
 const video = document.getElementById('video');
 const submit_button = document.getElementById('submit-button');
 
+const sounds = {};
 let scenario;
 
 const initialize_covid_scenario = () => {
@@ -932,14 +940,23 @@ const initialize_covid_scenario = () => {
 	next_item_button_video.addEventListener('click', next_item_button_action);
 	hide_button(more_info_button);
 	more_info_button.addEventListener('click', display_more_info);
-	blink_doctor_image();	
+	blink_doctor_image();
+    sounds.wrong = create_sound_element('./sounds/12 bad.WAV');
+    sounds.right = create_sound_element('./sounds/select good.WAV');
+    sounds.back = create_sound_element('./sounds/pop2.WAV');
+    sounds.next = create_sound_element('./sounds/pop3.WAV');
+    sounds.more_info = create_sound_element('./sounds/pop5.WAV');
 };
 
 const display_more_info = () => {
 	const step = scenario[step_number];
-	display_response(step['More_Info 2'], also_display_algorithm(step['more_info']));
-	hide_button(more_info_button);
-	show_button(next_item_button);
+	const message = step['More_Info 2'];
+	if (message) {
+		display_response(message, also_display_algorithm(step['more_info']));
+		hide_button(more_info_button);
+		show_button(next_item_button);
+		sounds.more_info.play();
+	}
 };
 
 const hide_button = (button) => {
@@ -1022,6 +1039,7 @@ const run_covid_scenario = (current_submission_count) => {
             if (correct) {
             	show_button(next_item_button);
             	display_response(step['Correct_Feedback'], also_display_algorithm(step['correct_feedback']));
+            	sounds.right.play();
             } else {
             	hide_button(next_item_button);
             	if (submission_count === 1) {
@@ -1029,6 +1047,7 @@ const run_covid_scenario = (current_submission_count) => {
 				} else {
 					display_response(step['Incorrect_more than 2_Feedback 2'], also_display_algorithm(step['incorrect_more_than_2_feedback']));
 				}
+				sounds.wrong.play();
             }
         }
 	} else if (step_type === 'video') {
@@ -1039,7 +1058,7 @@ const run_covid_scenario = (current_submission_count) => {
 	}
 };
 
-const next_item_button_action = () => {
+const next_item_button_action = (event) => {
 	if (text_pieces) {
 		text_piece_index++;
 	}
@@ -1054,8 +1073,11 @@ const next_item_button_action = () => {
 	} else {
 		display_info(text_pieces[text_piece_index]);
 	}
-	if (step_number > 1 && document.getElementById('landscape-warning-message')) {
-		document.getElementById('landscape-warning-message').remove();
+	if (event) {
+		if (document.getElementById('landscape-warning-message')) {
+			document.getElementById('landscape-warning-message').remove();
+		}
+		sounds.next.play();	
 	}
 };
 
@@ -1064,8 +1086,9 @@ const previous_item_button_action = () => {
 		if (step_number === 0) {
 			hide_previous_item_button();
 		} else {
-			if (step_types[scenario[step_number].type] !== 'quiz') {
-				// quizzes don't have back buttons but feedback from submit does
+			if (!info_interface() ||
+			    step_types[scenario[step_number].type] !== 'quiz') {
+				// quizzes don't have back buttons but feedback (info interface) from submit does
 				step_number--;
 				submission_count = 0;
 			}
@@ -1075,6 +1098,7 @@ const previous_item_button_action = () => {
 		text_piece_index--;	
 		scenario_info.innerHTML = text_pieces[text_piece_index];
 	}
+	sounds.back.play();	
 };
 
 const also_display_algorithm = (value => value === 'Pneumonia-COVID19');
@@ -1095,6 +1119,8 @@ const show_interface = (name) => {
 	}
 };
 
+const info_interface = () => !scenario_interface.hidden;
+
 const display_algorithm_on_left_side = (display) => {
 	doctor_image.hidden = display;
 	algorithm.hidden = !display;
@@ -1112,8 +1138,11 @@ const display_response = (response, also_display_algorithm) => {
 	show_interface('info');
 	display_algorithm_on_left_side(also_display_algorithm);
 	display_info(text_pieces[0]);
-// 	hide_button(previous_item_button);
-    show_button(more_info_button);
+	const step = scenario[step_number];
+	const message = step['More_Info 2'];
+    if (message) {
+    	show_button(more_info_button);
+    }
 };
 
 const remove_all_children = (element) => {
