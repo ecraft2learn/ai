@@ -975,7 +975,6 @@ let text_piece_index = 0;
 let text_pieces;
 let step_number;
 let submission_count = 0;
-const initial_step_number = 3; // should be 0 except while debugging
 
 const run_covid_scenario = (current_submission_count) => {
 	if (typeof step_number !== 'number') {

@@ -53,6 +53,8 @@ if (parameter_option('answer')) { // also the default
 	mode = 'answer questions';
 }
 
+const initial_step_number = +get_parameter_option('step'); // start from 0 unless explictly indicated otherwise
+
 const report_model_name = (topic) => {
 	// this can be called to generate "negative" sample questions
 	if (topic === 'pneumonia') {
