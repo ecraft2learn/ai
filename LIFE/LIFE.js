@@ -916,7 +916,9 @@ const quiz_options = document.getElementById('quiz-options');
 const video_interface = document.getElementById('video-interface');
 const video = document.getElementById('video');
 const submit_button = document.getElementById('submit-button');
-
+const answer_to_question_container = document.getElementById('answer-to-question-container');
+const answer_to_question = document.getElementById('answer-to-question');
+const answer_to_question_close_button = document.getElementById('answer-to-question-close-button');
 const sounds = {};
 let scenario;
 
@@ -930,6 +932,10 @@ const initialize_covid_scenario = () => {
 	next_item_button_video.addEventListener('click', next_item_button_action);
 	hide_button(more_info_button);
 	more_info_button.addEventListener('click', display_more_info);
+	answer_to_question_close_button.addEventListener('click', 
+	    () => {
+	    	answer_to_question_container.hidden = true;
+	    });
 	blink_doctor_image();
     sounds.wrong = create_sound_element('./sounds/12 bad.WAV');
     sounds.right = create_sound_element('./sounds/select good.WAV');
@@ -970,7 +976,9 @@ const speaking_recognition_callback = (question, ignore, confidence) => {
 		if (best_indices.length === 1) {
 			answer = answers[best_indices[0]];
 			speak(plain_text(answer));
-			console.log({question});
+			answer_to_question_container.hidden = false;
+			answer_to_question.innerHTML = answer;
+			console.log({answer});
 		} else {
 			sounds.more_info.play();
 		}

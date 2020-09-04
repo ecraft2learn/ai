@@ -344,3 +344,11 @@ padding: 20px;
   color: darkgray;
   margin-top: -16pt;
 }
+.container-for-answers {
+  background-color: lightblue;
+  border: black solid;
+  padding: 30px;
+  margin: 6px;
+  border-radius: 50%;
+  font-size: 1.5em;
+}
