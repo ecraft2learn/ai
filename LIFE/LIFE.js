@@ -1007,7 +1007,11 @@ const display_more_info = () => {
 	if (message) {
 		display_response(message, also_display_algorithm(step['more_info']));
 		hide_button(more_info_button);
-		show_button(next_item_button);
+		if (quiz_correct) {
+			show_button(next_item_button);
+		} else {
+			hide_button(next_item_button);
+		}
 		sounds.more_info.play();
 	}
 };
@@ -1045,6 +1049,7 @@ const split_text = (text) => {
 let text_piece_index = 0;
 let text_pieces;
 let step_number;
+let quiz_correct = true;
 let submission_count = 0;
 
 const run_covid_scenario = (current_submission_count) => {
@@ -1059,6 +1064,7 @@ const run_covid_scenario = (current_submission_count) => {
 	}
 	const step = scenario[step_number];
 	const step_type = step_types[step.type];
+	quiz_correct = true; // unless answered incorrectly below - if incorrect next_item_button is hidden in more info
 	if (step_type === 'display info' || step_type === 'display algorithm') {
 		show_interface('info');
 		text_pieces = split_text(step.text);
@@ -1088,8 +1094,8 @@ const run_covid_scenario = (current_submission_count) => {
         submit_button.onclick = () => {
         	submission_count++;
         	show_button(previous_item_button);
-        	const correct = correct_buttons.every(button => button.classList.contains('choice-selected'));
-            if (correct) {
+        	quiz_correct = correct_buttons.every(button => button.classList.contains('choice-selected'));
+            if (quiz_correct) {
             	show_button(next_item_button);
             	display_response(step['Correct_Feedback'], also_display_algorithm(step['correct_feedback']));
             	sounds.right.play();
