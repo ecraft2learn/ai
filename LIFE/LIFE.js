@@ -864,9 +864,7 @@ const initialize = () => {
 			files.push("../js/knn-classifier.js"); // "https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier",
         	files.push("knn-dataset-" + topic_to_questions_name[topic] + ".js");
 		}
-		load_local_or_remote_scripts(files, 
-									 undefined,
-									 run_covid_scenario);				                             
+		load_local_or_remote_scripts(files, undefined, initialize_covid_scenario);				                             
 	} else if (mode === 'answer questions') {
 		document.getElementById('question answering interface').hidden = false;
     	setup_interface();
@@ -898,6 +896,9 @@ const step_types = {1: 'display info',
                     6: 'display algorithm',
                     7: 'video'};
 
+
+const opening_credits_container = document.getElementById('opening-credits');
+const opening_credits_image = document.getElementById('opening-credits-image');
 const next_item_button = document.getElementById('next-item-button');
 const previous_item_button = document.getElementById('previous-item-button');
 const previous_item_button_in_quiz = document.getElementById('previous-item-button-in-quiz');
@@ -922,9 +923,32 @@ const answer_to_question_close_button = document.getElementById('answer-to-quest
 const sounds = {};
 let scenario;
 
+// can't start speaking until the user has done something
+let user_action_has_been_performed = false;
+let speech_ready_notification_permitted = false;
+const user_action_performed = () => {
+	if (!user_action_has_been_performed) { // first time
+		user_action_has_been_performed = true;
+		if (speech_ready_notification_permitted) {
+			notify_speech_ready();
+		}		
+	}
+};
+
+const notify_speech_ready = () => {
+	speak("Ready to listen to your questions. You'll hear this noise if I can't answer the question.",
+          () => {
+              sounds.more_info.play();
+    	  });
+};
+
 const initialize_covid_scenario = () => {
+	if (initial_step_number === 0) { // URL parameter not used to start in the middle
+		opening_credits();
+	} else {
+		leave_opening_credits();
+	}
 	scenario = LIFE.scenarios[covid_scenario_number]; // set this once scenario file has loaded 
-	scenario_interface.hidden = false;
 	previous_item_button.addEventListener('click', previous_item_button_action);
 	previous_item_button_in_quiz.addEventListener('click', previous_item_button_action);
 	previous_item_button_video.addEventListener('click', previous_item_button_action);
@@ -935,6 +959,9 @@ const initialize_covid_scenario = () => {
 	answer_to_question_close_button.addEventListener('click', 
 	    () => {
 	    	answer_to_question_container.hidden = true;
+	    	if (window.speechSynthesis) {
+                window.speechSynthesis.cancel(); // should stop all utterances
+            }
 	    });
 	blink_doctor_image();
     sounds.wrong = create_sound_element('./sounds/12 bad.WAV');
@@ -945,12 +972,36 @@ const initialize_covid_scenario = () => {
     if (listen_and_speak) {
     	load_question_answering_model(() => {
     		ecraft2learn.start_speech_recognition(speaking_recognition_callback, handle_recognition_error);
-    		speak("Ready to listen to your questions. You'll hear this noise if I can't answer the question.",
-    		      () => {
-                      sounds.more_info.play();
-    		      });
+    		if (user_action_has_been_performed) {
+				notify_speech_ready();
+			} else { // notify when first user action performed
+				speech_ready_notification_permitted = true;
+			}
     	});
     }
+};
+
+let opening_credits_urls = ["./images/credits.png", "./images/legal.png", "./images/start.png"];
+const opening_credits_duration = 2000;
+
+const opening_credits = () => {
+	const next_image = () => {
+		if (opening_credits_urls.length > 0) {
+			opening_credits_image.src = opening_credits_urls[0];
+			opening_credits_urls = opening_credits_urls.slice(1);
+		} else {
+			leave_opening_credits();
+		}
+		window.setTimeout(next_image, opening_credits_duration);
+	};
+	opening_credits_image.addEventListener('click', next_image);
+	window.setTimeout(next_image, opening_credits_duration);
+};
+
+const leave_opening_credits = () => {
+	opening_credits_container.hidden = true;
+	scenario_interface.hidden = false;
+	run_covid_scenario();
 };
 
 const plain_text = (html) => {
@@ -997,7 +1048,7 @@ const handle_recognition_error = (error) => {
     	// keep listening
     	ecraft2learn.start_speech_recognition(speaking_recognition_callback, handle_recognition_error);
     } else {
-    	console.log("recognition error", error);
+    	console.log("Recognition error: ", error);
     }
 };
 
@@ -1054,7 +1105,6 @@ let submission_count = 0;
 
 const run_covid_scenario = (current_submission_count) => {
 	if (typeof step_number !== 'number') {
-        initialize_covid_scenario();
 		step_number = initial_step_number;
 	}
 	if (typeof current_submission_count === 'number') {
@@ -1118,6 +1168,9 @@ const run_covid_scenario = (current_submission_count) => {
 };
 
 const next_item_button_action = (event) => {
+	if (event) {
+		user_action_performed();
+	}
 	if (text_pieces) {
 		text_piece_index++;
 	}
