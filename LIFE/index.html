@@ -37,6 +37,7 @@ topics.forEach(topic_name => {
 
 let mode;
 let covid_scenario_number;
+let just_download_context_sensitive_questions;
 if (parameter_option('answer')) { // also the default
 	mode = 'answer questions'; 
 } else if (parameter_option('train')) {
@@ -48,6 +49,11 @@ if (parameter_option('answer')) { // also the default
 } else if (parameter_option('covid-scenario') ) {
 	mode = "covid scenario";
 	covid_scenario_number = +get_parameter_option('covid-scenario');
+	topic = 'covid';
+} else if (parameter_option('download-sensitive-questions')) {
+	just_download_context_sensitive_questions = +get_parameter_option('download-sensitive-questions');
+	covid_scenario_number = just_download_context_sensitive_questions;
+	mode = "covid scenario";
 	topic = 'covid';
 } else {
 	mode = 'answer questions';

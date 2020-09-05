@@ -99,27 +99,27 @@ const use_model_and_knn_to_respond_to_question = async (the_question, answer_exp
     });
 };
 
-const prepare_for_context_sensitive_questions = (callback) => {
-	if (listen_and_speak) {
-		if (LIFE.context_sensitive_questions && LIFE.context_sensitive_questions.length > 0) {
-			const {scenario, earliest_step, latest_step, questions, answer} = LIFE.context_sensitive_questions[0];
-			const current_scenario = LIFE.scenarios[scenario];
-			LIFE.context_sensitive_questions = LIFE.context_sensitive_questions.slice(1);
-			embedding_model.embed(questions).then(embeddings => {
-				const context_sensitive_questions = {embeddings, questions, answer};
+let javascript = "// Automatically generated sentence embeddings for context sensitive questions\nlet questions;\n";
+
+const download_context_sensitive_questions = () => {
+	if (LIFE.context_sensitive_questions && LIFE.context_sensitive_questions.length > 0) {
+		const {scenario, earliest_step, latest_step, questions, answer} = LIFE.context_sensitive_questions[0];
+		const current_scenario = LIFE.scenarios[scenario];
+		LIFE.context_sensitive_questions = LIFE.context_sensitive_questions.slice(1);
+		embedding_model.embed(questions).then(embeddings => {
+			javascript += "questions = {\n";
+			javascript += "embeddings: tf.tensor(" + JSON.stringify(embeddings.arraySync()) + "),\n";
+			javascript += "questions: " + JSON.stringify(questions) + ",\n";
+			javascript += "answer: " + JSON.stringify(answer) + "};\n"; 
 				for (let i = earliest_step; i <= latest_step; i++) {
-					if (typeof current_scenario[i].context_sensitive_questions !== 'object') {
-						current_scenario[i].context_sensitive_questions = [];
-					}
-					current_scenario[i].context_sensitive_questions.push(context_sensitive_questions);
+					javascript += "if (typeof LIFE.scenarios[" + scenario + "][" + i + "].context_sensitive_questions !== 'object') {\n";
+					javascript += "  LIFE.scenarios[" + scenario + "][" + i + "].context_sensitive_questions = [];\n}\n";
+					javascript += "LIFE.scenarios[" + scenario + "][" + i + "].context_sensitive_questions.push(questions);\n";
 				}
-				prepare_for_context_sensitive_questions(callback);
+				download_context_sensitive_questions();
 			});
-		} else {
-			callback();
-		}
 	} else {
-		callback();
+		create_download_anchor(javascript, "context_sensitive_covid_questions.js");
 	}
 };
 
@@ -629,14 +629,16 @@ const setup = () => {
 											 });
 			}
         };
-        if (use_knn_classifier) {
+        if (just_download_context_sensitive_questions) {
+			download_context_sensitive_questions();
+        } else if (use_knn_classifier) {
         	load_local_or_remote_scripts(["../js/knn-classifier.js", // "https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier",
         	                              "knn-dataset-" + topic_to_questions_name[topic] + ".js"], 
         	                             undefined,
         	                             () => {
         	                             	 knn_classifier = knnClassifier.create();
         	                                 knn_classifier.setClassifierDataset(LIFE.knn_dataset);
-        	                                 prepare_for_context_sensitive_questions(process_mode);
+        	                                 process_mode();
         	                             });
         } else {
         	process_mode();
@@ -882,8 +884,8 @@ const initialize = () => {
 	if (mode === 'covid scenario') {
 		const files = ["covid-scenario-" + covid_scenario_number + ".js"];
 		if (listen_and_speak) {
-			// for convenience in using speech recognition and synthesis
-			files.push("../ecraft2learn.js");
+			files.push("context_sensitive_covid_questions.js");
+			files.push("../ecraft2learn.js"); // for convenience in using speech recognition and synthesis
 			files.push("../js/invoke_callback.js");
 			files.push("../js/knn-classifier.js"); // "https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier",
         	files.push("knn-dataset-" + topic_to_questions_name[topic] + ".js");
@@ -915,7 +917,7 @@ const load_question_answering_model = (callback) => {
 
 const step_types = {1: 'display info',
                     2: 'quiz',
-                    3: 'info', // skipped
+                    3: 'display info', // unclear why this is different from type 1
                     5: 'finished', // needed?
                     6: 'display algorithm',
                     7: 'video'};
@@ -1065,7 +1067,7 @@ const speaking_recognition_callback = (question, ignore, confidence) => {
     	const otherwise = () => {
     		use_model_and_knn_to_respond_to_question(question, true).then(process_response);
     	};
-    	try_context_sensitive_questions(scenario[step_number].context_sensitive_questions, process_answer, otherwise);
+    	try_context_sensitive_questions(question, scenario[step_number].context_sensitive_questions, process_answer, otherwise);
    	}
     // and start listening to the next question
     ecraft2learn.start_speech_recognition(speaking_recognition_callback, handle_recognition_error);
@@ -1080,13 +1082,21 @@ const handle_recognition_error = (error) => {
     }
 };
 
-const try_context_sensitive_questions = (questions_and_answers, process_answer, callback_if_no_answer) => {
-	if (!questions_and_answers) {
+const sensitive_question_threshold = .75;
+
+const try_context_sensitive_questions = (question, questions_and_answers, process_answer, callback_if_no_answer) => {
+	if (!questions_and_answers || questions_and_answers.length === 0) {
 		callback_if_no_answer();
 	}
 	const {embeddings, questions, answer} = questions_and_answers[0];
-	// to do  
-	try_context_sensitive_questions(questions_and_answers.slice(1), process_answer, callback_if_no_answer);
+	embedding_model.embed([question]).then((question_embedding) => {
+		const similarity = cosine_similarity(question_embedding, embeddings);
+		if (similarity > sensitive_question_threshold) {
+		 	process_answer(answer);
+	    } else {
+			try_context_sensitive_questions(questions_and_answers.slice(1), process_answer, callback_if_no_answer);
+		}
+	});
 };
 
 const display_more_info = () => {
