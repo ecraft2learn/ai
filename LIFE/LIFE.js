@@ -715,20 +715,13 @@ const logging_interface = () => {
     document.body.appendChild(clear_logs_button);
 };
 
-const create_sound_element = (url) => {
-	const sound = document.createElement('audio');
-	sound.src = url;
-	document.body.appendChild(sound);
-	return sound;
-};
-
 let question_area; // there may not be one
 
 const setup_interface =
 	() => {
         question_area = document.getElementById('question');
         let toggle_speech_recognition = document.getElementById('speech-recognition');
-        let sound_effect = create_sound_element('./sounds/12 bad.WAV'); // used when question heard but no answer forthcoming
+        let sound_effect = sounds.wrong; // used when question heard but no answer forthcoming
         let speech_recognition_on = false;
         let first_cant_answer = true;
         const toggle_speech_recognition_label = document.createElement('span');
@@ -946,7 +939,12 @@ const submit_button = document.getElementById('submit-button');
 const answer_to_question_container = document.getElementById('answer-to-question-container');
 const answer_to_question = document.getElementById('answer-to-question');
 const answer_to_question_close_button = document.getElementById('answer-to-question-close-button');
-const sounds = {};
+const sounds = {wrong: document.getElementById('wrong-sound'),
+                right: document.getElementById('right-sound'),
+                next: document.getElementById('next-sound'),
+                back: document.getElementById('back-sound'),
+                more_info: document.getElementById('more-info-sound')};
+
 let scenario;
 
 // can't start speaking until the user has done something
@@ -980,7 +978,7 @@ const initialize_covid_scenario = () => {
 	previous_item_button_video.addEventListener('click', previous_item_button_action);
 	next_item_button.addEventListener('click', next_item_button_action);
 	next_item_button_video.addEventListener('click', next_item_button_action);
-	hide_button(more_info_button);
+	hide_element(more_info_button);
 	more_info_button.addEventListener('click', display_more_info);
 	answer_to_question_close_button.addEventListener('click', 
 	    () => {
@@ -990,11 +988,6 @@ const initialize_covid_scenario = () => {
             }
 	    });
 	blink_doctor_image();
-    sounds.wrong = create_sound_element('./sounds/12 bad.WAV');
-    sounds.right = create_sound_element('./sounds/select good.WAV');
-    sounds.back = create_sound_element('./sounds/pop2.WAV');
-    sounds.next = create_sound_element('./sounds/pop3.WAV');
-    sounds.more_info = create_sound_element('./sounds/pop5.WAV');
     if (listen_and_speak) {
     	load_question_answering_model(() => {
     		ecraft2learn.start_speech_recognition(speaking_recognition_callback, handle_recognition_error);
@@ -1094,32 +1087,33 @@ const try_context_sensitive_questions = (question, questions_and_answers, proces
 		if (similarity > sensitive_question_threshold) {
 		 	process_answer(answer);
 	    } else {
-			try_context_sensitive_questions(questions_and_answers.slice(1), process_answer, callback_if_no_answer);
+			try_context_sensitive_questions(question, questions_and_answers.slice(1), process_answer, callback_if_no_answer);
 		}
 	});
 };
 
 const display_more_info = () => {
+	answer_to_question_container.hidden = true;
 	const step = scenario[step_number];
 	const message = step['More_Info 2'];
 	if (message) {
 		display_response(message, also_display_algorithm(step['more_info']));
-		hide_button(more_info_button);
+		hide_element(more_info_button);
 		if (quiz_correct) {
-			show_button(next_item_button);
+			show_element(next_item_button);
 		} else {
-			hide_button(next_item_button);
+			hide_element(next_item_button);
 		}
 		sounds.more_info.play();
 	}
 };
 
-const hide_button = (button) => {
-	button.style.opacity = 0;
+const hide_element = (element) => {
+	element.style.opacity = 0;
 };
 
-const show_button = (button) => {
-	button.style.opacity = 100;
+const show_element = (element) => {
+	element.style.opacity = 100;
 };
 
 const split_text = (text) => {
@@ -1189,15 +1183,16 @@ const run_covid_scenario = (current_submission_count) => {
         	quiz_options.appendChild(document.createElement('br'));
         });     
         submit_button.onclick = () => {
+        	answer_to_question_container.hidden = true;
         	submission_count++;
-        	show_button(previous_item_button);
+        	show_element(previous_item_button);
         	quiz_correct = correct_buttons.every(button => button.classList.contains('choice-selected'));
             if (quiz_correct) {
-            	show_button(next_item_button);
+            	show_element(next_item_button);
             	display_response(step['Correct_Feedback'], also_display_algorithm(step['correct_feedback']));
             	sounds.right.play();
             } else {
-            	hide_button(next_item_button);
+            	hide_element(next_item_button);
             	if (submission_count === 1) {
 					display_response(step['Incorrect_Feedback 2'], also_display_algorithm(step['incorrect_feedback']));
 				} else {
@@ -1215,6 +1210,7 @@ const run_covid_scenario = (current_submission_count) => {
 };
 
 const next_item_button_action = (event) => {
+	answer_to_question_container.hidden = true;
 	if (event) {
 		user_action_performed();
 	}
@@ -1222,9 +1218,9 @@ const next_item_button_action = (event) => {
 		text_piece_index++;
 	}
 	if ((text_piece_index === 0 || !text_pieces) && step_number === 0) {
-		hide_button(previous_item_button);
+		hide_element(previous_item_button);
 	} else {
-		show_button(previous_item_button);
+		show_element(previous_item_button);
 	}
 	if (!text_pieces || text_piece_index >= text_pieces.length) {
 		step_number++;
@@ -1241,9 +1237,10 @@ const next_item_button_action = (event) => {
 };
 
 const previous_item_button_action = () => {
+	answer_to_question_container.hidden = true;
 	if (text_piece_index === 0 || !text_pieces) {
 		if (step_number === 0) {
-			hide_previous_item_button();
+			hide_element(previous_item_button);
 		} else {
 			if (!info_interface() ||
 			    step_types[scenario[step_number].type] !== 'quiz') {
@@ -1300,7 +1297,7 @@ const display_response = (response, also_display_algorithm) => {
 	const step = scenario[step_number];
 	const message = step['More_Info 2'];
     if (message) {
-    	show_button(more_info_button);
+    	show_element(more_info_button);
     }
 };
 
