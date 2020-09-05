@@ -99,6 +99,30 @@ const use_model_and_knn_to_respond_to_question = async (the_question, answer_exp
     });
 };
 
+const prepare_for_context_sensitive_questions = (callback) => {
+	if (listen_and_speak) {
+		if (LIFE.context_sensitive_questions && LIFE.context_sensitive_questions.length > 0) {
+			const {scenario, earliest_step, latest_step, questions, answer} = LIFE.context_sensitive_questions[0];
+			const current_scenario = LIFE.scenarios[scenario];
+			LIFE.context_sensitive_questions = LIFE.context_sensitive_questions.slice(1);
+			embedding_model.embed(questions).then(embeddings => {
+				const context_sensitive_questions = {embeddings, questions, answer};
+				for (let i = earliest_step; i <= latest_step; i++) {
+					if (typeof current_scenario[i].context_sensitive_questions !== 'object') {
+						current_scenario[i].context_sensitive_questions = [];
+					}
+					current_scenario[i].context_sensitive_questions.push(context_sensitive_questions);
+				}
+				prepare_for_context_sensitive_questions(callback);
+			});
+		} else {
+			callback();
+		}
+	} else {
+		callback();
+	}
+};
+
 const use_model_to_respond_to_question = async (the_question) => {
 	return embedding_model.embed([the_question]).then((question_embedding) => {
 		const prediction_tensor = loaded_model.predict([question_embedding]);
@@ -612,7 +636,7 @@ const setup = () => {
         	                             () => {
         	                             	 knn_classifier = knnClassifier.create();
         	                                 knn_classifier.setClassifierDataset(LIFE.knn_dataset);
-        	                                 process_mode();
+        	                                 prepare_for_context_sensitive_questions(process_mode);
         	                             });
         } else {
         	process_mode();
@@ -1021,23 +1045,27 @@ const speak = (message, callback) => {
 };
 
 const speaking_recognition_callback = (question, ignore, confidence) => {
-    const handle_answer = (response) => {
+    const process_response = (response) => {
 	    const {best_indices, question_embedding} = response;
-	    let answer;	
 		if (best_indices.length === 1) {
-			answer = answers[best_indices[0]];
-			speak(plain_text(answer));
-			answer_to_question_container.hidden = false;
-			answer_to_question.innerHTML = answer;
-			console.log({answer});
+			process_answer(answers[best_indices[0]]);
 		} else {
 			sounds.more_info.play();
 		}
 		question_embedding.dispose();
 		console.log(response); // for now
     };
+    const process_answer = (answer) => {
+    	speak(plain_text(answer));
+		answer_to_question_container.hidden = false;
+		answer_to_question.innerHTML = answer;
+		console.log({answer});
+    };
     if (confidence >= .5) {
-   		use_model_and_knn_to_respond_to_question(question, true).then(handle_answer);
+    	const otherwise = () => {
+    		use_model_and_knn_to_respond_to_question(question, true).then(process_response);
+    	};
+    	try_context_sensitive_questions(scenario[step_number].context_sensitive_questions, process_answer, otherwise);
    	}
     // and start listening to the next question
     ecraft2learn.start_speech_recognition(speaking_recognition_callback, handle_recognition_error);
@@ -1050,6 +1078,15 @@ const handle_recognition_error = (error) => {
     } else {
     	console.log("Recognition error: ", error);
     }
+};
+
+const try_context_sensitive_questions = (questions_and_answers, process_answer, callback_if_no_answer) => {
+	if (!questions_and_answers) {
+		callback_if_no_answer();
+	}
+	const {embeddings, questions, answer} = questions_and_answers[0];
+	// to do  
+	try_context_sensitive_questions(questions_and_answers.slice(1), process_answer, callback_if_no_answer);
 };
 
 const display_more_info = () => {
