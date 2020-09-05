@@ -1013,10 +1013,10 @@ const opening_credits = () => {
 		if (opening_credits_urls.length > 0) {
 			opening_credits_image.src = opening_credits_urls[0];
 			opening_credits_urls = opening_credits_urls.slice(1);
+			window.setTimeout(next_image, opening_credits_duration);
 		} else {
 			leave_opening_credits();
 		}
-		window.setTimeout(next_image, opening_credits_duration);
 	};
 	opening_credits_image.addEventListener('click', next_image);
 	window.setTimeout(next_image, opening_credits_duration);
