@@ -45,7 +45,7 @@ const files_to_cache = [
 "/ai/js/universal-sentence-encoder/group1-shard6of7",
 "/ai/js/universal-sentence-encoder/group1-shard7of7",
 "/ai/LIFE/models/15-07-2020-covid.json",
-"/ai/LIFE/models/15-07-2020-covids.bin",
+"/ai/LIFE/models/15-07-2020-covid.bin",
 "/ai/LIFE/LIFE.webmanifest",
 ];
 
