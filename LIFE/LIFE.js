@@ -1045,6 +1045,11 @@ const speech_listening_callback = (question, ignore, confidence) => {
 	    const {best_indices, question_embedding} = response;
 		if (best_indices.length === 1) {
 			process_answer(answers[best_indices[0]]);
+		} else if (is_covid_question(question)) {
+			speak("This app can't answer your question so passing it along to Google's Covid research explorer");
+			answer_to_question_container.hidden = false;
+		    answer_to_question.innerHTML = 
+		        '<iframe width=1024 height= 512 src="https://covid19-research-explorer.appspot.com/results?mq=' + question + '">';
 		} else {
 			sounds.more_info.play();
 		}
@@ -1068,6 +1073,17 @@ const speech_listening_callback = (question, ignore, confidence) => {
    	window.setTimeout(() => hide_element(last_thing_heard_feedback), 5000);
     // and start listening to the next question
     ecraft2learn.start_speech_recognition(speech_listening_callback, handle_recognition_error);
+};
+
+const is_covid_question = (question) => {
+	const covid_words = ['covid', 'corona', 'virus', 'sars'];
+	const question_lower_case = question.toLowerCase();
+	for (let i = 0; i < covid_words.length; i++) {
+        if (question_lower_case.indexOf(covid_words[i]) >= 0) {
+        	return true;
+        }
+	}
+	return false;
 };
 
 const handle_recognition_error = (error) => {
