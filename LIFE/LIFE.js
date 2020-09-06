@@ -1049,7 +1049,7 @@ const speech_listening_callback = (question, ignore, confidence) => {
 			speak("This app can't answer your question so passing it along to Google's Covid research explorer");
 			answer_to_question_container.hidden = false;
 		    answer_to_question.innerHTML = 
-		        '<iframe width=1024 height= 512 src="https://covid19-research-explorer.appspot.com/results?mq=' + question + '">';
+		        '<iframe width=768 height=386 src="https://covid19-research-explorer.appspot.com/results?mq=' + question + '">';
 		} else {
 			sounds.more_info.play();
 		}
