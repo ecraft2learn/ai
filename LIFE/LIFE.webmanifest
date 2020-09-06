@@ -1,7 +1,7 @@
 {
-    "name": "Intelligent Support for LIFE games - University of Oxford",
+    "name": "Intelligent Support for the LIFE app - University of Oxford",
     "short_name": "LIFE Support",
-    "description": "Provides answers to questions that may arise when playing the LIFE games.",
+    "description": "Provides answers to questions that may arise when using the LIFE app.",
     "icons": [
         {
             "src": "/ai/LIFE/icons/icon-32.png",
@@ -29,7 +29,7 @@
             "type": "image/png"
         }
     ],
-    "start_url": "/ai/LIFE/index.html",
+    "start_url": "/ai/LIFE/index.html?covid-scenario=1&listen",
     "display": "standalone",
     "theme_color": "#B12A34",
     "background_color": "#B12A34"
