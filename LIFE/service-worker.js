@@ -6,7 +6,7 @@ const cache_name = "life-support-v7";
 
 const files_to_cache = [
 "/ai/LIFE/index.html",
-"/ai/LIFE/LIFE.css",
+"/ai/css/LIFE.css",
 "/ai/ecraft2learn.js",
 "/ai/js/tfjs.js",
 "/ai/js/train.js",
