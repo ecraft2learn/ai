@@ -939,6 +939,7 @@ const submit_button = document.getElementById('submit-button');
 const answer_to_question_container = document.getElementById('answer-to-question-container');
 const answer_to_question = document.getElementById('answer-to-question');
 const answer_to_question_close_button = document.getElementById('answer-to-question-close-button');
+const last_thing_heard_feedback = document.getElementById('last-thing-heard');
 const sounds = {wrong: document.getElementById('wrong-sound'),
                 right: document.getElementById('right-sound'),
                 next: document.getElementById('next-sound'),
@@ -990,7 +991,7 @@ const initialize_covid_scenario = () => {
 	blink_doctor_image();
     if (listen_and_speak) {
     	load_question_answering_model(() => {
-    		ecraft2learn.start_speech_recognition(speaking_recognition_callback, handle_recognition_error);
+    		ecraft2learn.start_speech_recognition(speech_listening_callback, handle_recognition_error);
     		if (user_action_has_been_performed) {
 				notify_speech_ready();
 			} else { // notify when first user action performed
@@ -1039,7 +1040,7 @@ const speak = (message, callback) => {
 			           callback);
 };
 
-const speaking_recognition_callback = (question, ignore, confidence) => {
+const speech_listening_callback = (question, ignore, confidence) => {
     const process_response = (response) => {
 	    const {best_indices, question_embedding} = response;
 		if (best_indices.length === 1) {
@@ -1056,20 +1057,23 @@ const speaking_recognition_callback = (question, ignore, confidence) => {
 		answer_to_question.innerHTML = answer;
 		console.log({answer});
     };
-    if (confidence >= .5) {
+    if (confidence >= .5 && user_action_has_been_performed) {
     	const otherwise = () => {
     		use_model_and_knn_to_respond_to_question(question, true).then(process_response);
     	};
     	try_context_sensitive_questions(question, scenario[step_number].context_sensitive_questions, process_answer, otherwise);
    	}
+   	show_element(last_thing_heard_feedback);
+   	last_thing_heard_feedback.innerHTML = question + " (confidence: " + confidence.toFixed(2) + ")";
+   	window.setTimeout(() => hide_element(last_thing_heard_feedback), 5000);
     // and start listening to the next question
-    ecraft2learn.start_speech_recognition(speaking_recognition_callback, handle_recognition_error);
+    ecraft2learn.start_speech_recognition(speech_listening_callback, handle_recognition_error);
 };
 
 const handle_recognition_error = (error) => {
 	if (error === "no-speech" || error === "No speech heard for a while.") {
     	// keep listening
-    	ecraft2learn.start_speech_recognition(speaking_recognition_callback, handle_recognition_error);
+    	ecraft2learn.start_speech_recognition(speech_listening_callback, handle_recognition_error);
     } else {
     	console.log("Recognition error: ", error);
     }
@@ -1080,16 +1084,17 @@ const sensitive_question_threshold = .75;
 const try_context_sensitive_questions = (question, questions_and_answers, process_answer, callback_if_no_answer) => {
 	if (!questions_and_answers || questions_and_answers.length === 0) {
 		callback_if_no_answer();
+	} else {
+		const {embeddings, questions, answer} = questions_and_answers[0];
+		embedding_model.embed([question]).then((question_embedding) => {
+			const similarity = cosine_similarity(question_embedding, embeddings);
+			if (similarity > sensitive_question_threshold) {
+				process_answer(answer);
+			} else {
+				try_context_sensitive_questions(question, questions_and_answers.slice(1), process_answer, callback_if_no_answer);
+			}
+		});		
 	}
-	const {embeddings, questions, answer} = questions_and_answers[0];
-	embedding_model.embed([question]).then((question_embedding) => {
-		const similarity = cosine_similarity(question_embedding, embeddings);
-		if (similarity > sensitive_question_threshold) {
-		 	process_answer(answer);
-	    } else {
-			try_context_sensitive_questions(question, questions_and_answers.slice(1), process_answer, callback_if_no_answer);
-		}
-	});
 };
 
 const display_more_info = () => {

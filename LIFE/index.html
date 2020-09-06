@@ -137,6 +137,8 @@ p {
 <h2>We recommend you view this web app in landscape mode.</h2>
 </div>
 <div id="entire-page">
+<div id="last-thing-heard" class="speech-recognition-feedback" style:opacity=0>
+</div>
 <div id="question answering interface" hidden>
 <p>
 <input id="question"
@@ -176,10 +178,12 @@ Loading. Please wait...
 <tr>
 <td>
 <div id="doctor-image" class="center" style="width:512px;">
-<img id="doctor-image-eyes-open" src="images/DOC_FEMALE_MASK_1.png" height=384 width=384></img>
-<img id="doctor-image-eyes-closed" src="images/DOC_FEMALE_MASK_2.png" height=384 width=384 hidden></img>
+<!-- 20 pixels on the top of the doctor images was removed to give room for speech feedback
+     and since the images were 512x512 they are reduced here by 75% -->
+<img id="doctor-image-eyes-open" src="images/DOC_FEMALE_MASK_1.png" height=369 width=384></img>
+<img id="doctor-image-eyes-closed" src="images/DOC_FEMALE_MASK_2.png" height=369 width=384 hidden></img>
 </div>
-<iframe class="algorithm" id="algorithm" width=512 height=384 src="algorithm.html" hidden></iframe>
+<iframe class="algorithm" id="algorithm" width=512 height=369 src="algorithm.html" hidden></iframe>
 </td>
 <td>
 <table style="margin-top: -30px;">
