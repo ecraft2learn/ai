@@ -36,6 +36,7 @@ const files_to_cache = [
 "/ai/LIFE/images/start.png",
 "/ai/LIFE/images/oxford-logo.png",
 "/ai/LIFE/icons/icon-32.png",
+"/ai/LIFE/icons/icon-256.png",
 "/ai/LIFE/movies/How to fit check guidance 360p.mp4",
 "/ai/js/universal-sentence-encoder/group1-shard1of7",
 "/ai/js/universal-sentence-encoder/group1-shard2of7",
