@@ -991,7 +991,15 @@ const initialize_covid_scenario = () => {
 	blink_doctor_image();
     if (listen_and_speak) {
     	load_question_answering_model(() => {
-    		ecraft2learn.start_speech_recognition(speech_listening_callback, handle_recognition_error);
+    		if (!document.hidden) {
+    			ecraft2learn.start_speech_recognition(speech_listening_callback, handle_recognition_error);
+    		}
+    		// if tab is minimized then recognition is stopped, start listening again when no longer hidden
+			window.addEventListener('visibilitychange', () => {
+				if (!document.hidden) {
+					ecraft2learn.start_speech_recognition(speech_listening_callback, handle_recognition_error);
+				}
+			});
     		if (user_action_has_been_performed) {
 				notify_speech_ready();
 			} else { // notify when first user action performed
@@ -1071,8 +1079,10 @@ const speech_listening_callback = (question, ignore, confidence) => {
    	show_element(last_thing_heard_feedback);
    	last_thing_heard_feedback.innerHTML = question + " (confidence: " + confidence.toFixed(2) + ")";
    	window.setTimeout(() => hide_element(last_thing_heard_feedback), 5000);
-    // and start listening to the next question
-    ecraft2learn.start_speech_recognition(speech_listening_callback, handle_recognition_error);
+   	if (!document.hidden) {
+		// and start listening to the next question
+		ecraft2learn.start_speech_recognition(speech_listening_callback, handle_recognition_error);  		
+   	}
 };
 
 const is_covid_question = (question) => {
@@ -1088,8 +1098,10 @@ const is_covid_question = (question) => {
 
 const handle_recognition_error = (error) => {
 	if (error === "no-speech" || error === "No speech heard for a while.") {
-    	// keep listening
-    	ecraft2learn.start_speech_recognition(speech_listening_callback, handle_recognition_error);
+		if (!document.hidden) {
+			// keep listening
+			ecraft2learn.start_speech_recognition(speech_listening_callback, handle_recognition_error);
+		}
     } else {
     	console.log("Recognition error: ", error);
     }
