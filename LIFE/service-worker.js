@@ -38,6 +38,7 @@ const files_to_cache = [
 "/ai/LIFE/icons/icon-32.png",
 "/ai/LIFE/icons/icon-256.png",
 "/ai/LIFE/movies/How to fit check guidance 360p.mp4",
+"/ai/LIFE/movies/PPE REMOVAL - Aerosol generating procedures 360p.mp4",
 "/ai/js/universal-sentence-encoder/group1-shard1of7",
 "/ai/js/universal-sentence-encoder/group1-shard2of7",
 "/ai/js/universal-sentence-encoder/group1-shard3of7",
