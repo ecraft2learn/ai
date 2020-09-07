@@ -28,7 +28,7 @@ LIFE.scenarios[1] = [
 [ "26_Text", "Watch this video on how to doff the PPE so as to protect yourself from possible SARS-CoV-2 Aerosol droplets.","Choices","type",1,"Total_Choices",0,"Correct_Choices",1,"text_black",true,"correct_feedback","","incorrect_feedback","","incorrect_more_than_2_feedback","","more_info","","flowchart_poster_area",1,"comments_2","","quiz_identifier_titles_for_final_feedback",""],
 [ "27_Text", "VIDEO: Doffing lvl 2","Choices","Pneumonia-COVID19", "Choices_Index0", "Doffing lvl 2","type",7,"Total_Choices",1,"Correct_Choices",1,"text_black",true,"correct_feedback","","incorrect_feedback","","incorrect_more_than_2_feedback","","more_info","","flowchart_poster_area",1,"comments_2","","quiz_identifier_titles_for_final_feedback",""],
 [ "28_Text", "Well done. You have successfully managed a child with Severe Pneumonia and possible COVID-19 disease.","Choices","type",1,"Total_Choices",0,"Correct_Choices",1,"text_black",true,"correct_feedback","","incorrect_feedback","","incorrect_more_than_2_feedback","","more_info","","flowchart_poster_area",1,"comments_2","","quiz_identifier_titles_for_final_feedback",""],
-[ "29_Text", "Remember: 1. There should be lead a clinician / lead nurse to lead on policies and procedures for COVID-19.","Choices","type",1,"Total_Choices",0,"Correct_Choices",1,"text_black",true,"correct_feedback","","incorrect_feedback","","incorrect_more_than_2_feedback","","more_info","","flowchart_poster_area",8,"comments","Pneumonia-COVID19", "More comments", "CHANGE POSTER VISUAL TO BOX 5","quiz_identifier_titles_for_final_feedback",""],
+[ "29_Text", "Remember: 1. There should be a lead clinician / lead nurse to lead on policies and procedures for COVID-19.","Choices","type",1,"Total_Choices",0,"Correct_Choices",1,"text_black",true,"correct_feedback","","incorrect_feedback","","incorrect_more_than_2_feedback","","more_info","","flowchart_poster_area",8,"comments","Pneumonia-COVID19", "More comments", "CHANGE POSTER VISUAL TO BOX 5","quiz_identifier_titles_for_final_feedback",""],
 [ "30_Text", "2. Your hospital should have paediatric isolation cubicles dedicated for suspected or confirmed COVID-19 patients.","Choices","type",1,"Total_Choices",0,"Correct_Choices",1,"text_black",true,"correct_feedback","","incorrect_feedback","","incorrect_more_than_2_feedback","","more_info","","flowchart_poster_area",1,"comments_2","","quiz_identifier_titles_for_final_feedback",""],
 [ "31_Text", "SCENARIO FINISHED","Choices","type",5,"Total_Choices",0,"Correct_Choices",1,"text_black",true,"correct_feedback","","incorrect_feedback","","incorrect_more_than_2_feedback","","more_info","","flowchart_poster_area",1,"comments_2","","quiz_identifier_titles_for_final_feedback",""],]
 
@@ -71,7 +71,7 @@ LIFE.scenarios[1][15].choices = ["Prop up the head in sniffing position",
                                  "Give systemic steroids",
                                  "Start bag-mask-ventilation",
                                  "Give oxygen via nasopharyngeal airway"];
-LIFE.scenarios[1][18].choices = ["via Metered Dose Inhaler/Spacer",
+LIFE.scenarios[1][17].choices = ["via Metered Dose Inhaler/Spacer",
                                  "via nebulisation"];
 LIFE.scenarios[1][19].choices = ["Monitor pulse rate and signs of circulatory compromise",
                                  "Manage circulatory impairement with IV fluid bolus",
@@ -88,6 +88,7 @@ LIFE.scenarios[1][22].choices = ["Give Paracetamol",
                                  "Start oro/nasogastric feeding",
                                  "Give oral antibiotics and send home for isolation",
                                  "Give oral steroids"];
+LIFE.scenarios[1][25].video_URL = "./movies/PPE REMOVAL - Aerosol generating procedures 360p.mp4";
 
 LIFE.context_sensitive_questions =
     [{scenario: 1,
@@ -95,28 +96,28 @@ LIFE.context_sensitive_questions =
       latest_step: 8,
       questions: ["Where is the grandmother sitting?",
                   "Where is the grandmother?"],
-      answer: "An answer to the question about 'the location of the grandmother' is  forthcoming."},
+      answer: "An answer to the question about 'the location of the grandmother' is forthcoming."},
      {scenario: 1,
       earliest_step: 9,
       latest_step: 9,
       questions: ["What is meant by ‘breathing adequacy’?",
                   "What does ‘breathing adequacy’ mean?"],
-      answer: "An answer to the question about 'breathing adequacy' is  forthcoming."},
+      answer: "An answer to the question about 'breathing adequacy' is forthcoming."},
      {scenario: 1,
       earliest_step: 9,
       latest_step: 9,
       questions: ["What is meant by ‘assess the airway for secretions’?",
                   "How should one ‘assess the airway for secretions’?"],
-      answer: "An answer to the question about 'assessing the airway for secretions' is  forthcoming."},
+      answer: "An answer to the question about 'assessing the airway for secretions' is forthcoming."},
      {scenario: 1,
       earliest_step: 15,
       latest_step: 15,
       questions: ["What is meant by ‘A’ and ‘B’?",
                   "What is 'A' and 'B'?"],
-      answer: "An answer to the question about 'A' and 'B' is  forthcoming."},
+      answer: "An answer to the question about 'A' and 'B' is forthcoming."},
      {scenario: 1,
       earliest_step: 20,
       latest_step: 20,
       questions: ["Why AVPU when the child is actively sitting on grandma’s lap, is alert and cooperates?",
                   "Why consider AVPU?"],
-      answer: "An answer to the question about 'AVPU' is  forthcoming."}];
+      answer: "An answer to the question about 'AVPU' is forthcoming."}];

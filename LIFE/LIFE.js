@@ -968,11 +968,6 @@ const notify_speech_ready = () => {
 };
 
 const initialize_covid_scenario = () => {
-	if (initial_step_number === 0) { // URL parameter not used to start in the middle
-		opening_credits();
-	} else {
-		leave_opening_credits();
-	}
 	scenario = LIFE.scenarios[covid_scenario_number]; // set this once scenario file has loaded 
 	previous_item_button.addEventListener('click', previous_item_button_action);
 	previous_item_button_in_quiz.addEventListener('click', previous_item_button_action);
@@ -989,6 +984,11 @@ const initialize_covid_scenario = () => {
             }
 	    });
 	blink_doctor_image();
+	if (initial_step_number === 0) { // URL parameter not used to start in the middle
+		opening_credits();
+	} else {
+		leave_opening_credits();
+	}
     if (listen_and_speak) {
     	load_question_answering_model(() => {
     		if (!document.hidden) {
@@ -1131,9 +1131,11 @@ const display_more_info = () => {
 	const step = scenario[step_number];
 	const message = step['More_Info 2'];
 	if (message) {
+		step.displaying_more_info = true;
 		display_response(message, also_display_algorithm(step['more_info']));
 		hide_element(more_info_button);
-		if (quiz_correct) {
+		if (step.quiz_correct || text_piece_index < text_pieces.length-1) {
+			// if correct or there is more to display 
 			show_element(next_item_button);
 		} else {
 			hide_element(next_item_button);
@@ -1175,7 +1177,6 @@ const split_text = (text) => {
 let text_piece_index = 0;
 let text_pieces;
 let step_number;
-let quiz_correct = true;
 let submission_count = 0;
 
 const run_covid_scenario = (current_submission_count) => {
@@ -1189,13 +1190,19 @@ const run_covid_scenario = (current_submission_count) => {
 	}
 	const step = scenario[step_number];
 	const step_type = step_types[step.type];
-	quiz_correct = true; // unless answered incorrectly below - if incorrect next_item_button is hidden in more info
+	step.quiz_correct = true; // unless answered incorrectly below - if incorrect next_item_button is hidden in more info
 	if (step_type === 'display info' || step_type === 'display algorithm') {
 		show_interface('info');
 		text_pieces = split_text(step.text);
 		text_piece_index = -1;
 		next_item_button_action();
 		display_algorithm_on_left_side(step_type === 'display algorithm');
+		if (step['More_Info 2']) {
+			// there is more info 
+			show_element(more_info_button);
+		} else {
+			hide_element(more_info_button);
+		}
 	} else if (step_type === 'quiz') {
 		text_pieces = undefined;
 		submit_button.disabled = true;
@@ -1220,8 +1227,8 @@ const run_covid_scenario = (current_submission_count) => {
         	answer_to_question_container.hidden = true;
         	submission_count++;
         	show_element(previous_item_button);
-        	quiz_correct = correct_buttons.every(button => button.classList.contains('choice-selected'));
-            if (quiz_correct) {
+        	step.quiz_correct = correct_buttons.every(button => button.classList.contains('choice-selected'));
+            if (step.quiz_correct) {
             	show_element(next_item_button);
             	display_response(step['Correct_Feedback'], also_display_algorithm(step['correct_feedback']));
             	sounds.right.play();
@@ -1238,6 +1245,9 @@ const run_covid_scenario = (current_submission_count) => {
 	} else if (step_type === 'video') {
 		video.src = step.video_URL;
         show_interface('video');
+	} else if (step_type === 'finished') {
+		display_response(step.text);
+		hide_element(next_item_button); 
 	} else {
 		console.log('unknown step type', step_type);
 	}
@@ -1261,6 +1271,12 @@ const next_item_button_action = (event) => {
 		run_covid_scenario();
 	} else {
 		display_info(text_pieces[text_piece_index]);
+		const step = scenario[step_number];
+		if (text_piece_index === text_pieces.length-1 && // last one
+		   !step.quiz_correct && // user got quiz wrong
+		   step.displaying_more_info) {
+            hide_element(next_item_button);
+		}
 	}
 	if (event) {
 		if (document.getElementById('landscape-warning-message')) {
@@ -1330,7 +1346,8 @@ const display_response = (response, also_display_algorithm) => {
 	display_info(text_pieces[0]);
 	const step = scenario[step_number];
 	const message = step['More_Info 2'];
-    if (message) {
+    if (message && response !== message) {
+    	// there is more info and this response isn't itself more info
     	show_element(more_info_button);
     }
 };
