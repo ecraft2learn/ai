@@ -2212,8 +2212,8 @@ xhr.send();
           // if the browser has no support for speech recognition then the Microsoft Speech API is used (API key required)
           if (typeof SpeechRecognition === 'undefined' && typeof webkitSpeechRecognition === 'undefined') {
               if (!inside_snap()) {
-                  alert("This browser does not support speech recognition. Use Chrome or type in your questions instead.");
-                  return;
+                  alert("This browser does not support speech recognition. Chrome is known to work.");
+                  return false;
               }
               // no support from this browser so try using the Microsoft Speech API
               inform("This browser does not support speech recognition",
@@ -2222,7 +2222,7 @@ xhr.send();
                       function () {
                            ecraft2learn.start_microsoft_speech_recognition(interim_spoken_callback, final_spoken_callback, error_callback);
                       });                  
-              return;
+              return false;
           }
           if (window.speechSynthesis.speaking || ecraft2learn.speaking_ongoing || ecraft2learn.speech_recognition) { 
               // don't listen while speaking or while listening is still in progress
@@ -2414,6 +2414,7 @@ xhr.send();
                window.removeEventListener("message", process_messages);
           };
           window.addEventListener("message", process_messages);
+          return true;
     },
 
     get_default_lanugage: () => ecraft2learn.default_language || navigator.language,

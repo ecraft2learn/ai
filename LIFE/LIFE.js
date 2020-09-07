@@ -1022,6 +1022,7 @@ const opening_credits = () => {
 			leave_opening_credits();
 		}
 	};
+	opening_credits_container.hidden = false;
 	opening_credits_image.addEventListener('click', next_image);
 	window.setTimeout(next_image, opening_credits_duration);
 };
