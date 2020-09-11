@@ -315,8 +315,8 @@ const display_trial_results = (trial) => {
         return;
     }
     const results = trial.result.results;
-    const loss = metrics_of_highest_score.average_loss;;
-    const accuracy = metrics_of_highest_score.average_accuracy;
+    const loss = metrics_of_highest_score && metrics_of_highest_score.average_loss;
+    const accuracy = metrics_of_highest_score && metrics_of_highest_score.average_accuracy;
     let message = "";
     const best_score = score >= highest_score;
     const best_loss = loss <= lowest_loss;
@@ -334,7 +334,7 @@ const display_trial_results = (trial) => {
         message = "<b>Best so far.<br>";
     }
     message += "Score = " + shorter_number(score);
-    if (results.samples && results.samples.length > 1) {
+    if (results.samples && results.samples.length > 1 && metrics_of_highest_score) {
         message += " (" + shorter_number(metrics_of_highest_score.score_standard_deviation) + " s.d.)";
     }
     const add_samples = (kind) => {
@@ -411,13 +411,15 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
                 const model_name = best_model.name;
                 const average_text = number_of_samples > 1 ? 'Average ' : '';
                 install_settings_button.innerHTML = 
-                    "Click to set '" + model_name + "' to best one found (" +
+                    metrics_of_highest_score ?
+                    ("Click to set '" + model_name + "' to best one found (" +
                     average_text + "Loss = " + 
                     shorter_number(metrics_of_highest_score.average_loss) +
                     (typeof metrics_of_highest_score.average_accuracy === 'undefined' ? 
                         "" : "; " + average_text + "Accuracy = " + 
                     shorter_number(metrics_of_highest_score.average_accuracy)) + 
-                    ")<br>";
+                    ")<br>") :
+                    "Highest score not yet defined.";
                 display_trial(result.argmin, install_settings_button);
                 const settings = result.argmin;
                 settings.model_name = model_name;
@@ -801,7 +803,7 @@ const optimize = async (model_name, xs, ys, validation_tensors,
         const current_layers = get_layers();
         const choices = [];
         choices.push(current_layers); // unchanged
-        choices.push([Math.round(current_layers[0]*(1+Math.random()))].concat(current_layers)); // add up to 2x first layer
+        choices.push([Math.round(current_layers[current_layers.length-1]*(1+Math.random()))].concat(current_layers)); // add up to 2x last layer
         choices.push([current_layers[0]].concat(current_layers)); // add copy of first layer
         if (current_layers.length > 2) {
             choices.push(current_layers.slice(1)); // all but first
