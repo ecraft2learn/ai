@@ -1200,7 +1200,7 @@ window.ecraft2learn =
                                       }
                                   });
     };
-    const send_data = function(model_name, kind, input, output, ignore_old_dataset, callback) {
+    const send_data = (model_name, kind, input, output, ignore_old_dataset, callback, permitted_labels) => {
         record_callbacks(callback);
         const time_stamp = Date.now();
         request_of_support_window('tensorflow.js',
@@ -1208,10 +1208,11 @@ window.ecraft2learn =
                                   () => {
                                       return {data: {input: snap_to_javascript(input, true),
                                                      output: snap_to_javascript(output, false)},
-                                              model_name: model_name,
-                                              kind: kind,
+                                              model_name,
+                                              kind,
+                                              permitted_labels: snap_to_javascript(permitted_labels, false),
                                               ignore_old_dataset: ignore_old_dataset,
-                                              time_stamp: time_stamp};
+                                              time_stamp};
                                   },
                                   (message) => {
                                       return message.data_received === time_stamp ||

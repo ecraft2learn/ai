@@ -40,7 +40,7 @@ const get_data = (model_name, kind) => {
     }
     return data[model_name][kind];
 };
-const set_data = (model_name, kind, value, callback) => {
+const set_data = (model_name, kind, value, callback, permitted_labels) => {
     if (!data.hasOwnProperty(model_name)) {
         data[model_name] = {};
     }
@@ -48,7 +48,7 @@ const set_data = (model_name, kind, value, callback) => {
         if (value.output.length > 0 && isNaN(+value.output[0])) {
             // values might be strings that represent numbers - only non-numeric strings can be category labels
             let labels;
-            [value.output, labels] = to_one_hot(value.output, data[model_name].categories);
+            [value, labels] = to_one_hot_and_removed_data_with_unknown_output_labels(value, permitted_labels);
             data[model_name].categories = labels;
             if (model_name === 'all models') {
                 // recreate all models with for example softmax and one-hot created before this data was available
@@ -78,13 +78,17 @@ const set_data = (model_name, kind, value, callback) => {
     invoke_callback(callback);
 };
 
-const to_one_hot = (labels, current_labels) => {
-    const unique_labels = current_labels || [];
-    labels.forEach((label) => {
-        if (unique_labels.indexOf(label) < 0) {
-            unique_labels.push(label);
-        }
-    });
+const to_one_hot_and_removed_data_with_unknown_output_labels = (input_and_output, permitted_labels) => {
+    const unique_labels = permitted_labels || [];
+    const labels = input_and_output.output;
+    const original_input = input_and_output.input;
+    if (unique_labels.length === 0) {
+        labels.forEach((label) => {
+            if (unique_labels.indexOf(label) < 0) {
+                unique_labels.push(label);
+            }
+        });
+    }
     const one_hot = (index, n) => {
         let vector = [];
         for (let i = 0; i < n; i++) {
@@ -92,9 +96,16 @@ const to_one_hot = (labels, current_labels) => {
         }
         return vector;
     };
-    const one_hot_labels =
-        labels.map((label) => one_hot(unique_labels.indexOf(label), unique_labels.length));
-    return [one_hot_labels, unique_labels];
+    const new_input = [];
+    const new_output = [];
+    labels.forEach((label, index) => {
+        const label_index = unique_labels.indexOf(label);
+        if (label_index >= 0) {
+            new_input.push(original_input[index]);
+            new_output.push(one_hot(label_index, unique_labels.length))
+        } // otherwise skip if output label not permitted 
+    });
+    return [{input: new_input, output: new_output}, unique_labels];
 };
 
 const optimization_methods =
@@ -1526,15 +1537,15 @@ const receive_message =
             stop_all();
         } else if (typeof message.data !== 'undefined') {
             try {
-                const kind = message.kind;
+                const {kind, data, permitted_labels, ignore_old_dataset, time_stamp} = message;
                 const model_name = message.model_name || 'all models';
                 const callback = () => {
-                    event.source.postMessage({data_received: message.time_stamp}, "*"); 
+                    event.source.postMessage({data_received: time_stamp}, "*"); 
                 };
-                if (message.ignore_old_dataset) {
-                    set_data(model_name, kind, message.data);
+                if (ignore_old_dataset) {
+                    set_data(model_name, kind, data, undefined, permitted_labels);
                 } else {
-                    set_data(model_name, kind, add_to_data(message.data, model_name, kind));
+                    set_data(model_name, kind, add_to_data(data, model_name, kind), undefined, permitted_labels);
                 }
                 invoke_callback(callback);
             } catch (error) {
