@@ -499,7 +499,8 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                         update_weights = true;
                     }
                 }
-                if (typeof lowest_validation_loss === 'undefined' || validation_loss < lowest_validation_loss) {
+                if (typeof lowest_validation_loss === 'undefined' || (validation_loss-lowest_validation_loss)/lowest_validation_loss < -1e-6) {
+                    // ignore progress of less than one millionth in the loss
                     lowest_validation_loss = validation_loss;
                     lowest_validation_loss_epoch = epoch;
                     if (!validation_accuracy) {
@@ -548,6 +549,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                              validationData: xs_validation && [xs_validation, ys_validation],
                              validationSplit: validation_split,
                              shuffle,
+                             classWeight: tensorflow.get_data(model_name, 'class_weights'),
                              callbacks: stats_callback};
       const after_fit_callback = (full_history) => {
 //           console.log(tf.memory());
