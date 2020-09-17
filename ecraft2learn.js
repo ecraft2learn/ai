@@ -149,7 +149,8 @@ window.ecraft2learn =
           }
           let original_open_project = SnapSerializer.prototype.openProject;
           SnapSerializer.prototype.openProject = function (project, ide) {
-              stop_all_scripts();
+              stop_all_scripts(true);
+              remove_all_message_listeners();
               if (ecraft2learn.snap_project_opened && window.parent === window) {
                   // already been opened and not inside an iframe
                   // problem with the following is that some ecraft2learn functions have
@@ -175,7 +176,7 @@ window.ecraft2learn =
               }      
           };        
       };
-      const stop_all_scripts = function () {
+      const stop_all_scripts = (and_reset_iframes) => {
           if (window.speechSynthesis) {
               window.speechSynthesis.cancel(); // should stop all utterances
           }
@@ -186,6 +187,9 @@ window.ecraft2learn =
           if (ecraft2learn.support_window) {
               Object.values(ecraft2learn.support_window).forEach(function (support_window) {
                   support_window.postMessage('stop', '*');
+                  if (and_reset_iframes) {
+                      support_window.postMessage('reset', '*');
+                  }
               });
           }
           ecraft2learn.outstanding_callbacks.forEach(function (callback) {
@@ -784,6 +788,17 @@ window.ecraft2learn =
                    "You may find that the Raspberry Pi is too slow for machine learning to work well.");
         }       
     };
+    let message_listeners = [];
+    const listen_for_messages = (listener) => {
+        window.addEventListener('message', listener);
+        message_listeners.push(listener);
+    };
+    const remove_all_message_listeners = () => {
+        message_listeners.forEach(listener => {
+            window.removeEventListener('message', listener);
+        });
+        message_listeners = [];
+    };
     let load_transfer_training = (source_name, training_data, callback) => {
         record_callbacks(callback);
         let source;
@@ -810,7 +825,7 @@ window.ecraft2learn =
                     window.removeEventListener('message', receive_messages_from_iframe);
                 }
         };
-        window.addEventListener('message', receive_messages_from_iframe, false);               
+        listen_for_messages(receive_messages_from_iframe);               
     };
     let train = function (options) {
       // options can be
@@ -862,7 +877,7 @@ window.ecraft2learn =
                       invoke_callback(callback, "Ready");
                   }
           };
-          window.addEventListener('message', receive_messages_from_iframe, false);         
+          listen_for_messages(receive_messages_from_iframe);         
           return;
       }           
       if (add_to_previous_training &&
@@ -1142,7 +1157,7 @@ window.ecraft2learn =
                         }
                     }
                 };
-                window.addEventListener('message', receive_message);            
+                listen_for_messages(receive_message);            
             }
             if (ecraft2learn.support_window[support_window_type]) {
                 ecraft2learn.support_window[support_window_type].postMessage(request_generator(), '*');
@@ -1288,8 +1303,9 @@ window.ecraft2learn =
 //                                   });
     };
     const predictions_from_model = (model_names, inputs, success_callback, error_callback,
-    // optional categories added after release - really should have used a single JavaScript object as input
+        // optional categories added after release - really should have used a single JavaScript object as input arguments
                                     categories) => {
+        // while categories can be computed from the dataset it is needed if there is both a training dataset and validation
         record_callbacks(success_callback, error_callback);
         const time_stamp = Date.now();
         request_of_support_window('tensorflow.js',
@@ -1500,7 +1516,14 @@ window.ecraft2learn =
                                               epochs,
                                               time_stamp,
                                               what_to_optimize: snap_to_javascript(what_to_optimize),
-                                              scoring_weights: snap_to_javascript(scoring_weights)};
+                                              scoring_weights: snap_to_javascript(scoring_weights),
+                                              tfvis_options: {callbacks: ['onEpochEnd'],
+                                                              yAxisDomain: [0, 5],
+                                                              width: 480,
+                                                              container_width: 500, // rationalise this
+                                                              height: 400,
+                                                              display_graphs: true,
+                                                              display_layers: true}};
                                   },
                                   (message) => {
                                       return message.optimize_hyperparameters_time_stamp === time_stamp;
@@ -1614,7 +1637,7 @@ window.ecraft2learn =
                 window.removeEventListener('message', receive_message);
             }
         };
-        window.addEventListener('message', receive_message);
+        listen_for_messages(receive_message);
         if (typeof ecraft2learn.support_window[source] === 'undefined') {
             // create the support window as 1x1 pixel
             create_machine_learning_window(source, undefined, undefined, undefined, true);
@@ -2129,12 +2152,11 @@ xhr.send();
 
     let loading_tensor_flow = false;
 
-    window.addEventListener("message",
-                            function (event) {
-                                  if (typeof event.data.together_url !== 'undefined') {
-                                      ecraft2learn.together_URL = event.data.together_url;
-                                  }
-                            });
+    listen_for_messages((event) => {
+                            if (typeof event.data.together_url !== 'undefined') {
+                                ecraft2learn.together_URL = event.data.together_url;
+                            }
+                        });
 
     // the following are the ecraft2learn functions available via this library
 
@@ -2414,7 +2436,7 @@ xhr.send();
                // but not all browsers accept that
                window.removeEventListener("message", process_messages);
           };
-          window.addEventListener("message", process_messages);
+          listen_for_messages(process_messages);
           return true;
     },
 
@@ -3082,7 +3104,7 @@ xhr.send();
                               }, 
                               TRAINING_IMAGE_WIDTH,
                               TRAINING_IMAGE_HEIGHT);
-       window.addEventListener("message", receive_confidences);
+       listen_for_messages(receive_confidences);
   },
   costume_confidences: function (costume_or_costume_number, callback, sprite) {
       let receive_confidences = function (event) {
@@ -3099,7 +3121,7 @@ xhr.send();
       }
       record_callbacks(callback);
       ecraft2learn.support_window['training using camera'].postMessage({predict: get_costume_data(costume)}, "*");
-      window.addEventListener("message", receive_confidences);
+      listen_for_messages(receive_confidences);
 //       costume_to_image(costume,
 //                        function (image) {
 //                            support_window_request("You need to train the system before using 'Image label confidences'.\n" +
@@ -3108,7 +3130,7 @@ xhr.send();
 //                                                   TRAINING_IMAGE_WIDTH,
 //                                                   TRAINING_IMAGE_HEIGHT,
 //                                                   image);
-//                             window.addEventListener("message", receive_confidences);
+//                             listen_for_messages(receive_confidences);
 //                         });                            
   },
   microphone_confidences: function (builtin_recognizer, callback) {
@@ -3144,7 +3166,7 @@ xhr.send();
       } else {
           ecraft2learn.support_window['training using microphone'].postMessage({predict: !builtin_recognizer}, "*");
       }
-      window.addEventListener("message", receive_confidences);
+      listen_for_messages(receive_confidences);
   },
   stop_audio_recognition: () => {
       if (ecraft2learn.support_window['training using microphone']) {
@@ -3170,7 +3192,7 @@ xhr.send();
       }
       // convert from milliseconds to seconds
       ecraft2learn.support_window['training using microphone (old version)'].postMessage({predict: duration_in_seconds*1000}, "*");
-      window.addEventListener("message", receive_confidences);  
+      listen_for_messages(receive_confidences);  
   },
   stop_audio_recognition: function () {
       if (ecraft2learn.support_window['training using microphone']) {
@@ -3197,7 +3219,7 @@ xhr.send();
       ecraft2learn.support_window['training using camera'].postMessage({train: get_costume_data(costume),
                                                                         label: label},
                                                                        "*");
-      window.addEventListener("message", receive_comfirmation);
+      listen_for_messages(receive_comfirmation);
 //       costume_to_image(costume,
 //                        function (image) {
 //                            support_window_request("You need to start training before using 'Add image to training'.\n" +
@@ -3211,7 +3233,7 @@ xhr.send();
 //                                                    TRAINING_IMAGE_WIDTH,
 //                                                    TRAINING_IMAGE_HEIGHT,
 //                                                    image);
-//                             window.addEventListener("message", receive_comfirmation);
+//                             listen_for_messages(receive_comfirmation);
 //                        });
   },
   costume_count: function (sprite) {
@@ -3265,7 +3287,7 @@ xhr.send();
                       window.removeEventListener("message", listen_for_posenet_window_ready);
                   }
               }
-              window.addEventListener("message", listen_for_posenet_window_ready);
+              listen_for_messages(listen_for_posenet_window_ready);
               return;                      
           }
           record_callbacks(callback);
@@ -3282,7 +3304,7 @@ xhr.send();
                   window.removeEventListener("message", receive_poses);
               };
           };
-          window.addEventListener("message", receive_poses);
+          listen_for_messages(receive_poses);
       };
       ask_for_poses();
   },
