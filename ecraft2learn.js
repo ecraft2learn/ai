@@ -3598,6 +3598,7 @@ xhr.send();
       }
   },
   sentence_features: (sentences, callback) => {
+      record_callbacks(callback);
       const embed = () => {
           ecraft2learn.universal_sentence_encoder.embed(sentences.asArray()).then(embeddings_tensor => {
               const embeddings = embeddings_tensor.arraySync();
