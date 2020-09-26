@@ -710,7 +710,6 @@ const optimize = async (model_name, xs, ys, validation_tensors,
                 next_sample(resolve);
         };
         const next_sample = (resolve) => {
-            samples_remaining--;
             model = make_model(); // recreate model
             train(resolve);
         };
@@ -770,6 +769,7 @@ const optimize = async (model_name, xs, ys, validation_tensors,
                          training_number,
                          tfvis_options},
                         (results) => {
+                            samples_remaining--;
                             if (samples_remaining === 0) {
                                 final_results(results, resolve);
                             } else {
