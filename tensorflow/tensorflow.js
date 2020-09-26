@@ -50,7 +50,7 @@ const set_data = (model_name, kind, value, callback, permitted_labels) => {
             let labels, class_weights;
             [value, labels, class_weights] = to_one_hot_and_removed_data_with_unknown_output_labels(value, permitted_labels, kind==='training');
             data[model_name].categories = labels;
-            if (kind==='training') {
+            if (kind ==='training') {
                 data[model_name].class_weights = class_weights;
             }
             if (model_name === 'all models') {
@@ -618,6 +618,8 @@ const standard_deviation = (list) => {
     return Math.sqrt(variance/(list.length-1));
 };
 
+let training_number = 0;
+
 const optimize = async (model_name, xs, ys, validation_tensors, 
                         number_of_experiments, // number of different parameters settings to explore
                         epochs,
@@ -627,6 +629,7 @@ const optimize = async (model_name, xs, ys, validation_tensors,
                         number_of_samples, // how many times to repeat experiments on the same parameters
                         tfvis_options
                         ) => {
+    training_number = 0;
     const create_and_train_model = async ({layers, optimization_method, loss_function, epochs, learning_rate,
                                            dropout_rate, validation_split, activation, shuffle}, 
                                           {xs, ys}) => {
@@ -666,6 +669,11 @@ const optimize = async (model_name, xs, ys, validation_tensors,
                                  xs_validation: validation_tensors && validation_tensors[0],
                                  ys_validation: validation_tensors && validation_tensors[1],
                                 };
+        const test_data = get_data(model_name, 'test');
+        if (test_data) {
+            tensor_datasets.xs_test = tf.tensor(test_data.input);
+            tensor_datasets.ys_test = tf.tensor(test_data.output);
+        }
         const make_model = () => {
             return create_model({model_name,
                                  tensor_datasets,
@@ -749,12 +757,17 @@ const optimize = async (model_name, xs, ys, validation_tensors,
                          status: hpjs.STATUS_OK});
         };
         const train = (resolve) => {
+            const class_names = get_data(model_name, 'categories');
+            training_number++;
             train_model(model,
                         tensor_datasets,
                         {epochs, 
                          learning_rate,
                          validation_split,
                          shuffle,
+                         class_names,
+                         compute_confusion_matrices: !!class_names,
+                         training_number,
                          tfvis_options},
                         (results) => {
                             if (samples_remaining === 0) {
@@ -1186,6 +1199,8 @@ const train_with_parameters = async function (surface_name) {
                            learning_rate: gui_state["Training"]["Learning rate"],
                            validation_split: gui_state["Training"]["Validation split"],
                            shuffle: to_boolean(gui_state["Training"]["Shuffle data"]),
+                           class_names: categories,
+                           compute_confusion_matrices: !!categories,
                            tfvis_options: {callbacks: ['onEpochEnd'],
                                            yAxisDomain,
                                            width,
@@ -1633,9 +1648,12 @@ const receive_message =
             let model_name = message.train.model_name;
             install_settings(message.train);
             const options = message.train;
-            if (get_data(model_name, 'categories')) {
+            const categories = get_data(model_name, 'categories');
+            if (categories) {
                 options.tfvis_options.measure_accuracy = true;
                 options.tfvis_options.display_confusion_matrix = true;
+                options.class_names = categories;
+                options.compute_confusion_matrices = true;
             }
             options.tfvis_options.display_graphs = true; // make this optional
             train_model(get_model(model_name),

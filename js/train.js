@@ -105,9 +105,8 @@ const create_model = (options, failure_callback) => {
     record_callbacks(failure_callback);
     try {
         const {model_name, hidden_layer_sizes, dropout_rate, optimizer, layer_initializer, batch_normalization, regularizer, learning_rate,
-               loss_function, activation, last_activation, seed, datasets, custom_model_builder, load_model_for_further_training} = options;
+               loss_function, activation, last_activation, seed, datasets, custom_model_builder, load_model_for_further_training, training_number} = options;
         const tfvis_options = typeof tfvis === 'object' ? options.tfvis_options || {} : {}; // ignore options if tfvis not loaded
-        training_number = options.training_number;
         let class_names = options.class_names;
         let {input_shape} = options;
         if (!input_shape) {
@@ -212,9 +211,8 @@ const create_model = (options, failure_callback) => {
         let model = (typeof loaded_model !== 'undefined' && loaded_model) || (custom_model_builder ? custom_model_builder() : build_model());
         compile_model(model);
         if (tfvis_options.display_layers_after_creation) {
-            show_layers(model, 'Model after creation');
+            show_layers(model, 'Model after creation', training_number);
         }
-//         model.ready_for_prediction = true;
         return model;
   } catch (error) {
       if (failure_callback) {
@@ -235,9 +233,9 @@ const tfjs_function = (fun, function_table, layer_index) => {
     return fun(layer_index);
 };
 
-const show_layers = (model, tab_name) => {
+const show_layers = (model, tab_name, training_number) => {
     tf.tidy(() => {
-        const surface = {name: 'Layers', tab: tab_label(tab_name)};
+        const surface = {name: 'Layers', tab: tab_label(tab_name, training_number)};
         tfvis.show.modelSummary(surface, model);
         model.layers.forEach((layer, index) => {
             surface.name = "Layer#" + index;
@@ -246,8 +244,7 @@ const show_layers = (model, tab_name) => {
     });
 };
 
-let training_number;
-const tab_label = (label) => label + (typeof training_number === 'undefined' ? '' : '#' + training_number);
+const tab_label = (label, training_number) => label + (typeof training_number === 'undefined' ? '' : '#' + training_number);
 
 const update_tensors = (datasets, batch_size) => {
     let {xs_array, ys_array, xs_validation_array, ys_validation_array, xs_test_array, ys_test_array} = datasets;
@@ -402,7 +399,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
     }
     const {class_names, batch_size, shuffle, epochs, validation_split, learning_rate, dropout_rate, batch_normalization, optimizer,
            layer_initializer, regularizer, seed, stop_if_no_progress_for_n_epochs, initialEpoch, slices_to_use,
-           testing_fraction, validation_fraction, fraction_kept, split_data_on_each_experiment, compute_confusion_matrices} 
+           testing_fraction, validation_fraction, fraction_kept, split_data_on_each_experiment, compute_confusion_matrices, training_number} 
           = options;
     const number_of_training_epochs = epochs;
     const use_tf_datasets = datasets.use_tf_datasets;
@@ -413,7 +410,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                             typeof datasets.train === 'undefined' &&
                             typeof validation_fraction === 'number' && 
                             typeof testing_fraction === 'number');
-    const tab_name = tab_label('Training');
+    const tab_name = tab_label('Training', training_number);
     const surface_name = tfvis_options.measure_accuracy ? 'Loss and accuracy' : 'Loss';
     let train_again_button;
     const add_train_again_button = () => {
@@ -445,7 +442,6 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
         update_tensors(datasets, batch_size);
     }
     try {
-        training_number = options.training_number;
         // callbacks based upon https://storage.googleapis.com/tfjs-vis/mnist/dist/index.html
         let epoch_history = [];
         const metrics = ['loss', 'val_loss'];
@@ -564,7 +560,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
           const number_of_tests = xs_test && xs_test.shape[0];
           const percentage_of_tests = (x) => +(100*x/number_of_tests).toFixed(2);
           if (tfvis_options.display_layers_after_training) {
-              show_layers(model, 'Model after training');
+              show_layers(model, 'Model after training', training_number);
           }
           let confusion_matrix, test_loss, test_accuracy, number_of_classes;
           // following enables confusion matrices for fine-tuning but cause out of memory problems
@@ -618,7 +614,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
               "Name, Layer1,Layer2,Layer3,layer4,layer5, Batch size, Dropout rate, Normalizer, Epochs, Optimizer, Initializer, Regularizer," +
               "Testing fraction, Validation fraction, Fraction kept, " +
               Object.keys(response) + ", seed, ";
-          if (confusion_matrix && model_options.add_confusion_to_csv) {
+          if (confusion_matrix && options.add_confusion_to_csv) {
               let confusion_labels = [];
               confusion_matrix.forEach((row, i) => {
                   row.forEach((item, j) => {
@@ -677,7 +673,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
           csv_values += (highest_accuracy_epoch && highest_accuracy_epoch) + ", ";
           csv_values += response["Duration in seconds"] +", ";
           csv_values += options.current_seed + ", ";               
-          if (confusion_matrix && model_options.add_confusion_to_csv) {
+          if (confusion_matrix && options.add_confusion_to_csv) {
               confusion_matrix.forEach(row => {
                   csv_values += row.map(percentage_of_tests) + ', '; 
               });      
@@ -688,14 +684,14 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
           response.history = full_history;               
           invoke_callback(success_callback, response);
           if (confusion_matrix && tfvis_options.display_confusion_matrix) {
-              tfvis.render.confusionMatrix({name: 'Confusion Matrix All',
-                                            tab: tab_label('Charts')},
+              tfvis.render.confusionMatrix({name: 'Confusion Matrix',
+                                            tab: tab_label('Confusion', training_number)},
                                            {values: confusion_matrix,
                                             tickLabels: class_names});
           }
-          if (confusion_matrix && tfvis_options.display_collapsed_confusion_matrix) {
+          if (confusion_matrix && tfvis_options.display_collapsed_confusion_matrix) { // special to Onyx
               tfvis.render.confusionMatrix({name: 'Confusion Matrix GP or not',
-                                            tab: tab_label('Charts')},
+                                            tab: tab_label('Charts', training_number)},
                                            {values: collapse_confusion_matrix(confusion_matrix, 
                                                                               tfvis_options.display_collapsed_confusion_matrix.indices),
                                             tickLabels: tfvis_options.display_collapsed_confusion_matrix.labels});
@@ -857,8 +853,10 @@ const loss_measure = (results) =>
     results['Lowest training loss'] || 
     results['Training loss'];
 
+let experiment_number = 0;
+
 const hyperparameter_search = (options, datasets, success_callback, error_callback) => {
-    let experiment_number = 0;
+    experiment_number = 0;
     let previous_model;
     let lowest_loss;
     let best_model;
