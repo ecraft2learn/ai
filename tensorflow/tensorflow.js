@@ -394,12 +394,14 @@ const display_trial_results = (trial) => {
 };
 
 const optimize_hyperparameters_with_parameters = (draw_area, model) => {
+    // this uses parameters from the GUI to guide the search 
     draw_area.appendChild(optimize_hyperparameters_messages);
     const name_element = document.getElementById('name_element');
     const model_name = name_element ? name_element.value : model ? model.name : 'my-model';
     const categories = get_data(model_name, 'categories');
     const [xs, ys] = get_tensors(model_name, 'training');
     let validation_tensors = get_tensors(model_name, 'validation'); // undefined if no validation data
+    const test_tensors = get_tensors(model_name, 'test');
     let epochs = gui_state["Training"]["Number of iterations"];
     let onExperimentBegin = (i, trial) => {
         if (stop_on_next_experiment) {
@@ -425,7 +427,7 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
     const number_of_samples = Math.round(gui_state["Optimize"]["Number of samples"]);
     const what_to_optimize = search_descriptions.map(description => gui_state["Optimize"][description]);
     const scoring_weights = weight_descriptions.map(description => gui_state["Optimize"][description]);
-    optimize(model_name, xs, ys, validation_tensors, number_of_experiments, epochs, 
+    optimize(model_name, xs, ys, validation_tensors, test_tensors, number_of_experiments, epochs, 
              onExperimentBegin, onExperimentEnd, error_handler, 
              what_to_optimize, scoring_weights, number_of_samples)
         .then((result) => {
@@ -566,13 +568,18 @@ const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
    try {   
        const [xs, ys] = get_tensors(model_name, 'training');
        const validation_tensors = get_tensors(model_name, 'validation'); // undefined if no validation data
-           optimize(model_name, xs, ys, validation_tensors, number_of_experiments, epochs, 
+       const test_tensors = get_tensors(model_name, 'test');
+           optimize(model_name, xs, ys, validation_tensors, test_tensors, number_of_experiments, epochs, 
                     experiment_begin_callback, new_experiment_end_callback, error_callback, 
                     what_to_optimize,
                     scoring_weights,
                     number_of_samples,
                     tfvis_options)
               .then((result) => {
+                  xs.dispose();
+                  ys.dispose();
+                  tf.dispose(validation_tensors);
+                  tf.dispose(test_tensors);
                   if (result) {
                       result.best_model = best_model || previous_model; // if no best model then previous had NaN loss
                   }
@@ -620,7 +627,7 @@ const standard_deviation = (list) => {
 
 let training_number = 0;
 
-const optimize = async (model_name, xs, ys, validation_tensors, 
+const optimize = async (model_name, xs, ys, validation_tensors, test_tensors,
                         number_of_experiments, // number of different parameters settings to explore
                         epochs,
                         onExperimentBegin, onExperimentEnd, error_callback,
@@ -630,6 +637,7 @@ const optimize = async (model_name, xs, ys, validation_tensors,
                         tfvis_options
                         ) => {
     training_number = 0;
+    best_model = undefined;
     const create_and_train_model = async ({layers, optimization_method, loss_function, epochs, learning_rate,
                                            dropout_rate, validation_split, activation, shuffle}, 
                                           {xs, ys}) => {
@@ -668,12 +676,9 @@ const optimize = async (model_name, xs, ys, validation_tensors,
                                  ys,
                                  xs_validation: validation_tensors && validation_tensors[0],
                                  ys_validation: validation_tensors && validation_tensors[1],
+                                 xs_test: test_tensors && test_tensors[0],
+                                 ys_test: test_tensors && test_tensors[1],
                                 };
-        const test_data = get_data(model_name, 'test');
-        if (test_data) {
-            tensor_datasets.xs_test = tf.tensor(test_data.input);
-            tensor_datasets.ys_test = tf.tensor(test_data.output);
-        }
         const make_model = () => {
             return create_model({model_name,
                                  tensor_datasets,
@@ -685,7 +690,7 @@ const optimize = async (model_name, xs, ys, validation_tensors,
                                  dropout_rate,
                                  learning_rate});            
         };
-        let model = make_model();
+        let model = make_model(); // recreate model with new parameters
         let samples_remaining = number_of_samples;
         let samples = [];
         const sample_results = 
@@ -707,10 +712,8 @@ const optimize = async (model_name, xs, ys, validation_tensors,
                     score = -loss;
                 }
                 samples.push({score, loss, accuracy, duration, size});
-                next_sample(resolve);
         };
         const next_sample = (resolve) => {
-            model = make_model(); // recreate model
             train(resolve);
         };
         const final_results = 
@@ -744,7 +747,7 @@ const optimize = async (model_name, xs, ys, validation_tensors,
                     highest_score = average_score;
                     metrics_of_highest_score =
                         {average_loss, average_accuracy, average_duration, average_size, score_standard_deviation};
-                    if (best_model) {
+                    if (best_model && !best_model.disposed) {
                         best_model.dispose();
                         best_model.disposed = true;
                     }
@@ -770,10 +773,11 @@ const optimize = async (model_name, xs, ys, validation_tensors,
                          tfvis_options},
                         (results) => {
                             samples_remaining--;
+                            sample_results(results, resolve);        
                             if (samples_remaining === 0) {
                                 final_results(results, resolve);
                             } else {
-                                sample_results(results, resolve);
+                                next_sample(resolve);
                             }
                         },
                         (error) => {
@@ -786,7 +790,9 @@ const optimize = async (model_name, xs, ys, validation_tensors,
                             }
                         });
         };
-        model.ready_for_prediction = true; // even if no training the weights have been randomly initialised
+        // even with no training the weights have been randomly initialised so
+        // models are always ready and this is only kept for backwards compabitility
+        model.ready_for_prediction = true;  
         return new Promise(train);
     };
     record_callbacks(create_and_train_model, error_callback);

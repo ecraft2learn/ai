@@ -68,7 +68,8 @@ let next_slice = () => {
 };
 
 const create_and_train_model = (options, success_callback, failure_callback) => {
-//     record_callbacks(success_callback, failure_callback); // this isn't meant to be called by Snap!
+    // this isn't meant to be called by Snap! (despite the confusion that tensorflow.js has a local function with the same name)
+    // is called by LIFE.js, nails.js, 
     options.success_callback = success_callback;
     set_random_number_seed(options);
     let model = create_model(options, failure_callback);
@@ -882,7 +883,7 @@ const hyperparameter_search = (options, datasets, success_callback, error_callba
                             }
                             if (loss < lowest_loss || typeof lowest_loss === 'undefined') {
                                 lowest_loss = loss;
-                                if (best_model) {
+                                if (best_model && !best_model.disposed) {
                                     best_model.dispose();
                                     best_model.disposed = true;
                                 }
