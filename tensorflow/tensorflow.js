@@ -368,15 +368,15 @@ const display_trial_results = (trial) => {
         message = "<b>Best so far.<br>";
     }
     message += "Score = " + shorter_number(score);
-    if (results.samples && results.samples.length > 1 && metrics_of_highest_score) {
-        message += " (" + shorter_number(metrics_of_highest_score.score_standard_deviation) + " s.d.)";
-    }
     const add_samples = (kind) => {
         if (results.samples && results.samples.length > 1) {
             message += "<br>(";
+            const values = [];
             results.samples.forEach((sample) => {
                 message += shorter_number(sample[kind]) + ", ";
+                values.push(sample[kind]);
             });
+            message += "Std Dev " + shorter_number(standard_deviation(values));
             message += ")";
         }
     };        
@@ -1940,6 +1940,7 @@ return {get_model,
         train_with_parameters,
         create_hyperparameter_optimization_tab,
         save_and_load,
+        standard_deviation,
         create_button,
         replace_with_best_model,
         replace_button_results};
