@@ -382,10 +382,12 @@ const display_trial_results = (trial) => {
     };        
     add_samples('score');
     message += "<br>Loss = " + loss; // toFixed may end up displaying 0 if small enough
+    message += "<br>Lowest loss epoch = " + results['Lowest validation loss epoch'];
     add_samples('loss');
     if (accuracy) {
         message += "<br>Accuracy = " + shorter_number(accuracy);
         add_samples('accuracy');
+        message += "<br>Highest accuracy epoch = " + results['Highest accuracy epoch'];
     }
     if (best_score) {
         message += "</b>";
@@ -397,13 +399,14 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
     // this uses parameters from the GUI to guide the search 
     draw_area.appendChild(optimize_hyperparameters_messages);
     const name_element = document.getElementById('name_element');
-    const model_name = name_element ? name_element.value : model ? model.name : 'my-model';
-    const categories = get_data(model_name, 'categories');
+    const options = {};
+    options.model_name = name_element ? name_element.value : model ? model.name : 'my-model';
+    options.categories = get_data(model_name, 'categories');
     const [xs, ys] = get_tensors(model_name, 'training');
     let validation_tensors = get_tensors(model_name, 'validation'); // undefined if no validation data
     const test_tensors = get_tensors(model_name, 'test');
-    let epochs = gui_state["Training"]["Number of iterations"];
-    let onExperimentBegin = (i, trial) => {
+    options.epochs = gui_state["Training"]["Number of iterations"];
+    options.onExperimentBegin = (i, trial) => {
         if (stop_on_next_experiment) {
             stop_on_next_experiment = false;
             hyperparameter_searching = false;
@@ -413,7 +416,7 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
         optimize_hyperparameters_messages.innerHTML += "<br><br>Experiment " + (i+1) + ":<br>";
         display_trial(trial.args, optimize_hyperparameters_messages);
     };
-    const onExperimentEnd = (i, trial) => {
+    options.onExperimentEnd = (i, trial) => {
         display_trial_results(trial);
     };
     const error_handler = (error) => {
@@ -423,13 +426,11 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
         hyperparameter_searching = false;
         stop_on_next_experiment = false;
     };
-    const number_of_experiments = Math.round(gui_state["Optimize"]["Number of experiments"]);
-    const number_of_samples = Math.round(gui_state["Optimize"]["Number of samples"]);
-    const what_to_optimize = search_descriptions.map(description => gui_state["Optimize"][description]);
-    const scoring_weights = weight_descriptions.map(description => gui_state["Optimize"][description]);
-    optimize(model_name, xs, ys, validation_tensors, test_tensors, number_of_experiments, epochs, 
-             onExperimentBegin, onExperimentEnd, error_handler, 
-             what_to_optimize, scoring_weights, number_of_samples)
+    options.number_of_experiments = Math.round(gui_state["Optimize"]["Number of experiments"]);
+    options.number_of_samples = Math.round(gui_state["Optimize"]["Number of samples"]);
+    options.what_to_optimize = search_descriptions.map(description => gui_state["Optimize"][description]);
+    options.scoring_weights = weight_descriptions.map(description => gui_state["Optimize"][description]);
+    optimize(options, xs, ys, validation_tensors, test_tensors)
         .then((result) => {
             if (!result) {
                 // error has been handled
@@ -545,36 +546,27 @@ const inverse_lookup = (value, table) => {
 
 let previous_model;
 
-const optimize_hyperparameters = (model_name, number_of_experiments, epochs,
-                                  experiment_end_callback, success_callback, error_callback,
-                                  what_to_optimize,
-                                  scoring_weights,
-                                  number_of_samples,
-                                  tfvis_options) => {
+const optimize_hyperparameters = (options) => {
    // this is meant to be called when messages are received from a client page (e.g. Snap!)
+   const {model_name, epochs, experiment_end_callback, success_callback, error_callback} = options;
    record_callbacks(success_callback, error_callback);
    create_hyperparameter_optimization_tab(model, true);
-   const experiment_begin_callback = (i, trial) => {
+   options.onExperimentBegin = (i, trial) => {
         optimize_hyperparameters_messages.innerHTML += "<br><br>Experiment " + (i+1) + ":<br>";
         display_trial(trial.args, optimize_hyperparameters_messages);
    };
-   const new_experiment_end_callback = (i, trial) => {
+   options.onExperimentEnd = (i, trial) => {
        display_trial_results(trial);
        if (experiment_end_callback) {
            experiment_end_callback(i, trial);
        }
    }
-   gui_state["Training"]["Number of iterations"] = epochs;
+   gui_state["Training"]["Number of iterations"] = epochs; // why just this one?
    try {   
        const [xs, ys] = get_tensors(model_name, 'training');
        const validation_tensors = get_tensors(model_name, 'validation'); // undefined if no validation data
        const test_tensors = get_tensors(model_name, 'test');
-           optimize(model_name, xs, ys, validation_tensors, test_tensors, number_of_experiments, epochs, 
-                    experiment_begin_callback, new_experiment_end_callback, error_callback, 
-                    what_to_optimize,
-                    scoring_weights,
-                    number_of_samples,
-                    tfvis_options)
+           optimize(xs, ys, validation_tensors, test_tensors, options)
               .then((result) => {
                   xs.dispose();
                   ys.dispose();
@@ -627,15 +619,16 @@ const standard_deviation = (list) => {
 
 let training_number = 0;
 
-const optimize = async (model_name, xs, ys, validation_tensors, test_tensors,
-                        number_of_experiments, // number of different parameters settings to explore
-                        epochs,
-                        onExperimentBegin, onExperimentEnd, error_callback,
-                        what_to_optimize,
-                        scoring_weights,
-                        number_of_samples, // how many times to repeat experiments on the same parameters
-                        tfvis_options
-                        ) => {
+const optimize = async (xs, ys, validation_tensors, test_tensors, options) => {
+    let {model_name, 
+         number_of_experiments, // number of different parameters settings to explore
+         epochs,
+         learning_rate,
+         onExperimentBegin, onExperimentEnd, error_callback,
+         what_to_optimize,
+         scoring_weights,
+         number_of_samples, // how many times to repeat experiments on the same parameters
+         tfvis_options} = options;
     training_number = 0;
     best_model = undefined;
     const create_and_train_model = async ({layers, optimization_method, loss_function, epochs, learning_rate,
@@ -1874,12 +1867,14 @@ const receive_message =
             record_callbacks(success_callback, error_callback, experiment_end_callback);             
             message.tfvis_options.measure_accuracy = !!categories;
             message.tfvis_options.display_confusion_matrix = !!categories;
-            optimize_hyperparameters(model_name, number_of_experiments, epochs,
-                                     experiment_end_callback, success_callback, error_callback,
-                                     message.what_to_optimize,
-                                     message.scoring_weights,
-                                     message.number_of_samples,
-                                     message.tfvis_options);
+            const {learning_rate, what_to_optimize, scoring_weights, number_of_samples, tfvis_options} = message;
+            optimize_hyperparameters({model_name, number_of_experiments, epochs,
+                                      learning_rate,
+                                      experiment_end_callback, success_callback, error_callback,
+                                      what_to_optimize,
+                                      scoring_weights,
+                                      number_of_samples,
+                                      tfvis_options});
         } else if (typeof message.replace_with_best_model !== 'undefined') {
             const model_name = message.replace_with_best_model;
             replace_with_best_model(model_name,

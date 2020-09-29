@@ -1497,7 +1497,8 @@ window.ecraft2learn =
                                       trial_end_callback, success_callback, error_callback,
                                       what_to_optimize,
                                       scoring_weights,
-                                      number_of_samples) => {
+                                      number_of_samples,
+                                      learning_rate) => {
         if (typeof epochs !== 'number') {
             epochs = 0; // so it will use default in tensorflow.js support_window
         }
@@ -1514,6 +1515,7 @@ window.ecraft2learn =
                                               number_of_experiments,
                                               number_of_samples,
                                               epochs,
+                                              learning_rate,
                                               time_stamp,
                                               what_to_optimize: snap_to_javascript(what_to_optimize),
                                               scoring_weights: snap_to_javascript(scoring_weights),
