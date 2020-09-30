@@ -621,9 +621,13 @@ let training_number = 0;
 
 const optimize = async (xs, ys, validation_tensors, test_tensors, options) => {
     let {model_name, 
+         // not clear if the following (up to callbacks) can be replaced by initial settings of GUI
          number_of_experiments, // number of different parameters settings to explore
          epochs,
          learning_rate,
+         stop_if_no_progress_for_n_epochs,
+         validation_split,
+         shuffle,
          onExperimentBegin, onExperimentEnd, error_callback,
          what_to_optimize,
          scoring_weights,
@@ -631,7 +635,7 @@ const optimize = async (xs, ys, validation_tensors, test_tensors, options) => {
          tfvis_options} = options;
     training_number = 0;
     best_model = undefined;
-    const create_and_train_model = async ({layers, optimization_method, loss_function, epochs, learning_rate,
+    const create_and_train_model = async ({layers, optimization_method, loss_function, epochs, learning_rate, stop_if_no_progress_for_n_epochs,
                                            dropout_rate, validation_split, activation, shuffle}, 
                                           {xs, ys}) => {
         if (create_and_train_model.stopped_prematurely) {
@@ -655,10 +659,13 @@ const optimize = async (xs, ys, validation_tensors, test_tensors, options) => {
         if (!learning_rate) {
             learning_rate = gui_state["Training"]["Learning rate"];
         }
-        if (typeof dropout_rate === 'undefined') {
+        if (typeof stop_if_no_progress_for_n_epochs !== 'number') {
+            stop_if_no_progress_for_n_epochs = gui_state["Training"]["Stop if no progress for number of iterations"];
+        }
+        if (typeof dropout_rate !== 'number') {
             dropout_rate = gui_state["Model"]["Dropout rate"];
         }
-        if (typeof validation_split === 'undefined') {
+        if (typeof validation_split !== 'number') {
             validation_split = gui_state["Training"]["Validation split"];
         }
         if (typeof shuffle !== 'boolean') {
@@ -758,6 +765,7 @@ const optimize = async (xs, ys, validation_tensors, test_tensors, options) => {
                         tensor_datasets,
                         {epochs, 
                          learning_rate,
+                         stop_if_no_progress_for_n_epochs,
                          validation_split,
                          shuffle,
                          class_names,
@@ -822,6 +830,8 @@ const optimize = async (xs, ys, validation_tensors, test_tensors, options) => {
     }
     if (to_boolean(gui_state["Optimize"]["Search for best shuffle data setting"])) {
         space.shuffle = hpjs.choice([true, false]);
+    } else {
+        space.shuffle = shuffle;
     }
     if (to_boolean(gui_state["Optimize"]["Search for best number of training iterations"])) {
         const current_epochs = Math.round(gui_state["Training"]["Number of iterations"]);
@@ -830,12 +840,16 @@ const optimize = async (xs, ys, validation_tensors, test_tensors, options) => {
         const number_of_choices = 10;
         const increment = Math.max(1, Math.round((maximum-minimum)/number_of_choices)); 
         space.epochs = hpjs.quniform(minimum, maximum, increment);
+    } else {
+        space.epochs = epochs;
     }
     if (to_boolean(gui_state["Optimize"]["Search for best validation split"])) {
         const current_validation_split = gui_state["Training"]["Validation split"];
         const minimum = current_validation_split < .05 ? 0 : current_validation_split/2;
         const maximum = Math.min(.95, current_validation_split*1.5+.1);
         space.validation_split = hpjs.uniform(minimum, maximum);
+    } else {
+        space.validation_split = validation_split;
     }
     if (to_boolean(gui_state["Optimize"]["Search for best dropout rate"])) {
         const current_dropout_rate = gui_state["Model"]["Dropout rate"];
@@ -848,6 +862,8 @@ const optimize = async (xs, ys, validation_tensors, test_tensors, options) => {
         const current_learning_rate_log = Math.log(current_learning_rate);
         const number_of_choices = 10;
         space.learning_rate = hpjs.qloguniform(current_learning_rate_log-1, current_learning_rate_log+1, current_learning_rate/number_of_choices);
+    } else {
+        space.learning_rate = learning_rate;
     }
     if (to_boolean(gui_state["Optimize"]["Search for best number of layers"])) {
         const current_layers = get_layers();
@@ -876,6 +892,7 @@ const optimize = async (xs, ys, validation_tensors, test_tensors, options) => {
         }));
         space.layers = hpjs.choice(choices);
     }
+    space.stop_if_no_progress_for_n_epochs = stop_if_no_progress_for_n_epochs;
     try {
         const result = await hpjs.fmin(create_and_train_model,
                                        space,
@@ -1867,9 +1884,13 @@ const receive_message =
             record_callbacks(success_callback, error_callback, experiment_end_callback);             
             message.tfvis_options.measure_accuracy = !!categories;
             message.tfvis_options.display_confusion_matrix = !!categories;
-            const {learning_rate, what_to_optimize, scoring_weights, number_of_samples, tfvis_options} = message;
+            const {learning_rate, stop_if_no_progress_for_n_epochs, validation_split, shuffle,
+                   what_to_optimize, scoring_weights, number_of_samples, tfvis_options} = message;
             optimize_hyperparameters({model_name, number_of_experiments, epochs,
                                       learning_rate,
+                                      stop_if_no_progress_for_n_epochs,
+                                      validation_split,
+                                      shuffle,
                                       experiment_end_callback, success_callback, error_callback,
                                       what_to_optimize,
                                       scoring_weights,

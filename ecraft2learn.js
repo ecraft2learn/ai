@@ -1498,7 +1498,10 @@ window.ecraft2learn =
                                       what_to_optimize,
                                       scoring_weights,
                                       number_of_samples,
-                                      learning_rate) => {
+                                      learning_rate,
+                                      stop_if_no_progress_for_n_epochs,
+                                      validation_split,
+                                      shuffle) => {
         if (typeof epochs !== 'number') {
             epochs = 0; // so it will use default in tensorflow.js support_window
         }
@@ -1516,6 +1519,9 @@ window.ecraft2learn =
                                               number_of_samples,
                                               epochs,
                                               learning_rate,
+                                              stop_if_no_progress_for_n_epochs,
+                                              validation_split,
+                                              shuffle,
                                               time_stamp,
                                               what_to_optimize: snap_to_javascript(what_to_optimize),
                                               scoring_weights: snap_to_javascript(scoring_weights),
