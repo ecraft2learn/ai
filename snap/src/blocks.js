@@ -158,7 +158,7 @@ CustomCommandBlockMorph, SymbolMorph, ToggleButtonMorph, DialMorph*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.blocks = '2020-July-29';
+modules.blocks = '2020-September-20';
 
 var SyntaxElementMorph;
 var BlockMorph;
@@ -456,7 +456,9 @@ SyntaxElementMorph.prototype.replaceInput = function (oldArg, newArg) {
     }
     replacement.parent = this;
     this.children[idx] = replacement;
-    if (oldArg instanceof ReporterBlockMorph && scripts) {
+    if (oldArg instanceof ReporterBlockMorph && scripts &&
+        !oldArg.isPrototype
+    ) {
         if (!(oldArg instanceof RingMorph)
                 || (oldArg instanceof RingMorph && oldArg.contents())) {
             scripts.add(oldArg);
@@ -2731,6 +2733,7 @@ BlockMorph.prototype.userMenu = function () {
     var menu = new MenuMorph(this),
         world = this.world(),
         myself = this,
+        hasLine = false,
         shiftClicked = world.currentKey === 16,
         proc = this.activeProcess(),
         top = this.topBlock(),
@@ -3092,6 +3095,19 @@ BlockMorph.prototype.userMenu = function () {
         }
         return menu;
     }
+    if (contains(
+        ['doBroadcast', 'doSend', 'doBroadcastAndWait', 'receiveMessage',
+            'receiveOnClone', 'receiveGo'],
+        this.selector
+    )) {
+        hasLine = true;
+        menu.addLine();
+        menu.addItem(
+            (this.selector.indexOf('receive') === 0 ?
+                "senders..." : "receivers..."),
+            'showMessageUsers'
+        );
+    }
     if (this.parent instanceof ReporterSlotMorph
             || (this.parent instanceof CommandSlotMorph)
             || (this instanceof HatBlockMorph)
@@ -3099,7 +3115,7 @@ BlockMorph.prototype.userMenu = function () {
                 && (top instanceof HatBlockMorph))) {
         return menu;
     }
-    menu.addLine();
+    if (!hasLine) {menu.addLine(); }
     menu.addItem("ringify", 'ringify');
     if (StageMorph.prototype.enableCodeMapping) {
         menu.addLine();
@@ -3113,6 +3129,83 @@ BlockMorph.prototype.userMenu = function () {
         );
     }
     return menu;
+};
+
+BlockMorph.prototype.showMessageUsers = function () {
+    var ide = this.parentThatIsA(IDE_Morph) ||
+            this.parentThatIsA(BlockEditorMorph)
+                .target.parentThatIsA(IDE_Morph),
+        corral = ide.corral,
+        getter = (this.selector.indexOf('receive') === 0) ?
+            'allSendersOf' : 'allHatBlocksFor',
+        inputs = this.inputs(),
+        message, receiverName, knownSenders;
+
+    if (this.selector === 'receiveGo') {
+        message = '__shout__go__';
+    } else if (this.selector === 'receiveOnClone') {
+        message = '__clone__init__';
+    } else if (inputs[0] instanceof InputSlotMorph) {
+        message = inputs[0].evaluate();
+    }
+
+    if (((this.selector === 'doSend') && inputs[1] instanceof InputSlotMorph)) {
+        receiverName = this.inputs()[1].evaluate();
+    } else if (this.selector.indexOf('receive') === 0) {
+        receiverName = this.scriptTarget().name;
+    }
+
+    if (message !== '') {
+        if (getter === 'allSendersOf') {
+            knownSenders = ide.stage.globalBlocksSending(message, receiverName);
+        }
+        corral.frame.contents.children.concat(corral.stageIcon).forEach(
+            icon => {
+                if (icon.object &&
+                    ((this.selector !== 'doSend' ||
+                        receiverName === icon.object.name) &&
+                    (icon.object[getter](
+                        message,
+                        receiverName,
+                        knownSenders
+                    ).length > 0))
+                ) {
+                    icon.flash();
+                }
+            }
+        );
+    }
+};
+
+BlockMorph.prototype.isSending = function (message, receiverName, known = []) {
+    if (typeof message === 'number') {
+        message = message.toString();
+    }
+    return this.allChildren().some(morph => {
+        var event, eventReceiver;
+        if (morph.isCustomBlock &&
+                morph.isGlobal &&
+                    contains(known, morph.definition)
+        ) {
+            return true;
+        }
+        if ((morph.selector) &&
+                contains(
+                    ['doBroadcast', 'doBroadcastAndWait', 'doSend'],
+                    morph.selector)
+        ) {
+            event = morph.inputs()[0].evaluate();
+            if (morph.selector === 'doSend') {
+                eventReceiver = morph.inputs()[1].evaluate();
+            }
+            return ((morph.selector !== 'doSend') ||
+                    (receiverName === eventReceiver)) &&
+                ((event === message) ||
+                    (message instanceof Array &&
+                        message[0] === 'any message'));
+        }
+        return false;
+    });
 };
 
 BlockMorph.prototype.developersMenu = function () {
@@ -3392,7 +3485,12 @@ BlockMorph.prototype.restoreInputs = function (oldInputs, offset = 0) {
     // restore matching inputs in their original order
     this.inputs().forEach(inp => {
         old = oldInputs[offset];
-        if (old instanceof ReporterBlockMorph) {
+        if (old instanceof RingMorph) {
+            if (old.contents()) {
+                this.replaceInput(inp, old.fullCopy());
+            }
+            // otherwise ignore the empty ring
+        } else if (old instanceof ReporterBlockMorph) {
             if (inp instanceof TemplateSlotMorph || inp.isStatic) {
                 leftOver.push(old);
             } else {
@@ -4047,6 +4145,7 @@ BlockMorph.prototype.scriptPic = function () {
         fb = this.stackFullBounds(),
         pic = newCanvas(fb.extent()),
         ctx = pic.getContext('2d');
+
     this.allComments().forEach(comment =>
         ctx.drawImage(
             comment.fullImage(),
@@ -4055,6 +4154,32 @@ BlockMorph.prototype.scriptPic = function () {
         )
     );
     ctx.drawImage(scr, 0, 0);
+    return pic;
+};
+
+BlockMorph.prototype.fullImage = function () {
+    // answer a canvas image meant for (semi-) transparent blocks
+    // that lets the background shine through
+    var src, solid, pic, ctx;
+
+    if (this.alpha === 1) {
+        return BlockMorph.uber.fullImage.call(this);
+    }
+    this.forAllChildren(m => {
+        if (m instanceof BlockMorph) {
+            m.mouseLeaveBounds();
+        }
+    });
+    src = BlockMorph.uber.fullImage.call(this);
+    solid = this.doWithAlpha(1, () => BlockMorph.uber.fullImage.call(this));
+    pic = newCanvas(this.fullBounds().extent());
+    ctx = pic.getContext('2d');
+    ctx.fillStyle = ScriptsMorph.prototype.getRenderColor().toString();
+    ctx.fillRect(0, 0, pic.width, pic.height);
+    ctx.globalCompositeOperation = 'destination-in';
+    ctx.drawImage(solid, 0, 0);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.drawImage(src, 0, 0);
     return pic;
 };
 
@@ -7248,10 +7373,17 @@ ScriptsMorph.prototype.recoverLastDrop = function (forRedrop) {
         }
     } else if (dropped instanceof ReporterBlockMorph) {
         if (rec.lastDropTarget) {
-            rec.lastDropTarget.replaceInput(
-                rec.lastDroppedBlock,
-                rec.lastReplacedInput
-            );
+            if (forRedrop) {
+                rec.lastDropTarget.replaceInput(
+                    rec.lastReplacedInput,
+                    rec.lastDroppedBlock
+                );
+            } else {
+                rec.lastDropTarget.replaceInput(
+                    rec.lastDroppedBlock,
+                    rec.lastReplacedInput
+                );
+            }
             rec.lastDropTarget.fixBlockColor(null, true);
             if (rec.lastPreservedBlocks) {
                 rec.lastPreservedBlocks.forEach(morph =>
@@ -7545,7 +7677,7 @@ ScriptsMorph.prototype.scriptTarget = function () {
     if (editor) {
         return editor.target;
     }
-    throw new Error('script target bannot be found for orphaned scripts');
+    throw new Error('script target cannot be found for orphaned scripts');
 };
 
 
@@ -8984,7 +9116,8 @@ InputSlotMorph.prototype.menuFromDict = function (
                     null, // doubleClickAction
                     null, // shortcut
                     !(choices[key] instanceof Array) &&
-                        typeof choices[key] !== 'function' // verbatim?
+                        typeof choices[key] !== 'function' &&
+                            typeof(choices[key]) !== 'number' // verbatim?
                 );
             }
         }

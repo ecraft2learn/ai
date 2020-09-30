@@ -98,17 +98,16 @@
 /*global modules, CommandBlockMorph, SpriteMorph, TemplateSlotMorph, Map,
 StringMorph, Color, DialogBoxMorph, ScriptsMorph, ScrollFrameMorph, WHITE,
 Point, HandleMorph, HatBlockMorph, BlockMorph, detect, List, Process,
-AlignmentMorph, ToggleMorph, InputFieldMorph, ReporterBlockMorph,
-StringMorph, nop, radians, BoxMorph, ArrowMorph, PushButtonMorph,
-contains, InputSlotMorph, ToggleButtonMorph, IDE_Morph, MenuMorph, copy,
-ToggleElementMorph, fontHeight, StageMorph, SyntaxElementMorph,
-SnapSerializer, CommentMorph, localize, CSlotMorph, MorphicPreferences,
-SymbolMorph, isNil, CursorMorph, VariableFrame, WatcherMorph, Variable,
-BooleanSlotMorph, XML_Serializer, SnapTranslator*/
+AlignmentMorph, ToggleMorph, InputFieldMorph, ReporterBlockMorph, StringMorph,
+nop, radians, BoxMorph, ArrowMorph, PushButtonMorph, contains, InputSlotMorph,
+ToggleButtonMorph, IDE_Morph, MenuMorph, copy, ToggleElementMorph, fontHeight,
+StageMorph, SyntaxElementMorph, CommentMorph, localize, CSlotMorph,
+MorphicPreferences, SymbolMorph, isNil, CursorMorph, VariableFrame,
+WatcherMorph, Variable, BooleanSlotMorph, XML_Serializer, SnapTranslator*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.byob = '2020-July-24';
+modules.byob = '2020-September-14';
 
 // Declarations
 
@@ -559,6 +558,40 @@ CustomBlockDefinition.prototype.purgeCorpses = function () {
     this.scripts = this.scripts.filter(topBlock =>
         !topBlock.isCorpse
     );
+};
+
+// CustomBlockDefinition dependencies
+
+CustomBlockDefinition.prototype.collectDependencies = function (
+    excluding = [],
+    result = []
+) {
+    if (!this.isGlobal) {
+        throw new Error('collecting dependencies is only supported\n' +
+            'for global custom blocks');
+    }
+    excluding.push(this);
+    this.scripts.concat(
+        this.body ? [this.body.expression] : []
+    ).forEach(script => {
+        script.forAllChildren(morph => {
+            if (morph.isCustomBlock &&
+                morph.isGlobal &&
+                !contains(excluding, morph.definition) &&
+                !contains(result, morph.definition)
+            ) {
+                result.push(morph.definition);
+                morph.definition.collectDependencies(excluding, result);
+            }
+        });
+    });
+    return result;
+};
+
+CustomBlockDefinition.prototype.isSending = function (message, receiverName) {
+    return this.scripts.concat(
+        this.body ? [this.body.expression] : []
+    ).some(script => script.isSending(message, receiverName));
 };
 
 // CustomCommandBlockMorph /////////////////////////////////////////////
@@ -1105,11 +1138,6 @@ CustomCommandBlockMorph.prototype.userMenu = function () {
         } else {
             menu.addLine();
         }
-        /*
-        if (shiftClicked) {
-            menu.addItem("export definition...", 'exportBlockDefinition');
-        }
-        */
         if (this.isTemplate) { // inside the palette
             if (this.isGlobal) {
                 menu.addItem(
@@ -1164,6 +1192,13 @@ CustomCommandBlockMorph.prototype.userMenu = function () {
                 "duplicate block definition...",
                 'duplicateBlockDefinition'
             );
+            if (this.isGlobal) {
+                menu.addItem(
+                    "export block definition...",
+                    'exportBlockDefinition',
+                    'including dependencies'
+                );
+            }
         } else { // inside a script
             // if global or own method - let the user delete the definition
             if (this.isGlobal ||
@@ -1188,10 +1223,11 @@ CustomCommandBlockMorph.prototype.userMenu = function () {
 };
 
 CustomCommandBlockMorph.prototype.exportBlockDefinition = function () {
-    var xml = new SnapSerializer().serialize(this.definition),
-        ide = this.parentThatIsA(IDE_Morph);
-
-    ide.saveXMLAs(xml, this.spec);
+    var ide = this.parentThatIsA(IDE_Morph);
+    new BlockExportDialogMorph(
+        ide.serializer,
+        [this.definition].concat(this.definition.collectDependencies())
+    ).popUp(this.world());
 };
 
 CustomCommandBlockMorph.prototype.duplicateBlockDefinition = function () {
@@ -1423,6 +1459,9 @@ CustomReporterBlockMorph.prototype.duplicateBlockDefinition
 
 CustomReporterBlockMorph.prototype.deleteBlockDefinition
     = CustomCommandBlockMorph.prototype.deleteBlockDefinition;
+
+CustomReporterBlockMorph.prototype.exportBlockDefinition
+    = CustomCommandBlockMorph.prototype.exportBlockDefinition;
 
 // CustomReporterBlockMorph events:
 
@@ -2263,7 +2302,7 @@ BlockEditorMorph.prototype.updateDefinition = function () {
     var head, ide,
         oldSpec = this.definition.blockSpec(),
         pos = this.body.contents.position(),
-        count = 0,
+        count = 1,
         element;
 
     this.definition.receiver = this.target; // only for serialization

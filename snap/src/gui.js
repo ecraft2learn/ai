@@ -78,7 +78,7 @@ Animation, BoxMorph, BlockEditorMorph, BlockDialogMorph, Note, ZERO, BLACK*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.gui = '2020-August-01';
+modules.gui = '2020-September-21';
 
 // Declarations
 
@@ -1921,11 +1921,9 @@ IDE_Morph.prototype.fixLayout = function (situation) {
             flag = this.embedPlayButton.flag;
             flag.size = Math.floor(Math.min(
                         this.width(), this.height())) / 5;
-            flag.setWidth(flag.size);
-            flag.setHeight(flag.size);
+            flag.fixLayout();
             this.embedPlayButton.size = flag.size * 1.6;
-            this.embedPlayButton.setWidth(this.embedPlayButton.size);
-            this.embedPlayButton.setHeight(this.embedPlayButton.size);
+            this.embedPlayButton.fixLayout();
             if (this.embedOverlay) {
                 this.embedOverlay.setExtent(this.extent());
             }
@@ -3971,7 +3969,7 @@ IDE_Morph.prototype.aboutSnap = function () {
         module, btn1, btn2, btn3, btn4, licenseBtn, translatorsBtn,
         world = this.world();
 
-    aboutTxt = 'Snap! 6.1.2\nBuild Your Own Blocks\n\n'
+    aboutTxt = 'Snap! 6.2.1\nBuild Your Own Blocks\n\n'
         + 'Copyright \u24B8 2008-2020 Jens M\u00F6nig and '
         + 'Brian Harvey\n'
         + 'jens@moenig.org, bh@cs.berkeley.edu\n\n'
@@ -5827,12 +5825,12 @@ IDE_Morph.prototype.initializeCloud = function () {
                 this.controlBar.cloudButton.refresh();
                 this.source = 'cloud';
                 if (!isNil(response.days_left)) {
+                    var duration = response.days_left + ' day' +
+                        (response.days_left > 1 ? 's' : '');
                     new DialogBoxMorph().inform(
-                        'Unverified account: ' +
-                        response.days_left +
-                        ' days left',
+                        'Unverified account: ' + duration + ' left' +
                         'You are now logged in, and your account\n' +
-                        'is enabled for three days.\n' +
+                        'is enabled for ' + duration + '.\n' +
                         'Please use the verification link that\n' +
                         'was sent to your email address when you\n' +
                         'signed up.\n\n' +
@@ -5841,7 +5839,7 @@ IDE_Morph.prototype.initializeCloud = function () {
                         'cannot find it, please use the "Resend\n' +
                         'Verification Email..." option in the cloud\n' +
                         'menu.\n\n' +
-                        'You have ' + response.days_left + ' days left.',
+                        'You have ' + duration + ' left.',
                         world,
                         this.cloudIcon(null, new Color(0, 180, 0))
                     );
@@ -7147,7 +7145,9 @@ ProjectDialogMorph.prototype.saveProject = function () {
     var name = this.nameField.contents().text.text,
         notes = this.notesText.text;
 
-    this.ide.projectNotes = notes || this.ide.projectNotes;
+    if (this.ide.projectNotes !== notes) {
+        this.ide.projectNotes = notes;
+    }
     if (name) {
         if (this.source === 'cloud') {
             if (detect(
@@ -8502,6 +8502,44 @@ SpriteIconMorph.prototype.copyCostume = function (costume) {
 SpriteIconMorph.prototype.copySound = function (sound) {
     var dup = sound.copy();
     this.object.addSound(dup.audio, dup.name);
+};
+
+// SpriteIconMorph flashing
+
+SpriteIconMorph.prototype.flash = function () {
+    var world = this.world(),
+        isFlat = MorphicPreferences.isFlat,
+        highlight = SpriteMorph.prototype.highlightColor,
+        previousColor = isFlat ? this.pressColor : this.outlineColor,
+        previousOutline = this.outline,
+        previousState = this.userState;
+
+    if (isFlat) {
+        this.pressColor = highlight;
+    } else {
+        this.outlineColor = highlight;
+        this.outline = 2;
+    }
+    this.userState = 'pressed';
+    this.rerender();
+
+    world.animations.push(new Animation(
+        nop,
+        nop,
+        0,
+        800,
+        nop,
+        () => {
+            if (isFlat) {
+                this.pressColor = previousColor;
+            } else {
+                this.outlineColor = previousColor;
+                this.outline = previousOutline;
+            }
+            this.userState = previousState;
+            this.rerender();
+        }
+    ));
 };
 
 // CostumeIconMorph ////////////////////////////////////////////////////

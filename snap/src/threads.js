@@ -61,7 +61,7 @@ StageMorph, SpriteMorph, StagePrompterMorph, Note, modules, isString, copy, Map,
 isNil, WatcherMorph, List, ListWatcherMorph, alert, console, TableMorph, BLACK,
 TableFrameMorph, ColorSlotMorph, isSnapObject, newCanvas, Symbol, SVG_Costume*/
 
-modules.threads = '2020-August-01';
+modules.threads = '2020-September-02';
 
 var ThreadManager;
 var Process;
@@ -2136,6 +2136,52 @@ Process.prototype.reportIfElse = function (block) {
         }
     }
 };
+
+/*
+// Process - hyperized reporter-if, experimental, commented out for now
+
+Process.prototype.reportIfElse = function (block) {
+    var inputs = this.context.inputs;
+
+    if (inputs.length < 1) {
+        this.evaluateNextInput(block);
+    } else if (inputs.length > 1) {
+        if (this.flashContext()) {return; }
+        if (inputs[0] instanceof List && this.enableHyperOps) {
+            if (inputs.length < 3) {
+                this.evaluateNextInput(block);
+            } else {
+                this.returnValueToParentContext(
+                    this.hyperIf.apply(this, inputs)
+                );
+                this.popContext();
+            }
+        } else {
+            this.returnValueToParentContext(inputs.pop());
+            this.popContext();
+        }
+    } else {
+        if (inputs[0] instanceof List && this.enableHyperOps) {
+            this.evaluateNextInput(block);
+        } else {
+            // this.assertType(inputs[0], ['Boolean']);
+            if (inputs[0]) {
+                this.evaluateNextInput(block);
+            } else {
+                inputs.push(null);
+                this.evaluateNextInput(block);
+            }
+        }
+    }
+};
+
+Process.prototype.hyperIf = function (test, trueValue, falseValue) {
+    if (test instanceof List) {
+        return test.map(each => this.hyperIf(each, trueValue, falseValue));
+    }
+    return test ? trueValue : falseValue;
+};
+*/
 
 // Process process related primitives
 
@@ -4638,6 +4684,12 @@ Process.prototype.spritesAtPoint = function (point, stage) {
 };
 
 Process.prototype.reportRelationTo = function (relation, name) {
+    if (this.enableHyperOps) {
+        if (name instanceof List && !this.isCoordinate(name)) {
+            return name.map(each => this.reportRelationTo(relation, each));
+        }
+    }
+
 	var rel = this.inputOption(relation);
  	if (rel === 'distance') {
   		return this.reportDistanceTo(name);
@@ -4646,6 +4698,13 @@ Process.prototype.reportRelationTo = function (relation, name) {
     	return this.reportDirectionTo(name);
     }
     return 0;
+};
+
+Process.prototype.isCoordinate = function (data) {
+    return data instanceof List &&
+        (data.length() === 2) &&
+            this.reportTypeOf(data.at(1)) === 'number' &&
+                this.reportTypeOf(data.at(2)) === 'number';
 };
 
 Process.prototype.reportDistanceTo = function (name) {

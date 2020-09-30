@@ -46,7 +46,7 @@
 
 /*global modules, contains*/
 
-modules.locale = '2020-July-24';
+modules.locale = '2020-September-21';
 
 // Global stuff
 
@@ -168,7 +168,7 @@ SnapTranslator.dict.de = {
     'translator_e-mail':
         'jens@moenig.org, jadga.huegle@sap.com',
     'last_changed':
-        '2020-07-24'
+        '2020-09-03'
 };
 
 SnapTranslator.dict.it = {
@@ -179,7 +179,7 @@ SnapTranslator.dict.it = {
     'translator_e-mail':
         's_federici@yahoo.com, albertofirpo12@gmail.com, zairik@gmail.com',
     'last_changed':
-        '2016-05-10'
+        '2020-09-18'
 };
 
 SnapTranslator.dict.ja = {
@@ -223,7 +223,7 @@ SnapTranslator.dict.pt = {
     'translator_e-mail':
         'mmsequeira@gmail.com',
     'last_changed':
-        '2020-04-06'
+        '2020-08-03'
 };
 
 SnapTranslator.dict.cs = {
@@ -342,9 +342,9 @@ SnapTranslator.dict.no = {
     'language_translator':
         'Olav A Marschall',
     'translator_e-mail':
-        'mattebananer@gmail.com',
+        'olavmarschall@gmail.com',
     'last_changed':
-        '2013-09-16'
+        '2020-08-19'
 };
 
 SnapTranslator.dict.dk = {
@@ -377,7 +377,7 @@ SnapTranslator.dict.ca = {
     'translator_e-mail':
         'bernat@snap4arduino.rocks, jguille2@xtec.cat',
     'last_changed':
-        '2020-01-30'
+        '2020-08-31'
 };
 
 SnapTranslator.dict.ca_VA = {
@@ -483,11 +483,11 @@ SnapTranslator.dict.tr = {
     'language_name':
         'Türkçe',
     'language_translator':
-        'Hakan Atas - www.3drobolab.com, Turgut Güneysu',
+        'Turgut Güneysu, Hakan Atas',
     'translator_e-mail':
-        'hakanatas@gmail.com, tguneysu@msn.com, mustafaipekbayrak@gmail.com',
+        'tguneysu@msn.com', // hakanatas@gmail.com, mustafaipekbayrak@gmail.com',
     'last_changed':
-        '2019-01-22'
+        '2020-09-20'
 };
 
 SnapTranslator.dict.hu = {

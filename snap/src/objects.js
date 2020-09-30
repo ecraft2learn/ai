@@ -84,7 +84,7 @@ BlockEditorMorph, BlockDialogMorph, PrototypeHatBlockMorph,  BooleanSlotMorph,
 localize, TableMorph, TableFrameMorph, normalizeCanvas, VectorPaintEditorMorph,
 HandleMorph, AlignmentMorph, Process, XML_Element, WorldMap, copyCanvas*/
 
-modules.objects = '2020-July-26';
+modules.objects = '2020-September-18';
 
 var SpriteMorph;
 var StageMorph;
@@ -5753,23 +5753,8 @@ SpriteMorph.prototype.yBottom = function () {
 // SpriteMorph message broadcasting
 
 SpriteMorph.prototype.allMessageNames = function () {
-    var msgs = [],
-        all = this.scripts.children.slice();
-    this.customBlocks.forEach(def => {
-        if (def.body) {
-            all.push(def.body.expression);
-        }
-        def.scripts.forEach(scr => all.push(scr));
-    });
-    if (this.globalBlocks) {
-        this.globalBlocks.forEach(def => {
-            if (def.body) {
-                all.push(def.body.expression);
-            }
-            def.scripts.forEach(scr => all.push(scr));
-        });
-    }
-    all.forEach(script => {
+    var msgs = [];
+    this.allScripts().forEach(script => {
         script.allChildren().forEach(morph => {
             var txt;
             if (morph instanceof InputSlotMorph && morph.choices && contains(
@@ -5788,8 +5773,14 @@ SpriteMorph.prototype.allMessageNames = function () {
     return msgs;
 };
 
+SpriteMorph.prototype.allSendersOf = function (message, receiverName, known) {
+    return this.allScripts().filter(script =>
+        script.isSending(message, receiverName, known)
+    );
+};
+
 SpriteMorph.prototype.allHatBlocksFor = function (message) {
-    if (typeof message === 'number') {message = message.toString(); }
+    if (typeof message === 'number') { message = message.toString(); }
     return this.scripts.children.filter(morph => {
         var event;
         if (morph.selector) {
@@ -5841,6 +5832,25 @@ SpriteMorph.prototype.allGenericHatBlocks = function () {
         }
         return false;
     });
+};
+
+SpriteMorph.prototype.allScripts = function () {
+    var all = this.scripts.children.slice();
+    this.customBlocks.forEach(def => {
+        if (def.body) {
+            all.push(def.body.expression);
+        }
+        def.scripts.forEach(scr => all.push(scr));
+    });
+    if (this.globalBlocks) {
+        this.globalBlocks.forEach(def => {
+            if (def.body) {
+                all.push(def.body.expression);
+            }
+            def.scripts.forEach(scr => all.push(scr));
+        });
+    }
+    return all;
 };
 
 // SpriteMorph events
@@ -9173,6 +9183,9 @@ StageMorph.prototype.yBottom = function () {
 StageMorph.prototype.allMessageNames
     = SpriteMorph.prototype.allMessageNames;
 
+StageMorph.prototype.allSendersOf
+    = SpriteMorph.prototype.allSendersOf;
+
 StageMorph.prototype.allHatBlocksFor
     = SpriteMorph.prototype.allHatBlocksFor;
 
@@ -9184,6 +9197,9 @@ StageMorph.prototype.allHatBlocksForInteraction
 
 StageMorph.prototype.allGenericHatBlocks
     = SpriteMorph.prototype.allGenericHatBlocks;
+
+StageMorph.prototype.allScripts
+    = SpriteMorph.prototype.allScripts;
 
 // StageMorph events
 
@@ -9315,6 +9331,21 @@ StageMorph.prototype.reportPenTrailsAsCostume = function () {
         this.trailsCanvas,
         this.newCostumeName(localize('Background'))
     );
+};
+
+// StageMorph scanning global custom blocks for message sends
+
+StageMorph.prototype.globalBlocksSending = function (message, receiverName) {
+    // "transitive hull"
+    var all = this.globalBlocks.filter(
+            def =>def.isSending(message, receiverName)
+        );
+    this.globalBlocks.forEach(def => {
+        if (def.collectDependencies().some(dep => contains(all, dep))) {
+            all.push(def);
+        }
+    });
+    return all;
 };
 
 // SpriteBubbleMorph ////////////////////////////////////////////////////////
@@ -9817,16 +9848,19 @@ Costume.prototype.thumbnail = function (extentPoint, recycleMe) {
     // my thumbnail representation keeping the originial aspect ratio
     // a "recycleMe canvas can be passed for re-use
     var src = this.contents, // at this time sprites aren't composite morphs
-        scale = Math.min(
-            (extentPoint.x / src.width),
-            (extentPoint.y / src.height)
-        ),
-        xOffset = (extentPoint.x - (src.width * scale)) / 2,
-        yOffset = (extentPoint.y - (src.height * scale)) / 2,
+        scale, xOffset, yOffset,
         trg = newCanvas(extentPoint, true, recycleMe), // non-retina
         ctx = trg.getContext('2d');
 
     if (!src || src.width + src.height === 0) {return trg; }
+
+    scale = Math.min(
+        (extentPoint.x / src.width),
+        (extentPoint.y / src.height)
+    );
+    xOffset = (extentPoint.x - (src.width * scale)) / 2;
+    yOffset = (extentPoint.y - (src.height * scale)) / 2;
+
     ctx.save();
     ctx.scale(scale, scale);
     ctx.drawImage(

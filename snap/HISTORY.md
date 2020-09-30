@@ -2,6 +2,129 @@
 
 ## in development:
 
+## 6.2.1
+* **New Features:**
+    * added "get value from key" reporter to database library, thanks, Brian! 
+* **Notable Changes:**
+    * updated reference manual for v6.2, thanks, Brian!
+* **Notable Fixes:**
+    * fixed translatability of certain drop-downs such as "point in direction _"
+* **Translation Updates:**
+    * Turkish, thanks, Turgut!
+    * Italian, thanks, Stefano!
+
+### 2020-09-21
+* reference manual update to v6.2, thanks, Brian!
+* added single record query to data library, thanks, Brian
+* Turkish translation update, thanks ,Turgut!
+* Italian translation update, thanks, Stefano!
+
+### 2020-09-20
+* new dev version
+* blocks: fixed translatability of certain drop-downs such as "point in direction _"
+
+## 6.2.0:
+* **New Features:**
+    * show message senders and receivers from the blocks context menu
+    * "export block definition" including dependencies
+    * hyperized "distance/direction to _" reporter primitive
+    * new "Database" library operating on localstore
+* **Notable Changes:**
+    * swapped version number and "Build Your Own Blocks" in page title
+* **Notable Fixes:**
+    * changing the type of a custom block from reporter to command in the block editor changes the prototype instead of adding another one
+    * deleting project notes in the "save" dialog now also deletes them in the saved project
+    * items in list-boxes such as the project list are no longer auto-translated
+    * fixed a redo issue
+    * fixed a rare race condition when loading projects
+* **Translation Updates:**
+    * Catalan, thanks, Joan!
+    * Norwegian, thanks, Olav!
+    * German
+
+### 2020-09-18
+* objects: Fixed costume thumbnail for asynch loading, thanks, Bernat!
+* prepared release
+
+### 2020-09-14
+* blocks: fixed "redrop" (redo)
+* byob: consolidated custon block definition update counter, thanks, Brian B.!
+
+### 2020-09-12
+* morphic: don't auto-translate ListMorph items
+
+### 2020-09-10
+* added input type assertions to Database library
+
+### 2020-09-08
+* swapped version number and "Build Your Own Blocks" in page title
+
+### 2020-09-07
+* gui: deleting project notes in the "save" dialog now also deletes them in the saved project
+
+### 2020-09-04
+* byob, blocks, objects: refactored scanning for message senders
+* blocks: support scanning for message receivers from inside a block editor
+* blocks: fixed changing the type of a custom block from reporter to command in the block editor
+
+### 2020-09-03
+* byob: experimental: Inspect & export dependencies for global custom blocks (shift-right-click for context menu)
+* byob: new feature: "export block definition" including dependencies
+* blocks, byob, objects: find message sends in global custom blocks dependencies
+
+### 2020-09-02
+* threads: hyperized "distance/direction to _" reporter primitive
+
+### 2020-09-01
+* Norwegian translation update, thanks, Olav
+* gui, blocks: fixed a bunch of typos and UI strings, thanks, Brian Broll!
+* colors library update, thanks, Brian H.! 
+* German translation update
+* objects: also scan custom blocks for message sends
+
+### 2020-08-31
+* Catalan translation update, thanks, Joan!
+
+### 2020-08-18
+* blocks: tweaked menu separator line above "senders.../receivers..." to only show once
+
+### 2020-08-08
+* blocks: changed "show senders/receivers" menu entry to "senders.../receivers..."
+* gui: tweaked SpriteIconMorph>>flash() for flat design mode
+
+### 2020-08-07
+* new dev version
+* added new localstorage library
+* show message senders / receivers from the blocks context menu, thanks, Bernat!
+
+## 6.1.4:
+* fixed "green flag" symbol size for embedded proects (for real ^^)
+
+## 6.1.3:
+* **Notable Changes:**
+    * exporting pictures of (semi-) faded blocks now includes the cropped solid background color
+    * "to lowercase" reporter now also in Strings library, thanks, Brian!
+* **Notable Fixes:**
+    * fixed restoring ringed inputs when relabelling and compiling HOFs
+    * added viewport, thanks, Radman!
+    * fixed "green flag" symbol size for community website, thanks, Bernat!
+* **Translation Updates:**
+    * Catalan, thanks, Joan!
+    * Portuguese, thanks, Manuel!
+
+### 2020-08-05
+* threads: experimental hyperized reporter-if, commented out for now
+* blocks: fixed restoring ringed inputs when relabelling and compiling HOFs
+* added viewport, thanks, Radman!
+* Catalan translation update, thanks, Joan!
+* Portuguese translation update, thanks, Manuel!
+* added blocks to Strings library, thanks, Brian!
+* fixed "green flag" symbol size for community website, thanks, Bernat!
+
+### 2020-08-04
+* new dev version
+* blocks: include background color when exporting (semi-) transparent script pics 
+
 ## 6.1.2:
 * fixed variable scope for ASK/TELL
 
