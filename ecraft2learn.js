@@ -1247,13 +1247,22 @@ window.ecraft2learn =
                                       }
                                   }); 
     };
+    const set_tensorflow_visualization_options = (width, height, minimum_loss, maximum_loss,
+                                                  display_graphs, display_layers_after_training, display_confusion_matrix) => {
+        ecraft2learn.tensorflow_visualization_options = 
+            {width, height,
+             container_width: width+20, // need some room for scroll bars
+             yAxisDomain: [minimum_loss, maximum_loss],
+             display_graphs, display_layers_after_training, display_confusion_matrix};
+    };
     const train_model = (model_name, epochs, learning_rate, shuffle, validation_split,
                          success_callback, error_callback,
                          // following added after release so easiest to add them at the end
                          stop_if_no_progress_for_n_epochs) => {
         record_callbacks(success_callback, error_callback);
         const time_stamp = Date.now();
-        const tfvis_options = {display_graphs: true,
+        const tfvis_options = ecraft2learn.tensorflow_visualization_options ||
+                              {display_graphs: true,
                                display_confusion_matrix: true};
         request_of_support_window('tensorflow.js',
                                   'Loaded',
@@ -1513,6 +1522,15 @@ window.ecraft2learn =
         request_of_support_window('tensorflow.js',
                                   'Loaded',
                                   () => {
+                                      const tfvis_options = ecraft2learn.tensorflow_visualization_options ||
+                                                            {callbacks: ['onEpochEnd'],
+                                                             yAxisDomain: [0, 5],
+                                                             width: 480,
+                                                             container_width: 500,
+                                                             height: 400,
+                                                             display_graphs: true,
+                                                             display_layers: true,
+                                                             display_confusion_matrix: true}
                                       return {optimize_hyperparameters: true,
                                               model_name,
                                               number_of_experiments,
@@ -1525,13 +1543,7 @@ window.ecraft2learn =
                                               time_stamp,
                                               what_to_optimize: snap_to_javascript(what_to_optimize),
                                               scoring_weights: snap_to_javascript(scoring_weights),
-                                              tfvis_options: {callbacks: ['onEpochEnd'],
-                                                              yAxisDomain: [0, 5],
-                                                              width: 480,
-                                                              container_width: 500, // rationalise this
-                                                              height: 400,
-                                                              display_graphs: true,
-                                                              display_layers: true}};
+                                              tfvis_options};
                                   },
                                   (message) => {
                                       return message.optimize_hyperparameters_time_stamp === time_stamp;
@@ -3369,7 +3381,8 @@ xhr.send();
   create_tensorflow_model,
   send_data,
   train_model,
-  is_model_ready_for_prediction,
+  set_tensorflow_visualization_options,
+  is_model_ready_for_prediction, // kept for backwards compatibility
   predictions_from_model,
   load_tensorflow_model_from_URL,
   get_prediction_from_teachable_machine_image_or_pose_model,
