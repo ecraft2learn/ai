@@ -400,7 +400,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
     }
     const {class_names, batch_size, shuffle, epochs, validation_split, learning_rate, dropout_rate, batch_normalization, optimizer,
            layer_initializer, regularizer, seed, stop_if_no_progress_for_n_epochs, initialEpoch, slices_to_use,
-           testing_fraction, validation_fraction, fraction_kept, split_data_on_each_experiment, compute_confusion_matrices, training_number} 
+           testing_fraction, validation_fraction, fraction_kept, split_data_on_each_experiment, training_number} 
           = options;
     const number_of_training_epochs = epochs;
     const use_tf_datasets = datasets.use_tf_datasets;
@@ -574,7 +574,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
 //                   ys_test = tf.tensor(ys_test_array);
 //               }
 //           }
-          if (compute_confusion_matrices && xs_test && class_names) {
+          if ((options.add_confusion_to_csv || tfvis_options.display_confusion_matrix) && xs_test && class_names) {
               const test_loss_tensor = model.evaluate(xs_test, ys_test);
               test_loss = test_loss_tensor[0].dataSync()[0];
               test_accuracy = test_loss_tensor[1].dataSync()[0];

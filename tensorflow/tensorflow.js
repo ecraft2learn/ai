@@ -769,7 +769,6 @@ const optimize = async (xs, ys, validation_tensors, test_tensors, options) => {
                          validation_split,
                          shuffle,
                          class_names,
-                         compute_confusion_matrices: !!class_names,
                          training_number,
                          tfvis_options},
                         (results) => {
@@ -1216,7 +1215,6 @@ const train_with_parameters = async function (surface_name) {
                            validation_split: gui_state["Training"]["Validation split"],
                            shuffle: to_boolean(gui_state["Training"]["Shuffle data"]),
                            class_names: categories,
-                           compute_confusion_matrices: !!categories,
                            tfvis_options: {callbacks: ['onEpochEnd'],
                                            yAxisDomain,
                                            width,
@@ -1667,11 +1665,9 @@ const receive_message =
             const categories = get_data(model_name, 'categories');
             if (categories) {
                 options.tfvis_options.measure_accuracy = true;
-                options.tfvis_options.display_confusion_matrix = true;
+//                 options.tfvis_options.display_confusion_matrix = true;
                 options.class_names = categories;
-                options.compute_confusion_matrices = true;
             }
-            options.tfvis_options.display_graphs = true; // make this optional
             train_model(get_model(model_name),
                         get_data(model_name, 'datasets'),
                         options,                         
@@ -1883,7 +1879,6 @@ const receive_message =
             };
             record_callbacks(success_callback, error_callback, experiment_end_callback);             
             message.tfvis_options.measure_accuracy = !!categories;
-            message.tfvis_options.display_confusion_matrix = !!categories;
             const {learning_rate, stop_if_no_progress_for_n_epochs, validation_split, shuffle,
                    what_to_optimize, scoring_weights, number_of_samples, tfvis_options} = message;
             optimize_hyperparameters({model_name, number_of_experiments, epochs,
