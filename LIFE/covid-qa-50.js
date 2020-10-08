@@ -5,8 +5,7 @@
 
 "use strict";
 
-// Most paraphrases by Ken Kahn
-// a few from https://quillbot.com/
+// Paraphrases by Ken Kahn
 
 LIFE.sentences_and_answers = () => {
     let group_of_questions = [];
