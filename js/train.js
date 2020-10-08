@@ -546,7 +546,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                              validationData: xs_validation && [xs_validation, ys_validation],
                              validationSplit: validation_split,
                              shuffle,
-                             classWeight: tensorflow.get_data(model_name, 'class_weights'),
+                             classWeight: typeof tensorflow === 'object'? tensorflow.get_data(model_name, 'class_weights') : undefined,
                              callbacks: stats_callback};
       const after_fit_callback = (full_history) => {
 //           console.log(tf.memory());
