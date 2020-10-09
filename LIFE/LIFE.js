@@ -1061,7 +1061,8 @@ const speak = (message, callback) => {
 			           callback);
 };
 
-const speech_listening_callback = (question, ignore, confidence) => {
+const speech_listening_callback = (original_question, ignore, confidence) => {
+	let question = original_question.toLowerCase();
     const process_response = (response) => {
 	    const {best_indices, question_embedding, best_score} = response;
 		if (best_indices.length === 1) {
@@ -1069,11 +1070,17 @@ const speech_listening_callback = (question, ignore, confidence) => {
 			process_answer(answer);
 			logs.answered.push({question, answer, score: best_score});
 		} else if (is_covid_question(question)) {
-			speak("This app can't answer your question so passing it along to Google's Covid research explorer");
+			const trigger = 'ask research explorer';
+			const ask_explorer_index = question.indexOf(trigger);
+			if (ask_explorer_index >= 0) {
+				question = question.slice(ask_explorer_index+trigger.length)
+			} else {
+				speak("This app can't answer your question so passing it along to Google's Covid research explorer");
+			}
 			answer_to_question_container.hidden = false;
 		    answer_to_question.innerHTML = 
 		        '<iframe width=768 height=386 src="https://covid19-research-explorer.appspot.com/results?mq=' + question + '">';
-		    logs.passed_off_to_others.push({question});
+		    logs.passed_off_to_others.push({original_question});
 		} else {
 			sounds.more_info.play();
 			logs.unanswered.push({question});
@@ -1107,7 +1114,7 @@ const speech_listening_callback = (question, ignore, confidence) => {
 };
 
 const is_covid_question = (question) => {
-	const covid_words = ['covid', 'corona', 'virus', 'sars'];
+	const covid_words = ['covid', 'corona', 'virus', 'sars', 'ask research explorer'];
 	const question_lower_case = question.toLowerCase();
 	for (let i = 0; i < covid_words.length; i++) {
         if (question_lower_case.indexOf(covid_words[i]) >= 0) {
