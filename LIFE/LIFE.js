@@ -21,6 +21,13 @@ let loaded_model;
 
 let knn_classifier; // will be bound if 'knn' is a URL option
 
+const logs = {
+	unanswered: [],
+	answered: [],
+	passed_off_to_others: [],
+	too_low_speech_recognition_confidence: []
+};
+
 const cosine_similarity = (embedding1, embedding2) => {
 	const cosine_similarity_tensor = tf.dot(embedding1, tf.transpose(embedding2));
 	const similarity = cosine_similarity_tensor.arraySync()[0];
@@ -924,6 +931,9 @@ const previous_item_button_in_quiz = document.getElementById('previous-item-butt
 const previous_item_button_video = document.getElementById('previous-item-button-video');
 const next_item_button_video = document.getElementById('next-item-button-video');
 const more_info_button = document.getElementById('more-info-button');
+const quit_button = document.getElementById('quit-button');
+const final_message = document.getElementById('final-message');
+const congratulations = document.getElementById('congratulations');
 const scenario_interface = document.getElementById('scenario-interface');
 const scenario_info = document.getElementById('scenario-info');
 const doctor_image = document.getElementById('doctor-image'); // container of the following
@@ -983,6 +993,7 @@ const initialize_covid_scenario = () => {
                 window.speechSynthesis.cancel(); // should stop all utterances
             }
 	    });
+	quit_button.addEventListener('click', display_final_message);
 	blink_doctor_image();
 	if (initial_step_number === 0) { // URL parameter not used to start in the middle
 		opening_credits();
@@ -1030,6 +1041,7 @@ const opening_credits = () => {
 const leave_opening_credits = () => {
 	opening_credits_container.hidden = true;
 	scenario_interface.hidden = false;
+	show_element(quit_button);
 	run_covid_scenario();
 };
 
@@ -1051,16 +1063,20 @@ const speak = (message, callback) => {
 
 const speech_listening_callback = (question, ignore, confidence) => {
     const process_response = (response) => {
-	    const {best_indices, question_embedding} = response;
+	    const {best_indices, question_embedding, best_score} = response;
 		if (best_indices.length === 1) {
-			process_answer(answers[best_indices[0]]);
+			const answer = answers[best_indices[0]];
+			process_answer(answer);
+			logs.answered.push({question, answer, score: best_score});
 		} else if (is_covid_question(question)) {
 			speak("This app can't answer your question so passing it along to Google's Covid research explorer");
 			answer_to_question_container.hidden = false;
 		    answer_to_question.innerHTML = 
 		        '<iframe width=768 height=386 src="https://covid19-research-explorer.appspot.com/results?mq=' + question + '">';
+		    logs.passed_off_to_others.push({question});
 		} else {
 			sounds.more_info.play();
+			logs.unanswered.push({question});
 		}
 		question_embedding.dispose();
 		console.log(response); // for now
@@ -1069,14 +1085,18 @@ const speech_listening_callback = (question, ignore, confidence) => {
     	speak(plain_text(answer));
 		answer_to_question_container.hidden = false;
 		answer_to_question.innerHTML = answer;
-		console.log({answer});
+// 		console.log({answer});
     };
-    if (confidence >= .5 && user_action_has_been_performed) {
-    	const otherwise = () => {
-    		use_model_and_knn_to_respond_to_question(question, true).then(process_response);
-    	};
-    	try_context_sensitive_questions(question, scenario[step_number].context_sensitive_questions, process_answer, otherwise);
-   	}
+    if (user_action_has_been_performed) {
+        if (confidence >= .5) {
+			const otherwise = () => {
+				use_model_and_knn_to_respond_to_question(question, true).then(process_response);
+			};
+			try_context_sensitive_questions(question, scenario[step_number].context_sensitive_questions, process_answer, otherwise);
+		} else {
+			logs.too_low_speech_recognition_confidence.push({question, confidence});
+		}
+    }
    	show_element(last_thing_heard_feedback);
    	last_thing_heard_feedback.innerHTML = question + " (confidence: " + confidence.toFixed(2) + ")";
    	window.setTimeout(() => hide_element(last_thing_heard_feedback), 5000);
@@ -1246,11 +1266,48 @@ const run_covid_scenario = (current_submission_count) => {
 		video.src = step.video_URL;
         show_interface('video');
 	} else if (step_type === 'finished') {
-		display_response(step.text);
-		hide_element(next_item_button); 
+		display_final_message(true);
+// 		display_response(step.text);
+// 		hide_element(next_item_button); 
 	} else {
 		console.log('unknown step type', step_type);
 	}
+};
+
+const display_final_message = (finished) => {
+	if (finished === true) {
+		congratulations.hidden = false;
+	}
+	const new_line = "%0D%0A";
+	let email_body = new_line;
+	if (logs.unanswered.length > 0) {
+		email_body += new_line + "The following are questions the app was unable to answer:" + new_line;
+		logs.unanswered.forEach(({question}) => {
+			email_body += question + new_line;
+		});
+	}
+	if (logs.passed_off_to_others.length > 0) {
+		email_body += new_line + "The following are questions the app was unable to answer but passed off to covid19-research-explorer.appspot.com:" + new_line;
+		logs.passed_off_to_others.forEach(({question}) => {
+			email_body += question + new_line;
+		});
+	}
+	if (logs.answered.length > 0) {
+		email_body += new_line + "The following are questions the app answered. Please highlight any that were inappropriate or incorrect." + new_line;
+		logs.answered.forEach(({question, answer}) => {
+			email_body += "Question: " + question + new_line + "Answer: " + answer.replace(/\n/g, "%0D%0A") + new_line + new_line;
+		});
+	}
+	if (logs.too_low_speech_recognition_confidence.length > 0) {
+		email_body += new_line + "The following was heard but but with too low confidence to answer:" + new_line;
+		logs.too_low_speech_recognition_confidence.forEach(({question, confidence}) => {
+			email_body += question + " (confidence: " + confidence + ")" + new_line;
+		});
+	}
+	document.getElementById('email-link').href += email_body;
+	scenario_interface.hidden = true;
+	hide_element(quit_button);
+    final_message.hidden = false;
 };
 
 const next_item_button_action = (event) => {

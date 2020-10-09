@@ -137,8 +137,9 @@ p {
 <h2>We recommend you view this web app in landscape mode.</h2>
 </div>
 <div id="entire-page">
-<div id="last-thing-heard" class="speech-recognition-feedback" style:opacity=0>
+<div id="last-thing-heard" class="speech-recognition-feedback invisible">
 </div>
+<button id="quit-button" class="generic-button right-justify invisible">Quit</button>
 <div id="question answering interface" hidden>
 <p>
 <input id="question"
@@ -169,8 +170,19 @@ Loading. Please wait...
 </table>
 </div>
 
-<div id='opening-credits' hidden>
+<div id="opening-credits" hidden>
 <img id="opening-credits-image" src="./images/oxford-logo.png"></img>
+</div>
+
+<div id="final-message" hidden>
+<h2 id="congratulations" hidden>Congratulations! You finished the scenario.</h2>
+<h2>Thank you for running this app.</h2>
+<h3>If you are willing to help this research project then please click on this to 
+<a id="email-link" target="_blank" href="mailto:kenneth.kahn@education.ox.ac.uk?subject=Questions asked of the LIFE Covid app&body=Remove any personal or identifying information before sending. ">
+open an email message</a>
+and then click on the 'Send' button.
+Remove any personal or identifying information before sending since we cannot promise that this information will be kept secure.
+</h3>
 </div>
 
 <div id="scenario-interface" hidden>

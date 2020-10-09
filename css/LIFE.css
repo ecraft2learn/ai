@@ -345,3 +345,9 @@ padding: 20px;
   font-size: 1em;
   text-align: center;
 }
+.right-justify {
+  text-align: right;
+}
+.invisible {
+  opacity: 0;
+}
