@@ -11,7 +11,7 @@ window.LIFE =
 
 Math.seedrandom(42); // so can shuffle paraphrases and then set aside a subset for testing.
 
-const number_of_test_questions_per_group = 2;
+const number_of_test_questions_per_group = 1;
 
 let group_of_questions = [];
 let answers = [];
@@ -477,20 +477,31 @@ const setup = () => {
     	}
     };
     const training_data = (callback) => {
-    	let questions = [];
+    	let inputs = [];
     	let outputs = [];
-    	const number_of_groups = group_of_questions.length;
-    	group_of_questions.forEach((group, group_number) => {
-            group.forEach((question) => {
-            	questions.push(question);
-            	outputs.push(group_number);
-            });
+    	const group_tensors = Object.values(LIFE.knn_dataset);
+    	const number_of_groups = group_tensors.length;
+    	group_tensors.forEach((group_tensor, group_number) => {
+    		const group_embeddings = group_tensor.arraySync().slice(number_of_test_questions_per_group);
+    		group_embeddings.forEach((sentence_embedding) => {
+    			inputs.push(sentence_embedding);
+    			outputs.push(group_number);
+    		})    		
     	});
+    	const xs = tf.tensor(inputs);
     	const ys = tf.oneHot(tf.tensor1d(outputs, 'int32'), number_of_groups);
-    	get_embeddings(questions, (embeddings) => {
-			callback({xs: embeddings,
-					  ys: ys});
-    	});
+    	callback({xs, ys});
+//     	const number_of_groups = group_of_questions.length;
+//     	group_of_questions.forEach((group, group_number) => {
+//             group.forEach((question) => {
+//             	questions.push(question);
+//             	outputs.push(group_number);
+//             });
+//     	});	
+//     	get_embeddings(questions, (embeddings) => {
+// 			callback({xs: embeddings,
+// 					  ys: ys});
+//     	});
     };    	
 //     	let group_number = 0;
 //     	let question_number = 0;
@@ -579,7 +590,9 @@ const setup = () => {
         	dataset_javascript += "LIFE.knn_dataset = {\n";
         	const fill_dataset = (group_number) => {
         		if (group_number < group_of_questions.length) {
-					embedding_model.embed(group_of_questions[group_number]).then((embeddings) => {
+        			const questions = group_of_questions[group_number];
+        			tf.util.shuffle(questions); // shuffle now to simplify testing and training 
+					embedding_model.embed(questions).then((embeddings) => {
 						// 'embeddings' is a 2D tensor consisting of the 512-dimensional embeddings for each sentence.
 						dataset_javascript += group_number + ": tf.tensor(" + JSON.stringify(embeddings.arraySync()) + "),\n";
 						embeddings.dispose();
@@ -897,7 +910,7 @@ const initialize = () => {
     } else if (mode === 'create model') {
     	document.body.innerHTML = "Training started";
     }
-    if (mode === 'test' || mode === 'create model') {
+    if (mode === 'test') { //  || mode === 'create model'
     	split_into_train_and_test_datasets();
     }
 };
@@ -1315,6 +1328,7 @@ const display_final_message = (finished) => {
 	scenario_interface.hidden = true;
 	hide_element(quit_button);
     final_message.hidden = false;
+    ecraft2learn.stop_speech_recognition();
 };
 
 const next_item_button_action = (event) => {
@@ -1469,7 +1483,7 @@ const blink_doctor_image = () => {
 
 const split_into_train_and_test_datasets = () => {
 	group_of_questions.forEach((group, group_number) => {
-    	tf.util.shuffle(group);
+//     	tf.util.shuffle(group); // groups are now shuffled before saving
     	group_of_questions_test[group_number] = group.slice(0, number_of_test_questions_per_group);
     	group_of_questions[group_number] = group.slice(number_of_test_questions_per_group);
     });
