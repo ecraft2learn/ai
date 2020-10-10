@@ -2,7 +2,7 @@
 // caches files locally
 // based upon https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Offline_Service_workers
 
-const cache_name = "life-support-v7";
+const cache_name = "life-support-v8";
 
 const files_to_cache = [
 "/ai/LIFE/index.html",
@@ -20,7 +20,7 @@ const files_to_cache = [
 "/ai/LIFE/context_sensitive_covid_questions.js",
 "/ai/LIFE/algorithm.html",
 "/ai/LIFE/covid-scenario-1.js",
-"/ai/LIFE/knn-dataset-covid-qa-50.js",
+"/ai/LIFE/knn-dataset-covid-qa-cdc-africa.js",
 "/ai/js/universal-sentence-encoder/model.json",
 "/ai/js/universal-sentence-encoder/vocab.json",
 "/ai/LIFE/sounds/12 bad.WAV",
@@ -46,8 +46,8 @@ const files_to_cache = [
 "/ai/js/universal-sentence-encoder/group1-shard5of7",
 "/ai/js/universal-sentence-encoder/group1-shard6of7",
 "/ai/js/universal-sentence-encoder/group1-shard7of7",
-"/ai/LIFE/models/15-07-2020-covid.json",
-"/ai/LIFE/models/15-07-2020-covid.weights.bin",
+"/ai/LIFE/models/08-10-2020-covid.json",
+"/ai/LIFE/models/08-10-2020-covid.weights.bin",
 "/ai/LIFE/LIFE.webmanifest",
 ];
 
