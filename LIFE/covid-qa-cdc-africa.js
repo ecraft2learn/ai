@@ -48,7 +48,8 @@ nursing duties.`
 group_of_questions.push([
 `Where should triage be carried out in the health facility?`,
 `Where in a health facility should we carry out triage?`,
-`What is the best part of a hospital for carrying out triage?`
+`What is the best part of a hospital for carrying out triage?`,
+`Where should triage of patient take place in a healthcare facility?`
 ]);
 
 answers.push(
@@ -542,7 +543,10 @@ goggles may be necessary depending on the risk assessment. See
 Africa CDC PPE guidance for more info.`);
 
 group_of_questions.push([
-`How long can one wear the complete PPE for effective protection?`
+`How long can one wear the complete PPE for effective protection?`,
+`What is the maximum time we can wear complete PPE for good protection?`,
+`How long can one wear complete PPE and still be protected?`,
+`What is the longest time one can wear complete PPE and stay protected?`
 ]);
 
 answers.push(
@@ -550,8 +554,8 @@ answers.push(
 fitness of the healthcare worker, how heavy the workload is, and
 many others. The risk of heat illness is real and should be minimised
 by carefully planning the workload, supporting healthcare workers
-with food and clean water, and providing rest and recuperation
-areas.`);
+with food and clean water, and providing rest and recuperation areas.`
+);
 
 group_of_questions.push([
 `Are the Ebola PPE adequate for working in COVID-19 treatment centres?`,
@@ -988,7 +992,9 @@ vectors for COVID-19 transmission.`);
 
 group_of_questions.push([
 `What is the recommended way to cool isolation units?`, //  in the tropics
-`How should we keep isolation units cool?`
+`How should we keep isolation units cool?`,
+`What is recommended about keeping isolation wards cool?`,
+`What are good ways of cooling the isolation units?`
 ]);
 
 answers.push(
@@ -1109,7 +1115,10 @@ need to see a family member. They should clean their clothes and the
 areas where they stay properly.`);
 
 group_of_questions.push([
-`How often or at what stage should frontline workers be advised to go for test while caring for COVID-19 patients?`
+`How often or at what stage should frontline workers be advised to go for test while caring for COVID-19 patients?`,
+`When and how often should frontline workers be tested while caring for covid patients?`,
+`What is recommended about testing of frontline workers caring for COVID-19 patients?`,
+`When should an HCW get tested and how often?`
 ]);
 
 answers.push(
