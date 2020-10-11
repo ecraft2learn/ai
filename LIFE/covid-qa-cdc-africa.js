@@ -142,9 +142,9 @@ washed daily and dried properly either in the sun or with electric
 iron. If cared for correctly and worn appropriately, cloth masks can
 prevent up to 50% of droplets from touching the face. Do not touch
 the mask with unwashed hands and sanitize or wash your hands
-after touching it. See how to use and how not to use mask from
-Africa CDC and the WHO guideline on masks. Find more information
-on transmission here.`);
+after touching it. See <a href="https://africacdc.org/download/simple-instructions-on-how-to-use-a-face-mask/" target="_blank>how to use</a> and <a href="https://africacdc.org/download/simple-instructions-on-how-not-to-use-a-face-mask/" target="_blank">how not to use mask</a> from
+Africa CDC and the <a href="https://www.who.int/publications/i/item/advice-on-the-use-of-masks-in-the-community-during-home-care-and-in-healthcare-settings-in-the-context-of-the-novel-coronavirus-(2019-ncov)-outbreak" target="_blank">WHO guideline on masks</a>. Find more information
+on transmission <a href="https://africacdc.org/download/position-statement-on-transmission-of-sars-cov-2-by-pre-asymptomatic-and-asymptomatic-individuals/" target="_blank">here</a>.`);
 
 group_of_questions.push([
 `Can uninfected persons in the community use the surgical mask?`,
@@ -213,7 +213,7 @@ group_of_questions.push([
 answers.push(
 `Cloth masks should comprise at least three layers of linen and nonwoven
 material (like interlining fabric) in-between, but it should not
-make breathing difficult. Find out more here.
+make breathing difficult. Find out more <a href="https://www.who.int/publications/i/item/advice-on-the-use-of-masks-in-the-community-during-home-care-and-in-healthcare-settings-in-the-context-of-the-novel-coronavirus-(2019-ncov)-outbreak" target="_blank">here</a>.
 `);
 
 group_of_questions.push([
@@ -228,7 +228,7 @@ answers.push(
 blue or green side on the outside, irrespective of one’s health status.
 The mask should cover the mouth and nose and the metal strip
 should be at the top and moulded to fit the nose. See Africa CDC
-guidance How to wear and use a mask.`);
+guidance <a href="https://africacdc.org/download/simple-instructions-on-how-to-use-a-face-mask/" target="_blank>How to wear and use a mask.</a>`);
 
 group_of_questions.push([
 `How should a used face mask be disposed?`,
@@ -243,7 +243,7 @@ medical waste, if possible, with fire in a bag. It is recommended to
 cut them into two pieces each to prevent them from being re-used.
 Remember to clean the scissors or the blade used in cutting them
 with 70% alcohol or alcohol-based hand rub/sanitizer. See methods
-of medical waste disposal here.`);
+of medical waste disposal <a href="https://www.who.int/news-room/fact-sheets/detail/health-care-waste" target="_blank">here</a>.`);
 
 group_of_questions.push([
 `Is it advisable to use alcohol spray on N95 masks after use, or to wash and allow it to dry and reuse?`, // , after ensuring proper hand hygiene and storage
@@ -380,8 +380,9 @@ physical distancing at entrances or visiting areas. Reusable face
 shields and cotton surgical gowns may be decontaminated locally
 using the laundry and detergent or disinfectant. This reduces the
 need for constant resupply of expensive single use PPE. See the
-WHO rational use of PPE and Africa CDC strategies for managing
-acute shortage of PPE for further information.`);
+<a href="https://apps.who.int/iris/handle/10665/331215" target="_blank">WHO rational use of PPE</a> and
+<a href="https://africacdc.org/download/strategies-for-managing-acute-shortages-of-personal-protective-equipment-during-covid-19-pandemic/" target="_blank">Africa CDC strategies for managing
+acute shortage of PPE</a> for further information.`);
 
 group_of_questions.push([
 `Is it advisable to use an additional hood to cover the neck?`, // Staff are not comfortable using a gown because it exposes the neck, 
@@ -423,7 +424,7 @@ answers.push(
 smaller aerosols such as intubating or suctioning of patients, and
 swab collection. PPE recommended for use during such procedures
 are medical gloves, N95 masks, face shield or goggles, and gown or
-coverall. See Africa CDC PPE guidance for a detailed list of AGPs.`);
+coverall. See <a href"https://africacdc.org/download/covid-19-guidance-on-use-of-personal-protective-equipment-for-different-clinical-settings-and-activities/" target="_blank">Africa CDC PPE guidance for a detailed list of AGPs</a>.`);
 
 group_of_questions.push([
 `Can we use the same area for donning and doffing?`,
@@ -524,8 +525,8 @@ answers.push(
 `Cloth mask is enough if there is possibility of being exposed to
 infection. However, if the task in the community involves homebased
 care, swab taking or evacuation of a COVID-19 positive case,
-full PPE as used in HCFs is recommended. See Africa CDC guidance
-note for PPE for more info.`);
+full PPE as used in HCFs is recommended.
+See <a href="https://africacdc.org/download/covid-19-guidance-on-use-of-personal-protective-equipment-for-different-clinical-settings-and-activities/" target="_blank">Africa CDC guidance note for PPE for more info</a>.`);
 
 group_of_questions.push([
 `What is the minimum PPE that personnel at the triage area should have?`,
@@ -540,7 +541,7 @@ hygiene and surgical mask should be enough if practised with
 physical distancing. When there is need to conduct more testing and
 screening with more patients, the use of gown, gloves and possibly
 goggles may be necessary depending on the risk assessment. See
-Africa CDC PPE guidance for more info.`);
+<a href="https://africacdc.org/download/covid-19-guidance-on-use-of-personal-protective-equipment-for-different-clinical-settings-and-activities/" target="_blank">Africa CDC PPE guidance for more info</a>.`);
 
 group_of_questions.push([
 `How long can one wear the complete PPE for effective protection?`,
@@ -660,9 +661,9 @@ answers.push(
 `Clean the healthcare facility every day and disinfect high-risk areas
 once a day or more often than once as the case may be. Specific
 areas within health facilities should be cleaned more or less
-frequently according to the risk they pose. Please see the WHO
-guidelines on cleaning and disinfection, and Africa CDC guidance
-on environmental decontamination for more precise information.`);
+frequently according to the risk they pose. Please see the <a href="(https://apps.who.int/iris/bitstream/handle/10665/331695/WHO-2019-nCov-IPC_PPE_use-2020.3-eng.pdf" target="_blank">WHO
+guidelines on cleaning and disinfection</a>, and <a href="https://africacdc.org/download/guidance-on-environmental-decontamination/" target="_blank">Africa CDC guidance
+on environmental decontamination</a> for more precise information.`);
 
 group_of_questions.push([
 `How can we disinfect door handles and wall tiles within the hospital setting?`,
@@ -675,8 +676,9 @@ answers.push(
 `Door handles are high touch surfaces and should be cleaned
 and disinfected regularly. Tiles and walls should also be cleaned
 according to a regular programme of environmental hygiene.
-Please see the WHO guidelines on cleaning and disinfection, and
-Africa CDC guidance on environmental decontamination for further
+Please see the <a href="(https://apps.who.int/iris/bitstream/handle/10665/331846/WHO-2019-nCoV-IPC_WASH-2020.3-eng.pdf?ua=1" target="_blank">WHO guidelines on cleaning and disinfection</a>, and
+<a href="https://africacdc.org/download/guidance-on-environmental-decontamination/" target="_blank">
+Africa CDC guidance on environmental decontamination</a>0.1 for further
 information.`);
 
 group_of_questions.push([
@@ -727,8 +729,8 @@ answers.push(
 circumstances. For high touch surfaces and healthcare settings this
 may be followed by the use of a disinfectant such as Dettol, GQPlus,
 Cleanline, etc. Chlorine solution (0.1%) can also be used. Please
-see Africa CDC guidance on environmental decontamination for
-more information.`);
+see <a href="https://africacdc.org/download/guidance-on-environmental-decontamination/" target="_blank">Africa CDC guidance on environmental decontamination for
+more information</a>.`);
 
 group_of_questions.push([
 `What concentration of sodium hypochlorite is recommended for hospital use with the current pandemic?`,
@@ -741,7 +743,7 @@ answers.push(
 `Chlorine high test hypochlorite or chlorine bleach solution should
 be diluted to 0.1% concentration for surface disinfection and 0.05%
 for soaking clean laundry if needed. Solution of 0.5% should only be
-used for body fluid spills (as per usual recommendations).`);
+used for body fluid spills (<a href="https://africacdc.org/download/guidance-on-environmental-decontamination/" target="_blank">as per usual recommendations</a>).`);
 
 group_of_questions.push([
 `How do we clean computer keyboards?`, //  if keyboard covers are not available
@@ -853,7 +855,7 @@ group_of_questions.push([
 
 answers.push(
 `Guidelines for waste management of medical waste could be found
-here: https://www.who.int/news-room/fact-sheets/detail/healthcare-waste.`);
+<a href="https://www.who.int/news-room/fact-sheets/detail/healthcare-waste" target="_blank">here</a>.`);
 
 group_of_questions.push([
 `What about chlorine handwashing?`,
@@ -869,9 +871,8 @@ products is available. The chlorine concentration for hand rinsing
 is 0.05% and this should be prepared fresh every day. The chlorine
 concentration diminishes quickly if the water used is not clear, if it is
 kept without a lid, or if exposed to sunlight.
-Instructions for making the solution can be found here https://
-www.cdc.gov/coronavirus/2019-ncov/global-covid-19/makehandwashing-
-solution.html`);
+Instructions for making the solution can be found <a href="https://www.cdc.gov/coronavirus/2019-ncov/global-covid-19/makehandwashing-
+solution.html" target="_blank">here</a>.`);
 
 group_of_questions.push([
 `What is the recommended disinfectant for terminal cleaning?`,
@@ -1033,8 +1034,8 @@ in quarantine may have other diseases than COVID-19. However,
 toilets can be shared if necessary but there must be hand hygiene
 facility and the toilets should be cleaned frequently. Patients should
 be educated on how to protect themselves against infection within
-the area. WHO and UNICEF jointly recommend one toilet for a
-maximum of 20 patients.`);
+the area. <a href="https://wash.unhcr.org/download/covid-19-wash-technical-brief/" target="_blank">WHO and UNICEF jointly recommend one toilet for a
+maximum of 20 patients.</a>`);
 
 group_of_questions.push([
 `Should visitors be allowed to visit the isolation facilities?`,
@@ -1070,7 +1071,8 @@ period they are in the bus or taxi. Hand hygiene and cleaning of
 face mask must be done afterwards and the passengers should
 avoid touching their faces. Clear public health messaging should
 be created for people who use the public transport. Please refer to
-Africa CDC guidance for transportation sector.`);
+<a href="https://africacdc.org/download/covid-19-guidance-for-transportation-sector/" target="_blank">
+Africa CDC guidance for transportation sector</a>.`);
 
 group_of_questions.push([
 `What is the recommendation for homecare for confirmed mild cases of COVID-19?`, // Is this effective in our setting?
@@ -1234,7 +1236,7 @@ another person. Most droplets are heavy and will fall to the ground
 within 1 meter, but smaller droplets can travel further, up to 2 meter. Very few
 droplets can travel even further than that, they are very few that the
 risk of transmission is very small. It is important to maintain physical
-distance of 1 m as a minimum. In some areas it is possible to maintain
+distance of 1 meter as a minimum. In some areas it is possible to maintain
 physical distance of 2 meter and a more precautionary approach is
 advised. It is important to comply with the recommendations in
 your area as this will take into consideration your specific local
