@@ -80,7 +80,7 @@ group_of_questions.push([
 `What is the risk of getting infected through the eyes?`, // as little or no emphasis is placed on the eye cover?`,
 `Is the risk high of getting infected through the eyes?`,
 `Is infection through one's eyes a high risk?`,
-'Are eyes a high risk becoming infected?'
+`Are eyes a high risk becoming infected?`
 ]);
 
 answers.push(
@@ -95,7 +95,6 @@ group_of_questions.push([
 `Are eye shields essential?`,
 `When must we use eye shields?`,
 `Is the use of eye shi essential?`
-
 ]);
 
 answers.push(
@@ -1321,6 +1320,12 @@ who have been exposed to an infectious disease such as COVID-19
 to see if they become sick. These people may have been exposed
 to an infectious disease without knowing it, or they may have the
 disease but do not show symptoms as at the time.`);
+
+Math.seedrandom(259); // so the paraphrases are shuffled in exactly the same way each time this is run
+
+group_of_questions.forEach((group) => {
+    tf.util.shuffle(group);
+});
 
 return {group_of_questions, answers};
 
