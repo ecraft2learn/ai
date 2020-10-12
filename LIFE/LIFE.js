@@ -217,9 +217,16 @@ const setup = () => {
     	});
     	return [best_index, second_best_index];
     };
-    const write_good_and_bad = (question, response, good, group_number, question_number, message) => {
+    const write_good_and_bad = (question, response, good, group_number, question_number, message, best_indices) => {
     	document.writeln(question + "<br>");
     	document.writeln("<b>" + message + "</b><br>");
+    	best_indices.forEach((wrong_index, i) => {
+    		document.writeln("Wrong questions #" + i + ":<br>");
+    		group_of_questions[wrong_index].forEach(question => {
+    			document.writeln("<blockquote>" + question + "</blockquote>");
+    		});
+    		document.writeln("<br>");
+    	});
     	if (typeof response === 'number') {
     		document.writeln("Bad answer: " + answers[response] + "<br>");
 //     	} else if (typeof response === 'object') {
@@ -291,7 +298,7 @@ const setup = () => {
             		response.correct_index = group_number;
             		if (knn_predictions) {
             			const add_problem_to_page = (message) => {
-            			    write_good_and_bad(question, response, answers[group_number], group_number, question_number, message);
+            			    write_good_and_bad(question, response, answers[group_number], group_number, question_number, message, best_indices);
             			};
 						total++;
 						if (best_indices.length === 0) {
@@ -303,7 +310,7 @@ const setup = () => {
 								singleton_response_right++;
 							} else {
 								singleton_response_wrong++;
-								add_problem_to_page('singleton wrong: ' + best_indices[0] + "!= " + group_number);
+								add_problem_to_page('singleton wrong: ' + best_indices[0] + " != " + group_number);
 								console.log("singleton wrong", response);
 								if (second_best_answer_index === group_number) {
 									// right but below score threshold
@@ -321,7 +328,7 @@ const setup = () => {
 								second_of_many_responses_right++;
 							} else {
 								many_responses_wrong++;
-								add_problem_to_page('top two responses wrong: ' + best_indices[0] + " and" + best_indices[1] + "!= " + group_number);
+								add_problem_to_page('top two responses wrong: ' + best_indices[0] + " and " + best_indices[1] + " != " + group_number);
 								console.log("top two responses wrong", response);
 							}
 						}
@@ -477,19 +484,18 @@ const setup = () => {
     	}
     };
     const training_data = (callback) => {
-    	let inputs = [];
-    	let outputs = [];
-    	const group_tensors = Object.values(LIFE.knn_dataset);
+    	let inputs_and_outputs = [];
+    	const group_tensors = Object.values(LIFE.knn_dataset);   	
     	const number_of_groups = group_tensors.length;
     	group_tensors.forEach((group_tensor, group_number) => {
     		const group_embeddings = group_tensor.arraySync().slice(number_of_test_questions_per_group);
     		group_embeddings.forEach((sentence_embedding) => {
-    			inputs.push(sentence_embedding);
-    			outputs.push(group_number);
+    			inputs_and_outputs.push([sentence_embedding, group_number]);
     		})    		
     	});
-    	const xs = tf.tensor(inputs);
-    	const ys = tf.oneHot(tf.tensor1d(outputs, 'int32'), number_of_groups);
+    	tf.util.shuffle(inputs_and_outputs);
+    	const xs = tf.tensor(inputs_and_outputs.map(input_and_output => input_and_output[0]));
+    	const ys = tf.oneHot(tf.tensor1d(inputs_and_outputs.map(input_and_output => input_and_output[1]), 'int32'), number_of_groups);
     	callback({xs, ys});
 //     	const number_of_groups = group_of_questions.length;
 //     	group_of_questions.forEach((group, group_number) => {
@@ -590,8 +596,7 @@ const setup = () => {
         	dataset_javascript += "LIFE.knn_dataset = {\n";
         	const fill_dataset = (group_number) => {
         		if (group_number < group_of_questions.length) {
-        			const questions = group_of_questions[group_number];
-        			tf.util.shuffle(questions); // shuffle now to simplify testing and training 
+        			const questions = group_of_questions[group_number]; 
 					embedding_model.embed(questions).then((embeddings) => {
 						// 'embeddings' is a 2D tensor consisting of the 512-dimensional embeddings for each sentence.
 						dataset_javascript += group_number + ": tf.tensor(" + JSON.stringify(embeddings.arraySync()) + "),\n";
