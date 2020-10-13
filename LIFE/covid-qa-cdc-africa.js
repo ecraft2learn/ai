@@ -834,10 +834,10 @@ disinfectant is not ideal for sensitive medical equipment because it
 is corrosive and may irritate patients’ skin.`);
 
 group_of_questions.push([
-`Is there any need for special cleaning of bathrooms or rest rooms?`,
+`Is there any need for special cleaning of bathrooms or restrooms?`,
 `Do bathrooms need any special cleaning?`,
-`What is recommended for cleaning rest rooms?`,
-`Is there anything special we should do to clean rest rooms?`
+`What is recommended for cleaning restrooms?`,
+`Is there anything special we should do to clean restrooms?`
 ]);
 
 answers.push(
@@ -915,7 +915,7 @@ group_of_questions.push([
 `How effective is fumigating surfaces like beds and mattresses?`, // in the control of COVID-19
 `Should we fumigate beds and mattresses?`,
 `Is fumigating beds recommended?`,
-`How should be disinfect mattresses?`
+`How should we disinfect mattresses?`
 ]);
 
 answers.push(
