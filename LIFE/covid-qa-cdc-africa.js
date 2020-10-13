@@ -1009,7 +1009,7 @@ lower area of the room may be a better option.`);
 group_of_questions.push([
 `Is there a need for HEPA filter in isolation rooms, triage areas, swapping rooms and care areas of COVID-19 patients?`,
 `Should we use HEPA filters in treatment centres?`,
-`Are HEPA filters recommended is isolation areas?`,
+`Are HEPA filters recommended in isolation areas?`,
 `Should triage areas use HEPA filters?`
 ]);
 
