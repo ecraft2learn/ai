@@ -38,7 +38,7 @@ const cosine_similarity = (embedding1, embedding2) => {
 let model_confidence_threshold = .25;
 let model_confidence_threshold_if_knn_rejected = .6;
 let similarity_threshold = .75;
-let similarity_minimum = .7;
+let similarity_minimum = .6;
 let similarity_only_threshold = .9;
 let similarity_difference_threshold = .1;
 
@@ -88,7 +88,7 @@ const use_model_and_knn_to_respond_to_question = async (the_question, answer_exp
 						// see if it is a close race and eliminate those not close 
 						for (let i = 1; i < indices_passing_thresholds.length; i++) {
 							if (indices_passing_thresholds[i-1][1]-indices_passing_thresholds[i][1] < similarity_difference_threshold) {
-								combined_result.best_indices.push(indices_passing_thresholds[i-1][0]);
+								combined_result.best_indices.push(indices_passing_thresholds[i][0]);
 							}
 						}
 					}		 			
@@ -301,16 +301,19 @@ const setup = () => {
             			    write_good_and_bad(question, response, answers[group_number], group_number, question_number, message, best_indices);
             			};
 						total++;
+						const more_info = '<br>Best score = ' + best_score.toFixed(4) + "; best score index = " + best_answer_index + 
+							              "; second best score = " + second_best_score.toFixed(4) + "; second best index = " + second_best_answer_index +
+							              ' ;Correct answer = ' + group_number;
 						if (best_indices.length === 0) {
 							no_answer++;
-							add_problem_to_page('no answer');
+							add_problem_to_page('No answer. ' + more_info);
 							console.log("no answer", response);
 						} else if (best_indices.length === 1) {
 							if (best_indices[0] === group_number) {
 								singleton_response_right++;
 							} else {
 								singleton_response_wrong++;
-								add_problem_to_page('singleton wrong: ' + best_indices[0] + " != " + group_number);
+								add_problem_to_page('singleton wrong: ' + best_indices[0] + " != " + group_number + more_info);
 								console.log("singleton wrong", response);
 								if (second_best_answer_index === group_number) {
 									// right but below score threshold
@@ -328,7 +331,7 @@ const setup = () => {
 								second_of_many_responses_right++;
 							} else {
 								many_responses_wrong++;
-								add_problem_to_page('top two responses wrong: ' + best_indices[0] + " and " + best_indices[1] + " != " + group_number);
+								add_problem_to_page('top two responses wrong: ' + best_indices[0] + " and " + best_indices[1] + " != " + group_number + more_info);
 								console.log("top two responses wrong", response);
 							}
 						}
@@ -646,8 +649,7 @@ const setup = () => {
 					document.getElementById('experiment-number').innerHTML =
 						+document.getElementById('experiment-number').innerHTML + 1;
 				}
-				load_local_or_remote_scripts(...training_scripts,
-				                             "../js/hyperparameters.js",
+				load_local_or_remote_scripts([...training_scripts, "../js/hyperparameters.js"],
 											 undefined,
 											 () => {
 												setup_data(search);
@@ -742,6 +744,9 @@ const logging_interface = () => {
 
 let question_area; // there may not be one
 
+const keep_listening = true; // if true speech recognition should stay on until explictly stopped but never fully debugged
+// strange that onend events repeatedly triggered
+
 const setup_interface =
 	() => {
         question_area = document.getElementById('question');
@@ -759,23 +764,18 @@ const setup_interface =
         	if (answer) {
         		answer_area.innerHTML = answer;
         		if (speech_recognition_on) {
-        			let voices = window.speechSynthesis.getVoices();
-        			ecraft2learn.speak(answer_area.textContent);
+        			let voices = window.speechSynthesis.getVoices(); // does this cause the voices to be pre-loaded?
+        			speak(answer_area.textContent);
         		}          
         	} else {
         		answer_area.innerHTML = "<b style='color:red;'>Sorry I can't answer <i>\"" + question + "\"</i></b>";
         		if (speech_recognition_on) {
         			if (first_cant_answer) {
         				first_cant_answer = false;
-        				ecraft2learn.speak("Sorry I can't answer '" + question + "'. Next time I can't answer you will only hear the following sound.", 
-        								   undefined,
-        								   undefined, 
-        								   ecraft2learn.get_voice_number_matching(["uk", "female"], 0),
-        								   undefined,
-        								   undefined,
-        								   () => {
-        									   sound_effect.play(); 
-        								   });
+        				speak("Sorry I can't answer '" + question + "'. Next time I can't answer you will only hear the following sound.", 
+						      () => {
+						          sound_effect.play(); 
+        					  });
         			} else {
         				sound_effect.play();
         			}
@@ -817,12 +817,12 @@ const setup_interface =
     	question_area.value = spoken_text;
     	answer_question(spoken_text);
     	// and start listening to the next question
-    	ecraft2learn.start_speech_recognition(recognition_callback, handle_recognition_error);
+//     	ecraft2learn.start_speech_recognition_v2(recognition_callback, {error_callback: handle_recognition_error, keep_listening});
     };
     const handle_recognition_error = (error) => {
     	if (error === "no-speech") {
     		// keep listening
-    		ecraft2learn.start_speech_recognition(recognition_callback, handle_recognition_error);
+    		ecraft2learn.start_speech_recognition_v2(recognition_callback, {error_callback: handle_recognition_error, keep_listening});
     	} else {
     		toggle_speech_recognition_label.innerHTML = 
     			"Type your questions because speech recognition causes this error: " 
@@ -837,7 +837,7 @@ const setup_interface =
     	} else {
     		speech_recognition_on = true;
     		toggle_speech_recognition_label.innerHTML = turn_off_speech_recognition_label;
-    		ecraft2learn.start_speech_recognition(recognition_callback, handle_recognition_error);                     
+    		ecraft2learn.start_speech_recognition_v2(recognition_callback, {error_callback: handle_recognition_error, keep_listening});                    
     	}
     };
     toggle_speech_recognition.addEventListener('click', toggle_speech);
@@ -989,10 +989,23 @@ const user_action_performed = () => {
 };
 
 const notify_speech_ready = () => {
-	speak("Ready to listen to your questions. You'll hear this noise if I can't answer the question.",
-          () => {
-              sounds.more_info.play();
-    	  });
+	console.log('notify_speech_ready');
+	window.speechSynthesis.cancel(); // fixes a mysterious problem where the speaking is in progress forever without making a sounds
+	let callback = () => {
+		sounds.more_info.play();
+		if (!document.hidden) {
+			ecraft2learn.start_speech_recognition_v2(speech_listening_callback, {error_callback: handle_recognition_error, keep_listening}); 
+		}
+	};
+	const run_callback_only_once = () => {
+		if (callback) {
+            callback();
+            callback = undefined;
+        }
+	};
+	speak("Ready to listen to your questions. You'll hear this noise if I can't answer the question.", run_callback_only_once);
+	// following works around a bug where the speech never ends (though nothing is heard)
+    setTimeout(run_callback_only_once, 3000);
 };
 
 const initialize_covid_scenario = () => {
@@ -1020,13 +1033,10 @@ const initialize_covid_scenario = () => {
 	}
     if (listen_and_speak) {
     	load_question_answering_model(() => {
-    		if (!document.hidden) {
-    			ecraft2learn.start_speech_recognition(speech_listening_callback, handle_recognition_error);
-    		}
     		// if tab is minimized then recognition is stopped, start listening again when no longer hidden
 			window.addEventListener('visibilitychange', () => {
 				if (!document.hidden) {
-					ecraft2learn.start_speech_recognition(speech_listening_callback, handle_recognition_error);
+					ecraft2learn.start_speech_recognition_v2(speech_listening_callback, {error_callback: handle_recognition_error, keep_listening});
 				}
 			});
     		if (user_action_has_been_performed) {
@@ -1125,10 +1135,10 @@ const speech_listening_callback = (original_question, ignore, confidence) => {
    	show_element(last_thing_heard_feedback);
    	last_thing_heard_feedback.innerHTML = question + " (confidence: " + confidence.toFixed(2) + ")";
    	window.setTimeout(() => hide_element(last_thing_heard_feedback), 5000);
-   	if (!document.hidden) {
-		// and start listening to the next question
-		ecraft2learn.start_speech_recognition(speech_listening_callback, handle_recognition_error);  		
-   	}
+//    	if (!document.hidden) {
+// 		// and start listening to the next question
+// 		ecraft2learn.start_speech_recognition_v2(speech_listening_callback, {error_callback: handle_recognition_error, keep_listening});  		
+//    	}
 };
 
 const is_covid_question = (question) => {
@@ -1143,10 +1153,10 @@ const is_covid_question = (question) => {
 };
 
 const handle_recognition_error = (error) => {
-	if (error === "no-speech" || error === "No speech heard for a while.") {
+	if (error === "no-speech" || error === "No speech heard for a while." || error === 'aborted') {
 		if (!document.hidden) {
 			// keep listening
-			ecraft2learn.start_speech_recognition(speech_listening_callback, handle_recognition_error);
+			ecraft2learn.start_speech_recognition_v2(speech_listening_callback, {error_callback: handle_recognition_error, keep_listening});
 		}
     } else {
     	console.log("Recognition error: ", error);

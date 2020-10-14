@@ -650,6 +650,9 @@ window.ecraft2learn =
             ecraft2learn.speaking_ongoing = false;
             invoke_callback(finished_callback, message);
         };
+        utterance.onerror = (speech_error) => {
+            console.log({speech_error});
+        };
         ecraft2learn.speaking_ongoing = true;
         window.speechSynthesis.speak(utterance);
     };
@@ -2168,7 +2171,7 @@ xhr.send();
    
     var image_recognitions = {}; // record of most recent results from calls to take_picture_and_analyse
 
-    var debugging = false; // if true console will fill with information
+    var debugging = true; // if true console will fill with information
 
     let loading_tensor_flow = false;
 
@@ -2234,16 +2237,35 @@ xhr.send();
           };
           xhr.send();
       },
-
-      start_speech_recognition: function (final_spoken_callback, 
-                                          // following are optional
-                                          error_callback, 
-                                          interim_spoken_callback, 
-                                          language, 
-                                          max_alternatives,
-                                          all_results_callback,
-                                          all_confidence_values_callback,
-                                          grammar) {
+      start_speech_recognition_v2: (final_spoken_callback, options) => {
+          const {error_callback, 
+                 interim_spoken_callback,
+                 language,
+                 max_alternatives,
+                 all_results_callback,
+                 all_confidence_values_callback,
+                 grammar,
+                 keep_listening} = options;
+           ecraft2learn.start_speech_recognition(final_spoken_callback,
+                                                 error_callback, 
+                                                 interim_spoken_callback, 
+                                                 language,
+                                                 max_alternatives,
+                                                 all_results_callback,
+                                                 all_confidence_values_callback,
+                                                 grammar,
+                                                 keep_listening);
+      },
+      start_speech_recognition: (final_spoken_callback, 
+                                 // following are optional
+                                 error_callback, 
+                                 interim_spoken_callback, 
+                                 language,
+                                 max_alternatives,
+                                 all_results_callback,
+                                 all_confidence_values_callback,
+                                 grammar,
+                                 keep_listening) => {
           // final_spoken_callback and interim_spoken_callback are called
           // with the text recognised by the browser's speech recognition capability
           // interim_spoken_callback 
@@ -2262,24 +2284,24 @@ xhr.send();
               inform("This browser does not support speech recognition",
                      "You could use Chrome or you can use Microsoft's speech recognition service.\n" +
                      "Go ahead and use the Microsoft service? (It requires an API key.)",
-                      function () {
-                           ecraft2learn.start_microsoft_speech_recognition(interim_spoken_callback, final_spoken_callback, error_callback);
-                      });                  
+                     function () {
+                          ecraft2learn.start_microsoft_speech_recognition(interim_spoken_callback, final_spoken_callback, error_callback);
+                     });                  
               return false;
           }
-          if (window.speechSynthesis.speaking || ecraft2learn.speaking_ongoing || ecraft2learn.speech_recognition) { 
+          const restart_speech_recognition = () => {
+              ecraft2learn.start_speech_recognition(final_spoken_callback, error_callback, interim_spoken_callback, language, 
+                                                    max_alternatives, all_results_callback, all_confidence_values_callback,
+                                                    grammar, keep_listening);
+          };
+          if (window.speechSynthesis.speaking || ecraft2learn.speaking_ongoing || (!keep_listening && ecraft2learn.speech_recognition)) { 
               // don't listen while speaking or while listening is still in progress
               // added ecraft2learn.speaking_ongoing since window.speechSynthesis.speaking wasn't sufficient on some systems
               // in particular when an external speaker is involved
               if (debugging) {
                   console.log("Delaying start due to " + (window.speechSynthesis.speaking ? "speaking" : "listen in progress"));
               }
-              setTimeout(function () {
-                             ecraft2learn.start_speech_recognition(final_spoken_callback, error_callback, interim_spoken_callback, language, 
-                                                                   max_alternatives, all_results_callback, all_confidence_values_callback,
-                                                                   grammar); 
-                         },
-                         100); // try again in a tenth of a second
+              setTimeout(restart_speech_recognition, 100); // try again in a tenth of a second
               return;
           }
           record_callbacks(final_spoken_callback, error_callback, interim_spoken_callback, all_results_callback, all_confidence_values_callback);
@@ -2314,7 +2336,7 @@ xhr.send();
           let handle_result = function (event) {
               let spoken = event.results[event.resultIndex][0].transcript; // first result
               let final = event.results[event.resultIndex].isFinal;
-              if (final) {
+              if (final && !keep_listening) {
                   // unless callback turns it back on
                   ecraft2learn.stop_speech_recognition();
               }
@@ -2357,7 +2379,7 @@ xhr.send();
           const handle_error = function (event) {
               // pass original message along in case a program wants to respond to each one.
               invoke_callback(error_callback, improve_error_message(event.error), event.error);
-              ecraft2learn.stop_speech_recognition();
+//               ecraft2learn.stop_speech_recognition();
               if (debugging) {
                   console.log("Recognition error: " + event.error);
               }
@@ -2376,6 +2398,7 @@ xhr.send();
               speech_recognition = (typeof SpeechRecognition === 'undefined') ?
                                    new webkitSpeechRecognition() :
                                    new SpeechRecognition();
+              speech_recognition.continuous = keep_listening;
               // following prevents speech_recognition from being garbage collected before its listeners run
               // it is also used to prevent multiple speech recognitions to occur simultaneously
               ecraft2learn.speech_recognition = speech_recognition;
@@ -2412,13 +2435,17 @@ xhr.send();
                   if (debugging) {
                       console.log("On end triggered.");
                   }
-                  if (ecraft2learn.speech_recognition) {
-                      if (debugging) {
-                          console.log("On end but no result or error so stopping then restarting.");
+                  if (ecraft2learn.speech_recognition) { // hasn't been turned off
+                      if (keep_listening) {
+                          restart_speech_recognition();
+                      } else {
+                          if (debugging) {
+                              console.log("On end but no result or error so stopping then restarting.");
+                          }
+                          ecraft2learn.stop_speech_recognition();
+                          create_speech_recognition_object();
+                          restart();
                       }
-                      ecraft2learn.stop_speech_recognition();
-                      create_speech_recognition_object();
-                      restart();
                   }                
               };
           };
