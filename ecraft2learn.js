@@ -2171,7 +2171,7 @@ xhr.send();
    
     var image_recognitions = {}; // record of most recent results from calls to take_picture_and_analyse
 
-    var debugging = true; // if true console will fill with information
+    var debugging = false; // if true console will fill with information
 
     let loading_tensor_flow = false;
 
