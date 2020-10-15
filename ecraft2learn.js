@@ -2437,7 +2437,7 @@ xhr.send();
                   }
                   if (ecraft2learn.speech_recognition) { // hasn't been turned off
                       if (keep_listening) {
-                          restart_speech_recognition();
+                          speech_recognition.start();
                       } else {
                           if (debugging) {
                               console.log("On end but no result or error so stopping then restarting.");

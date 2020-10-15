@@ -989,7 +989,6 @@ const user_action_performed = () => {
 };
 
 const notify_speech_ready = () => {
-	console.log('notify_speech_ready');
 	window.speechSynthesis.cancel(); // fixes a mysterious problem where the speaking is in progress forever without making a sounds
 	let callback = () => {
 		sounds.more_info.play();
