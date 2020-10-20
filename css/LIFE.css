@@ -299,6 +299,7 @@ padding: 20px;
 }
 .center {
   text-align: center;
+  margin: 0 auto;
 }
 .in-box {
   border: black solid;
