@@ -1106,7 +1106,8 @@ const speech_listening_callback = (original_question, ignore, confidence) => {
 			}
 			answer_to_question_container.hidden = false;
 		    answer_to_question.innerHTML = 
-		        '<iframe width=768 height=386 src="https://covid19-research-explorer.appspot.com/results?mq=' + question + '">';
+		        '<div><p>Exercise scepticism when perusing these results since many papers are pre-prints or report on preliminary or tentative findings.</p>' +
+		        '<iframe width=768 height=386 src="https://covid19-research-explorer.appspot.com/results?mq=' + question + '"></div>';
 		    logs.passed_off_to_others.push({original_question});
 		} else {
 			sounds.more_info.play();
@@ -1172,6 +1173,7 @@ const try_context_sensitive_questions = (question, questions_and_answers, proces
 		embedding_model.embed([question]).then((question_embedding) => {
 			const similarity = cosine_similarity(question_embedding, embeddings);
 			if (similarity > sensitive_question_threshold) {
+				logs.answered.push({question, answer, score: similarity, context_sensitive: true});
 				process_answer(answer);
 			} else {
 				try_context_sensitive_questions(question, questions_and_answers.slice(1), process_answer, callback_if_no_answer);
@@ -1309,6 +1311,7 @@ const run_covid_scenario = (current_submission_count) => {
 };
 
 const display_final_message = (finished) => {
+	answer_to_question_container.hidden = true;
 	if (finished === true) {
 		congratulations.hidden = false;
 	}
@@ -1322,8 +1325,8 @@ const display_final_message = (finished) => {
 	}
 	if (logs.passed_off_to_others.length > 0) {
 		email_body += new_line + "The following are questions the app was unable to answer but passed off to covid19-research-explorer.appspot.com:" + new_line;
-		logs.passed_off_to_others.forEach(({question}) => {
-			email_body += question + new_line;
+		logs.passed_off_to_others.forEach(({original_question}) => {
+			email_body += original_question + new_line;
 		});
 	}
 	if (logs.answered.length > 0) {
