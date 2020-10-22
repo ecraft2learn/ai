@@ -993,6 +993,9 @@ const notify_speech_ready = () => {
 	let callback = () => {
 		sounds.more_info.play();
 		if (!document.hidden) {
+			window.speechSynthesis.cancel();
+			ecraft2learn.speaking_ongoing = false;
+			console.log("starting speech recognition");
 			ecraft2learn.start_speech_recognition_v2(speech_listening_callback, {error_callback: handle_recognition_error, keep_listening}); 
 		}
 	};
@@ -1004,7 +1007,7 @@ const notify_speech_ready = () => {
 	};
 	speak("Ready to listen to your questions. You'll hear this noise if I can't answer the question.", run_callback_only_once);
 	// following works around a bug where the speech never ends (though nothing is heard)
-    setTimeout(run_callback_only_once, 3000);
+    setTimeout(run_callback_only_once, 5000);
 };
 
 const initialize_covid_scenario = () => {
@@ -1088,30 +1091,89 @@ const speak = (message, callback) => {
 			           callback);
 };
 
+const ask_site = (question) => {
+	question = question.toLowerCase();
+	let end_of_trigger_index = contains_fragment(['research explorer'], question);
+	if (end_of_trigger_index) {
+		return ask_research_explorer(question.slice(end_of_trigger_index).trim());
+	}
+	let end_of_who = contains_fragment(['who', 'w h o', 'wh0', 'w80', 'who0'], question);
+	if (end_of_who) {
+		end_of_trigger_index = contains_fragment(['newsroom', 'news room'], question);
+		if (end_of_trigger_index) {
+			return ask_WHO_newsroom(question.slice(end_of_trigger_index).trim());
+		}
+		end_of_trigger_index = contains_fragment(['publications', 'publication'], question);
+		if (end_of_trigger_index) {
+			return ask_WHO_publications(question.slice(end_of_trigger_index).trim());
+		}
+		end_of_trigger_index = contains_fragment(['advice for the public', 'advice to the public', 'public advice'], question);
+		if (end_of_trigger_index) {
+			return ask_WHO_advice_for_the_public(question.slice(end_of_trigger_index).trim());
+		}
+		return ask_WHO(question.slice(end_of_who).trim());
+	}
+};
+
+const contains_fragment = (fragments, question) => {
+	for (let i = 0; i < fragments.length; i++) {
+		const fragment = fragments[i];
+		const index = question.indexOf(fragment);
+		if (index >= 0) {
+			return index+fragment.length;
+		}
+	}
+};
+
+const ask_research_explorer = (question) =>
+    `<div><p>Exercise scepticism when perusing these results since many papers are pre-prints or report on preliminary or tentative findings.</p>
+     <iframe width=768 height=386 src="https://covid19-research-explorer.appspot.com/results?mq= ${question}"></div>`;
+
+const ask_WHO = (question) => 
+    `<a href="https://www.google.com/search?q=${question} site%3Awho.int" target="_blank">
+     Click to see what is in the WHO website related to "${question}"</a>`;
+
+const ask_WHO_newsroom = (question) => 
+    `<a href="https://www.google.com/search?q=${question} site%3Awho.int%2Fnews-room%2Fq-a-detail%2F" target="_blank">
+     Click to see what is in the WHO newsroom related to "${question}"</a>`;
+
+const ask_WHO_advice_for_the_public = (question) =>
+    `<a href="https://www.google.com/search?q=${question} site%3A%2Fwww.who.int%2Femergencies%2Fdiseases%2Fnovel-coronavirus-2019%2Fadvice-for-public%2F" target="_blank">
+     Click to see the WHO advice to the public related to "${question}"</a>`;
+
+const ask_WHO_publications = (question) => 
+   `<a href="https://www.google.com/search?q=${question} site%3Ahttps%3A%2F%2Fwww.who.int%2Fpublications%2Fi%2Fitem%2F" target="_blank">
+    Click to see the WHO publications related to "${question}"</a>`;
+// following caused error:
+//?covid-scenario=1&covid&listen:1 Refused to display 'https://www.google.com/search?q=site%3Ahttps%3A%2F%2Fwww.who.int%2Fpublications%2Fi%2Fitem%2F%20s%20if%20someone%20can%20get%20covered%20twice' in a frame because it set 'X-Frame-Options' to 'sameorigin'.   
+//          '<div><p>Publications from WHO.</p>' +
+// 		 '<iframe width=768 height=386 src="https://www.google.com/search?q=site%3Ahttps%3A%2F%2Fwww.who.int%2Fpublications%2Fi%2Fitem%2F ' + question + '"></div>';
+
 const speech_listening_callback = (original_question, ignore, confidence) => {
 	let question = original_question.toLowerCase();
+	question = question.replace(/covered/gi, 'covid'); // correct for speech recognition mistake
     const process_response = (response) => {
 	    const {best_indices, question_embedding, best_score} = response;
-		if (best_indices.length === 1) {
+		if (best_indices.length === 1) { // what if there are more than one answer?
 			const answer = answers[best_indices[0]];
 			process_answer(answer);
 			logs.answered.push({question, answer, score: best_score});
-		} else if (is_covid_question(question)) {
-			const trigger = 'ask research explorer';
-			const ask_explorer_index = question.indexOf(trigger);
-			if (ask_explorer_index >= 0) {
-				question = question.slice(ask_explorer_index+trigger.length)
-			} else {
-				speak("This app can't answer your question so passing it along to Google's Covid research explorer");
-			}
-			answer_to_question_container.hidden = false;
-		    answer_to_question.innerHTML = 
-		        '<div><p>Exercise scepticism when perusing these results since many papers are pre-prints or report on preliminary or tentative findings.</p>' +
-		        '<iframe width=768 height=386 src="https://covid19-research-explorer.appspot.com/results?mq=' + question + '"></div>';
-		    logs.passed_off_to_others.push({original_question});
 		} else {
-			sounds.more_info.play();
-			logs.unanswered.push({question});
+            const ask_site_html = ask_site(question);
+            if (ask_site_html) {
+            	answer_to_question_container.hidden = false;
+		        answer_to_question.innerHTML = ask_site_html;
+		        logs.passed_off_to_others.push({original_question});
+		        return;
+			} else if (is_covid_question(question)) {
+				speak("This app can't answer your question so passing it along to Google's Covid research explorer");
+				answer_to_question_container.hidden = false;
+				answer_to_question.innerHTML = ask_research_explorer(question);
+				logs.passed_off_to_others.push({original_question});
+			} else {
+				sounds.more_info.play();
+				logs.unanswered.push({question});
+			}
 		}
 		question_embedding.dispose();
 		console.log(response); // for now
@@ -1132,17 +1194,17 @@ const speech_listening_callback = (original_question, ignore, confidence) => {
 			logs.too_low_speech_recognition_confidence.push({question, confidence});
 		}
     }
+    display_feedback(question + " (confidence: " + confidence.toFixed(2) + ")");
+};
+
+const display_feedback = (html) => {
    	show_element(last_thing_heard_feedback);
-   	last_thing_heard_feedback.innerHTML = question + " (confidence: " + confidence.toFixed(2) + ")";
-   	window.setTimeout(() => hide_element(last_thing_heard_feedback), 5000);
-//    	if (!document.hidden) {
-// 		// and start listening to the next question
-// 		ecraft2learn.start_speech_recognition_v2(speech_listening_callback, {error_callback: handle_recognition_error, keep_listening});  		
-//    	}
+   	last_thing_heard_feedback.innerHTML = html;
+   	window.setTimeout(() => hide_element(last_thing_heard_feedback), 8000);	
 };
 
 const is_covid_question = (question) => {
-	const covid_words = ['covid', 'corona', 'virus', 'sars', 'ask research explorer'];
+	const covid_words = ['covid', 'corona', 'virus', 'sars', 'pandemic', 'epidemic'];
 	const question_lower_case = question.toLowerCase();
 	for (let i = 0; i < covid_words.length; i++) {
         if (question_lower_case.indexOf(covid_words[i]) >= 0) {
@@ -1155,11 +1217,13 @@ const is_covid_question = (question) => {
 const handle_recognition_error = (error) => {
 	if (error === "no-speech" || error === "No speech heard for a while." || error === 'aborted') {
 		if (!document.hidden) {
-			// keep listening
+			// keep listening but seem to need to do a full restart
+			ecraft2learn.stop_speech_recognition();
 			ecraft2learn.start_speech_recognition_v2(speech_listening_callback, {error_callback: handle_recognition_error, keep_listening});
 		}
     } else {
     	console.log("Recognition error: ", error);
+    	display_feedback(error);
     }
 };
 

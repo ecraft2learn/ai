@@ -651,6 +651,7 @@ window.ecraft2learn =
             invoke_callback(finished_callback, message);
         };
         utterance.onerror = (speech_error) => {
+            ecraft2learn.speaking_ongoing = false;
             console.log({speech_error});
         };
         ecraft2learn.speaking_ongoing = true;
