@@ -1037,7 +1037,9 @@ const initialize_covid_scenario = () => {
     	load_question_answering_model(() => {
     		// if tab is minimized then recognition is stopped, start listening again when no longer hidden
 			window.addEventListener('visibilitychange', () => {
-				if (!document.hidden) {
+				if (document.hidden) {
+					ecraft2learn.stop_speech_recognition();
+				} else {
 					ecraft2learn.start_speech_recognition_v2(speech_listening_callback, {error_callback: handle_recognition_error, keep_listening});
 				}
 			});
@@ -1159,17 +1161,11 @@ const speech_listening_callback = (original_question, ignore, confidence) => {
 			process_answer(answer);
 			logs.answered.push({question, answer, score: best_score});
 		} else {
-            const ask_site_html = ask_site(question);
-            if (ask_site_html) {
-            	answer_to_question_container.hidden = false;
-		        answer_to_question.innerHTML = ask_site_html;
-		        logs.passed_off_to_others.push({original_question});
-		        return;
-			} else if (is_covid_question(question)) {
+            if (is_covid_question(question)) {
 				speak("This app can't answer your question so passing it along to Google's Covid research explorer");
 				answer_to_question_container.hidden = false;
 				answer_to_question.innerHTML = ask_research_explorer(question);
-				logs.passed_off_to_others.push({original_question});
+				logs.passed_off_to_others.push({question: original_question});
 			} else {
 				sounds.more_info.play();
 				logs.unanswered.push({question});
@@ -1189,7 +1185,14 @@ const speech_listening_callback = (original_question, ignore, confidence) => {
 			const otherwise = () => {
 				use_model_and_knn_to_respond_to_question(question, true).then(process_response);
 			};
-			try_context_sensitive_questions(question, scenario[step_number].context_sensitive_questions, process_answer, otherwise);
+			const ask_site_html = ask_site(question);
+            if (ask_site_html) {
+            	answer_to_question_container.hidden = false;
+		        answer_to_question.innerHTML = ask_site_html;
+		        logs.passed_off_to_others.push({question});
+			} else {
+			    try_context_sensitive_questions(question, scenario[step_number].context_sensitive_questions, process_answer, otherwise);
+			}
 		} else {
 			logs.too_low_speech_recognition_confidence.push({question, confidence});
 		}
@@ -1389,8 +1392,8 @@ const display_final_message = (finished) => {
 	}
 	if (logs.passed_off_to_others.length > 0) {
 		email_body += new_line + "The following are questions the app was unable to answer but passed off to covid19-research-explorer.appspot.com:" + new_line;
-		logs.passed_off_to_others.forEach(({original_question}) => {
-			email_body += original_question + new_line;
+		logs.passed_off_to_others.forEach(({question}) => {
+			email_body += question + new_line;
 		});
 	}
 	if (logs.answered.length > 0) {
