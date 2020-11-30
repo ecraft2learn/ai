@@ -2746,6 +2746,7 @@ xhr.send();
                                        2*stage.width(),
                                        2*stage.height(),
                                        mirrored);
+      ecraft2learn.video = undefined; // this is so one can change the browser settings to use a different camera
       invoke_callback(callback, create_costume(canvas));
   },
 
