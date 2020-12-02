@@ -253,7 +253,7 @@ window.ecraft2learn =
             // callback.emptySlots+1 is in case callback is passed more arguments than callback has empty slots
             let parameters = callback.emptySlots > 0 ?
                              Array.prototype.slice.call(arguments, 1, callback.emptySlots+1) :
-                             Array.prototype.slice.call(arguments, 1);
+                             Array.prototype.slice.call(arguments, 1, 2);
             // invoke the callback with the argments (other than the callback itself)
             // if BlockMorph then needs a receiver -- apparently callback is good enough
             if (callback.receiver.isWarped) {
