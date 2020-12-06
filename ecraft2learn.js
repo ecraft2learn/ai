@@ -2450,7 +2450,6 @@ xhr.send();
                   }                
               };
           };
-          create_speech_recognition_object();
           ecraft2learn.stop_speech_recognition = function () {
               if (debugging) {
                   console.log("Stopped.");
@@ -2463,6 +2462,7 @@ xhr.send();
                   speech_recognition.stop();
               }
           };
+          create_speech_recognition_object();
           restart();
           // if the tab or window is minimised or hidden then
           // speech recognition is paused until the window or tab is shown again
