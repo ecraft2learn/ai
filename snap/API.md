@@ -1,6 +1,6 @@
 # The Snap! API
 
-Jens Mönig, July 07, 2020
+Jens Mönig, Bernat Romagosa, November 21, 2020
 
 This document describes how Snap! can be accessed from an outside program to start scripts, send and retrieve information. The model use case is embedding interactive Snap! projects in other websites such as MOOCs or other adaptive learning platforms.
 
@@ -27,6 +27,11 @@ Currently the API consists of the following methods:
 #### Create and Modify Lists
 
 * IDE_Morph.prototype.newList()
+
+#### Access the Serialized Project
+
+* IDE_Morph.prototype.getProjectXML()
+* IDE_Morph.prototype.loadProjectXML()
 
 ## Referencing the IDE
 
@@ -57,6 +62,34 @@ The model case in mind is embedding Snap! in an iframe:
 In such a set up the ide can be accessed through the ```contentWindow``` property, e.g.
 
     var ide = document.getElementsByTagName("iframe")[0].contentWindow.world.children[0];
+
+### Cross-domain iframes
+
+If the iframe and the container do not share domains, you won't be able to reach the world
+and, thus, the API. For that particular case, you should use the `postMessage` mechanism,
+as follows:
+
+    document.querySelector('iframe').postMessage(
+        { selector: <API selector>, params: <param array> },
+        '*'
+    );
+
+For instance, to get the value of a variable named "foo", you would do:
+
+    document.querySelector('iframe').postMessage(
+        { selector: 'getVar', params: [ 'foo' ] },
+        '*'
+    );
+
+The way to capture the return values of these messages from the page containing the iframe
+is to define an `onmessage` listener:
+
+    winndow.addEventListener('message',function(e) {
+        console.log('the response to', e.data.selector, 'is', e.data.response);
+    },false);
+
+Note that `e.data.selector` carries the original selector back, so you can tie it to the
+request, while `e.data.response` carries the return value of the API method call.
 
 ## Interacting with the IDE
 
@@ -113,7 +146,7 @@ The getMessage() method returns a new Array that contains all the message string
     ide.getMessages();
 
 #### return value
-an Array of strings, or an empty Array
+an Array of Strings, or an empty Array
 
 
 ### IDE_Morph.prototype.getVarNames()
@@ -123,7 +156,7 @@ The getVarNames() method returns a new Array that contains all the global variab
     ide.getVarNames();
 
 ### return value
-an Array of strings, or an empty Array
+an Array of Strings, or an empty Array
 
 
 ### IDE_Morph.prototype.getVar()
@@ -145,6 +178,7 @@ The setVar() methods assigns a value to the a global variable specified by name.
 #### return value
 undefined
 
+
 ### IDE_Morph.prototype.newList()
 The newList() methods returns a new Snap! list. Optionally a source array containing the list elements can be specified.
 
@@ -153,6 +187,31 @@ The newList() methods returns a new Snap! list. Optionally a source array contai
 
 #### return value
 a new Snap! List
+
+
+### IDE_Morph.prototype.getProjectXML()
+the getProjectXML() method returns a string in XML format representing the serialized project currently loaded into the IDE.
+
+#### syntax
+    ide.getProjectXML();
+
+#### return value
+an XML String
+
+
+### IDE_Morph.prototype.loadProjectXML()
+the loadProjectXML() method replaces the current project of the IDE with another serialized one encoded in a string in XML format. Note that no user acknowledgement is required, all unsaved edits to the prior project are lost.
+
+#### syntax
+    ide.loadProjectXML(projectData);
+
+#### parameters
+* projectData
+    * XML string representing a serialized project
+    
+#### return value
+unefined
+
 
 ## Manipulating Lists
 

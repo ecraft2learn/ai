@@ -107,7 +107,7 @@ WatcherMorph, Variable, BooleanSlotMorph, XML_Serializer, SnapTranslator*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.byob = '2020-September-14';
+modules.byob = '2020-October-07';
 
 // Declarations
 
@@ -3323,7 +3323,7 @@ InputSlotDialogMorph.prototype.deleteFragment = function () {
 
 InputSlotDialogMorph.prototype.createSlotTypeButtons = function () {
     // populate my 'slots' area with radio buttons, labels and input fields
-    var defLabel, defInput, defSwitch, loopArrow;
+    var defLabel, defInput, defSwitch, loopArrow, settingsButton;
 
     // slot types
     this.addSlotTypeButton('Object', '%obj');
@@ -3431,7 +3431,7 @@ InputSlotDialogMorph.prototype.createSlotTypeButtons = function () {
             'loop',
             this.fontSize * 0.7,
             WHITE
-        ),
+        ).getImage(),
         null // builder method that constructs the element morph
     );
     loopArrow.refresh = () => {
@@ -3447,6 +3447,19 @@ InputSlotDialogMorph.prototype.createSlotTypeButtons = function () {
     };
     this.slots.loopArrow = loopArrow;
     this.slots.add(loopArrow);
+
+    // settings button
+    settingsButton = new PushButtonMorph(
+        this.slots,
+        () => this.slots.userMenu().popUpAtHand(this.world()),
+        new SymbolMorph('gearPartial', this.fontSize * 1.5)
+    );
+    settingsButton.padding = 0;
+    settingsButton.fixLayout();
+    settingsButton.refresh = nop;
+    this.slots.settingsButton = settingsButton;
+    this.slots.add(settingsButton);
+
 };
 
 InputSlotDialogMorph.prototype.setSlotType = function (type) {
@@ -3629,6 +3642,13 @@ InputSlotDialogMorph.prototype.fixSlotsLayout = function () {
     // loop arrow
 
     this.slots.loopArrow.setPosition(this.slots.defaultInputLabel.position());
+    this.slots.settingsButton.setPosition(
+        this.slots.bottomRight().subtract(
+            this.slots.settingsButton.extent().add(
+                this.padding + this.slots.border
+            )
+        )
+    );
 
     this.slots.changed();
 };

@@ -34,7 +34,7 @@
 /*global modules, hex_sha512*/
 
 modules = modules || {};
-modules.cloud = '2020-May-17';
+modules.cloud = '2020-October-21';
 
 // Global stuff
 
@@ -49,6 +49,12 @@ function Cloud() {
 Cloud.prototype.init = function () {
     this.apiBasePath = '/api/v1';
     this.url = this.determineCloudDomain() + this.apiBasePath;
+    this.username = null;
+    this.disabled = false;
+};
+
+Cloud.prototype.disable = function () {
+    this.disabled = true;
     this.username = null;
 };
 
@@ -162,6 +168,8 @@ Cloud.prototype.request = function (
     errorMsg,
     wantsRawResponse,
     body) {
+
+    if (this.disabled) { return; }
 
     var request = new XMLHttpRequest(),
         myself = this,

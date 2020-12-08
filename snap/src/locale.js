@@ -46,7 +46,7 @@
 
 /*global modules, contains*/
 
-modules.locale = '2020-September-21';
+modules.locale = '2020-November-23';
 
 // Global stuff
 
@@ -168,7 +168,7 @@ SnapTranslator.dict.de = {
     'translator_e-mail':
         'jens@moenig.org, jadga.huegle@sap.com',
     'last_changed':
-        '2020-09-03'
+        '2020-11-02'
 };
 
 SnapTranslator.dict.it = {
@@ -179,7 +179,7 @@ SnapTranslator.dict.it = {
     'translator_e-mail':
         's_federici@yahoo.com, albertofirpo12@gmail.com, zairik@gmail.com',
     'last_changed':
-        '2020-09-18'
+        '2020-11-19'
 };
 
 SnapTranslator.dict.ja = {
@@ -267,7 +267,7 @@ SnapTranslator.dict.fr = {
     'translator_e-mail':
         'i.scool@mac.com',
     'last_changed':
-        '2019-06-25'
+        '2020-10-28'
 };
 
 SnapTranslator.dict.si = {
@@ -285,11 +285,11 @@ SnapTranslator.dict.ru = {
     'language_name':
         'Русский',
     'language_translator':
-        'Svetlana Ptashnaya, Проскурнёв Артём',
+        'Svetlana Ptashnaya, Проскурнёв Артём, Pavel Belousov',
     'translator_e-mail':
-        'svetlanap@berkeley.edu, tema@school830.ru',
+        'svetlanap@berkeley.edu, tema@school830.ru, pbsite@mail.ru',
     'last_changed':
-        '2018-02-05'
+        '2020-11-02'
 };
 
 SnapTranslator.dict.es = {
@@ -300,7 +300,7 @@ SnapTranslator.dict.es = {
     'translator_e-mail':
         'victor.muratalla@yahoo.com / rizzi.cristian@gmail.com',
     'last_changed':
-        '2019-06-25'
+        '2020-11-19'
 };
 
 SnapTranslator.dict.nl = {
@@ -362,11 +362,11 @@ SnapTranslator.dict.el = {
     'language_name':
         'Ελληνικά',
     'language_translator':
-        'Ino Samaras , Alexandros Prekates',
+        'Ino Samaras, Alexandros Prekates, HM100',
     'translator_e-mail':
-        'ino.samaras@berkeley.edu , aprekates@sch.gr',
+        'ino.samaras@berkeley.edu, aprekates@sch.gr',
     'last_changed':
-        '2019-01-28'
+        '2020-11-23'
 };
 
 SnapTranslator.dict.ca = {

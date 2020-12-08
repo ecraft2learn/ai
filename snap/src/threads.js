@@ -61,7 +61,7 @@ StageMorph, SpriteMorph, StagePrompterMorph, Note, modules, isString, copy, Map,
 isNil, WatcherMorph, List, ListWatcherMorph, alert, console, TableMorph, BLACK,
 TableFrameMorph, ColorSlotMorph, isSnapObject, newCanvas, Symbol, SVG_Costume*/
 
-modules.threads = '2020-September-02';
+modules.threads = '2020-November-22';
 
 var ThreadManager;
 var Process;
@@ -375,7 +375,7 @@ ThreadManager.prototype.removeTerminatedProcesses = function () {
                 }
             }
             if (proc.topBlock instanceof ReporterBlockMorph ||
-                    proc.isShowingResult) {
+                    proc.isShowingResult || proc.exportResult) {
                 result = proc.homeContext.inputs[0];
                 if (proc.onComplete instanceof Function) {
                     proc.onComplete(result);
@@ -1531,7 +1531,7 @@ Process.prototype.doSetVar = function (varName, value) {
 Process.prototype.doChangeVar = function (varName, value) {
     var varFrame = this.context.variables,
         name = varName;
-
+    this.assertType(value, 'number');
     if (name instanceof Context) {
         if (name.expression.selector === 'reportGetVar') {
             name.variables.changeVar(
@@ -4374,9 +4374,17 @@ Process.prototype.changePenHSVA = Process.prototype.changeHSVA;
 Process.prototype.setBackgroundHSVA = Process.prototype.setHSVA;
 Process.prototype.changeBackgroundHSVA = Process.prototype.changeHSVA;
 
-// Process pasting primitives
+// Process cutting & pasting primitives
 
-Process.prototype.doPasteOn = function (name, thisObj, stage) {
+Process.prototype.doPasteOn = function (name) {
+    this.blitOn(name, 'source-atop');
+};
+
+Process.prototype.doCutFrom = function (name) {
+    this.blitOn(name, 'destination-out');
+};
+
+Process.prototype.blitOn = function (name, mask, thisObj, stage) {
     // allow for lists of sprites and also check for temparary clones,
     // as in Scratch 2.0,
     var those;
@@ -4386,16 +4394,19 @@ Process.prototype.doPasteOn = function (name, thisObj, stage) {
         name = stage;
     }
     if (isSnapObject(name)) {
-        return thisObj.pasteOn(name);
+        return thisObj.blitOn(name, mask);
     }
     if (name instanceof List) { // assume all elements to be sprites
         those = name.itemsArray();
     } else {
         those = this.getObjectsNamed(name, thisObj, stage); // clones
     }
-    those.forEach(each =>
-        this.doPasteOn(each, thisObj, stage)
-    );
+    those.forEach(each => {
+        // only draw on same-named clones that don't dynamically the costume
+        if (!each.inheritsAttribute('costume #')) {
+            this.blitOn(each, mask, thisObj, stage);
+        }
+    });
 };
 
 // Process temporary cloning (Scratch-style)
@@ -4540,6 +4551,12 @@ Process.prototype.reportAspect = function (aspect, location) {
     // relevant for what gets reported. Sprites can only sense colors in layers
     // below themselves, not their own color and not colors in sprites above
     // their own layer.
+
+    if (this.enableHyperOps) {
+        if (location instanceof List && !this.isCoordinate(location)) {
+            return location.map(each => this.reportAspect(aspect, each));
+        }
+    }
 
     var choice = this.inputOption(aspect),
         target = this.inputOption(location),
@@ -4766,6 +4783,19 @@ Process.prototype.reportDirectionTo = function (name) {
 };
 
 Process.prototype.reportAttributeOf = function (attribute, name) {
+    // hyper-dyadic
+    // note: specifying strings in the left input only accesses
+    // sprite-local variables. Attributes such as "width", "direction" etc.
+    // can only be queried via the dropdown menu and are, therefore, not
+    // reachable as dyadic inputs
+    return this.hyperDyadic(
+        (att, obj) => this.reportBasicAttributeOf(att, obj),
+        attribute,
+        name
+    );
+};
+
+Process.prototype.reportBasicAttributeOf = function (attribute, name) {
     var thisObj = this.blockReceiver(),
         thatObj,
         stage;
@@ -4845,7 +4875,6 @@ Process.prototype.reportGet = function (query) {
     // answer a reference to a first-class member
     // or a list of first-class members
     var thisObj = this.blockReceiver(),
-        neighborhood,
         stage,
         objName;
 
@@ -4885,6 +4914,9 @@ Process.prototype.reportGet = function (query) {
             return thisObj.isTemporary ?
                     this.reportGet(['clones']) : new List();
         case 'neighbors':
+            // old rectangular, bounding-box-based algorithm
+            // deprecated in favor of a circular perimeter based newer one
+            /*
             stage = thisObj.parentThatIsA(StageMorph);
             neighborhood = thisObj.bounds.expandBy(new Point(
                 thisObj.width(),
@@ -4893,10 +4925,13 @@ Process.prototype.reportGet = function (query) {
             return new List(
                 stage.children.filter(each =>
                     each instanceof SpriteMorph &&
+                        each.isVisible &&
                         (each !== thisObj) &&
-                            each.bounds.intersects(neighborhood)
+                        each.bounds.intersects(neighborhood)
                 )
             );
+            */
+            return thisObj.neighbors();
         case 'dangling?':
             return !thisObj.rotatesWithAnchor;
         case 'draggable?':
@@ -4984,6 +5019,7 @@ Process.prototype.doSet = function (attribute, value) {
     }
     switch (name) {
     case 'anchor':
+    case 'my anchor':
         this.assertType(rcvr, 'sprite');
         if (value instanceof SpriteMorph) {
             // avoid circularity here, because the GUI already checks for
@@ -4999,11 +5035,13 @@ Process.prototype.doSet = function (attribute, value) {
         }
         break;
     case 'parent':
+    case 'my parent':
         this.assertType(rcvr, 'sprite');
         value = value instanceof SpriteMorph ? value : null;
         rcvr.setExemplar(value, true); // throw an error in case of circularity
         break;
     case 'temporary?':
+    case 'my temporary?':
         this.assertType(rcvr, 'sprite');
         this.assertType(value, 'Boolean');
         if (value) {
@@ -5013,6 +5051,7 @@ Process.prototype.doSet = function (attribute, value) {
         }
         break;
     case 'name':
+    case 'my name':
         this.assertType(rcvr, ['sprite', 'stage']);
         this.assertType(value, ['text', 'number']);
         ide = rcvr.parentThatIsA(IDE_Morph);
@@ -5026,12 +5065,14 @@ Process.prototype.doSet = function (attribute, value) {
         }
         break;
     case 'dangling?':
+    case 'my dangling?':
         this.assertType(rcvr, 'sprite');
         this.assertType(value, 'Boolean');
         rcvr.rotatesWithAnchor = !value;
         rcvr.version = Date.now();
         break;
     case 'draggable?':
+    case 'my draggable?':
         this.assertType(rcvr, 'sprite');
         this.assertType(value, 'Boolean');
         rcvr.isDraggable = value;
@@ -5047,6 +5088,7 @@ Process.prototype.doSet = function (attribute, value) {
         rcvr.version = Date.now();
         break;
     case 'rotation style':
+    case 'my rotation style':
         this.assertType(rcvr, 'sprite');
         this.assertType(+value, 'number');
         if (!contains([0, 1, 2], +value)) {
@@ -5068,11 +5110,13 @@ Process.prototype.doSet = function (attribute, value) {
         rcvr.version = Date.now();
         break;
     case 'rotation x':
+    case 'my rotation x':
         this.assertType(rcvr, 'sprite');
         this.assertType(value, 'number');
         rcvr.setRotationX(value);
         break;
     case 'rotation y':
+    case 'my rotation y':
         this.assertType(rcvr, 'sprite');
         this.assertType(value, 'number');
         rcvr.setRotationY(value);
@@ -5228,10 +5272,8 @@ Process.prototype.doSetVideoTransparency = function(factor) {
 };
 
 Process.prototype.reportVideo = function(attribute, name) {
-    var thisObj = this.blockReceiver(),
-        stage = thisObj.parentThatIsA(StageMorph),
-        thatObj = this.getOtherObject(name, thisObj, stage);
-
+    // hyper-dyadic
+    var stage = this.blockReceiver().parentThatIsA(StageMorph);
     if (!stage.projectionSource || !stage.projectionSource.stream) {
         // wait until video is turned on
         if (!this.context.accumulator) {
@@ -5242,7 +5284,17 @@ Process.prototype.reportVideo = function(attribute, name) {
         this.pushContext();
         return;
     }
+    return this.hyperDyadic(
+        (att, obj) => this.reportBasicVideo(att, obj),
+        attribute,
+        name
+    );
+};
 
+Process.prototype.reportBasicVideo = function(attribute, name) {
+    var thisObj = this.blockReceiver(),
+        stage = thisObj.parentThatIsA(StageMorph),
+        thatObj = this.getOtherObject(name, thisObj, stage);
     switch (this.inputOption(attribute)) {
     case 'motion':
         if (thatObj instanceof SpriteMorph) {
@@ -5560,9 +5612,10 @@ Process.prototype.reportNewCostume = function (pixels, width, height, name) {
     dta = ctx.createImageData(width, height);
     for (i = 0; i < src.length; i += 1) {
         px = src[i].asArray();
-        for (k = 0; k < 4; k += 1) {
+        for (k = 0; k < 3; k += 1) {
             dta.data[(i * 4) + k] = px[k];
         }
+        dta.data[i * 4 + 3] = (px[3] === undefined ? 255 : px[3]);
     }
     ctx.putImageData(dta, 0, 0);
     return new Costume(

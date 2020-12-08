@@ -1271,7 +1271,7 @@
     Michael Ball found and fixed a longstanding scrolling bug.
     Brian Harvey contributed to the design and implementation of submenus.
     Ken Kahn contributed to Chinese keboard entry and Android support.
-    Brian Broll contributed clickable URLs in text elements.
+    Brian Broll contributed clickable URLs in text elements and many bugfixes.
 
     - Jens Mönig
 */
@@ -1280,7 +1280,7 @@
 
 /*global window, HTMLCanvasElement, FileReader, Audio, FileList, Map*/
 
-var morphicVersion = '2020-September-12';
+var morphicVersion = '2020-November-12';
 var modules = {}; // keep track of additional loaded modules
 var useBlurredShadows = true;
 
@@ -7961,7 +7961,7 @@ MenuMorph.prototype.addItem = function (
     */
     this.items.push([
         verbatim ? labelString || 'close' : localize(labelString || 'close'),
-        action || nop,
+        action === 0 ? 0 : action || nop,
         hint,
         color,
         bold || false,
@@ -9438,7 +9438,7 @@ TextMorph.prototype.slotAt = function (aPoint) {
         charX = 0;
     }
     columnLength = this.lines[row - 1].length;
-    while (col < columnLength - 2 && aPoint.x - this.left() > charX) {
+    while (col < columnLength - 1 && aPoint.x - this.left() > charX) {
         charX += ctx.measureText(this.lines[row - 1][col]).width;
         col += 1;
     }
@@ -9724,7 +9724,7 @@ TriggerMorph.prototype.init = function (
 ) {
     // additional properties:
     this.target = target || null;
-    this.action = action || null;
+    this.action = action === 0 ? 0 : action|| null;
     this.doubleClickAction = doubleClickAction || null;
     this.environment = environment || null;
     this.labelString = labelString || ' ';
@@ -11224,11 +11224,11 @@ HandMorph.prototype.grab = function (aMorph) {
     if (this.children.length === 0) {
         this.world.stopEditing();
         this.grabOrigin = aMorph.situation();
-        if (!aMorph.noDropShadow) {
-            aMorph.addShadow();
-        }
         if (aMorph.prepareToBeGrabbed) {
             aMorph.prepareToBeGrabbed(this);
+        }
+        if (!aMorph.noDropShadow) {
+            aMorph.addShadow();
         }
         this.add(aMorph);
 

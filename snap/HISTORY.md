@@ -2,6 +2,308 @@
 
 ## in development:
 
+## 6.3.7
+* **Notable Changes:**
+    * added "loadProjectXML" method to the api
+    * hyperized "atrribute OF sprite" reporter primitive in the sensing category
+    * show the common attributes for sprites in the OF-dropdown by default
+    * hyperized "color/sprite AT location" reporter primitive
+    * hyperized "VIDEO _ ON _" reporter primitive
+* **Documentation Updates:**
+    * API update for "loadProjectXML"
+* **Notable Fixes:**
+    * fixed display of inherited sprite-local variables
+* **Translation Updates:**
+    * Greek, thanks, HM100!
+
+### 2020-11-23
+* Greek translation update, thanks, HM100!
+* prepared patch
+
+### 2020-11-22
+* objects: fixed display of inherited sprite-local variables
+* threads: make sure video capture is turned on before accessing it programmatically 
+
+### 2020-11-21
+* new dev version
+* api: new loadProjectXML() method
+* updated api documentation
+* threads: hyperized "atrribute OF sprite" reporter primitive
+* blocks: show the common attributes for sprites in the OF-dropdown by default
+* threads: hyperized "color/sprite AT location" reporter primitive
+* threads: hyperized "VIDEO _ ON _" reporter primitive
+
+## 6.3.6
+* **Notable Changes:**
+    * changed determining "neighbors" from rectangular to circular perimeter
+* **Notable Fixes:**
+    * fixed a loading bug for projects with watchers on SVG costumes
+    * fixed stretching SVG costumes with fixed aspect ratios in Firefox
+    * only report neighbors that are visible
+* **Translation Updates:**
+    * Italian, thanks, Stefano!
+    * Spanish, thanks, Joan!
+
+### 2020-11-20
+* threads: only report neighbors that are visible, thanks Frederic, for reporting this bug!
+* Italian translation update, thanks, Stefano!
+* Spanish translation update, thanks, Joan!
+* threads, objects: changed determining "neighbors" from rectangular to circular perimeter
+* objects: fixed a loading bug for projects with watchers on SVG costumes
+* prepared patch
+
+### 2020-11-19
+* new dev version
+* objects: rasterize SVGs internally before stretching them, so it all works on Firefox
+
+## 6.3.5
+* **Notable Fixes:**
+    * support exported SVGs to be edited in Inkscape
+
+### 2020-11-19
+* new dev version
+* objects: tweaked exported SVG's color alpha part as stroke-opacity so Inkscape can handle them, sigh.
+* prepared patch
+
+## 6.3.4
+* **Notable Changes:**
+    * added "postMessage" mechanism to the api for communicating with Snap! inside an iFrame, thanks, Bernat!
+* **Documentation Updates:**
+    * API update for "postMessage", thanks, Bernat!
+* **Notable Fixes:**
+    * fixed updating cells showing sprites or costumes inside list watchers
+    * fixed a project loading bug (for watchers showing costumes)
+
+### 2020-11-18
+* new dev version
+* objects: fixed updating cells showing sprites or costumes inside list watchers
+* objects: fixed a project loading bug (for watchers showing costumes)
+* api: new postMessage mechanism, thanks, Bernat!
+* prepared patch
+
+## 6.3.3
+* **Notable Changes:**
+    * added type assertion for numerical value in CHANGE VARIABLE BY NUM block, thanks, Eckart, for the suggestion
+* **Notable Fixes:**
+    * fixed a costume fitting issue, thanks, Joan!
+    * fixed keyboard formula input for "power of", "neg", "lg" and "id"
+    * fixed repositioning sprite after "editRotationPointOnly"
+* **Translation Updates:**
+    * Spanish, thanks, Joan!
+
+### 2020-11-1/
+* blocks, objects: refactored and unified default values for block templates
+* Spanish translation update, thanks, Joan!
+* gui, objects: fixed #2715 - reposition sprite after "editRotationPointOnly"
+* prepared patch
+
+### 2020-11-15
+* new dev version
+* objects: fixed costume fitting, thanks, Joan!
+* objects: fixed keyboard formula input for "power of"
+* objects: fixed keyboard formula input for "neg"
+* objects: fixed keyboard formula input for "lg" and "id"
+* threads: added type assertion for numerical value in CHANGE VARIABLE BY NUM block
+
+## 6.3.2
+* **Notable Changes:**
+    * added meaningful defaults to blocks in the palette that didn't already have them
+* **Notable Fixes:**
+    * fixed a costume-shrinkWrap edgecase bug, thanks, Brian, for reporting it!
+    * fixed dynamic costume-inheritance for PASTE and CUT
+    * fixed being unable to place the cursor at the end of a multi-line text
+
+### 2020-11-12
+* morphic: fixed being unable to place the cursor at the end of a multi-line text
+* prepared patch
+
+### 2020-11-11
+* objects: added meaningful defaults to blocks in the palette that didn't already have them
+* threads: fixed dynamic costume-inheritance for PASTE and CUT
+
+### 2020-11-09
+* new dev version
+* objects: fixed #2712 - a costume-shrinkWrap edgecase bug, thanks, Brian, for reporting it!
+
+## 6.3.1
+* **Notable Fixes:**
+    * fixed PASTE and CUT for the stage
+
+### 2020-11-05
+* new dev version
+* objects: fixed #2709
+* prepared patch
+
+## 6.3.0
+* **New Features:**
+    * new gesture: holding the shift-key when dragging extracts a single command from a stack of blocks
+    * new "extract" single command block context menu option
+    * new CUT FROM command in the pen category
+    * added "pie chart" option to PLOT command in the frequency distribution analysis library
+    * added getProjectXML() method to the API
+    * new noCloud flag that disables cloud access, thanks, Bernat
+* **Notable Changes:**
+    * security: pause generic WHEN hat blocks when loading a project or importing a sprite until the user clicks the green flag or un-pauses the red stop sign, unless opening it with #present:&noRun
+* **Documentation Updates:**
+    * API update
+* **Notable Fixes:**
+    * fixed a translation bug for zero-value menu selection entries
+    * wait until all assets have loaded before auto-triggering the green-flag event
+    * don't show some development-only blocks as search results
+    * fixed "rename costume" dialog title to distinguish between costumes and backgrounds
+* **Translation Updates:**
+    * Russian, thanks, Pavel!
+    * German
+    * French, thanks, Jeremy!
+
+### 2020-11-04
+* prepared minor release
+
+### 2020-11-03
+* Russian translation update, thanks, Pavel!
+* objects: added "relabel" feature for the new "cut from" / "paste on" primitives
+
+### 2020-11-02
+* objects: tweaked drop-shadows for sprites
+* blocks: tweaked drop-shadows for comments
+* objects, threads: added new CUT FROM command to the pen category
+* updated German translation with new "cut from %spr" entry
+* morphic: reverted "unclosable menu prevention", because it broke the search box in the project dialog
+
+### 2020-10-28
+* gui: tweaked wait-until-assets-are-loaded mechanism
+* gui: fixed "rename costume" dialog title to distinguish between costumes and backgrounds
+* German translation update for "rename background" 
+* French translation update
+
+### 2020-10-27
+* gui, objects, store: pause generic WHEN hat blocks when loading a project or importing a sprite until the user clicks the green flag or un-pauses the red stop sign, unless opening it with #present:&noRun
+* morphic: prevent unclosable menus, thanks, Brian B.! 
+
+### 2020-10-26
+* objects: added test for the existence of generic WHEN hat blocks
+
+### 2020-10-23
+* pushed dev version to v6.3.0 because of new features
+* objects: don't show some development-only blocks as search results
+* blocks: fixed a multi-line-text spec typo 
+* blocks: removed unused %month slot
+* blocks: removed unused %lst slot
+
+### 2020-10-22
+* blocks: fixed UNDO/REDO for "extracted" (single) command blocks
+* blocks: refactored userExtractJustThis
+* blocks: refactored userDestroyJustThis
+* blocks: un-hid "extract" menu-option
+* morphic: create drop-shadows just in time
+* blocks: holding the shift-key when dragging extracts a single command from a stack of blocks
+* German translation update for new string "extract" 
+
+### 2020-10-21
+* gui: wait until all costumes have loaded before auto-triggering the green-flag event 
+* gui, objects, store: wait until all sounds have loaded before auto-triggering the green-flag event
+* gui, cloud: added noCloud flag that disables cloud access, thanks, Bernat!
+* blocks: new experimental (hidden) "extract" single command block context menu option
+
+### 2020-10-20
+* added "pie chart" option to PLOT command in the frequency distribution analysis library
+* morphic: enabled zero values for menu selection entries
+* blocks: fixed translation bug for zero-value menu selection entries
+* Russian translation update, thanks, Pavel!
+* api: added getProjectXML() method
+* gui: removed an obsolete comment 
+
+### 2020-10-15
+* new dev version
+* Russian translation update, thanks, Pavel!
+
+## 6.2.4
+* **Documentation Updates:**
+    * Reference manual update
+* **Notable Fixes:**
+    * fixed showing message senders if there are comments in scripts
+* **Translation Updates:**
+    * Russian, thanks, Pavel!
+
+### 2020-10-09
+* new dev version
+* objects: fixed showing message senders if there are comments in scripts
+* Russian translation update, thanks, Pavel!
+* prepared patch
+
+## 6.2.3
+* **Notable Fixes:**
+    * disabled "result pic" option for custom block definitions
+* **Translation Updates:**
+    * Greek, thanks, HM100!
+
+### 2020-10-09
+* new dev version
+* Greek translation update, thanks, HM100!
+* blocks: disabled "result pic" option for custom block definitions
+* prepared patch
+
+## 6.2.2
+* **New Features:**
+    * new "add comment" option in the block context menu, thanks, Rob Fidler!
+    * new "settings" button in the input slot dialog
+    * added "bar / lines" option for plotting charts in the "frequency distribution analysis" library
+    * enabled "result pic" for command scripts containing a "report" block
+* **Notable Changes:**
+    * made (hidden) "Blurred shadows" setting persistent, use to get rid of "red bar" artifacts on old laptops using Chrome
+    * specifying alpha values is now optional for generating pixels in bitmaps (costumes), none means the pixel is solid 
+    * attribute selection in the SET block are now prefixed with "my"
+    * assume stage dimensions for "SWITCH TO COSTUME" with list if current costume dimensions don't fit
+    * new "48 kHz" option in the "sampling rate" dropdown 
+    * increased area / sensitivity for collapsing variadic input slots, esp. on mobile devices
+* **Notable Fixes:**
+    * "append" block now shows up when searching  for it
+    * disable blurred shadows inside input slots if the hidden "blurred shadows" setting is turned off, use this setting on old laptops displaying "red bars" in Chrome 
+* **Translation Updates:**
+    * Greek, thanks, HM100!
+    * German
+
+### 2020-10-08
+* blocks: enabled "result pic" for command scripts containing a "report" block
+* prepared release
+
+### 2020-10-07
+* byob: added "settings" button to input slot dialog
+* symbols: added "gearPartial" icon
+* blocks: fixed an empty-slot detection issue (reported in the forums), but left it commented out for now, until researching the consequences ;-)
+* blocks: increased area / sensitivity for collapsing variadic input slots 
+* blocks: tweaked expanding variadic inputs
+* blocks: reverted sensitivity tweaks for variadic inputs
+* blocks, threads: reintroduced a different approach for making it easier to collapse variadic inputs
+
+### 2020-10-06
+* blocks: disable blurred shadows inside input slots if the hidden "blurred shadows" setting is turned off
+* widgets: honor (hidden) blurred shadows setting for input widgets
+* objects: honor (hidden) blurred shadows setting for watcher cell widgets
+* tables: honor (hidden) blurred shadows setting for pictograms in tables
+* gui: made (hidden) "Blurred shadows" setting persistent, use to get rid of "red bar" artifacts on old laptops using Chrome
+* blocks: fixed a zoom blocks glitch
+* byob: fixed positioning of loop arrow symbol in the input slot dialog
+
+### 2020-10-05
+* Greek translation updata, thanks, HM100!
+* blocks, threads: prefixed attribute selection in the SET block with "my" 
+* German translation update
+* objects: assume stage dimensions for "SWITCH TO COSTUME" with list if current costume dimensions don't fit
+
+### 2020-10-04
+* threads: made alpha values optional for generating costume pixels, none = solid
+* objects: fixed #2694 - removed "dev" flag from "append" primitive - made sure it shows up in block-search
+
+### 2020-09-28
+* tweaked "frequency distribution analysis" library to plot lines in any color or style
+ 
+### 2020-09-25
+* new dev version
+* updated "frequency distribution analysis" library: New "lines" option for plotting
+* blocks: new "add comment" option in the block context menu, thanks, Rob Fidler!
+* blocks: added "48 kHz" option to the "sampling rate" dropdown 
+
 ## 6.2.1
 * **New Features:**
     * added "get value from key" reporter to database library, thanks, Brian! 

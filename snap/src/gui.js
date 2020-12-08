@@ -78,7 +78,7 @@ Animation, BoxMorph, BlockEditorMorph, BlockDialogMorph, Note, ZERO, BLACK*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.gui = '2020-September-21';
+modules.gui = '2020-November-23';
 
 // Declarations
 
@@ -337,6 +337,9 @@ IDE_Morph.prototype.openIn = function (world) {
     this.reactToWorldResize(world.bounds);
 
     function applyFlags(dict) {
+        if (dict.noCloud) {
+            myself.cloud.disable();
+        }
         if (dict.embedMode) {
             myself.setEmbedMode();
         }
@@ -346,7 +349,7 @@ IDE_Morph.prototype.openIn = function (world) {
             myself.toggleAppMode(true);
         }
         if (!dict.noRun) {
-            myself.runScripts();
+            autoRun();
         }
         if (dict.hideControls) {
             myself.controlBar.hide();
@@ -364,6 +367,25 @@ IDE_Morph.prototype.openIn = function (world) {
         if (!myself.isEmbedMode) {
             world.worldCanvas.focus();
         }
+    }
+    
+    function autoRun () {
+        // wait until all costumes and sounds are loaded
+        if (isLoadingAssets()) {
+            myself.world().animations.push(
+                new Animation(nop, nop, 0, 200, nop, autoRun)
+            );
+        } else {
+            myself.runScripts();
+        }
+    }
+
+    function isLoadingAssets() {
+        return myself.sprites.asArray().concat([myself.stage]).some(any =>
+            (any.costume ? any.costume.loaded !== true : false) ||
+            any.costumes.asArray().some(each => each.loaded !== true) ||
+            any.sounds.asArray().some(each => each.loaded !== true)
+        );
     }
 
     // dynamic notifications from non-source text files
@@ -1082,11 +1104,16 @@ IDE_Morph.prototype.createControlBar = function () {
         settingsButton.setCenter(myself.controlBar.center());
         settingsButton.setLeft(this.left());
 
-        cloudButton.setCenter(myself.controlBar.center());
-        cloudButton.setRight(settingsButton.left() - padding);
-
         projectButton.setCenter(myself.controlBar.center());
-        projectButton.setRight(cloudButton.left() - padding);
+
+        if (myself.cloud.disabled) {
+            cloudButton.hide();
+            projectButton.setRight(settingsButton.left() - padding);
+        } else {
+            cloudButton.setCenter(myself.controlBar.center());
+            cloudButton.setRight(settingsButton.left() - padding);
+            projectButton.setRight(cloudButton.left() - padding);
+        }
 
         this.refreshSlider();
         this.updateLabel();
@@ -2287,6 +2314,10 @@ IDE_Morph.prototype.stopFastTracking = function () {
 };
 
 IDE_Morph.prototype.runScripts = function () {
+    if (this.stage.threads.pauseCustomHatBlocks) {
+        this.stage.threads.pauseCustomHatBlocks = false;
+        this.controlBar.stopButton.refresh();
+    }
     this.stage.fireGreenFlagEvent();
 };
 
@@ -2405,7 +2436,8 @@ IDE_Morph.prototype.applySavedSettings = function () {
         keyboard = this.getSetting('keyboard'),
         tables = this.getSetting('tables'),
         tableLines = this.getSetting('tableLines'),
-        autoWrapping = this.getSetting('autowrapping');
+        autoWrapping = this.getSetting('autowrapping'),
+        solidshadow = this.getSetting('solidshadow');
 
     // design
     if (design === 'flat') {
@@ -2481,6 +2513,12 @@ IDE_Morph.prototype.applySavedSettings = function () {
     // plain prototype labels
     if (plainprototype) {
         BlockLabelPlaceHolderMorph.prototype.plainLabel = true;
+    }
+
+    // solid shadow
+    if (solidshadow) {
+        window.useBlurredShadows = false;
+        this.rerender();
     }
 };
 
@@ -3969,7 +4007,7 @@ IDE_Morph.prototype.aboutSnap = function () {
         module, btn1, btn2, btn3, btn4, licenseBtn, translatorsBtn,
         world = this.world();
 
-    aboutTxt = 'Snap! 6.2.1\nBuild Your Own Blocks\n\n'
+    aboutTxt = 'Snap! 6.3.7\nBuild Your Own Blocks\n\n'
         + 'Copyright \u24B8 2008-2020 Jens M\u00F6nig and '
         + 'Brian Harvey\n'
         + 'jens@moenig.org, bh@cs.berkeley.edu\n\n'
@@ -4251,6 +4289,9 @@ IDE_Morph.prototype.save = function () {
         // cannot save to examples, deprecated localStorage
         this.source = null;
     }
+
+    if (this.cloud.disabled) {this.source = 'disk'; }
+
     if (this.projectName) {
         if (this.source === 'disk') {
             this.exportProject(this.projectName);
@@ -5201,6 +5242,12 @@ IDE_Morph.prototype.toggleDynamicInputLabels = function () {
 
 IDE_Morph.prototype.toggleBlurredShadows = function () {
     window.useBlurredShadows = !useBlurredShadows;
+    this.rerender();
+    if (window.useBlurredShadows) {
+        this.removeSetting('solidshadow');
+    } else {
+        this.saveSetting('solidshadow', false);
+    }
 };
 
 IDE_Morph.prototype.toggleLongFormInputDialog = function () {
@@ -6488,7 +6535,9 @@ ProjectDialogMorph.prototype.buildContents = function () {
         this.srcBar.add(notification);
     }
 
-    this.addSourceButton('cloud', localize('Cloud'), 'cloud');
+    if (!this.ide.cloud.disabled) {
+        this.addSourceButton('cloud', localize('Cloud'), 'cloud');
+    }
 
     if (this.task === 'open') {
         this.buildFilterField();
@@ -8707,7 +8756,7 @@ CostumeIconMorph.prototype.editCostume = function () {
 
 CostumeIconMorph.prototype.editRotationPointOnly = function () {
     var ide = this.parentThatIsA(IDE_Morph);
-    this.object.editRotationPointOnly(this.world());
+    this.object.editRotationPointOnly(this.world(), ide);
     ide.hasChangedMedia = true;
 };
 
@@ -8729,7 +8778,7 @@ CostumeIconMorph.prototype.renameCostume = function () {
             }
         }
     ).prompt(
-        this.currentSprite instanceof SpriteMorph ?
+        ide.currentSprite instanceof SpriteMorph ?
             'rename costume' : 'rename background',
         costume.name,
         this.world()

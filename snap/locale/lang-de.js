@@ -185,7 +185,7 @@ SnapTranslator.dict.de = {
     'translator_e-mail':
         'jens@moenig.org, jadga.huegle@sap.com', // optional
     'last_changed':
-        '2020-09-03', // this, too, will appear in the Translators tab
+        '2020-11-02', // this, too, will appear in the Translators tab
 
     // GUI
     // control bar:
@@ -491,6 +491,8 @@ SnapTranslator.dict.de = {
         'schreibe %s Größe %n',
     'paste on %spr':
         'drucke auf %spr',
+    'cut from %spr':
+        'schneide aus %spr',
     'pen vectors':
         'Vektor-Malspuren',
 
@@ -1172,6 +1174,10 @@ SnapTranslator.dict.de = {
         'eine Kopie aufnehmen',
     'only duplicate this block':
         'nur diesen Block duplizieren',
+    'extract':
+        'herausziehen',
+    'only grab this block':
+        'nur diesen Block bewegen',
     'delete':
         'L\u00f6schen',
     'senders...':
@@ -1288,6 +1294,8 @@ SnapTranslator.dict.de = {
         'Exportieren',
     'rename costume':
         'Kost\u00fcm umbenennen',
+    'rename background':
+        'Hintergrund umbenennen',
 
     // sounds
     'Play sound':
@@ -1908,7 +1916,7 @@ SnapTranslator.dict.de = {
     'other clones':
         'andere Klone',
     'dangling?':
-        'Baumeln?',
+        'baumelnd?',
     'draggable?':
         'greifbar?',
     'rotation style':
@@ -1945,6 +1953,26 @@ SnapTranslator.dict.de = {
         'Rand oben',
     'bottom':
         'Rand unten',
+
+    // attributes in the SET block's dropdown
+    'my anchor':
+        'Attribut Verankerung',
+    'my parent':
+        'Attribut Vorfahr',
+    'my name':
+        'Attribut Name',
+    'my temporary?':
+        'Attribut temporär?',
+    'my dangling?':
+        'Attribut baumelnd?',
+    'my draggable?':
+        'Attribut greifbar?',
+    'my rotation style':
+        'Attribut Drehtyp',
+    'my rotation x':
+        'Attribut Drehpunkt x',
+    'my rotation y':
+        'Attribut Drehpunkt y',
 
     // inheritance
     'inherited':

@@ -69,22 +69,22 @@
 // Global stuff ////////////////////////////////////////////////////////
 
 /*global PaintEditorMorph, ListWatcherMorph, PushButtonMorph, ToggleMorph, ZERO,
-DialogBoxMorph, InputFieldMorph, SpriteIconMorph, BlockMorph, SymbolMorph,
+DialogBoxMorph, InputFieldMorph, SpriteIconMorph, BlockMorph, SymbolMorph, nop,
 ThreadManager, VariableFrame, detect, BlockMorph, BoxMorph, Color, Animation,
 CommandBlockMorph, FrameMorph, HatBlockMorph, MenuMorph, Morph, MultiArgMorph,
-Point, ReporterBlockMorph, ScriptsMorph, StringMorph, SyntaxElementMorph,  nop,
+ReporterBlockMorph, ScriptsMorph, StringMorph, SyntaxElementMorph, XML_Element,
 TextMorph, contains, degrees, detect, newCanvas, radians, Array, CursorMorph,
 Date, FrameMorph, Math, MenuMorph, Morph, invoke, MorphicPreferences, WHITE,
-Object, PenMorph, Point, Rectangle, ScrollFrameMorph, SliderMorph, String,
-StringMorph, TextMorph, contains, copy, degrees, detect, document, isNaN,
+Object, PenMorph, Point, Rectangle, ScrollFrameMorph, SliderMorph, VideoMotion,
+StringMorph, TextMorph, contains, copy, degrees, detect, document, isNaN, Point,
 isString, newCanvas, nop, parseFloat, radians, window, modules, IDE_Morph,
-VariableDialogMorph, HTMLCanvasElement, Context, List, RingMorph, VideoMotion,
-SpeechBubbleMorph, InputSlotMorph, isNil, FileReader, TableDialogMorph,
+VariableDialogMorph, HTMLCanvasElement, Context, List, RingMorph, HandleMorph,
+SpeechBubbleMorph, InputSlotMorph, isNil, FileReader, TableDialogMorph, String,
 BlockEditorMorph, BlockDialogMorph, PrototypeHatBlockMorph,  BooleanSlotMorph,
 localize, TableMorph, TableFrameMorph, normalizeCanvas, VectorPaintEditorMorph,
-HandleMorph, AlignmentMorph, Process, XML_Element, WorldMap, copyCanvas*/
+AlignmentMorph, Process, WorldMap, copyCanvas, useBlurredShadows*/
 
-modules.objects = '2020-September-18';
+modules.objects = '2020-November-22';
 
 var SpriteMorph;
 var StageMorph;
@@ -209,13 +209,15 @@ SpriteMorph.prototype.initBlocks = function () {
             only: SpriteMorph,
             type: 'command',
             category: 'motion',
-            spec: 'point in direction %dir'
+            spec: 'point in direction %dir',
+            defaults: [90]
         },
         doFaceTowards: {
             only: SpriteMorph,
             type: 'command',
             category: 'motion',
-            spec: 'point towards %dst'
+            spec: 'point towards %dst',
+            defaults: [['mouse-pointer']]
         },
         gotoXY: {
             only: SpriteMorph,
@@ -228,7 +230,8 @@ SpriteMorph.prototype.initBlocks = function () {
             only: SpriteMorph,
             type: 'command',
             category: 'motion',
-            spec: 'go to %dst'
+            spec: 'go to %dst',
+            defaults: [['random position']]
         },
         doGlide: {
             only: SpriteMorph,
@@ -310,7 +313,7 @@ SpriteMorph.prototype.initBlocks = function () {
             type: 'reporter',
             category: 'looks',
             spec: '%img of costume %cst',
-            defaults: [['width']]
+            defaults: [['width'], ['current']]
         },
         reportNewCostume: {
             type: 'reporter',
@@ -321,7 +324,7 @@ SpriteMorph.prototype.initBlocks = function () {
             type: 'reporter',
             category: 'looks',
             spec: 'stretch %cst x: %n y: %n %',
-            defaults: ['', 100, 50]
+            defaults: [['current'], 100, 50]
         },
         doSayFor: {
             only: SpriteMorph,
@@ -355,18 +358,19 @@ SpriteMorph.prototype.initBlocks = function () {
             type: 'command',
             category: 'looks',
             spec: 'change %eff effect by %n',
-            defaults: [null, 25]
+            defaults: [['ghost'], 25]
         },
         setEffect: {
             type: 'command',
             category: 'looks',
             spec: 'set %eff effect to %n',
-            defaults: [null, 0]
+            defaults: [['ghost'], 0]
         },
         getEffect: {
             type: 'reporter',
             category: 'looks',
-            spec: '%eff effect'
+            spec: '%eff effect',
+            defaults: [['ghost']]
         },
         clearEffects: {
             type: 'command',
@@ -422,21 +426,21 @@ SpriteMorph.prototype.initBlocks = function () {
             spec: 'go back %n layers',
             defaults: [1]
         },
+
+        // Looks - Debugging primitives for development mode
         doScreenshot: {
+            dev: true,
             type: 'command',
             category: 'looks',
             spec: 'save %imgsource as costume named %s',
             defaults: [['pen trails'], localize('screenshot')]
         },
-
-        // Looks - Debugging primitives for development mode
         reportCostumes: {
             dev: true,
             type: 'reporter',
             category: 'looks',
             spec: 'wardrobe'
         },
-
         alert: {
             dev: true,
             type: 'command',
@@ -698,6 +702,11 @@ SpriteMorph.prototype.initBlocks = function () {
             category: 'pen',
             spec: 'paste on %spr'
         },
+        doCutFrom: {
+            type: 'command',
+            category: 'pen',
+            spec: 'cut from %spr'
+        },
 
         // Control
         receiveGo: {
@@ -708,7 +717,8 @@ SpriteMorph.prototype.initBlocks = function () {
         receiveKey: {
             type: 'hat',
             category: 'control',
-            spec: 'when %keyHat key pressed'
+            spec: 'when %keyHat key pressed',
+            defaults: [['space']]
         },
         receiveInteraction: {
             type: 'hat',
@@ -797,7 +807,8 @@ SpriteMorph.prototype.initBlocks = function () {
         doStopThis: {
             type: 'command',
             category: 'control',
-            spec: 'stop %stopChoices'
+            spec: 'stop %stopChoices',
+            defaults: [['all']]
         },
         doRun: {
             type: 'command',
@@ -857,7 +868,8 @@ SpriteMorph.prototype.initBlocks = function () {
         createClone: {
             type: 'command',
             category: 'control',
-            spec: 'create a clone of %cln'
+            spec: 'create a clone of %cln',
+            defaults: [['myself']]
         },
         newClone: {
             type: 'reporter',
@@ -883,7 +895,8 @@ SpriteMorph.prototype.initBlocks = function () {
             only: SpriteMorph,
             type: 'predicate',
             category: 'sensing',
-            spec: 'touching %col ?'
+            spec: 'touching %col ?',
+            defaults: [['mouse-pointer']]
         },
         reportTouchingColor: {
             only: SpriteMorph,
@@ -901,7 +914,7 @@ SpriteMorph.prototype.initBlocks = function () {
             type: 'reporter',
             category: 'sensing',
             spec: '%asp at %loc',
-            defaults: [['hue']]
+            defaults: [['hue'], ['mouse-pointer']]
         },
         reportStackSize: {
             dev: true,
@@ -956,14 +969,15 @@ SpriteMorph.prototype.initBlocks = function () {
         reportKeyPressed: {
             type: 'predicate',
             category: 'sensing',
-            spec: 'key %key pressed?'
+            spec: 'key %key pressed?',
+            defaults: [['space']]
         },
         reportRelationTo: {
             only: SpriteMorph,
             type: 'reporter',
             category: 'sensing',
             spec: '%rel to %dst',
-            defaults: [['distance']]
+            defaults: [['distance'], ['mouse-pointer']]
         },
         doResetTimer: {
             type: 'command',
@@ -1014,7 +1028,8 @@ SpriteMorph.prototype.initBlocks = function () {
         reportDate: {
             type: 'reporter',
             category: 'sensing',
-            spec: 'current %dates'
+            spec: 'current %dates',
+            defaults: [['date']]
         },
         reportGet: {
             type: 'reporter',
@@ -1079,7 +1094,7 @@ SpriteMorph.prototype.initBlocks = function () {
             type: 'reporter',
             category: 'operators',
             spec: '%fun of %n',
-            defaults: [null, 10]
+            defaults: [['sqrt'], 10]
         },
         reportPower: {
             type: 'reporter',
@@ -1174,7 +1189,7 @@ SpriteMorph.prototype.initBlocks = function () {
             type: 'predicate',
             category: 'operators',
             spec: 'is %s a %typ ?',
-            defaults: [5]
+            defaults: [5, ['number']]
         },
         reportIsIdentical: {
             type: 'predicate',
@@ -1204,7 +1219,7 @@ SpriteMorph.prototype.initBlocks = function () {
             type: 'reporter',
             category: 'operators',
             spec: '%txtfun of %s',
-            defaults: [null, "Abelson & Sussman"]
+            defaults: [['encode URI'], "Abelson & Sussman"]
         },
         reportCompiled: { // experimental
             type: 'reporter',
@@ -1328,7 +1343,6 @@ SpriteMorph.prototype.initBlocks = function () {
         },
 
         reportConcatenatedLists: { // only in dev mode - experimental
-            dev: true,
             type: 'reporter',
             category: 'lists',
             spec: 'append %lists'
@@ -1398,7 +1412,8 @@ SpriteMorph.prototype.initBlocks = function () {
         doMapCodeOrHeader: {
             type: 'command',
             category: 'other',
-            spec: 'map %cmdRing to %codeKind %code'
+            spec: 'map %cmdRing to %codeKind %code',
+            defaults: [null, ['code']]
         },
         doMapValueCode: {
             type: 'command',
@@ -1578,14 +1593,13 @@ SpriteMorph.prototype.blockAlternatives = {
     clear: ['down', 'up', 'doStamp'],
     down: ['up', 'clear', 'doStamp'],
     up: ['down', 'clear', 'doStamp'],
+    doPasteOn: ['doCutFrom'],
+    doCutFrom: ['doPasteOn'],
     doStamp: ['clear', 'down', 'up'],
-
     setPenHSVA: ['changePenHSVA'],
     changePenHSVA: ['setPenHSVA'],
-
     setBackgroundHSVA: ['changeBackgroundHSVA'],
     changeBackgroundHSVA: ['setBackgroundHSVA'],
-
     changeSize: ['setSize'],
     setSize: ['changeSize'],
     
@@ -2381,6 +2395,7 @@ SpriteMorph.prototype.blockTemplates = function (category) {
         blocks.push(block('reportPenTrailsAsCostume'));
         blocks.push('-');
         blocks.push(block('doPasteOn'));
+        blocks.push(block('doCutFrom'));
         blocks.push('=');
         blocks.push(this.makeBlockButton(cat));
 
@@ -3338,6 +3353,7 @@ SpriteMorph.prototype.reporterize = function (expressionString) {
             case '*':
             case '/':
             case '%':
+            case '^':
             case '=':
             case '<':
             case '>':
@@ -3389,11 +3405,13 @@ SpriteMorph.prototype.reporterize = function (expressionString) {
             round: 'reportRound',
             not: 'reportNot'
         };
-        monads = ['abs', 'ceiling', 'floor', 'sqrt', 'sin', 'cos', 'tan',
-            'asin', 'acos', 'atan', 'ln', 'log', 'round', 'not'];
+        monads = ['abs', 'neg', 'ceiling', 'floor', 'sqrt', 'sin', 'cos',
+            'tan', 'asin', 'acos', 'atan', 'ln', 'log', 'lg', 'id', 'round',
+            'not'];
         alias = {
             ceil: 'ceiling',
-            '!' : 'not'
+            '!' : 'not',
+            '-' : 'neg'
         };
         monads.concat(['true', 'false']).forEach(word =>
             reverseDict[localize(word).toLowerCase()] = word
@@ -3565,13 +3583,14 @@ SpriteMorph.prototype.doWearPreviousCostume = function () {
 };
 
 SpriteMorph.prototype.doSwitchToCostume = function (id, noShadow) {
-    var w, h;
+    var w = 0, h = 0;
     if (id instanceof List) { // try to turn a list of pixels into a costume
         if (this.costume) {
             // recycle dimensions of current costume
             w = this.costume.width();
             h = this.costume.height();
-        } else {
+        }
+        if (w * h !== id.length()) {
             // assume stage's dimensions
             w = StageMorph.prototype.dimensions.x;
             h = StageMorph.prototype.dimensions.y;
@@ -4368,6 +4387,47 @@ SpriteMorph.prototype.overlappingPixels = function (otherSprite) {
     ];
 };
 
+// SpriteMorph neighbor detection
+
+SpriteMorph.prototype.neighbors = function (aStage) {
+    var stage = aStage || this.parentThatIsA(StageMorph),
+        myPerimeter = this.perimeter(stage);
+    return new List(
+        stage.children.filter(each => {
+            var eachPerimeter,
+                distance;
+            if (each instanceof SpriteMorph &&
+                each.isVisible &&
+                (each !== this)
+            ) {
+                eachPerimeter = each.perimeter(stage);
+                distance = myPerimeter.center.distanceTo(eachPerimeter.center);
+                return (distance - myPerimeter.radius - eachPerimeter.radius)
+                    < 0;
+            }
+            return false;
+        })
+    );
+};
+
+SpriteMorph.prototype.perimeter = function (aStage) {
+    var stage = aStage || this.parentThatIsA(StageMorph),
+        stageScale = this instanceof StageMorph ? 1 : stage.scale,
+        radius;
+    if (this.costume) {
+        radius = Math.max(
+            this.costume.width(),
+            this.costume.height()
+        ) * this.scale * stageScale;
+    } else {
+        radius = Math.max(this.width(), this.height());
+    }
+    return {
+        center: this.center(), // geometric center rather than position
+        radius: radius
+    };
+};
+
 // SpriteMorph pen ops
 
 SpriteMorph.prototype.doStamp = function () {
@@ -4450,7 +4510,7 @@ SpriteMorph.prototype.changeSize = function (delta) {
 
 // SpriteMorph printing on another sprite:
 
-SpriteMorph.prototype.pasteOn = function (target) {
+SpriteMorph.prototype.blitOn = function (target, mask = 'source-atop') {
     // draw my costume onto a copy of the target's costume scaled and rotated
     // so it appears as though I'm "stamped" onto it.
 
@@ -4549,7 +4609,7 @@ SpriteMorph.prototype.pasteOn = function (target) {
     ctx = targetCostume.contents.getContext('2d');
     ctx.rotate(radians(relRot));
     ctx.scale(relScale, relScale);
-    ctx.globalCompositeOperation = 'source-atop';
+    ctx.globalCompositeOperation = mask;
     ctx.drawImage(sourceCostume.contents, pos.x, pos.y);
 
     // make the target wear the new costume
@@ -5144,7 +5204,6 @@ SpriteMorph.prototype.positionTalkBubble = function () {
 // dragging and dropping adjustments b/c of talk bubbles and parts
 
 SpriteMorph.prototype.prepareToBeGrabbed = function (hand) {
-    this.removeShadow();
     this.recordLayers();
     this.shadowAttribute('x position');
     this.shadowAttribute('y position');
@@ -5152,7 +5211,6 @@ SpriteMorph.prototype.prepareToBeGrabbed = function (hand) {
             this.isCorrectingOutsideDrag()) {
         this.setCenter(hand.position());
     }
-    this.addShadow();
 };
 
 SpriteMorph.prototype.isCorrectingOutsideDrag = function () {
@@ -5775,7 +5833,7 @@ SpriteMorph.prototype.allMessageNames = function () {
 
 SpriteMorph.prototype.allSendersOf = function (message, receiverName, known) {
     return this.allScripts().filter(script =>
-        script.isSending(message, receiverName, known)
+        script.isSending && script.isSending(message, receiverName, known)
     );
 };
 
@@ -5823,6 +5881,12 @@ SpriteMorph.prototype.allHatBlocksForInteraction = function (interaction) {
         }
         return false;
     });
+};
+
+SpriteMorph.prototype.hasGenericHatBlocks = function () {
+    return this.scripts.children.some(morph =>
+        morph.selector === 'receiveCondition'
+    );
 };
 
 SpriteMorph.prototype.allGenericHatBlocks = function () {
@@ -6432,6 +6496,18 @@ SpriteMorph.prototype.replaceDoubleDefinitionsFor = function (definition) {
     }
 };
 
+// SpriteMorph controlling generic WHEN hats
+
+SpriteMorph.prototype.pauseGenericHatBlocks = function () {
+    var stage = this.parentThatIsA(StageMorph),
+        ide = this.parentThatIsA(IDE_Morph);
+    if (this.hasGenericHatBlocks()) {
+        stage.enableCustomHatBlocks = true;
+        stage.threads.pauseCustomHatBlocks = true;
+        ide.controlBar.stopButton.refresh();
+    }
+};
+
 // SpriteMorph inheritance - general
 
 SpriteMorph.prototype.chooseExemplar = function () {
@@ -6843,13 +6919,17 @@ SpriteMorph.prototype.hasSpriteVariable = function (varName) {
 };
 
 SpriteMorph.prototype.allLocalVariableNames = function (sorted) {
-    var data;
+    var exceptGlobals = this.globalVariables(),
+        globalNames = exceptGlobals.names(),
+        data;
 
     function alphabetically(x, y) {
         return x.toLowerCase() < y.toLowerCase() ? -1 : 1;
     }
 
- 	data = this.variables.names();
+ 	data = this.variables.allNames(exceptGlobals).filter(each =>
+		!contains(globalNames, each)
+    );
 	if (sorted) {
  		data.sort(alphabetically);
    }
@@ -8208,6 +8288,18 @@ StageMorph.prototype.editScripts = function () {
     scripts.focus.fixLayout();
 };
 
+// StageMorph controlling generic WHEN hats
+
+StageMorph.prototype.pauseGenericHatBlocks = function () {
+    var ide = this.parentThatIsA(IDE_Morph);
+    if (this.hasGenericHatBlocks() ||
+            ide.sprites.asArray().some(any => any.hasGenericHatBlocks())) {
+        this.enableCustomHatBlocks = true;
+        this.threads.pauseCustomHatBlocks = true;
+        ide.controlBar.stopButton.refresh();
+    }
+};
+
 // StageMorph block templates
 
 StageMorph.prototype.blockTemplates = function (category) {
@@ -8399,6 +8491,7 @@ StageMorph.prototype.blockTemplates = function (category) {
         blocks.push(block('reportPenTrailsAsCostume'));
         blocks.push('-');
         blocks.push(block('doPasteOn'));
+        blocks.push(block('doCutFrom'));
         blocks.push('=');
         blocks.push(this.makeBlockButton(cat));
 
@@ -8892,7 +8985,8 @@ StageMorph.prototype.trailsLogAsSVG = function () {
         p2 = this.normalizePoint(line[1]).translateBy(shift);
         svg += '<line x1="' + p1.x + '" y1="' + p1.y +
             '" x2="' + p2.x + '" y2="' + p2.y + '" ' +
-            'style="stroke:' + line[2].toString() + ';' +
+            'style="stroke:' + line[2].toRGBstring() + ';' +
+            'stroke-opacity:' + line[2].a + ';' +
             'stroke-width:' + line[3] +
             ';stroke-linecap:' + line[4] +
             '" />';
@@ -8976,7 +9070,7 @@ StageMorph.prototype.getPenAttribute
 
 // StageMorph printing on another sprite:
 
-StageMorph.prototype.pasteOn = SpriteMorph.prototype.pasteOn;
+StageMorph.prototype.blitOn = SpriteMorph.prototype.blitOn;
 
 // StageMorph pseudo-inherited behavior
 
@@ -8995,16 +9089,16 @@ StageMorph.prototype.showingWatcher = SpriteMorph.prototype.showingWatcher;
 StageMorph.prototype.addVariable = SpriteMorph.prototype.addVariable;
 StageMorph.prototype.deleteVariable = SpriteMorph.prototype.deleteVariable;
 
+// StageMorph neighbor detection
+
+StageMorph.prototype.neighbors = SpriteMorph.prototype.neighbors;
+StageMorph.prototype.perimeter = SpriteMorph.prototype.perimeter;
+
 // StageMorph block rendering
 
-StageMorph.prototype.doScreenshot
-    = SpriteMorph.prototype.doScreenshot;
-
-StageMorph.prototype.newCostumeName
-    = SpriteMorph.prototype.newCostumeName;
-
-StageMorph.prototype.blockForSelector
-    = SpriteMorph.prototype.blockForSelector;
+StageMorph.prototype.doScreenshot = SpriteMorph.prototype.doScreenshot;
+StageMorph.prototype.newCostumeName = SpriteMorph.prototype.newCostumeName;
+StageMorph.prototype.blockForSelector = SpriteMorph.prototype.blockForSelector;
 
 // StageMorph variable watchers (for palette checkbox toggling)
 
@@ -9194,6 +9288,9 @@ StageMorph.prototype.allHatBlocksForKey
 
 StageMorph.prototype.allHatBlocksForInteraction
     = SpriteMorph.prototype.allHatBlocksForInteraction;
+
+StageMorph.prototype.hasGenericHatBlocks
+    = SpriteMorph.prototype.hasGenericHatBlocks;
 
 StageMorph.prototype.allGenericHatBlocks
     = SpriteMorph.prototype.allGenericHatBlocks;
@@ -9652,8 +9749,8 @@ Costume.prototype.canvasBoundingBox = function (pic) {
     }
 
     function getLeft() {
-        for (col = 0; col <= w; col += 1) {
-            for (row = 0; row <= h; row += 1) {
+        for (col = 0; col < w; col += 1) {
+            for (row = 0; row < h; row += 1) {
                 if (getAlpha(col, row)) {
                     return col;
                 }
@@ -9663,8 +9760,8 @@ Costume.prototype.canvasBoundingBox = function (pic) {
     }
 
     function getTop() {
-        for (row = 0; row <= h; row += 1) {
-            for (col = 0; col <= w; col += 1) {
+        for (row = 0; row < h; row += 1) {
+            for (col = 0; col < w; col += 1) {
                 if (getAlpha(col, row)) {
                     return row;
                 }
@@ -9674,8 +9771,8 @@ Costume.prototype.canvasBoundingBox = function (pic) {
     }
 
     function getRight() {
-        for (col = w; col >= 0; col -= 1) {
-            for (row = h; row >= 0; row -= 1) {
+        for (col = w - 1; col >= 0; col -= 1) {
+            for (row = h - 1; row >= 0; row -= 1) {
                 if (getAlpha(col, row)) {
                     return Math.min(col + 1, w);
                 }
@@ -9685,8 +9782,8 @@ Costume.prototype.canvasBoundingBox = function (pic) {
     }
 
     function getBottom() {
-        for (row = h; row >= 0; row -= 1) {
-            for (col = w; col >= 0; col -= 1) {
+        for (row = h - 1; row >= 0; row -= 1) {
+            for (col = w - 1; col >= 0; col -= 1) {
                 if (getAlpha(col, row)) {
                     return Math.min(row + 1, h);
                 }
@@ -9761,7 +9858,9 @@ Costume.prototype.stretched = function (w, h) {
 
     ctx.translate(Math.abs(Math.min(w, 0)), Math.abs(Math.min(h, 0)));
     ctx.scale(xRatio, yRatio);
-    ctx.drawImage(this.contents, 0, 0);
+    // first rasterize in case it's an SVG and in case it's on Firefox
+    // because Firefox prevents stretching of SVGs with locked aspect ratios
+    ctx.drawImage(this.rasterized().contents, 0, 0);
     stretched = new Costume(
         canvas,
         this.name,
@@ -9803,14 +9902,17 @@ Costume.prototype.edit = function (aWorld, anIDE, isnew, oncancel, onsubmit) {
     );
 };
 
-Costume.prototype.editRotationPointOnly = function (aWorld) {
+Costume.prototype.editRotationPointOnly = function (aWorld, anIDE) {
     var editor = new CostumeEditorMorph(this),
         action,
         dialog,
         txt;
 
     editor.fixLayout();
-    action = () => editor.accept();
+    action = () => {
+        editor.accept();
+        anIDE.currentSprite.wearCostume(this, true); // don't shadow
+    };
     dialog = new DialogBoxMorph(this, action);
     txt = new TextMorph(
         localize('click or drag crosshairs to move the rotation center'),
@@ -9839,28 +9941,38 @@ Costume.prototype.editRotationPointOnly = function (aWorld) {
 
 Costume.prototype.shrinkToFit = function (extentPoint) {
     if (extentPoint.x < this.width() || (extentPoint.y < this.height())) {
-        this.contents = this.thumbnail(extentPoint);
+        this.contents = this.thumbnail(extentPoint, null, true);
     }
 };
 
-Costume.prototype.thumbnail = function (extentPoint, recycleMe) {
+Costume.prototype.thumbnail = function (extentPoint, recycleMe, noPadding) {
     // answer a new Canvas of extentPoint dimensions containing
     // my thumbnail representation keeping the originial aspect ratio
     // a "recycleMe canvas can be passed for re-use
-    var src = this.contents, // at this time sprites aren't composite morphs
-        scale, xOffset, yOffset,
-        trg = newCanvas(extentPoint, true, recycleMe), // non-retina
-        ctx = trg.getContext('2d');
+    // if "noPadding" is "true" the resulting thumbnail fits inside the
+    // given extentPoint without padding it, i.e. one of the dimensions
+    // is likely to be lesser than that of the extentPoint
+    var src = this.contents,
+        w = src ? src.width : 1, // could be an asynchronously loading SVG
+        h = src ? src.height : 1, // could be an asynchronously loading SVG
+        scale = Math.min(
+            (extentPoint.x / w),
+            (extentPoint.y / h)
+        ),
+        xOffset = noPadding ? 0
+            : Math.floor((extentPoint.x - (w * scale)) / 2),
+        yOffset = noPadding ? 0
+            : Math.floor((extentPoint.y - (h * scale)) / 2),
+        trg, ctx;
 
-    if (!src || src.width + src.height === 0) {return trg; }
-
-    scale = Math.min(
-        (extentPoint.x / src.width),
-        (extentPoint.y / src.height)
+    trg = newCanvas(
+        noPadding ? new Point(this.width() * scale, this.height() * scale)
+            : extentPoint,
+        true, // non-retina
+        recycleMe
     );
-    xOffset = (extentPoint.x - (src.width * scale)) / 2;
-    yOffset = (extentPoint.y - (src.height * scale)) / 2;
-
+    if (!src || src.width + src.height === 0) {return trg; }
+    ctx = trg.getContext('2d');
     ctx.save();
     ctx.scale(scale, scale);
     ctx.drawImage(
@@ -10192,6 +10304,9 @@ function Sound(audio, name) {
     // internal for decoding, don't persist
     this.audioBuffer = null; // for decoding ops
     this.isDecoding = false;
+
+    // internal for deserializing, don't persist
+    this.loaded = null; // for de-serialization only
 }
 
 Sound.prototype.play = function () {
@@ -10902,6 +11017,7 @@ CellMorph.prototype.update = function () {
         return;
     }
     if (this.version !== this.contents.version) {
+        this.fixLayout();
         this.rerender();
         this.version = this.contents.version;
     }
@@ -10930,11 +11046,13 @@ CellMorph.prototype.render = function (ctx) {
         ctx.closePath();
         ctx.stroke();
 
-        ctx.shadowOffsetX = this.border;
-        ctx.shadowOffsetY = this.border;
-        ctx.shadowBlur = this.border;
-        ctx.shadowColor = this.color.darker(80).toString();
-        this.drawShadow(ctx, this.edge, this.border / 2);
+        if (useBlurredShadows) {
+            ctx.shadowOffsetX = this.border;
+            ctx.shadowOffsetY = this.border;
+            ctx.shadowBlur = this.border;
+            ctx.shadowColor = this.color.darker(80).toString();
+            this.drawShadow(ctx, this.edge, this.border / 2);
+        }
     }
 };
 
