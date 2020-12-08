@@ -229,7 +229,7 @@ const load_mobilenet = (when) => {
  * Initialises by loading the knn model, finding and loading
  * available camera devices, and setting off the animate function.
  */
-const initialise_page = async function (incoming_training_class_names, source) {
+const initialise_page = async function (incoming_training_class_names, source, hostname, search, hash) {
   set_class_names(incoming_training_class_names);
 
   document.getElementById('main').style.display = 'block';
@@ -244,14 +244,14 @@ const initialise_page = async function (incoming_training_class_names, source) {
         info.id = 'info';
         document.body.appendChild(info);
     }
-    if (window.location.hostname === window.top.location.hostname) {
+    if (window.location.hostname === hostname) {
         info.textContent = 'This browser does not support video capture, ' +
                            'lacks permission to use the camera, ' +
                            'or this device does not have a camera.';      
     } else {
         // because the iframe is from a different domain we suggest to the user 
         // that the ecraft2learn clone of Snap! be used instead
-        let new_url = "https://ecraft2learn.github.io/ai/snap/snap-no-logging.html" + window.top.location.search + window.top.location.hash;
+        let new_url = "https://ecraft2learn.github.io/ai/snap/snap-no-logging.html" + search + hash;
         info.innerHTML = 
             `The browser is preventing access to the camera from this window.
              Re-open this Snap! project with <a href="${new_url}" taget="_blank">this clone hosted on ecraft2learn.github.io</a>.`;
@@ -419,8 +419,8 @@ const listen_for_messages = function (event) {
          }
     } else if (typeof event.data.get_image_features !== 'undefined') {
         image_data_to_features_vector(event.data.get_image_features.image_data, 
-                                     event.data.get_image_features.time_stamp,
-                                     event.source);
+                                      event.data.get_image_features.time_stamp,
+                                      event.source);
     } else if (event.data === 'stop') {
         stop();
     } else if (event.data === 'restart') {
@@ -430,7 +430,7 @@ const listen_for_messages = function (event) {
         if (event.data.no_display_of_support_window) {
             set_class_names(event.data.training_class_names);
         } else {
-            initialise_page(event.data.training_class_names, event.source).then(start);
+            initialise_page(event.data.training_class_names, event.source, event.data.hostname, event.data.search, event.data.hash).then(start);
         }
     } else if (typeof event.data.new_introduction !== 'undefined') {
         // update HTML of the page with custom introduction
@@ -444,7 +444,7 @@ const listen_for_messages = function (event) {
                     // fully initialised 
 //                  window.parent.postMessage('Ready', "*");
                 } else {
-                    initialise_page(data_set.labels, event.source);
+                    initialise_page(data_set.labels, event.source, window.location);
                 }
                 if (TOGETHER_JS) {
                     collaborate();

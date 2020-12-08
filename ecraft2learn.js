@@ -867,7 +867,10 @@ window.ecraft2learn =
                   if (event.data === "MobileNet loaded" || event.data === "Audio support loaded") {
                       machine_learning_window.postMessage({training_class_names: buckets,
                                                            training_name,
-                                                           no_display_of_support_window},
+                                                           no_display_of_support_window,
+                                                           hostname: window.location.hostname,
+                                                           search: window.location.search,
+                                                           hash: window.location.hash},
                                                           "*");
                       if (no_display_of_support_window) {
                          invoke_callback(callback);
