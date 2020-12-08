@@ -216,6 +216,9 @@ modules.api = '2020-November-21';
 
 window.onmessage = function (event) {
     // make the API accessible from outside an iframe
+    if (!event.data.selector) {
+        return; // added by Ken Kahn
+    }
     var ide = world.children[0];
     window.top.postMessage(
         {
