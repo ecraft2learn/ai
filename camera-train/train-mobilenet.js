@@ -244,9 +244,18 @@ const initialise_page = async function (incoming_training_class_names, source) {
         info.id = 'info';
         document.body.appendChild(info);
     }
-    info.textContent = 'This browser does not support video capture, ' +
-                       'lacks permission to use the camera, ' +
-                       'or this device does not have a camera.';
+    if (window.location.hostname === window.top.location.hostname) {
+        info.textContent = 'This browser does not support video capture, ' +
+                           'lacks permission to use the camera, ' +
+                           'or this device does not have a camera.';      
+    } else {
+        // because the iframe is from a different domain we suggest to the user 
+        // that the ecraft2learn clone of Snap! be used instead
+        let new_url = "https://ecraft2learn.github.io/ai/snap/snap-no-logging.html" + window.top.location.search + window.top.location.hash;
+        info.innerHTML = 
+            `The browser is preventing access to the camera from this window.
+             Re-open this Snap! project with <a href="${new_url}" taget="_blank">this clone hosted on ecraft2learn.github.io</a>.`;
+    }
     info.style.display = 'block';
     throw e;
   }
