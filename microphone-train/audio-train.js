@@ -259,18 +259,22 @@ const message_receiver =
         if (typeof event.data.training_class_names !== 'undefined') {
             // received the names of the classes so ready to initialise
             // test if microphone is available
-            navigator.mediaDevices.getUserMedia({audio: true}).catch ((error) => {
-                handle_microphone_error(event.data);
-                return;   
-            });
-            await initialise(event.data.training_class_names);
-            let please_wait_element = document.getElementById('please-wait');
-            if (please_wait_element && event.data.training_class_names.length > 0) {
-                please_wait_element.remove();
-                let introduction = document.getElementById("introduction");
-                introduction.style.display = 'block'; // was hidden until everything is loaded
-            }
-            window.parent.postMessage("Ready", "*");
+            navigator.mediaDevices.getUserMedia({audio: true})
+                .then(() => {
+                    initialise(event.data.training_class_names).then(() => {
+                        let please_wait_element = document.getElementById('please-wait');
+                        if (please_wait_element && event.data.training_class_names.length > 0) {
+                            please_wait_element.remove();
+                            let introduction = document.getElementById("introduction");
+                            introduction.style.display = 'block'; // was hidden until everything is loaded
+                        }
+                        window.parent.postMessage("Ready", "*");
+                    });                    
+                })
+                .catch ((error) => {
+                    handle_microphone_error(event.data);
+                    return;   
+                });
          } else if (typeof event.data.new_introduction !== 'undefined') {
             // introductory text overridde
             let introduction = document.getElementById("introduction");
@@ -304,19 +308,20 @@ const message_receiver =
     };
 
     const handle_microphone_error = ({hostname, search, hash}) => {
-        let message;
+        let message_element = document.createElement('h2');
         if (window.location.hostname === hostname) {
-            message = 'This browser does not support audio capture, ' +
-                      'lacks permission to use the microphone, ' +
-                      'or this device does not have a microphone.';      
+            message_element.innerHTML = 'This browser does not support audio capture, ' +
+                                        'lacks permission to use the microphone, ' +
+                                        'or this device does not have a microphone.';      
         } else {
             // because the iframe is from a different domain we suggest to the user 
             // that the ecraft2learn clone of Snap! be used instead
             let new_url = "https://ecraft2learn.github.io/ai/snap/snap-no-logging.html" + search + hash;
-            message = `The browser is preventing access to the microphone from this window.
-                       Re-open this Snap! project with <a href="${new_url}" target="_blank">this clone hosted on ecraft2learn.github.io</a>.`;
+            message_element.innerHTML = 
+                `The browser is preventing access to the microphone from this window.
+                 Re-open this Snap! project with <a href="${new_url}" target="_blank">this clone hosted on ecraft2learn.github.io</a>.`;
         }
-        document.write(message);
+        document.body.appendChild(message_element);
     };
     
     window.addEventListener('DOMContentLoaded', 
