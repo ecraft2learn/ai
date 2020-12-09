@@ -254,7 +254,7 @@ const initialise_page = async function (incoming_training_class_names, source, h
         let new_url = "https://ecraft2learn.github.io/ai/snap/snap-no-logging.html" + search + hash;
         info.innerHTML = 
             `The browser is preventing access to the camera from this window.
-             Re-open this Snap! project with <a href="${new_url}" taget="_blank">this clone hosted on ecraft2learn.github.io</a>.`;
+             Re-open this Snap! project with <a href="${new_url}" target="_blank">this clone hosted on ecraft2learn.github.io</a>.`;
     }
     info.style.display = 'block';
     throw e;
