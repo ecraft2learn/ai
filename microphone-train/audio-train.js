@@ -258,13 +258,11 @@ const message_receiver =
     async (event) => {
         if (typeof event.data.training_class_names !== 'undefined') {
             // received the names of the classes so ready to initialise
-            try {
-                // test if microphone is available
-                navigator.mediaDevices.getUserMedia({audio: true});
-            } catch (error) {
+            // test if microphone is available
+            navigator.mediaDevices.getUserMedia({audio: true}).catch ((error) => {
                 handle_microphone_error(event.data);
                 return;   
-            }
+            });
             await initialise(event.data.training_class_names);
             let please_wait_element = document.getElementById('please-wait');
             if (please_wait_element && event.data.training_class_names.length > 0) {
