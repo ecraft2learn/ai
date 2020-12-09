@@ -139,18 +139,18 @@ const initialise = async function (training_class_names) {
             await stop_recognising(true);
             user_recognizer.collectExample(training_class_names[class_index])
                 .then(() => {
-                    examples_collected++;
-                    if (typeof info_text.count !== 'number') {
-                        info_text.count = 1;
-                        info_text.innerHTML = "&nbsp;&nbsp;" + info_text.count + " example trained";
-                    } else {
-                         info_text.count++;
-                         info_text.innerHTML = "&nbsp;&nbsp;" + info_text.count + " examples trained";
-                    }                         
-             })
-             .catch(error => {
-                 report_error(error.message);
-             });
+                        examples_collected++;
+                        if (typeof info_text.count !== 'number') {
+                            info_text.count = 1;
+                            info_text.innerHTML = "&nbsp;&nbsp;" + info_text.count + " example trained";
+                        } else {
+                             info_text.count++;
+                             info_text.innerHTML = "&nbsp;&nbsp;" + info_text.count + " examples trained";
+                        }                         
+                    })
+                .catch(error => {
+                    report_error(error.message);
+                });
         };
         let train_off = function (class_index, info_text) {
             // obsolete
@@ -258,6 +258,13 @@ const message_receiver =
     async (event) => {
         if (typeof event.data.training_class_names !== 'undefined') {
             // received the names of the classes so ready to initialise
+            try {
+                // test if microphone is available
+                navigator.mediaDevices.getUserMedia({audio: true});
+            } catch (error) {
+                handle_microphone_error(event.data);
+                return;   
+            }
             await initialise(event.data.training_class_names);
             let please_wait_element = document.getElementById('please-wait');
             if (please_wait_element && event.data.training_class_names.length > 0) {
@@ -298,8 +305,24 @@ const message_receiver =
         }
     };
 
+    const handle_microphone_error = ({hostname, search, hash}) => {
+        let message;
+        if (window.location.hostname === hostname) {
+            message = 'This browser does not support audio capture, ' +
+                      'lacks permission to use the microphone, ' +
+                      'or this device does not have a microphone.';      
+        } else {
+            // because the iframe is from a different domain we suggest to the user 
+            // that the ecraft2learn clone of Snap! be used instead
+            let new_url = "https://ecraft2learn.github.io/ai/snap/snap-no-logging.html" + search + hash;
+            message = `The browser is preventing access to the microphone from this window.
+                       Re-open this Snap! project with <a href="${new_url}" target="_blank">this clone hosted on ecraft2learn.github.io</a>.`;
+        }
+        document.write(message);
+    };
+    
     window.addEventListener('DOMContentLoaded', 
-        (event) => {
+        (event) => {        
             window.addEventListener("message", message_receiver, false);
             window.parent.postMessage("Audio support loaded", "*");     
         });
