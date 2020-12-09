@@ -208,12 +208,26 @@ window.ecraft2learn =
               original_stopAllScripts();
           };      
       };
+      const workaround_snap_message_listener = () => {
+          const snap_listener = window.onmessage;
+          window.onmessage = undefined;
+          window.addEventListener('message',
+                                  (event) => {
+                                      if (!event.data.selector) {
+                                          return; 
+                                      }
+                                      snap_listener(event);
+                                  });
+      };
       if (document.body) {
           track_whether_snap_is_stopped();
           enhance_snap_openProject();
+          workaround_snap_message_listener();
       } else {
+          // too soon so wait until page is loaded
           window.addEventListener('load', track_whether_snap_is_stopped, false);
           window.addEventListener('load', enhance_snap_openProject, false);
+          window.addEventListener('load', workaround_snap_message_listener, false);
       }
       let get_global_variable_value = function (name, default_value) {
           // returns the value of the Snap! global variable named 'name'
