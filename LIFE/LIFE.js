@@ -911,7 +911,7 @@ const initialize = () => {
 		load_local_or_remote_scripts(files, undefined, initialize_covid_scenario);				                             
 	} else if (mode === 'answer questions') {
 		document.getElementById('question answering interface').hidden = false;
-    	setup_interface();
+    	load_local_or_remote_scripts(["../ecraft2learn.js", "../js/invoke_callback.js"], undefined, setup_interface);
     } else if (mode === 'create model') {
     	document.body.innerHTML = "Training started";
     }
