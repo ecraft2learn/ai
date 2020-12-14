@@ -155,6 +155,17 @@ This use of word embeddings works for grammatical analogies as well.
 Try solving "slow is to slower as fast is to what?".
 You might need to add 'fast' as an exception.
 </p>
+<p class="instructions">
+Note that for word analogies of the form A is to B as C is to D that the distance between A-B to C-D is much
+less than if A, B, C, and D were just words chosen at random.
+One could search through a list of words by choosing four words and measuring the distance between
+differences between pairs of words.
+If one only keeps those where the distance is small one may discover new word analogy puzzles.
+However, if one did this by searching through all 20,000 words then 3,998,800,199,970,000 combinations would
+have to be considered.
+Here is a <a href="../snap/snap.html?project=word analogy search&editMode&noRun" target="_blank">
+project that enables one to search through a smaller set</a>.
+</p>
 <h4 class="instructions-white" id="closest-words">Finding all the 'closest' words</h4>
 <p class="instructions">
 If you were to use the <span class="block-name">closest word to</span> reporter to sort all
