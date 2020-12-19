@@ -457,7 +457,7 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
                 install_settings_button.className = "support-window-button";
                 draw_area.appendChild(install_settings_button);
                 const model_name = best_model.name;
-                const average_text = number_of_samples > 1 ? 'Average ' : '';
+                const average_text = options.number_of_samples > 1 ? 'Average ' : '';
                 install_settings_button.innerHTML = 
                     metrics_of_highest_score ?
                     ("Click to set '" + model_name + "' to best one found (" +
