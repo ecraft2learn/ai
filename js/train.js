@@ -105,8 +105,9 @@ const next_slice_number = (options) => {
 const create_model = (options, failure_callback) => {
     record_callbacks(failure_callback);
     try {
-        const {model_name, hidden_layer_sizes, dropout_rate, optimizer, layer_initializer, batch_normalization, regularizer, learning_rate,
-               loss_function, activation, last_activation, seed, datasets, custom_model_builder, load_model_for_further_training, training_number} = options;
+        const {model_name, hidden_layer_sizes, dropout_rate, optimizer, layer_initializer, batch_normalization, regularizer,
+               learning_rate, loss_function, activation, last_activation, seed, datasets, custom_model_builder,
+               load_model_for_further_training, training_number} = options;
         const tfvis_options = typeof tfvis === 'object' ? options.tfvis_options || {} : {}; // ignore options if tfvis not loaded
         let class_names = options.class_names;
         let {input_shape} = options;
@@ -161,8 +162,9 @@ const create_model = (options, failure_callback) => {
                 const kernelRegularizer = last_layer ? undefined : tfjs_function(regularizer, tf.regularizers, index);
                 const kernelInitializer = last_layer ? undefined : tfjs_function(layer_initializer, tf.initializers, index);
                 const activation_function = (typeof activation === 'string' ? activation : tfjs_function(activation, tf.layers, index)) || 'relu';
+                const number_of_categories = class_names && Math.max(class_names.length, window.minimum_number_of_categories_for_textual_output || 0);
                 const configuration = {inputShape: index === 0 ? input_shape : undefined,
-                                       units: last_layer && class_names ? class_names.length : +size,
+                                       units: last_layer && class_names ? number_of_categories : +size,
                                        activation: last_layer ? last_activation || (class_names && 'softmax') : activation_function,
                                        kernelInitializer,
                                        kernelRegularizer,
@@ -831,11 +833,11 @@ const enhance_error_message = (error_message) => {
 const categorical_results = (results, categories) => 
     results.map((result) => {
         const result_as_object = {};
-        result.forEach((result, index) => {(
-            result_as_object[categories[index]] = result)
-        });
+        categories.forEach((category, index) => {
+            result_as_object[category] = result[index];
+        })
         return result_as_object;
-    });
+});
 
 const shape_of_data = (data) => {
    if (typeof data === 'number') {

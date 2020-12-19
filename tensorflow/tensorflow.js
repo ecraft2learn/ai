@@ -40,7 +40,12 @@ const get_data = (model_name, kind) => {
     }
     return data[model_name][kind];
 };
-const set_data = (model_name, kind, value, callback, permitted_labels) => {
+
+const set_data = (model_name, kind, value, callback, permitted_labels, minimum_number_of_categories) => {
+    if (minimum_number_of_categories) {
+        // following needs to be available to train.js 
+        window.minimum_number_of_categories_for_textual_output = minimum_number_of_categories;
+    }
     if (!data.hasOwnProperty(model_name)) {
         data[model_name] = {};
     }
@@ -48,7 +53,10 @@ const set_data = (model_name, kind, value, callback, permitted_labels) => {
         if (value.output.length > 0 && isNaN(+value.output[0])) {
             // values might be strings that represent numbers - only non-numeric strings can be category labels
             let labels, class_weights;
-            [value, labels, class_weights] = to_one_hot_and_removed_data_with_unknown_output_labels(value, permitted_labels, kind==='training');
+            [value, labels, class_weights] = 
+                to_one_hot_and_removed_data_with_unknown_output_labels(value, 
+                                                                       permitted_labels,
+                                                                       kind==='training');
             data[model_name].categories = labels;
             if (kind ==='training') {
                 data[model_name].class_weights = class_weights;
@@ -118,7 +126,9 @@ const to_one_hot_and_removed_data_with_unknown_output_labels = (input_and_output
         const label_index = unique_labels.indexOf(label);
         if (label_index >= 0) {
             new_input.push(original_input[index]);
-            new_output.push(one_hot(label_index, unique_labels.length))
+            new_output.push(one_hot(label_index,
+                                    Math.max(unique_labels.length,
+                                             window.minimum_number_of_categories_for_textual_output || 0)));
         } // otherwise skip if output label not permitted 
     });
     let class_weights = [];
@@ -400,7 +410,8 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
     draw_area.appendChild(optimize_hyperparameters_messages);
     const name_element = document.getElementById('name_element');
     const options = {};
-    options.model_name = name_element ? name_element.value : model ? model.name : 'my-model';
+    const model_name = name_element ? name_element.value : model ? model.name : 'my-model';
+    options.model_name = model_name;
     options.categories = get_data(model_name, 'categories');
     const [xs, ys] = get_tensors(model_name, 'training');
     let validation_tensors = get_tensors(model_name, 'validation'); // undefined if no validation data
@@ -430,7 +441,7 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
     options.number_of_samples = Math.round(gui_state["Optimize"]["Number of samples"]);
     options.what_to_optimize = search_descriptions.map(description => gui_state["Optimize"][description]);
     options.scoring_weights = weight_descriptions.map(description => gui_state["Optimize"][description]);
-    optimize(options, xs, ys, validation_tensors, test_tensors)
+    optimize(xs, ys, validation_tensors, test_tensors, options)
         .then((result) => {
             if (!result) {
                 // error has been handled
@@ -632,7 +643,7 @@ const optimize = async (xs, ys, validation_tensors, test_tensors, options) => {
          what_to_optimize,
          scoring_weights,
          number_of_samples, // how many times to repeat experiments on the same parameters
-         tfvis_options} = options;
+         tfvis_options} = options || {};
     training_number = 0;
     best_model = undefined;
     const create_and_train_model = async ({layers, optimization_method, loss_function, epochs, learning_rate, stop_if_no_progress_for_n_epochs,
@@ -1595,15 +1606,15 @@ const receive_message =
             reset_all();
         } else if (typeof message.data !== 'undefined') {
             try {
-                const {kind, data, permitted_labels, ignore_old_dataset, time_stamp} = message;
+                const {kind, data, permitted_labels, ignore_old_dataset, minimum_number_of_categories_for_textual_output, time_stamp} = message;
                 const model_name = message.model_name || 'all models';
                 const callback = () => {
                     event.source.postMessage({data_received: time_stamp}, "*"); 
                 };
                 if (ignore_old_dataset) {
-                    set_data(model_name, kind, data, undefined, permitted_labels);
+                    set_data(model_name, kind, data, undefined, permitted_labels, minimum_number_of_categories_for_textual_output);
                 } else {
-                    set_data(model_name, kind, add_to_data(data, model_name, kind), undefined, permitted_labels);
+                    set_data(model_name, kind, add_to_data(data, model_name, kind), undefined, permitted_labels, minimum_number_of_categories_for_textual_output);
                 }
                 invoke_callback(callback);
             } catch (error) {

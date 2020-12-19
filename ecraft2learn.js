@@ -1248,6 +1248,7 @@ window.ecraft2learn =
                                               kind,
                                               permitted_labels: snap_to_javascript(permitted_labels, false),
                                               ignore_old_dataset: ignore_old_dataset,
+                                              minimum_number_of_categories_for_textual_output: ecraft2learn.minimum_number_of_categories_for_textual_output,
                                               time_stamp};
                                   },
                                   (message) => {
@@ -1275,6 +1276,9 @@ window.ecraft2learn =
              container_width: width+20, // need some room for scroll bars
              yAxisDomain: [minimum_loss, maximum_loss],
              display_graphs, display_layers_after_training, display_confusion_matrix};
+    };
+    const set_minimum_number_of_categories = (minimum) => {
+        ecraft2learn.minimum_number_of_categories_for_textual_output = minimum;
     };
     const train_model = (model_name, epochs, learning_rate, shuffle, validation_split,
                          success_callback, error_callback,
@@ -3428,6 +3432,7 @@ xhr.send();
   send_data,
   train_model,
   set_tensorflow_visualization_options,
+  set_minimum_number_of_categories,
   is_model_ready_for_prediction, // kept for backwards compatibility
   predictions_from_model,
   load_tensorflow_model_from_URL,
