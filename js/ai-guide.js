@@ -268,7 +268,7 @@ window.addEventListener(
              let img        = document.createElement('img');
              const path_to_images = element.getAttribute('path_to_images');
              const path_to_projects = element.getAttribute('path_to_projects');
-             const snap_url = element.getAttribute('snap_url');
+             const snap_url = element.getAttribute('snap_url') || "https://snap.berkeley.edu/snap/snap.html";
              if (path_to_images) {
                  img.src = path_to_images + name + ".png"; 
              } else {
@@ -292,7 +292,7 @@ window.addEventListener(
                       window.location.hostname  === '127.0.0.1';
                  let iframe_src = local_web_server ? 
                                   window.location.origin + "/ai/snap/snap.html?project=" + name + search + window.location.hash : 
-                                  "https://snap.berkeley.edu/snap/snap.html#present:Username=toontalk&ProjectName=" + name + search;                
+                                  snap_url + "#present:Username=toontalk&ProjectName=" + name + search;                
                  if (full_screen !== 'true') {
                      iframe_src += "&editMode";
                  }
