@@ -293,7 +293,7 @@ window.addEventListener(
                  let iframe_src = local_web_server ? 
                                   window.location.origin + "/ai/snap/snap.html?project=" + name + search + window.location.hash : 
                                   snap_url + "#present:Username=toontalk&ProjectName=" + name + search;                
-                 if (full_screen !== 'true') {
+                 if (full_screen !== 'true' || edit_mode === 'true') {
                      iframe_src += "&editMode";
                  }
                  iframe.src = iframe_src;
