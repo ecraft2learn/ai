@@ -1753,18 +1753,11 @@ const receive_message =
                         error_callback,
                         categories);
             });
-//         } else if (typeof message.is_model_ready_for_prediction !== 'undefined') {
-//             let name = message.is_model_ready_for_prediction.model_name;
-//             let model = models[name];
-//             let ready;
-//             if (model) {
-//                 ready = !!model.ready_for_prediction; 
-//             } else {
-// //                 event.source.postMessage({error: "Unknown model '" + name + "' asked if ready for predictions."}, "*");
-//                 ready = false; // unknown model is not ready
-//             }
-//             event.source.postMessage({ready_for_prediction: ready,
-//                                       model_name: name}, "*"); 
+        } else if (typeof message.does_model_exist !== 'undefined') {
+            let name = message.does_model_exist.model_name;
+            let model = models[name];
+            event.source.postMessage({model_exists: !!model,
+                                      model_name: name}, "*"); 
         } else if (typeof message.load_model_from_URL !== 'undefined') {
             try {
                 let URL = message.load_model_from_URL;
