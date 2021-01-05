@@ -2,6 +2,158 @@
 
 ## in development:
 
+## 6.5.0
+* **New Features:**
+    * warning about "unsaved changes" when opening or creating a new project
+    * visual indication of unsaved changes in the IDE's project label
+    * automatic backup of unsaved changes to localstore, option to restore in the file menu until the first change in the new project
+* **Notable Changes:**
+    * 25% speed-up for reporters, WARP and TURBO
+    * up to 40x speed-up for "new costume from list" reporter primitive 
+    * re-enabled reporter drops in "key _ pressed?" input slot
+* **Notable Fixes:**
+    * fixed a bug in hyperblocks
+    * fixed keyboard formula entry for subtraction
+* **Documentation Updates:**
+    * new Manual for v6.5, thanks, Brian!
+    * added unsavedChanges() method and documentation to the Snap! API
+* **Translation Updates:**
+    * German
+    * Catalan, thanks, Joan!
+    * Russian, thanks, Pavel!
+
+### 2020-12-23
+* Manual updated, thanks, Brian!
+* prepared release
+
+### 2020-12-22
+* threads: up to 40x speed-up for "new costume from list" reporter primitive 
+* api: added unsavedChanges() method and documentation
+* blocks, gui: visual indication of unsaved changes in the IDE's project label
+* Russian translation update, thanks, Pavel!
+
+### 2020-12-21
+* gui: tweaked backup / restore
+* new Manual for v6.5, thanks, Brian!
+* German translation update
+
+### 2020-12-20
+* gui, blocks, objects: keep track of unsaved edits
+
+### 2020-12-19
+* threads: added code-documentation for the WARP/timestamp optimization
+* gui: new auto-backup to localstore feature 
+
+### 2020-12-18
+* threads: optimized scheduler, reduced system calls to Date.now(), 25 % speed-up for reporters, WARP and TURBO
+* threads: fixed a typo in hyperDyadic()
+
+### 2020-12-17
+* blocks: added hook for caching variadic inputs
+* blocks: refactored blockSequence() non-recursively
+* reverted variadic input caching experiment
+
+### 2020-12-16
+* threads, objects: added dev debugging hook for counting yields
+
+### 2020-12-14
+* new dev version
+* objects: fixed keyboard formula entry for subtraction
+* blocks: re-enabled reporter drops in "key _ pressed?" input slot
+
+## 6.4.1
+* **Documentation Updates:**
+    * new Manual for v6.4, thanks, Brian!
+* **Notable Fixes:**
+    * fixed zebra coloring for imported scripts
+
+### 2020-12-14
+* new dev version
+* new Manual for v6.4, thanks, Brian!
+* gui fixed zebra coloring for imported scripts
+* prepared patch
+
+## 6.4.0
+* **New Features:**
+    * ray casting: new "ray length" option in the "relation TO object" primitive
+    * hyperdyadic MIN and MAX primitives reachable via "relabel"
+    * hyperdyadic less / great than or equals primitives reachable via "relabel"
+    * hyperdyadic ATAN2 primitive reachable via "relabel"
+    * new SIGN function in arithmetic dropdown
+* **Notable Changes:**
+    * searching for blocks and keyboard entry now includes the contents of dropdown menus
+    * disabled dropping reporters into certain dropdowns (monadic functions, types, costume attributes, graphic effects, layers, audio attributes, pen attributes, dates, relation, keys, video attributes)
+    * changed VIDEO _ ON _ reporter primitive to be hyper-monadic (second slot)
+    * hyperized OBJECT reporter primitive in sensing 
+* **Notable Fixes:**
+    * keep internal linked-list organization intact for hyperblocks
+    * improved SVG loading in Firefox, thanks, Joan!
+    * prevent browser override for ctrl+o gesture
+    * fixed layout issue when importing a sprite in presentation mode
+* **Translation Updates:**
+    * Spanish, thanks, Joan!
+    * Catalan, thanks, Joan!
+    * Tamil, thanks, Barthdry!
+    * German
+
+### 2020-12-11
+* blocks: fixed special drop-downs for keyboard entry
+* store: fixed layout issue when importing a sprite in presentation mode
+* prepared minor release
+
+### 2020-12-09
+* Tamil translation update, thanks, Barthdry!
+* threads, objects: added hyperdyadic ATAN2 primitive reachable via "relabel"
+* threads: hyperized OBJECT reporter primitive in sensing 
+
+### 2020-12-07
+* GUI: improved SVG loading, thanks, Joan!
+* threads, objects, blocks: compiled multimap, thanks, Brian
+* reverted multimap, let's use a JS-block based custom block to engineer it first
+
+### 2020-12-05
+* objects: alternative collision detection method using the video-cache, commented out for reference.
+* German translation update for "ray length"  
+
+### 2020-12-04
+* threads: refactored raycasting
+* integrated raycasting into "relation TO object" primitive
+
+### 2020-12-03
+* threads: raycasting edge detection, under construction
+
+### 2020-12-02
+* threads, blocks: added SIGN function to monadic dropdown
+* Catalan translation update, thanks, Joan!
+* Morphic: prevent browser override for ctrl+o gesture
+* objects, threads: refactored mouseX / mouseY to use generic coordinate conversion
+
+### 2020-12-01
+* threads, objects: added hyperdyadic MIN and MAX primitives reachable via "relabel"
+* threads, objects: added hyperdyadic less/greaterThanOrEquals prims 
+* blocks: made monadic functions and data types menus static
+* blocks: made costume attribute, graphic effects and layers menus static
+* blocks: made audio attributes menu static
+* blocks: made pen attributes menus static
+* blocks: made sensing attributes menus largely static
+* threads: changed reportVideo() to be hyper-monadic
+* lists: made sure map() doesn't mutate internal list linked-ness
+
+### 2020-11-30
+* threads: keep internal linked-list organization intact for hyperblocks
+* update libraries
+
+### 2020-11-27
+* objects: extended block-search to include dropdown choices in primitives
+* byob, objects: extended block-search to include dropdown choices in custom blocks
+
+### 2020-11-26
+* blocks, objects: refactored input slot specs
+* blocks: refactored special input slot dop-down menus for search
+
+### 2020-11-23
+* new dev version
+
 ## 6.3.7
 * **Notable Changes:**
     * added "loadProjectXML" method to the api

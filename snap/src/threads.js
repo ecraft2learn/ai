@@ -61,7 +61,7 @@ StageMorph, SpriteMorph, StagePrompterMorph, Note, modules, isString, copy, Map,
 isNil, WatcherMorph, List, ListWatcherMorph, alert, console, TableMorph, BLACK,
 TableFrameMorph, ColorSlotMorph, isSnapObject, newCanvas, Symbol, SVG_Costume*/
 
-modules.threads = '2020-November-22';
+modules.threads = '2020-December-22';
 
 var ThreadManager;
 var Process;
@@ -161,7 +161,7 @@ function invoke(
     } else if (action instanceof Function) {
         return action.apply(
             receiver,
-            contextArgs.asArray().concat(callerProcess)
+            contextArgs.itemsArray().concat(callerProcess)
         );
     } else {
         throw new Error('expecting a block or ring but getting ' + action);
@@ -583,7 +583,10 @@ function Process(topBlock, receiver, onComplete, yieldFirst) {
     this.httpRequest = null;
     this.isPaused = false;
     this.pauseOffset = null;
-    this.frameCount = 0;
+    this.currentTime = Date.now(); // keeping track of time between yields
+    this.frameCount = 0; // only used for profiling and debugging
+    this.stepFrameCount = 0; // keeping track of when to keep time
+    this.yieldCount = 0; // only used for profiling and debugging
     this.exportResult = false;
     this.onComplete = onComplete || null;
     this.procedureCount = 0;
@@ -623,15 +626,22 @@ Process.prototype.runStep = function (deadline) {
     this.readyToYield = false;
     this.isInterrupted = false;
 
+    // repeatedly evaluate the next context (stack frame) until
+    // it's time to yield. In case of WARP or infinite recursive
+    // reporters (or long HOFs) emergency-yield every 500 ms.
+    // Since looking up the current time at every stack frame puts
+    // an amazing strain on performance, only check the system time
+    // every n (=100) contexts.
+    // This is happens over at evaluateContext().
     while (!this.readyToYield && !this.isInterrupted
             && this.context
-            && (Date.now() - this.lastYield < this.timeout)
+            && (this.currentTime - this.lastYield < this.timeout)
     ) {
         // also allow pausing inside atomic steps - for PAUSE block primitive:
         if (this.isPaused) {
             return this.pauseStep();
         }
-        if (deadline && (Date.now() > deadline)) {
+        if (deadline && (this.currentTime > deadline)) {
             if (this.isAtomic &&
                     this.homeContext.receiver &&
                     this.homeContext.receiver.endWarp) {
@@ -642,6 +652,8 @@ Process.prototype.runStep = function (deadline) {
         this.evaluateContext();
     }
 
+    this.stepFrameCount = 0;
+    this.yieldCount += 1;
     this.lastYield = Date.now();
     this.isFirstStep = false;
 
@@ -706,7 +718,22 @@ Process.prototype.pauseStep = function () {
 
 Process.prototype.evaluateContext = function () {
     var exp = this.context.expression;
+
+    // keep track of overall frames for profiling purposes.
+    // also keep track of frames inside the current atomic step.
+    // In order to let Snap! behave similarly on a wide range of
+    // differently performant hardware decide when to yield inside
+    // a WARPed script or an infinitely recursive reporter
+    // by how much time has elapsed since the last yield, but since
+    // looking up the system time is surprisingly costly only look it
+    // up every 100 frames.
     this.frameCount += 1;
+    this.stepFrameCount += 1;
+    if (this.stepFrameCount > 100) {
+        this.currentTime = Date.now();
+        this.stepFrameCount = 0;
+    }
+
     if (this.context.tag === 'exit') {
         this.expectReport();
     }
@@ -1074,7 +1101,7 @@ Process.prototype.reify = function (topBlock, parameterNames, isCustomBlock) {
                 : [this.context.expression.fullCopy()];
     }
 
-    context.inputs = parameterNames.asArray();
+    context.inputs = parameterNames.itemsArray();
     context.receiver
         = this.context ? this.context.receiver : this.receiver;
     context.origin = context.receiver; // for serialization
@@ -1101,7 +1128,7 @@ Process.prototype.reifyPredicate = function (topBlock, parameterNames) {
 Process.prototype.reportJSFunction = function (parmNames, body) {
     return Function.apply(
         null,
-        parmNames.asArray().concat([body])
+        parmNames.itemsArray().concat([body])
     );
 };
 
@@ -1123,7 +1150,7 @@ Process.prototype.evaluate = function (
         // }
         return context.apply(
             this.blockReceiver(),
-            args.asArray().concat([this])
+            args.itemsArray().concat([this])
         );
     }
     if (context.isContinuation) {
@@ -1138,7 +1165,7 @@ Process.prototype.evaluate = function (
         exit,
         runnable,
         expr,
-        parms = args.asArray(),
+        parms = args.itemsArray(),
         i,
         value;
 
@@ -1156,7 +1183,7 @@ Process.prototype.evaluate = function (
 
     if (context.expression instanceof ReporterBlockMorph) {
         // auto-"warp" nested reporters
-        this.readyToYield = (Date.now() - this.lastYield > this.timeout);
+        this.readyToYield = (this.currentTime - this.lastYield > this.timeout);
     }
 
     // assign arguments to parameters
@@ -1266,7 +1293,7 @@ Process.prototype.initializeFor = function (context, args) {
             context.expression,
             outer
             ),
-        parms = args.asArray(),
+        parms = args.itemsArray(),
         i,
         value;
 
@@ -1372,7 +1399,7 @@ Process.prototype.reportCallCC = function (aContext) {
 };
 
 Process.prototype.runContinuation = function (aContext, args) {
-    var parms = args.asArray();
+    var parms = args.itemsArray();
 
     // determine whether the continuations is to show the result
     // in a value-balloon becuse the user has directly clicked on a reporter
@@ -1402,7 +1429,7 @@ Process.prototype.evaluateCustomBlock = function () {
         context = method.body,
         declarations = method.declarations,
         args = new List(this.context.inputs),
-        parms = args.asArray(),
+        parms = args.itemsArray(),
         runnable,
         exit,
         i,
@@ -1476,7 +1503,7 @@ Process.prototype.evaluateCustomBlock = function () {
             runnable.parentContext = exit;
         }
         // auto-"warp" nested reporters
-        this.readyToYield = (Date.now() - this.lastYield > this.timeout);
+        this.readyToYield = (this.currentTime - this.lastYield > this.timeout);
     } else {
         // tag all "stop this block" blocks with the current
         // procedureCount as exitTag, and mark all "report" blocks
@@ -1501,7 +1528,7 @@ Process.prototype.evaluateCustomBlock = function () {
 
 Process.prototype.doDeclareVariables = function (varNames) {
     var varFrame = this.context.outerContext.variables;
-    varNames.asArray().forEach(name =>
+    varNames.itemsArray().forEach(name =>
         varFrame.addVar(name)
     );
 };
@@ -3088,14 +3115,14 @@ Process.prototype.encodeSound = function (samples, rate) {
     }
     if (channels === 1) {
         arrayBuffer.copyToChannel(
-            Float32Array.from(samples.asArray()),
+            Float32Array.from(samples.itemsArray()),
             0,
             0
         );
     } else {
         for (i = 0; i < channels; i += 1) {
             arrayBuffer.copyToChannel(
-                Float32Array.from(samples.at(i + 1).asArray()),
+                Float32Array.from(samples.at(i + 1).itemsArray()),
                 i,
                 0
             );
@@ -3598,8 +3625,8 @@ Process.prototype.hyperDyadic = function (baseOp, a, b) {
         if (this.isMatrix(a)) {
             if (this.isMatrix(b)) {
                 // zip both arguments ignoring out-of-bounds indices
-                a = a.asArray();
-                b = b.asArray();
+                a = a.itemsArray();
+                b = b.itemsArray();
                 len = Math.min(a.length, b.length);
                 result = new Array(len);
                 for (i = 0; i < len; i += 1) {
@@ -3623,8 +3650,8 @@ Process.prototype.hyperZip = function (baseOp, a, b) {
     if (a instanceof List) {
         if (b instanceof List) {
             // zip both arguments ignoring out-of-bounds indices
-            a = a.asArray();
-            b = b.asArray();
+            a = a.itemsArray();
+            b = b.itemsArray();
             len = Math.min(a.length, b.length);
             result = new Array(len);
             for (i = 0; i < len; i += 1) {
@@ -3696,16 +3723,6 @@ Process.prototype.reportBasicPower = function (a, b) {
     return Math.pow(+a, +b);
 };
 
-Process.prototype.reportModulus = function (a, b) {
-    return this.hyperDyadic(this.reportBasicModulus, a, b);
-};
-
-Process.prototype.reportBasicModulus = function (a, b) {
-    var x = +a,
-        y = +b;
-    return ((x % y) + y) % y;
-};
-
 Process.prototype.reportRandom = function (a, b) {
     return this.hyperDyadic(this.reportBasicRandom, a, b);
 };
@@ -3719,10 +3736,54 @@ Process.prototype.reportBasicRandom = function (min, max) {
     return Math.floor(Math.random() * (ceil - floor + 1)) + floor;
 };
 
+// Process math primtives - arithmetic hyperdyadic
+
+Process.prototype.reportModulus = function (a, b) {
+    return this.hyperDyadic(this.reportBasicModulus, a, b);
+};
+
+Process.prototype.reportBasicModulus = function (a, b) {
+    var x = +a,
+        y = +b;
+    return ((x % y) + y) % y;
+};
+
+Process.prototype.reportAtan2 = function (a, b) {
+    return this.hyperDyadic(this.reportBasicAtan2, a, b);
+};
+
+Process.prototype.reportBasicAtan2 = function (a, b) {
+    return degrees(Math.atan2(+a, +b));
+};
+
+Process.prototype.reportMin = function (a, b) {
+    return this.hyperDyadic(this.reportBasicMin, a, b);
+};
+
+Process.prototype.reportBasicMin = function (a, b) {
+    return Math.min(+a, +b);
+};
+
+Process.prototype.reportMax = function (a, b) {
+    return this.hyperDyadic(this.reportBasicMax, a, b);
+};
+
+Process.prototype.reportBasicMax = function (a, b) {
+    return Math.max(+a, +b);
+};
+
 // Process logic primitives - hyper-diadic / monadic where applicable
 
 Process.prototype.reportLessThan = function (a, b) {
     return this.hyperDyadic(this.reportBasicLessThan, a, b);
+};
+
+Process.prototype.reportLessThanOrEquals = function (a, b) {
+    return this.hyperDyadic(
+        (a, b) => !this.reportBasicGreaterThan(a, b),
+        a,
+        b
+    );
 };
 
 Process.prototype.reportBasicLessThan = function (a, b) {
@@ -3735,18 +3796,16 @@ Process.prototype.reportBasicLessThan = function (a, b) {
     return x < y;
 };
 
-Process.prototype.reportNot = function (bool) {
-    if (this.enableHyperOps) {
-        if (bool instanceof List) {
-            return bool.map(each => this.reportNot(each));
-        }
-    }
-    // this.assertType(bool, 'Boolean');
-    return !bool;
-};
-
 Process.prototype.reportGreaterThan = function (a, b) {
     return this.hyperDyadic(this.reportBasicGreaterThan, a, b);
+};
+
+Process.prototype.reportGreaterThanOrEquals = function (a, b) {
+    return this.hyperDyadic(
+        (a, b) => !this.reportBasicLessThan(a, b),
+        a,
+        b
+    );
 };
 
 Process.prototype.reportBasicGreaterThan = function (a, b) {
@@ -3761,6 +3820,16 @@ Process.prototype.reportBasicGreaterThan = function (a, b) {
 
 Process.prototype.reportEquals = function (a, b) {
     return snapEquals(a, b);
+};
+
+Process.prototype.reportNot = function (bool) {
+    if (this.enableHyperOps) {
+        if (bool instanceof List) {
+            return bool.map(each => this.reportNot(each));
+        }
+    }
+    // this.assertType(bool, 'Boolean');
+    return !bool;
 };
 
 Process.prototype.reportIsIdentical = function (a, b) {
@@ -3830,6 +3899,9 @@ Process.prototype.reportMonadic = function (fname, n) {
     // case '\u2212': // minus-sign
     case 'neg':
         result = n * -1;
+        break;
+    case 'sign':
+        result = Math.sign(x);
         break;
     case 'ceiling':
         result = Math.ceil(x);
@@ -4182,7 +4254,7 @@ Process.prototype.alert = function (data) {
     if (this.homeContext.receiver) {
         world = this.homeContext.receiver.world();
         if (world.isDevMode) {
-            alert('Snap! ' + data.asArray());
+            alert('Snap! ' + data.itemsArray());
         }
     }
 };
@@ -4193,7 +4265,7 @@ Process.prototype.log = function (data) {
     if (this.homeContext.receiver) {
         world = this.homeContext.receiver.world();
         if (world.isDevMode) {
-            console.log('Snap! ' + data.asArray());
+            console.log('Snap! ' + data.itemsArray());
         }
     }
 };
@@ -4711,6 +4783,9 @@ Process.prototype.reportRelationTo = function (relation, name) {
  	if (rel === 'distance') {
   		return this.reportDistanceTo(name);
   	}
+    if (rel === 'ray length') {
+    	return this.reportRayLengthTo(name);
+    }
     if (rel === 'direction') {
     	return this.reportDirectionTo(name);
     }
@@ -4751,6 +4826,175 @@ Process.prototype.reportDistanceTo = function (name) {
         return rc.distanceTo(point) / stage.scale;
     }
     return 0;
+};
+
+Process.prototype.reportRayLengthTo = function (name) {
+    // raycasting edge detection - answer the distance between the asking
+    // sprite's rotation center to the target sprite's outer edge (the first
+    // opaque pixel) in the asking sprite's current direction
+    var thisObj = this.blockReceiver(),
+        thatObj,
+        stage,
+        rc,
+        targetBounds,
+        intersections = [],
+        dir,
+        a, b, x, y,
+        top, bottom, left, right,
+        hSect, vSect,
+        point, hit,
+        temp,
+        width, imageData;
+
+    hSect = (yLevel) => {
+        var theta = radians(dir);
+        b = rc.y - yLevel;
+        a = b * Math.tan(theta);
+        x = rc.x + a;
+        if (
+            (x === rc.x &&
+                ((dir === 180 && rc.y < yLevel) ||
+                dir === 0 && rc.y > yLevel)
+            ) ||
+            (x > rc.x && dir >= 0 && dir < 180) ||
+            (x < rc.x && dir >= 180 && dir < 360)
+        ) {
+            if (x >= left && x <= right) {
+                intersections.push(new Point(x, yLevel));
+            }
+        }
+    };
+
+    vSect = (xLevel) => {
+        var theta = radians(360 - dir - 90);
+        b = rc.x - xLevel;
+        a = b * Math.tan(theta);
+        y = rc.y + a;
+        if (
+            (y === rc.y &&
+                ((dir === 90 && rc.x < xLevel) ||
+                dir === 270 && rc.x > xLevel)
+            ) ||
+            (y > rc.y && dir >= 90 && dir < 270) ||
+            (y < rc.y && (dir >= 270 || dir < 90))
+        ) {
+            if (y >= top && y <= bottom) {
+                intersections.push(new Point(xLevel, y));
+            }
+        }
+    };
+
+    if (!thisObj) {return -1; }
+    rc = thisObj.rotationCenter();
+    point = rc;
+    stage = thisObj.parentThatIsA(StageMorph);
+    thatObj = this.getOtherObject(name, thisObj, stage);
+    if (!(thatObj instanceof SpriteMorph)) {return -1; }
+
+    // determine intersections with the target's bounding box
+    dir = thisObj.heading;
+    targetBounds = thatObj.bounds;
+    top = targetBounds.top();
+    bottom = targetBounds.bottom();
+    left = targetBounds.left();
+    right = targetBounds.right();
+
+    // test if already inside the target
+    if (targetBounds.containsPoint(rc)) {
+        intersections.push(rc);
+        hSect(top);
+        hSect(bottom);
+        vSect(left);
+        vSect(right);
+        if (intersections.length < 2) {
+            return -1;
+        }
+    } else {
+        hSect(top);
+        hSect(bottom);
+        vSect(left);
+        vSect(right);
+        if (intersections.length < 2) {
+            return -1;
+        }
+        // sort
+        if (dir !== 90) {
+            if (Math.sign(rc.x - intersections[0].x) !==
+                Math.sign(intersections[0].x - intersections[1].x) ||
+                Math.sign(rc.y - intersections[0].y) !==
+                Math.sign(intersections[0].y - intersections[1].y)
+            ) {
+                temp = intersections[0];
+                intersections[0] = intersections[1];
+                intersections[1] = temp;
+            }
+        }
+    }
+
+    // for debugging:
+    /*
+    return new List(intersections)
+        .map(point => thisObj.snapPoint(point))
+        .map(point => new List([point.x, point.y]));
+    */
+
+    // convert intersections to local bitmap coordinates of the target
+    intersections = intersections.map(point =>
+        point.subtract(targetBounds.origin).floorDivideBy(stage.scale)
+    );
+
+    // get image data
+    width = Math.floor(targetBounds.width() / stage.scale);
+    imageData = thatObj.getImageData();
+
+    // scan the ray along the coordinates of a Bresenham line
+    // for the first opaque pixel
+    function alphaAt(imageData, width, x, y) {
+        var idx = y * width + x;
+        return imageData[idx] && 0x000000FF; // alpha
+    }
+
+    function isOpaque(x, y) {
+        return alphaAt(imageData, width, x, y) > 0;
+    }
+
+    function scan(testFunc, x0, y0, x1, y1) {
+        // Bresenham's algorithm
+        var dx = Math.abs(x1 - x0),
+            sx = x0 < x1 ? 1 : -1,
+            dy = -Math.abs(y1 - y0),
+            sy = y0 < y1 ? 1 : -1,
+            err = dx + dy,
+            e2;
+
+        while (true) {
+            if (testFunc(x0, y0)) {
+                return new Point(x0 * stage.scale, y0 * stage.scale);
+            }
+            if (x0 === x1 && y0 === y1) {
+                return -1; // not found
+            }
+            e2 = 2 * err;
+            if (e2 > dy) {
+                err += dy;
+                x0 += sx;
+            }
+            if (e2 < dx) {
+                err += dx;
+                y0 += sy;
+            }
+        }
+    }
+
+    hit = scan(
+        isOpaque,
+        intersections[0].x,
+        intersections[0].y,
+        intersections[1].x,
+        intersections[1].y
+    );
+    if (hit === -1) {return hit; }
+    return rc.distanceTo(hit.add(targetBounds.origin)) / stage.scale;
 };
 
 Process.prototype.reportDirectionTo = function (name) {
@@ -4982,6 +5226,13 @@ Process.prototype.reportGet = function (query) {
 };
 
 Process.prototype.reportObject = function (name) {
+    // hyper-monadic
+    if (this.enableHyperOps) {
+        if (name instanceof List) {
+            return name.map(each => this.reportObject(each));
+        }
+    }
+
     var thisObj = this.blockReceiver(),
         thatObj,
         stage;
@@ -5156,30 +5407,22 @@ Process.prototype.reportContextFor = function (context, otherObj) {
 };
 
 Process.prototype.reportMouseX = function () {
-    var stage, world;
+    var world;
     if (this.homeContext.receiver) {
-        stage = this.homeContext.receiver.parentThatIsA(StageMorph);
-        if (stage) {
-            world = stage.world();
-            if (world) {
-                return (world.hand.position().x - stage.center().x)
-                    / stage.scale;
-            }
+        world = this.homeContext.receiver.world();
+        if (world) {
+            return this.homeContext.receiver.snapPoint(world.hand.position()).x;
         }
     }
     return 0;
 };
 
 Process.prototype.reportMouseY = function () {
-    var stage, world;
+    var world;
     if (this.homeContext.receiver) {
-        stage = this.homeContext.receiver.parentThatIsA(StageMorph);
-        if (stage) {
-            world = stage.world();
-            if (world) {
-                return (stage.center().y - world.hand.position().y)
-                    / stage.scale;
-            }
+        world = this.homeContext.receiver.world();
+        if (world) {
+            return this.homeContext.receiver.snapPoint(world.hand.position()).y;
         }
     }
     return 0;
@@ -5272,8 +5515,11 @@ Process.prototype.doSetVideoTransparency = function(factor) {
 };
 
 Process.prototype.reportVideo = function(attribute, name) {
-    // hyper-dyadic
-    var stage = this.blockReceiver().parentThatIsA(StageMorph);
+    // hyper-monadic
+    var thisObj = this.blockReceiver(),
+        stage = thisObj.parentThatIsA(StageMorph),
+        thatObj;
+
     if (!stage.projectionSource || !stage.projectionSource.stream) {
         // wait until video is turned on
         if (!this.context.accumulator) {
@@ -5284,17 +5530,13 @@ Process.prototype.reportVideo = function(attribute, name) {
         this.pushContext();
         return;
     }
-    return this.hyperDyadic(
-        (att, obj) => this.reportBasicVideo(att, obj),
-        attribute,
-        name
-    );
-};
 
-Process.prototype.reportBasicVideo = function(attribute, name) {
-    var thisObj = this.blockReceiver(),
-        stage = thisObj.parentThatIsA(StageMorph),
-        thatObj = this.getOtherObject(name, thisObj, stage);
+    if (this.enableHyperOps) {
+        if (name instanceof List) {
+            return name.map(each => this.reportVideo(attribute, each));
+        }
+    }
+    thatObj = this.getOtherObject(name, thisObj, stage);
     switch (this.inputOption(attribute)) {
     case 'motion':
         if (thatObj instanceof SpriteMorph) {
@@ -5608,14 +5850,14 @@ Process.prototype.reportNewCostume = function (pixels, width, height, name) {
 
     canvas = newCanvas(new Point(width, height), true);
     ctx = canvas.getContext('2d');
-    src = pixels.asArray();
+    src = pixels.itemsArray();
     dta = ctx.createImageData(width, height);
     for (i = 0; i < src.length; i += 1) {
-        px = src[i].asArray();
+        px = src[i].itemsArray();
         for (k = 0; k < 3; k += 1) {
-            dta.data[(i * 4) + k] = px[k];
+            dta.data[(i * 4) + k] = +px[k];
         }
-        dta.data[i * 4 + 3] = (px[3] === undefined ? 255 : px[3]);
+        dta.data[i * 4 + 3] = (px[3] === undefined ? 255 : +px[3]);
     }
     ctx.putImageData(dta, 0, 0);
     return new Costume(
@@ -5708,6 +5950,10 @@ Process.prototype.reportStackSize = function () {
 
 Process.prototype.reportFrameCount = function () {
     return this.frameCount;
+};
+
+Process.prototype.reportYieldCount = function () {
+    return this.yieldCount;
 };
 
 // Process single-stepping
@@ -5858,7 +6104,7 @@ Process.prototype.reportAtomicMap = function (reporter, list) {
 
     this.assertType(list, 'list');
 	var result = [],
-    	src = list.asArray(),
+    	src = list.itemsArray(),
     	len = src.length,
         formalParameterCount = reporter.inputs.length,
         parms,
@@ -5909,7 +6155,7 @@ Process.prototype.reportAtomicKeep = function (reporter, list) {
 
     this.assertType(list, 'list');
     var result = [],
-        src = list.asArray(),
+        src = list.itemsArray(),
         len = src.length,
         formalParameterCount = reporter.inputs.length,
         parms,
@@ -5960,7 +6206,7 @@ Process.prototype.reportAtomicFindFirst = function (reporter, list) {
     // #3 - optional | source list
 
     this.assertType(list, 'list');
-    var src = list.asArray(),
+    var src = list.itemsArray(),
         len = src.length,
         formalParameterCount = reporter.inputs.length,
         parms,
@@ -6013,7 +6259,7 @@ Process.prototype.reportAtomicCombine = function (list, reporter) {
 
     this.assertType(list, 'list');
     var result = '',
-        src = list.asArray(),
+        src = list.itemsArray(),
         len = src.length,
         formalParameterCount = reporter.inputs.length,
         parms,
@@ -6072,7 +6318,7 @@ Process.prototype.reportAtomicSort = function (list, reporter) {
 
     // iterate over the data in a single frame:
 	return new List(
-  		list.asArray().slice().sort((a, b) =>
+  		list.itemsArray().slice().sort((a, b) =>
             invoke(
                 func,
                 new List([a, b]),
@@ -6091,7 +6337,7 @@ Process.prototype.reportAtomicGroup = function (list, reporter) {
     var result = [],
         dict = new Map(),
         groupKey,
-        src = list.asArray(),
+        src = list.itemsArray(),
         len = src.length,
         func,
         i;

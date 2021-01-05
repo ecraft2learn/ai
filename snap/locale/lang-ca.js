@@ -185,7 +185,7 @@ SnapTranslator.dict.ca = {
     'translator_e-mail':
         'bernat@snap4arduino.rocks, jguille2@xtec.cat', // optional
     'last_changed':
-        '2020-08-31', // this, too, will appear in the Translators tab
+        '2020-12-21', // this, too, will appear in the Translators tab
 
     // GUI
     // control bar:
@@ -457,6 +457,8 @@ SnapTranslator.dict.ca = {
         'omple',
     'paste on %spr':
         'estampa sobre %spr',
+    'cut from %spr':
+        'retalla de %spr',
 
     // control:
     'when %greenflag clicked':
@@ -786,6 +788,14 @@ SnapTranslator.dict.ca = {
             + '(en navegadors que ho suportin)',
     'Save As...':
         'Anomena i desa...',
+    'Restore unsaved project':
+        'Recupera el projecte no desat',
+    'Clear backup':
+        'Esborra la còpia de seguretat',
+    'Backup failed.\nThis cannot be undone, proceed anyway?':
+        'La còpia de seguretat ha fallat.\nNo es podran desfer els canvis, voleu continuar?',
+    'Unsaved Changes!':
+        'Hi ha canvis sense desar!',
     'Import...':
         'Importa...',
     'file menu import hint':
@@ -1003,6 +1013,10 @@ SnapTranslator.dict.ca = {
         'crea una còpia\ni fes-la servir',
     'only duplicate this block':
         'duplica només aquest bloc',
+    'extract':
+        'extreu',
+    'only grab this block':
+        'i fes servir només aquest bloc',
     'delete':
         'esborra\'m',
     'script pic...':
@@ -1029,6 +1043,10 @@ SnapTranslator.dict.ca = {
         'edita...',
     'duplicate block definition...':
         'duplica la definició d\'aquest bloc',
+    'export block definition...':
+        'exporta aquest bloc...',
+    'including dependencies':
+        'amb les seves dependències',
     'Same Named Blocks':
         'Blocs amb el mateix nom',
     'Another custom block with this name exists.\n':
@@ -2609,6 +2627,8 @@ SnapTranslator.dict.ca = {
         '%rel a %dst',
     'distance':
         'distància',
+    'ray length':
+        'distància de xoc',
     'costume':
         'vestit',
     'sound':

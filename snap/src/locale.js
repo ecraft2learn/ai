@@ -46,7 +46,7 @@
 
 /*global modules, contains*/
 
-modules.locale = '2020-November-23';
+modules.locale = '2020-December-22';
 
 // Global stuff
 
@@ -168,7 +168,7 @@ SnapTranslator.dict.de = {
     'translator_e-mail':
         'jens@moenig.org, jadga.huegle@sap.com',
     'last_changed':
-        '2020-11-02'
+        '2020-12-21'
 };
 
 SnapTranslator.dict.it = {
@@ -289,7 +289,7 @@ SnapTranslator.dict.ru = {
     'translator_e-mail':
         'svetlanap@berkeley.edu, tema@school830.ru, pbsite@mail.ru',
     'last_changed':
-        '2020-11-02'
+        '2020-12-22'
 };
 
 SnapTranslator.dict.es = {
@@ -300,7 +300,7 @@ SnapTranslator.dict.es = {
     'translator_e-mail':
         'victor.muratalla@yahoo.com / rizzi.cristian@gmail.com',
     'last_changed':
-        '2020-11-19'
+        '2020-12-01'
 };
 
 SnapTranslator.dict.nl = {
@@ -377,7 +377,7 @@ SnapTranslator.dict.ca = {
     'translator_e-mail':
         'bernat@snap4arduino.rocks, jguille2@xtec.cat',
     'last_changed':
-        '2020-08-31'
+        '2020-12-21'
 };
 
 SnapTranslator.dict.ca_VA = {
@@ -461,11 +461,11 @@ SnapTranslator.dict.ta = {
     'language_name':
         'Tamil',
     'language_translator':
-        'vinayakumar R',
+        'vinayakumar R, Barthdry',
     'translator_e-mail':
         'vnkmr7620@gmail.com',
     'last_changed':
-        '2015-02-20'
+        '2020-12-09'
 };
 
 SnapTranslator.dict.te = {
