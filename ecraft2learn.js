@@ -40,7 +40,7 @@ window.ecraft2learn =
           if (when_loaded) {
               script.onload = () => {
                   if (typeof ecraft2learn === 'object') {
-                      show_message();
+                      show_message("loaded", .1);
                       if (typeof ecraft2learn.loaded_scripts === 'undefined') {
                           ecraft2learn.loaded_scripts = [];
                       }
@@ -51,7 +51,7 @@ window.ecraft2learn =
           }
           if (if_error) {
               script.onerror = (error) => {
-                  show_message();
+                  show_message("Not loaded due to error", 3);
                   invoke_callback(if_error, error.message);
               };
           }
@@ -174,7 +174,17 @@ window.ecraft2learn =
                   original_open_project(project, ide);
                   ecraft2learn.snap_project_opened = true;
               }      
-          };        
+          };
+          const original_resume_all = ThreadManager.prototype.resumeAll;
+          ThreadManager.prototype.resumeAll = (stage) => {
+              if (stage) {
+                  original_resume_all.call(stage.threads, stage);
+              }
+              ecraft2learn.paused_callbacks.forEach((callback) => {
+                  callback();
+              });
+              ecraft2learn.paused_callbacks = [];
+          };
       };
       const stop_all_scripts = (and_reset_iframes) => {
           if (window.speechSynthesis) {
@@ -196,6 +206,7 @@ window.ecraft2learn =
               callback.stopped_by_user = true;
           });
           ecraft2learn.outstanding_callbacks = []; // removes all outstanding callbacks
+          ecraft2learn.paused_callbacks = [];
       };
       const track_whether_snap_is_stopped = function () {
           if (!inside_snap()) {
@@ -277,15 +288,6 @@ window.ecraft2learn =
                 return invoke(callback, new List(parameters), (callback instanceof BlockMorph && callback));
             }
             const stage = world.children[0].stage; // this.parentThatIsA(StageMorph);
-//             var process = stage.threads.startProcess(callback.expression,
-//                                                      callback.receiver,
-//                                                      stage.isThreadSafe,
-//                                                      true,
-//                                                      function (result) {
-//                                                        console.log(result);
-//                                                      },
-//                                                      false,
-//                                                      false);
             const process = new Process(null, callback.receiver, null, true);
             process.initializeFor(callback, new List(parameters));
             if (!process.topBlock.world()) {
@@ -293,7 +295,19 @@ window.ecraft2learn =
                 // however they are displayed at the top of the "world"
                 process.topBlock.world = () => world;
             };
-            stage.threads.processes.push(process);
+            if (stage.threads.isPaused()) {
+                ecraft2learn.paused_callbacks =
+                    ecraft2learn.paused_callbacks.concat(() => {
+                        stage.threads.processes.push(process);
+                    });
+            } else {
+                stage.threads.processes.push(process);
+                // invoke works immediately but advice was to queue this up instead
+//                 return invoke(callback, new List(parameters), (callback instanceof BlockMorph && callback)); 
+                // https://forum.snap.berkeley.edu/t/calling-from-js/4982
+                // but couldn't get it to work
+//                 process.evaluate(callback, new List(parameters), true); // is command
+            }
             return process;
         } else if (typeof callback === 'function') { // assume JavaScript callback
             callback.apply(this, Array.prototype.slice.call(arguments, 1));
@@ -749,7 +763,7 @@ window.ecraft2learn =
         }
         let XHR = new XMLHttpRequest();
         XHR.addEventListener('load', function(event) {
-            show_message(""); // remove loading message
+            show_message("loaded", .1);
             callback(event);
         });
         if (!error_callback) {
@@ -758,7 +772,7 @@ window.ecraft2learn =
             }
         }
         XHR.addEventListener('error', function (event) {
-            show_message(""); // remove loading message
+            show_message("loaded", .1); 
             error_callback(event);
         });
         show_message("Contacting " + cloud_provider);
@@ -1181,7 +1195,11 @@ window.ecraft2learn =
                 listen_for_messages(receive_message);            
             }
             if (ecraft2learn.support_window[support_window_type]) {
-                ecraft2learn.support_window[support_window_type].postMessage(request_generator(), '*');
+                try {
+                    ecraft2learn.support_window[support_window_type].postMessage(request_generator(), '*');
+                } catch (error) {
+                    inform("Error in setting up a support window", error.message);
+                }    
             } // else may have loaded another project into Snap! and the old window is gone now
         };
         send_request_when_support_window_is(window_ready_state, support_window_type, send_request);
@@ -1318,23 +1336,26 @@ window.ecraft2learn =
                                       }
                                   });
     };
+    const does_model_exist = (model_name, callback) => {
+        record_callbacks(callback);
+        request_of_support_window('tensorflow.js',
+                                  'Loaded',
+                                  () => {
+                                      return {does_model_exist: {model_name: model_name}};
+                                  },
+                                  (message) => {
+                                      return typeof message.model_exists === 'boolean' &&
+                                             message.model_name === model_name;
+                                  },
+                                  (message) => {
+                                      invoke_callback(callback, javascript_to_snap(message.model_exists));
+                                  });
+    };
     const is_model_ready_for_prediction = (model_name, callback) => {
         // now if a model exists then it is ready for prediction
         // if not yet trained the weights will be random but still capable of "predicting"
+        // kept around for backwards compatibility
         invoke_callback(callback, javascript_to_snap(true));
-//         record_callbacks(callback);
-//         request_of_support_window('tensorflow.js',
-//                                   'Loaded',
-//                                   () => {
-//                                       return {is_model_ready_for_prediction: {model_name: model_name}};
-//                                   },
-//                                   (message) => {
-//                                       return typeof message.ready_for_prediction === 'boolean' &&
-//                                              message.model_name === model_name;
-//                                   },
-//                                   (message) => {
-//                                       invoke_callback(callback, javascript_to_snap(message.ready_for_prediction));
-//                                   });
     };
     const predictions_from_model = (model_names, inputs, success_callback, error_callback,
         // optional categories added after release - really should have used a single JavaScript object as input arguments
@@ -1481,6 +1502,7 @@ window.ecraft2learn =
     const load_tensorflow_model_from_URL = (URL, success_callback, error_callback) => {
         record_callbacks(success_callback, error_callback);
         URL = relative_to_absolute_url(URL);
+        show_message("Loading model...");
         request_of_support_window('tensorflow.js',
                                   'Loaded',
                                   () => {
@@ -1492,11 +1514,14 @@ window.ecraft2learn =
                                   },
                                   (message) => {
                                       if (message.model_loaded === URL) {
+                                          show_message("Loaded", .1);
                                           invoke_callback(success_callback, javascript_to_snap(message.model_name));
                                       } else if (error_callback) {
+                                          show_message("Model not loaded due to error", 3);
                                           console.log(message.error_message);
                                           invoke_callback(error_callback, javascript_to_snap(message.error_message));
                                       } else {
+                                          show_message("Model not loaded due to error", 3);
                                           inform("Error in loading a model from a URL", message.error_message);
                                       }
                                   });
@@ -1800,10 +1825,10 @@ window.ecraft2learn =
         return mary_tts_voice_number;
     };
     var history_of_informs = [];
-    const show_message = function (message, seconds) {
+    const show_message = (message, seconds) => {
         if (inside_snap()) {
-            var ide = get_snap_ide(ecraft2learn.snap_context);
-            ide.showMessage(message, seconds);
+            const ide = get_snap_ide(ecraft2learn.snap_context);
+            ide.showMessage(message, seconds || 5); // by defaults messages won't remain up more than 5 seconds
         } else {
             alert(message);
         }
@@ -1885,7 +1910,7 @@ window.ecraft2learn =
             },
             (message) => {
                 if (loading_coco_ssd_message_presented) {
-                    show_message("");
+                    show_message("loaded", .1);
                 }
                 if (message.error_message) {   
                     const title = "Error detecting images of objects in a costume";
@@ -1934,7 +1959,7 @@ window.ecraft2learn =
                                 },
                                 (message) => {
                                     if (loading_body_pix_message_presented) {
-                                        show_message("");
+                                        show_message("loaded", .1);
                                     }
                                     if (message.error_message) {   
                                         const title = "Error computing segmentations of a costume";
@@ -3434,6 +3459,7 @@ xhr.send();
   set_tensorflow_visualization_options,
   set_minimum_number_of_categories,
   is_model_ready_for_prediction, // kept for backwards compatibility
+  does_model_exist,
   predictions_from_model,
   load_tensorflow_model_from_URL,
   get_prediction_from_teachable_machine_image_or_pose_model,
@@ -3503,7 +3529,7 @@ xhr.send();
                               }
           let load_word_locations = () => {
               const finished_callback = () => {
-                  show_message("");
+                  show_message("loaded", .1);
                   invoke_callback(callback, "loaded");
               };
               if (word_locations_url) {
@@ -3685,7 +3711,7 @@ xhr.send();
           ecraft2learn.load_universal_sentence_encoder(() => {
               ecraft2learn.universal_sentence_encoder_module.load().then(model => {
                   ecraft2learn.universal_sentence_encoder = model;
-                  show_message();
+                  show_message("Loaded", .1);
                   embed();
               });
           });
@@ -3702,7 +3728,7 @@ xhr.send();
           ecraft2learn.load_universal_sentence_encoder(() => {
               ecraft2learn.universal_sentence_encoder_module.loadTokenizer().then(tokenizer => {
                   ecraft2learn.universal_sentence_encoder_tokenizer = tokenizer;
-                  show_message();
+                  show_message("loaded", .1);
                   tokenize();
               });
           });
@@ -3725,7 +3751,7 @@ xhr.send();
           ecraft2learn.load_BERT(() => {
               qna.load().then(model => {
                   ecraft2learn.universal_sentence_encoder = model;
-                  show_message();
+                  show_message("loaded", .1);
                   answer();
               });
           });
@@ -3737,6 +3763,7 @@ xhr.send();
       });
       stop_all_scripts();
       ecraft2learn.outstanding_callbacks = [];
+      ecraft2learn.paused_callbacks = [];
       ecraft2learn.support_window = {};
       ecraft2learn.support_window_is_ready = {};
       ecraft2learn.support_iframe = {};
