@@ -37,7 +37,9 @@ window.addEventListener('load', function () {
 						   } else if (full_screen) {
 						   	   ide_morph.toggleAppMode(true);
 						   	   if (run_full_screen) {
-								   ide_morph.runScripts();
+						   	   	   setTimeout(() => {
+						   	   	   	  ide_morph.runScripts();
+						   	   	   });								   
 							   }
 						   }
 						   ide_morph.showMessage(""); // remove message
