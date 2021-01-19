@@ -170,7 +170,7 @@ LIFE.context_sensitive_questions =
       earliest_step: 15,
       latest_step: 29,
       questions: ["When do we give steroids?",
-                  "At what stage are steriods recommended?",
+                  "At what stage are steroids recommended?",
                   "Under what conditions should we give steroids?"],
       answer: "This remains controversial in COVID-19. " + 
               "However, if the child has acute respiratory symptoms with a wheeze, and a known history (or a current diagnosis) of asthma, " + 
