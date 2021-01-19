@@ -219,6 +219,21 @@ window.ecraft2learn =
               original_stopAllScripts();
           };      
       };
+      const enhance_stop_all_sounds = () => {
+          if (!inside_snap()) {
+              return;
+          }
+          const original_stop_all_sounds = Process.prototype.doStopAllSounds;
+          const ide = get_snap_ide();
+          if (ide) {
+              Process.prototype.doStopAllSounds = () => {
+                  original_stop_all_sounds.call(ide.stage.threads.processes[0]);
+                  if (window.speechSynthesis) {
+                      window.speechSynthesis.cancel(); // should stop all utterances
+                  }
+              }
+          }
+      }
       const workaround_snap_message_listener = () => {
           const snap_listener = window.onmessage;
           window.onmessage = undefined;
@@ -230,15 +245,17 @@ window.ecraft2learn =
                                       snap_listener(event);
                                   });
       };
-      if (document.body) {
+      const enhance_snap = () => {
           track_whether_snap_is_stopped();
+          enhance_stop_all_sounds();
           enhance_snap_openProject();
           workaround_snap_message_listener();
+      };
+      if (document.body) {
+          enhance_snap();
       } else {
           // too soon so wait until page is loaded
-          window.addEventListener('load', track_whether_snap_is_stopped, false);
-          window.addEventListener('load', enhance_snap_openProject, false);
-          window.addEventListener('load', workaround_snap_message_listener, false);
+          window.addEventListener('load', enhance_snap, false);
       }
       let get_global_variable_value = function (name, default_value) {
           // returns the value of the Snap! global variable named 'name'
