@@ -1947,6 +1947,7 @@ window.ecraft2learn =
         });
     };
     let loading_body_pix_message_presented = false;
+    let loading_body_pix_message_removed = false;
     const segmentation_handler = (multi_person, costume, options, callback, error_callback, config, default_config) => {
       if (options) {
           options = array_to_object(snap_to_javascript(options));
@@ -1976,7 +1977,10 @@ window.ecraft2learn =
                                 },
                                 (message) => {
                                     if (loading_body_pix_message_presented) {
-                                        show_message("loaded", .1);
+                                        if (!loading_body_pix_message_removed) {
+                                            show_message("loaded", .1);
+                                        }
+                                        loading_body_pix_message_removed = true;
                                     }
                                     if (message.error_message) {   
                                         const title = "Error computing segmentations of a costume";
