@@ -284,6 +284,7 @@ window.ecraft2learn =
     };
     let invoke_callback = function (callback) { // any number of additional arguments
         // callback could either be a Snap! object or a JavaScript function
+        // see https://github.com/jmoenig/Snap/issues/1938
         if (inside_snap() && callback instanceof Context) { // assume Snap! callback
             if (callback.stopped_by_user) {
                 return;

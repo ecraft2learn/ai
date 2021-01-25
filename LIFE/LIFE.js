@@ -744,7 +744,7 @@ const logging_interface = () => {
 
 let question_area; // there may not be one
 
-const keep_listening = true; // if true speech recognition should stay on until explictly stopped but never fully debugged
+const keep_listening = false; // if true speech recognition should stay on until explictly stopped but never fully debugged
 // strange that onend events repeatedly triggered
 
 const setup_interface =
@@ -820,25 +820,27 @@ const setup_interface =
 //     	ecraft2learn.start_speech_recognition_v2(recognition_callback, {error_callback: handle_recognition_error, keep_listening});
     };
     const handle_recognition_error = (error) => {
-    	if (error === "no-speech") {
-    		// keep listening
-    		ecraft2learn.start_speech_recognition_v2(recognition_callback, {error_callback: handle_recognition_error, keep_listening});
-    	} else {
-    		toggle_speech_recognition_label.innerHTML = 
-    			"Type your questions because speech recognition causes this error: " 
-    			+ error;
+    	if (listening) {
+			if (error === "no-speech") {
+				// keep listening
+				turn_speech_recognition_on(true);
+			} else {
+				toggle_speech_recognition_label.innerHTML = 
+					"Type your questions because speech recognition causes this error: " 
+					+ error;
+			}    		
     	}
     };
-    const toggle_speech = (event) => {
+    const toggle_speech = () => {
+    	// this is for the interface where questions can be typed (not the covid scenario)
     	if (speech_recognition_on) {
     		speech_recognition_on = false;
     		toggle_speech_recognition_label.innerHTML = turn_on_speech_recognition_label;
-    		ecraft2learn.stop_speech_recognition();
     	} else {
     		speech_recognition_on = true;
     		toggle_speech_recognition_label.innerHTML = turn_off_speech_recognition_label;
-    		ecraft2learn.start_speech_recognition_v2(recognition_callback, {error_callback: handle_recognition_error, keep_listening});                    
     	}
+    	turn_speech_recognition_on(speech_recognition_on);
     };
     toggle_speech_recognition.addEventListener('click', toggle_speech);
     if (user_id_for_logs) {
@@ -949,7 +951,9 @@ const previous_item_button_in_quiz = document.getElementById('previous-item-butt
 const previous_item_button_video = document.getElementById('previous-item-button-video');
 const next_item_button_video = document.getElementById('next-item-button-video');
 const more_info_button = document.getElementById('more-info-button');
+const help_link = document.getElementById('help');
 const quit_button = document.getElementById('quit-button');
+const toggle_listen_button = document.getElementById('toggle-listen-button');
 const final_message = document.getElementById('final-message');
 const congratulations = document.getElementById('congratulations');
 const scenario_interface = document.getElementById('scenario-interface');
@@ -996,7 +1000,7 @@ const notify_speech_ready = () => {
 			window.speechSynthesis.cancel();
 			ecraft2learn.speaking_ongoing = false;
 			console.log("starting speech recognition");
-			ecraft2learn.start_speech_recognition_v2(speech_listening_callback, {error_callback: handle_recognition_error, keep_listening}); 
+			turn_speech_recognition_on(true);
 		}
 	};
 	const run_callback_only_once = () => {
@@ -1006,8 +1010,36 @@ const notify_speech_ready = () => {
         }
 	};
 	speak("Ready to listen to your questions. You'll hear this noise if I can't answer the question.", run_callback_only_once);
+	toggle_listen_button.innerHTML = turn_off_listen;
+	toggle_listen_button.addEventListener('click', toggle_listen);
 	// following works around a bug where the speech never ends (though nothing is heard)
-    setTimeout(run_callback_only_once, 5000);
+    setTimeout(run_callback_only_once, 7500);
+};
+
+let listening = true;
+const turn_off_listen = "Stop listening to speech";
+const resume_listen = "Resume listening to speech";
+const not_yet_ready_to_listen = "Not yet ready to listen to speech";
+
+const toggle_listen = () => {
+	// this is only for the Covid scenarios
+	turn_speech_recognition_on(!listening);
+};
+
+const turn_speech_recognition_on = (flag) => {
+	listening = flag;
+	if (listening) {
+        ecraft2learn.start_speech_recognition_v2(speech_listening_callback, 
+												 {error_callback: handle_recognition_error,
+												  keep_listening});
+    } else {
+		ecraft2learn.stop_speech_recognition()
+	}
+	if (listening) {
+       	toggle_listen_button.innerHTML = turn_off_listen;
+    } else {
+        toggle_listen_button.innerHTML = resume_listen; 
+    }
 };
 
 const initialize_covid_scenario = () => {
@@ -1027,6 +1059,7 @@ const initialize_covid_scenario = () => {
             }
 	    });
 	quit_button.addEventListener('click', display_final_message);
+	toggle_listen_button.innerHTML = not_yet_ready_to_listen;
 	blink_doctor_image();
 	if (initial_step_number === 0) { // URL parameter not used to start in the middle
 		opening_credits();
@@ -1037,11 +1070,7 @@ const initialize_covid_scenario = () => {
     	load_question_answering_model(() => {
     		// if tab is minimized then recognition is stopped, start listening again when no longer hidden
 			window.addEventListener('visibilitychange', () => {
-				if (document.hidden) {
-					ecraft2learn.stop_speech_recognition();
-				} else {
-					ecraft2learn.start_speech_recognition_v2(speech_listening_callback, {error_callback: handle_recognition_error, keep_listening});
-				}
+				turn_speech_recognition_on(!document.hidden);
 			});
     		if (user_action_has_been_performed) {
 				notify_speech_ready();
@@ -1073,7 +1102,9 @@ const opening_credits = () => {
 const leave_opening_credits = () => {
 	opening_credits_container.hidden = true;
 	scenario_interface.hidden = false;
+	show_element(help_link);
 	show_element(quit_button);
+	show_element(toggle_listen_button);
 	run_covid_scenario();
 };
 
@@ -1218,16 +1249,18 @@ const is_covid_question = (question) => {
 };
 
 const handle_recognition_error = (error) => {
-	if (error === "no-speech" || error === "No speech heard for a while." || error === 'aborted') {
-		if (!document.hidden) {
-			// keep listening but seem to need to do a full restart
-			ecraft2learn.stop_speech_recognition();
-			ecraft2learn.start_speech_recognition_v2(speech_listening_callback, {error_callback: handle_recognition_error, keep_listening});
-		}
-    } else {
-    	console.log("Recognition error: ", error);
-    	display_feedback(error);
-    }
+	if (listening) {
+		if (error === "no-speech" || error === "No speech heard for a while." || error === 'aborted') {
+			if (!document.hidden) {
+				// keep listening but seem to need to do a full restart
+				ecraft2learn.stop_speech_recognition();
+				turn_speech_recognition_on(true);
+			}
+		} else {
+			console.log("Recognition error: ", error);
+			display_feedback(error);
+		}		
+	}
 };
 
 const sensitive_question_threshold = .75;

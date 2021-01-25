@@ -236,32 +236,7 @@ figcaption {
   margin-top: -16px;
 }
 .generic-button {
-/* originally copied from jquery-ui many subsequent edits */
-margin-top: 10px;
-/*  padding: .8em 1em; */
-display: inline-block;
-position:absolute relative;
-line-height: normal;
-margin-right: .1em;
-cursor: pointer;
-vertical-align: middle;
-text-align: center;
-font-size: 1.5em;
--webkit-user-select: none;
--moz-user-select: none;
--ms-user-select: none;
-user-select: none;
-border-radius: 8px;
-padding: 10px;
-box-shadow: 5px 3px 5px black;
-color: navy;
-cursor: pointer;
-text-decoration: none;
-width: fit-content;
-background-color: buttonface;
-border-radius: 100%;
-padding: 20px;
-}
+/* originally copied from jquery-ui many subsequent edits */margin-top: 10px;/*  padding: .8em 1em; */display: inline-block;position:absolute relative;line-height: normal;margin-right: .5em;cursor: pointer;vertical-align: middle;text-align: center;font-size: 1.5em;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;border-radius: 8px;padding: 10px;box-shadow: 5px 3px 5px black;color: navy;cursor: pointer;text-decoration: none;width: fit-content;background-color: buttonface;border-radius: 100%;padding: 20px;}
 .next-or-previous-item-button {
   padding: 20px;
   font-size: 2em;
