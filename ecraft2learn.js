@@ -3719,8 +3719,18 @@ xhr.send();
   },
   sentence_features: (sentences, callback) => {
       record_callbacks(callback);
+      if (!(sentences instanceof List)) {
+          throw new Error("Sentence features expected a list of sentences. Not " + sentences.constructor.name);;
+      }
+      const sentences_as_javascript = sentences.asArray();
+      if (sentences_as_javascript.length === 0) {
+          throw new Error("Sentence features does not accept empty lists.");
+      } 
+      if (typeof sentences_as_javascript[0] !== 'string') {
+          throw new Error("Sentence features expected the sentences to be text. Not " + sentences_as_javascript[0].constructor.name);
+      }
       const embed = () => {
-          ecraft2learn.universal_sentence_encoder.embed(sentences.asArray()).then(embeddings_tensor => {
+          ecraft2learn.universal_sentence_encoder.embed(sentences_as_javascript).then(embeddings_tensor => {
               const embeddings = embeddings_tensor.arraySync();
               embeddings_tensor.dispose();
               invoke_callback(callback, javascript_to_snap(embeddings));   
