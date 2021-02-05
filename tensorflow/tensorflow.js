@@ -1842,9 +1842,11 @@ const receive_message =
                     best_parameters.metrics = metrics_of_highest_score;
                 }
                 const model = result.best_model;
-                add_to_models(model);
-                model.best_model = model;
-                model.best_parameters = best_parameters;
+                if (model) {
+                    add_to_models(model);
+                    model.best_model = model;
+                    model.best_parameters = best_parameters;
+                }
                 event.source.postMessage({optimize_hyperparameters_time_stamp: time_stamp,
                                           final_optimize_hyperparameters: best_parameters},
                                          "*");
