@@ -56,7 +56,8 @@ const set_data = (model_name, kind, value, callback, permitted_labels, minimum_n
             [value, labels, class_weights] = 
                 to_one_hot_and_removed_data_with_unknown_output_labels(value, 
                                                                        permitted_labels,
-                                                                       kind==='training');
+                                                                       // consider making this optional 
+                                                                       kind === 'training');
             data[model_name].categories = labels;
             if (kind ==='training') {
                 data[model_name].class_weights = class_weights;
@@ -1837,7 +1838,7 @@ const receive_message =
                 if (highest_accuracy > 0) {
                     best_parameters.highest_accuracy = highest_accuracy;
                 }
-                if (typeof highest_score ==='number') {
+                if (typeof highest_score === 'number') {
                     best_parameters.highest_score = highest_score;
                     best_parameters.metrics = metrics_of_highest_score;
                 }
