@@ -18,6 +18,7 @@ const record_callbacks = (...args) => {
 
 const invoke_callback = (callback, ...args) => { // any number of additional arguments
     if (callback && callback.stopped_prematurely) {
+        callback.stopped_prematurely = false; // so can be reused
         return;
     }
     if (typeof callback === 'function') { 
