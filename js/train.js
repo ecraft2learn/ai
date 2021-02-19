@@ -113,7 +113,7 @@ const create_model = (options, failure_callback) => {
         let {input_shape} = options;
         if (!input_shape) {
             if (datasets) {
-                if (datasets.xs_array) {
+                if (datasets.xs_array && datasets.xs_array.length > 0) {
                     input_shape = shape_of_data(datasets.xs_array[0]);
                 } else if (datasets.xs) {
                     input_shape = datasets.xs.shape.slice(1);
@@ -145,7 +145,7 @@ const create_model = (options, failure_callback) => {
         if (datasets) {
             // transfer treats last layer with custom code
             let output_size;
-            if (datasets.ys_array) {
+            if (datasets.ys_array && datasets.ys_array.length > 0) {
                 output_size = typeof datasets.ys_array[0] === 'number' ? 1 : datasets.ys_array[0].length;
             } else if (datasets.ys) {
                 output_size = datasets.ys.shape.slice(1)[0];
@@ -479,6 +479,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
         let best_weights = [];
         let update_weights = false;
         let last_epoch = 0;
+        const warmup_epochs = Math.round(epochs*0.2); // first 20% not reliable for discovering best parameters
         const stats_callback = 
             {onEpochEnd: async (epoch, history) => {
 //                 console.log(history, epoch);
@@ -492,13 +493,15 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                 validation_loss = typeof history.val_loss === 'undefined' ? history.loss : history.val_loss;
                 data_accuracy = history.acc;
                 validation_accuracy = history.val_acc;
-                if (typeof lowest_data_loss === 'undefined' || data_loss < lowest_data_loss) {
+                if (epoch >= warmup_epochs && (typeof lowest_data_loss === 'undefined' || data_loss < lowest_data_loss)) {
                     lowest_data_loss = data_loss;
                     if (!validation_loss) { // only using training data 
                         update_weights = true;
                     }
                 }
-                if (typeof lowest_validation_loss === 'undefined' || (validation_loss-lowest_validation_loss)/lowest_validation_loss < -1e-6) {
+                if (epoch >= warmup_epochs && 
+                    (typeof lowest_validation_loss === 'undefined' ||
+                     (validation_loss-lowest_validation_loss)/lowest_validation_loss < -1e-6)) {
                     // ignore progress of less than one millionth in the loss
                     lowest_validation_loss = validation_loss;
                     lowest_validation_loss_epoch = epoch;
@@ -506,7 +509,8 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                         update_weights = true;
                     }
                 }
-                if (typeof validation_accuracy === 'number' && 
+                if (epoch >= warmup_epochs && 
+                    typeof validation_accuracy === 'number' && 
                     (typeof highest_accuracy === 'undefined' || validation_accuracy > highest_accuracy)) {
                     highest_accuracy = validation_accuracy;
                     highest_accuracy_epoch = epoch;
@@ -530,6 +534,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                     throw error;
                 }
                 if (stop_if_no_progress_for_n_epochs &&
+                    epoch >= warmup_epochs+stop_if_no_progress_for_n_epochs && 
                     (!highest_accuracy_epoch || (epoch-highest_accuracy_epoch >= stop_if_no_progress_for_n_epochs)) &&
                     epoch-lowest_validation_loss_epoch >= stop_if_no_progress_for_n_epochs) {
                     // if there has been no progress in accuracy or loss then stop
