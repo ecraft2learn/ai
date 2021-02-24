@@ -50,33 +50,49 @@ const set_data = (model_name, kind, value, callback, permitted_labels, minimum_n
         data[model_name] = {};
     }
     if (value.hasOwnProperty('output')) {
-        if (value.output.length > 0 && isNaN(+value.output[0])) {
+        if (value.output.length > 0) {
+            const values_are_non_numeric_strings = 
+                typeof value.output[0] === 'string' && isNaN(+value.output[0]);
+            const values_are_lists_of_non_numeric_strings = 
+                value.output[0] instanceof Array && value.output[0].length > 0 && isNaN(+value.output[0][0]);
             // values might be strings that represent numbers - only non-numeric strings can be category labels
-            let labels, class_weights;
-            [value, labels, class_weights] = 
-                to_one_hot_and_removed_data_with_unknown_output_labels(value, 
-                                                                       permitted_labels,
-                                                                       // consider making this optional 
-                                                                       kind === 'training');
-            data[model_name].categories = labels;
-            if (kind ==='training') {
-                data[model_name].class_weights = class_weights;
+            // or might be a list of non-numeric strings
+            if (values_are_non_numeric_strings || values_are_lists_of_non_numeric_strings) {
+                let labels, class_weights;
+                [value, labels, class_weights] = 
+                    to_one_hot_and_removed_data_with_unknown_output_labels(value,
+                                                                           values_are_non_numeric_strings, 
+                                                                           permitted_labels,
+                                                                           // consider making this optional 
+                                                                           kind === 'training');
+                if (values_are_non_numeric_strings) {
+                    data[model_name].categories = labels;
+                } else {
+                    data[model_name].categories_for_multiple_output = labels;
+                }
+                if (kind ==='training') {
+                    data[model_name].class_weights = class_weights;
+                }
+                if (model_name === 'all models') {
+                    // recreate all models with for example softmax and one-hot created before this data was available
+                    Object.keys(data).forEach((name) => {
+                        if (data[name].hasOwnProperty('recreate')) {
+                            data[name]['recreate'](callback);
+                            callback = undefined;
+                        }
+                    });
+                } else if (data[model_name].hasOwnProperty('recreate')) {
+                    data[model_name]['recreate'](callback);
+                    callback = undefined;               
+                }
+            } else {
+                if (value.output.length > 0 && typeof value.output[0] === 'string') {
+                    value.output = value.output.map((n) => +n); // string to number
+                } else if (value.output.length > 0 && value.output[0] instanceof Array) {
+                    value.output = value.output.map((list) => list.map((n) => +n));
+                }               
+                data[model_name].categories = undefined;
             }
-            if (model_name === 'all models') {
-                // recreate all models with for example softmax and one-hot created before this data was available
-                Object.keys(data).forEach((name) => {
-                    if (data[name].hasOwnProperty('recreate')) {
-                        data[name]['recreate'](callback);
-                        callback = undefined;
-                    }
-                });
-            } else if (data[model_name].hasOwnProperty('recreate')) {
-                data[model_name]['recreate'](callback);
-                callback = undefined;               
-            }
-        } else {
-            value.output = value.output.map((n) => +n); // string to number
-            data[model_name].categories = undefined;
         }        
     }
     data[model_name][kind] = value;
@@ -95,14 +111,25 @@ const reset_all = () => {
     model = undefined;
 };
 
-const to_one_hot_and_removed_data_with_unknown_output_labels = (input_and_output, permitted_labels, need_class_weights) => {
+const to_one_hot_and_removed_data_with_unknown_output_labels = 
+    (input_and_output, values_are_non_numeric_strings, permitted_labels, need_class_weights) => {
+    // if values_are_non_numeric_strings is false then they are lists of non-numeric strings
     const unique_labels = permitted_labels || [];
     const labels = input_and_output.output;
     const original_input = input_and_output.input;
     if (unique_labels.length === 0) {
         labels.forEach((label) => {
-            if (unique_labels.indexOf(label) < 0) {
-                unique_labels.push(label);
+            if (values_are_non_numeric_strings) {
+                if (unique_labels.indexOf(label) < 0) {
+                    unique_labels.push(label);
+                }
+            } else {
+                // label is really a list of labels
+                label.forEach((element) => {
+                    if (unique_labels.indexOf(element) < 0) {
+                        unique_labels.push(element);
+                    }
+                })
             }
         });
     }
@@ -117,20 +144,39 @@ const to_one_hot_and_removed_data_with_unknown_output_labels = (input_and_output
     const new_output = [];
     const counts = {};
     labels.forEach((label, index) => {
-        if (need_class_weights) {
-            if (counts[label]) {
-                counts[label] = counts[label]+1;
-            } else {
-                counts[label] = 1;
+        if (values_are_non_numeric_strings) {
+            if (need_class_weights) {
+                if (counts[label]) {
+                    counts[label] = counts[label]+1;
+                } else {
+                    counts[label] = 1;
+                }
+            }
+            const label_index = unique_labels.indexOf(label);
+            if (label_index >= 0) {
+                // only copy the input over if not skipping this entry
+                new_input.push(original_input[index]);
+                new_output.push(one_hot(label_index,
+                                        Math.max(unique_labels.length,
+                                                 window.minimum_number_of_categories_for_textual_output || 0)));
+            } // otherwise skip if output label not permitted
+        } else {    
+            const n_hot = unique_labels.map((unique_label) => {
+                // label is a list of labels
+                return label.indexOf(unique_label) >= 0 ? 1 : 0;
+            });
+            new_input.push(original_input[index]); // keep all the input entries
+            new_output.push(n_hot);
+            if (need_class_weights) {
+                label.forEach((element) => {
+                    if (counts[element]) {
+                        counts[element] = counts[element]+1;
+                    } else {
+                        counts[element] = 1;
+                    }
+                });                
             }
         }
-        const label_index = unique_labels.indexOf(label);
-        if (label_index >= 0) {
-            new_input.push(original_input[index]);
-            new_output.push(one_hot(label_index,
-                                    Math.max(unique_labels.length,
-                                             window.minimum_number_of_categories_for_textual_output || 0)));
-        } // otherwise skip if output label not permitted 
     });
     let class_weights = [];
     if (need_class_weights) {
@@ -1698,10 +1744,17 @@ const receive_message =
                 if (categories) {
                     return average_categorical_results();
                 }
-                const averages = results[0].map(() => 0);
+                const averages = results[0].map((x) => typeof x === 'number' ? 0 : x.map(() => 0));
                 results.forEach((result) => {
                     result.forEach((prediction, index) => {
-                        averages[index] += prediction/results.length;
+                        if (typeof prediction === 'number') {
+                            averages[index] += prediction/results.length;
+                        } else { // assume it a list of numbers
+                            prediction.forEach((number, value_index) => {
+                                averages[index][value_index] += number/results.length;
+                            });
+                        }
+                        
                     });                        
                 });
                 return averages;     
