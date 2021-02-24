@@ -205,6 +205,7 @@ const create_model = (options, failure_callback) => {
            } else {
                loss = 'meanSquaredError';
            }
+//            loss = (a, b) => {a.print(); b.print(); return tf.losses[loss_function](a,b);};
            const compile_options = {optimizer: optimizer_function,
                                     loss,
                                     metrics: class_names && ['accuracy','crossentropy']};
