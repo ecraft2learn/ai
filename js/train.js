@@ -480,7 +480,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
         let best_weights = [];
         let update_weights = false;
         let last_epoch = 0;
-        const warmup_epochs = Math.round(epochs*0.2); // first 20% not reliable for discovering best parameters
+        const warmup_epochs = Math.round(epochs*0.1); // first 10% not reliable for discovering best parameters
         const stats_callback = 
             {onEpochEnd: async (epoch, history) => {
 //                 console.log(history, epoch);
