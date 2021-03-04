@@ -1903,6 +1903,7 @@ window.ecraft2learn =
         }
     };
     let loading_coco_ssd_message_presented = false;
+    let loading_coco_ssd_message_removed = false;
     const detection_handler = (costume, options, callback, error_callback) => {
         if (options) {
             options = array_to_object(snap_to_javascript(options));
@@ -1928,7 +1929,9 @@ window.ecraft2learn =
             },
             (message) => {
                 if (loading_coco_ssd_message_presented) {
-                    show_message("loaded", .1);
+                    if (!loading_coco_ssd_message_removed)
+                        show_message("loaded", .1);
+                        loading_coco_ssd_message_removed = true;
                 }
                 if (message.error_message) {   
                     const title = "Error detecting images of objects in a costume";
@@ -3517,6 +3520,13 @@ xhr.send();
   },
   load_training_from_URL: (URL, user_callback) => {
       load_transfer_training_from_URL('camera', URL, user_callback);
+  },
+  set_random_number_seed: (x) => {
+      // tf isn't available in this window need to post a message to the support window
+      // but this won't help use of random within Snap! - seems both windows need to load tensorflow
+      if (Math.seedrandom) { // provided by tensorflow.js 
+          Math.seedrandom(x);
+      }
   },
   // some word embedding functionality
   dot_product,
