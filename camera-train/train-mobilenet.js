@@ -430,7 +430,11 @@ const listen_for_messages = function (event) {
         if (event.data.no_display_of_support_window) {
             set_class_names(event.data.training_class_names);
         } else {
-            initialise_page(event.data.training_class_names, event.source, event.data.hostname, event.data.search, event.data.hash).then(start);
+            initialise_page(event.data.training_class_names, event.source, event.data.hostname, event.data.search, event.data.hash)
+              .then(() => {
+                      window.parent.postMessage("Ready", "*");
+                      start();
+                });
         }
     } else if (typeof event.data.new_introduction !== 'undefined') {
         // update HTML of the page with custom introduction
