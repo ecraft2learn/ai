@@ -9,7 +9,7 @@
     written by Jens Mönig
     jens@moenig.org
 
-    Copyright (C) 2020 by Jens Mönig
+    Copyright (C) 2021 by Jens Mönig
 
     This file is part of Snap!.
 
@@ -61,7 +61,7 @@ StageMorph, SpriteMorph, StagePrompterMorph, Note, modules, isString, copy, Map,
 isNil, WatcherMorph, List, ListWatcherMorph, alert, console, TableMorph, BLACK,
 TableFrameMorph, ColorSlotMorph, isSnapObject, newCanvas, Symbol, SVG_Costume*/
 
-modules.threads = '2020-December-22';
+modules.threads = '2021-February-23';
 
 var ThreadManager;
 var Process;
@@ -786,7 +786,8 @@ Process.prototype.evaluateBlock = function (block, argCount) {
     inputs = this.context.inputs;
 
     if (argCount > inputs.length) {
-        this.evaluateNextInput(block);
+        // this.evaluateNextInput(block);
+        this.evaluateNextInputSet(block); // frame-optimized version
     } else {
         if (this.flashContext()) {return; } // yield to flash the block
         if (this[selector]) {
@@ -910,7 +911,8 @@ Process.prototype.evaluateMultiSlot = function (multiSlot, argCount) {
         this.popContext();
     } else {
         if (argCount > inputs.length) {
-            this.evaluateNextInput(multiSlot);
+            // this.evaluateNextInput(multiSlot);
+            this.evaluateNextInputSet(multiSlot); // frame-optimized version
         } else {
             this.returnValueToParentContext(new List(inputs));
             this.popContext();
@@ -1030,6 +1032,63 @@ Process.prototype.evaluateNextInput = function (element) {
         }
     } else {
         this.pushContext(exp, outer);
+    }
+};
+
+Process.prototype.evaluateNextInputSet = function (element) {
+    // Optimization to use instead of evaluateNextInput(), bums out a few
+    // frames and function calls to save a some milliseconds.
+    // the idea behind this optimization is to keep evaluating the inputs
+    // while we know for sure that we aren't boing to yield anyway
+    var args = element.inputs(),
+        sel = this.context.expression.selector,
+        outer = this.context.outerContext, // for tail call elimination
+        exp, ans;
+
+    while (args.length > this.context.inputs.length) {
+        exp = args[this.context.inputs.length];
+        if (exp.isUnevaluated) {
+            if (exp.isUnevaluated === true || exp.isUnevaluated()) {
+                if (sel === 'reify' || sel === 'reportScript') {
+                    this.context.addInput(exp);
+                } else {
+                    this.context.addInput(this.reify(exp, new List()));
+                }
+            } else {
+                this.pushContext(exp, outer);
+                break;
+            }
+        } else {
+            if (exp instanceof MultiArgMorph || exp instanceof ArgLabelMorph ||
+                    exp instanceof BlockMorph) {
+                 this.pushContext(exp, outer);
+                 break;
+            } else { // asuming an ArgMorph
+                if (this.flashContext()) {return; } // yield to flash
+                if (exp.bindingID) {
+                    if (this.isCatchingErrors) {
+                        try {
+                            ans = this.context.variables.getVar(exp.bindingID);
+                        } catch (error) {
+                            this.handleError(error, exp);
+                        }
+                    } else {
+                        ans = this.context.variables.getVar(exp.bindingID);
+                    }
+                } else {
+                    ans = exp.evaluate();
+                    if (ans) {
+                        if (exp.constructor === CommandSlotMorph ||
+                                exp.constructor === ReporterSlotMorph ||
+                                (exp instanceof CSlotMorph &&
+                                    (!exp.isStatic || exp.isLambda))) {
+                            ans = this.reify(ans, new List());
+                        }
+                    }
+                }
+                this.context.addInput(ans);
+            }
+        }
     }
 };
 
@@ -1873,7 +1932,6 @@ Process.prototype.shadowListAttribute = function (list) {
 // Process accessing list elements - hyper dyadic
 
 Process.prototype.reportListItem = function (index, list) {
-    var rank;
     this.assertType(list, 'list');
     if (index === '') {
         return '';
@@ -1884,70 +1942,89 @@ Process.prototype.reportListItem = function (index, list) {
     if (this.inputOption(index) === 'last') {
         return list.at(list.length());
     }
-    rank = this.rank(index);
-    if (rank > 0 && this.enableHyperOps) {
-        if (rank === 1) {
-            if (index.isEmpty()) {
-                return list.map(item => item);
-            }
-            return index.map(idx => list.at(idx));
-        }
-        return this.reportItems(index, list);
+    if (index instanceof List && this.enableHyperOps) {
+        return list.query(index);
     }
     return list.at(index);
 };
 
-Process.prototype.reportItems = function (indices, list) {
-    // This. This is it. The pinnacle of my programmer's life.
-    // After days of roaming about my house and garden,
-    // of taking showers and rummaging through the fridge,
-    // of strumming the charango and the five ukuleles
-    // sitting next to my laptop on my desk,
-    // and of letting my mind wander far and wide,
-    // to come up with this design, always thinking
-    // "What would Brian do?".
-    // And look, Ma, it's turned out all beautiful! -jens
+// Process - experimental tabular list ops
 
-    return makeSelector(
-        this.rank(list),
-        indices.cdr(),
-        makeLeafSelector(indices.at(1))
-    )(list);
+Process.prototype.reportTranspose = function (list) {
+    this.assertType(list, 'list');
+    return list.transpose();
+};
 
-    function makeSelector(rank, indices, next) {
-        if (rank === 1) {
-            return next;
-        }
-        return makeSelector(
-            rank - 1,
-            indices.cdr(),
-            makeBranch(
-                indices.at(1) || new List(),
-                next
-            )
-        );
+Process.prototype.reportCrossproduct = function (lists) {
+    this.assertType(lists, 'list');
+    if (lists.isEmpty()) {
+        return lists;
     }
+    this.assertType(lists.at(1), 'list');
+    return lists.crossproduct();
+};
 
-    function makeBranch(indices, next) {
-        return function(data) {
-            if (indices.isEmpty()) {
-                return data.map(item => next(item));
-            }
-            return indices.map(idx => next(data.at(idx)));
-        };
-    }
+Process.prototype.reportReshape = function (list, shape) {
+    this.assertType(shape, 'list');
+    list = list instanceof List ? list : new List([list]);
+    return list.reshape(shape);
+};
 
-    function makeLeafSelector(indices) {
-        return function (data) {
-            if (indices.isEmpty()) {
-                return data.map(item => item);
-            }
-            return indices.map(idx => data.at(idx));
-        };
-    }
+Process.prototype.reportSlice = function (list, indices) {
+    // currently not in use
+    this.assertType(list, 'list');
+    this.assertType(indices, 'list');
+    return list.slice(indices);
 };
 
 // Process - other basic list accessors
+
+Process.prototype.reportListAttribute = function (choice, list) {
+    var option = this.inputOption(choice);
+    switch (option) {
+    case 'length':
+        this.assertType(list, 'list');
+        return list.length();
+    case 'size':
+        this.assertType(list, 'list');
+        return list.size();
+    case 'rank':
+        return list instanceof List ? list.rank() : 0;
+    case 'dimensions':
+        return list instanceof List ? list.shape() : new List();
+    case 'flatten':
+        return list instanceof List ? list.ravel() : new List([list]);
+    case 'columns':
+        this.assertType(list, 'list');
+        return list.columns();
+    case 'transpose':
+        this.assertType(list, 'list');
+        return list.transpose();
+    case 'reverse':
+        this.assertType(list, 'list');
+        return list.reversed();
+    case 'lines':
+        this.assertType(list, 'list');
+        if (list.canBeTXT()) {
+            return list.asTXT();
+        }
+        throw new Error('unable to convert to lines');
+    case 'csv':
+        this.assertType(list, 'list');
+        if (list.canBeCSV()) {
+            return list.asCSV();
+        }
+        throw new Error('unable to convert to CSV');
+    case 'json':
+        this.assertType(list, 'list');
+        if (list.canBeJSON()) {
+            return list.asJSON();
+        }
+        throw new Error('unable to convert to JSON');
+    default:
+        return 0;
+    }
+};
 
 Process.prototype.reportListLength = function (list) {
     this.assertType(list, 'list');
@@ -2016,6 +2093,19 @@ Process.prototype.reportBasicNumbers = function (start, end) {
         }
     }
     return new List(result);
+};
+
+Process.prototype.reportListCombination = function (choice, lists) {
+    // experimental, currently not in use
+    var option = this.inputOption(choice);
+    switch (option) {
+    case 'append':
+        return this.reportConcatenatedLists(lists);
+    case 'cross product':
+        return this.reportCrossproduct(lists);
+    default:
+        return 0;
+    }
 };
 
 Process.prototype.reportConcatenatedLists = function (lists) {
@@ -3671,16 +3761,6 @@ Process.prototype.isMatrix = function (data) {
     return data instanceof List && data.at(1) instanceof List;
 };
 
-Process.prototype.rank = function(data) {
-    var rank = 0,
-        cur = data;
-    while (cur instanceof List) {
-        rank += 1;
-        cur = cur.at(1);
-    }
-    return rank;
-};
-
 // Process math primtives - arithmetic
 
 Process.prototype.reportSum = function (a, b) {
@@ -3761,7 +3841,14 @@ Process.prototype.reportMin = function (a, b) {
 };
 
 Process.prototype.reportBasicMin = function (a, b) {
-    return Math.min(+a, +b);
+    // return Math.min(+a, +b); // enhanced to also work with text
+    var x = +a,
+        y = +b;
+    if (isNaN(x) || isNaN(y)) {
+        x = a;
+        y = b;
+    }
+    return x < y ? x : y;
 };
 
 Process.prototype.reportMax = function (a, b) {
@@ -3769,7 +3856,14 @@ Process.prototype.reportMax = function (a, b) {
 };
 
 Process.prototype.reportBasicMax = function (a, b) {
-    return Math.max(+a, +b);
+    // return Math.max(+a, +b); // enhanced to also work with text
+    var x = +a,
+        y = +b;
+    if (isNaN(x) || isNaN(y)) {
+        x = a;
+        y = b;
+    }
+    return x > y ? x : y;
 };
 
 // Process logic primitives - hyper-diadic / monadic where applicable
@@ -3822,6 +3916,10 @@ Process.prototype.reportEquals = function (a, b) {
     return snapEquals(a, b);
 };
 
+Process.prototype.reportNotEquals = function (a, b) {
+    return !snapEquals(a, b);
+};
+
 Process.prototype.reportNot = function (bool) {
     if (this.enableHyperOps) {
         if (bool instanceof List) {
@@ -3834,6 +3932,10 @@ Process.prototype.reportNot = function (bool) {
 
 Process.prototype.reportIsIdentical = function (a, b) {
     var tag = 'idTag';
+    if (isString(a) && isString(b)) {
+        // compare texts case-sentitive
+        return a === b;
+    }
     if (this.isImmutable(a) || this.isImmutable(b)) {
         return snapEquals(a, b);
     }
@@ -5769,6 +5871,12 @@ Process.prototype.doSetInstrument = function (num) {
 // Process image processing primitives
 
 Process.prototype.reportGetImageAttribute = function (choice, name) {
+    if (this.enableHyperOps) {
+        if (name instanceof List) {
+            return name.map(each => this.reportGetImageAttribute(choice, each));
+        }
+    }
+
     var cst = this.costumeNamed(name) || new Costume(),
         option = this.inputOption(choice);
 
@@ -5853,9 +5961,9 @@ Process.prototype.reportNewCostume = function (pixels, width, height, name) {
     src = pixels.itemsArray();
     dta = ctx.createImageData(width, height);
     for (i = 0; i < src.length; i += 1) {
-        px = src[i].itemsArray();
+        px = src[i] instanceof List ? src[i].itemsArray() : [src[i]];
         for (k = 0; k < 3; k += 1) {
-            dta.data[(i * 4) + k] = +px[k];
+            dta.data[(i * 4) + k] = px[k] === undefined ? +px[0] : +px[k];
         }
         dta.data[i * 4 + 3] = (px[3] === undefined ? 255 : +px[3]);
     }
@@ -6246,7 +6354,7 @@ Process.prototype.reportAtomicFindFirst = function (reporter, list) {
             return src[i];
          }
     }
-    return false;
+    return '';
 };
 
 Process.prototype.reportAtomicCombine = function (list, reporter) {
@@ -6925,6 +7033,15 @@ JSCompiler.prototype.compileExpression = function (block) {
             'compiling does not yet support\n' +
             'custom blocks'
         );
+
+    // special evaluation primitives
+    case 'doRun':
+    case 'evaluate':
+        return 'invoke(' +
+            this.compileInput(inputs[0]) +
+            ',' +
+            this.compileInput(inputs[1]) +
+            ')';
 
     // special command forms
     case 'doSetVar': // redirect var to process

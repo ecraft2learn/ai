@@ -34,7 +34,7 @@
 /*global modules, hex_sha512*/
 
 modules = modules || {};
-modules.cloud = '2020-October-21';
+modules.cloud = '2021-February-04';
 
 // Global stuff
 
@@ -352,7 +352,7 @@ Cloud.prototype.login = function (
 };
 
 Cloud.prototype.signup = function (
-	username,
+    username,
     password,
     passwordRepeat,
     email,
@@ -361,7 +361,7 @@ Cloud.prototype.signup = function (
 ) {
     this.request(
         'POST',
-        '/users/' + encodeURIComponent(username) + '?' + this.encodeDict({
+        '/users/' + encodeURIComponent(username.trim()) + '?' + this.encodeDict({
             email: email,
             password: hex_sha512(password),
             password_repeat: hex_sha512(passwordRepeat)

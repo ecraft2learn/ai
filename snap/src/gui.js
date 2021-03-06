@@ -9,7 +9,7 @@
     written by Jens Mönig
     jens@moenig.org
 
-    Copyright (C) 2020 by Jens Mönig
+    Copyright (C) 2021 by Jens Mönig
 
     This file is part of Snap!.
 
@@ -78,7 +78,7 @@ Animation, BoxMorph, BlockEditorMorph, BlockDialogMorph, Note, ZERO, BLACK*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.gui = '2020-December-23';
+modules.gui = '2021-February-25';
 
 // Declarations
 
@@ -2284,6 +2284,9 @@ IDE_Morph.prototype.droppedText = function (aString, name, fileType) {
     if (aString.indexOf('<media') === 0) {
         return this.openMediaString(aString);
     }
+    if (aString.indexOf('<block') === 0) {
+        aString = '<script>' + aString + '</script>';
+    }
     if (aString.indexOf('<script') === 0) {
         return this.openScriptString(aString);
     }
@@ -4234,8 +4237,8 @@ IDE_Morph.prototype.aboutSnap = function () {
         module, btn1, btn2, btn3, btn4, licenseBtn, translatorsBtn,
         world = this.world();
 
-    aboutTxt = 'Snap! 6.5.0\nBuild Your Own Blocks\n\n'
-        + 'Copyright \u24B8 2008-2020 Jens M\u00F6nig and '
+    aboutTxt = 'Snap! 6.6.0\nBuild Your Own Blocks\n\n'
+        + 'Copyright \u24B8 2008-2021 Jens M\u00F6nig and '
         + 'Brian Harvey\n'
         + 'jens@moenig.org, bh@cs.berkeley.edu\n\n'
         + '        Snap! is developed by the University of California, '

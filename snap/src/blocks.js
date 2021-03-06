@@ -9,7 +9,7 @@
     written by Jens Mönig
     jens@moenig.org
 
-    Copyright (C) 2020 by Jens Mönig
+    Copyright (C) 2021 by Jens Mönig
 
     This file is part of Snap!.
 
@@ -158,7 +158,7 @@ CustomCommandBlockMorph, SymbolMorph, ToggleButtonMorph, DialMorph*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.blocks = '2020-December-22';
+modules.blocks = '2021-February-15';
 
 var SyntaxElementMorph;
 var BlockMorph;
@@ -459,6 +459,32 @@ SyntaxElementMorph.prototype.labelParts = {
             '1' : 1,
             last : ['last'],
             any : ['any']
+        }
+    },
+    '%la': {
+        type: 'input',
+        tags: 'read-only static',
+        menu: {
+            'length' : ['length'],
+            // 'size' : ['size'],
+            'rank' : ['rank'],
+            'dimensions' : ['dimensions'],
+            'flatten' : ['flatten'],
+            'columns' : ['columns'],
+            // 'transpose' : ['transpose'],
+            'reverse' : ['reverse'],
+            '~' : null,
+            'lines' : ['lines'],
+            'csv' : ['csv'],
+            'json' : ['json']
+        }
+    },
+    '%mlfunc': {
+        type: 'input',
+        tags: 'read-only static',
+        menu: {
+            'append' : ['append'],
+            'cross product' : ['cross product']
         }
     },
     '%dim': {
@@ -986,6 +1012,11 @@ SyntaxElementMorph.prototype.labelParts = {
         slots: '%l',
         defaults: 2
     },
+    '%nums': {
+        type: 'multi',
+        slots: '%n',
+        defaults: 2
+    },
     '%exp': {
         type: 'multi',
         slots: '%s',
@@ -1211,11 +1242,15 @@ SyntaxElementMorph.prototype.revertToDefaultInput = function (arg, noValues) {
     // set default value
     if (!noValues) {
         if (inp !== -1) {
-            if (deflt instanceof MultiArgMorph) {
+            if (deflt instanceof MultiArgMorph && !inp) {
+                // first - and only - input is variadic
                 deflt.setContents(this.defaults);
                 deflt.defaults = this.defaults;
             } else if (!isNil(this.defaults[inp])) {
                 deflt.setContents(this.defaults[inp]);
+                if (deflt instanceof MultiArgMorph) {
+                    deflt.defaults = this.defaults[inp];
+                }
             }
         }
     }
@@ -3012,8 +3047,8 @@ BlockMorph.prototype.userMenu = function () {
                 }
                 if (ide) {
                     ide.saveXMLAs(
-                        ide.serializer.serialize(this),
-                        this.selector + ' script',
+                        ide.serializer.serialize(top),
+                        top.selector + ' script',
                         false);
                 }
             },

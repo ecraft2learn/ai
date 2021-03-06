@@ -6,7 +6,7 @@
 
     written by Jens Mönig
 
-    Copyright (C) 2020 by Jens Mönig
+    Copyright (C) 2021 by Jens Mönig
 
     This file is part of Snap!.
 
@@ -46,7 +46,7 @@
 
 /*global modules, contains*/
 
-modules.locale = '2020-December-22';
+modules.locale = '2021-February-15';
 
 // Global stuff
 
@@ -168,7 +168,7 @@ SnapTranslator.dict.de = {
     'translator_e-mail':
         'jens@moenig.org, jadga.huegle@sap.com',
     'last_changed':
-        '2020-12-21'
+        '2021-02-15'
 };
 
 SnapTranslator.dict.it = {
@@ -307,11 +307,11 @@ SnapTranslator.dict.nl = {
     'language_name':
         'Nederlands',
     'language_translator':
-        'Sjoerd Dirk Meijer, Frank Sierens, Jan-Gerard van der Toorn',
+        'Joek van Montfort, Sjoerd Dirk Meijer, Frank Sierens, Jan-Gerard van der Toorn',
     'translator_e-mail':
-        'sjoerddirk@fromScratchEd.nl, frank.sierens@telenet.be, jg.2019@xs4all.nl',
+        'joek@xota.nl, sjoerddirk@fromScratchEd.nl, frank.sierens@telenet.be, jg.2019@xs4all.nl',
     'last_changed':
-        '2017-09-01'
+        '2020-12-15'
 };
 
 SnapTranslator.dict.pl = {
@@ -465,7 +465,7 @@ SnapTranslator.dict.ta = {
     'translator_e-mail':
         'vnkmr7620@gmail.com',
     'last_changed':
-        '2020-12-09'
+        '2021-01-25'
 };
 
 SnapTranslator.dict.te = {
@@ -487,7 +487,7 @@ SnapTranslator.dict.tr = {
     'translator_e-mail':
         'tguneysu@msn.com', // hakanatas@gmail.com, mustafaipekbayrak@gmail.com',
     'last_changed':
-        '2020-09-20'
+        '2021-01-26'
 };
 
 SnapTranslator.dict.hu = {

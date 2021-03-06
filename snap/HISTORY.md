@@ -2,6 +2,201 @@
 
 ## in development:
 
+## 6.6.0
+* **New Features:**
+    * new "reshape" primitive for lists
+    * list operations as dropdown menu of new "length of list" block
+* **Notable Changes:**
+    * 2D lists inside ITEM OF now have the right order of dimensions (rows, columns, planes, etc.)
+    * changed "length of list" to become a general list operations primitive
+    * enhanced MIN and MAX to also operate on text
+    * added "is _ identical to _ ?" to relabel options of equals
+    * enabled scientific notation in numeric text fields
+    * removed experimental "transpose (list)" primitive - has been merged into "length of list"
+    * removed "reverse" block from the "frequency distribution analysis" library
+* **Notable Fixes:**
+    * don't show internal "compile" reporter in search results
+    * fixed a bug for showing the senders of a message
+    * compiled "find first" now also reports empty instead of false if none is found
+    * support one level of currying in the experimental JS JIT compiler
+* **Documentation Updates:**
+    * updated manual with hyper-semantics of ITEM OF, thanks Brian!
+* **Translation Updates:**
+    * German
+
+### 2021-02-25
+* updated manual, thanks, Brian!
+* prepared minor release
+
+### 2021-02-23
+* threads, objects: commented out experimental slice() primitive
+
+### 2021-02-20
+* lists: removed experimental list.slice() feature from production code
+* threads, objects: experimental list slice() primitive, hidden, available via find / relabel
+
+### 2021-02-16
+* objects: reverted list palette reordering
+
+### 2021-02-15
+* threads: fixed #2783
+* threads: fixed #2784
+* blocks: took out "transpose" from "length" dropdown
+* German translation update
+* removed "reverse" block from the "frequency distribution analysis" library
+* support for ranges of indices using zero and negative numbers inside index-lists in "item of"
+
+### 2021-02-14
+* lists: fixed transcription typos in strideTranspose(), thanks, Brian!
+
+### 2021-02-13
+* blocks, threads, lists: distinguish between "columns" (<3D) and (deep) "transpose"
+* byob: fixed a bug for showing the senders of a message
+
+### 2021-02-12
+* blocks, threads, lists: distinguish between "transpose" (<3D) and "deep transpose"
+
+### 2021-02-11
+* objects: rearranged the blocks in the lists category palette
+* lists: fixed list.reverse() to return a shallow copy instead of mutating the original
+
+### 2021-02-10
+* objects: added "is _ identical to _ ?" to relabel options of equals
+* morphic: enable scientific notation in numeric text fields
+* threads: changed error message for "lines" conversion
+* updated German translations
+
+### 2021-02-09
+* lists: refactored matrix ops to avoid JS stack overflows
+* objects: fixed internal migration for "transpose" block
+* threads: enhanced MIN and MAX to also operate on text
+* threads: enhanced list attributes 'rank', 'shape' and 'ravel' to also handle scalars
+* threads: enhanced 'reshape' to also handle scalars
+* lists: limit crash-dangerous matrix-exploding ops to 1 MM elements (reshape, crossproduct)
+* objects, threads: took out "crossproduct" primitive option from the palette
+* objects, blocks: added defaults to RESHAPE in palette
+
+### 2021-02-08
+* lists, objects, threads: new RESHAPE primitive
+* lists: added internal naive (recursive)  version of CROSSPRODUCT
+* lists: added TRANSPOSE for higher dimensions, thanks, Brian!
+* objects, blocks, threads: added "cross product" to "append" as dropdown, and "reverse" to "length"
+
+### 2021-02-06
+* simplified private list.range() method
+* blocks: changed wordings for list attributes
+
+### 2021-02-05
+* new manual for v6.6, thanks, Brian!
+* objects: don't show internal "compile" reporter in search results
+* blocks, objects, threads: added experimental "atribute of list" reporter primitive to dev mode
+* objects: replaced "length of list" primitive with new "attribute of list" reporter
+* objects: added "txt" option to list attribure dropdown - not yet operational
+* lists, threads: added "txt" list conversion
+
+### 2021-02-04
+* lists, threads: changed query semantics for table selectors in ITEM OF to rows, columns, planes, etc.
+* pushed dev version number
+* lists: tweaked query()
+* cloud: trimmed usernames, thanks, Michael
+
+### 2021-02-03
+* new dev version
+
+## 6.5.2
+* **Notable Changes:**
+    * identity comparison of texts is now case-sensitive
+    * hyperized image attribute reporter primitive (monadic)
+    * when constructing a costume from a pixel list handle single values as greyscale
+    * experimental "transpose (list)" primitive relabelling option for "all but first"
+    * renamed "Obsolete!" blocks to "Undefined!"
+* **Notable Fixes:**
+    * fixed a glitch in the animation library's "sine in-out" easing function 
+    * fixed a postMessage glitch in the API, thanks, Bernat!
+    * fixed a glitch in the Turkish translation that broke the "Looks" blocks category
+    * fixed a glitch that prevented the text cursor from displaying instantly in certain situations
+    * fixed importing exported reporter-scripts (experimental feature)
+* **Translation Updates:**
+    * Tamil, thanks, Barthdry!
+    * German
+    * Turkish
+
+### 2021-02-02
+* lists: added a few internal - as of now unused - matrix operations
+* lists, threads: refactored hyper list access
+* prepared patch
+
+### 2021-02-01
+* lists: refactored some matrix operations
+* threads: made identity comparison of texts case-sensitive
+* blocks, gui: fixed importing exported reporter-scripts (experimental feature)
+
+### 2021-01-30
+* threads, objects, lists: renamed experimental "rotate" primitive into "transpose"
+* objects: added "transpose" to palette for testing
+* updated German translation for "transpose"
+* morphic: fixed #2768
+* objects: removed "transpose" from the palette for now
+
+### 2021-01-29
+* threads, objects: new experimental "rotate (list)" primitive relabelling option for "all but first"
+* threads, objects: removed previous experimental "column" and "width" primitives again
+* lists, threads, objects refactored experimental "rotate" primitive
+* updated German translation
+* added more relabelling options for "rotate"
+
+### 2021-01-27
+* threads: hyperized new experimental "column" primitive
+
+### 2021-01-26
+* threads: handle single values as greyscale when constructing a costume from a pixel list
+* threads, objects experimental "column _ of _" reporter relabelling option for "item _ of _"
+* threads, objects experimental "width of _" reporter relabelling option for "length of _"
+* updated German translation (with experimental block specs)
+* fixed an input slot spec glitch in the Turkish translation 
+* store: renamed "Obsolete!" blocks to "Undefined!"
+
+### 2021-01-25
+* threads: hyperized image attribute reporter primitive (monadic)
+* pulled pending PRs
+
+### 2021-01-21
+* new dev version
+* animation library: fixed a glitch in the "sine in-out" easing function 
+
+## 6.5.1
+* **New Features:**
+    * experimental (non-hyperized) "not equals" primitive reachable via "relabel"
+* **Notable Changes:**
+    * 10% speed-up for reporters, WARP and TURBO
+    * updated list utilities library, thanks, Brian!
+* **Notable Fixes:**
+    * fixed a bug when changing a Boolean input slot with a default value to numerical type 
+* **Documentation Updates:**
+    * Snap! Manual sources and compiling documentation, thanks, Brian!
+    * updated "contentWindows" part of the Snap! API, thanks, Bernat
+* **Translation Updates:**
+    * Dutch, thanks, Joek!
+
+### 2021-01-11
+* prepared patch
+
+### 2021-01-08
+* updated Snap! Manual and manual compiling documentation, thanks, Brian!
+
+### 2021-01-07
+* updated Snap! API documentation, thanks, Bernat!
+
+### 2021-01-05
+* widgets: fixed a conversion bug when retrieving a numerical value from an input field
+* objects, threads: experimental (non-hyperized) "not equals" primitive reachable via "relabel"
+* Dutch translation update, thanks, Joek!
+* updated list utilities library, thanks, Brian!
+
+### 2021-01-04
+* new dev version
+* threads: optimized frame stepper, reduced frames for input evaluation, 10 % speed-up for reporters, WARP and TURBO
+
 ## 6.5.0
 * **New Features:**
     * warning about "unsaved changes" when opening or creating a new project

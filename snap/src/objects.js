@@ -9,7 +9,7 @@
     written by Jens Mönig
     jens@moenig.org
 
-    Copyright (C) 2020 by Jens Mönig
+    Copyright (C) 2021 by Jens Mönig
 
     This file is part of Snap!.
 
@@ -84,7 +84,7 @@ BlockEditorMorph, BlockDialogMorph, PrototypeHatBlockMorph,  BooleanSlotMorph,
 localize, TableMorph, TableFrameMorph, normalizeCanvas, VectorPaintEditorMorph,
 AlignmentMorph, Process, WorldMap, copyCanvas, useBlurredShadows*/
 
-modules.objects = '2020-December-22';
+modules.objects = '2021-February-23';
 
 var SpriteMorph;
 var StageMorph;
@@ -1138,6 +1138,11 @@ SpriteMorph.prototype.initBlocks = function () {
             category: 'operators',
             spec: '%s = %s'
         },
+        reportNotEquals: {
+            type: 'predicate',
+            category: 'operators',
+            spec: '%s \u2260 %s'
+        },
         reportLessThan: {
             type: 'predicate',
             category: 'operators',
@@ -1254,6 +1259,7 @@ SpriteMorph.prototype.initBlocks = function () {
             defaults: [['encode URI'], "Abelson & Sussman"]
         },
         reportCompiled: { // experimental
+            dev: true,
             type: 'reporter',
             category: 'operators',
             spec: 'compile %repRing for %n args',
@@ -1318,10 +1324,16 @@ SpriteMorph.prototype.initBlocks = function () {
             category: 'lists',
             spec: 'all but first of %l'
         },
-        reportListLength: {
+        reportListLength: { // deprecated as of v6.6
             type: 'reporter',
             category: 'lists',
             spec: 'length of %l'
+        },
+        reportListAttribute: {
+            type: 'reporter',
+            category: 'lists',
+            spec: '%la of %l',
+            defaults: [['length']]
         },
         reportListContainsItem: {
             type: 'predicate',
@@ -1373,12 +1385,38 @@ SpriteMorph.prototype.initBlocks = function () {
             spec: 'numbers from %n to %n',
             defaults: [1, 10]
         },
-
-        reportConcatenatedLists: { // only in dev mode - experimental
+    /*
+        reportListCombination: { // currently not in use
+            type: 'reporter',
+            category: 'lists',
+            spec: '%mlfunc %lists',
+            defaults: [['append']]
+        },
+    */
+        reportConcatenatedLists: {
             type: 'reporter',
             category: 'lists',
             spec: 'append %lists'
         },
+        reportTranspose: { // deprecated
+            type: 'reporter',
+            category: 'lists',
+            spec: 'transpose %l'
+        },
+        reportReshape: {
+            type: 'reporter',
+            category: 'lists',
+            spec: 'reshape %l to %nums',
+            defaults: [null, [4, 3]]
+        },
+    /*
+        reportSlice: { // currently not in use
+            type: 'reporter',
+            category: 'lists',
+            spec: 'slice %l by %nums',
+            defaults: [null, [2, -1]]
+        },
+    */
 
         // HOFs
         reportMap: {
@@ -1565,6 +1603,21 @@ SpriteMorph.prototype.initBlockMigrations = function () {
             selector: 'doSetGlobalFlag',
             inputs: [['turbo mode']],
             offset: 1
+        },
+        reportTableRotated: {
+            selector: 'reportListAttribute',
+            inputs: [['transpose']],
+            offset: 1
+        },
+        reportTranspose: {
+            selector: 'reportListAttribute',
+            inputs: [['transpose']],
+            offset: 1
+        },
+        reportListLength: {
+            selector: 'reportListAttribute',
+            inputs: [['length']],
+            offset: 1
         }
     };
 };
@@ -1683,15 +1736,25 @@ SpriteMorph.prototype.blockAlternatives = {
     reportMax: ['reportMin', 'reportSum', 'reportDifference', 'reportProduct',
         'reportQuotient', 'reportPower', 'reportModulus', 'reportAtan2'],
     reportLessThan: ['reportLessThanOrEquals', 'reportEquals',
-        'reportGreaterThan', 'reportGreaterThanOrEquals'],
-    reportEquals: ['reportLessThan', 'reportLessThanOrEquals',
-        'reportGreaterThan', 'reportGreaterThanOrEquals'],
+        'reportNotEquals', 'reportGreaterThan', 'reportGreaterThanOrEquals'],
+    reportEquals: ['reportIsIdentical', 'reportNotEquals', 'reportLessThan',
+        'reportLessThanOrEquals', 'reportGreaterThan',
+        'reportGreaterThanOrEquals'],
+    reportNotEquals: ['reportEquals', 'reportIsIdentical', 'reportLessThan',
+        'reportLessThanOrEquals', 'reportGreaterThan',
+        'reportGreaterThanOrEquals'],
     reportGreaterThan: ['reportGreaterThanOrEquals', 'reportEquals',
-        'reportLessThan', 'reportLessThanOrEquals'],
+        'reportIsIdentical', 'reportNotEquals', 'reportLessThan',
+        'reportLessThanOrEquals'],
     reportLessThanOrEquals: ['reportLessThan', 'reportEquals',
-        'reportGreaterThan', 'reportGreaterThanOrEquals'],
+        'reportIsIdentical', 'reportNotEquals', 'reportGreaterThan',
+        'reportGreaterThanOrEquals'],
     reportGreaterThanOrEquals: ['reportGreaterThan', 'reportEquals',
-        'reportLessThan', 'reportLessThanOrEquals'],
+        'reportIsIdentical', 'reportNotEquals', 'reportLessThan',
+        'reportLessThanOrEquals'],
+    reportIsIdentical: ['reportEquals', 'reportNotEquals', 'reportLessThan',
+        'reportLessThanOrEquals', 'reportGreaterThan',
+        'reportGreaterThanOrEquals'],
     reportAnd: ['reportOr'],
     reportOr: ['reportAnd'],
 
@@ -1701,7 +1764,7 @@ SpriteMorph.prototype.blockAlternatives = {
     doShowVar: ['doHideVar'],
     doHideVar: ['doShowVar'],
 
-    // lists - HOFs
+    // HOFs
     reportMap: ['reportKeep', 'reportFindFirst'],
     reportKeep: ['reportFindFirst', 'reportMap'],
     reportFindFirst: ['reportKeep', 'reportMap'],
@@ -2181,6 +2244,9 @@ SpriteMorph.prototype.blockForSelector = function (selector, setDefaults) {
             for (i = 0; i < defaults.length; i += 1) {
                 if (defaults[i] !== null) {
                     inputs[i].setContents(defaults[i]);
+                    if (inputs[i] instanceof MultiArgMorph) {
+                        inputs[i].defaults = defaults[i];
+                    }
                 }
             }
         }
@@ -2731,7 +2797,7 @@ SpriteMorph.prototype.blockTemplates = function (category) {
         blocks.push(block('reportListItem'));
         blocks.push(block('reportCDR'));
         blocks.push('-');
-        blocks.push(block('reportListLength'));
+        blocks.push(block('reportListAttribute'));
         blocks.push(block('reportListIndex'));
         blocks.push(block('reportListContainsItem'));
         blocks.push(block('reportListIsEmpty'));
@@ -2744,6 +2810,7 @@ SpriteMorph.prototype.blockTemplates = function (category) {
         blocks.push(block('doForEach'));
         blocks.push('-');
         blocks.push(block('reportConcatenatedLists'));
+        blocks.push(block('reportReshape'));
         blocks.push('-');
         blocks.push(block('doAddToList'));
         blocks.push(block('doDeleteFromList'));
@@ -2917,9 +2984,10 @@ SpriteMorph.prototype.freshPalette = function (category) {
                         'reportCONS',
                         'reportListItem',
                         'reportCDR',
-                        'reportListLength',
+                        'reportListAttribute',
                         'reportListIndex',
                         'reportConcatenatedLists',
+                        'reportReshape',
                         'reportListContainsItem',
                         'reportListIsEmpty',
                         'doForEach',
@@ -8890,7 +8958,7 @@ StageMorph.prototype.blockTemplates = function (category) {
         blocks.push(block('reportListItem'));
         blocks.push(block('reportCDR'));
         blocks.push('-');
-        blocks.push(block('reportListLength'));
+        blocks.push(block('reportListAttribute'));
         blocks.push(block('reportListIndex'));
         blocks.push(block('reportListContainsItem'));
         blocks.push(block('reportListIsEmpty'));
@@ -8903,6 +8971,7 @@ StageMorph.prototype.blockTemplates = function (category) {
         blocks.push(block('doForEach'));
         blocks.push('-');
         blocks.push(block('reportConcatenatedLists'));
+        blocks.push(block('reportReshape'));
         blocks.push('-');
         blocks.push(block('doAddToList'));
         blocks.push(block('doDeleteFromList'));
