@@ -551,7 +551,9 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
       const configuration = {batchSize: batch_size,
                              epochs,
                              initialEpoch,
-                             validationData: xs_validation && [xs_validation, ys_validation],
+                             validationData: (xs_validation && xs_validation.shape[0] > 0) ? 
+                                             [xs_validation, ys_validation] : 
+                                             undefined,
                              validationSplit: validation_split,
                              shuffle,
                              classWeight: typeof tensorflow === 'object'? tensorflow.get_data(model_name, 'class_weights') : undefined,
