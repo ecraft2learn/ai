@@ -2,6 +2,79 @@
 
 ## in development:
 
+## 6.7.1
+* **Notable Fixes:**
+    * fixed recursive calls in PIPE
+    * the "length of list" block no longer appears twice in search results
+    * prevent inserting items at non-integer / out-of-bounds indices
+    * save all items of a heterogeneously structured linked/arrayed list
+
+### 2021-03-09
+* new dev version
+* objects: fixed #2797
+* fixed recursive calls in PIPE
+* lists: prevent usage of lists as dictionaries
+* store: fixed #2798
+* prepared patch
+
+## 6.7.0
+* **New Features:**
+    * undelete sprites
+* **Notable Changes:**
+    * optimized special cases for COMBINE (sum, product, min, max) by up to 34 x
+    *  rebind (relabel) recursive calls when duplicating a custom block definition 
+    * custom block label parts inside the prototype (in the block editor) are now displayed the same as in block instances
+    * variadic ring inputs are now arranged vertically (e.g. the reporter rings in PIPE)
+    * changed zebra-coloring for yellow custom block prototypes (in the block editor) so the hat block changes the shade, not the prototype
+    * improved layout and rendering of (+) buttons in custom block prototypes
+    * updated libraries: list utilities, variadic reporters, iteration-composition, colors and APL, thanks, Brian!
+* **Notable Fixes:**
+    * displaying a table containing the stage no longer crashes the page
+    * correct identities when combining the items of an empty list with + /  * / min / max
+* **Documentation Updates:**
+    * updated manual, thanks Brian!
+* **Translation Updates:**
+    * German
+
+### 2021-03-08
+* prepared minor release
+
+### 2021-03-06
+* updated libraries and manual, thanks, Brian!
+
+### 2021-03-05
+* tables, objects: displaying a table containing the stage no longer crashes the page
+* gui: added "trash is empty" information, commented out for now
+* gui: changed gui strings for undelete feature
+* updated German translation
+* byob: rebind (relabel) recursive calls when duplicating a custom block definition 
+
+### 2021-03-04
+* gui: added trash button for undeleting sprites
+* gui: accept drops of sprites and sprite-icons in trash button
+* gui: animate undeleted sprites to glide back onstage
+
+### 2021-03-03
+* symbols: added "trash" symbol
+* symbols: added "trashFull" symbol
+
+### 2021-03-02
+* threads: optimized special cases for COMBINE (sum, product, min, max) by up to 34 x
+* threads: optimized special cases for compiled version of COMBINE
+* gui, objects: undelete sprites 
+* threads: correct identities when combining the items of an empty list with + /  * / min / max
+* gui: pushed dev version to 6.7 because of new documentable features
+
+### 2021-03-01
+* byob: improved layout and rendering of (+) buttons in custom block prototypes
+* byob: display custom block label parts in the prototype (in the block editor) the same as in block instances
+* byob: changed zebra-coloring for yellow custom block prototypes (in the block editor) so the hat block changes the shade, not the prototype
+
+### 2021-02-27
+* new dev version
+* blocks: arrange variadic ring inputs vertically (e.g. the reporter rings in PIPE)
+* blocks: removed a redundant unused case for block highlights 
+
 ## 6.6.0
 * **New Features:**
     * new "reshape" primitive for lists
