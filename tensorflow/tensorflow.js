@@ -8,7 +8,7 @@ window.tensorflow =
 ((function () {
 
 let models = {};
-const get_model = (name) => models[name];
+const get_model = (name) => name === '*current model*' ? model : models[name];
 
 let model; // used for defaults such as model name when creating a model
 
@@ -63,8 +63,11 @@ const set_data = (model_name, kind, value, callback, permitted_labels, minimum_n
                     to_one_hot_and_removed_data_with_unknown_output_labels(value,
                                                                            values_are_non_numeric_strings, 
                                                                            permitted_labels,
-                                                                           // consider making this optional 
-                                                                           kind === 'training');
+                    // disabling class weights - see What is the Effect of Importance Weighting in Deep Learning?
+                    // https://arxiv.org/abs/1812.03372
+                                                                           false); 
+//                                                                            // consider making this optional 
+//                                                                            kind === 'training');
                 if (values_are_non_numeric_strings) {
                     data[model_name].categories = labels;
                 } else {
@@ -229,7 +232,8 @@ const loss_function_named = (name) => {
 const add_to_models = function (new_model) {
     const current_model = models[new_model.name];
     if (current_model && current_model !== new_model && 
-        !current_model.disposed) {
+        !current_model.disposed &&
+        model_variants_from_current_search.length === 0) {
         try {
             current_model.dispose();
             current_model.disposed = true;
@@ -309,6 +313,7 @@ let highest_score;
 let metrics_of_highest_score;
 let is_best_so_far;
 let best_model;
+let best_parameters;
 let stop_on_next_experiment = false;
 let hyperparameter_searching = false;
 const optimize_hyperparameters_button = document.createElement('button');
@@ -634,7 +639,8 @@ const optimize_hyperparameters = (options) => {
                       result.best_model = best_model || previous_model; // if no best model then previous had NaN loss
                   }
                   invoke_callback(success_callback, result);
-                  if (previous_model && !previous_model.disposed && best_model && previous_model !== best_model) {
+                  if (previous_model && !previous_model.disposed && best_model && previous_model !== best_model &&
+                      model_variants_from_current_search.length === 0) {
                       previous_model.dispose();
                       previous_model.disposed = true;
                       previous_model = undefined;
@@ -676,6 +682,7 @@ const standard_deviation = (list) => {
 };
 
 let training_number = 0;
+let model_variants_from_current_search = []; // only used if model name includes '#' for keeping versions
 
 const optimize = async (xs, ys, validation_tensors, test_tensors, options) => {
     let {model_name, 
@@ -692,7 +699,9 @@ const optimize = async (xs, ys, validation_tensors, test_tensors, options) => {
          number_of_samples, // how many times to repeat experiments on the same parameters
          tfvis_options} = options || {};
     training_number = 0;
+    model_variants_from_current_search = [];
     best_model = undefined;
+    best_parameters = undefined;
     const create_and_train_model = async ({layers, optimization_method, loss_function, epochs, learning_rate, stop_if_no_progress_for_n_epochs,
                                            dropout_rate, validation_split, activation, shuffle}, 
                                           {xs, ys}) => {
@@ -737,6 +746,11 @@ const optimize = async (xs, ys, validation_tensors, test_tensors, options) => {
                                  xs_test: test_tensors && test_tensors[0],
                                  ys_test: test_tensors && test_tensors[1],
                                 };
+        const version_number_index = model_name.indexOf('#');
+        if (version_number_index > 0 && training_number > 0) {
+            model_name = model_name.substring(0, version_number_index+1) + training_number;
+            model_variants_from_current_search.push(model_name);
+        }
         const make_model = () => {
             return create_model({model_name,
                                  tensor_datasets,
@@ -805,7 +819,7 @@ const optimize = async (xs, ys, validation_tensors, test_tensors, options) => {
                     highest_score = average_score;
                     metrics_of_highest_score =
                         {average_loss, average_accuracy, average_duration, average_size, score_standard_deviation};
-                    if (best_model && !best_model.disposed) {
+                    if (best_model && !best_model.disposed && model_variants_from_current_search.length === 0) {
                         best_model.dispose();
                         best_model.disposed = true;
                     }
@@ -1879,30 +1893,30 @@ const receive_message =
                     error_callback(new Error("No results from search."));
                     return;
                 }
-                const best_parameters = result.argmin;
-                best_parameters.input_shape = shape_of_data((get_data(model_name, 'training') || get_data(model_name, 'validation')).input[0]);
-                best_parameters.optimization_method = inverse_lookup(best_parameters.optimization_method, optimization_methods);
-                best_parameters.loss_function       = inverse_lookup(best_parameters.loss_function, loss_functions(categories));
+                const parameters = result.argmin;
+                parameters.input_shape = shape_of_data((get_data(model_name, 'training') || get_data(model_name, 'validation')).input[0]);
+                parameters.optimization_method = inverse_lookup(parameters.optimization_method, optimization_methods);
+                parameters.loss_function       = inverse_lookup(parameters.loss_function, loss_functions(categories));
                 // So validation data is used when creating and training the model with the best parameters.
-                best_parameters.used_validation_data = !!get_data(model_name, 'validation');
+                parameters.used_validation_data = !!get_data(model_name, 'validation');
                 if (lowest_loss > 0) {
-                    best_parameters.lowest_loss = lowest_loss;
+                    parameters.lowest_loss = lowest_loss;
                 }
                 if (highest_accuracy > 0) {
-                    best_parameters.highest_accuracy = highest_accuracy;
+                    parameters.highest_accuracy = highest_accuracy;
                 }
                 if (typeof highest_score === 'number') {
-                    best_parameters.highest_score = highest_score;
-                    best_parameters.metrics = metrics_of_highest_score;
+                    parameters.highest_score = highest_score;
+                    parameters.metrics = metrics_of_highest_score;
                 }
                 const model = result.best_model;
                 if (model) {
                     add_to_models(model);
-                    model.best_model = model;
-                    model.best_parameters = best_parameters;
+                    best_model = model;
+                    best_parameters = parameters;
                 }
                 event.source.postMessage({optimize_hyperparameters_time_stamp: time_stamp,
-                                          final_optimize_hyperparameters: best_parameters},
+                                          final_optimize_hyperparameters: parameters},
                                          "*");
             };
             const experiment_end_callback = (n, trial) => {
@@ -1970,7 +1984,7 @@ const replace_with_best_model = (name_of_model_used_in_search, success_callback,
     let error_message;
     if (!model) {
         error_message = "No model named '" + name_of_model_used_in_search + "' found.";
-    } else if (!model.best_model) {
+    } else if (!best_model) {
         error_message = "No model found by searching for better parameters for model '" + 
                         name_of_model_used_in_search +
                         "' to replace it."; 
@@ -1982,11 +1996,11 @@ const replace_with_best_model = (name_of_model_used_in_search, success_callback,
         }
         throw new Error(error_message);        
     }
-    add_to_models(model.best_model);
-    install_settings(model.best_parameters);
-    show_layers(model.best_model, 'Model found by parameter search');
+    add_to_models(best_model);
+    install_settings(best_parameters);
+    show_layers(best_model, 'Model found by parameter search');
     if (success_callback) {
-        invoke_callback(success_callback, model.best_parameters);
+        invoke_callback(success_callback, best_parameters);
     }
 };
 

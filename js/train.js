@@ -217,6 +217,7 @@ const create_model = (options, failure_callback) => {
         if (tfvis_options.display_layers_after_creation) {
             show_layers(model, 'Model after creation', training_number);
         }
+        tensorflow.add_to_models(model);
         return model;
   } catch (error) {
       if (failure_callback) {
