@@ -117,7 +117,7 @@ const reset_all = () => {
 const to_one_hot_and_removed_data_with_unknown_output_labels = 
     (input_and_output, values_are_non_numeric_strings, permitted_labels, need_class_weights) => {
     // if values_are_non_numeric_strings is false then they are lists of non-numeric strings
-    const unique_labels = permitted_labels || [];
+    const unique_labels = permitted_labels.map((label) => label.toLowerCase()) || [];
     const labels = input_and_output.output;
     const original_input = input_and_output.input;
     if (unique_labels.length === 0) {
@@ -147,6 +147,7 @@ const to_one_hot_and_removed_data_with_unknown_output_labels =
     const new_output = [];
     const counts = {};
     labels.forEach((label, index) => {
+        label = label.toLowerCase();
         if (values_are_non_numeric_strings) {
             if (need_class_weights) {
                 if (counts[label]) {
@@ -702,9 +703,9 @@ const optimize = async (xs, ys, validation_tensors, test_tensors, options) => {
     model_variants_from_current_search = [];
     best_model = undefined;
     best_parameters = undefined;
-    const create_and_train_model = async ({layers, optimization_method, loss_function, epochs, learning_rate, stop_if_no_progress_for_n_epochs,
-                                           dropout_rate, validation_split, activation, shuffle}, 
-                                          {xs, ys}) => {
+    const create_and_train_model = async (options, {xs, ys}) => {
+        let {layers, optimization_method, loss_function, epochs, learning_rate, stop_if_no_progress_for_n_epochs,
+             dropout_rate, validation_split, activation, shuffle} = options;
         if (create_and_train_model.stopped_prematurely) {
             return;
         }
@@ -842,6 +843,7 @@ const optimize = async (xs, ys, validation_tensors, test_tensors, options) => {
                          shuffle,
                          class_names,
                          training_number,
+                         dropout_rate,
                          tfvis_options},
                         (results) => {
                             samples_remaining--;
