@@ -844,6 +844,7 @@ const optimize = async (xs, ys, validation_tensors, test_tensors, options) => {
                          class_names,
                          training_number,
                          dropout_rate,
+                         optimization_method,
                          tfvis_options},
                         (results) => {
                             samples_remaining--;
