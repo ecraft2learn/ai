@@ -217,7 +217,7 @@ const create_model = (options, failure_callback) => {
         if (tfvis_options.display_layers_after_creation) {
             show_layers(model, 'Model after creation', training_number);
         }
-        if (tensorflow.model_variants_from_current_search.length > 0) {
+        if (model_name.indexOf('#') > 0) {
             tensorflow.add_to_models(model);
         }
         return model;
@@ -655,7 +655,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
               csv_values += "0, "; // unused layers
           }
           csv_values += batch_size + ", ";
-          csv_values += dropout_rate + ", ";
+          csv_values += dropout_rate.toFixed(4) + ", ";
           csv_values += batch_normalization + ", ";
           csv_values += epochs + ", ";
           csv_values += options.optimization_method + ", ";

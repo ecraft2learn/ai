@@ -2011,7 +2011,6 @@ window.addEventListener('message', receive_message);
 
 return {get_model, 
         add_to_models,
-        model_variants_from_current_search,
         models: () => models,
         get_data,
         set_data,
