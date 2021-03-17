@@ -114,10 +114,13 @@ const reset_all = () => {
     model = undefined;
 };
 
+const to_lower_case = (x) => 
+    typeof x === 'string' ? x.toLowerCase() : x.map(element => element.toLowerCase());
+
 const to_one_hot_and_removed_data_with_unknown_output_labels = 
     (input_and_output, values_are_non_numeric_strings, permitted_labels, need_class_weights) => {
     // if values_are_non_numeric_strings is false then they are lists of non-numeric strings
-    const unique_labels = permitted_labels.map((label) => label.toLowerCase()) || [];
+    const unique_labels = permitted_labels.map(to_lower_case) || [];
     const labels = input_and_output.output;
     const original_input = input_and_output.input;
     if (unique_labels.length === 0) {
@@ -147,7 +150,7 @@ const to_one_hot_and_removed_data_with_unknown_output_labels =
     const new_output = [];
     const counts = {};
     labels.forEach((label, index) => {
-        label = label.toLowerCase();
+        label = to_lower_case(label);
         if (values_are_non_numeric_strings) {
             if (need_class_weights) {
                 if (counts[label]) {
