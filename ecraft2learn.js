@@ -116,7 +116,7 @@ window.ecraft2learn =
           var allBlocks = ide.sprites.asArray().concat([ide.stage])
                          .map(function (item) {return item.customBlocks})
                          .reduce(function (a, b) {return a.concat(b)})
-                         .concat(ide.stage.globalBlocks);
+                         .concat(ide.stage.windoglobalBlocks);
           var blockSpecs = allBlocks.map(function (block) {return block.blockSpec()});
           var index = blockSpecs.indexOf(labelSpec);
           if (index < 0) {
@@ -257,11 +257,11 @@ window.ecraft2learn =
           // too soon so wait until page is loaded
           window.addEventListener('load', enhance_snap, false);
       }
-      let get_global_variable_value = function (name, default_value) {
+    const get_global_variable_value = function (name, default_value) {
           // returns the value of the Snap! global variable named 'name'
           // if none exists returns default_value
-          var ide = get_snap_ide(ecraft2learn.snap_context);
-          var value;
+          const ide = get_snap_ide(ecraft2learn.snap_context);
+          let value;
           try {
               value = ide.globalVariables.getVar(name);
           } catch (e) {
@@ -270,10 +270,7 @@ window.ecraft2learn =
           if (value === undefined) {
               return default_value;
           }
-          if (typeof value ===  'string') {
-              return value;
-          }
-          return value.asArray();
+          return javascript_to_snap(value);
     };
     const record_callbacks = function () {
         Array.from(arguments).forEach(function (callback) {
@@ -1519,7 +1516,7 @@ window.ecraft2learn =
 //         };
     const load_tensorflow_model_from_URL = (URL, success_callback, error_callback) => {
         record_callbacks(success_callback, error_callback);
-        URL = relative_to_absolute_url(URL);
+        URL = encodeURI(relative_to_absolute_url(URL));
         show_message("Loading model...");
         request_of_support_window('tensorflow.js',
                                   'Loaded',
@@ -2287,7 +2284,7 @@ xhr.send();
           // calls callback with the contents of the 'url' unless an error occurs and then error_callback is called
           // ironically this is the rare function that may be useful when there is no Internet connection
           // since it can be used to communicate with localhost (e.g. to read/write Raspberry Pi or Arduino pins)
-          url = relative_to_absolute_url(url);
+          url = encodeURI(relative_to_absolute_url(url));
           var xhr = new XMLHttpRequest();
           record_callbacks(callback, error_callback);
           xhr.open('GET', url);
@@ -3500,6 +3497,10 @@ xhr.send();
   stop_all_scripts,
   snap_to_javascript,
   javascript_to_snap,
+  global_variable_names: () => javascript_to_snap(get_snap_ide().globalVariables.names()),
+  get_global_variable_value: (name) => get_global_variable_value(name),
+  set_global_variable: (name, value, sender) => get_snap_ide().globalVariables.setVar(name, value, sender),
+  delete_global_variable: (name) => get_snap_ide().globalVariables.deleteVar(name),
   relative_to_absolute_url,
   load_script,
   load_camera_training_from_file: (callback) => {
