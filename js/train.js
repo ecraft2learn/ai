@@ -655,7 +655,7 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
               csv_values += "0, "; // unused layers
           }
           csv_values += batch_size + ", ";
-          csv_values += dropout_rate.toFixed(4) + ", ";
+          csv_values += (dropout_rate && dropout_rate.toFixed(4)) + ", ";
           csv_values += batch_normalization + ", ";
           csv_values += epochs + ", ";
           csv_values += options.optimization_method + ", ";
