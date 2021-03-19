@@ -686,7 +686,7 @@ const standard_deviation = (list) => {
 };
 
 let training_number = 0;
-let model_variants_from_current_search = []; // only used if model name includes '#' for keeping versions
+let model_variants_from_current_search = []; // only used if model name includes '_' for keeping versions
 
 const optimize = async (xs, ys, validation_tensors, test_tensors, options) => {
     let {model_name, 
@@ -750,7 +750,7 @@ const optimize = async (xs, ys, validation_tensors, test_tensors, options) => {
                                  xs_test: test_tensors && test_tensors[0],
                                  ys_test: test_tensors && test_tensors[1],
                                 };
-        const version_number_index = model_name.indexOf('#');
+        const version_number_index = model_name.indexOf('_');
         if (version_number_index > 0 && training_number > 0) {
             model_name = model_name.substring(0, version_number_index+1) + training_number;
             model_variants_from_current_search.push(model_name);
