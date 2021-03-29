@@ -217,7 +217,7 @@ const create_model = (options, failure_callback) => {
         if (tfvis_options.display_layers_after_creation) {
             show_layers(model, 'Model after creation', training_number);
         }
-        if (model_name.indexOf('_') > 0) {
+        if (model_name.indexOf('_') > 0 && +(model_name.substring(model_name.indexOf('_')+1)) >= 0) {
             tensorflow.add_to_models(model);
         }
         return model;

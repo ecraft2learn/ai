@@ -686,7 +686,7 @@ const standard_deviation = (list) => {
 };
 
 let training_number = 0;
-let model_variants_from_current_search = []; // only used if model name includes '_' for keeping versions
+let model_variants_from_current_search = []; // only used if model name includes '_0' for keeping versions
 
 const optimize = async (xs, ys, validation_tensors, test_tensors, options) => {
     let {model_name, 
@@ -694,6 +694,7 @@ const optimize = async (xs, ys, validation_tensors, test_tensors, options) => {
          number_of_experiments, // number of different parameters settings to explore
          epochs,
          learning_rate,
+         dropout_rate,
          stop_if_no_progress_for_n_epochs,
          validation_split,
          shuffle,
@@ -706,6 +707,21 @@ const optimize = async (xs, ys, validation_tensors, test_tensors, options) => {
     model_variants_from_current_search = [];
     best_model = undefined;
     best_parameters = undefined;
+    if (learning_rate) {
+        gui_state["Training"]["Learning rate"] = learning_rate;
+    }
+    if (epochs) {
+        gui_state["Training"]["Number of iterations"] = epochs;
+    }
+    if (typeof validation_split === 'number') {
+        gui_state["Training"]["Validation split"] = validation_split;
+    }
+    if (typeof dropout_rate === 'number') {
+        gui_state["Model"]["Dropout rate"] = dropout_rate;
+    }
+    if (typeof shuffle === 'boolean') {
+        gui_state["Training"]["Shuffle data"] = shuffle;
+    }
     const create_and_train_model = async (options, {xs, ys}) => {
         let {layers, optimization_method, loss_function, epochs, learning_rate, stop_if_no_progress_for_n_epochs,
              dropout_rate, validation_split, activation, shuffle} = options;
@@ -750,9 +766,9 @@ const optimize = async (xs, ys, validation_tensors, test_tensors, options) => {
                                  xs_test: test_tensors && test_tensors[0],
                                  ys_test: test_tensors && test_tensors[1],
                                 };
-        const version_number_index = model_name.indexOf('_');
+        const version_number_index = model_name.lastIndexOf('_');
         if (version_number_index > 0 && training_number > 0) {
-            model_name = model_name.substring(0, version_number_index+1) + training_number;
+            model_name = model_name.substring(0, version_number_index+1) + (training_number + 1); // 1-indexing
             model_variants_from_current_search.push(model_name);
         }
         const make_model = () => {
