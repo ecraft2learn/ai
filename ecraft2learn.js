@@ -287,7 +287,11 @@ window.ecraft2learn =
                 return;
             }
             if (!(callback.expression instanceof CommandBlockMorph ||
-                  callback.expression instanceof ReporterBlockMorph)) {
+                  callback.expression instanceof ReporterBlockMorph ||
+                  (callback.expression instanceof Array &&
+                   callback.expression.length > 0 &&
+                   (callback.expression[0] instanceof CommandBlockMorph ||
+                    callback.expression[0] instanceof ReporterBlockMorph)))) {
                 return;
             }
             // callback.emptySlots+1 is in case callback is passed more arguments than callback has empty slots
@@ -305,7 +309,8 @@ window.ecraft2learn =
             const stage = world.children[0].stage; // this.parentThatIsA(StageMorph);
             const process = new Process(null, callback.receiver, null, true);
             process.initializeFor(callback, new List(parameters));
-            if (!process.topBlock.world()) {
+            if (typeof process.topBlock.world === 'function' &&
+                !process.topBlock.world()) {
                 // this is needed for error reporting - without it errors aren't repeated
                 // however they are displayed at the top of the "world"
                 process.topBlock.world = () => world;
@@ -3111,6 +3116,12 @@ xhr.send();
   },
   save_project: function (name) {
       get_snap_ide().saveProject(name);
+  },
+  save_global_variable_as_csv: (name) => {
+      const value = get_global_variable_value(name);
+      get_snap_ide().saveFileAs(value.asCSV(),
+                                'text/csv;charset=utf-8', // RFC 4180
+                                name);
   },
   console_log: function (message) {
       message = snap_to_javascript(message);
