@@ -96,7 +96,9 @@ const set_data = (model_name, kind, value, callback, permitted_labels, minimum_n
                 }               
                 data[model_name].categories = undefined;
             }
-        }        
+        } else {
+            value = undefined;
+        }      
     }
     data[model_name][kind] = value;
     if (kind === 'training') {
@@ -108,6 +110,7 @@ const set_data = (model_name, kind, value, callback, permitted_labels, minimum_n
     }
     invoke_callback(callback);
 };
+
 const reset_all = () => {
     data = {};
     models = {};
