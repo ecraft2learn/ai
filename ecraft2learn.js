@@ -111,7 +111,7 @@ window.ecraft2learn =
       let run_snap_block = function (labelSpec) { // add parameters later
           // runs a Snap! block that matches labelSpec
           // labelSpec if it takes areguments will look something like 'label %txt of size %n'
-          var ide = get_snap_ide(ecraft2learn.snap_context);
+          var ide = get_snap_ide();
           // based upon https://github.com/jmoenig/Snap--Build-Your-Own-Blocks/issues/1791#issuecomment-313529328
           var allBlocks = ide.sprites.asArray().concat([ide.stage])
                          .map(function (item) {return item.customBlocks})
@@ -125,20 +125,22 @@ window.ecraft2learn =
           var blockTemplate = allBlocks[index].templateInstance();
           return invoke_block_morph(blockTemplate);
       };
-      const get_snap_ide = (start) => {
-          // finds the Snap! IDE_Morph that is the element 'start' or one of its ancestors
+      const get_snap_ide = () => {
+          // finds the Snap! IDE_Morph 
           if (!inside_snap()) {
               return;
           }
-          let ide = start;
-          while (ide && !(ide instanceof IDE_Morph)) {
-              ide = ide.parent;
+          if (typeof ecraft2learn !== 'undefined' && typeof ecraft2learn.snap_context !== 'undefined') {
+              const stage = ecraft2learn.snap_context.parentThatIsA(StageMorph);
+              if (stage) {
+                  let ide = stage.parentThatIsA(IDE_Morph);
+                  if (ide) {
+                      return ide;
+                  }
+              }
           }
-          if (!ide) {
-              // not as general but works well (for now)
-              return world.children[0];
-          }
-          return ide;
+          // not as general but works well (for now)
+          return world.children[0];
       };
       const enhance_snap_openProject = function () {
           if (!inside_snap()) {
@@ -260,7 +262,7 @@ window.ecraft2learn =
     const get_global_variable_value = function (name, default_value) {
           // returns the value of the Snap! global variable named 'name'
           // if none exists returns default_value
-          const ide = get_snap_ide(ecraft2learn.snap_context);
+          const ide = get_snap_ide();
           let value;
           try {
               value = ide.globalVariables.getVar(name);
@@ -1519,9 +1521,35 @@ window.ecraft2learn =
 //                 callback(ecraft2learn.posenet_webcam);
 //             }
 //         };
+    const save_tensorflow_model_to_localstorage = ((model_name, success_callback, error_callback) => {
+        record_callbacks(success_callback, error_callback);
+        request_of_support_window('tensorflow.js',
+                                  'Saved',
+                                  () => {
+                                      return {save_model_to_localstorage: model_name};
+                                  },
+                                  (message) => {
+                                      return message.model_saved === model_name ||
+                                             message.error_saving_model === model_name;
+                                  },
+                                  (message) => {
+                                      if (message.model_saved === model_name) {
+                                          invoke_callback(success_callback, javascript_to_snap(model_name));
+                                      } else if (error_callback) {
+                                          show_message("Model not saved due to error", 3);
+                                          console.log(message.error_message);
+                                          invoke_callback(error_callback, javascript_to_snap(message.error_message));
+                                      } else {
+                                          show_message("Model not saved due to error", 3);
+                                          inform("Error in saving a model to local storage", message.error_message);
+                                      }
+                                  });        
+    });
     const load_tensorflow_model_from_URL = (URL, success_callback, error_callback) => {
         record_callbacks(success_callback, error_callback);
-        URL = encodeURI(relative_to_absolute_url(URL));
+        if (URL.indexOf('localstorage:') !== 0) {
+            URL = encodeURI(relative_to_absolute_url(URL));
+        }
         show_message("Loading model...");
         request_of_support_window('tensorflow.js',
                                   'Loaded',
@@ -1545,6 +1573,36 @@ window.ecraft2learn =
                                           inform("Error in loading a model from a URL", message.error_message);
                                       }
                                   });
+    };
+    const save_project_to_localstorage = (name, success_callback, error_callback) => {
+        record_callbacks(success_callback, error_callback);
+        try {
+            const ide = get_snap_ide();
+            const xml = ide.serializer.serialize(ide.stage);
+            localStorage.setItem('-snap-project-' + name, xml);
+            invoke_callback(success_callback, name);
+        } catch (error) {
+            invoke_callback(error_callback, error.message);
+        }
+    };
+    const load_project_from_localstorage = (name) => {
+        const ide = get_snap_ide();
+        const xml = localStorage.getItem('-snap-project-' + name);
+        ide.openProjectString(xml,
+                              () => {
+                                  // ide may have changed when loading project?
+//                                   const ide = get_snap_ide();
+//                                   
+//                                   world.children[0]
+                                  setTimeout(() => {
+                                                 ide.runScripts();
+                                             },
+                                             1000);
+//                                   ide.toggleAppMode();
+                              });
+    };
+    const is_project_saved_in_localstorage = (name) => {
+        return !!localStorage.getItem('-snap-project-' + name);
     };
     const load_data_from_URL = (kind, URL, add_to_previous_data, model_name, success_callback, error_callback) => {
         record_callbacks(success_callback, error_callback);
@@ -1847,7 +1905,7 @@ window.ecraft2learn =
     var history_of_informs = [];
     const show_message = (message, seconds) => {
         if (inside_snap()) {
-            const ide = get_snap_ide(ecraft2learn.snap_context);
+            const ide = get_snap_ide();
             ide.showMessage(message, seconds || 5); // by defaults messages won't remain up more than 5 seconds
         } else {
             alert(message);
@@ -1875,7 +1933,7 @@ window.ecraft2learn =
             return;
         }
         record_callbacks(callback);
-        const ide = get_snap_ide(ecraft2learn.snap_context);
+        const ide = get_snap_ide();
         if (!message) {
             message = "No message available.";
         }
@@ -3494,7 +3552,11 @@ xhr.send();
   is_model_ready_for_prediction, // kept for backwards compatibility
   does_model_exist,
   predictions_from_model,
+  save_project_to_localstorage,
+  load_project_from_localstorage,
   load_tensorflow_model_from_URL,
+  is_project_saved_in_localstorage,
+  save_tensorflow_model_to_localstorage,
   get_prediction_from_teachable_machine_image_or_pose_model,
   get_prediction_from_teachable_machine_audio_model,
   load_data_from_URL,
