@@ -689,7 +689,7 @@ const standard_deviation = (list) => {
 };
 
 let training_number = 0;
-let model_variants_from_current_search = []; // only used if model name includes '_0' for keeping versions
+let model_variants_from_current_search = []; // only used if model name includes '_1' for keeping versions
 
 const optimize = async (xs, ys, validation_tensors, test_tensors, options) => {
     let {model_name, 
@@ -1850,7 +1850,29 @@ const receive_message =
             let name = message.does_model_exist.model_name;
             let model = models[name];
             event.source.postMessage({model_exists: !!model,
-                                      model_name: name}, "*"); 
+                                      model_name: name}, "*");
+        } else if (typeof message.save_model_to_localstorage !== 'undefined') {
+            try {
+                const model_name = message.save_model_to_localstorage;
+                const model = tensorflow.get_model(model_name);
+                if (!model) {
+                    invoke_callback(error_callback, 'Unable to find a model named ' + model_name);
+                    return;
+                }
+                const error_callback = (error) => {
+                    const error_message = error.message;
+                    event.source.postMessage({error_saving_model: model_name,
+                                              error_message: 'Error saving the model ' + model_name + ' ' +
+                                                             error_message}, "*");
+                };
+                model.save('localstorage://' + model_name).then(
+                    () => {
+                        event.source.postMessage({model_saved: model_name}, "*");
+                    },
+                    error_callback);
+            } catch (error) {
+                invoke_callback(error_callback, error);
+            }                                      
         } else if (typeof message.load_model_from_URL !== 'undefined') {
             try {
                 let URL = message.load_model_from_URL;
@@ -1864,19 +1886,15 @@ const receive_message =
                                               error_message: 'Error reading ' + URL + ' to load a neural net. ' +
                                                              error_message}, "*");
                 }
-                tf.loadLayersModel(URL).then((model) => {
-//                                            model.ready_for_prediction = true;
-                                           // until https://github.com/tensorflow/tfjs/issues/885 is resolved need to update the name
-                                           let name = URL.substring(URL.lastIndexOf('/')+1, URL.lastIndexOf('.'));
-                                           model.name = name;
-                                           tensorflow.add_to_models(model);
-                                           enable_evaluate_button();
-                                           event.source.postMessage({model_loaded: URL,
-                                                                     model_name: name}, "*");
-//                                            model.compile({loss: 'meanSquaredError', optimizer: 'adamax'});
-                                           show_layers(model, 'Model after loading');
-                                       },
-                                       error_callback);
+                tf.loadLayersModel(URL).then(
+                    (model) => {
+                        tensorflow.add_to_models(model);
+                        enable_evaluate_button();
+                        event.source.postMessage({model_loaded: URL,
+                                                  model_name: model.name}, "*");
+                        show_layers(model, 'Model after loading');
+                    },
+                    error_callback);
             } catch (error) {
                 invoke_callback(error_callback, error);
             }
