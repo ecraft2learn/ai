@@ -1680,6 +1680,9 @@ const contents_of_URL = (URL, success_callback, error_callback) => {
     xhr.send();
 };
 
+let universal_sentence_encoder;
+let universal_sentence_encoder_module;
+
 const receive_message =
     async (event) => {
         if (window.stopped_prematurely) {
@@ -1846,6 +1849,46 @@ const receive_message =
                         error_callback,
                         categories);
             });
+        } else if (typeof message.sentence_features !== 'undefined') {
+            const embed = () => {
+                universal_sentence_encoder.embed(message.sentence_features).then(embeddings_tensor => {
+                    const embeddings = embeddings_tensor.arraySync();
+                    embeddings_tensor.dispose();
+                    event.source.postMessage({sentence_features_computed: embeddings,
+                                              time_stamp: message.time_stamp},
+                                             '*'); 
+                 });
+            };
+            const load_script = (url, callback) => {
+                const script = document.createElement("script");
+                script.type = "text/javascript";
+                script.src = url;
+                script.onload = callback;
+                document.head.appendChild(script);
+            };
+            const load_universal_sentence_encoder = (callback) => {
+                if (typeof universal_sentence_encoder_module === 'undefined') {
+                    load_script('../js/universal-sentence-encoder.js',
+                                () => {
+                                    universal_sentence_encoder_module = use;
+                                    invoke_callback(callback);
+                                });
+                } else {
+                    invoke_callback(callback);
+                }
+            };
+            if (universal_sentence_encoder) {
+                embed();
+            } else {
+//                   show_message("Loading the Universal Sentence Encoder ...");
+                load_universal_sentence_encoder(() => {
+                    universal_sentence_encoder_module.load().then(model => {
+                        universal_sentence_encoder = model;
+//                           show_message("Loaded", .1);
+                        embed();
+                    });
+                });
+            };
         } else if (typeof message.does_model_exist !== 'undefined') {
             let name = message.does_model_exist.model_name;
             let model = models[name];

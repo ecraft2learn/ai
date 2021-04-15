@@ -1524,7 +1524,7 @@ window.ecraft2learn =
     const save_tensorflow_model_to_localstorage = ((model_name, success_callback, error_callback) => {
         record_callbacks(success_callback, error_callback);
         request_of_support_window('tensorflow.js',
-                                  'Saved',
+                                  'Loaded',
                                   () => {
                                       return {save_model_to_localstorage: model_name};
                                   },
@@ -3801,8 +3801,8 @@ xhr.send();
           invoke_callback(callback);
       }
   },
-  sentence_features: (sentences, callback) => {
-      record_callbacks(callback);
+  sentence_features: (sentences, success_callback, error_callback) => {
+      record_callbacks(success_callback, error_callback);
       if (!(sentences instanceof List)) {
           throw new Error("Sentence features expected a list of sentences. Not " + sentences.constructor.name);;
       }
@@ -3817,7 +3817,7 @@ xhr.send();
           ecraft2learn.universal_sentence_encoder.embed(sentences_as_javascript).then(embeddings_tensor => {
               const embeddings = embeddings_tensor.arraySync();
               embeddings_tensor.dispose();
-              invoke_callback(callback, javascript_to_snap(embeddings));   
+              invoke_callback(success_callback, javascript_to_snap(embeddings));   
           });
       };
       if (ecraft2learn.universal_sentence_encoder) {
@@ -3832,6 +3832,29 @@ xhr.send();
               });
           });
       };
+      // following works but not clear it is better in any way
+//       const time_stamp = Date.now();
+//       request_of_support_window('tensorflow.js',
+//                                 'Loaded',
+//                                 () => {
+//                                     return {sentence_features: sentences_as_javascript,
+//                                             time_stamp};
+//                                 },
+//                                 (message) => {
+//                                     return typeof message.sentence_features_computed !== 'undefined' ||
+//                                            typeof message.error_message !== 'undefined';
+//                                 },
+//                                 (message) => {
+//                                     if (message.time_stamp === time_stamp) {
+//                                         invoke_callback(success_callback,
+//                                                         javascript_to_snap(message.sentence_features_computed));
+//                                     } else if (error_callback) {
+//                                         console.log(message.error_message);
+//                                         invoke_callback(error_callback, javascript_to_snap(message.error_message));
+//                                     } else {
+//                                         inform("Error computing features of sentences", message.error_message);
+//                                     }
+//                                 });
   },
   tokenize_sentence: (sentence, callback) => {
       const tokenize = () => {
