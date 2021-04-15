@@ -3573,7 +3573,8 @@ xhr.send();
   global_variable_names: () => javascript_to_snap(get_snap_ide().globalVariables.names()),
   get_global_variable_value: (name) => get_global_variable_value(name),
   set_global_variable: (name, value, sender) => get_snap_ide().globalVariables.setVar(name, value, sender),
-  delete_global_variable: (name) => get_snap_ide().globalVariables.deleteVar(name),
+//   delete_global_variable: (name) => get_snap_ide().globalVariables.deleteVar(name),
+  delete_global_variable: (name) => ecraft2learn.snap_context.deleteVariable(name),
   relative_to_absolute_url,
   load_script,
   load_camera_training_from_file: (callback) => {
