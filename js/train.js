@@ -522,7 +522,8 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                         update_weights = true;
                     }
                 }
-                if (update_weights) {
+                if (update_weights && stop_if_no_progress_for_n_epochs > 0) {
+                    // if not early stopping then use final layer weights
                     best_weights = update_best_weights(model, best_weights);
                 }
                 if (tfvis_callbacks) {
