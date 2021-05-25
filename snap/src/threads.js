@@ -61,7 +61,7 @@ StageMorph, SpriteMorph, StagePrompterMorph, Note, modules, isString, copy, Map,
 isNil, WatcherMorph, List, ListWatcherMorph, alert, console, TableMorph, BLACK,
 TableFrameMorph, ColorSlotMorph, isSnapObject, newCanvas, Symbol, SVG_Costume*/
 
-modules.threads = '2021-March-02';
+modules.threads = '2021-April-17';
 
 var ThreadManager;
 var Process;
@@ -2535,7 +2535,8 @@ Process.prototype.doRepeat = function (counter, body) {
         outer = this.context.outerContext, // for tail call elimination
         isCustomBlock = this.context.isCustomBlock;
 
-    if (counter < 1) { // was '=== 0', which caused infinite loops on non-ints
+    if (isNaN(counter) || counter < 1) { 
+	// was '=== 0', which caused infinite loops on non-ints
         return null;
     }
     this.popContext();
@@ -2610,7 +2611,7 @@ Process.prototype.doForEach = function (upvar, list, script) {
     this.pushContext();
     this.context.outerContext.variables.addVar(upvar);
     this.context.outerContext.variables.setVar(upvar, next);
-    this.evaluate(script, new List([next]), true);
+    this.evaluate(script, new List(/*[next]*/), true);
 };
 
 Process.prototype.doFor = function (upvar, start, end, script) {
@@ -5025,10 +5026,12 @@ Process.prototype.reportRayLengthTo = function (name) {
         dir,
         a, b, x, y,
         top, bottom, left, right,
-        hSect, vSect,
+        circa, hSect, vSect,
         point, hit,
         temp,
         width, imageData;
+
+    circa = (num) => Math.round(num * 10000000) / 10000000; // good enough
 
     hSect = (yLevel) => {
         var theta = radians(dir);
@@ -5036,12 +5039,13 @@ Process.prototype.reportRayLengthTo = function (name) {
         a = b * Math.tan(theta);
         x = rc.x + a;
         if (
-            (x === rc.x &&
+            (circa(x) === circa(rc.x) &&
                 ((dir === 180 && rc.y < yLevel) ||
                 dir === 0 && rc.y > yLevel)
             ) ||
             (x > rc.x && dir >= 0 && dir < 180) ||
-            (x < rc.x && dir >= 180 && dir < 360)
+            (circa(x) < circa(rc.x) &&
+                dir >= 180 && dir < 360)
         ) {
             if (x >= left && x <= right) {
                 intersections.push(new Point(x, yLevel));
@@ -5055,7 +5059,7 @@ Process.prototype.reportRayLengthTo = function (name) {
         a = b * Math.tan(theta);
         y = rc.y + a;
         if (
-            (y === rc.y &&
+            (circa(y) === circa(rc.y) &&
                 ((dir === 90 && rc.x < xLevel) ||
                 dir === 270 && rc.x > xLevel)
             ) ||
@@ -5624,12 +5628,18 @@ Process.prototype.reportMouseDown = function () {
 };
 
 Process.prototype.reportKeyPressed = function (keyString) {
+    // hyper-monadic
     var stage;
     if (this.homeContext.receiver) {
         stage = this.homeContext.receiver.parentThatIsA(StageMorph);
         if (stage) {
             if (this.inputOption(keyString) === 'any key') {
                 return Object.keys(stage.keysPressed).length > 0;
+            }
+            if (keyString instanceof List && this.enableHyperOps) {
+                return keyString.map(
+                    each => stage.keysPressed[each] !== undefined
+                );
             }
             return stage.keysPressed[keyString] !== undefined;
         }

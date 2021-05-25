@@ -84,7 +84,7 @@ BlockEditorMorph, BlockDialogMorph, PrototypeHatBlockMorph,  BooleanSlotMorph,
 localize, TableMorph, TableFrameMorph, normalizeCanvas, VectorPaintEditorMorph,
 AlignmentMorph, Process, WorldMap, copyCanvas, useBlurredShadows*/
 
-modules.objects = '2021-March-09';
+modules.objects = '2021-April-23';
 
 var SpriteMorph;
 var StageMorph;
@@ -1348,7 +1348,6 @@ SpriteMorph.prototype.initBlocks = function () {
             spec: 'is %l empty?'
         },
         reportListIndex: {
-            dev: true,
             type: 'reporter',
             category: 'lists',
             spec: 'index of %s in %l',
@@ -5114,7 +5113,7 @@ SpriteMorph.prototype.applyGraphicsEffects = function (canvas) {
             }
             v = max / 255;
 
-            h = (h + hueShift * 360 / 200) % 360;
+            h = (((h + hueShift * 360 / 200) % 360) + 360) % 360;
             s = Math.max(0, Math.min(s + saturationShift / 100, 1));
             v = Math.max(0, Math.min(v + brightnessShift / 100, 1));
 
@@ -5378,7 +5377,11 @@ SpriteMorph.prototype.positionTalkBubble = function () {
     var stage = this.parentThatIsA(StageMorph),
         stageScale = stage ? stage.scale : 1,
         bubble = this.talkBubble(),
-        middle = this.center().y;
+        bottom = this.bottom(),
+        step = this.extent().divideBy(10)
+            .max(new Point(5, 5).scaleBy(stageScale))
+            .multiplyBy(new Point(-1, 1));
+
     if (!bubble) {return null; }
     bubble.show();
     if (!bubble.isPointingRight) {
@@ -5388,9 +5391,10 @@ SpriteMorph.prototype.positionTalkBubble = function () {
     }
     bubble.setLeft(this.right());
     bubble.setBottom(this.top());
-    while (!this.isTouching(bubble) && bubble.bottom() < middle) {
-        bubble.moveBy(new Point(-1, 1).scaleBy(stageScale));
+    while (!this.isTouching(bubble) && bubble.bottom() < bottom) {
+        bubble.moveBy(step);
     }
+    bubble.moveBy(step.mirror());
     if (!stage) {return null; }
     if (bubble.right() > stage.right()) {
         bubble.isPointingRight = false;
@@ -11267,7 +11271,7 @@ CellMorph.prototype.render = function (ctx) {
             ctx.shadowOffsetY = this.border;
             ctx.shadowBlur = this.border;
             ctx.shadowColor = this.color.darker(80).toString();
-            this.drawShadow(ctx, this.edge, this.border / 2);
+            this.drawShadow(ctx, this.edge, 0);
         }
     }
 };
@@ -11281,10 +11285,8 @@ CellMorph.prototype.drawShadow = function (context, radius, inset) {
     context.beginPath();
     context.moveTo(0, h - offset);
     context.lineTo(0, offset);
-    context.stroke();
 
     // top left:
-    context.beginPath();
     context.arc(
         offset,
         offset,
@@ -11293,11 +11295,8 @@ CellMorph.prototype.drawShadow = function (context, radius, inset) {
         radians(-90),
         false
     );
-    context.stroke();
 
     // top right:
-    context.beginPath();
-    context.moveTo(offset, 0);
     context.lineTo(w - offset, 0);
     context.stroke();
 };
@@ -12026,7 +12025,9 @@ WatcherMorph.prototype.parseTxt = function () {
 
 WatcherMorph.prototype.setStyle = function (style) {
     this.style = style;
+    this.changed();
     this.fixLayout();
+    this.rerender();
 };
 
 WatcherMorph.prototype.styleNormal = function () {
@@ -12192,7 +12193,7 @@ StagePrompterMorph.prototype.fixLayout = function () {
     );
     this.button.setCenter(this.inputField.center());
     this.button.setLeft(this.inputField.right() + this.border);
-    this.setHeight(
+    this.bounds.setHeight(
         this.inputField.bottom()
             - this.top()
             + this.edge

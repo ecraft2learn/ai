@@ -2,6 +2,96 @@
 
 ## in development:
 
+## 6.8.1
+* **Notable Fixes:**
+    * fixed peeling off niladic custom block instances from prototype templates
+
+### 2021-05-04
+* new dev version
+* gui: fixed "peeling off" niladic custom block instances from prototype templates
+* prepared patch
+
+## 6.8.0
+* **New Features:**
+    * first-class colors, sorta, in the new "Colors" library, thanks, Brian!
+    * you can now also "peel off" custom block instances from their prototype templates in the block editor
+* **Notable Changes:**
+    * speed-up talk bubble positioning by 5x
+* **Notable Fixes:**
+    * work around a floating point precision glitch in "ray length"
+    * fixed an occasional rendering glitch when changing the display style of a variable watcher
+    * fixed color effect for negative inputs, thanks, Brian!
+    * fixed some issues round bignums, thanks, Brian!
+* **Documentation Updates:**
+    * updated manual, thanks Brian!
+
+### 2021-05-03
+* new versions of "Colors" and bignums libraries, updated documentation, thanks, Brian
+* bumped dev version to v6.8
+* prepared minor release
+
+### 2021-04-23
+* objects: fixed color effect for negative inputs, thanks, Brian!
+
+### 2021-04-17
+* objects: fixed an occasional rendering glitch when changing the display style of a variable watcher
+* objects: tweaked CellMorph shadow rendering
+* byob: enable "peeling off" custom block instances from their prototype templates
+
+### 2021-04-17
+* new dev version
+* threads: worked around a floating point precision glitch in "ray length"
+* objects: speed-up  talk bubble positioning by 5x
+
+## 6.7.4
+* **Notable Fixes:**
+    * fixed DEAL in the APL library, thanks, Brian!
+    * fixed a resizing edge case bug for the stage prompter (ASK command)
+    * fixed finding "index of" block by search 
+
+### 2021-04-09
+* objects fixed #2821 - "index of" block not found by search
+* prepared patch
+
+### 2021-03-28
+* new dev version
+* fixed DEAL in the APL library, thanks, Brian!
+* objects: fixed a resizing edge case bug for the stage prompter (ASK command)
+
+## 6.7.3
+* **Notable Changes:**
+    * hyperized "key _ pressed?" predicate
+* **Notable Fixes:**
+    * repeat stops when encountering a non-numerical counter input, thanks, Stefan!
+    * updated list-utilities library, thanks, Brian!
+* **Documentation Updates:**
+    * updated manual with links in the toc, thanks Brian!
+
+### 2021-03-19
+* manual updated with active links and links in the toc, thanks, Brian!
+* threads: hyperized "key _ pressed?" predicate
+* prepared patch
+
+### 2021-03-17
+* new dev version
+* threads fixed repeat for non-numbers, thanks Stefan!
+* updated list-utilities library, thanks, Brian!
+
+## 6.7.2
+* **Notable Changes:**
+    * disabled empty-slot implicit parameter in FOREACH
+* **Notable Fixes:**
+    * fixed "transpose" in the APL library, thanks, Brian!
+* **Translation Updates:**
+    * Catalan, thanks, Joan!
+
+### 2021-03-15
+* new dev version
+* Catalan translation update, thanks, Joan!
+* lists, apl: fixed "transpose", thanks, Brian!
+* threads: disabled empty-slot implicit parameter in FOREACH
+* prepared patch release
+
 ## 6.7.1
 * **Notable Fixes:**
     * fixed recursive calls in PIPE
