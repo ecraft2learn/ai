@@ -1,0 +1,13 @@
+{
+  "embeddings": [
+    {
+      "tensorName": "CHWsupervisor",
+      "tensorShape": [
+        2428,
+        512
+      ],
+      "tensorPath": "https://ecraft2learn.github.io/ecraft2learn/CHWsupervisor/projector-data.tsv",
+      "metadataPath": "https://ecraft2learn.github.io/ecraft2learn/CHWsupervisor/projector-metadata.tsv"
+    }
+  ]
+}
