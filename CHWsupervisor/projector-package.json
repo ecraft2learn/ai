@@ -6,8 +6,8 @@
         2428,
         512
       ],
-      "tensorPath": "https://ecraft2learn.github.io/ecraft2learn/CHWsupervisor/projector-data.tsv",
-      "metadataPath": "https://ecraft2learn.github.io/ecraft2learn/CHWsupervisor/projector-metadata.tsv"
+      "tensorPath": "https://ecraft2learn.github.io/ai/CHWsupervisor/projector-data.tsv",
+      "metadataPath": "https://ecraft2learn.github.io/ai/CHWsupervisor/projector-metadata.tsv"
     }
   ]
 }
