@@ -291,7 +291,7 @@ window.addEventListener(
 //                       window.location.hostname  === 'localhost' ||
 //                       window.location.hostname  === '127.0.0.1';
                  let iframe_src = //local_web_server ? 
-                                  window.location.origin + "/ai/snap/snap.html?project=" + name + search + window.location.hash : 
+                                  window.location.origin + "/ai/snap/snap.html?project=" + name + search + window.location.hash; 
                                   //snap_url + "#present:Username=toontalk&ProjectName=" + name + search;                
                  if (full_screen !== 'true' || edit_mode === 'true') {
                      iframe_src += "&editMode";
