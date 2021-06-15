@@ -268,7 +268,7 @@ window.addEventListener(
              let img        = document.createElement('img');
              const path_to_images = element.getAttribute('path_to_images');
              const path_to_projects = element.getAttribute('path_to_projects');
-             const snap_url = element.getAttribute('snap_url') || "https://snap.berkeley.edu/snap/snap.html";
+             const snap_url = element.getAttribute('snap_url') || "snap/snap.html";
              if (path_to_images) {
                  img.src = path_to_images + name + ".png"; 
              } else {
