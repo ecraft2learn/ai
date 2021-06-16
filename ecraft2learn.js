@@ -3890,7 +3890,7 @@ xhr.send();
           show_message("Loading the Question Answering Model ...");
           ecraft2learn.load_BERT(() => {
               qna.load().then(model => {
-                  ecraft2learn.universal_sentence_encoder = model;
+                  ecraft2learn.BERT = model;
                   show_message("loaded", .1);
                   answer();
               });
