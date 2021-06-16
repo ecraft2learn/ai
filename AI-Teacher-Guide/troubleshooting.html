@@ -10,10 +10,16 @@ Please send email to <a href="mailto:toontalk@gmail.com">Ken Kahn &lt;toontalk@g
 
 <h3>General advice</h3>
 <p>The guide has been well-tested on Chrome.
-Some problems have been observed with FireFox and Edge so best to avoid them.
-Some chapters need to load many Snap! projects as interactive illustrations.
-Unfortunately this can take several seconds causing scrolling and interactive illustrations to not work well while the page is loading.
-To address this there is a good deal of text to read at the top of each chapter while the rest is loading.</p>
+Some problems have been observed with FireFox and Edge so switch to Chrome if you encounter problems or very slow responses.
+</p>
+
+<h3>Permission in Snap! to run JavaScript</h3>
+<p>
+For security reasons, Snap! requires that a user explicitly enable JavaScript in the Settings dialog.
+The easiest way to avoid this is to use the
+<a href="https://ecraft2learn.github.io/ai/snap/snap.html">eCraft2Learn Snap! clone</a>
+that enables JavaScript automatically.
+</p>
 
 <h3>Granting permission for the guide to use the microphone and camera</h3>
 <p>The first time the guide is loaded into Chrome it should ask for permission to use the microphone or camera.
@@ -31,14 +37,10 @@ or <span class="block-name">Poses</span> blocks</h3>
 Training a computer to recognise images runs quickly on modern PCs because it is able to use the
 <a href="http://www.nvidia.com/object/what-is-gpu-computing.html" target="_blank">GPU</a> that is part of nearly all computers.
 There is a GPU on a Raspberry Pi but you may find it runs very slowly.
-On a high-end laptop training takes 100 to 200 milliseconds per image and prediction takes 40 to 60 milliseconds.
-On a high-end Android phone training ranges from 60 to 1500 milliseconds and prediction takes 1.1 to 1.3 seconds.
+On a laptop training takes 100 to 200 milliseconds per image and prediction takes 40 to 60 milliseconds.
+On a Android phone training ranges from 60 to 1500 milliseconds and prediction takes 1.1 to 1.3 seconds.
 On a Raspberry Pi training takes 80 to 250 seconds and prediction 100 to 2500 seconds (2 or 3 minutes is typical).
 At the time of writing this developers are actively working on the Android version of deep learning and not all examples work yet.
-</p>
-<p>
-Developers are working on a means to save a model after training.
-When this is ready one can train on a PC and the load the trained model on a slower device.
 </p>
 <h3 id="tensorflow">Problems with user-created machine learning models</h3>
 <p>
