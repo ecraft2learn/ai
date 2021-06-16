@@ -54,20 +54,24 @@ Translating between languages.
 While computers can deal with text as strings of characters, a technique called
 <a href="https://gist.github.com/aparrish/2f562e3737544cf29aaf1af30362f469" target="_blank">word embedding</a>
 works by converting words into a long list of numbers.
-These numbers can either be created by humans where a number has a meaning such as 'minimum size', 'maximum size' or 'average life expectancy'.
+These numbers can either be created by humans where each number has a meaning such as 'minimum size', 'maximum size' or 'average life expectancy'.
 Most AI programs instead use numbers created by machine learning
 (see <a href="chapter4.html">the previous chapter</a> and <a href="chapter6.html">the next chapter</a>).
-The numbers are created by considering text with billions word (e.g. all Wikipedia pages in a given language).
-People don't understand what the numbers mean but similar words have similar numbers and unrelated words have very different numbers.
+The numbers are created by training machine learning models on billions of words (e.g. all Wikipedia pages in a given language).
+People don't understand what the numbers mean but similar words have similar numbers and
+unrelated words have very different numbers.
 Each number measures a 'feature' of the word but what feature is a mystery.
 </p>
 <p class="background-information">
-The word embeddings used in this chapter were created by <a href="https://fasttext.cc/docs/en/support.html" target="_blank">Facebook</a>.
+The word embeddings used in this chapter were created by
+<a href="https://fasttext.cc/docs/en/support.html" target="_blank">researchers at Facebook</a>.
 They trained their machine learning models on 157 different languages on all Wikipedia articles in each language.
 Even though that was about a billion words each that wasn't enough,
 so they also trained their models on tens of billions more words found by <a href="http://commoncrawl.org/" target="_blank">crawling the web</a>.
 They created tables for each language of at least a million different words.
-The blocks described here provide the 20,000 most common words for 15 languages.
+The blocks described here provide the 20,000 most common words for 15 languages
+(Chinese, English, Finnish, French, German, Greek, Hindi, Indonesian, Italian,
+Japanese, Lithuanian, Portuguese, Sinhalese, Spanish, and Swedish).
 (Larger tables and more languages can be added. Send requests to toontalk@gmail.com.)
 </p>
 <h4 class="instructions-white" id="words-to-numbers">Turning a word into lots of numbers</h4>
@@ -96,9 +100,9 @@ A program can search through all the words to find the word that is closest to a
 The <span class="block-name">closest word to</span> reporter block does this.
 </p>
 
-<h4 class="advanced-information-white" id="measuring-distance">Different ways of measuring distances in high dimensional spaces</h4>
 <p class="advanced-topic">Click to read an advanced topic</p>
 <span class="advanced-topic-body">
+<h4 class="advanced-information-white" id="measuring-distance">Different ways of measuring distances in high dimensional spaces</h4>
 <p class="background-information advanced-information">
 There are two common ways of measuring distance in a high-dimensional space.
 One is <a href="https://en.wikipedia.org/wiki/Euclidean_distance" target="_blank">Euclidean distance</a>
@@ -114,11 +118,12 @@ Using the <span class="block-name">acos of</span> block on the <span class="bloc
 produces the angle between the inputs which is easier to understand.
 </p>
 </span>
+</h4>
 
 <figure class = "snap-iframe"
         id = "closest word to"
         container_style = "width: 800px; height: 500px" 
-        caption = "Finding the word closest to a word. TRY IT!">
+        caption = "Finding the word closest to a word. TRY IT! Then try it again after changing it to a language you know.">
 </figure>
 </p>
 
@@ -155,6 +160,9 @@ This use of word embeddings works for grammatical analogies as well.
 Try solving "slow is to slower as fast is to what?".
 You might need to add 'fast' as an exception.
 </p>
+<p class="background-information">
+We have published some papers on using word embeddings. See <a href="/ai/index.html#publications">our publications</a>.
+</p>
 <p class="instructions">
 Note that for word analogies of the form A is to B as C is to D that the distance between A-B to C-D is much
 less than if A, B, C, and D were just words chosen at random.
@@ -171,7 +179,7 @@ project that enables one to search through a smaller set</a>.
 If you were to use the <span class="block-name">closest word to</span> reporter to sort all
 the words by distance to a list of features, it would take about a full day since it will have
 to call the reporter 20,000 times.
-Instead we provide the <span class="block-name">closest words to</span> reporter that 
+Instead we provide the <span class="block-name">closest words to</span> reporter (notice the plural) that 
 does it all at once in less than a second if the device has a
 <a href="http://www.nvidia.com/object/what-is-gpu-computing.html" target="_blank">GPU</a>
 (except the first time it is called it may take several seconds).
@@ -257,6 +265,8 @@ One way is to draw a succession of vertical lines, one for each feature.
 <p class="instructions">
 A full screen version of this program can be
 <a href="../snap/snap.html?project=draw%20word%20embedding&editMode&noRun" target="_blank">found here</a>.
+See if you can create other ways of visualising embeddings.
+For example, to compare two embeddings perhaps the visualisations should be interleaved.
 </p>
 <h4 class="background-information-white" id="to-2d-points">Mapping 300 dimensional points to two-dimensional points</h4>
 <p class="background-information">
@@ -268,8 +278,9 @@ We use a technique called
 It can be understood as a physics simulation where all points in crowded areas repel each other and
 all points are attracted to those with a small distance away (in high-dimensional space).
 This <a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io/ai/word-embeddings/en/projector.json" target="_blank">
-data projector</a> displays all 20,000 English words in two or three dimensions using either t-SNE
-or PCA (<a href="https://en.wikipedia.org/wiki/Principal_component_analysis" target="_blank">principal component analysis</a>).
+data projector</a> displays all 20,000 English words in two or three dimensions using either t-SNE,
+PCA (<a href="https://en.wikipedia.org/wiki/Principal_component_analysis" target="_blank">principal component analysis</a>),
+or <a href="https://umap-learn.readthedocs.io/en/latest/how_umap_works.html">UMAP</a>.
 You can also use the projector to see the word embeddings of these languages:
 <a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io/ai/word-embeddings/de/projector.json" target="_blank">German</a>,
 <a href="https://projector.tensorflow.org/?config=https://ecraft2learn.github.io/ai/word-embeddings/el/projector.json" target="_blank">Greek</a>,
@@ -310,7 +321,7 @@ Here is a program that displays 50 random words at the location generated by t-S
 <h4 class="instructions-white" id="translations">Word embeddings can do translations</h4>
 <p class="instructions">
 What would happen if you took, for example, the features of the English word 'dog' and 
-asked for the closest word in say French.
+asked for the closest word in, say, French?
 Try this with different source and target languages and different words.
 Compare it with <a href="https://translate.google.com/" target="_blank">Google Translate</a>.
 Tip: it is easy to copy and paste words that your keyboard can't type from the Google Translate page.
@@ -326,7 +337,7 @@ Japanese, Lithuanian, Portuguese, Sinhalese, Spanish, and Swedish.
 </figure>
 </p>
 <p class="instructions">
-Note that this version of <span class="command-block">closest word to</span> has
+Note that this version of <span class="block-name">closest word to</span> has
 the choice of how one measures the distance between two vectors.
 <a href="https://en.wikipedia.org/wiki/Euclidean_distance" target="_blank">Euclidean distance</a>
 is the familiar 2D distance measure.
@@ -342,7 +353,7 @@ The process is <a href="../word-embeddings/adding-more-languages.html" target="_
 <p class="sample-program">
 The following game picks a random word and gives the player warmer or colder feedback as the player makes guesses.
 This does so by comparing the distance to the secret word with the previous distance.
-It uses the <span class="command-block">location of ...</span> reporter block to display your guesses.
+It uses the <span class="block-name">location of ...</span> reporter block to display your guesses.
 The game is very hard!
 There are many ways to make the game better.
 See if you can!
@@ -377,45 +388,6 @@ An easy way to import a passage into Snap! is to drag a file that contains the p
         container_style = "width: 800px; height: 800px" 
         caption = "Ask questions of a passage of text describing Snap!. TRY IT!">
 </figure>
-
-<h4 class="societal-impact-white" id="benefits-and-risks">Benefits and risks using word embeddings</h4>
-<p class="societal-impact">
-Word embeddings can be used as a component in AI programs that do
-sentiment analysis, entity detection, recommendations, summarising text, translation, and question answering.
-This is typically done by replacing the words in a text with their embeddings and then doing machine learning on the 
-approximate meaning of the words.
-This makes the systems work better with synonyms and paraphrasings.
-</p>
-<p class="societal-impact">
-Word embeddings are learned by examining text with billions of words.
-These texts may have captured
-<a href="https://developers.googleblog.com/2018/04/text-embedding-models-contain-bias.html" target="_blank">
-societal biases</a>.
-For example, the following example seems to have captured the bias that butchers are male and bakers are female.
-But the bias is so weak that if <a href="https://en.wikipedia.org/wiki/Cosine_similarity" target="_blank">cosine similarity</a>
-is used instead of <a href="https://en.wikipedia.org/wiki/Euclidean_distance" target="_blank">Euclidean distance</a>
-the unbiased "chef" is found.
-Some word embedding databases have the bias that doctors are male and nurses are female.
-They will answer the question "man is to doctor as woman is to X" with "nurse".
-Is this a bias? Or might it be due to the fact that only women can nurse babies?
-Run some experiments below to explore these kinds of questions.
-</p>
-<figure class = "snap-iframe"
-        id = "word analogy bias"
-        container_style = "width: 700px; height: 450px" 
-        caption = "Bias in word analogy solutions. See if you can find more.">
-</figure>
-<p class="societal-impact">
-A paper called <a href="https://science.sciencemag.org/content/356/6334/183" target="_blank">
-Semantics derived automatically from language corpora contain human-like biases</a>
-proposed a way to measure word biases.
-The idea is to use the average distance two words have to two sets of "attribute" words.
-To explore gender bias, for example, the attribute word lists can be "male, man, boy" and "female, woman, girl".
-The difference of the average distances provides a score that can be used to compare words.
-In <a href="../snap/snap.html?project=draw%20word%bias&editMode&noRun" target="_blank">
-this implementation of the scoring reporter</a> one can see that "mathematics" has a higher "maleness" score than "art".
-And "art" has a higher "pleasantness" score than "mathematics".
-</p>
 <h4 class="sample-program-white" id="codenames">Generating clues for the Codenames board game</h4>
 <p class="sample-program">
 <a href=""target="_blank">Codenames</a> is an award-winning board game.
@@ -434,7 +406,46 @@ Enhance it to make sure that none of the possible clues suggest the other team's
 or the assassin's codename.
 </p>
 </h4>
-<h4 class="how-it-works-white" id="how-do-word-embeddings-work">How does this work?</h4>
+<h4 class="societal-impact-white" id="benefits-and-risks">Benefits and risks using word embeddings</h4>
+<p class="societal-impact">
+Word and sentence embeddings can be used as a component in AI programs that do
+sentiment analysis, entity detection, recommendations, summarising text, translation, and question answering.
+This is typically done by replacing the words or phrases in a text with their embeddings
+and then training a machine learning system on these 
+approximate meaning of the words.
+This makes the systems work better with synonyms and paraphrasings.
+</p>
+<p class="societal-impact">
+Word embeddings are learned by examining text with billions of words.
+These texts may have captured
+<a href="https://developers.googleblog.com/2018/04/text-embedding-models-contain-bias.html" target="_blank">
+societal biases</a>.
+For example, the following example seems to have captured the bias that butchers are male and bakers are female.
+But the bias is so weak that if <a href="https://en.wikipedia.org/wiki/Cosine_similarity" target="_blank">cosine similarity</a>
+is used instead of <a href="https://en.wikipedia.org/wiki/Euclidean_distance" target="_blank">Euclidean distance</a>
+the unbiased "chef" is found.
+Some word embedding databases have the bias that doctors are male and nurses are female.
+They will answer the question "man is to doctor as woman is to X" with "nurse".
+Is this a bias? Or might it be due to the fact that only women can <i>nurse</i> babies?
+Run some experiments below to explore these kinds of questions.
+</p>
+<figure class = "snap-iframe"
+        id = "word analogy bias"
+        container_style = "width: 700px; height: 450px" 
+        caption = "Bias in word analogy solutions. Run it and then swap man and woman. See if you can find more biases.">
+</figure>
+<p class="societal-impact">
+A paper called <a href="https://science.sciencemag.org/content/356/6334/183" target="_blank">
+Semantics derived automatically from language corpora contain human-like biases</a>
+proposed a way to measure word biases.
+The idea is to use the average distance two words have to two sets of "attribute" words.
+To explore gender bias, for example, the attribute word lists can be "male, man, boy" and "female, woman, girl".
+The difference of the average distances provides a score that can be used to compare words.
+In <a href="../snap/snap.html?project=draw%20word%bias&editMode&noRun" target="_blank">
+this implementation of the scoring reporter</a> one can see that "mathematics" has a higher "maleness" score than "art".
+And "art" has a higher "pleasantness" score than "mathematics".
+</p>
+<h4 class="how-it-works-white" id="how-do-word-embeddings-work">How do word embeddings work?</h4>
 <p class="how-it-works">
 While we don't really know what the numbers mean, they must be encoding lots of things about words such as
 gender, grammatical category, family relationships, and hundreds more things.
@@ -470,7 +481,7 @@ For example, 'dog', 'dogs', puppy', and 'canine' are close.
 Words like 'wolf', 'cow', and 'mouse' are close but not as close as those words.
 And all of these words are far from abstract words like 'truth' and 'logic'.
 So they discovered that it is possible to find a rotation that will cause many word embeddings
-in one language to cause translations of those words to be close.
+in one language to be close to corresponding words in another language.
 The way it was done at first and in these Snap! blocks is by giving a program a word list between
 English and each other language.
 500 words is enough to find a good rotation that brings most of the other 19500 words
@@ -584,7 +595,7 @@ the sample project that answers questions about Snap! AI blocks</a>
 </li>
 <li>
 Using the <span class="block-name">answer this question ... using this passage ...</span> block
-together with the <span class="block-name">Ask Wikipedia</span> block make a general question answering program.
+together with the <span class="block-name">Ask Wikipedia</span> block to make a general question answering program.
 Consider adding speech input and output.
 </li>
 <li>
@@ -611,7 +622,7 @@ E.g. one sense of "duck" is close to "chicken" while another sense is close to "
 There is plenty more that AI programs can do with language including
 determining the grammatical structure of sentences (this is called "parsing"),
 figuring out the sentiment in some text,
-and question answering.
+and summarising text.
 We plan to add more.
 </p>
 
@@ -626,7 +637,7 @@ The <a href="https://gist.github.com/aparrish/2f562e3737544cf29aaf1af30362f469" 
 has a very good introduction to the subject and the contains examples that are helpful but require familiarity with Python.
 This <a href="https://developers.googleblog.com/2018/04/text-embedding-models-contain-bias.html" target="_blank">
 Google blog about biases in word embeddings</a> is very good and clear.
-In Google's <a href="https://cloud.google.com/blog/products/ai-machine-learning/steering-the-right-course-for-ai" target="_blank">
+Google's <a href="https://cloud.google.com/blog/products/ai-machine-learning/steering-the-right-course-for-ai" target="_blank">
 Steering the right course for AI</a> discusses bias along with other societal issues including interpretivity, jobs, and doing good.
 <a href="https://arxiv.org/abs/1905.09866" target="_blank">Fair is Better than Sensational:
 Man is to Doctor as Woman is to Doctor</a> discusses biases in word embeddings in depth.
@@ -636,7 +647,6 @@ is a clear interactive description of how t-SNE works.
 pioneered the idea adjusting the word embeddings to support translation.
 <a href="https://arxiv.org/abs/1710.04087" target="_blank">Word Translation Without Parallel Data</a>
 explores how word embeddings can be used for translation without using word lists or translated texts.
-<a href="https://arxiv.org/abs/1710.04087" target="_blank">Word Translation Without Parallel Data</a>
 <a href="https://projector.tensorflow.org/" target="_blank">projector.tensorflow.org</a>
 is a great website for interactively exploring different ways of visualising high-dimensional spaces.
 Here is a video of <a href="https://www.youtube.com/watch?v=RJVL80Gg3lA" target="_blank">
