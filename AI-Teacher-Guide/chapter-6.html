@@ -60,7 +60,7 @@ so the model can be trained on records of previous games.
 </p>
 <h4 class="instructions-white" id="how-to-use-ml-blocks">How to Use Machine Learning Blocks</h4>
 <p class="instructions">
-To create and use a machine learning model you need these components:
+To create and use a machine learning model you need to:
 </p>
 <ol class="instructions">
 <li>
@@ -68,11 +68,14 @@ Create a model with the desired number and size of layers.
 The model will connect the input to the first layer, the first layer to the second layer,
 and so on until the last layer which is the output of the model.
 More layers and wider layers typically makes the model more accurate but also slower to train and use.
+Though there is the risk that a large model "memorises" the training data and isn't able to generalise to new inputs.
 </li>
 <li>
 Provide the data as two lists.
 The elements of the first list are the input and the second list contains the corresponding outputs.
 Note that the elements of the lists can be numbers or lists of numbers.
+If the output list contains text, the elements will automatically be converted to numbers
+and the system will assume the task is to classify the input as one of the output textual labels.
 </li>
 <li>
 Train the model.
@@ -82,6 +85,7 @@ You can use advanced optimization methods to adjust the steps and improve the tr
 </li>
 <li>
 Use the model to make predictions.
+Predictions can either be probabilities that each label correctly categorises the input or else a number or list of numbers.
 A good way to evaluate the model is to use test data that wasn't used in training. 
 If it makes good predictions on the test data you can use it to predict things about the world,
 solve mathematics puzzles, or play games.
@@ -90,16 +94,16 @@ solve mathematics puzzles, or play games.
 <h4 class="instructions-white" id="small-ml-example">A small example: Training a model to estimate square roots</h4>
 <p class="instructions">
 In the following you can use the <span class="block-name">Create a neural net model ...</span>
-block to create a model with four "hidden" layers.
-(Hidden in that they are in-between the input and the output.)
-You then use the <span class="block-name">Send training data ...</span>
+block to create a model with two "hidden" layers of size 100 and 20.
+(Hidden here means that they are in-between the input and the output.)
+You can then use the <span class="block-name">Send training data ...</span>
 block to set the training data to ten numbers and their square roots.
 Next you can use the <span class="block-name">Train model named ...</span> block to train the model. 
 This can take several seconds and you should finally see the remaining "error"
 (often called the "loss"), the accuracy, and how long it took.
 Smaller errors are better.
 Finally, you can use the <span class="block-name">Get predictions from model ...</span> block
-(the version that gets only one prediction at a time)
+(the version that gets many predictions at a time)
 to test how well the model has learned.
 </p>
 <figure class = "snap-iframe"
@@ -117,6 +121,14 @@ We suggest you first experiment with what are called the <i>hyperparameters</i> 
 the number and size of the layers, the optimizer, the learning rate, the loss function,
 the validation split, and the number of learning steps.
 With the right settings the following can create a good square root estimator.
+</p>
+<p class="instructions">
+Note that the training can take several minutes.
+So long as you leave the tab visible you can do other things on your computer while it is running.
+We advise putting the tab in a new window.
+Once a model is trained and you are ready to use it in your app you can
+<a href="#saving-and-loading-models">save the trained model and load it</a> into your app
+to avoid the training time.
 </p>
 <figure class = "snap-iframe"
         id = "better machine learning exercise"
@@ -147,7 +159,7 @@ It was trained to output a label for a vector of three numbers:
 50 different random colors were given one of nine color names.
 Instead of responding with a number or a color name the model lists a "score"
 for each of the possible color names. The scores add up to 1.
-The percentage of confidences of each label is obtained by multiplying each score by 100.
+The confidence or probability of being correct of each label is turned into percentages by multiplying each score by 100.
 The following model does well with only a few colors,
 perhaps you can improve by training it with more colors and by training it better.
 </p>
@@ -165,7 +177,7 @@ Click to learn how.
 <span class="advanced-topic-body">
 <p class="how-it-works">
 The Snap! blocks for machine learning check if the output values are numbers.
-When they aren't it collects together all the unique values (e.g., all the color names in the data).
+When they aren't, it collects together all the unique values (e.g., all the color names in the data).
 It then uses a technique called <a href="https://en.wikipedia.org/wiki/One-hot" target="_blank">one hot</a>.
 If the colors were "red", "green", and "blue" they could be converted to 0, 1, and 2.
 But it wouldn't work well since the numbers imply that "red" is closer to "green" than "blue".
@@ -177,7 +189,7 @@ Each color is equally distant to any other this way.
 The model responds with predictions with a vector of numbers between 0 and 1 that add up to 1.
 Each number is what the model estimates is the probability
 that the correct color name is the corresponding one in the list of color names.
-E.g. For if the prediction is <.5, .2, .3> for "red", "green", and "blue" then
+E.g. For if the prediction is <0.5, 0.2, 0.3> for "red", "green", and "blue" then
 the model is estimating that the odds of red being correct is 50%, green 20%, and blue 30%.
 The Snap! model prediction blocks return a list where each element is a list of a color name and number.
 The <span class="block-name">Name this color ...</span> in the above sample project
@@ -220,7 +232,12 @@ The neural net will be trained with a collection of these 12 numbers as input an
 </p>
 <h4 class="instructions-white" id="ai-questions">Training a model to answer questions</h4>
 <p class="instructions">
-Questions can be associated with answers using the <span class="block-name">features of sentence</span> block.
+One way to build a question-answering app is to use a table of expected questions and known answers.
+To deal with the many ways to ask the same question one can train a model using 
+the <span class="block-name">features of sentence</span> block described in
+the <a href="../chapter-5.html#sentence-embeddings">
+chapter on word and sentence embeddings</a>.
+An app can respond to questions by choosing the top-scoring predictions from the model given the embedding of the question.
 Here is a project for defining, training, and testing such as app:
 <figure class = "snap-iframe"
         id = "AI Questions"
@@ -235,13 +252,16 @@ Here is a project for defining, training, and testing such as app:
 Using the <span class="block-name">features of sentence</span> block together with a few training examples
 we can create an app that will indicate the degree of confidence (or lack thereof) indicated by the input sentence.
 Here is a project for defining, training, and testing such as app:
+</p>
 <figure class = "snap-iframe"
         id = "confidence"
         run_full_screen = "true"
+        stage_ratio = "0.25"
         edit_mode = "true"
-        container_style = "width: 900px; height: 800px" 
+        container_style = "width: 900px; height: 550px" 
         caption = "Train a model to recognize emotions in text!">
 </figure>
+<p class="instructions">
 Here is <a href="chapter-5.html#confidence-guesser">simple project that uses this model</a>.
 </p>
 <h4 class="how-it-works-white" id="introduction-to-deep-neural-nets">A brief introduction to deep neural nets</h4>
@@ -249,7 +269,8 @@ Here is <a href="chapter-5.html#confidence-guesser">simple project that uses thi
 A deep neural net consists of an input layer, some number of hidden layers, and an output layer.
 The nets that the <span class="block-name">Create a neural net model ...</span> block creates
 are always in a sequence and each neuron is connected to every neuron in the neighbouring layers.
-While this is a common architecture there are many models that branch and are connected more sparsely.
+While this is a common architecture, there are many models that connect the neurons in other patterns.
+Some contain branches and loops and some are connected more sparsely.
 </p>
 <figure class="how-it-works-white">
 <img src="images/TB010-Deep-Neural-Network.jpg" class="center">
@@ -287,12 +308,14 @@ to open an interface page and navigating to the Save/Load section.
 Your projects can load models using the <span class="block-name">Load neural net from URL ...</span> block
 if you have copied your saved model files (both the JSON that defines the model and the learned weights file)
 to a web server.
-They can load data using the <span class="block-name">Load X data from URL</span> block where <i>X</i> can
+</p>
+<p class="instructions">
+Other blocks can load data using the <span class="block-name">Load X data from URL</span> block where <i>X</i> can
 be either "training" or "validation".
 Training data is used in training both as data to process
 and a random sample is used to calculate how well the model is doing.
-validation data is only used to calculate the error or loss during training.
-Note that one can save training data as validation data.
+Validation data is used to calculate the error or loss during training.
+The validation data error can be used to tune the learning process.
 </p>
 <figure class = "snap-iframe"
         id = "load neural net"
@@ -314,7 +337,7 @@ Note that one can save training data as validation data.
 <p class="background-information">
 Every day there is news of new applications of machine learning to problems.
 Sometimes it is for entertainment as when <a href="https://www.youtube.com/watch?v=Pc2aJxnmzh0" target="_blank">
-SnapChat filters add animations or distort people's faces></a>.
+SnapChat filters add animations or distort people's faces</a>.
 Sometimes it saves lives as when
 <a href="https://www.blog.google/technology/ai/fighting-fire-machine-learning-two-students-use-tensorflow-predict-wildfires/" target="_blank">
 students used machine learning to predict wildfires</a>.
@@ -338,33 +361,41 @@ And for the number of cases of flu each week across many countries we used
 from the World Health Organisation.
 </p>
 <p class="instructions">
-An easy way to bring data into Snap! is by importing the contents of a TXT file into a variable.
-Create a variable and then right click on the variable's "watcher" and select <i>import</i>.
+An easy way to bring data into Snap! is by dragging a file onto the Snap! browser tab.
+This works for TXT, CSV (a spreadsheet format), and JSON (JavaScript structured data) file types.
+Or if you already have a variable, you can import its contents by right clicking on the variable's "watcher"
+and select <i>import</i>.
 </p>
 <figure class="instructions-white">
 <img src="images/importing-data.png" class="center">
 <figcaption>A convenient way to bring data into Snap!</figcaption>
 </figure>
 <p class="instructions">
-Bringing data into Snap! as text is only the first step.
-The Snap! <span class="block-name">split ... by</span> block can turn text into lists.
-The lists often need to be cleaned up and restructured.
+Bringing data into Snap! as text is sometimes only the first step.
+If you import some text and need lists, you can use the Snap!
+<span class="block-name">split ... by</span> block to turn text into lists.
+Data often needs to be cleaned up and restructured.
 This is often called <a href="https://en.wikipedia.org/wiki/Data_wrangling" target="_blank">data wrangling</a>.
 </p>
 <p class="instructions">
 In this <a href="../snap/snap.html?project=weather data&editMode" target="_blank">Snap! project</a>
 data wrangling is performed on both the weather and flu data.
-The idea is to have each element of the weather dataset to contain the weather for a week matched up with the flu data for the following week.
+The idea is to have each element of the weather dataset to contain the weather for a week matched up
+with the flu data for the following week.
+(If one week is not a good estimate for the duration between exposure and confirmed diagonosis, then
+one can try other offsets.)
 One problem is that the flu data from the World Health Organisation is weekly for entire countries
 while the weather data is daily for weather stations (often in cities).
 In the sample project data for Ireland and Switzerland were used because a big country could have very different weather in different parts.
 Also one needs to avoid datasets that are incomplete which occurs often.
 </p>
 <p class="instructions">
-Weather and flu are seasonal so to make interesting predictions we need to say if the weather data was higher or lower than typical for that time of year
-how does it predict how the flu cases will vary from what is typical for that time of year. 
-To address this, the data has been regularised which in this case means that all measurements have been divided by the average value for that measurement.
-So a value such as 0.75 means that reading was 75% of the average value for that measurement that week of the year.
+Weather and flu are seasonal so to make interesting predictions we need to determined
+if the weather data was higher or lower than typical for that time of year
+predicts how the flu cases will vary from what is typical for that time of year. 
+To address this, the data has been regularised which in this case means that all measurements
+have been divided by the average value for that measurement.
+So a value such as 0.75 means that reading was 75% of the average value for that measurement for that week of the year.
 </p>
 <p class="instructions">
 Another challenge is to work out how to evaluate how well a model does.
@@ -381,6 +412,7 @@ Or if start to get good predictions then see if a simpler model works almost as 
 Maybe the precipitation measurements don't matter.
 Or maybe it doesn't need the full daily measurements of the previous week.
 Alternatively, try doing something similar with other available datasets.
+There are excellent <a href="https://data.world/datasets/covid-19">covid datasets</a>, for example.
 </p>
 <h4 id="tic-tac-toe" class="instructions-white">Learning to win at Tic Tac Toe</h4>
 <p class="background-information">
@@ -428,8 +460,9 @@ This is quite challenging and only appropriate for those with a good deal of exp
 </p>
 <p class="instructions">
 An alternative is to instead focus on learning how to design good neural nets and how to train them effectively.
-Click on the following to skip the Snap! programming challenge and start training models right away.
-Once you have a model trained to win (most of the time) you can set up tournaments with the trained models of classmates or friends!
+Click on the following to skip the Snap! Tic Tac Toe programming challenge and instead start training models right away.
+Once you have a model trained to win (most of the time),
+you can set up tournaments with the trained models of classmates or friends!
 </p>
 <p class="advanced-topic">
 Click to see how you can train a neural net to play Tic Tac Toe in Snap!.
@@ -441,7 +474,7 @@ This <a href="../snap/snap.html?project=tic tac toe machine learning&editMode" t
 has a variable called <i>Players</i> whose value is a list of two player types.
 A player type can be 'human', 'random', or the name of a model you created.
 Games are recorded and are the basis for training. 
-The space bar will start a new game and if humans aren't playing a new game will start as soon as a game is over.
+The space bar will start a new game and, if humans aren't playing, a new game will start as soon as a game is over.
 </p>
 <p class="instructions">
 There is a supporting web page that allows you to experiment with training and provides a way to save and load models and game data.
@@ -451,9 +484,10 @@ It will have a 'return to Snap!' button.
 <p class="how-it-works">
 The core idea is that the board positions are recorded after each move.
 When a game ends then outcomes are associated with each move.
-If the game ended in a tied the outcome is 0.
-If the move led to a win then 1, otherwise -1.
-The model is trained to predict a value between -1 and 1 for moves that may or may not be games it has been trained on.
+If the game ended in a tie, the outcome is 0.
+If the move led to a win, then 1, otherwise -1.
+The model is trained to predict a value between -1 and 1 for board positions resulting from moves.
+Note that it needs to predict the outcomes of board positions, even if it never encountered the board during training.
 </p>
 <p class="how-it-works">
 Neural nets work only with numbers so we need to decide how a board position will be represented with numbers.
@@ -468,7 +502,7 @@ So to avoid this problem machine learning programs typically use
 <a href="https://en.wikipedia.org/wiki/One-hot" target="_blank">one hot</a>
 vectors that are all zeros except for a single one.
 So X can be &lt;1,0,0&gt;, O can be &lt;0,1,0&gt;, and empty can be &lt;0,0,1&gt;.
-While a board could then be 9x3 (or 3x9) matrix it is easier to flatten the structure so that every board 
+While a board could then be a 9x3 (or 3x9) matrix it is easier to flatten the structure so that every board 
 is a vector of 27 zeros and ones.
 </p>
 <figure class="how-it-works">
@@ -586,10 +620,10 @@ the number of people who get the flu a few days later, or the number of bicycle 
 Or try enhancing <a href="#real-world-data-projects">the sample flu prediction project</a>.
 </li>
 <li>
-Use <a href="chapter-5.html">word embeddings</a> to do machine learning on texts.
+Use <a href="chapter-5.html">word and sentence embeddings</a> from the previous chapter to do machine learning on texts.
 For example, one can do
 <a href="https://en.wikipedia.org/wiki/Sentiment_analysis" target="_blank">sentiment analysis</a> of sentences by
-converting input sentences to the average of the embeddings of its words.
+converting input sentences to a list of numbers using the <span class="block-name">get features of sentence</span> block.
 The output could be a few numbers capturing the emotional content of the input sentences (e.g. angry, happy, excited).
 </li>
 </ol>
