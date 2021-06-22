@@ -9,10 +9,10 @@
 <h2>A guide to building AI apps and artefacts</h2>
 <h3>Chapter 1 - Adding speaking to programs</h3>
 <h4>Ken Kahn, University of Oxford</h4>
-<p>
-You can download the blocks presented here as a
+<p class="resources">
+You can export the blocks presented here as a
 <a href="/ai/snap/snap.html?project=speaking&editMode" target="_blank">project</a> or 
-a <a href="speaking blocks.xml" download target="_blank">library</a>.
+download as a <a href="speaking blocks.xml" download target="_blank">library</a> to import into your projects.
 </p>
 <div id="table-of-contents"></div>
 <h4 class="guide-to-guide-white">Browser compatibility</h4>
@@ -89,7 +89,7 @@ The Mary TTS (text-to-speech) blocks below work in any browser.)
 
 <figure class = "snap-iframe"
         id = "simple speak block"
-        container_style = "width: 800px; height: 250px" 
+        container_style = "width: 750px; height: 250px" 
         caption = "A simple block for speaking text. TRY IT">
 </figure>
 
@@ -99,7 +99,8 @@ The <span class="command-name">set default language</span> command sets what lan
 It can be the language's name in the language or in English.
 Or you can use language code followed by the dialect code.
 E.g. en-GB for English as spoken in Great Britain.
-Language codes should be one of the <a href="https://en.wikipedia.org/wiki/IETF_language_tag" target="_blank">IETF language tags</a>.
+Language codes should be one of the
+<a href="https://en.wikipedia.org/wiki/IETF_language_tag" target="_blank">IETF language tags</a>.
 </p>
 
 <span class="non-essential">
@@ -175,7 +176,8 @@ Click to read an advanced topic
 <p class="background-information">
 Code blocks that should run when some computation finishes are an instance of an advanced computer science concept called
 <a class="notranslate english" translate=no href="https://en.wikipedia.org/wiki/Continuation" target="_blank">continuations</a>.
-These are used to support asynchronous computations.
+These are used to support asynchronous computations
+(where it doesn't wait for the block to finish before doing the next thing).
 The complexity introduced by continuations need not make things hard for students.
 They can easily place blocks in the <span class="block-name">Speak</span> block
 without understanding the underlying computer science.
@@ -203,8 +205,7 @@ than displays, keyboards, mice, buttons, and touch sensors.
 
 <h4 class="societal-impact-white" id="misuse-of-speech-synthesis">Can speech synthesis be misused?</h4>
 <p class="societal-impact">
-It is hard to imagine dangers with today's speech synthesis technology.
-As it gets better it may enable the automation of tasks that voice actors perform today.
+As the technology gets better it may enable the automation of tasks that voice actors perform today.
 A more serious worry is that the next generation of speech synthesis may be able to
 <a href="http://www.radiolab.org/story/breaking-news/" target="_blank">
 fool people into thinking that someone said something they didn't</a>.
@@ -275,11 +276,11 @@ Some of them are intended to speak other languages.
 </p>
 
 <p class="instructions">
-Regarding the 'language' option, unfortunately many browsers currently ignore it.
-When a browser accepts it the argument should be one of the
+Regarding the 'language' option, it can be the language's name in the language or in English.
+Or you can use language code followed by the dialect code.
+E.g. en-GB for English as spoken in Great Britain.
+Language codes should be one of the
 <a href="https://en.wikipedia.org/wiki/IETF_language_tag" target="_blank">IETF language tags</a>.
-It describes the language and dialect, e.g. en-GB.
-This library, however, will accept the name of the language in itself or in English.
 </p>
 
 <p class="instructions">
@@ -328,7 +329,7 @@ are words that mean and sound different but are spelled the same.
 The English word <span class="notranslate english" translate=no>"Read"</span>
 can sound like <span class="notranslate english" translate=no>"reed"</span> or
 <span class="notranslate english" translate=no>"red"</span> depending upon the tense.
-The English word <span class="notranslate english" translate=no>"Lead"</span> the verb
+The English verb <span class="notranslate english" translate=no>"Lead"</span>
 sounds different from <span class="notranslate english" translate=no>"lead"</span> the metal.
 Some voices are better than others at using the correct pronunciation.
 Explore how different voices deal with <span class="notranslate english" translate=no>"read"</span> in the following.
@@ -352,11 +353,12 @@ See if the voices can figure out the right one from the surrounding words.
 <p class="instructions">
 It is interesting to explore how different voices deal with non-words such as the growl "grrrrrrrrrrrrr".
 Listen to how it sounds for each voice and then explore other non-words.
+Can you make it growl by lowering the pitch and speed?
 <figure class = "snap-iframe"
         id = "grrrrrrr"
         full_screen = "true"
         container_style = "width: 800px; height: 600px" 
-        caption = "Click the green flag to hear different voices say 'grrrrrrr'. Then edit the program to hear other non-words.">
+        caption = "Listen to different voices saying 'grrrrrrr'. Then edit the program to hear other non-words.">
 </figure>
 </p>
 
@@ -415,6 +417,7 @@ at <a href="http://mary.dfki.de:59125/" target="_blank">the MARY TTS site</a>.
 There is a standard called
 <a class="notranslate" translate=no href="https://www.w3.org/TR/speech-synthesis/" target="_blank">Speech Synthesis Markup Language</a>
 that provides great control over how the speech is generated.
+Try this <a href="https://l-www.vocalware.com/index/demo" target="_blank">demo</a>.
 However, it has yet to be implemented in the voices one commonly finds available in browsers.
 </p>
 
@@ -462,7 +465,12 @@ See what effects the parameters have.
 Then try them out in your own projects perhaps starting with the simple blocks.
 </p>
 
-<script src="../js/where-to-get-library.js"></script>
+<h4 class="guide-to-guide-white">Where to get these blocks to use in your projects</h4>
+<p class="resources">
+You can export the blocks presented here as a
+<a href="/ai/snap/snap.html?project=speaking&editMode" target="_blank">project</a> or 
+download as a <a href="speaking blocks.xml" download target="_blank">library</a> to import into your projects.
+</p>
 
 <h4 class="guide-to-guide-white" id="speech-recognition">Learn about speech recognition</h4>
 <p class="guide-to-guide">
