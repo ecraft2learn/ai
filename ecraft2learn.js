@@ -666,6 +666,8 @@ window.ecraft2learn =
             }
         } else if (ecraft2learn.default_language) {
             utterance.lang = ecraft2learn.default_language;
+        } else {
+            utterance.lang = navigator.language;
         }
         pitch = +pitch; // if string try convering to a number
         if (typeof pitch === 'number' && pitch > 0) {
@@ -682,10 +684,10 @@ window.ecraft2learn =
             }
             utterance.rate = rate;
         }
-        if (!voice_number && ecraft2learn.default_language) {
+        if (!voice_number) {
             let voices = window.speechSynthesis.getVoices();
             voices.some(function (voice, index) {
-                if (voice.lang === ecraft2learn.default_language) {
+                if (voice.lang === (ecraft2learn.default_language || navigator.language)) {
                     voice_number = index+1; // 1-indexing
                     return true;
                 }
