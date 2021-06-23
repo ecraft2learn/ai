@@ -62,7 +62,7 @@ There are many ways of specifying the language:
 (3) give the language code followed by the dialect code.
 E.g. en-GB for English as spoken in Great Britain.
 Language codes should be one of the <a href="https://en.wikipedia.org/wiki/IETF_language_tag" target="_blank">IETF language tags</a>.
-Google's Chrome browser supports over <a href="https://cloud.google.com/speech/docs/languages" target="_blank">100 languages</a>.
+Google's Chrome browser supports over <a href="https://www.google.com/intl/en/chrome/demos/speech.html" target="_blank">100 languages</a>.
 If the language code and dialect code are the same you don't need to give both.
 E.g., fr will be treated as fr-FR.
 </p>
@@ -73,10 +73,11 @@ E.g., fr will be treated as fr-FR.
 Speech recognition can encounter errors such as the inability to access the microphone.
 The most common "error" is when after several seconds nothing is heard.
 The <span class="block-name">listen then ...</span> block keeps listening until there is an error.
-When the speech recogniser notices that nothing has been said then
-the error block is given the text <span class="block-name">no-speech</span>.
-Other errors are <span class="block-name">audio-capture</span> when the browser can't find a microphone and 
-<span class="block-name">not-allowed</span> when permission to use the microphone hasn't been granted.
+When the speech recogniser notices a problem the error block is given a text error message.
+The error messages are
+"Unable to access the microphone. Perhaps another program is using it or permission has not been granted.",
+"No speech heard for a while.", and
+"Permission to use the microphone not granted.".
 Try the following and then be quiet for a while.
 </p>
 
@@ -108,7 +109,7 @@ Occasionally it will mishear you.
 There is a
 <a href="../snap/snap.html?project=command&noRun" target="_blank">full screen version of this</a>.
 This program supports many ways of saying the same command word or phrase.
-A <a href="../snap/snap.html?project=command%20sentences&noRun" target="_blank">different program</a> expects the user to say full sentences
+A <a href="../snap/snap.html?project=command%20sentences" target="_blank">different program</a> expects the user to say full sentences
 and looks for numbers and the command words ('forward' and 'right') to respond.
 This version seems much more intelligent, but is it?
 </p>
@@ -136,7 +137,7 @@ and select 'edit' you'll see the following program.
 <img src="images/command-program.png" class="center">
 <figcaption>The blocks that implement the speech command program</figcaption></figure>
 
-<p class="advanced-topic">Click to read an advanced topic</p>
+<p class="advanced-topic">Click to read an explanation of how the speech command program works</p>
 <span class="advanced-topic-body">
 <p class="advanced-information">
 The <span class="block-name">spoken</span> variable contains what was just recognised.
@@ -149,7 +150,7 @@ When a number is spoken the turtle then turns or moves appropriately.
 </span>
 
 <h4 class="advanced-information-white">An alternative way to do the same thing</h4>
-<p class="advanced-topic">Click to read another advanced topic</p>
+<p class="advanced-topic">Click to read an advanced topic</p>
 <span class="advanced-topic-body">
 <p class="advanced-information">
 The command program relies upon what computer scientists call
@@ -168,9 +169,8 @@ For example, it is very difficult to implement a response when
 no other parts of the program understand what was said.
 The first version responds by saying it didn't understand what was said, repeats what it thinks it heard,
 and says to try again.
-The <a href="../snap/snap.html?project=command%20broadcast%202&noRun" target="_blank">broadcast version</a>
+The <a href="../snap/snap.html?project=command%20broadcast%202" target="_blank">broadcast version</a>
 cannot do so.</p>
-</span>
 </span>
 
 <h4 class="sample-program-white" id="sentence-generation-project">An example project involving generating sentences using parts of speech concepts</h4>
@@ -275,7 +275,7 @@ Juliet and Romeo lived barely ever after.
 You may want to enhance the program to turn
 <span class="notranslate english" translate=no>"a amateur"</span>
 into <span class="notranslate english" translate=no>"an amateur".</span>
-Try changing to have a different template story.
+Try changing it to have a different template story.
 </p>
 <p class="sample-program">
 If you click on <img src="images/show-blocks.png"> you'll see the blocks behind the program.
@@ -292,7 +292,7 @@ Typically, there are many matches so it picks one at random and says it.
         id = "Wikipedia answers"
         full_screen = "true"
         container_style = "width: 800px; height: 600px" 
-        caption = "Click the green flag and then say a word or short phrase">
+        caption = "Click on the app and then say a word or short phrase">
 </figure>
 
 <figure class="non-essential">
@@ -361,7 +361,7 @@ The use of <a href="https://www.wired.com/story/companion-robots-are-here/" targ
 provide social support is controversial since again the robots may lack understanding and empathy.
 Speech technology has become part of
 <a href="https://www.theguardian.com/technology/2017/sep/10/should-robot-be-your-childs-best-friend" target="_blank">
-interactive toys</a> and children become too emotionally attached to them.
+interactive toys</a> and some argue that children become too emotionally attached to them.
 </p>
 
 <p class="teacher-guide societal-impact">
@@ -417,38 +417,6 @@ What can one say about a speech recogniser if it makes the same mistakes as peop
 What if its mistakes are different?
 </p>
 
-<h4 class="project-ideas-white" id="project-ideas">Ideas for projects using speech synthesis and recognition</h4>
-<p class="project-ideas">
-Here are some ideas for projects using speech recognition
-(and sometimes also use speech synthesis as described in 
-<a class="guide-link" href="chapter-1.html">Chapter 1</a>).
-<ul class="project-ideas">
-<li>A robot that responds to commands such as "forward", "left", "right", and "stop".</li>
-<li>A chatbot that can (pretend to) talk about a particular subject.
-Chatbots have a <a href="https://en.wikipedia.org/wiki/ELIZA" target="_blank">history going back over fifty years</a>
-but it is only recently that speech can replace typing as the way to communicate with a chatbot.</li>
-<li>Another example of a textual program that can be reconceived as a verbal program
-are <a href="https://en.wikipedia.org/wiki/Adventure_game#Text_adventures_and_Interactive_Fiction" target="_blank">adventure games</a>.
-A virtual world is simulated where one can navigate by saying things like "walk north" or "open door"
-and hearing responses such as 
-"you now see a castle in the distance" and "the door is locked".
-This can result in a computer game that blind people can play
-(or drivers can play without taking their eyes off the road).</li>
-<li>Guessing games such as "guess what number I'm thinking of".
-The computer can either pick a number and respond to guesses with "warmer" or "colder".
-Or the computer can guess numbers and listen for the words "warmer" or "colder" to decide what to guess next.</li>
-<li>Telling or responding to knock knock jokes.</li>
-<li>An interactive artwork that responds differently depending upon if it hears is something positive or negative. 
-It could do so by searching for key words and phrases in what it hears or
-it could connect to a <a href="https://en.wikipedia.org/wiki/Sentiment_analysis" target="_blank">sentiment analysis</a> service.</li>
-<li>Putting together two speech apps so they interact.
-For example, the part-of-speech sample program described earlier could be paired with a program that searches for keywords such as
-"noun", "verb", etc. and then responds with a random entry in the corresponding list.
-This could be even more exciting if the two apps were placed into some physical devices that "converse".</li>
-<li>And thousands of other things.</li>
-</ul>
-</p>
-
 <h4 class="non-essential" id="full-featured-block">A full-featured speech recognition block</h4>
 <p class="advanced-information non-essential">
 The speech recognition engines typically can do more than
@@ -461,7 +429,8 @@ All of these functionalities are provided by this block:
 
 <figure class = "snap-iframe non-essential"
         id = "complex listen block"
-        container_style = "width: 620px; height: 360px" 
+        stage_ratio = ".75"
+        container_style = "width: 1100px; height: 440px" 
         caption = "A full-featured block for turning speech into text. TRY IT">
 </figure>
 
@@ -471,10 +440,9 @@ All of these functionalities are provided by this block:
 <li>The first argument are blocks that receive interim results as they are produced.</li>
 <li>The next argument are blocks that receive the final result.</li>
 <li>The next argument receives errors if there are any.</li>
-<li>Text that indicates the language followed by the dialect.
+<li>It can be the name of the language (in English or in itself).
+Or it can be one of the <a href="https://en.wikipedia.org/wiki/IETF_language_tag" target="_blank">IETF language tags</a>.
 E.g. en-GB for English as spoken in Great Britain.
-It should be one of the <a href="https://en.wikipedia.org/wiki/IETF_language_tag" target="_blank">IETF language tags</a>.
-Google's Chrome browser supports over <a href="https://cloud.google.com/speech/docs/languages" target="_blank">100 languages</a>.
 </li>
 <li>The maximum number of alternative recognition results.
 If not provided it is 1. Note the recognition engine may return fewer results.</li>
@@ -488,9 +456,6 @@ Note that for Google's speech recognition engine currently only the first altern
 
 <p class="advanced-information non-essential">
 Watching the interim results can provide some insight into the process of recognition.
-You can test this using the above block where you put the <span class="block-name">say</span>
-block with an empty text field in the first argument.
-(Snap! interprets an empty field in this context as the input to the blocks (in this case the current interim result).)
 For example, if you say <span class="notranslate english" translate=no>"red"</span>
 you'll see <span class="notranslate english" translate=no>"red"</span>
 but if you soon afterwards say <span class="notranslate english" translate=no>"a book"</span>
@@ -521,12 +486,45 @@ Try fractions and negative numbers.
 Try very big numbers.
 </p>
 
+<h4 class="project-ideas-white" id="project-ideas">Ideas for projects using speech synthesis and recognition</h4>
+<p class="project-ideas">
+Here are some ideas for projects using speech recognition
+(and sometimes also use speech synthesis as described in 
+<a class="guide-link" href="chapter-1.html">the previous chapter</a>).
+</p>
+<ul class="project-ideas">
+<li>A robot that responds to commands such as "forward", "left", "right", and "stop".</li>
+<li>A chatbot that can (pretend to) talk about a particular subject.
+Chatbots have a <a href="https://en.wikipedia.org/wiki/ELIZA" target="_blank">history going back over fifty years</a>
+but it is only recently that speech can replace typing as the way to communicate with a chatbot.</li>
+<li>Another example of a textual program that can be reconceived as a verbal program
+are <a href="https://en.wikipedia.org/wiki/Adventure_game#Text_adventures_and_Interactive_Fiction" target="_blank">adventure games</a>.
+A virtual world is simulated where one can navigate by saying things like "walk north" or "open door"
+and hearing responses such as 
+"you now see a castle in the distance" and "the door is locked".
+This can result in a computer game that blind people can play
+(or drivers can play without taking their eyes off the road).</li>
+<li>Guessing games such as "guess what number I'm thinking of".
+The computer can either pick a number and respond to guesses with "warmer" or "colder".
+Or the computer can guess numbers and listen for the words "warmer" or "colder" to decide what to guess next.</li>
+<li>Telling or responding to knock knock jokes.</li>
+<li>An interactive artwork that responds differently depending upon if it hears is something positive or negative. 
+It could do so by searching for key words and phrases in what it hears or
+it could connect to a <a href="https://en.wikipedia.org/wiki/Sentiment_analysis" target="_blank">sentiment analysis</a> service.</li>
+<li>Putting together two speech apps so they interact.
+For example, the part-of-speech sample program described earlier could be paired with a program that searches for keywords such as
+"noun", "verb", etc. and then responds with a random entry in the corresponding list.
+This could be even more exciting if the two apps were placed into some physical devices that "converse".</li>
+<li>And thousands of other things.</li>
+</ul>
+
+
 <h4 class="resources-white" id="additional-resources">Additional resources</h4>
 <p class="resources">
 <a href="https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition" target="_blank">
 This documentation of speech recognition</a>
 is a very complete description of speech recognition features browsers should support.
-(Chrome currently is the only one but other browser developers are working on it.)
+(Chrome and Edge currently are the browsers but other browser developers are working on it.)
 </p>
 
 <p class="resources">
