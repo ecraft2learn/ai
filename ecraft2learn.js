@@ -2410,18 +2410,16 @@ xhr.send();
           // grammar -- see https://www.w3.org/TR/jsgf/ for JSGF format
           // if the browser has no support for speech recognition then the Microsoft Speech API is used (API key required)
           if (typeof SpeechRecognition === 'undefined' && typeof webkitSpeechRecognition === 'undefined') {
-              if (!inside_snap()) {
-                  alert("This browser does not support speech recognition. Chrome is known to work.");
+              if (typeof SpeechRecognition === 'undefined' && typeof webkitSpeechRecognition === 'undefined') {
+                  if (!inside_snap()) {
+                      alert("This browser does not support speech recognition. Chrome and Edge are known to work.");
+                      return false;
+                  }
+                  // no support from this browser so try using the Microsoft Speech API
+                  inform("This browser does not support speech recognition",
+                         "You could use Chrome or Edge.");                  
                   return false;
               }
-              // no support from this browser so try using the Microsoft Speech API
-              inform("This browser does not support speech recognition",
-                     "You could use Chrome or you can use Microsoft's speech recognition service.\n" +
-                     "Go ahead and use the Microsoft service? (It requires an API key.)",
-                     function () {
-                          ecraft2learn.start_microsoft_speech_recognition(interim_spoken_callback, final_spoken_callback, error_callback);
-                     });                  
-              return false;
           }
           const restart_speech_recognition = () => {
               ecraft2learn.start_speech_recognition(final_spoken_callback, error_callback, interim_spoken_callback, language, 
