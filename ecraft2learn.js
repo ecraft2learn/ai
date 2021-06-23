@@ -2523,6 +2523,8 @@ xhr.send();
                   return "Unable to access the microphone. Perhaps another program is using it or permission has not been granted.";
               } else if (message === 'no-speech') {
                   return "No speech heard for a while.";
+              } else if (message === 'not-allowed') {
+                  return "Permission to use the microphone not granted.";
               }
               return message;
           };
