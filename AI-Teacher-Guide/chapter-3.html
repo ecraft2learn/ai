@@ -78,10 +78,10 @@ Furthermore, they work even without a network connection.
 
 <p class="background-information">
 In projects there is a different way of providing keys to Snap!
-(as described <a href="#api-keys">here</a>) but in this chapter you can paste your key or keys below
+(as described <a href="#api-keys-in-snap">here</a>) but in this chapter you can paste your key or keys below
 and they'll be passed to the services as you use example blocks.
-<br><label>Copy and paste your Google key here:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input id="Google image key" type="text"></label>
-<br><label>Copy and paste your Microsoft key here:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input id="Microsoft image key" type="text"></label>
+<br><label>Copy and paste your Google key here:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input id="Google image key" type="text" style="width:24em;"></label>
+<br><label>Copy and paste your Microsoft key here:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input id="Microsoft image key" type="text" style="width:24em;"></label>
 
 <h4 class="instructions-white" id="simple-image-recognition-block">A simple image recognition block</h4>
 <p class="instructions">
@@ -92,6 +92,7 @@ The list is ordered by how confident the vision provider is that the label match
 
 <figure class = "snap-iframe"
         id = "image labels reporter"
+        stage_ratio = "0.25"
         container_style = "width: 800px; height: 350px" 
         caption = "A block for reporting the labels describing what the camera is showing. TRY IT">
 </figure>
@@ -108,8 +109,8 @@ to take a new picture and add it as a costume to the current sprite.
 
 <figure class = "snap-iframe"
         id = "image labels reporter and show photo"
-        container_style = "width: 1000px; height: 400px" 
-        iframe_style = "margin-left: -800px; margin-top: 150px;"
+        container_style = "width: 1000px; height: 550px" 
+        iframe_style = "margin-left: -790px; margin-top: 150px;"
         caption = "After sending a photo for analysis you can use a block to display the image. TRY IT">
 </figure>
 
@@ -231,7 +232,7 @@ Compare the documentation for the vision services from
 
 <figure class = "snap-iframe"
         id = "recognize new photo"
-        container_style = "width: 800px; height: 350px" 
+        container_style = "width: 800px; height: 330px" 
         caption = "A block for reporting the entire analysis response. TRY IT">
 </figure>
 </span>
@@ -251,7 +252,7 @@ It isn't as convenient as 'Recognize new photo' but it can support more complex 
         caption = "A block for obtaining the entire analysis response as a callback. TRY IT">
 </figure>
 </span>
-<h4 class="instructions-white" id="api-keys">How to provide API keys</h4>
+<h4 class="instructions-white" id="api-keys-in-snap">How to provide API keys</h4>
 <p class="instructions">
 This chapter uses the API keys provided in the text areas above.
 When constructing a project there are two ways to provide keys:
@@ -261,18 +262,16 @@ Appending any (or all) of
 <span class="block-name">&Google image key=...</span> or
 <span class="block-name">&Microsoft image key=...</span>
 to a shared project URL will
-provide all three keys (after "..." is replaced by the real keys).
+provide the keys (after "..." is replaced by the real keys).
 You can provide only one key if you aren't interested in comparing the responses from different AI service providers.
 Refresh the page after adding the keys.
 </li>
-<li>Edit any of the following special reporters (found in the <a href="#library">eCraft2Learn block library</a>):</li>
+<li>Edit one or both of the global variables
+<span class="block-name">Google vision key</span> or
+<span class="block-name">Microsoft vision key</span>.
+Note these variables are declared as transient so they will not be set if you save and load your project.
+</li>
 </ol>
-
-<figure class = "snap-iframe instructions-white"
-        id = "blank keys"
-        container_style = "width: 600px; height: 600px" 
-        caption = "Reporters for API keys that users edit to provide service keys.">
-</figure>
 
 <p class="background-information">
 Because all the AI cloud services are commercial services heavy use can be costly.
@@ -281,7 +280,6 @@ This conflicts with one of the great things about tools like Scratch and Snap! -
 that it is so easy to share one's projects with a wider community.
 Adding the keys to the URL solves this problem if one is careful to keep the URL with keys private
 and share the version without the keys.
-It is possible but more awkward to maintain private and public versions when using reporters for keys.
 </p>
 
 <h4 class="societal-impact-white" id="image-recognition-good-for">What is image recognition good for?</h4>
@@ -316,17 +314,17 @@ Here is a nice short video on bias and machine learning published by Google.
 <h4 class="how-it-works-white" id="how-does-computer-vision-work">How does computer vision work?</h4>
 <p class="how-it-works">
 Image recognition begins with pixels.
-Each pixel is a number or three numbers (for red, green, and blue components)
+Each pixel is a number (for the gray level) or three numbers (for red, green, and blue components)
 that corresponds to a tiny piece of an image.
 There are two main approaches to processing images:
+<br>
+&nbsp;&nbsp;1. A sequence of programmed processing steps to find edges, determine textures, identify objects, etc.</li>
+<br>
+&nbsp;&nbsp;2. A machine learning system
 </p>
-<ol class="how-it-works">
-<li>A sequence of programmed processing steps to find edges, determine textures, identify objects, etc.</li>
-<li>A machine learning system</li>
-</ol>
 
 <p class="societal-impact">
-Most of the recent progress has been with machine learning systems that for many tasks are near human level.
+Most of the recent progress has been with machine learning systems that for many tasks are near or better than humans.
 For some tasks such as
 <a href="https://www.extremetech.com/extreme/233746-ai-beats-doctors-at-visual-diagnosis-observes-many-times-more-lung-cancer-signals" target="_blank">
 detecting lung cancer from x-rays</a> machine learning has exceeded the ability of experts.
@@ -348,27 +346,29 @@ Different levels or stages of the processing by the neural net recognise differe
 Researchers have built
 <a href="https://distill.pub/2017/feature-visualization/" target="_blank">
 software that figures out what images produce the greatest response from the different layers</a>.
+A very nice interactive tool for exploring what different pieces of a neural network respond to
+is the <a href="https://microscope.openai.com" target="_blank">OpenAI Microscope</a>.
 </p>
 
 <figure class="background-information-white">
 <img src="images/edges layer.png" class="center">
-<figcaption>Ideal images for a neural net layer that looks for edges</figcaption>
+<figcaption>Ideal images for an early neural net layer that looks for edges</figcaption>
 </figure>
 <figure class="background-information-white">
 <img src="images/textures layer.png" class="center">
-<figcaption>Ideal images for a neural net layer that looks for textures</figcaption>
+<figcaption>Ideal images for a later neural net layer that looks for textures</figcaption>
 </figure>
 <figure class="background-information-white">
 <img src="images/patterns layer.png" class="center">
-<figcaption>Ideal images for a neural net layer that looks for patterns</figcaption>
+<figcaption>Ideal images for a later neural net layer that looks for patterns</figcaption>
 </figure>
 <figure class="background-information-white">
 <img src="images/parts layer.png" class="center">
-<figcaption>Ideal images for a neural net layer that looks for parts</figcaption>
+<figcaption>Ideal images for a later neural net layer that looks for parts</figcaption>
 </figure>
 <figure class="background-information-white">
 <img src="images/objects layer.png" class="center">
-<figcaption>Ideal images for a neural net layer that looks for objects</figcaption>
+<figcaption>Ideal images for a late neural net layer that looks for objects</figcaption>
 </figure>
 
 <span class="non-essential">
@@ -398,8 +398,8 @@ Repeat until X is reached.
 <p class="project-ideas">
 For projects that use a camera that can't move there are many possibilities:
 <ol class="project-ideas">
-<li>Engages in a simple conversation about what it thinks it is seeing.</li>
-<li>Responds to what it sees.
+<li>Engage in a simple conversation about what it thinks it is seeing.</li>
+<li>Respond to what it sees.
 E.g. says "How cute" when the description includes words such as "kitten" or "puppy"
 but says "How scary!" when the description is a toy lion or wolf.</li>
 <li>Enhance the <a class="guide-link" href="chapter-2.html#story-generator" target="_blank">story generator example</a>
@@ -423,14 +423,14 @@ There are many more vision services, see for example this
 The <a href="https://en.wikipedia.org/wiki/Computer_vision" target="_blank">Wikipedia page</a> on computer vision is very thorough.
 There are many MOOCS on computer vision and machine learning for image recognition.
 <a class="notranslate" translate=no href="https://distill.pub/" target="_blank">Distill</a> is a scientific journal that strives to explain clearly complex machine learning topics.
-A <a href="https://distill.pub/2018/building-blocks/">recent Distill article</a> is an in-depth description of how a neural net does image recognition.
+A <a href="https://distill.pub/2018/building-blocks/">Distill article</a> is an in-depth description of how a neural net does image recognition.
 A <a href="https://www.nytimes.com/2018/03/06/technology/google-artificial-intelligence.html" target="_blank">general audience summary of the article</a> was written by the New York Times. 
 Codecademy has a <a href="http://news.codecademy.com/what-is-machine-learning/" target="_blank">
 good interview with a data scientist about machine learning</a>.
 </p>
 </span>
 
-<h4 class="guide-to-guide-white">Where to get these blocks to use in your projects</h4>
+<h4 id="library" class="guide-to-guide-white">Where to get these blocks to use in your projects</h4>
 <p class="resources">
 You can export the blocks presented here as a
 <a href="/ai/snap/snap.html?project=seeing&editMode" target="_blank">project</a> or 
