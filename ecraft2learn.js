@@ -65,7 +65,7 @@ window.ecraft2learn =
       };
       let get_key = function (key_name) {
           // API keys are provided by Snap! reporters
-          var key = run_snap_block(key_name);
+          var key = get_global_variable_value(key_name);
           var get_hash_parameter = function (name, parameters, default_value) {
               var parts = decodeURI(parameters).split('&');
               var value = default_value;
@@ -100,12 +100,12 @@ window.ecraft2learn =
           }
           // key missing to explain how to obtain keys
           inform("Missing API key",
-                 "No value reported by the '" + key_name +
-                 "' reporter. After obtaining the key edit the reporter in the 'Variables' area.\n" +
+                 "You need to set the variable '" + key_name +
+                 "' to your key." +
                  "Do you want to visit https://github.com/ecraft2learn/ai/wiki to learn how to get a key?",
                  function () {
                        window.onbeforeunload = null; // don't warn about reload
-                       document.location.assign("https://github.com/ecraft2learn/ai/wiki");                                 
+                       window.open("https://github.com/ecraft2learn/ai/wiki", "_blank");                                 
                  });
       };
       let run_snap_block = function (labelSpec) { // add parameters later
