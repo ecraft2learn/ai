@@ -463,7 +463,16 @@ window.ecraft2learn =
                    "Either try a different browser or try using the MARY TTS instead.");
             return;
         }
+        let original_voice_number = voice_number;
         voice_number = +voice_number; // convert to nunber if is a string
+        if (isNaN(voice_number)) {
+            voices.some((voice, index) => {
+                if (voice.name === original_voice_number) {
+                    voice_number = index;
+                    return true;
+                }
+            });
+        }
         if (typeof voice_number === 'number' && !isNaN(voice_number)) {
             voice_number--; // Snap (and Scratch) use 1-indexing so convert here
             if (voice_number === -1) {
