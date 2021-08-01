@@ -1040,8 +1040,6 @@ window.ecraft2learn =
                                   });
       } else {
           let iframe = document.createElement('iframe');
-          document.body.appendChild(iframe);
-          iframe.src = URL;
           if (one_pixel_iframe) {
               iframe.style.width = '1px';
               iframe.style.height = '1px';
@@ -1058,6 +1056,8 @@ window.ecraft2learn =
           } else if (source === 'training using camera' || source === 'classify image' || source === 'posenet') {
               iframe.allow = "camera";
           }
+          iframe.src = URL;
+          document.body.appendChild(iframe);
           ecraft2learn.support_iframe[source] = iframe;
           support_window = iframe.contentWindow;
       }
