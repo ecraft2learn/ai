@@ -1054,7 +1054,7 @@ window.ecraft2learn =
           iframe.style.backgroundColor = 'white';
           // see https://sites.google.com/a/chromium.org/dev/Home/chromium-security/deprecating-permissions-in-cross-origin-iframes
           if (source === 'training using microphone') {
-              iframe.allow = "microphone"; 
+              iframe.allow = "microphone https://snap.berkeley.edu https://ecraft2learn.github.io"; 
           } else if (source === 'training using camera' || source === 'classify image' || source === 'posenet') {
               iframe.allow = "camera";
           }
