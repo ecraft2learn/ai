@@ -2332,8 +2332,12 @@ xhr.send();
       url_for_collaboration: function () {
           return ecraft2learn.together_URL;
       },
-      run: function (function_name, parameters, this_object) {
+      run: function (function_name, parameters, ide, stage, process) {
           // runs one of the functions in this library
+          let parameters_array = (parameters.asArray() || [parameters]);
+          parameters_array.push(ide);
+          parameters_array.push(stage);
+          parameters_array.push(process);
           if (typeof ecraft2learn[function_name] === 'undefined') {
               if (function_name === "add_photo_as_costume") { // needed for backwards compatibility
                   // define it now with default image dimensions
@@ -2341,7 +2345,7 @@ xhr.send();
                   ecraft2learn.setup_camera(640, 
                                             480, 
                                             function () {
-                                                ecraft2learn[function_name].apply(null, parameters.asArray());
+                                                ecraft2learn[function_name].apply(null, parameters_array);
                                             });
                   return;
               } else if (function_name === "stop_speech_recognition") {
@@ -2351,7 +2355,7 @@ xhr.send();
                      "eCraft2learn library does not have a function named '" + function_name + "'.");
               return;
           }
-          return ecraft2learn[function_name].apply(this_object, (parameters.asArray() || [parameters]));
+          return ecraft2learn[function_name].apply(null, parameters_array);
       },
 
       read_url: function (url, callback, error_callback, access_token, json_format) {
@@ -3908,11 +3912,11 @@ xhr.send();
           });
       };     
   },
-  label_of_size: (text, size, proc) => {
+  label_of_size: (text, size, ide, stage) => {
       // this was once in a library with the help:
       // LABEL will stamp text on the stage at the given font size.
       // The direction of the text is the direction the sprite is facing, and color will match the pen color.
-        var stage = world.children[0].stage; // this.parentThatIsA(StageMorph),
+        //var stage = world.children[0].stage; // this.parentThatIsA(StageMorph),
         context = stage.penTrails().getContext('2d'),
         rotation = radians(this.direction() - 90),
         trans = new Point(
