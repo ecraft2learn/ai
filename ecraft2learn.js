@@ -3920,7 +3920,7 @@ xhr.send();
       // LABEL will stamp text on the stage at the given font size.
       // The direction of the text is the direction the sprite is facing, and color will match the pen color.
     var stage = world.children[0].stage, // this.parentThatIsA(StageMorph),
-        ide = get_snap_ide()
+        ide = get_snap_ide(),
         context = stage.penTrails().getContext('2d'),
         rotation = radians(ide.currentSprite.direction() - 90),
         trans = new Point(
