@@ -2332,12 +2332,12 @@ xhr.send();
       url_for_collaboration: function () {
           return ecraft2learn.together_URL;
       },
-      run: function (function_name, parameters, ide, stage, process) {
+      run: function (function_name, parameters, process, ide, stage) {
           // runs one of the functions in this library
           let parameters_array = (parameters.asArray() || [parameters]);
+          parameters_array.push(process);
           parameters_array.push(ide);
           parameters_array.push(stage);
-          parameters_array.push(process);
           if (typeof ecraft2learn[function_name] === 'undefined') {
               if (function_name === "add_photo_as_costume") { // needed for backwards compatibility
                   // define it now with default image dimensions
