@@ -3344,7 +3344,7 @@ xhr.send();
       if (!ecraft2learn.support_window['training using microphone']) {
           if (!builtin_recognizer) {
               inform("Training request warning",
-                     "Run the 'Train with audio buckets ...' command before using 'Audio label confidences'");
+                     'Either run this block with the "Pre-trained model of 20 words" option or run the "Train with audio buckets ..." command before using this block.');
               return;              
           }
           // create a hidden support window
