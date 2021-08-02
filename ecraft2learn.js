@@ -3916,8 +3916,8 @@ xhr.send();
       // this was once in a library with the help:
       // LABEL will stamp text on the stage at the given font size.
       // The direction of the text is the direction the sprite is facing, and color will match the pen color.
-        var stage = world.children[0].stage, // this.parentThatIsA(StageMorph),
-        context = stage.penTrails().getContext('2d'),
+    var stage = world.children[0].stage, // this.parentThatIsA(StageMorph),
+        ide = get_snap_ide()
         context = stage.penTrails().getContext('2d'),
         rotation = radians(ide.currentSprite.direction() - 90),
         trans = new Point(
@@ -3928,27 +3928,27 @@ xhr.send();
         len,
         pos;
 
-        if (isWarped) {endWarp(); }
-        context.save();
-        context.font = size + 'px monospace';
-        context.textAlign = 'left';
-        context.textBaseline = 'alphabetic';
-        context.fillStyle = ide.currentSprite.color.toString();
-        len = context.measureText(text).width;
-        trans = trans.multiplyBy(1 / stage.scale);
-        context.translate(trans.x, trans.y);
-        context.rotate(rotation);
-        context.fillText(text, 0, 0);
-        context.translate(-trans.x, -trans.y);
-        context.restore();
-        pos = new Point(
+     if (isWarped) {endWarp(); }
+     context.save();
+     context.font = size + 'px monospace';
+     context.textAlign = 'left';
+     context.textBaseline = 'alphabetic';
+     context.fillStyle = ide.currentSprite.color.toString();
+     len = context.measureText(text).width;
+     trans = trans.multiplyBy(1 / stage.scale);
+     context.translate(trans.x, trans.y);
+     context.rotate(rotation);
+     context.fillText(text, 0, 0);
+     context.translate(-trans.x, -trans.y);
+     context.restore();
+     pos = new Point(
           len * Math.sin(radians(ide.currentSprite.direction())),
           len * Math.cos(radians(ide.currentSprite.direction())));
-        pos = pos.add(new Point(ide.currentSprite.xPosition(), ide.currentSprite.yPosition()));
-        ide.currentSprite.gotoXY(pos.x, pos.y, false);
-        ide.currentSprite.changed();
-        if (isWarped) {ide.currentSprite.startWarp(); }
-        stage.changed();
+     pos = pos.add(new Point(ide.currentSprite.xPosition(), ide.currentSprite.yPosition()));
+     ide.currentSprite.gotoXY(pos.x, pos.y, false);
+     ide.currentSprite.changed();
+     if (isWarped) {ide.currentSprite.startWarp(); }
+     stage.changed();
   },
   initialise_all: function () {
       Object.values(ecraft2learn.support_window).forEach(function (support_window) {
