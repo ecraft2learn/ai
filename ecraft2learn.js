@@ -284,6 +284,7 @@ window.ecraft2learn =
     let invoke_callback = function (callback) { // any number of additional arguments
         // callback could either be a Snap! object or a JavaScript function
         // see https://github.com/jmoenig/Snap/issues/1938
+        // note cannot use => to define this function since "apply" won't work
         if (inside_snap() && callback instanceof Context) { // assume Snap! callback
             if (callback.stopped_by_user) {
                 return;
@@ -2334,6 +2335,7 @@ xhr.send();
       },
       run: function (function_name, parameters) { //, process, ide, stage) {
           // runs one of the functions in this library
+          // note cannot use => to define this function since "apply" won't work
           let parameters_array = (parameters.asArray() || [parameters]);
           // the following could enable some code cleanup but any calls to eCraft2learn functions
           // with optional arguments unspecified will be confused for the following
