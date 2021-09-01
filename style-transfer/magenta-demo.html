@@ -1,0 +1,25 @@
+<html>
+  <head>
+    <!-- Load @magenta/image -->
+    <script src="https://cdn.jsdelivr.net/npm/@magenta/image@^0.1.2"></script> 
+  </head>
+  <body>
+    <img id="content" height="225" src="content.jpg"/>
+    <img id="style" height="225" src="style.jpg"/>
+    <canvas id="stylized" height="225"></canvas>
+      <script>
+        const model = new mi.ArbitraryStyleTransferNetwork();
+        const contentImg = document.getElementById('content');
+        const styleImg = document.getElementById('style');
+        const stylizedCanvas = document.getElementById('stylized');
+ 
+        function stylize() {
+          model.stylize(contentImg, styleImg).then((imageData) => {
+            stylizedCanvas.getContext('2d').putImageData(imageData, 0, 0);
+          });
+        }
+ 
+        model.initialize().then(stylize);
+      </script> 
+  </body>
+</html>
