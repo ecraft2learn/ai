@@ -3696,6 +3696,7 @@ xhr.send();
       } else if (!(exceptions instanceof Array)) {
           exceptions = exceptions.asArray();
       }
+      exceptions = exceptions.map(word => word.toLowerCase()); // word embeddings are forced to lower case
       if (!(target_features instanceof Array)) {
           target_features = target_features.asArray();
       }
@@ -3747,7 +3748,7 @@ xhr.send();
               let candidate_features = words_to_features[language][word];
               words_considered++;
               distance = use_distance ? distance_squared(target_features, candidate_features) :
-                                        // subtract 1 since closest cosine similarity is 1
+                                        // subtract from 1 since closest cosine similarity is 1
                                         1-cosine_similarity(target_features, candidate_features, target_magnitude); 
               if (distance < best_distance) {
                   best_word = word;
