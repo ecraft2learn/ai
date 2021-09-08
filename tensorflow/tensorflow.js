@@ -519,7 +519,7 @@ const optimize_hyperparameters_with_parameters = (draw_area, model) => {
                 const average_text = options.number_of_samples > 1 ? 'Average ' : '';
                 install_settings_button.innerHTML = 
                     metrics_of_highest_score ?
-                    ("Click to set '" + model_name + "' to best one found (" +
+                    ("Click to set the model named '" + model_name + "' to best one found (" +
                     average_text + "Loss = " + 
                     shorter_number(metrics_of_highest_score.average_loss) +
                     (typeof metrics_of_highest_score.average_accuracy === 'undefined' ? 
