@@ -79,6 +79,16 @@ window.webrtc =
       send_channel.onopen = () => {
           console.log("Send channel opened.");
       };
+      const compute_maximum_message_size = (connection) => {
+          // Thanks to dardoro for this suggestion how to make this work with FireFox
+          if (typeof connection.sctp !== 'undefined') {
+              return connection.sctp.maxMessageSize;    
+          }
+          // 16k is a reasonable default - even if the maximum_message_size is more
+          // since the message will be broken into parts
+          // could follow suggestion in https://blog.mozilla.org/webrtc/large-data-channel-messages/
+          return 16384;  
+      };
       const multi_part_message_token = "***multi-part message***";
       const send_data = (data, error_callback) => {
           if (send_channel.readyState === "connecting") {
@@ -91,7 +101,7 @@ window.webrtc =
           }
           try {
               const message = typeof data === 'string' ? data : JSON.stringify(data);
-              const maximum_message_size = connection.sctp.maxMessageSize;
+              const maximum_message_size = compute_maximum_message_size(connection);
               const number_of_parts = Math.ceil(message.length/maximum_message_size);
               if (number_of_parts > 1) {
                   send_channel.send(multi_part_message_token + number_of_parts);
@@ -120,7 +130,7 @@ window.webrtc =
           receive_channel = event.channel;
           receive_channel.onmessage = (event) => {
               let message = event.data;
-              const maximum_message_size = connection.sctp.maxMessageSize;
+              const maximum_message_size = compute_maximum_message_size(connection);
               const is_multi_part_message = message.indexOf(multi_part_message_token) === 0;
               if (is_multi_part_message && message_so_far === null) {
                   // start of multi-part message
