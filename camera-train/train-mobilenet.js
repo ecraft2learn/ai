@@ -32,8 +32,8 @@ const videoHeight = 250;
 let NUM_CLASSES = 3; // default
 let training_class_names;
 
-// K value for KNN
-const TOPK = 10;
+// default K value for KNN
+let top_k = 10;
 
 const TOGETHER_JS = window.location.search.indexOf('together') >= 0;
 
@@ -186,7 +186,7 @@ async function animate() {
         // don't do this if haven't yet loaded mobilenet_model
         // note this shouldn't be running if stopped because returned to Snap!
         logits = infer(image);
-        let result = await classifier.predictClass(logits, TOPK);
+        let result = await classifier.predictClass(logits, top_k);
         for (let i=0; i<NUM_CLASSES; i++) {
             // Make the predicted class bold
             if (result.classIndex == i){
@@ -380,7 +380,7 @@ const listen_for_messages = function (event) {
             return;
         }
         const predict = (logits) => {
-            classifier.predictClass(logits, TOPK).then(
+            classifier.predictClass(logits, event.data.top_k || top_k).then(
                 (results) => {
                     event.source.postMessage({confidences: Object.values(results.confidences)}, "*");
                     logits.dispose();

@@ -3312,7 +3312,7 @@ xhr.send();
                               TRAINING_IMAGE_HEIGHT);
        listen_for_messages(receive_confidences);
   },
-  costume_confidences: function (costume_or_costume_number, callback, sprite) {
+  costume_confidences: function (costume_or_costume_number, callback, sprite, top_k) {
       let receive_confidences = function (event) {
           if (typeof event.data.confidences !== 'undefined') {
               invoke_callback(callback, javascript_to_snap(event.data.confidences));
@@ -3326,7 +3326,7 @@ xhr.send();
           return;
       }
       record_callbacks(callback);
-      ecraft2learn.support_window['training using camera'].postMessage({predict: get_costume_data(costume)}, "*");
+      ecraft2learn.support_window['training using camera'].postMessage({predict: get_costume_data(costume), top_k}, "*");
       listen_for_messages(receive_confidences);
 //       costume_to_image(costume,
 //                        function (image) {
