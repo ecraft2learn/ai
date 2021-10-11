@@ -3835,22 +3835,33 @@ xhr.send();
       if (typeof sentences_as_javascript[0] !== 'string') {
           throw new Error("Sentence features expected the sentences to be text. Not " + sentences_as_javascript[0].constructor.name);
       }
-      const embed = () => {
-          ecraft2learn.universal_sentence_encoder.embed(sentences_as_javascript).then(embeddings_tensor => {
+      let all_embeddings = [];
+      const batch_size = 64;
+      const embed = (sentences) => {
+          const batch = sentences.slice(0, batch_size);
+          const remaining_sentences = sentences.slice(batch_size);
+          ecraft2learn.universal_sentence_encoder.embed(batch).then(embeddings_tensor => {
               const embeddings = embeddings_tensor.arraySync();
+              all_embeddings = all_embeddings.concat(embeddings);
               embeddings_tensor.dispose();
-              invoke_callback(success_callback, javascript_to_snap(embeddings));   
+              if (remaining_sentences.length === 0) {
+                  invoke_callback(success_callback, javascript_to_snap(all_embeddings));
+              } else {
+                  setTimeout(() => { // give other processes a chance to run
+                      embed(remaining_sentences);
+                  });                  
+              }  
           });
       };
       if (ecraft2learn.universal_sentence_encoder) {
-          embed();
+          embed(sentences_as_javascript);
       } else {
           show_message("Loading the Universal Sentence Encoder ...");
           ecraft2learn.load_universal_sentence_encoder(() => {
               ecraft2learn.universal_sentence_encoder_module.load().then(model => {
                   ecraft2learn.universal_sentence_encoder = model;
                   show_message("Loaded", .1);
-                  embed();
+                  embed(sentences_as_javascript);
               });
           });
       };
