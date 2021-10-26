@@ -71,7 +71,7 @@ const set_data = (model_name, kind, value, callback, permitted_labels, minimum_n
                 if (values_are_non_numeric_strings) {
                     data[model_name].categories = labels;
                 } else {
-                    data[model_name].categories_for_multiple_output = labels;
+                    data[model_name].categories = labels; // was categories_for_multiple_output but not used
                 }
                 if (kind ==='training') {
                     data[model_name].class_weights = class_weights;
