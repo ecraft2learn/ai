@@ -3836,7 +3836,7 @@ xhr.send();
           throw new Error("Sentence features expected the sentences to be text. Not " + sentences_as_javascript[0].constructor.name);
       }
       let all_embeddings = [];
-      const batch_size = 64;
+      const batch_size = 2;
       const embed = (sentences) => {
           const batch = sentences.slice(0, batch_size);
           const remaining_sentences = sentences.slice(batch_size);
