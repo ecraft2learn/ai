@@ -1714,6 +1714,9 @@ const receive_message =
             try {
                 const options = message.create_model;
                 const model_name = message.create_model.model_name;
+                if (typeof model_name !== 'string') {
+                    throw new Error("Model name must be text. " + model_name + " is a " + typeof model_name);
+                }
                 options.class_names = get_data(model_name, 'categories');
                 if (options.loss_function === true) {
                     options.loss_function = default_loss_function(options.class_names);

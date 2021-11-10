@@ -1279,7 +1279,7 @@ window.ecraft2learn =
                                       if (message.model_created === name) {
                                           invoke_callback(success_callback,
                                                           javascript_to_snap(message.description));
-                                      } else if (message.create_model_failed) {
+                                      } else if (typeof message.create_model_failed !== 'undefined') {
                                           if (error_callback) {
                                               invoke_callback(error_callback, message.error_message);
                                           } else {
