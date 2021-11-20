@@ -388,7 +388,24 @@ const train_model = (model, datasets, options, success_callback, failure_callbac
                         "Perhaps the name is misspelled or you are trying to train before the model was created.";
     } else if (!datasets) {
         error_message = "Cannot train '" + options.model_name + "' before sending some training data.";      
-    }    
+    }
+    if (!error_message) {
+        try {
+            const input_size = model.layers[0].batchInputShape && model.layers[0].batchInputShape[1];
+            const output_size = model.layers[model.layers.length-1].units;
+            const train_input_size = datasets.xs_array && datasets.xs_array[0].length;
+            const train_output_size = datasets.ys_array && datasets.ys_array[0].length;
+            if (typeof train_input_size === 'number' && train_input_size !== input_size) {
+                error_message = "The model is expecting input elements that are " + input_size + 
+                                " long, while the training data is "+ train_input_size + " long.";
+            } else if (typeof train_output_size === 'number' && train_output_size !==output_size) {
+                error_message = "The model is defined to output elements that are " + output_size + 
+                                " long, while the training data is "+ train_output_size + " long.";
+            }        
+        } catch (error_checking_input_and_output_sizes) {
+            console.log(error_checking_input_and_output_sizes);
+        }
+    }
     if (error_message) {
         if (failure_callback) {
             invoke_callback(failure_callback, error_message);
