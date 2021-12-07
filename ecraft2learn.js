@@ -1557,7 +1557,7 @@ window.ecraft2learn =
                                       }
                                   });        
     });
-    const load_tensorflow_model_from_URL = (URL, success_callback, error_callback) => {
+    const load_tensorflow_model_from_URL = (URL, success_callback, error_callback, is_graph_model) => {
         record_callbacks(success_callback, error_callback);
         if (URL.indexOf('localstorage:') !== 0) {
             URL = encodeURI(relative_to_absolute_url(URL));
@@ -1566,7 +1566,8 @@ window.ecraft2learn =
         request_of_support_window('tensorflow.js',
                                   'Loaded',
                                   () => {
-                                      return {load_model_from_URL: URL};
+                                      return {load_model_from_URL: URL,
+                                              is_graph_model};
                                   },
                                   (message) => {
                                       return message.model_loaded === URL ||

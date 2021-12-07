@@ -1931,16 +1931,22 @@ const receive_message =
                     event.source.postMessage({error_loading_model: URL,
                                               error_message: 'Error reading ' + URL + ' to load a neural net. ' +
                                                              error_message}, "*");
+                };
+                const when_loaded = (model) => {
+                    if (!model.name) {
+                        model.name = 'unnamed';
+                    }
+                    tensorflow.add_to_models(model);
+                    enable_evaluate_button();
+                    event.source.postMessage({model_loaded: URL,
+                                              model_name: model.name}, "*");
+                    show_layers(model, 'Model after loading');
+                };
+                if (message.is_graph_model) {
+                    tf.loadGraphModel(URL).then(when_loaded, error_callback);
+                } else {
+                    tf.loadLayersModel(URL).then(when_loaded, error_callback);
                 }
-                tf.loadLayersModel(URL).then(
-                    (model) => {
-                        tensorflow.add_to_models(model);
-                        enable_evaluate_button();
-                        event.source.postMessage({model_loaded: URL,
-                                                  model_name: model.name}, "*");
-                        show_layers(model, 'Model after loading');
-                    },
-                    error_callback);
             } catch (error) {
                 invoke_callback(error_callback, error);
             }
