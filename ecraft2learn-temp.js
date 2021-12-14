@@ -6,11 +6,11 @@
 
 "use strict";
 
-let this_url = document.querySelector('script[src*="ecraft2learn.js"]').src; // the URL where this library lives
+window.current_ecraft2learn_url = document.querySelector('script[src*="ecraft2learn.js"]').src; // the URL where this library lives
 if (!window.ecraft2learn_url || // not already loaded
     window.ecraft2learn_url.indexOf("localhost") < 0 || // or earlier load was not using localhost for debugging
-    this_url.indexOf("localhost") >= 0) { // or reloading localhost
-window.ecraft2learn_url = this_url; // remember this load 
+    current_ecraft2learn_url.indexOf("localhost") >= 0) { // or reloading localhost
+window.ecraft2learn_url = current_ecraft2learn_url; // remember this load 
 window.ecraft2learn =
   (function () {
       const relative_to_absolute_url = (url) => {
