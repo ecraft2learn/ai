@@ -5,16 +5,14 @@
  */
 
 "use strict";
+
+let this_url = document.querySelector('script[src*="ecraft2learn.js"]').src; // the URL where this library lives
+if (!window.ecraft2learn_url || // not already loaded
+    window.ecraft2learn_url.indexOf("localhost") < 0 || // or earlier load was not using localhost for debugging
+    this_url.indexOf("localhost") >= 0) { // or reloading localhost
+window.ecraft2learn_url = this_url; // remember this load 
 window.ecraft2learn =
   (function () {
-      let this_url = document.querySelector('script[src*="ecraft2learn.js"]').src; // the URL where this library lives
-      if (window.ecraft2learn && window.ecraft2learn.my_url) { // already loaded
-          if (window.ecraft2learn.my_url.indexOf("localhost") >= 0 && 
-              this_url.indexOf("localhost") < 0) {
-              return; // can't debug if localhost is overridden by another url
-          }
-          window.ecraft2learn.my_url = this_url;
-      }
       const relative_to_absolute_url = (url) => {
           if (url.indexOf("//") < 0) {
               if (url.indexOf('/ai') === 0) {
@@ -4186,6 +4184,7 @@ ecraft2learn.language_defaults =
   arabic:      "ar-SA",
   chinese:     "cmn-Hans-CN" // "zh-CN"
 };
+}
 
 // this.videoFlipped = true;
 // if (typeof CamSnapshotDialogMorph !== 'undefined') {
