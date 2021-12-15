@@ -309,11 +309,58 @@ function start() {
 //  Create training buttons and info texts 
     let train_on  = (i) => training = i;
     let train_off = (i) => training = -1;
-    info_texts = create_training_buttons(training_class_names, train_on, train_off); 
-    create_save_training_button('camera',
-                                () => classifier.getClassifierDataset(),
-                                () => training_class_names);
-//     create_return_to_snap_button();
+    info_texts = create_training_buttons(training_class_names, train_on, train_off);
+    const save_training = () => {
+        // based upon https://stackoverflow.com/questions/19721439/download-json-object-as-a-file-from-browser
+        let tensors = classifier.getClassifierDataset();
+        // tried using JSON.stringify but arrays became "0":xxx, "1":xxx, ...
+        // also needed to move tensors from GPU using dataSync
+        let json = '{"saved_camera_training":{';
+        let keys = Object.keys(tensors);
+        const jsonify_tensor = (tensor) => {
+            let flat_array = tensor.dataSync();
+            let shape = tensor.shape;
+            json += '{"shape":' + JSON.stringify(shape) + ',' +
+                     '"data":' + JSON.stringify(Object.values(flat_array)) + '}';
+        };
+        keys.forEach(function (key, index) {
+            json += '"' + key + '":[';
+            let tensor_or_array_of_tensors = tensors[key];
+            if (tensor_or_array_of_tensors instanceof Array) {
+                json += '[';
+                tensor_or_array_of_tensors.forEach((tensor, index) => {
+                    jsonify_tensor(tensor);
+                    if (index < tensor_or_array_of_tensors.length-1) { // except for last one
+                        json += ',';
+                    }
+                });
+                json += ']';
+            } else {
+                jsonify_tensor(tensor_or_array_of_tensors);
+            }
+            if (index === keys.length-1) {
+                json += ']'; // no comma on the last one
+            } else {
+                json += '],';
+            }
+        });
+        json += '},';
+        let introduction = document.getElementById("introduction");
+        if (introduction.getAttribute("updated")) {
+            json += '"html":"' + encodeURIComponent(introduction.innerHTML) + '",';
+        }
+        json += '"labels":' + JSON.stringify(training_class_names);
+        json += '}';
+        return json;
+//         let data_URL = "data:text/json;charset=utf-8," + encodeURIComponent(json);
+//         let anchor = document.createElement('a');
+//         anchor.setAttribute("href", data_URL);
+//         anchor.setAttribute("download", "saved_training.json");
+//         document.body.appendChild(anchor); // required for firefox -- still true???
+//         anchor.click();
+//         anchor.remove();
+    }
+    create_save_training_button('camera', save_training);
     let please_wait = document.getElementById("please-wait");
     if (please_wait) {
         please_wait.remove(); // remove it if not already removed

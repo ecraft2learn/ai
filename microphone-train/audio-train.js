@@ -23,19 +23,17 @@ const create_user_recognizer = async () => {
     return user_recognizer;
 };
 
-const update_info_texts = (labels, tensor_data_set) => {
-    if (!info_texts || !tensor_data_set) {
+const update_info_texts = (labels, dataset) => {
+    if (!info_texts || !dataset) {
         return; // too early to update them
     }
     labels.forEach((word, index) => {
-         if (tensor_data_set[word]) {
-             let count = tensor_data_set[word].length;
-             if (count > 1) {
-                 info_texts[index].innerHTML = "&nbsp;&nbsp;" + count + " examples trained";
-             } else if (count === 1) {
-                 info_texts[index].innerHTML = "&nbsp;&nbsp;" + count + " example trained";
-             }                                    
-         }
+        let count = dataset.saved_microphone_training.label2Ids[word].length;
+        if (count > 1) {
+            info_texts[index].innerHTML = "&nbsp;&nbsp;" + count + " examples trained";
+        } else if (count === 1) {
+            info_texts[index].innerHTML = "&nbsp;&nbsp;" + count + " example trained";
+         }                                    
      });    
 };
 
@@ -222,9 +220,23 @@ const initialise = async function (training_class_names) {
             update_info_texts(training_class_names, user_recognizer.transferExamples);
         }
         create_test_button(training_class_names);
-        create_save_training_button('microphone',
-                                    () => user_recognizer.transferExamples,
-                                    () => user_recognizer.wordLabels());
+        const save_training = () => {
+            // based upon https://stackoverflow.com/questions/19721439/download-json-object-as-a-file-from-browser
+            let dataset = user_recognizer.dataset;
+            // tried using JSON.stringify but arrays became "0":xxx, "1":xxx, ...
+            // also needed to move tensors from GPU using dataSync
+            let json = '{"saved_microphone_training":';
+            let keys = Object.keys(dataset.label2Ids);
+            json += JSON.stringify(dataset);     
+            let introduction = document.getElementById("introduction");
+            if (introduction.getAttribute("updated")) {
+                json += ',"html":"' + encodeURIComponent(introduction.innerHTML) + '"';
+            }
+            json += ',"labels":' + JSON.stringify(keys);
+            json += '}';
+            return json;
+        };
+        create_save_training_button('microphone', save_training);
         create_return_to_snap_button();
         window.parent.postMessage({show_message: "Ready",
                                    duration: 2},
@@ -281,28 +293,28 @@ const message_receiver =
             introduction.innerHTML = event.data.new_introduction;
             introduction.setAttribute("updated", true);
          } else if (typeof event.data.training_data !== 'undefined') {
-            let data_set = string_to_data_set('microphone', event.data.training_data);
-            if (data_set) {
-                if (data_set.html) {
-                    let introduction = decodeURIComponent(data_set.html);
+            let dataset = string_to_data_set('microphone', event.data.training_data);
+            if (dataset) {
+                if (dataset.html) {
+                    let introduction = decodeURIComponent(dataset.html);
                     update_introduction(introduction);
                 }
-                load_data_set('microphone',
-                              data_set,
-                              (tensor_data_set) => {
-                                  create_user_recognizer()
-                                      .then(async (recognizer) => {
-                                          recognizer.transferExamples = tensor_data_set;
-                                          let labels = training_classes || Object.keys(tensor_data_set);
-                                          recognizer.words = labels;
-                                          update_info_texts(labels, tensor_data_set);
-                                          // pass back labels in case Snap! doesn't know them
-                                          event.source.postMessage({data_set_loaded: labels}, "*");
-                                          train_user_recognizer();
-                                          event.source.postMessage("Ready", "*");
-                                          initialise(labels); // no-op if already initialised                                            
-                                      });
-                              });
+                create_user_recognizer()
+                    .then(async (recognizer) => {
+                        recognizer.dataset.examples = dataset.saved_microphone_training.examples;
+                        recognizer.dataset.label2Ids = dataset.saved_microphone_training.label2Ids;
+                        Object.values(recognizer.dataset.examples).forEach(example => {
+                            example.spectrogram.data = Float32Array.from(Object.values(example.spectrogram.data));
+                        });
+                        let labels = training_classes || dataset.labels;
+                        recognizer.words = labels;
+                        update_info_texts(labels, dataset);
+                        // pass back labels in case Snap! doesn't know them
+                        event.source.postMessage({data_set_loaded: labels}, "*");
+                        train_user_recognizer();
+                        event.source.postMessage("Ready", "*");
+                        initialise(labels); // no-op if already initialised                                            
+                  });
             }
         }
     };

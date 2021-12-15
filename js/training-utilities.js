@@ -72,7 +72,17 @@ function create_return_to_snap_button(innerHTML, append_to_element_with_this_id)
     }
 }
 
-function create_save_training_button(source_name, tensors_getter, training_class_names_getter, innerHTML) {
+const save_json = (json) => {
+    let data_URL = "data:text/json;charset=utf-8," + encodeURIComponent(json);
+    let anchor = document.createElement('a');
+    anchor.setAttribute("href", data_URL);
+    anchor.setAttribute("download", "saved_training.json");
+    document.body.appendChild(anchor); // required for firefox -- still true???
+    anchor.click();
+    anchor.remove();
+};
+
+function create_save_training_button (source_name, save_training, innerHTML) {
     let save_training_button = document.createElement('button');
     if (!innerHTML) {
         innerHTML = "Save your training (to load later using the 'Load " + source_name + " training data ...' block)";
@@ -81,58 +91,9 @@ function create_save_training_button(source_name, tensors_getter, training_class
     save_training_button.className = "save-training-button";
     save_training_button.title = "Clicking this will save the training you have done. " +
                                  "To restore the training use a 'load " + source_name + " training data ...' block.";
-    let save_training = function () {
-        // based upon https://stackoverflow.com/questions/19721439/download-json-object-as-a-file-from-browser
-        let tensors = tensors_getter();
-        // tried using JSON.stringify but arrays became "0":xxx, "1":xxx, ...
-        // also needed to move tensors from GPU using dataSync
-        let json = '{"saved_' + source_name + '_training":{';
-        let keys = Object.keys(tensors);
-        const jsonify_tensor = (tensor) => {
-            let flat_array = tensor.dataSync();
-            let shape = tensor.shape;
-            json += '{"shape":' + JSON.stringify(shape) + ',' +
-                     '"data":' + JSON.stringify(Object.values(flat_array)) + '}';
-        };
-        keys.forEach(function (key, index) {
-            json += '"' + key + '":[';
-            let tensor_or_array_of_tensors = tensors[key];
-            if (tensor_or_array_of_tensors instanceof Array) {
-                json += '[';
-                tensor_or_array_of_tensors.forEach((tensor, index) => {
-                    jsonify_tensor(tensor);
-                    if (index < tensor_or_array_of_tensors.length-1) { // except for last one
-                        json += ',';
-                    }
-                });
-                json += ']';
-            } else {
-                jsonify_tensor(tensor_or_array_of_tensors);
-            }
-            if (index === keys.length-1) {
-                json += ']'; // no comma on the last one
-            } else {
-                json += '],';
-            }
-        });
-        json += '},';
-        let introduction = document.getElementById("introduction");
-        if (introduction.getAttribute("updated")) {
-            json += '"html":"' + encodeURIComponent(introduction.innerHTML) + '",';
-        }
-        json += '"labels":' + JSON.stringify(training_class_names_getter());
-        json += '}';
-        let data_URL = "data:text/json;charset=utf-8," + encodeURIComponent(json);
-        let anchor = document.createElement('a');
-        anchor.setAttribute("href", data_URL);
-        anchor.setAttribute("download", "saved_training.json");
-        document.body.appendChild(anchor); // required for firefox -- still true???
-        anchor.click();
-        anchor.remove();
-    }
-    save_training_button.addEventListener('click', save_training);
+    save_training_button.addEventListener('click', (dataset_getter) => save_json(save_training(dataset_getter)));
     document.body.appendChild(save_training_button);
-}
+};
 
 function string_to_data_set(source_name, data_set_string) {
     const start = '{"saved_' + source_name + '_training":';
