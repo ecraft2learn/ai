@@ -5,18 +5,23 @@
  */
 
 "use strict";
+
+window.current_ecraft2learn_url = document.querySelector('script[src*="ecraft2learn.js"]').src; // the URL where this library lives
+if (!window.ecraft2learn_url || // not already loaded
+    window.ecraft2learn_url.indexOf("localhost") < 0 || // or earlier load was not using localhost for debugging
+    current_ecraft2learn_url.indexOf("localhost") >= 0) { // or reloading localhost
+window.ecraft2learn_url = current_ecraft2learn_url; // remember this load 
 window.ecraft2learn =
   (function () {
-      let this_url = document.querySelector('script[src*="ecraft2learn.js"]').src; // the URL where this library lives
       const relative_to_absolute_url = (url) => {
           if (url.indexOf("//") < 0) {
-              if (url.indexOf('/ai') === 0) {
-                  const ai_index = this_url.indexOf('/ai');
+              if (url.indexOf('/ai/') === 0) {
+                  const ai_index = window.ecraft2learn_url.indexOf('/ai');
                   return this_url.substring(0, ai_index) + url;
               }
-              // is relative to this_url
-              const last_slash_index = this_url.lastIndexOf('/');
-              return this_url.substring(0, last_slash_index+1) + url;
+              // is relative to window.ecraft2learn_url
+              const last_slash_index = window.ecraft2learn_url.lastIndexOf('/');
+              return window.ecraft2learn_url.substring(0, last_slash_index+1) + url;
           } else {
               return url;
           }
@@ -745,7 +750,7 @@ window.ecraft2learn =
         document.getElementById("world").style.display = 'none';
         let input_container = document.createElement('div');
         let instructions = document.createElement('p');
-        instructions.innerHTML = "<b> Click the file chooser and select a saved training file.</b> It should be a JSON file.";
+        instructions.innerHTML = "<br><br><b>Click the file chooser and select a saved training file.</b> It should be a JSON file.<br>";
         input_container.appendChild(instructions);
         input_container.appendChild(input);
         document.body.appendChild(input_container);
@@ -4179,6 +4184,7 @@ ecraft2learn.language_defaults =
   arabic:      "ar-SA",
   chinese:     "cmn-Hans-CN" // "zh-CN"
 };
+}
 
 // this.videoFlipped = true;
 // if (typeof CamSnapshotDialogMorph !== 'undefined') {
