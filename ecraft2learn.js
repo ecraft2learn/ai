@@ -6,10 +6,12 @@
 
 "use strict";
 
+// ensure that https://ecraft2learn.github.io/ai/ecraft2learnx.js isn't loaded twice but allow
+// other URLs, e.g. localhost while debugging
 window.current_ecraft2learn_url = document.querySelector('script[src*="ecraft2learn.js"]').src; // the URL where this library lives
 if (!window.ecraft2learn_url || // not already loaded
-    window.ecraft2learn_url.indexOf("localhost") < 0 || // or earlier load was not using localhost for debugging
-    current_ecraft2learn_url.indexOf("localhost") >= 0) { // or reloading localhost
+    // or not loading from github.io
+    !document.querySelector('script[src*="https://ecraft2learn.github.io/ai/ecraft2learnx.js"]')) {
 window.ecraft2learn_url = current_ecraft2learn_url; // remember this load 
 window.ecraft2learn =
   (function () {
@@ -2394,6 +2396,15 @@ xhr.send();
               }
           };
           xhr.send();
+      },
+      set_presentation_mode: (flag) => {
+          // based upon the getter/setter Snap! libary
+          const ide = get_snap_ide();
+          if (flag != ide.isAppMode) {
+              ide.savingPreferences = false;
+              ide.toggleAppMode();
+              ide.savingPreferences = true;
+          }
       },
       start_speech_recognition_v2: (final_spoken_callback, options) => {
           const {error_callback, 
