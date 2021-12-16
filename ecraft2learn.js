@@ -11,7 +11,7 @@
 window.current_ecraft2learn_url = document.querySelector('script[src*="ecraft2learn.js"]').src; // the URL where this library lives
 if (!window.ecraft2learn_url || // not already loaded
     // or not loading from github.io
-    !document.querySelector('script[src*="https://ecraft2learn.github.io/ai/ecraft2learnx.js"]')) {
+    !document.querySelector('script[src*="https://ecraft2learn.github.io/ai/ecraft2learn.js"]')) {
 window.ecraft2learn_url = current_ecraft2learn_url; // remember this load 
 window.ecraft2learn =
   (function () {
