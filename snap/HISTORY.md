@@ -1,6 +1,767 @@
 # Snap! (BYOB) History
 
-## in development:
+## 7.0.0:
+* **New Features:**
+    * scenes
+    * extensions
+    * single blocks palette option, thanks, Michael!
+    * web-serial support, thanks, Dariusz Dorożalski!
+    * hide any block, including variables and custom helper blocks in palette, also use "hide/show var" primitive on custom blocks (same as on primitives)
+    * generate Parsons Problems from projects: Hide all unused blocks from the scripting area in the palette
+    * user defined custom block palettes
+    * introspection, syntax analysis and assembly (new block-attribute reporter, split & join scripts)
+    * PWA, thanks, Joan and John, for pioneering this at Robolot and in Mircoblocks!
+    * new "blocksZoom=n" url parameter, thanks, Bernat!
+    * message and key hat blocks can be expanded to show an optional upvar referencing their event data
+    * BROADCAST blocks are expandable to feature a second input for message receivers, default is "all"
+    * block-instances can be dragged off from templates in the "export blocks", "unused blocks" and "hide blocks" dialogs
+    * added "enter" key to key-pressed dropdown
+    * added green flag symbol to message drop-down
+    * the green flag button's background color indicates whether the current scene is running or idle
+    * empty categories are indicated by half-tone buttons
+    * added "r-g-b-a" option to dropdown menu of SET / CHANGE PEN command and PEN reporter 
+    * new preference setting per scene for pen color model and graphic effects, HSV or HSL, default is HSV
+    * new preference setting per scene to "disable click-to-run" on blocks, for use in micro-world extensions
+    * new Signada hardware library, thanks, Citilab Barcelona!
+* **Notable Changes:**
+    * saved projects remember the last edited sprite
+    * libraries no longer rely on the JSF primitive, projects may need to re-import their libraries to run without having to enable JS extensions
+    * bulk hide/show arbitrary blocks in the palette via the palette's context menu (instead of the primitive blocks' context menus)
+    * hidden blocks don't appear in search results / keyboard input options
+    * codification and js-func blocks don't appear in search results unless enabled
+    * migrated SEND blocks to be BROADCAST TO blocks
+    * "when I receive 'any message'" hat scripts are threadsafe (uninterruptable by other messages)
+    * changed the scale of the graphics color effect from 0-200 to 0-100
+    * result-bubbles (when clicking on a reporter) now stay visible until the next click
+    * took out "Hyper blocks support" setting from the gears menu (it's now hidden behind shift-click)
+    * new Birdbrain Technology extensions for Finch and Hummingbird, thanks, Kristina and Bambi!
+    * retired Leap Motion library
+    * display blocks with their error messages for custom blocks, thanks, Michael!
+    * made scrollbars thinner by default and slightly transparent in flat design mode
+    * blocked xhr requests from Snap! to s.b.e
+    * the "message" reporter and watcher in the control category has been deprecated and moved to dev mode for backwards compatibility
+    * updated the Snap! API and documentation with methods to navigate among scenes and control processes
+    * removed old hidden "prefer smooth animations" setting (no longer used, old projects will continue to work just fine)
+    * removed old hidden "virtual keyboard" setting (was no longer used for the last years)
+    * removed old hidden "project urls" setting
+    * removed hidden "cache inputs" setting (only used for debugging the evaluator)
+* **Notable Fixes:**
+    * made scrollbars in the wardrobe and jukebox more responsive
+    * fixed centering of menus, thanks, Brian Broll!
+    * fixed occasional invisible error messages
+    * fixed audio_comp library "plot sound" block to work with translations, thanks, Hans, for the report!
+    * colors library: fixed SET PEN to work with more than a single sprite per costume,  thanks, Jadga, for the report!
+    * fixed exporting comment pics from inside the block editor, thanks, Jadga, for the report!
+    * fixed copying unattached comments among sprites, thanks, Jadga, for the report!
+    * disabled dropping reporters onto message hat block input slots
+    * fixed outdated blocks specs for "When I am ..." hat block in many translations
+    * fixed duplicating custom block definitions that don't have a body
+    * allow selecting the fill color in the vector editor via touch-hold gesture on touch devices
+    * fixed an infinite loop in the FILL block when the pen colors have been set to an invalid color (via a bad library)
+    * fixed some minor variable-renaming issues
+    * fixed STOP OTHER SCRIPTS for use inside TELL
+    * made "remove duplicates" reporter in the "list utilities" library (a lot) faster
+    * fixed translation support for the libraries list, thanks, Joan!
+* **Documentation Updates:**
+    * updated manual, thanks, Brian!
+    * updated readme, thanks, Michael!
+* **Translation Updates:**
+    * German
+    * Chinese, thanks, Simon!
+    * Brazilian Portuguese, thank you, Cassiano D'Andrea!
+    * Catalan, thanks, Joan!
+
+### 2021-12-13
+* objects: tweaked asynchronous costume loading/rendering issue
+* rc7
+* v7 release
+
+### 2021-12-12
+* threads: fixed #2932
+
+### 2021-12-11
+* objects: remove all clones when the green flag is sent to a scene
+* rc6
+
+### 2021-12-10
+* Catalan and German translation updates, thanks, Joan!
+* translation support for the libraries list, thanks, Joan!
+* objects: fixed categories cache invalidation for duplicated sprites
+* rc4
+* threads: remove all clones when the green flag is broadcast to all
+* rc5
+
+### 2021-12-09
+* blocks, threads: never push untested last minute changes that might break everything
+* gui: select motion category when switching to a scene that doesn't have the current custom category
+* rc2
+* objects: worked around an asynchronous rendering issue
+* rc3
+
+### 2021-12-08
+* blocks: refactored syntax trees
+* rc1
+
+### 2021-12-07
+* objects: backwards-compatibility fix for key-event hat blocks
+* store, objects: load category-less custom blocks into "other"
+
+### 2021-12-06
+* blocks, threads: refactored block assembly, experimental
+* German translation update
+
+### 2021-12-05
+* blocks, threads, objects: introspection & syntax analysis, experimental
+
+### 2021-12-03
+* blocks, threads: block-assembly support for multi-args, experimental
+* threads: changed the visualization for an empty context to reporter-ring 
+
+### 2021-12-02
+* blocks, threads: block-assembly support refactorings, experimental
+
+### 2021-12-01
+* blocks, threads: block-assembly support refactorings, experimental
+* blocks, threads: equality testing for scripts, experimental
+
+### 2021-11-30
+* blocks, threads: block-assembly support, experimental
+* gui: fixed #2920
+
+### 2021-11-29
+* renamed "r-g-b-a" option to "RGBA" and "r-g-b(-a)" to "RGB(A)"
+
+### 2021-11-28
+* fixed a glitch in "remove duplicates" in the "list utilities" library 
+
+### 2021-11-27
+* blocks, threads: tweaked SET / CHANGE PEN dropdown option to "r-g-b(-a)"
+* made "remove duplicates" reporter in the "list utilities" library (a lot) faster
+
+### 2021-11-26
+* added signada extension files to the pwa cache
+* blocks, treads, objects: added "r-g-b-a" option to dropdown menu of SET / CHANGE PEN command and PEN reporter 
+
+### 2021-11-25
+* gui: rearranged and amended the project menu
+* German translation update for project menu entries
+* objects: fixed a FILL issue when the pen color has been set to an invalid color via a bad library
+
+### 2021-11-24
+* threads: fixed #2918
+* gui, objects, scenes: added scene-setting to hide/show buttons in the unified palette
+* store: made "show buttons" setting for unified palette persistent in the XML
+* German translation update for "Show buttons" setting
+* added indented sub-preferences to the settings menu
+
+### 2021-11-23
+* byob: refresh category buttons when hiding / showing blocks
+* gui: refresh category buttons when switching to dev mode and back
+* gui: refresh category buttons when turning built-in extensions on and off
+
+### 2021-11-19
+* objects, byob, gui: visually indicate empty categories by half-toning their buttons
+
+### 2021-11-18
+* gui: only pause generic hat blocks when loading a new project, not when switching to a new scene
+
+### 2021-11-17
+* gui: set the green-flag button's background color to "active" while a thread is running
+* api: changed "processes" method to "isRunning"
+* updated api documentation
+* gui: refresh stop button when switching scenes
+
+### 2021-11-16
+* store, gui: updated serializer app tag to v7
+* api: removed incomplete api documentation from the source code
+* updated api documentation
+
+### 2021-11-15
+* German translation update
+* gui: made "Hyper blocks support" setting hidden in the gears menu
+* gui, objects, threads, store, translations: Removed old hidden "prefer smooth animations" setting
+* gui: removed experimental hidden "add scenes" option from the settings menus
+* gui, translations: removed old hidden "virtual keyboard" setting
+* gui: removed old hidden "project urls" setting
+* gui: removed hidden "cache inputs" setting (only used for debugging the evaluator)
+
+### 2021-11-14
+* locale: contextualize translations
+* gui: refresh IDE when changing the pen color model
+
+### 2021-11-12
+* store: fixed importing custom categories from libraries, thanks, Eckart, for reporting this!
+* gui, objects, scenes, store: reverted to HSV as default pen color model
+* store: fixed a serialization conflict for global variables referencing the stage
+* gui: made HSL preference setting hidden behind shift-click
+
+### 2021-11-11
+* German translation update, changed %hsva -> %clrdim
+* Brazilian Portuguese translation update, thank you, Cassiano D'Andrea!!
+* threads, gui: experimental "disalbe click-to-run" preference
+* gui, scenes, store: made "pen color model" and "disable click-to-run" settings persistent per scene
+
+### 2021-11-10
+* objects, store: new "penColorModel" setting, can e 'hsv' or 'hsl'
+* gui, objects: new (hidden) pen-color-model preference setting (per session)
+* objects: changed the scale of the graphics color effect from 0-200 to 0-100
+* objects: refactored graphics color effect to reuse Morphic's conversion methods
+* objects: use the selected pen color model (hsl or hsv) for graphic effects
+
+### 2021-11-09
+* objects, store: refactored block-migration mechanism
+* gui: changed display of project name in the IDE to PROJECT (SCENE)
+* gui: adjusted random color for new sprites to HSL model
+* objects: fixed keyboard entry for script variable getters
+* gui: changed edit project notes to always edit project motes instead of scene notes
+* byob, blocks, gui: allow block-instances to be dragged off from templates in the "export blocks" dialog
+* byob, gui: allow block-instances to be dragged off from templates in the "unused blocks" dialog
+
+### 2021-11-08
+* objects: renamed some internal color methods
+* objects, store: renamed internal pen color channel cache
+* objects, blocks, threads: renamed internal pen accessor methods
+* objects, threads, store, extensions: switched pen color dimensions from HSV to HSL
+* threads: fixed upvars in hat block prims when the user clicks on them to run them
+
+### 2021-11-07
+* widgets, blocks, byob: allow block-instances to be dragged off from templates in the "hide blocks" dialog
+* gui: prevent switching to another sprite if a "hide blocks" dialog is open
+
+### 2021-11-06
+* blocks: fixed some minor variable-renaming issues
+
+### 2021-11-03
+* sketch: allow selecting the fill color in the vector editor via touch-hold gesture on touch devices
+* updated version history
+
+### 2021-10-29
+* objects: flood-fill edge case fix, thanks, Dariusz!
+* gui: removed obsolete dev comments
+* blocks, objects: fixed scanning for senders and receivers of messages for new BROADCAST scheme
+
+### 2021-10-28
+* introduced default values for expandable slot specs
+* updated German translation
+* migrated Basque and Swedish translations to new BROADCAST block specs
+* migrated Slovenian, Romanian and Interlingua translations to new BROADCAST block specs
+* migrated Estonian, Hungarian, Croatian and Esperanto translations to new BROADCAST block specs
+* migrated Danish, Czech, Valencian Catalan and Arabic translations to new BROADCAST block specs
+* migrated Bulgarian, Traditional Chinese, Indonesian and Galician translations to new BROADCAST block specs
+* migrated Hebrew, Japanese Hiragana, Slovakian and Ukrainian translations to new BROADCAST block specs
+* migrated Japanese, Bangla, Portuguese and Norwegian translations to new BROADCAST block specs
+* migrated French, Italian, Greek and Spanish translations to new BROADCAST block specs
+* migrated Russian, Dutch, Tamil and Turkish translations to new BROADCAST block specs
+* migrated Catalan, Hindi, Polish and Telagu translations to new BROADCAST block specs
+* migrated Brazilian Portuguese, Malayam, Korean and Kannada translations to new BROADCAST block specs
+* migrated Finnish and Simplified Chinese translations to new BROADCAST block specs
+
+### 2021-10-27
+* included bbt extensions
+* updated service worker to cache bbtSnapExtension.js
+* pwa versioning & cache-busting mechanism 
+* changed PWA icon to Alonzo
+* tweaked PWA
+
+### 2021-10-26
+* objects: don't show codification and js-func blocks in search results unless enabled
+* gui, objects: new "showingExtensions" session setting for showing extension prims in the palette
+* German translation update for "extension blocks" setting
+* widgets: r-g-b editor for custom category colors (right-click on color-field)
+
+### 2021-10-25
+* byob: fixed #2902
+
+### 2021-10-22
+* blocks, objects: only show the "message" upvar in the "When I receive" hat if "any message" is selected
+* blocks: only show "key" upvar in the "When ... is pressed" hat if "any key" is selected
+* blocks: tweaked blocks layout for hidden expansion slots
+* blocks, objects, store, threads: made SEND blocks expandable for receivers and renamed them back to BROADCAST 
+* threads: deep copy atomic lists sent from one scene to another
+* bignum library: fixed IS IDENTICAL
+
+### 2021-10-21
+* threads, objects: make "when I receive 'any message'" hat scripts threadsafe (uninterruptable by other messages)
+* threads: enabled sending atomic lists to other scenes
+* threads: took out broadcasting a 2-item list to mean a message directed to a particular sprite
+* blocks, objects, threads: added "all" option to the receiver-dropdown of the SEND block
+* objects, blocks, threads: replaced BROADCAST block variants with SEND block variants
+* tweaked German translation for "all"
+
+### 2021-10-20
+* blocks: enable sending green-flag events when switching scenes
+* blocks, objects, gui, threads: removed "When switched to this scene hat block"
+* objects: rearranged "switch to scene" and "pause all" blocks in the palette
+* updated German translation (removed "when switched to this scene")
+* blocks, threads: removed options "1" and "last" from "switch to scene" dropdown
+
+### 2021-10-19
+* threads: enable sending green-flag events to specific sprites
+
+### 2021-10-14
+* gui, byob, objects: scroll custom category buttons if there are more than 6
+* gui, byob: scroll selected custom category button into view
+* gui: fixed "show categories" setting display
+* gui: sort custom category menu ("delete a category") alphabetically
+* blocks: enabled symbols inside input slots, activated %greenflag as selectable message
+
+### 2021-10-12
+* scenes, store: store single palette setting per project (for making extensions)
+* gui, scenes, objects: added scene-setting to hide/show category names in the unified palette
+* store: made "hide/show categories in unified palette" setting persistent
+* byob: hide unused blocks in palette
+* objects: tweaked unified palette formatting for hidden categories
+
+### 2021-10-11
+* objects: sort order of blocks in custom categories alphabetically in the unified palette
+
+### 2021-10-08
+* objects: tweaked variable block visibility
+* objects: filter hidden blocks out from search / keyboard input results
+* objects: prevent deprecated "message" reporter from showing up in search results
+* objects: tweaked hiding / showing inherited local blocks
+
+### 2021-10-07
+* objects, byob: new BlockVisibilityDialogMorph for bulk-selecting blocks to hide / show in the palette
+* ojects: simplified palette context menu
+* blocks: removed "hide" option from context menu of primitive blocks in the palette
+* objects, byob: optimized bulk hiding & showing palette blocks 
+
+### 2021-10-06
+* threads: programmatically hide individual variables in palette
+* extensions: new extension primitives for hiding and showing arbitrary blocks in the palette
+* threads: keep hidden variables out of the palette and drop-down menus
+* objects: added utilities to enumerate all palette blocks for hiding & showing
+* objects, threads, extensions: refactored block hiding methods
+* objects: added method to check whether an arbitrary block is hidden in the palette
+
+### 2021-10-05
+* threads, store: added infrastructure for hiding individual variables in palette
+
+### 2021-10-04
+* blocks: added "enter" key to key-pressed dropdown
+* updated German translation for "enter" key
+* threads: extended "hide/show var" primitive to also hide/show custom blocks in the palette
+
+* migrated Bangla block specs
+* migrated Portuguese block specs
+* migrated Norwegian block specs
+* migrated French block specs
+* migrated Italian block specs
+* migrated Greek block specs
+* migrated Spanish block specs
+* migrated Russian block specs
+* migrated Dutch block specs
+* migrated and fixed Tamil block specs
+* migrated Turkish block specs
+* migrated Catalan block specs
+* migrated Hindi block specs
+* migrated Polish block specs
+* migrated and fixed Simplified Chinese block specs
+* fixed Telagu block specs for %interaction
+* fixed Brazilian-Portuguese block specs for %interaction
+* fixed Malayalam block specs for %interaction
+* fixed Korean block specs for %interaction
+* fixed Kannada block specs for %interaction
+* fixed Finnish block specs for %interaction
+
+### 2021-10-03
+* migrated Hebrew block specs
+* migrated and fixed Japanese Hiragana block specs
+* migrated Slovak block specs
+* migrated Ukrainian block specs
+* migrated and fixed Japanese block specs
+
+### 2021-10-02
+* migrated Indonesian block specs
+* migrated Galician block specs
+
+### 2021-10-01
+* objects: tweaked detectable keynames and representations
+* German translation update
+* migrated Euskara block specs
+* migrated Telagu block specs
+* migrated Swedish block specs
+* migrated Slovenian block specs
+* migrated Romanian block specs
+* migrated Brazilian-Portuguese block specs
+* migrated Malayalam block specs
+* migrated Korean block specs
+* migrated Kannada block specs
+* migrated Interlingua block specs
+* migrated Hungarian block specs
+* migrated Croatian block specs
+* migrated Finnish block specs
+* migrated Estonian block specs
+* migrated Esperanto block specs
+* migrated Danish block specs
+* fixed Danish block spec for "When I am %interaction"
+* migrated Czech block specs
+* migrated Valencian-Catalan block specs
+* migrated Arabic block specs
+* migrated and fixed Bulgarian block specs
+* migrated and fixed Traditial-Chinese block specs
+
+### 2021-09-30
+* blocks, objects, threads, gui: optional upvars referencing event data for message, key and scene hat blocks
+* blocks: disabled dropping reporters onto message hat block input slots
+* threads: restricted inter-scene messages to text and numbers
+* objects: assign case-sensitive key symbol to key event hat blocks' upvars
+
+### 2021-09-29
+* objects, blocks: refactored experimental "When I receive message" hat block
+
+### 2021-09-28
+* objects, blocks, threads: new "When I receive message" hat block featuring an upvar for the transmission, experimental in dev mode
+
+### 2021-09-27
+* objects: renamed scene event hat block
+* German translation update
+
+### 2021-09-09
+* German translation update
+
+### 2021-09-08
+* objects: changed category for "switch to scene" to control
+* blocks, objects, threads: new hat block for "when this scene starts"
+* blocks, threads: changed "switch to scene" to be a stop block
+* threads: disabled "when this scene starts" hat blocks to directly switch to another scene
+* threads: slowed down scene switching to let the user better interrupt it, commented out for now
+
+### 2021-09-07
+* blocks, objects, threads: new change-of-scene event
+* gui, threads: enabled change-of-scene events for user-induced scene switches, made them user-stoppable
+
+### 2021-09-06
+* blocks: fixed exporting comment pics from inside the block editor, thanks, Jadga, for the report!
+* gui: fixed copying unattached comments among sprites, thanks, Jadga, for the report!
+
+### 2021-08-27
+* colors library: fixed SET PEN to work with more than a single sprite per costume, thanks, Jadga, for the report!
+
+### 2021-08-06
+* gui: new "blocksZoom=n" url parameter, thanks, Bernat!
+* extensions: added to the documentation
+
+### 2021-08-03
+* extensions: updated documentation
+* byob: record unsaved changes when applying edits to a custom block definition
+
+### 2021-08-02
+* extensions: updated documentation
+
+### 2021-08-01
+* gui: fixed saving projects with their names
+* store: fixed deserializing global settings per scene in multi-scene projects
+
+### 2021-07-29
+* gui: fixed switching scenes in presentation mode
+
+### 2021-07-23
+* byob, objects, gui, store: support custom categories in libraries
+* gui, byob: arrange custom categories alphabetically
+* store: fixed exporting sprites
+
+### 2021-07-22
+* store: serialize user defined block palettes
+* objects: enabled custom categories for the stage
+* store: load user defined palettes
+* gui: restore custom palettes when activating a scene
+* objects: added new category feature to palette context menu
+* gui, objects, scenes: fixed costume maximum extent
+* gui: cleaned up hidden menu
+* objects, gui: added delete category feature to palette context menu
+
+### 2021-07-21
+* user defined custom block palettes, under construction
+
+### 2021-07-20
+* threads, extensions: blocked xhr requests to from Snap! to s.b.e, thanks, Bernat!
+* widgets, scenes, gui: custom category prompter
+
+### 2021-07-19
+* fixed #2863, thanks, Brian!
+
+### 2021-07-16
+* new libraries manual versions, thanks, Brian!
+* palette hiding/showing primitives fixes, tanks, Michael!
+* readme update, thanks, Michael!
+* objects, gui: rearranged internal order of categories
+* byob: rearranged internal order of categories
+* objects: fixed overlapping blocks bug in unified palette
+* store, gui: fixed capturing global settings for serializing scenes
+* gui: update palette when switching to a new scene / loading a new project
+
+### 2021-07-15
+* gui: made sprite-bar height independent of the number of categories
+
+### 2021-07-13
+* objects: fixed search from palette context menu
+
+### 2021-07-12
+* Chinese translation update, thanks, Simon!
+* objects: fixed refactored "Delete a variable" button for stage palette
+
+### 2021-07-11
+* added libraries and media to cache, thanks, Joan!
+
+### 2021-07-10
+* PWA support, thanks, John, for showing me!
+
+### 2021-07-09
+* extensions: whitelisted 'https://snap.berkeley.edu/'
+* morphic: made scrollbars thinner by default
+* morphic: tweaked slider transparency for flat design mode
+* objects: translation support for category labels in the unified palette
+* threads: fixed vanishing JSF block bug in new error messages
+* gui: fixed blocks cache invalidation for unified palette
+
+### 2021-07-08
+* objects: added category labels to unified palette
+* gui: accelerated unified palette scrolling animation
+* adjust scroll bars when refreshing the palette
+* store: commented out saving the unified palette setting in the project xml during development
+* gui: fixed scroll-into-view glitch when adding scenes
+
+### 2021-07-07
+* morphic, gui: tweaked perish() animation
+* objects: fixed "hide / show primitives" for unified palette
+* threads: display blocks with their error messages for custom blocks, thanks, Michael!
+
+### 2021-07-06
+* byob, objects: new feature: hide custom helper blocks in palette
+* German translation update (hiding helper blocks in the palette)
+* gui: unified palette: offer the currently visible category when letting the user make a block
+* scenes, objects, gui: made unified palette the default for dev
+
+### 2021-07-05
+* gui: unified palette: indicate "selected" category in selector buttons
+* extensions: web-serial extension primitives, pioneered by Dariusz Dorożalski
+* added new "serial ports" library
+* added jshint esversion tags
+* gui: unified palette: don't animate scrolling if delta is zero
+* byob: replaced checkboxes in custom block context menus with symbols
+
+### 2021-07-04
+* fixed audio_comp library "plot sound" block to work with translations, thanks, Hans, for the report!
+
+### 2021-07-03
+* objects: arranged the blocks in the unified palette column-wise
+* gui: fixed the paletteHandle for the unified palette
+* gui, scenes, store: fixed unified palette for multi-scene projects
+* gui: fixed unified palette for searching
+* gui: renamed "Unified palette" to "Single palette" in the settings menu
+* updated German translation for unified palette setting
+
+### 2021-07-02
+* gui, object, store, etc.: unified blocks palette option, thanks, Michael!
+* merged scenes branch
+* morphic: fixed centering of menus, thanks, Brian Broll!
+* gui: animate scrollToPaletteCategory()
+* gui: guard against missing categories when scrolling the unified palette
+
+### 2021-05-21
+* gui, scenes, store: proxied thumbnail, name and notes in project, restored in XML
+* gui: distinguished project name from scene names, removed hidden "export as plain text" option
+* gui: sceneified project notes
+* gui: adjusted project thumbnail in "save" dialog
+* gui: some cleanups
+* gui, scenes: sceneified unsaved changes management
+* blocks: fixed search-blocks for scenesMenu
+
+### 2021-05-20
+* gui: marked projectName to be refactored and sceneified
+
+### 2021-05-19
+* gui: disabled scene icon context menu for project scene
+* gui: disabled dragging the project scene icon
+* gui: made sure the project scene stays in place
+* gui: added exporting single scenes
+* scenes, store: removed redundant properties "notes" and "thumbnail" from project
+* store: removed "thumbnail" property from scene xml
+
+### 2021-05-18
+* gui: fixed exporting media only for a single scene
+* gui: fixed cloud file format components
+* gui: "projectized" cloud file format for a single scene
+* gui: fixed cloud file format for multi-scene projects
+* gui: ensured unique scene names
+
+### 2021-05-11
+* gui: add multi-scene projects 
+* gui: adjusted scene album rendering
+* gui: tweaked scene album rendering
+
+### 2021-05-10
+* gui: project menu entries for "new scene" and "add scene" 
+
+### 2021-04-28
+* gui: only show scene album if the project has more than a single scene
+
+### 2021-04-23
+* store: serialize sprite-order from scenes
+* gui: sceneified refreshIDE()
+* gui: sceneified toggling dynamic input labels and switching languages
+* gui: sceneified "zoom blocks"
+* store: moved sprite-selection attribute from stage to scenes tag
+* scenes, store, gui: remember last edited scene in a project
+
+### 2021-04-22
+* store, gui: first pass at deserializing multi-scene projects
+* gui, scenes: migrated "new project" feature
+* gui: replaced openScene() with openProject()
+
+### 2021-04-21
+* store, gui: refactored project loading structure
+
+### 2021-04-20
+* scenes, store, gui: multi-scene project serialization format, first pass 
+
+### 2021-04-16
+* scenes, store, gui: remember last edited sprite in a scene / project
+* scenes: removed Project class
+* scenes, store, gui: export multi-scene projects
+
+### 2021-04-14
+* scenes: new Project class
+* store: sceneified projects
+* gui: switched to scene-based project serialization
+
+### 2021-04-12
+* blocks, objects, threads, gui: new "switch to scene _" command primitive
+* morphic, gui: support bulk-file-drop for importing scenes
+* gui: tweaked scene album colors
+
+### 2021-04-08
+* gui: scroll selected scene icon into view
+
+### 2021-04-01
+* gui: made scrollbars in the wardrobe and jukebox more responsive
+
+### 2021-04-01
+* gui: made scene icons selectable
+* gui: made scene icons observe the scene's stage versions
+
+### 2021-07-02
+* extensions: took out web-serial extension prims (not yet ready)
+
+### 2021-06-25
+* extensions: added first rough experimental version of web-serial extension primitives
+* extensions: commented out web-serial extension prims while thinking about their design
+
+### 2021-06-24
+* extensions: tweaked loading unlisted script-extensions
+* byob, threads, store: removed unused code
+* extensions: added documentation for adding external JS modules
+* updated bignumbers library
+
+### 2021-06-23
+* updated bignums library
+* pushed dev version to 6.10
+* took out device libraries (Hummingbird blocks and Leap Motion)
+
+### 2021-06-22
+* extensions: added script-loading extension primitive
+
+### 2021-06-20
+* updated extensions documentation
+
+### 2021-06-19
+* extensions: added color extension primitives
+* byob: fixed search for dynamic extension menus
+* tweaked make-vars library to reduce internal dependencies
+* updated the abominable colors library ;-)
+
+### 2021-06-18
+* extensions: added text extension primitives
+* updated strings library
+* extensions: tweaked variable declaration extension primitive, commented out palette refresh prim
+* tweaked make-variables library
+* tweaked strings library
+* extensions: added color library dropdown menu
+* blocks, threads, extensions: separated extension primitives from extension dropdown menus
+* blocks, byob: dynamic extension dropdown menu support
+* updated strings library (changed variable name to '_case independent')
+
+### 2021-06-17
+* extensions: added APL extension primitives
+* updated apl library
+* threads, extensions: added variable extension primitives
+* updated make-variables library
+
+### 2021-06-16
+* threads: added exception handling primitives for try/catch
+* extensions: added try-catch extension primitives
+* updated try-catch library
+* extensions: added object-naming extension primitive
+* updated text-costume library
+
+### 2021-06-15
+* extensions: tweaked world-map primitives
+* updated maps library
+* extensions: new naming convention
+* updated list-utilities library
+* extensions: documented function semantics
+* updated frequency-distribution-analysis library
+* updated animation library
+* updated words-sentences library
+' extensions: added tts
+* updated text-to-speech library
+* updated bar-charts library
+* fixed #2850 (occasional invisible error message), thanks, Ken, for the bug report!
+* extensions: added long-form xhr primitive
+* extensions: added geolocation extension primitive
+* maps: changed default style to OpenStreetMap
+* updated http-blocks library
+* updated pixels library
+* updated audio library
+* updated localstorage library
+
+### 2021-06-14
+* new dev version
+* threads, blocks, objects, extensions: new safe extensions mechanism
+* objects: added new "primitive" blocks to dev palette
+* updated list-utilities library
+* updated animation library
+* updated frequency-distribution-analysis library
+* extensions: added some world-map extension primitives
+* threads: associate setting with JSF-block rather than the evaluator
+* extensions: added more world-map extension primitives
+
+## 6.9.0
+* **Notable Changes:**
+    * JS-functions are now disabled by default until switched on in the settings menu per session
+    * error messages in presentation mode are now shown as pop-up messages onstage  
+* **Notable Fixes:**
+    * register unsaved changes when the user edits a comment
+    * fixed bignums library and and made colors library faster, thanks, Brian!
+    * fixed setting the IDE language via a url parameter, thanks, Joan!
+* **Translation Updates:**
+    * Polish, thanks, Witek!
+    * new Hindi translation, thanks, Barthdry!
+    * German
+
+### 2021-06-14
+* prepared release
+
+### 2021-06-11
+* byob, blocks: catch JS functions inside custom dropdown definitions
+* German translation update
+
+### 2021-06-10
+* threads: error messages in presentation mode are now shown as pop-up messages onstage  
+* store: commented out modal prompt to enable JS when loading a project that uses it
+* gui: renamed setting to "JavaScript extensions"
+
+### 2021-06-09
+* new dev version
+* Polish translation update, thanks, Witek!
+* blocks: register unsaved changes when the user edits a comment
+* new Hindi translation, thanks, Barthdry!
+* fixed bignums library and and made colors library faster, thanks, Brian!
+* gui: fixed setting the IDE language via a url parameter, thanks, Joan!
+* threads, gui, objects, byob, store: reinstated JS-function control, disabled JS-functions by default
+* gui, store: automatically logout when the user enablesJavaScript, commented out for now
 
 ## 6.8.1
 * **Notable Fixes:**
@@ -58,6 +819,23 @@
 * fixed DEAL in the APL library, thanks, Brian!
 * objects: fixed a resizing edge case bug for the stage prompter (ASK command)
 
+### 2021-03-31
+* gui: tweaked scene icon settings
+* gui: moved stage icon to the top of the corral
+
+### 2021-03-30
+* gui: added documentation
+* gui: added SceneIconMorph and SceneAlbumMorph prototypes 
+* gui: turned scenes into an observable list
+* gui: added scene icon thumbnails
+
+### 2021-03-25
+* gui, scenes: sceneified trash
+* gui: first "live" multi-scene experiment
+
+### 2021-03-19
+* gui, store, scenes: capture global settings in scenes
+
 ## 6.7.3
 * **Notable Changes:**
     * hyperized "key _ pressed?" predicate
@@ -72,7 +850,11 @@
 * threads: hyperized "key _ pressed?" predicate
 * prepared patch
 
+### 2021-03-18
+* gui, scenes, objects: more scene-refactorings
+
 ### 2021-03-17
+* objects, gui, paint, sketch, store: de-globalized stage dimensions 
 * new dev version
 * threads fixed repeat for non-numbers, thanks Stefan!
 * updated list-utilities library, thanks, Brian!
@@ -86,6 +868,15 @@
     * Catalan, thanks, Joan!
 
 ### 2021-03-15
+* gui: marked methods for scene refactorings
+
+### 2021-03-12
+* scenes, gui, store: added scenes class
+
+### 2021-03-11
+* gui, store: refactor loading a project into the IDE
+
+### 2021-03-09
 * new dev version
 * Catalan translation update, thanks, Joan!
 * lists, apl: fixed "transpose", thanks, Brian!
