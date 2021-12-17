@@ -19,7 +19,7 @@ window.ecraft2learn =
           if (url.indexOf("//") < 0) {
               if (url.indexOf('/ai/') === 0) {
                   const ai_index = window.ecraft2learn_url.indexOf('/ai');
-                  return this_url.substring(0, ai_index) + url;
+                  return window.ecraft2learn_url.substring(0, ai_index) + url;
               }
               // is relative to window.ecraft2learn_url
               const last_slash_index = window.ecraft2learn_url.lastIndexOf('/');
