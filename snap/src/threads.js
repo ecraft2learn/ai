@@ -64,7 +64,7 @@ SnapExtensions, AlignmentMorph, TextMorph, Cloud, HatBlockMorph*/
 
 /*jshint esversion: 6*/
 
-modules.threads = '2021-December-12';
+modules.threads = '2021-December-15';
 
 var ThreadManager;
 var Process;
@@ -4344,15 +4344,16 @@ Process.prototype.reportStringSize = function (data) {
 };
 
 Process.prototype.reportUnicode = function (string) {
-    var str;
+    var str, unicodeList;
 
     if (this.enableHyperOps) {
         if (string instanceof List) {
             return string.map(each => this.reportUnicode(each));
         }
         str = isNil(string) ? '\u0000' : string.toString();
-        if (str.length > 1) {
-            return this.reportUnicode(new List(str.split('')));
+        unicodeList = Array.from(str);
+        if (unicodeList.length > 1) {
+            return this.reportUnicode(new List(unicodeList));
         }
     } else {
         str = isNil(string) ? '\u0000' : string.toString();
@@ -4420,9 +4421,9 @@ Process.prototype.reportBasicTextSplit = function (string, delimiter) {
         str = str.trim();
         del = /\s+/;
         break;
+    case '':
     case 'letter':
-        del = '';
-        break;
+        return new List(Array.from(str));
     case 'csv':
         return this.parseCSV(string);
     case 'json':
@@ -4434,7 +4435,7 @@ Process.prototype.reportBasicTextSplit = function (string, delimiter) {
         return this.parseCSVfields(string);
     */
     default:
-        del = isNil(delimiter) ? '' : delimiter.toString();
+        del = delimiter.toString();
     }
     return new List(str.split(del));
 };

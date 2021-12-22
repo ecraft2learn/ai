@@ -86,7 +86,7 @@ BlockVisibilityDialogMorph, ThreadManager*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.gui = '2021-December-13';
+modules.gui = '2021-December-17';
 
 // Declarations
 
@@ -3507,14 +3507,12 @@ IDE_Morph.prototype.newSceneName = function (name, ignoredScene) {
 };
 
 IDE_Morph.prototype.newName = function (name, elements) {
-    var ix = name.indexOf('('),
-        stem = (ix < 0) ? name : name.substring(0, ix),
-        count = 1,
-        newName = stem;
+    var count = 1,
+        newName = name;
 
     while (contains(elements, newName)) {
         count += 1;
-        newName = stem + '(' + count + ')';
+        newName = name + '(' + count + ')';
     }
     return newName;
 };
@@ -4770,7 +4768,7 @@ IDE_Morph.prototype.aboutSnap = function () {
         module, btn1, btn2, btn3, btn4, licenseBtn, translatorsBtn,
         world = this.world();
 
-    aboutTxt = 'Snap! 7.0.0\nBuild Your Own Blocks\n\n'
+    aboutTxt = 'Snap! 7.0.1\nBuild Your Own Blocks\n\n'
         + 'Copyright \u24B8 2008-2021 Jens M\u00F6nig and '
         + 'Brian Harvey\n'
         + 'jens@moenig.org, bh@cs.berkeley.edu\n\n'
@@ -5684,9 +5682,11 @@ IDE_Morph.prototype.openBlocksString = function (str, name, silently) {
     ]);
 };
 
-IDE_Morph.prototype.rawOpenBlocksString = function (str, name, silently) {
+IDE_Morph.prototype.rawOpenBlocksString = function (str, name, silently) { // +++
     // name is optional (string), so is silently (bool)
     var blocks;
+    this.toggleAppMode(false);
+    this.spriteBar.tabBar.tabTo('scripts');
     if (Process.prototype.isCatchingErrors) {
         try {
             blocks = this.serializer.loadBlocks(str, this.stage);
@@ -5730,6 +5730,8 @@ IDE_Morph.prototype.openSpritesString = function (str) {
 };
 
 IDE_Morph.prototype.rawOpenSpritesString = function (str) {
+    this.toggleAppMode(false);
+    this.spriteBar.tabBar.tabTo('scripts');
     if (Process.prototype.isCatchingErrors) {
         try {
             this.serializer.loadSprites(str, this);
