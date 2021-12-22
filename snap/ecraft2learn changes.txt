@@ -1,0 +1,5 @@
+morphic.js - add test that this.world is defined since when ecraftt2learn uses show message this occurs
+
+snap.html - replace end with custom onload and addtional files
+
+sw.js - added many ecraft2learn URLs
