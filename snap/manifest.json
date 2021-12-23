@@ -1,6 +1,6 @@
 {
-  "name": "Snap!",
-  "short_name": "Snap!",
+  "name": "Snap! with AI Blocks",
+  "short_name": "Snap! AI",
   "icons": [{
       "src": "img/snap-icon-72.png",
       "sizes": "128x128",
@@ -44,7 +44,7 @@
       "type": "image/png"
     }],
   "lang": "en-US",
-  "start_url": "./snap.html",
+  "start_url": "../index.html",
   "display": "standalone",
   "background_color": "white",
   "theme_color": "white"
