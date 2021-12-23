@@ -1445,14 +1445,27 @@ window.ecraft2learn =
 //                                   });
 //     };
     const get_prediction_from_teachable_machine_image_or_pose_model = (type, model_path, costume, success_callback, error_callback) => {
-        get_prediction_from_teachable_machine_model({type, costume}, model_path, success_callback, error_callback)
+        const script_url = 'https://cdn.jsdelivr.net/npm/@teachablemachine/' +
+                           type +
+                           '@0.8/dist/teachablemachine-' +
+                           type +
+                           '.min.js';
+        load_script(script_url,
+                    () => {
+                        get_prediction_from_teachable_machine_model({type, costume}, model_path, success_callback, error_callback);
+                    },
+                    error_callback);        
     };
     const get_prediction_from_teachable_machine_audio_model = (model_path, options, success_callback, error_callback) => {
         if (typeof options !== 'object') {
             options = {};
         }
         options.type = 'audio';
-        get_prediction_from_teachable_machine_model(options, model_path, success_callback, error_callback)
+        load_script('https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands/dist/speech-commands.min.js',
+                    () => {
+                        get_prediction_from_teachable_machine_model(options, model_path, success_callback, error_callback);
+                    },
+                    error_callback);        
     };
     const get_prediction_from_teachable_machine_model = (options, model_path, success_callback, error_callback) => {
         // based on https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
@@ -3613,7 +3626,6 @@ xhr.send();
 //   delete_global_variable: (name) => get_snap_ide().globalVariables.deleteVar(name),
   delete_global_variable: (name) => ecraft2learn.snap_context.deleteVariable(name),
   relative_to_absolute_url,
-  load_script,
   load_camera_training_from_file: (callback) => {
       load_transfer_training_from_file('camera', callback);
   },
