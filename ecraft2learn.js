@@ -3620,6 +3620,12 @@ xhr.send();
   stop_all_scripts,
   snap_to_javascript,
   javascript_to_snap,
+  load_script: (url, success_callback, error_callback) => {
+      // only callers of this (Teachable Machine blocks) no longer need it
+      invoke_callback(() => invoke_callback(error_callback,
+                                            "Attempt to run an obsolete version of Teachable Machine block stopped. " +
+                                            "You can update your project by importing the listening and seeing blocks."));
+  },
   global_variable_names: () => javascript_to_snap(get_snap_ide().globalVariables.names()),
   get_global_variable_value: (name) => get_global_variable_value(name),
   set_global_variable: (name, value, sender) => get_snap_ide().globalVariables.setVar(name, value, sender),
