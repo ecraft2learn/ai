@@ -6,7 +6,8 @@
 
 let world;
 window.addEventListener('load', function () {
-	if ('serviceWorker' in navigator) { // for the Prgressive Web App
+	if ('serviceWorker' in navigator && window.location.hostname !== 'localhost') { 
+	    // No Prgressive Web App caching if running localhost
         navigator.serviceWorker.register('sw.js');
     }
 	var world_canvas = document.getElementById('world');
