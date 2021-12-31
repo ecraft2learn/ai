@@ -6,6 +6,9 @@
 
 let world;
 window.addEventListener('load', function () {
+	if ('serviceWorker' in navigator) { // for the Prgressive Web App
+        navigator.serviceWorker.register('sw.js');
+    }
 	var world_canvas = document.getElementById('world');
 	var ide_morph = new IDE_Morph();
 	var loop = function loop() {
