@@ -1719,7 +1719,7 @@ var cacheName = 'snap-ai-pwa',
 self.addEventListener('install', function(e) {
     e.waitUntil(
         caches.open(cacheName).then(function(cache) {
-            return cache.addAll(filesToCache); //.slice(0, 1100));
+            return cache.addAll(filesToCache);
         })
     );
 });
