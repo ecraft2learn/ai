@@ -57,8 +57,8 @@ modules.api = '2021-November-17';
 
 window.onmessage = function (event) {
     // make the API accessible from outside an iframe
-    var ide = world.children[0];
     if (!isNil(event.data.selector)) {
+        var ide = world.children[0];
         window.top.postMessage(
             {
                 selector: event.data.selector,
