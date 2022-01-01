@@ -2198,6 +2198,39 @@ window.ecraft2learn =
             throw new Error("Didn't receive a list of numbers as expected.");
         }
     };
+    const get_language_code = (language) => {
+        let entry = language_entry(language);
+        if (entry) {
+            let full_code = entry[1];
+            // see https://cloud.google.com/translate/docs/languages
+            if (full_code.indexOf('zh') === 0) {
+                return full_code; // only zh has country code attached zh-CN or zh-TW
+            }
+            let hypen_location = full_code.indexOf('-');
+            if (hypen_location > 0) {
+                return full_code.substring(0, hypen_location);
+            }
+            return full_code;
+        }
+    };
+    const translate = (text, callback) => {
+        const after_script_loaded = () => {
+//          const language_code = get_language_code(language);
+            add_translation_widget(null, false);  // no-op if already added
+            document.getElementsByTagName('canvas').item(0).style.setProperty('position', 'relative');
+            const div = document.createElement('div');
+            div.innerText = text;
+            const observer = new MutationObserver((mutations) => {
+                invoke_callback(callback, div.innerText); // if mutated should have been translated
+                observer.disconnect();
+                div.remove();
+                document.getElementById('google_translate_element').hidden = true;
+            });
+            observer.observe(div, {attributes: true, childList: true, subtree: true});
+            document.body.appendChild(div);            
+        };
+        load_script('/ai/js/translate.js', after_script_loaded);
+    };
     const word_to_features_or_location = function (word, language, features) {
         if (typeof word !== 'string') {
             inform((features ? 'features' : 'location') + " of word",
@@ -3658,6 +3691,7 @@ xhr.send();
           Math.seedrandom(x);
       }
   },
+  translate,
   // some word embedding functionality
   dot_product,
   cosine_similarity,
