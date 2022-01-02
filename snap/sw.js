@@ -3,6 +3,7 @@ var snapVersion = '7.0.1'
 var cacheName = 'snap-ai-pwa',
     filesToCache = [
         '/ai/snap/snap.html',
+        '/ai/snap/manifest.json',
 
         // program
         '/ai/snap/src/morphic.js',
@@ -1742,6 +1743,9 @@ self.addEventListener('fetch', function(e) {
     e.respondWith(
         caches.match(e.request).then(function(response) {
             return response || fetch(e.request);
+        },
+        (error) => {
+            console.error(error);
         })
     );
 });
