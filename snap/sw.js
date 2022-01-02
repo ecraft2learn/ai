@@ -1754,7 +1754,11 @@ self.addEventListener('activate', (evt) => {
 self.addEventListener('fetch', function(e) {
     e.respondWith(
         caches.match(e.request, {'ignoreSearch': true}).then(function(response) {
-            return response || fetch(e.request);
+                   try {
+                       return response || fetch(e.request);
+                   } catch (error) {
+                       console.error(error); 
+                   }
         },
         (error) => {
             console.error(error);
