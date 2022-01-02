@@ -5,6 +5,18 @@ var cacheName = 'snap-ai-pwa',
         '/ai/snap/snap.html',
         '/ai/snap/manifest.json',
 
+        // icons
+'/ai/snap/img/snap-icon-120.png',
+'/ai/snap/img/snap-icon-128.png',
+'/ai/snap/img/snap-icon-144.png',
+'/ai/snap/img/snap-icon-152.png',
+'/ai/snap/img/snap-icon-192.png',
+'/ai/snap/img/snap-icon-256.png',
+'/ai/snap/img/snap-icon-384.png',
+'/ai/snap/img/snap-icon-512.png',
+'/ai/snap/img/snap-icon-72.png',
+'/ai/snap/img/snap-icon-96.png',
+
         // program
         '/ai/snap/src/morphic.js',
         '/ai/snap/src/symbols.js',
