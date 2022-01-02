@@ -10,6 +10,7 @@ window.addEventListener('load', function () {
 	    // No Prgressive Web App caching if running localhost
         navigator.serviceWorker.register('sw.js');
     }
+    SnapExtensions.scripts.push('https://ecraft2learn.github.io/ai/ecraft2learn.js'); // is in modified snap.html
 	var world_canvas = document.getElementById('world');
 	var ide_morph = new IDE_Morph();
 	var loop = function loop() {
