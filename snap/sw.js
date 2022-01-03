@@ -1,6 +1,6 @@
 var snapVersion = '7.0.1'
 
-var cacheName = 'snap-ai-pwa',
+var cacheName = 'snap-ai-v2',
     filesToCache = [
         '/ai/snap/snap.html',
         '/ai/snap/manifest.json',
@@ -1696,18 +1696,23 @@ var cacheName = 'snap-ai-pwa',
 
 /* Start the service worker and cache all of the app's content */
 self.addEventListener('install', function(e) {
+    console.log("Service worker " + cacheName + " waiting to install");
     e.waitUntil(
         caches.open(cacheName).then(function(cache) {
+            console.log("Service worker " + cacheName + " installing");
             return cache.addAll(filesToCache);
         })
     );
 });
 
 self.addEventListener('activate', (evt) => {
+    console.log("Service worker " + cacheName + " waiting to activate");
     evt.waitUntil(
         caches.keys().then((keyList) => {
+            console.log("Service worker " + cacheName + " activating");
             return Promise.all(keyList.map((key) => {
                 if (key !== cacheName) {
+                    console.log("Deleting " + key + " since not equal to " + cacheName);
                     return caches.delete(key);
                 }
             }));
