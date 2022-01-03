@@ -8,7 +8,9 @@ function install_listener (event, cache_name, files_to_cache) {
     event.waitUntil(
         caches.open(cache_name).then(function(cache) {
             console.log("Service worker " + cache_name + " installing");
-            return cache.addAll(files_to_cache);
+            const result = cache.addAll(files_to_cache);
+            console.log("Service worker " + cache_name + " cached all files");
+            return result;
         })
     );
 }
