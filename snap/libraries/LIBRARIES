@@ -1,3 +1,18 @@
+speaking blocks.xml	Speaking	AI blocks for text to speech
+speaking.xml	Speaking demos	Tutorial project demonstrating blocks for for text to speech
+listening blocks.xml	Listening	AI blocks for recognizing speech
+listening.xml	Listening demos	Tutorial project demonstrating blocks for recognizing speech
+seeing blocks.xml	Seeing	AI blocks for object recognition and detection and pose recognition
+seeing.xml	Seeing demos	Tutorial project demonstrating blocks for object recognition and detection and pose recognition
+words blocks.xml	AI Language (NLP)	AI blocks for processing words and sentences
+words.xml	NLP demos	Tutorial project demonstrating blocks for processing words and sentences
+neural nets blocks.xml	Neural nets	AI blocks for creating, training, and using neural networks
+neural nets.xml	Neural net demos	Tutorial project demonstrating blocks for creating, training, and using neural networks
+misc AI blocks.xml	Misc AI	AI blocks for style transfer, Wikipedia, and image embedding
+misc AI.xml	Misc AI demos	Tutorial project demonstrating blocks for style transfer, Wikipedia, and image embedding
+~	~
+~	~
+~	~
 iteration-composition.xml	Iteration, composition	Traditional loop constructs (while, until, etc.) plus the Lisp "named let" (a generalization of FOR) plus functional iteration (repeated invocation of a function) and function composition.
 list-utilities.xml	List utilities	Some standard functions on lists (reverse, sort, etc.)
 colors.xml	Colors and Crayons	Incorporates the former crayon and set RGB libraries.  Implements fair hues (more orange, less green, adds brown) and a linear color scale including grayscale and fair-hue-based shades.
@@ -34,3 +49,4 @@ make-variables.xml	Create variables	Create and manage global/sprite/script varia
 ~	~
 serial_module.xml	Serial Ports	Connect to hardware extensions through the Web Serial API (Chromium, Chrome or Edge required)
 signada.xml	Signada (Network remote control)	Interact with MicroBlocks devices via WiFi. Requires the device to have a TFT display, two buttons and WiFi capability, as well as the Signada MicroBlocks project loaded. The Citilab ED1 and a bunch of the M5Stack boards are some of the devices that work with Signada.
+
