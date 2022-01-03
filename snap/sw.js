@@ -1,7 +1,10 @@
+importScripts('/ai/js/service-worker-utilities.js');
+
 var snapVersion = '7.0.1'
 
-var cacheName = 'snap-ai-v2',
-    filesToCache = [
+const cache_name = 'snap-ai-v3';
+
+const files_to_cache = [
         '/ai/snap/snap.html',
         '/ai/snap/manifest.json',
         '/ai/snap/src/favicon.ico',
@@ -1692,49 +1695,20 @@ var cacheName = 'snap-ai-v2',
 '/ai/word-embeddings/sv/word-locations.js',
 '/ai/word-embeddings/zh/wiki-words.js',
 '/ai/word-embeddings/zh/word-locations.js',
-    ];
 
-/* Start the service worker and cache all of the app's content */
-self.addEventListener('install', function(e) {
-    console.log("Service worker " + cacheName + " waiting to install");
-    e.waitUntil(
-        caches.open(cacheName).then(function(cache) {
-            console.log("Service worker " + cacheName + " installing");
-            return cache.addAll(filesToCache);
-        })
-    );
+];
+
+self.addEventListener('install', (event) => {
+    install_listener(event, cache_name, files_to_cache);
 });
 
-self.addEventListener('activate', (evt) => {
-    console.log("Service worker " + cacheName + " waiting to activate");
-    evt.waitUntil(
-        caches.keys().then((keyList) => {
-            console.log("Service worker " + cacheName + " activating");
-            return Promise.all(keyList.map((key) => {
-                if (key !== cacheName) {
-                    console.log("Deleting " + key + " since not equal to " + cacheName);
-                    return caches.delete(key);
-                }
-            }));
-        })
-    );
+self.addEventListener('activate', (event) => {
+    active_listener (event, cache_name);
     self.clients.claim();
 });
 
-/* Serve cached content when offline */
-self.addEventListener('fetch', function(e) {
-    e.respondWith(
-        caches.match(e.request, {'ignoreSearch': true}).then(function(response) {
-                   try {
-                       return response || fetch(e.request);
-                   } catch (error) {
-                       console.error(error); 
-                   }
-        },
-        (error) => {
-            console.error(error);
-        })
-    );
+self.addEventListener('fetch', function(event) {
+    fetch_listener(event);
 });
 
 

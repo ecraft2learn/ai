@@ -1,5 +1,7 @@
-const cacheName = 'snap-tensorflow-v3',
-    filesToCache = [
+importScripts('/ai/js/service-worker-utilities.js');
+
+const cache_name = 'snap-tensorflow-v4',
+    files_to_cache = [
 '/ai/tensorflow/index.html',
 '/ai/tensorflow/tensorflow.js',
 '/ai/tensorflow/hyperparameters_search.html',
@@ -16,47 +18,17 @@ const cacheName = 'snap-tensorflow-v3',
 '/ai/css/ai-teacher-guide.css'
 ];
 
-/* Start the service worker and cache all of the app's content */
-self.addEventListener('install', function(e) {
-    console.log("Service worker " + cacheName + " waiting to install");
-    e.waitUntil(
-        caches.open(cacheName).then(function(cache) {
-            console.log("Service worker " + cacheName + " installing");
-            return cache.addAll(filesToCache);
-        })
-    );
+self.addEventListener('install', (event) => {
+    install_listener(event, cache_name, files_to_cache);
 });
 
-self.addEventListener('activate', (evt) => {
-    console.log("Service worker " + cacheName + " waiting to activate");
-    evt.waitUntil(
-        caches.keys().then((keyList) => {
-            console.log("Service worker " + cacheName + " activating");
-            return Promise.all(keyList.map((key) => {
-                if (key !== cacheName) {
-                    console.log("Deleting " + key + " since not equal to " + cacheName);
-                    return caches.delete(key);
-                }
-            }));
-        })
-    );
+self.addEventListener('activate', (event) => {
+    active_listener (event, cache_name);
     self.clients.claim();
 });
 
-/* Serve cached content when offline */
-self.addEventListener('fetch', function(e) {
-    e.respondWith(
-        caches.match(e.request, {'ignoreSearch': true}).then(function(response) {
-                   try {
-                       return response || fetch(e.request);
-                   } catch (error) {
-                       console.error(error); 
-                   }
-        },
-        (error) => {
-            console.error(error);
-        })
-    );
+self.addEventListener('fetch', function(event) {
+    fetch_listener (event)
 });
 
 
