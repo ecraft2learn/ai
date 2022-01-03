@@ -3,6 +3,14 @@
   <head>
 <script src="../js/load-scripts.js"></script>
 <script>
+window.addEventListener('load',
+    () => {
+      if ('serviceWorker' in navigator && window.location.hostname !== 'localhost') { 
+          // No Prgressive Web App caching if running localhost
+          navigator.serviceWorker.register('sw-tensorflow.js');
+      }      
+    });
+
 // Add "test.js" to the following to run tests
 load_local_or_remote_scripts(
     ["../js/tfjs.js",
