@@ -20,8 +20,12 @@ function active_listener (event, cache_name) {
             console.log("Service worker " + cache_name + " activating");
             return Promise.all(keyList.map((key) => {
                 if (key !== cache_name) {
-                    console.log("Deleting " + key + " since not equal to " + cache_name);
-                    return caches.delete(key);
+                    const last_hypen = key.lastIndexOf('-');
+                    if (key.substring(0, last_hypen) === cache_name.substring(0, last_hypen)) {
+                        // only delete old if different version of the same cache 
+                        console.log("Deleting " + key + " since not equal to " + cache_name);
+                        return caches.delete(key);
+                    }
                 }
             }));
         })
