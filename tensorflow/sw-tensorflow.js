@@ -1,4 +1,4 @@
-const cacheName = 'snap-tensorflow-pwa',
+const cacheName = 'snap-tensorflow-v2',
     filesToCache = [
 '/ai/tensorflow/index.html',
 '/ai/tensorflow/tensorflow.js',
