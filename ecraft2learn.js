@@ -189,9 +189,11 @@ window.ecraft2learn =
               if (stage) {
                   original_resume_all.call(stage.threads, stage);
               }
-              ecraft2learn.paused_callbacks.forEach((callback) => {
-                  callback();
-              });
+              if (ecraft2learn.paused_callbacks) {
+                  ecraft2learn.paused_callbacks.forEach((callback) => {
+                      callback();
+                  });
+              }
               ecraft2learn.paused_callbacks = [];
           };
       };
