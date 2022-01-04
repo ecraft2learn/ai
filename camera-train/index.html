@@ -9,6 +9,13 @@
     <title>Machine learning from the camera</title>
 <script src="../js/load-scripts.js"></script>
 <script>
+window.addEventListener('load',
+    () => {
+      if ('serviceWorker' in navigator && window.location.hostname !== 'localhost') { 
+          // No Prgressive Web App caching if running localhost
+          navigator.serviceWorker.register('sw-camera-train.js');
+      }      
+    });
 load_local_or_remote_scripts(
     ["../js/tfjs.js", //      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs",
      "../js/mobilenet.js", //      "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet",

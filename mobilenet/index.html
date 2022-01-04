@@ -5,6 +5,13 @@
     <title>MobileNet</title>
 <script src="../js/load-scripts.js"></script>
 <script>
+window.addEventListener('load',
+    () => {
+      if ('serviceWorker' in navigator && window.location.hostname !== 'localhost') { 
+          // No Prgressive Web App caching if running localhost
+          navigator.serviceWorker.register('sw-mobilenet.js');
+      }      
+    });
 load_local_or_remote_scripts(
     ["../js/tfjs.js",
      "../js/mobilenet.js",

@@ -5,7 +5,6 @@
     <title>PoseNet - Reporting poses</title>
     <link href="../css/ai-teacher-guide.css" rel="stylesheet">
 </head>
-
 <body>
     <div id="loading">
         Loading the model...
@@ -37,6 +36,13 @@
             </p>
 <script src="../js/load-scripts.js"></script>
 <script>
+window.addEventListener('load',
+    () => {
+      if ('serviceWorker' in navigator && window.location.hostname !== 'localhost') { 
+          // No Prgressive Web App caching if running localhost
+          navigator.serviceWorker.register('sw-posenet.js');
+      }      
+    });
 load_local_or_remote_scripts(
     ["../js/stats.min.js",
      "../js/tfjs.js",
