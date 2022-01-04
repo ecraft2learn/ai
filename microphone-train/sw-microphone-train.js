@@ -1,8 +1,10 @@
 importScripts('/ai/js/service-worker-utilities.js');
 
-const cache_name = 'snap-microphone-train-v1',
+const cache_name = 'snap-microphone-train-v2',
     files_to_cache = [
-
+'/ai/js/tfjs.js',
+'/ai/js/training-utilities.js',
+'/ai/js/translate.js',
 '/ai/microphone-train/adapter.js',
 '/ai/microphone-train/audio-train.js',
 '/ai/microphone-train/index.html',

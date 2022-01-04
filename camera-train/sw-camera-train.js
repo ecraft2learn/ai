@@ -1,8 +1,13 @@
 importScripts('/ai/js/service-worker-utilities.js');
 
-const cache_name = 'snap-camera-train-v2',
+const cache_name = 'snap-camera-train-v3',
     files_to_cache = [
-
+    [
+'/ai/js/tfjs.js',
+'/ai/js/mobilenet.js',
+'/ai/js/knn-classifier.js',
+'/ai/js/training-utilities.js',
+'/ai/js/translate.js',
 '/ai/camera-train/index.html',
 '/ai/camera-train/train.js',
 '/ai/camera-train/train-mobilenet.js',

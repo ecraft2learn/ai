@@ -1,8 +1,10 @@
 importScripts('/ai/js/service-worker-utilities.js');
 
-const cache_name = 'snap-detection-v1',
+const cache_name = 'snap-detection-v2',
     files_to_cache = [
-
+'/ai/js/tfjs.js',
+'/ai/js/coco-ssd.js',
+'/ai/js/translate.js',
 '/ai/detection/detection.js',
 '/ai/detection/index.html',
 '/ai/detection/ssd_mobilenet_v2/group1-shard10of17',

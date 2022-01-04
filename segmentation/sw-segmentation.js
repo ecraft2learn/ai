@@ -1,7 +1,10 @@
 importScripts('/ai/js/service-worker-utilities.js');
 
-const cache_name = 'snap-segmentation-v1',
+const cache_name = 'snap-segmentation-v2',
     files_to_cache = [
+'/ai/js/tfjs.js',
+'/ai/js/body-pix.js',
+'/ai/js/translate.js',
 '/ai/segmentation/body_pix.js',
 '/ai/segmentation/index.html',
 '/ai/segmentation/part_to_color.txt',

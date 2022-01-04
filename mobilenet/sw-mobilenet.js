@@ -1,8 +1,9 @@
 importScripts('/ai/js/service-worker-utilities.js');
 
-const cache_name = 'snap-mobilenet-v1',
+const cache_name = 'snap-mobilenet-v2',
     files_to_cache = [
-
+'/ai/js/tfjs.js',
+'/ai/js/mobilenet.js',
 '/ai/mobilenet/index.html',
 '/ai/mobilenet/classify.js',
 '/ai/js/mobilenet_v1_1.0_224/group1-shard1of1',
