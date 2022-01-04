@@ -1,6 +1,6 @@
 importScripts('/ai/js/service-worker-utilities.js');
 
-const cache_name = 'snap-camera-train-v1',
+const cache_name = 'snap-microphone-train-v1',
     files_to_cache = [
 
 '/ai/microphone-train/adapter.js',
