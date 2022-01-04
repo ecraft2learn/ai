@@ -54,6 +54,6 @@ function remove_translation_widget() {
     }
 }
 
-if (window.location.search.indexOf('translate=') >= 0) {
+if (window.location.search.indexOf('translate=1') >= 0) {
     add_translation_widget();
 }

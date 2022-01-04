@@ -1009,30 +1009,31 @@ window.ecraft2learn =
   const create_machine_learning_window = function (source, iframe_in_new_tab, together_url, together, one_pixel_iframe) {
       let URL, support_window;
       source = source.trim(); // ignore white spaces on ends
+      const translate_query = (window.location.search.indexOf('translate=1') >= 0) ? "?translate=1" : "?";
       if (together_url) {
           URL = together_url;
       } else {
           if (source === 'training using camera') {
-              URL = "/camera-train/index.html?translate=1";
+              URL = "/camera-train/index.html" + translate_query;
               if (together) {
                   URL += "&together=1";
               }                  
           } else if (source === 'training using microphone') {
-              URL = "/microphone-train/index.html?translate=1";
+              URL = "/microphone-train/index.html" + translate_query;
           } else if (source === 'training using microphone (old version)') {
               URL = "/microphone-train/index-old.html?translate=1";
           } else if (source === 'posenet') {
-              URL = "/posenet/index.html?translate=1";
+              URL = "/posenet/index.html" + translate_query;
           } else if (source === 'style transfer') {
-              URL = "/style-transfer/index.html";
+              URL = "/style-transfer/index.html" + translate_query;
           } else if (source === 'image classifier') {
-              URL = "/mobilenet/index.html";
+              URL = "/mobilenet/index.html" + translate_query;
           } else if (source === 'tensorflow.js') {
-              URL = "/tensorflow/index.html";
+              URL = "/tensorflow/index.html" + translate_query;
           } else if (source === 'segmentation') {
-              URL = "/segmentation/index.html";
+              URL = "/segmentation/index.html" + translate_query;
           } else if (source === 'detection') {
-              URL = "/detection/index.html";
+              URL = "/detection/index.html" + translate_query;
           }
           if (window.location.hostname === "localhost" || window.location.protocol === 'file:') {
               URL = ".." + URL;
