@@ -54,7 +54,7 @@
             "type": "image/png"
         }
     ],
-    "scope": "/ai/",
+    "scope": "https://ecraft2learn.github.io/ai/",
     "lang": "en-US",
     "start_url": "snap.html",
     "id": "snap.html",
