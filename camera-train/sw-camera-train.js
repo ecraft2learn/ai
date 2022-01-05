@@ -2,7 +2,7 @@ importScripts('/ai/js/service-worker-utilities.js');
 
 const cache_name = 'snap-camera-train-v3',
     files_to_cache = [
-    [
+
 '/ai/js/tfjs.js',
 '/ai/js/mobilenet.js',
 '/ai/js/knn-classifier.js',
