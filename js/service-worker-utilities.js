@@ -23,6 +23,8 @@ function active_listener (event, cache_name) {
             return Promise.all(keyList.map((key) => {
                 if (key !== cache_name) {
                     const last_hypen = key.lastIndexOf('-');
+                    console.log(key + " " + cache_name + " " + 
+                                key.substring(0, last_hypen) + " " + cache_name.substring(0, last_hypen));
                     if (key.substring(0, last_hypen) === cache_name.substring(0, last_hypen)) {
                         // only delete old if different version of the same cache 
                         console.log("Deleting " + key + " since not equal to " + cache_name);
