@@ -1009,7 +1009,11 @@ window.ecraft2learn =
   const create_machine_learning_window = function (source, iframe_in_new_tab, together_url, together, one_pixel_iframe) {
       let URL, support_window;
       source = source.trim(); // ignore white spaces on ends
-      const translate_query = (window.location.search.indexOf('translate=1') >= 0) ? "?translate=1" : "?";
+      const translate_query = (window.location.search.indexOf('translate=1') >= 0 || 
+                               // default language is not English so offer translations from English
+                               navigator.language.substring(0,2) !== 'en') ? 
+                              "?translate=1" : 
+                              "?";
       if (together_url) {
           URL = together_url;
       } else {
