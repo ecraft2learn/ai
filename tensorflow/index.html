@@ -2,38 +2,26 @@
 <!-- Support panel for using TensorFlow in an iFrame from Snap! -->
 <html>
   <head>
-<script src="../js/load-scripts.js"></script>
+<script src="../js/tfjs.js"></script>
+<script src="../js/tfjs-vis.js"></script>
+<script src="../js/dat.gui.js"></script>
+<script src="../js/hyperparameters.min.js"></script>
+<script src="../js/train.js"></script>
+<script src="../js/invoke_callback.js"></script>
+<script src="../js/training-utilities.js"></script>
+<script src="../js/translate.js"></script>
+<script src="tensorflow.js"></script>
+<!-- Add "test.js" to the above to run tests -->
 <script>
 window.addEventListener('load',
     () => {
-      if ('serviceWorker' in navigator && window.location.hostname !== 'localhost') { 
-          // No Prgressive Web App caching if running localhost
-          navigator.serviceWorker.register('sw-tensorflow.js');
-      }      
+        if ('serviceWorker' in navigator && window.location.hostname !== 'localhost') { 
+            // No Prgressive Web App caching if running localhost
+            navigator.serviceWorker.register('sw-tensorflow.js');
+        } 
+        create_return_to_snap_button(undefined, "return_to_snap");
+        window.addEventListener('onbeforeunload', stop_all);     
     });
-
-// Add "test.js" to the following to run tests
-load_local_or_remote_scripts(
-    ["../js/tfjs.js",
-     "../js/tfjs-vis.js",
-     "../js/dat.gui.js",
-     "../js/hyperparameters.min.js",
-     "../js/train.js",
-     "../js/invoke_callback.js",
-     "tensorflow.js",
-     "../js/training-utilities.js",
-     "../js/translate.js"],
-     undefined, 
-     // using the same locally cached version so nothing breaks when released versions are updated
-//      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest",
-//      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis",
-//      "https://cdn.jsdelivr.net/npm/dat.gui",
-//      "https://cdn.jsdelivr.net/npm/hyperparameters@latest/dist/hyperparameters.min.js",
-     () => {
-         // when all the scripts have loaded
-         create_return_to_snap_button(undefined, "return_to_snap");
-         window.addEventListener('onbeforeunload', stop_all);
-     });
 </script>
     <link href="../css/ai-teacher-guide.css" rel="stylesheet">
   </head>

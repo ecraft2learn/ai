@@ -3288,9 +3288,11 @@ xhr.send();
       window.open("https://github.com/ecraft2learn/ai/wiki", "_blank");
   },
   open_web_page: (url) => {
-      window.open(relative_to_absolute_url(url), 
+      window.open(relative_to_absolute_url(url), "_blank");
+      // following should have worked
+      // see https://developer.mozilla.org/en-US/docs/Web/Manifest/scope
       // url.indexOf("//") < 0 && 
-                  window.matchMedia('(display-mode: standalone)').matches ? "_self" : "_blank");
+      // window.matchMedia('(display-mode: standalone)').matches ? "_self" : "_blank");
   },
   re_open_full_window: () => {
 //       const project_path = window.frameElement ? window.frameElement.getAttribute('project_path') : window.location.href;

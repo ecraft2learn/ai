@@ -7,25 +7,19 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link href="../css/ai-teacher-guide.css" rel="stylesheet">
     <link rel="icon" type="image/png" href="../images/eCraft2Learn-Favicon.png" />
-    <script src="../js/load-scripts.js"></script>
+    <script src="../js/tfjs.js"></script>
+    <script src="../js/training-utilities.js"></script>
+    <script src="../js/translate.js"></script>
+    <script src="speech-commands.js"></script>
+    <script src="audio-train.js"></script>
 <script>
 window.addEventListener('load',
     () => {
       if ('serviceWorker' in navigator && window.location.hostname !== 'localhost') { 
           // No Prgressive Web App caching if running localhost
           navigator.serviceWorker.register('sw-microphone-train.js');
-      }      
-    });
-load_local_or_remote_scripts(
-    ["../js/tfjs.js", //"https://cdn.jsdelivr.net/npm/@tensorflow/tfjs",
-     "../js/training-utilities.js",
-     "speech-commands.js",
-     "audio-train.js",
-     "../js/translate.js"],
-     // using the same locally cached version so nothing breaks when released versions are updated
-    undefined,
-    () => {
-        create_return_to_snap_button(); // create this button after everything has loaded
+      }
+      create_return_to_snap_button();      
     });
 </script>
 </head>

@@ -1,6 +1,5 @@
 window.addEventListener('load', function() {
     window.parent.postMessage("Ready", "*");   
-});
 
 // seems ml5.styleTransfer expects images that are 252x252
 const WIDTH  = 252;
@@ -45,4 +44,6 @@ window.addEventListener('message', function(event) {
                                                     '*');
                        });
     }
+});
+
 });

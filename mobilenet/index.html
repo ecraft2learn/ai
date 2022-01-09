@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>MobileNet</title>
-<script src="../js/load-scripts.js"></script>
+<script src="../js/tfjs.js"></script>
+<script src="../js/mobilenet.js"></script>
+<script src="classify.js"></script>
 <script>
 window.addEventListener('load',
     () => {
@@ -12,16 +14,6 @@ window.addEventListener('load',
           navigator.serviceWorker.register('sw-mobilenet.js');
       }      
     });
-load_local_or_remote_scripts(
-    ["../js/tfjs.js",
-     "../js/mobilenet.js",
-     "classify.js"],
-     // using the same locally cached version so nothing breaks when released versions are updated
-    ["../js/tfjs.js",
-     "../js/mobilenet.js",
-//      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs",
-//      "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet",
-     "classify.js"]);
 </script>
 </head>
 <body>

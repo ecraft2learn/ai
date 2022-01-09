@@ -34,7 +34,14 @@
                 <br>
                 <br> The <strong>output stride</strong> and <strong>image scale factor</strong> have the largest effects on accuracy/speed. A <i>higher</i> output stride results in lower accuracy but higher speed. A <i>higher</i> image scale factor results in higher accuracy but lower speed.
             </p>
-<script src="../js/load-scripts.js"></script>
+<script src="../js/tfjs.js"></script>
+<script src="../js/stats.min.js"></script>
+<script src="../js/posenet.js"></script>
+<script src="../js/dat.gui.js"></script>
+<script src="../js/training-utilities.js"></script>
+<script src="../js/translate.js"></script>
+<script src="demo_util.js"></script>
+<script src="camera.js"></script>
 <script>
 window.addEventListener('load',
     () => {
@@ -43,19 +50,6 @@ window.addEventListener('load',
           navigator.serviceWorker.register('sw-posenet.js');
       }      
     });
-load_local_or_remote_scripts(
-    ["../js/stats.min.js",
-     "../js/tfjs.js",
-     "../js/posenet.js",
-     "../js/dat.gui.js",
-     "demo_util.js",
-     "camera.js",
-     "../js/training-utilities.js",
-     "../js/translate.js"]);
-    // using the same locally cached version so nothing breaks when released versions are updated
-//      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs",
-//      "https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet",
-//      "https://cdn.jsdelivr.net/npm/dat.gui",
 </script>
 </body>
 </html>

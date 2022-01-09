@@ -12,7 +12,10 @@
     <p>
         You shouldn't see this.
     </p> 
-<script src="../js/load-scripts.js"></script>
+<script src="../js/tfjs.js"></script>
+<script src="../js/coco-ssd.js"></script>
+<script src="../js/translate.js"></script>
+<script src="detection.js"></script>
 <script>
 window.addEventListener('load',
     () => {
@@ -21,11 +24,6 @@ window.addEventListener('load',
           navigator.serviceWorker.register('sw-detection.js');
       }      
     });
-load_local_or_remote_scripts(
-    ["../js/tfjs.js",
-     "../js/coco-ssd.js", // "https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd", 
-     "detection.js",
-     "../js/translate.js"]);
 </script>
 </body>
 </html>

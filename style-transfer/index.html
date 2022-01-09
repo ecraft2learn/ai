@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Style Transfer</title>
-    <script src="../js/load-scripts.js"></script>
+<script src="ml5.min.js"></script>
+<script src="style-transfer.js"></script>
 <script>
 window.addEventListener('load',
     () => {
@@ -12,13 +13,6 @@ window.addEventListener('load',
           navigator.serviceWorker.register('sw-style-transfer.js');
       }      
     });
-load_local_or_remote_scripts(
-    ["ml5.min.js",
-     "style-transfer.js"],
-    // using the same locally cached version so nothing breaks when released versions are updated
-    ["ml5.min.js",
-    // "https://unpkg.com/ml5@0.1.1/dist/ml5.min.js",
-     "style-transfer.js"]);
 </script>
 </head>
 <body>

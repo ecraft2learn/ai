@@ -2,6 +2,8 @@
 // Written by Ken Kahn 
 // No rights reserved.
 
+window.addEventListener('load',
+() => {
 ((async function () {
 
 const models = () => tensorflow.models;
@@ -542,3 +544,4 @@ save_and_load_button.addEventListener('click',
   
 }()));
 
+})
