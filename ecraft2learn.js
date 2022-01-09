@@ -993,6 +993,21 @@ window.ecraft2learn =
           train(options);
       }
   };
+  const noisy_polygon_help = () => {
+      const iframe = document.createElement('iframe');
+      iframe.id = 'noisy-polygon-help';
+      iframe.width = 720;
+      iframe.height = 640;
+      iframe.style = 'z-index: 99; position: absolute';
+      iframe.src = 'https://ecraft2learn.github.io/ai/noisy-polygons/index.html';
+      document.body.insertBefore(iframe, document.body.firstChild);
+      window.addEventListener('message', event => {
+          if (event.data === 'Remove noisy-polygon-help') {
+              iframe.remove();
+              document.getElementById('morphic_keyboard').focus();
+          }
+      });
+  };
   const open_support_window = function (source, no_display) {
       if (!ecraft2learn.support_window[source] || ecraft2learn.support_window[source].closed) {
           create_machine_learning_window(source);
@@ -3656,6 +3671,7 @@ xhr.send();
   load_data_from_URL,
   optimize_hyperparameters,
   replace_with_best_model,
+  noisy_polygon_help,
   display_support_window: open_support_window,
   image_class,
   inform,
