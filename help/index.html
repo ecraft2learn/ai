@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+window.addEventListener('load',
+    () => {
+        if ('serviceWorker' in navigator && window.location.hostname !== 'localhost') { 
+            // No Prgressive Web App caching if running localhost
+            navigator.serviceWorker.register('sw-help.js');
+        }
+        if (window.location.search !== '') {
+            window.location.replace(window.location.search.substring(1));
+        }   
+    });
+
+</script>
+</head>
+</html>
