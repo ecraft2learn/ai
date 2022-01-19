@@ -138,6 +138,13 @@ window.addEventListener(
                                  hide_all,
                                  document.body.firstChild);
         }
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            // running as a PWA so don't open new tabs
+            const links = [...document.getElementsByTagName('a')];
+            links.forEach((link) => {
+                link.removeAttribute("target");
+            });
+        } 
 });
 
 // copy over search query and hash from URL to appropriate links

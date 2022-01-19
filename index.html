@@ -14,14 +14,7 @@ window.addEventListener('load',
         if ('serviceWorker' in navigator && window.location.hostname !== 'localhost') { 
             // No Prgressive Web App caching if running localhost
             navigator.serviceWorker.register('sw-ai-guide.js');
-        }
-        if (window.matchMedia('(display-mode: standalone)').matches) {
-            // running as a PWA
-            const links = [...document.getElementsByTagName('a')];
-            links.forEach((link) => {
-                link.removeAttribute("target");
-            });
-        }   
+        }  
     });
 </script>
 </head>
