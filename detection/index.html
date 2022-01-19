@@ -20,7 +20,7 @@
 window.addEventListener('load',
     () => {
       if ('serviceWorker' in navigator && window.location.hostname !== 'localhost') { 
-          // No Prgressive Web App caching if running localhost
+          // No Progressive Web App caching if running localhost
           navigator.serviceWorker.register('sw-detection.js');
       }      
     });

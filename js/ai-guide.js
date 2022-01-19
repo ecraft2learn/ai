@@ -138,6 +138,10 @@ window.addEventListener(
                                  hide_all,
                                  document.body.firstChild);
         }
+        if ('serviceWorker' in navigator && window.location.hostname !== 'localhost') { 
+            // No Progressive Web App caching if running localhost
+            navigator.serviceWorker.register('/ai/sw-ai-guide.js');
+        } 
         if (window.matchMedia('(display-mode: standalone)').matches) {
             // running as a PWA so don't open new tabs
             const links = [...document.getElementsByTagName('a')];
