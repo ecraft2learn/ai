@@ -246,6 +246,8 @@ window.ecraft2learn =
           }
       }
       const workaround_snap_message_listener = () => {
+          // this is an attempt to fix a problem with api.js
+          // however, the listener might run before this fix is made
           const snap_listener = window.onmessage;
           window.onmessage = undefined;
           window.addEventListener('message',
@@ -256,11 +258,24 @@ window.ecraft2learn =
                                       snap_listener(event);
                                   });
       };
+      const enhance_menu_morph_destroy = () => {
+          MenuMorph.prototype.destroy = function () {
+              if (this.hasFocus) {
+                  this.world.keyboardFocus = null;
+              }
+              // Ken Kahn added && this.world because it is null if called from show_message
+              if (!this.isListContents && this.world && (this.world.activeMenu === this)) {
+                  this.world.activeMenu = null;
+              }
+              MenuMorph.uber.destroy.call(this);
+          }; 
+      };
       const enhance_snap = () => {
           if (document.body && world && world.children.length > 0) {
               track_whether_snap_is_stopped();
               enhance_stop_all_sounds();
               enhance_snap_openProject();
+              enhance_menu_morph_destroy();
               workaround_snap_message_listener();
           } else {
               // too soon so wait until page is loaded
