@@ -208,5 +208,9 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', function(event) {
+    fetch_listener(event);
+});
+
+self.addEventListener('fetch', function(event) {
     fetch_listener (event)
 });
