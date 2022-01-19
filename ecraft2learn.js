@@ -257,17 +257,18 @@ window.ecraft2learn =
                                   });
       };
       const enhance_snap = () => {
-          track_whether_snap_is_stopped();
-          enhance_stop_all_sounds();
-          enhance_snap_openProject();
-          workaround_snap_message_listener();
+          if (document.body && world.children.length > 0) {
+              track_whether_snap_is_stopped();
+              enhance_stop_all_sounds();
+              enhance_snap_openProject();
+              workaround_snap_message_listener();
+          } else {
+              // too soon so wait until page is loaded
+              // window.addEventListener('load', enhance_snap, false); didn't work
+              setTimeout(enhance_snap, 100);
+          }
       };
-      if (document.body && world.children.length > 0) {
-          enhance_snap();
-      } else {
-          // too soon so wait until page is loaded
-          window.addEventListener('load', enhance_snap, false);
-      }
+    enhance_snap();
     const get_global_variable_value = function (name, default_value) {
           // returns the value of the Snap! global variable named 'name'
           // if none exists returns default_value
