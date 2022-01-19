@@ -8,7 +8,7 @@ let world;
 window.addEventListener('load', function () {
 	if ('serviceWorker' in navigator && window.location.hostname !== 'localhost') { 
 	    // No Prgressive Web App caching if running localhost
-        navigator.serviceWorker.register('sw.js');
+        navigator.serviceWorker.register('sw-snap.js');
     }
     SnapExtensions.scripts.push('https://ecraft2learn.github.io/ai/ecraft2learn.js'); // is in modified snap.html
 	var world_canvas = document.getElementById('world');
