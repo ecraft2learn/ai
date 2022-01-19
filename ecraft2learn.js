@@ -262,7 +262,7 @@ window.ecraft2learn =
           enhance_snap_openProject();
           workaround_snap_message_listener();
       };
-      if (document.body) {
+      if (document.body && world.children.length > 0) {
           enhance_snap();
       } else {
           // too soon so wait until page is loaded
