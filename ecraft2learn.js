@@ -257,7 +257,7 @@ window.ecraft2learn =
                                   });
       };
       const enhance_snap = () => {
-          if (document.body && world.children.length > 0) {
+          if (document.body && world && world.children.length > 0) {
               track_whether_snap_is_stopped();
               enhance_stop_all_sounds();
               enhance_snap_openProject();
