@@ -1,0 +1,18 @@
+{
+    "name": "AI Blocks Guide",
+    "short_name": "AI Guide",
+    "icons": [
+        {
+            "src": "images/eCraft2Learn-icon-72x72.png",
+            "sizes": "72x72",
+            "type": "image/png"
+        },
+    ],
+    "scope": "https://ecraft2learn.github.io/ai/",
+    "lang": "en-US",
+    "start_url": "index.html",
+    "id": "index.html",
+    "display": "standalone",
+    "background_color": "white",
+    "theme_color": "white"
+}
