@@ -1,6 +1,6 @@
 importScripts('/ai/js/service-worker-utilities.js');
 
-const cache_name = 'snap-ai-guide-v1',
+const cache_name = 'snap-ai-guide-v2',
     files_to_cache = [
 '/ai/index.html',
 '/ai/AI-Teacher-Guide/chapter-1.html',
@@ -154,7 +154,7 @@ const cache_name = 'snap-ai-guide-v1',
 '/ai/images/oxford-crestsq.png',
 '/ai/images/part%20of%20speech%20broadcast.png',
 '/ai/images/pentagon.png',
-'/ai/snap/images/pose-detection.gif', // over 14MB
+'/ai/images/pose-detection.gif', // over 14MB
 '/ai/images/powered-by-yahoo.png',
 '/ai/images/predict%20function.png',
 '/ai/images/question%20answer.png',
