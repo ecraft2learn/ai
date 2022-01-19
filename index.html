@@ -15,8 +15,12 @@ window.addEventListener('load',
             // No Prgressive Web App caching if running localhost
             navigator.serviceWorker.register('sw-ai-guide.js');
         }
-        if (window.location.search !== '') {
-            window.location.replace(window.location.search.substring(1));
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            // running as a PWA
+            const links = [...document.getElementsByTagName('a')];
+            links.forEach((link) => {
+                link.removeAttribute("target");
+            });
         }   
     });
 </script>
