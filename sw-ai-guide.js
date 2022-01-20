@@ -1,8 +1,9 @@
 importScripts('/ai/js/service-worker-utilities.js');
 
-const cache_name = 'snap-ai-guide-v2',
+const cache_name = 'snap-ai-guide-v3',
     files_to_cache = [
 '/ai/index.html',
+'/ai/manifest.json',
 '/ai/AI-Teacher-Guide/chapter-1.html',
 '/ai/AI-Teacher-Guide/chapter-2.html',
 '/ai/AI-Teacher-Guide/chapter-3.html',
