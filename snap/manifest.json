@@ -56,8 +56,8 @@
     ],
     "scope": "https://ecraft2learn.github.io/ai/",
     "lang": "en-US",
-    "start_url": "snap.html",
-    "id": "snap.html",
+    "start_url": "/ai/snap/snap.html",
+    "id": "/ai/snap/snap.html",
     "display": "standalone",
     "background_color": "white",
     "theme_color": "white"

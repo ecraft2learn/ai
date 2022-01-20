@@ -15,8 +15,8 @@
     ],
     "scope": "https://ecraft2learn.github.io/ai/",
     "lang": "en-US",
-    "start_url": "index.html",
-    "id": "index.html",
+    "start_url": "/ai/index.html",
+    "id": "/ai/index.html",
     "display": "standalone",
     "background_color": "white",
     "theme_color": "white"
