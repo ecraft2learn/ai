@@ -13,7 +13,7 @@
             "type": "image/png"
         }
     ],
-    "scope": "https://ecraft2learn.github.io/ai/",
+    "scope": "/ai/",
     "lang": "en-US",
     "start_url": "/ai/index.html",
     "id": "/ai/index.html",
