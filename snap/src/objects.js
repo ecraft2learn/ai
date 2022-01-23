@@ -9,7 +9,7 @@
     written by Jens Mönig
     jens@moenig.org
 
-    Copyright (C) 2021 by Jens Mönig
+    Copyright (C) 2022 by Jens Mönig
 
     This file is part of Snap!.
 
@@ -87,7 +87,7 @@ BlockVisibilityDialogMorph*/
 
 /*jshint esversion: 6*/
 
-modules.objects = '2021-December-13';
+modules.objects = '2022-January-20';
 
 var SpriteMorph;
 var StageMorph;
@@ -172,7 +172,9 @@ SpriteMorph.prototype.allCategories = function () {
 };
 
 SpriteMorph.prototype.blockColorFor = function (category) {
-    return this.blockColor[category] || this.customCategories.get(category);
+    return this.blockColor[category] ||
+        this.customCategories.get(category) ||
+        this.blockColor.other;
 };
 
 SpriteMorph.prototype.paletteColor = new Color(55, 55, 55);
@@ -1791,7 +1793,8 @@ SpriteMorph.prototype.blockAlternatives = {
     reportMax: ['reportMin', 'reportSum', 'reportDifference', 'reportProduct',
         'reportQuotient', 'reportPower', 'reportModulus', 'reportAtan2'],
     reportLessThan: ['reportLessThanOrEquals', 'reportEquals',
-        'reportNotEquals', 'reportGreaterThan', 'reportGreaterThanOrEquals'],
+        'reportIsIdentical', 'reportNotEquals', 'reportGreaterThan',
+        'reportGreaterThanOrEquals'],
     reportEquals: ['reportIsIdentical', 'reportNotEquals', 'reportLessThan',
         'reportLessThanOrEquals', 'reportGreaterThan',
         'reportGreaterThanOrEquals'],
@@ -3254,7 +3257,8 @@ SpriteMorph.prototype.isDisablingBlock = function (aBlock) {
 };
 
 SpriteMorph.prototype.changeBlockVisibility = function (aBlock, hideIt, quick) {
-    var ide, dict, cat;
+    var ide = this.parentThatIsA(IDE_Morph),
+        dict, cat;
     if (aBlock.isCustomBlock) {
         (aBlock.isGlobal ? aBlock.definition
             : this.getMethod(aBlock.semanticSpec)
@@ -4922,7 +4926,7 @@ SpriteMorph.prototype.write = function (text, size) {
     // thanks to Michael Ball for contributing this code!
     if (typeof text !== 'string' && typeof text !== 'number') {
         throw new Error(
-            'LABEL can only draw text or numbers, not a ' +
+            localize('can only write text or numbers, not a') + ' ' +
             typeof text
         );
     }
@@ -5518,7 +5522,7 @@ SpriteMorph.prototype.setEffect = function (effect, value) {
             ],
             eff
     )) {
-        throw new Error(localize('unsupported graphic effect') + ':\n' + eff);
+        throw new Error(localize('unsupported graphic effect') + ': "' + eff + '"');
     }
     if (eff === 'ghost') {
         this.alpha = 1 - Math.min(Math.max(+value || 0, 0), 100) / 100;
@@ -6128,6 +6132,7 @@ SpriteMorph.prototype.setRotationCenter = function (absoluteCoordinate) {
     if (!this.costume) {
         throw new Error('setting the rotation center requires a costume');
     }
+    this.shadowAttribute('costumes');
     delta = absoluteCoordinate.subtract(
         new Point(this.xPosition(), this.yPosition())
     ).divideBy(this.scale).rotateBy(radians(90 - this.heading));

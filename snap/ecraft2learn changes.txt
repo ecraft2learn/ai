@@ -1,5 +1,6 @@
 snap.html - replace end with custom onload and additional files
 
-sw.js - added many ecraft2learn URLs
+Update libaries
 
-api.js - Adobe's Acrobat Chrome extension was triggering error in Snap! message handler so moved binding inside
+api.js - Adobe's Acrobat Chrome extension was triggering error in Snap! message handler so moved binding inside Move 
+var ide = world.children[0];

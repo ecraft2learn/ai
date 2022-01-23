@@ -9,7 +9,7 @@
     written by Jens Mönig
     jens@moenig.org
 
-    Copyright (C) 2021 by Jens Mönig
+    Copyright (C) 2022 by Jens Mönig
 
     This file is part of Snap!.
 
@@ -86,7 +86,7 @@ BlockVisibilityDialogMorph, ThreadManager*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.gui = '2021-December-17';
+modules.gui = '2022-January-21';
 
 // Declarations
 
@@ -1055,7 +1055,7 @@ IDE_Morph.prototype.createControlBar = function () {
         }
         this.rerender();
     };
-    
+
     button.labelColor = new Color(
         0,
         MorphicPreferences.isFlat ? 100 : 200,
@@ -4768,8 +4768,8 @@ IDE_Morph.prototype.aboutSnap = function () {
         module, btn1, btn2, btn3, btn4, licenseBtn, translatorsBtn,
         world = this.world();
 
-    aboutTxt = 'Snap! 7.0.1\nBuild Your Own Blocks\n\n'
-        + 'Copyright \u24B8 2008-2021 Jens M\u00F6nig and '
+    aboutTxt = 'Snap! 7.0.6\nBuild Your Own Blocks\n\n'
+        + 'Copyright \u24B8 2008-2022 Jens M\u00F6nig and '
         + 'Brian Harvey\n'
         + 'jens@moenig.org, bh@cs.berkeley.edu\n\n'
         + '        Snap! is developed by the University of California, '

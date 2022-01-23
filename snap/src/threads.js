@@ -9,7 +9,7 @@
     written by Jens Mönig
     jens@moenig.org
 
-    Copyright (C) 2021 by Jens Mönig
+    Copyright (C) 2022 by Jens Mönig
 
     This file is part of Snap!.
 
@@ -64,7 +64,7 @@ SnapExtensions, AlignmentMorph, TextMorph, Cloud, HatBlockMorph*/
 
 /*jshint esversion: 6*/
 
-modules.threads = '2021-December-15';
+modules.threads = '2022-January-21';
 
 var ThreadManager;
 var Process;
@@ -861,7 +861,7 @@ Process.prototype.doApplyExtension = function (prim, args) {
 Process.prototype.reportApplyExtension = function (prim, args) {
     var ext = SnapExtensions.primitives.get(prim);
     if (isNil(ext)) {
-        throw new Error('missing / unspecified extension: ' + prim);
+        throw new Error(localize('missing / unspecified extension') + ': ' + prim);
     }
     return ext.apply(
         this.blockReceiver(),
@@ -1170,7 +1170,7 @@ Process.prototype.throwError = function (error, element) {
     this.errorFlag = true;
     this.topBlock.addErrorHighlight();
     if (ide.isAppMode) {
-        ide.showMessage(error.name + '\n' + error.message);
+        ide.showMessage(localize(error.name) + '\n' + error.message);
     } else {
         if (isNil(m) || isNil(m.world())) {m = this.topBlock; }
         m.showBubble(
@@ -1213,8 +1213,8 @@ Process.prototype.errorBubble = function (error, element) {
     // Return a morph containing an image of the elment causing the error
     // above the text of error.
     var errorMorph = new AlignmentMorph('column', 5),
-        errorIsNested = isNil(element.world()),
-        errorPrefix = errorIsNested ? `${localize('Inside a custom block')}:\n`
+        errorIsNested = !!element && isNil(element.world()),
+        errorPrefix = errorIsNested ? `${localize('Inside a custom block')}\n`
             : '',
         errorMessage = new TextMorph(
             `${errorPrefix}${localize(error.name)}:\n${localize(error.message)}`,
@@ -1223,16 +1223,18 @@ Process.prototype.errorBubble = function (error, element) {
         blockToShow = element;
 
     errorMorph.add(errorMessage);
-    if (errorIsNested) {
+
+    if (errorIsNested && error.cause !== 'user') {
         if (blockToShow.selector === 'reportGetVar') {
             // if I am a single variable, show my caller in the output.
             blockToShow = blockToShow.parent;
         }
-        errorMorph.text += `\n${localize('The error occured at:')}\n`;
+        errorMorph.children[0].text += `\n${localize('The error occured at')}`;
+        errorMorph.children[0].fixLayout();
         errorMorph.add(blockToShow.fullCopy());
-        errorMorph.fixLayout();
     }
 
+    errorMorph.fixLayout();
     return errorMorph;
 };
 
@@ -1455,7 +1457,12 @@ Process.prototype.initializeFor = function (context, args) {
         );
     }
     if (!(context instanceof Context)) {
-        throw new Error('expecting a ring but getting ' + context);
+        throw new Error(
+            localize('expecting a') + ' ' +
+            localize('ring') + ' ' +
+            localize('but getting a') + ' ' +
+            localize(this.reportTypeOf(context))
+        );
     }
 
     var outer = new Context(null, null, context.outerContext),
@@ -2094,19 +2101,25 @@ Process.prototype.reportListAttribute = function (choice, list) {
         if (list.canBeTXT()) {
             return list.asTXT();
         }
-        throw new Error('unable to convert to lines');
+        throw new Error(
+            localize('unable to convert to') + ' ' + localize('lines')
+        );
     case 'csv':
         this.assertType(list, 'list');
         if (list.canBeCSV()) {
             return list.asCSV();
         }
-        throw new Error('unable to convert to CSV');
+        throw new Error(
+            localize('unable to convert to') + ' ' + localize('CSV')
+        );
     case 'json':
         this.assertType(list, 'list');
         if (list.canBeJSON()) {
             return list.asJSON();
         }
-        throw new Error('unable to convert to JSON');
+        throw new Error(
+            localize('unable to convert to') + ' ' + localize('JSON')
+        );
     default:
         return 0;
     }
@@ -3744,8 +3757,10 @@ Process.prototype.doBroadcast = function (message, receivers) {
                         procs.push(stage.threads.startProcess(
                             block,
                             morph,
-                            stage.isThreadSafe || // make "any msg" threadsafe
-                                block.inputs()[0].evaluate() instanceof Array,
+                            stage.isThreadSafe,
+                            // commented out for now to enable tail recursion:
+                            // || // make "any msg" threadsafe
+                            // block.inputs()[0].evaluate() instanceof Array,
                             null, // exportResult (bool)
                             null, // callback
                             null, // isClicked
@@ -3818,7 +3833,15 @@ Process.prototype.assertType = function (thing, typeString) {
     if (typeString instanceof Array && contains(typeString, thingType)) {
         return true;
     }
-    throw new Error('expecting ' + typeString + ' but getting ' + thingType);
+    throw new Error(
+        localize('expecting a') + ' ' +
+        (typeString instanceof Array ?
+            typeString.reduce((a, b) => localize(a) + ' / ' + localize(b)) // +++
+            : localize(typeString)) +
+        ' ' +
+        localize('but getting a') + ' ' +
+        localize(thingType)
+    );
 };
 
 Process.prototype.assertAlive = function (thing) {
@@ -4340,7 +4363,7 @@ Process.prototype.reportStringSize = function (data) {
     if (data instanceof List) { // catch a common user error
         return data.length();
     }
-    return isNil(data) ? 0 : data.toString().length;
+    return isNil(data) ? 0 : Array.from(data.toString()).length;
 };
 
 Process.prototype.reportUnicode = function (string) {
@@ -4398,10 +4421,20 @@ Process.prototype.reportBasicTextSplit = function (string, delimiter) {
         str,
         del;
     if (!contains(types, strType)) {
-        throw new Error('expecting text instead of a ' + strType);
+        throw new Error(
+            localize('expecting a') + ' ' +
+            localize('text') + ' ' +
+            localize('but getting a') + ' ' +
+            localize(strType)
+        );
     }
     if (!contains(types, delType)) {
-        throw new Error('expecting a text delimiter instead of a ' + delType);
+        throw new Error(
+            localize('expecting a') + ' ' +
+            localize('text') + ' ' +
+            localize('but getting a') + ' ' +
+            localize(delType)
+        );
     }
     str = isNil(string) ? '' : string.toString();
     switch (this.inputOption(delimiter)) {
@@ -4569,6 +4602,9 @@ Process.prototype.assemble = function (blocks) {
     }
     if (blocks.isEmpty()) {
         return blocks;
+    }
+    if (this.reportIsA(blocks.at(1), 'number')) {
+        return blocks.map(each => this.assemble(each));
     }
     return blocks.map(each => this.assemble(each)).itemsArray().reduce(
         (a, b) => a.copyWithNext(b)
@@ -4754,7 +4790,7 @@ Process.prototype.goToLayer = function (name) {
 
 // Process scene primitives
 
-Process.prototype.doSwitchToScene = function (id, transmission) { // +++
+Process.prototype.doSwitchToScene = function (id, transmission) {
     var rcvr = this.blockReceiver(),
         idx = 0,
         message = this.inputOption(transmission.at(1)),
@@ -5879,18 +5915,20 @@ Process.prototype.reportContextFor = function (context, otherObj) {
         rootVars;
 
     result.receiver = otherObj;
-    if (result.outerContext) {
-        result.outerContext = copy(result.outerContext);
-        result.outerContext.variables = copy(result.outerContext.variables);
-        result.outerContext.receiver = otherObj;
-        if (result.outerContext.variables.parentFrame) {
-            rootVars = result.outerContext.variables.parentFrame;
-            receiverVars = copy(otherObj.variables);
-            receiverVars.parentFrame = rootVars;
-            result.outerContext.variables.parentFrame = receiverVars;
-        } else {
-            result.outerContext.variables.parentFrame = otherObj.variables;
-        }
+    if (!result.outerContext) {
+        result.outerContext = new Context();
+        result.variables.parentFrame = result.outerContext.variables;
+    }
+    result.outerContext = copy(result.outerContext);
+    result.outerContext.variables = copy(result.outerContext.variables);
+    result.outerContext.receiver = otherObj;
+    if (result.outerContext.variables.parentFrame) {
+        rootVars = result.outerContext.variables.parentFrame;
+        receiverVars = copy(otherObj.variables);
+        receiverVars.parentFrame = rootVars;
+        result.outerContext.variables.parentFrame = receiverVars;
+    } else {
+        result.outerContext.variables.parentFrame = otherObj.variables;
     }
     return result;
 };
@@ -6085,7 +6123,7 @@ Process.prototype.doMapCodeOrHeader = function (aContext, anOption, aString) {
         return this.doMapHeader(aContext, aString);
     }
     throw new Error(
-        ' \'' + anOption + '\'\nis not a valid option'
+        ' \'' + anOption + '\'\n' + localize('is not a valid option')
     );
 };
 
@@ -6122,7 +6160,7 @@ Process.prototype.doMapValueCode = function (type, aString) {
         break;
     default:
         throw new Error(
-            localize('unsupported data type') + ' ' + tp
+            localize('unsupported data type') + ': "' + tp + '"'
         );
     }
 
@@ -6965,6 +7003,11 @@ Context.prototype.toString = function () {
 };
 
 Context.prototype.image = function () {
+    var ring = this.toBlock();
+    return ring.doWithAlpha(1, () => ring.fullImage());
+};
+
+Context.prototype.toBlock = function () {
     var ring = new RingMorph(),
         block,
         cont;
@@ -6983,21 +7026,16 @@ Context.prototype.image = function () {
             }
         }
         ring.embed(block, this.inputs);
-        return ring.doWithAlpha(
-            1,
-            () => {
-                ring.clearAlpha();
-                return ring.fullImage();
-            }
-        );
+        ring.clearAlpha();
+        return ring;
     }
     if (this.expression instanceof Array) {
         block = this.expression[this.pc].fullCopy();
         if (block instanceof RingMorph && !block.contents()) { // empty ring
-            return block.doWithAlpha(1, () => block.fullImage());
+            return block;
         }
         ring.embed(block, this.isContinuation ? [] : this.inputs);
-        return ring.doWithAlpha(1, () => ring.fullImage());
+        return ring;
     }
 
     // otherwise show an empty ring
@@ -7010,7 +7048,7 @@ Context.prototype.image = function () {
             ring.parts()[1].addInput(inp)
         );
     }
-    return ring.doWithAlpha(1, () => ring.fullImage());
+    return ring;
 };
 
 // Context continuations:
@@ -7145,7 +7183,7 @@ Context.prototype.components = function () {
 Context.prototype.equalTo = function (other) {
     var c1 = this.components(),
         c2 = other.components();
-    if (snapEquals(c1.cdr(), c2.cdr())) {
+    if (this.emptyOrEqual(c1.cdr(), c2.cdr())) {
         if (this.expression && this.expression.length === 1 &&
                 other.expression && other.expression.length === 1) {
             return snapEquals(this.expression[0], other.expression[0]);
@@ -7155,9 +7193,18 @@ Context.prototype.equalTo = function (other) {
     return false;
 };
 
+Context.prototype.emptyOrEqual = function (list1, list2) {
+    // private - return TRUE if both lists are either equal
+    // or only contain empty items
+    return list1.equalTo(list2) || (
+        list1.itemsArray().every(item => !item) &&
+        list2.itemsArray().every(item => !item)
+    );
+};
+
 Context.prototype.copyWithInputs = function (inputs) {
     return this.expression ?
-        this.expression.copyWithInputs(inputs, this.inputs.slice())
+        this.expression.copyWithInputs(inputs)
         : this;
 };
 
