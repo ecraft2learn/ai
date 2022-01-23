@@ -141,14 +141,21 @@ window.addEventListener(
         if ('serviceWorker' in navigator && window.location.hostname !== 'localhost') { 
             // No Progressive Web App caching if running localhost
             navigator.serviceWorker.register('/ai/sw-for-ai-guide.js');
-        } 
+        }
+        const links = [...document.getElementsByTagName('a')];
         if (window.matchMedia('(display-mode: standalone)').matches) {
             // running as a PWA so don't open new tabs
-            const links = [...document.getElementsByTagName('a')];
             links.forEach((link) => {
                 link.removeAttribute("target");
             });
-        } 
+        } else {
+            // see https://web.dev/external-anchors-use-rel-noopener/?utm_source=lighthouse&utm_medium=devtools
+            links.forEach(link => {
+                if (link.getAttribute('target') === '_blank') {
+                    link.setAttribute('rel', 'noopener')
+                }    
+            });
+        }
 });
 
 // copy over search query and hash from URL to appropriate links
