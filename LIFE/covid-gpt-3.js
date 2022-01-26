@@ -120,9 +120,9 @@ let all_questions = [
     "What is the advice on use of gloves in the community?",
     "Should people in the community wear gloves?",
     "Is it ok to change gloves in a patient's room?",
-    "Can we change gloves while in patients’ room?",
+    "Can we change gloves while in patientsÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ room?",
     "Is it safe for healthcare workers to change gloves while in a patient's room?",
-    "Can healthcare workers change gloves in patients’ room?",
+    "Can healthcare workers change gloves in patientsÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ room?",
     "Should coveralls be worn when taking care of COVID-19 patients?",
     "Are coveralls recommended when taking care of patients?",
     "When taking care of covid patients should one wear coveralls?",
@@ -353,7 +353,80 @@ let all_questions = [
     "How does quarantine and isolation differ?"
 ];
 
-function get_gpt3_embeddings (questions, callback) {
-    const embeddings = questions.map(question => embeddings[all_questions.indexOf(question)]);
-    callback(tf.tensor(embeddings));    
+function obtain_gpt3_embeddings(questions, callback) {
+    const embeddings_for_questions = 
+        questions.map(question_group =>
+            tf.tensor(question_group.map(question => embeddings[all_questions.indexOf(question)])));
+    callback(embeddings_for_questions);  
 }
+
+//const all_questions_tensors = tf.tensor(all_questions);
+
+const test_each = () => {
+    let bad_count = 0;
+    embeddings.forEach((embedding, index) => {
+        const all_but = embeddings.slice(0, index).concat(embeddings.slice(index+1));
+        const all_but_tensor = tf.tensor(all_but);
+        const embedding_tensor = tf.tensor(embedding);
+        const cosines_tensor = tf.metrics.cosineProximity(embedding_tensor, all_but_tensor);
+        const question_order_cosines = cosines_tensor.dataSync();
+        cosines_tensor.dispose();
+        all_but_tensor.dispose();
+        embedding_tensor.dispose();
+        const sorted_cosines = [...question_order_cosines].sort((a,b) => a-b);
+        const group_number = x => Math.floor(x/4);
+        const adjust = x => x < index ? x : x+1;
+        const first_in_group = group_number(index)*4;
+        const in_group_1 = sorted_cosines.indexOf(question_order_cosines[first_in_group+0]);
+        const in_group_2 = sorted_cosines.indexOf(question_order_cosines[first_in_group+1]);
+        const in_group_3 = sorted_cosines.indexOf(question_order_cosines[first_in_group+2]);
+        const correct_group = group_number(index);
+        const closest_index = adjust(question_order_cosines.indexOf(sorted_cosines[0]));
+//         let votes = [];
+//         const group_in_the_top_n = (n) => { 
+//             for (let i = 0; i < n; i++) {
+//                 votes.push(adjust(question_order_cosines.indexOf(sorted_cosines[i])))
+//             }
+//         };
+        let groups = []; // votes.map(group_number);
+//         const k = 10;
+//         group_in_the_top_n(all_questions.length-1);
+        // const good = in_group_1 === 0 || in_group_2 === 0 | in_group_3 === 0;
+        const first_to_get_n_votes = (n) => {
+            let votes_so_far = {};
+            for (let i = 0; i < all_questions.length; i++) {
+                let group = group_number(adjust(question_order_cosines.indexOf(sorted_cosines[i])));
+                groups.push(group);
+                if (!votes_so_far[group]) {
+                    votes_so_far[group] = 0;
+                }
+                votes_so_far[group]++;
+                if (votes_so_far[group] === n) {
+                    return(group);
+                }
+            }
+        }
+        const best_group = first_to_get_n_votes(3);
+        const good = correct_group === best_group;  
+        if (!good) {
+            console.log('index of closest', closest_index,
+                        'group of closest', group_number(closest_index),
+                        'top score', sorted_cosines[0].toFixed(3));
+            console.log(//'ok', good ? "good" : "bad",
+                        'index', index,
+                        'group', correct_group, 
+                        // 1-indexing so that '2' means second highest
+                        'in-group1', in_group_1+1, question_order_cosines[first_in_group+0].toFixed(3),
+                        'in-group2', in_group_2+1, question_order_cosines[first_in_group+1].toFixed(3),
+                        'in-group3', in_group_3+1, question_order_cosines[first_in_group+2].toFixed(3),
+                        );
+            console.log(groups);
+//             console.log(question_order_cosines[k-1].toFixed(3), question_order_cosines[0].toFixed(3));
+            console.log('---------------');
+            bad_count++;
+        }
+    });
+    console.log('bad count', bad_count);    
+};
+
+test_each();
