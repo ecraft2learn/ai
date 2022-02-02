@@ -19,7 +19,7 @@ let answers = [];
 let embedding_model;
 let loaded_model;
 
-let knn_classifier; // will be bound if 'knn' is a URL option
+let knn_classifier; // will be bound if use_knn_classifier is true
 
 const logs = {
 	unanswered: [],
@@ -179,7 +179,14 @@ const setup = () => {
 	group_of_questions = group_of_questions_and_answers.group_of_questions;
 	answers = group_of_questions_and_answers.answers;
 	let group_of_questions_embeddings = [];
-    const obtain_embeddings = (group_of_questions, callback, group_number) => {
+	const obtain_embeddings = (group_of_questions, callback) => {
+		if (typeof all_questions === 'undefined') {
+			obtain_USE_embeddings(group_of_questions, callback);
+		} else {
+			obtain_gpt3_embeddings(group_of_questions, callback);
+		}
+	};
+    const obtain_USE_embeddings = (group_of_questions, callback, group_number) => {
         if (typeof group_number === 'undefined') {
           	group_number = 0;
         }
@@ -190,7 +197,7 @@ const setup = () => {
             // 'embeddings' is a 2D tensor consisting of the 512-dimensional embeddings for each sentence.
             group_of_questions_embeddings.push(embeddings);
             if (group_number+1 < group_of_questions.length) {
-                obtain_embeddings(group_of_questions, callback, group_number+1);
+                obtain_USE_embeddings(group_of_questions, callback, group_number+1);
             } else {
             	callback(group_of_questions_embeddings);
             }
@@ -488,10 +495,20 @@ const setup = () => {
     };
     const training_data = (callback) => {
     	let inputs_and_outputs = [];
-    	const group_tensors = Object.values(LIFE.knn_dataset);   	
+    	let group_tensors;
+    	if (LIFE.knn_dataset) {
+    		group_tensors = Object.values(LIFE.knn_dataset);
+    	} else {
+    		// GPT-3 embeddings
+    		obtain_embeddings(group_of_questions,
+    		                  (embeddings) => {
+    		                  	 group_tensors = embeddings;
+    		                  });    		                  
+    	} 	
     	const number_of_groups = group_tensors.length;
     	group_tensors.forEach((group_tensor, group_number) => {
     		const group_embeddings = group_tensor.arraySync().slice(number_of_test_questions_per_group);
+    		group_tensor.dispose();
     		group_embeddings.forEach((sentence_embedding) => {
     			inputs_and_outputs.push([sentence_embedding, group_number]);
     		})    		

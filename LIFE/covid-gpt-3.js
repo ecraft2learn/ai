@@ -120,9 +120,9 @@ let all_questions = [
     "What is the advice on use of gloves in the community?",
     "Should people in the community wear gloves?",
     "Is it ok to change gloves in a patient's room?",
-    "Can we change gloves while in patientsâ€™ room?",
+    "Can we change gloves while in patients’ room?",
     "Is it safe for healthcare workers to change gloves while in a patient's room?",
-    "Can healthcare workers change gloves in patientsâ€™ room?",
+    "Can healthcare workers change gloves in patients’ room?",
     "Should coveralls be worn when taking care of COVID-19 patients?",
     "Are coveralls recommended when taking care of patients?",
     "When taking care of covid patients should one wear coveralls?",
@@ -355,8 +355,8 @@ let all_questions = [
 
 function obtain_gpt3_embeddings(questions, callback) {
     const embeddings_for_questions = 
-        questions.map(question_group =>
-            tf.tensor(question_group.map(question => embeddings[all_questions.indexOf(question)])));
+        questions.map((question_group, index) =>
+            tf.tensor(question_group.map(question => embeddings[embeddings_gpt3_engine][all_questions.indexOf(question)])));
     callback(embeddings_for_questions);  
 }
 
@@ -369,10 +369,10 @@ const test_each = () => {
     const in_group_3 = [];
     const closest_index = [];
     const bad = [];
-    const analyse_embeddings = (embeddings, index, name) => {
-            const all_but = embeddings.slice(0, index).concat(embeddings.slice(index+1));
+    const analyse_embeddings = (embeddings_list, index, name) => {
+            const all_but = embeddings_list.slice(0, index).concat(embeddings_list.slice(index+1));
             const all_but_tensor = tf.tensor(all_but);
-            const embedding = embeddings[index];
+            const embedding = embeddings_list[index];
             const embedding_tensor = tf.tensor(embedding);
             const cosines_tensor = tf.metrics.cosineProximity(embedding_tensor, all_but_tensor);
             const question_order_cosines = cosines_tensor.dataSync();
@@ -403,16 +403,23 @@ const test_each = () => {
     //         group_in_the_top_n(all_questions.length-1);
             const good = group1 === 0 || group2 === 0 || group3 === 0;
             if (!good) {
-                return([name, 
-                          'closest', closest, 
-                          'group of closest', group_number(closest), 
-                          'correct group', correct_group,
-                          'query', all_questions[index],
-                          'wrong question', all_questions[closest],
-                          'question 1', first_in_group+0 !== index && all_questions[first_in_group+0],
-                          'question 2', first_in_group+1 !== index && all_questions[first_in_group+1],
-                          'question 3', first_in_group+2 !== index && all_questions[first_in_group+2],
-                          'question 4', first_in_group+3 !== index && all_questions[first_in_group+3]]);
+                if (name === 'USE')
+                    embedding_model.embed([all_questions[closest]]).then(embedding => {
+                        if (embedding.arraySync()[0][0] !== embeddings['USE'][closest][0]) {
+                            console.log('closest', embedding.arraySync()[0]);
+                            console.log('in USE', embeddings['USE'][closest]);
+                        }
+                    });
+                return(name + ": " + 
+                          'closest: ' + closest + 
+                          ' group of closest: ' + group_number(closest) + 
+                          ' correct group: ' + correct_group + '\n' +
+                          ' query: ' + all_questions[index] + '\n' +
+                          ' wrong question: ' + all_questions[closest] + '\n' +
+                          (first_in_group+0 !== index ? ' question 1: ' + all_questions[first_in_group+0] + '\n' : '') +
+                          (first_in_group+1 !== index ? ' question 2: ' + all_questions[first_in_group+1] + '\n' : '') +
+                          (first_in_group+2 !== index ? ' question 3: ' + all_questions[first_in_group+2] + '\n' : '') +
+                          (first_in_group+3 !== index ? ' question 4: ' + all_questions[first_in_group+3] + '\n' : ''));
             }
 //             const first_to_get_n_votes = (n) => {
 //                 let votes_so_far = {};
@@ -433,15 +440,17 @@ const test_each = () => {
     }
     const analyse_all_embeddings = (names) => {
         for (index = 0; index < all_questions.length; index++) {
-            const problems = [];
+            let problems = '';
+            let count = 0;
             names.forEach(name => {
                 const problem = analyse_embeddings(embeddings[name], index, name);
                 if (problem) {
-                    problems.push(problem);
+                    problems += problem + "\n";
+                    count++;
                 }
             });
-            if (problems.length > 0) {
-                bad.push(problems);
+            if (count > 0) {
+                bad.push(count + ' sources wrong:\n' + problems);
             }   
         };
     };
@@ -464,4 +473,36 @@ const test_each = () => {
     console.log(bad);    
 };
 
-test_each();
+let embedding_model; // for debugging
+
+const load_use = (callback) => {
+    use.load().then((model) => {
+//         model.embed([all_questions[11], "Should coveralls be worn when taking care of coronavirus patients?", all_questions[9], all_questions[10], all_questions[8]]).then(e => {
+//             const embeddings = e.arraySync();
+//             const cosines_tensor = tf.metrics.cosineProximity(tf.tensor([embeddings[0]]), tf.tensor(embeddings.slice(1)))
+//             const cosines = cosines_tensor.arraySync();
+//             console.log(cosines);
+//         });
+        embedding_model = model;
+        embeddings['USE'] = [];
+        const chunks = 16;
+        let chunk_size = all_questions.length/chunks;
+        const next_chunk = (i) => {
+            model.embed(all_questions.slice(i*chunk_size, (i+1)*chunk_size)).then(embeddings_tensor => {
+                embeddings['USE'] = embeddings['USE'].concat(embeddings_tensor.arraySync());
+                embeddings_tensor.dispose();
+                if (i < chunks-1) {
+                    setTimeout(() => { // give other processes a chance to run
+                        next_chunk(i+1);
+                    });
+                } else {
+                    callback();
+                }
+            });
+         };
+         next_chunk(0); 
+    });
+};
+
+// load_use(test_each);
+// test_each();

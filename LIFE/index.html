@@ -12,6 +12,13 @@
     <script src="../js/load-scripts.js"></script>
 <!--     following needs updating -->
     <link rel="manifest" href="/ai/LIFE/LIFE.webmanifest">
+
+<!-- following only for testing GPT-3 embeddings -->
+<script>
+window.embeddings = {};
+window.embeddings_gpt3_engine = 'davinci';
+</script>
+
 <script>
 if ('serviceWorker' in navigator && window.location.hostname !== 'localhost') {
     navigator.serviceWorker.register('service-worker.js');
@@ -34,6 +41,14 @@ topics.forEach(topic_name => {
 	    topic = topic_name;
 	}
 });
+
+let use_knn_classifier = true; // parameter_option('knn');
+
+if (parameter_option('gpt3')) {
+	use_knn_classifier = false;
+	load_local_or_remote_scripts([embeddings_gpt3_engine + '-embeddings.js',
+	                              'covid-gpt-3.js'])
+}
 
 let mode;
 let covid_scenario_number;
@@ -68,7 +83,7 @@ const report_model_name = (topic) => {
 	if (topic === 'pneumonia') {
 		return (mode === 'create model' || mode === 'search') ? "27-11-2019b-pneumonia" : "27-11-2019a-pneumonia";
 	} else if (topic === 'covid') {
-		return (mode === 'create model' || mode === 'search') ? "12-10-2020-covid" : "12-10-2020-covid";
+		return (mode === 'create model' || mode === 'search') ? "01-02-2022-covid-" + embeddings_gpt3_engine : "12-10-2020-covid";
 	} else if (topic === 'neonatal'){
 		return (mode === 'create model' || mode === 'search') ? "27-10-2019a" : "26-10-2019b";
 	}
@@ -76,7 +91,6 @@ const report_model_name = (topic) => {
 
 let model_name = report_model_name(topic);
 
-const use_knn_classifier = true; // parameter_option('knn');
 const save_knn_data = parameter_option('save-knn-data');
 
 const log_each_prediction = false;
@@ -85,7 +99,7 @@ const model_options = {
     seed: (number) => Math.round((number+Math.random())*1000000),
     model_name: model_name,
     score_threshold: 0.5,
-    hidden_layer_sizes: [1536,128,16],
+    hidden_layer_sizes: [2048,352,176], // [1536,128,16],
     batch_size: 256,
     dropout_rate: .5,
     batch_normalization: false,
@@ -96,16 +110,16 @@ const model_options = {
     layer_initializer: (index) => tf.initializers.varianceScaling({}),
     // for reporting results
     regularizer_name: 'l2(1e-3)',
-    optimizer_name: 'rmsprop(2e-4)',
+    optimizer_name: 'rmsprop(2e-3)',
     layer_initializer_name: 'varianceScaling', 
     testing_fraction: 0,
     validation_fraction: .3,
-    stop_if_no_progress_for_n_epochs: 500,
-    number_of_training_repeats: 3,
+    stop_if_no_progress_for_n_epochs: 100,
+    number_of_training_repeats:  3
     split_data_on_each_experiment: true,
     add_confusion_to_csv: false,
     search: {type: 'randomSearch', // or 'gridSearch' but it triggers an exception
-             number_of_experiments: 1,
+             number_of_experiments: 3,
              space: {
 //              	     epochs: [1000, 2000],
 //          dropout_rate: [0.25, .5,],
