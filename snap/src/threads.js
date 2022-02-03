@@ -64,7 +64,7 @@ SnapExtensions, AlignmentMorph, TextMorph, Cloud, HatBlockMorph*/
 
 /*jshint esversion: 6*/
 
-modules.threads = '2022-January-21';
+modules.threads = '2022-January-30';
 
 var ThreadManager;
 var Process;
@@ -1217,7 +1217,7 @@ Process.prototype.errorBubble = function (error, element) {
         errorPrefix = errorIsNested ? `${localize('Inside a custom block')}\n`
             : '',
         errorMessage = new TextMorph(
-            `${errorPrefix}${localize(error.name)}:\n${localize(error.message)}`,
+            `${errorPrefix}${localize(error.name)}\n${localize(error.message)}`,
             SyntaxElementMorph.prototype.fontSize
         ),
         blockToShow = element;
@@ -1229,7 +1229,7 @@ Process.prototype.errorBubble = function (error, element) {
             // if I am a single variable, show my caller in the output.
             blockToShow = blockToShow.parent;
         }
-        errorMorph.children[0].text += `\n${localize('The error occured at')}`;
+        errorMorph.children[0].text += `\n${localize('The question came up at')}`;
         errorMorph.children[0].fixLayout();
         errorMorph.add(blockToShow.fullCopy());
     }
@@ -4018,8 +4018,8 @@ Process.prototype.reportRandom = function (a, b) {
 };
 
 Process.prototype.reportBasicRandom = function (min, max) {
-    var floor = +min,
-        ceil = +max;
+    var floor = Math.min(+min, +max),
+        ceil = Math.max(+min, +max);
     if ((floor % 1 !== 0) || (ceil % 1 !== 0)) {
         return Math.random() * (ceil - floor) + floor;
     }

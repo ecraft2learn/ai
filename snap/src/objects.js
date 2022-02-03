@@ -83,11 +83,11 @@ SpeechBubbleMorph, InputSlotMorph, isNil, FileReader, TableDialogMorph, String,
 BlockEditorMorph, BlockDialogMorph, PrototypeHatBlockMorph,  BooleanSlotMorph,
 localize, TableMorph, TableFrameMorph, normalizeCanvas, VectorPaintEditorMorph,
 AlignmentMorph, Process, WorldMap, copyCanvas, useBlurredShadows,
-BlockVisibilityDialogMorph*/
+BlockVisibilityDialogMorph, CostumeIconMorph, SoundIconMorph*/
 
 /*jshint esversion: 6*/
 
-modules.objects = '2022-January-20';
+modules.objects = '2022-January-28';
 
 var SpriteMorph;
 var StageMorph;
@@ -10002,6 +10002,25 @@ SpriteBubbleMorph.prototype.dataAsMorph = function (data) {
             false, // italic
             'center'
         );
+
+        // support exporting text / numbers directly from speech balloons:
+        contents.userMenu = function () {
+            var menu = new MenuMorph(this),
+                ide = this.parentThatIsA(IDE_Morph)||
+                    this.world().childThatIsA(IDE_Morph);
+
+            if (ide.isAppMode) {return; }
+            menu.addItem(
+                'export',
+                () => ide.saveFileAs(
+                    data,
+                    'text/plain;charset=utf-8',
+                    localize('data')
+                )
+            );
+            return menu;
+        };
+
     } else if (typeof data === 'boolean') {
         img = sprite.booleanMorph(data).fullImage();
         contents = new Morph();
@@ -10016,8 +10035,103 @@ SpriteBubbleMorph.prototype.dataAsMorph = function (data) {
         contents.bounds.setWidth(img.width);
         contents.bounds.setHeight(img.height);
         contents.cachedImage = img;
+
+        // support costumes to be dragged out of speech balloons:
+        contents.isDraggable = true;
+
+        contents.selectForEdit = function () {
+            var cst = data.copy(),
+                icon,
+                prepare,
+                ide = this.parentThatIsA(IDE_Morph)||
+                    this.world().childThatIsA(IDE_Morph);
+
+            cst.name = ide.currentSprite.newCostumeName(cst.name);
+            icon = new CostumeIconMorph(cst);
+            prepare = icon.prepareToBeGrabbed;
+
+            icon.prepareToBeGrabbed = function (hand) {
+                hand.grabOrigin = {
+                    origin: ide.palette,
+                    position: ide.palette.center()
+                };
+                this.prepareToBeGrabbed = prepare;
+            };
+
+            if (ide.isAppMode) {return; }
+            icon.setCenter(this.center());
+            return icon;
+        };
+
+        // support exporting costumes directly from speech balloons:
+        contents.userMenu = function () {
+            var menu = new MenuMorph(this),
+                ide = this.parentThatIsA(IDE_Morph)||
+                    this.world().childThatIsA(IDE_Morph);
+
+            if (ide.isAppMode) {return; }
+            menu.addItem(
+                'export',
+                () => {
+                    if (data instanceof SVG_Costume) {
+                        // don't show SVG costumes in a new tab (shows text)
+                        ide.saveFileAs(
+                            data.contents.src,
+                            'text/svg',
+                            data.name
+                        );
+                    } else { // rasterized Costume
+                        ide.saveCanvasAs(data.contents, data.name);
+                    }
+                }
+            );
+            return menu;
+        };
+
     } else if (data instanceof Sound) {
         contents = new SymbolMorph('notes', 30);
+
+        // support sounds to be dragged out of speech balloons:
+        contents.isDraggable = true;
+
+        contents.selectForEdit = function () {
+            var snd = data.copy(),
+                icon,
+                prepare,
+                ide = this.parentThatIsA(IDE_Morph)||
+                    this.world().childThatIsA(IDE_Morph);
+
+            snd.name = ide.currentSprite.newSoundName(snd.name);
+            icon = new SoundIconMorph(snd);
+            prepare = icon.prepareToBeGrabbed;
+
+            icon.prepareToBeGrabbed = function (hand) {
+                hand.grabOrigin = {
+                    origin: ide.palette,
+                    position: ide.palette.center()
+                };
+                this.prepareToBeGrabbed = prepare;
+            };
+
+            if (ide.isAppMode) {return; }
+            icon.setCenter(this.center());
+            return icon;
+        };
+
+        // support exporting sounds directly from speech balloons:
+        contents.userMenu = function () {
+            var menu = new MenuMorph(this),
+                ide = this.parentThatIsA(IDE_Morph)||
+                    this.world().childThatIsA(IDE_Morph);
+
+            if (ide.isAppMode) {return; }
+            menu.addItem(
+                'export',
+                () => ide.saveAudioAs(data.audio, data.name)
+            );
+            return menu;
+        };
+
     } else if (data instanceof HTMLCanvasElement) {
         img = data;
         contents = new Morph();
@@ -10051,6 +10165,29 @@ SpriteBubbleMorph.prototype.dataAsMorph = function (data) {
         contents.bounds.setWidth(img.width);
         contents.bounds.setHeight(img.height);
         contents.cachedImage = img;
+
+        // support blocks to be dragged out of speech balloons:
+        contents.isDraggable = true;
+
+        contents.selectForEdit = function () {
+            var script = data.toBlock(),
+                prepare = script.prepareToBeGrabbed,
+                ide = this.parentThatIsA(IDE_Morph)||
+                    this.world().childThatIsA(IDE_Morph);
+
+            script.prepareToBeGrabbed = function (hand) {
+                prepare.call(this, hand);
+                hand.grabOrigin = {
+                    origin: ide.palette,
+                    position: ide.palette.center()
+                };
+                this.prepareToBeGrabbed = prepare;
+            };
+
+            if (ide.isAppMode) {return; }
+            script.setPosition(this.position());
+            return script;
+        };
     } else {
         contents = new TextMorph(
             data.toString(),
@@ -10060,6 +10197,25 @@ SpriteBubbleMorph.prototype.dataAsMorph = function (data) {
             false, // italic
             'center'
         );
+
+        // support exporting text / numbers directly from speech balloons:
+        contents.userMenu = function () {
+            var menu = new MenuMorph(this),
+                ide = this.parentThatIsA(IDE_Morph)||
+                    this.world().childThatIsA(IDE_Morph);
+
+            if (ide.isAppMode) {return; }
+            menu.addItem(
+                'export',
+                () => ide.saveFileAs(
+                    data.toString(),
+                    'text/plain;charset=utf-8',
+                    localize('data')
+                )
+            );
+            return menu;
+        };
+
     }
     if (contents instanceof TextMorph) {
         // reflow text boundaries
@@ -11362,6 +11518,7 @@ CellMorph.prototype.createContents = function () {
     // re-build my contents
     var txt,
         img,
+        myself = this,
         fontSize = SyntaxElementMorph.prototype.fontSize,
         isSameList = this.contentsMorph instanceof ListWatcherMorph
             && (this.contentsMorph.list === this.contents),
@@ -11430,6 +11587,29 @@ CellMorph.prototype.createContents = function () {
             this.contentsMorph.bounds.setWidth(img.width);
             this.contentsMorph.bounds.setHeight(img.height);
             this.contentsMorph.cachedImage = img;
+
+            // support blocks to be dragged out of watchers:
+            this.contentsMorph.isDraggable = true;
+
+            this.contentsMorph.selectForEdit = function () {
+                var script = myself.contents.toBlock(),
+                    prepare = script.prepareToBeGrabbed,
+                    ide = this.parentThatIsA(IDE_Morph) ||
+                        this.world().childThatIsA(IDE_Morph);
+
+                script.prepareToBeGrabbed = function (hand) {
+                    prepare.call(this, hand);
+                    hand.grabOrigin = {
+                        origin: ide.palette,
+                        position: ide.palette.center()
+                    };
+                    this.prepareToBeGrabbed = prepare;
+                };
+
+                if (ide.isAppMode) {return; }
+                script.setPosition(this.position());
+                return script;
+            };
         } else if (this.contents instanceof Costume) {
             img = this.contents.thumbnail(new Point(40, 40));
             this.contentsMorph = new Morph();
@@ -11437,8 +11617,62 @@ CellMorph.prototype.createContents = function () {
             this.contentsMorph.bounds.setWidth(img.width);
             this.contentsMorph.bounds.setHeight(img.height);
             this.contentsMorph.cachedImage = img;
+
+            // support costumes to be dragged out of watchers:
+            this.contentsMorph.isDraggable = true;
+
+            this.contentsMorph.selectForEdit = function () {
+                var cst = myself.contents.copy(),
+                    icon,
+                    prepare,
+                    ide = this.parentThatIsA(IDE_Morph)||
+                        this.world().childThatIsA(IDE_Morph);
+
+                cst.name = ide.currentSprite.newCostumeName(cst.name);
+                icon = new CostumeIconMorph(cst);
+                prepare = icon.prepareToBeGrabbed;
+
+                icon.prepareToBeGrabbed = function (hand) {
+                    hand.grabOrigin = {
+                        origin: ide.palette,
+                        position: ide.palette.center()
+                    };
+                    this.prepareToBeGrabbed = prepare;
+                };
+
+                if (ide.isAppMode) {return; }
+                icon.setCenter(this.center());
+                return icon;
+            };
         } else if (this.contents instanceof Sound) {
             this.contentsMorph = new SymbolMorph('notes', 30);
+
+            // support sounds to be dragged out of watchers:
+            this.contentsMorph.isDraggable = true;
+
+            this.contentsMorph.selectForEdit = function () {
+                var snd = myself.contents.copy(),
+                    icon,
+                    prepare,
+                    ide = this.parentThatIsA(IDE_Morph)||
+                        this.world().childThatIsA(IDE_Morph);
+
+                snd.name = ide.currentSprite.newCostumeName(snd.name);
+                icon = new SoundIconMorph(snd);
+                prepare = icon.prepareToBeGrabbed;
+
+                icon.prepareToBeGrabbed = function (hand) {
+                    hand.grabOrigin = {
+                        origin: ide.palette,
+                        position: ide.palette.center()
+                    };
+                    this.prepareToBeGrabbed = prepare;
+                };
+
+                if (ide.isAppMode) {return; }
+                icon.setCenter(this.center());
+                return icon;
+            };
         } else if (this.contents instanceof List) {
             if (this.contents.isTable()) {
                 this.contentsMorph = new TableFrameMorph(new TableMorph(
@@ -12069,14 +12303,11 @@ WatcherMorph.prototype.userMenu = function () {
                     this.currentValue.canBeCSV()) {
                 menu.addItem(
                     'export as CSV...',
-                    () => {
-                        var ide = this.parentThatIsA(IDE_Morph);
-                        ide.saveFileAs(
-                            this.currentValue.asCSV(),
-                            'text/csv;charset=utf-8', // RFC 4180
-                            this.getter // variable name
-                        );
-                    },
+                    () => ide.saveFileAs(
+                        this.currentValue.asCSV(),
+                        'text/csv;charset=utf-8', // RFC 4180
+                        this.getter // variable name
+                    ),
                     null,
                     new Color(100, 0, 0)
                 );
@@ -12085,14 +12316,11 @@ WatcherMorph.prototype.userMenu = function () {
                     this.currentValue.canBeJSON()) {
                 menu.addItem(
                     'export as JSON...',
-                    () => {
-                        var ide = this.parentThatIsA(IDE_Morph);
-                        ide.saveFileAs(
-                            this.currentValue.asJSON(true), // guess objects
-                            'text/json;charset=utf-8',
-                            this.getter // variable name
-                        );
-                    },
+                    () => ide.saveFileAs(
+                        this.currentValue.asJSON(true), // guess objects
+                        'text/json;charset=utf-8',
+                        this.getter // variable name
+                    ),
                     null,
                     new Color(100, 0, 0)
                 );
@@ -12109,27 +12337,48 @@ WatcherMorph.prototype.userMenu = function () {
             }
             menu.addItem(
                 'export...',
-                () => {
-                    var ide = this.parentThatIsA(IDE_Morph);
-                    ide.saveFileAs(
-                        this.currentValue.toString(),
-                        'text/plain;charset=utf-8',
-                        this.getter // variable name
-                    );
+                () => ide.saveFileAs(
+                    this.currentValue.toString(),
+                    'text/plain;charset=utf-8',
+                    this.getter // variable name
+                )
+            );
+        } else if (this.currentValue instanceof Costume) {
+            menu.addItem(
+                'export...',
+                 () => {
+                    if (this.currentValue instanceof SVG_Costume) {
+                        // don't show SVG costumes in a new tab (shows text)
+                        ide.saveFileAs(
+                            this.currentValue.contents.src,
+                            'text/svg',
+                            this.currentValue.name
+                        );
+                    } else { // rasterized Costume
+                        ide.saveCanvasAs(
+                            this.currentValue.contents,
+                            this.currentValue.name
+                        );
+                    }
                 }
+            );
+        } else if (this.currentValue instanceof Sound) {
+            menu.addItem(
+                'export...',
+                () => ide.saveAudioAs(
+                    this.currentValue.audio,
+                    this.currentValue.name
+                )
             );
         } else if (this.currentValue instanceof List &&
                 this.currentValue.canBeCSV()) {
             menu.addItem(
                 'export...',
-                 () => {
-                    var ide = this.parentThatIsA(IDE_Morph);
-                    ide.saveFileAs(
-                        this.currentValue.asCSV(),
-                        'text/csv;charset=utf-8', // RFC 4180
-                        this.getter // variable name
-                    );
-                }
+                () => ide.saveFileAs(
+                    this.currentValue.asCSV(),
+                    'text/csv;charset=utf-8', // RFC 4180
+                    this.getter // variable name
+                )
             );
             if (this.currentValue.canBeJSON()) {
                 menu.addItem(
@@ -12148,14 +12397,11 @@ WatcherMorph.prototype.userMenu = function () {
                 this.currentValue.canBeJSON()) {
             menu.addItem(
                 'export...',
-                 () => {
-                    var ide = this.parentThatIsA(IDE_Morph);
-                    ide.saveFileAs(
-                        this.currentValue.asJSON(true), // guessObjects
-                        'text/json;charset=utf-8',
-                        this.getter // variable name
-                    );
-                }
+                () => ide.saveFileAs(
+                    this.currentValue.asJSON(true), // guessObjects
+                    'text/json;charset=utf-8',
+                    this.getter // variable name
+                )
             );
         } else if (this.currentValue instanceof Context) {
             vNames = this.currentValue.outerContext.variables.names();

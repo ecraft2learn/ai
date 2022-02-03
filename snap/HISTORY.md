@@ -8,6 +8,83 @@
 * **Documentation Updates:**
 * **Translation Updates:**
 
+## 7.1.2:
+* **Notable Changes:**
+    * friendlier error messages
+* **Translation Updates:**
+    * German
+
+### 2022-01-31
+* new dev version
+* threads, locale: friendlier error messages
+* German translation update
+* prepared v7.1.2
+
+## 7.1.1:
+* **Notable Fixes:**
+    * disabled reporter drops into "When I am ..." hat block (again)
+    * fixed "pick random" for descending ranges, thanks, Brian!
+
+### 2022-01-30
+* new dev version
+* blocks: disabled reporter drops into "When I am ..." hat block (again)
+* threads: fixed #2972 (fixed "pick random" for descending ranges), thanks, Brian!
+* prepared v7.1.1
+
+## 7.1.0:
+* **New Features:**
+    * delete and insert individual variadic slots, script vars & ring params via the context menu
+    * drag blocks, costumes and sounds out from result bubbles, and from speech balloons and variable watchers when in edit mode
+    * export data (costumes, sounds, text, numbers, atomic lists) from result bubbles, and from speech balloons and variable watchers when in edit mode via the context menu
+* **Notable Fixes:**
+    * fixed layout for scrolling custom categories, thanks, Eckart, for the bug report!
+    * text-costumes library: fixed preserving (more) pen state, thanks, Brian!
+* **Translation Updates:**
+    * Hungarian, thank you, Attila Faragó, for this HUGE update!
+    * German
+
+### 2022-01-28
+* tables: support dragging costumes and sounds out from table views
+* blocks: support exporting costumes from result bubbles
+* blocks: support exporting sounds from result bubbles
+* objects: support exporting sounds and costumes from speech balloons in edit mode
+* objects: support exporting sounds and costumes from variable watchers in edit mode
+* blocks: support exporting numbers and text from result bubbles
+* objects: support exporting numbers and text from speech balloons when in edit mode
+* lists: support exporting atomic lists from list watchers everywhere when in edit mode
+* tables: support exporting atomic tables from table views everywhere when in edit mode
+* v7.1.0
+
+### 2022-01-27
+* blocks, gui: support dragging costumes and sounds out from result bubbles
+* objects: support dragging costumes and sounds out from speech balloons
+* objects: support dragging costumes and sounds out from variable watchers
+
+### 2022-01-26
+* blocks: refactored slot context menus
+* blocks: support for deleting and inserting individual script vars & ring params
+* German translation update
+* blocks: support for deleting and inserting individual rings inside variadic inputs
+* updated text-costumes library, thanks, Brian!
+* Hungarian translation update, thank you, Attila Faragó!
+
+### 2022-01-25
+* blocks: support deleting and inserting individual variadic slots
+
+### 2022-01-23
+* morphic: added Node >> childThatIsA
+* tables: support dragging blocks out from table views
+
+### 2022-01-22
+* blocks: support dragging blocks out from result bubbles
+* objects: support dragging blocks out from speech balloons
+* objects: support dragging blocks out from variable watchers
+* morphic, objects: only allow dragging block out from balloons and watchers in edit mode (not in presentation mode)
+
+### 2022-01-21
+* new dev version
+* gui: fixed layout for scrolling custom categories, thanks, Eckart, for the bug report!
+
 ## 7.0.6:
 * **Notable Changes:**
     * added more localizable error strings

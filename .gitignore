@@ -4,3 +4,7 @@ onyx/saved-tensors-v4.js
 onyx/saved-tensors-v5.js
 onyx/saved-tensors-v6.js
 snap/help/SnapManual.md
+LIFE/models/01-02-2022-covid-curie.json
+LIFE/models/01-02-2022-covid-curie.weights.bin
+LIFE/models/01-02-2022-covid-davinci.json
+LIFE/models/01-02-2022-covid-davinci.weights.bin
