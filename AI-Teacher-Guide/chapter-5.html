@@ -388,6 +388,41 @@ An easy way to import a passage into Snap! is to drag a file that contains the p
         container_style = "width: 800px; height: 800px" 
         caption = "Ask questions of a passage of text describing Snap!. TRY IT!">
 </figure>
+
+<h4 class="instructions-white" id="gpt-3">Conversing with GPT-3</h4>
+<p class="background-information">
+<a href="https://en.wikipedia.org/wiki/GPT-3" target="_blank">GPT-3</a> is a neural network model that
+is capable of generating text in response to a prompt.
+The impressive thing is how often the generated text is very appropriate whether it is
+answering questions, fixing the grammar of a sentence, summarising text, or following instructions.
+GPT-3 was trained on hundreds of billions of words from web pages and books.
+Surprisingly, the "only" thing it learns is to predict the next word (or token that is sometimes a part of a word).
+</p>
+
+<p class="instructions">
+You can access GPT-3 from Snap! using the
+<span class="block-name">complete <prompt> using GPT-3 ...</span> block.
+You need to provide it with your <a href="https://openai.com" target="_blank">OpenAI GPT-3 API key</a>.
+It accepts many of the <a href="https://beta.openai.com/docs/api-reference/completions" target="_blank">
+options supported by the OpenAI API</a>.
+</p>
+<figure class = "snap-iframe"
+        id = "GPT-3 exercise"
+        container_style = "width: 750px; height: 410px" 
+        caption = "See how the different GPT-3 engines complete your prompts">
+</figure>
+
+<h4 class="sample-program-white" id="GPT-3 Gopher">Having a conversation with GPT-3</h4>
+<p class="sample-program">
+<a href="../snap/snap.html?project=GPT-3 Gopher" target="_blank">GPT-3 Gopher</a> is a sample program
+that tries to hold a conversation using GPT-3.
+It uses <a href="chapter-2.html">speech recognition</a> to listen to what you say.
+What you say is added to a prompt that tries to get GPT-3 to be a good conversationalist
+by describing the situation and giving it several conversational exchanges.
+It avoids the problem that as the conversation goes on the prompt gets too long for GPT-3
+by truncating it while keeping the context description.
+</p>
+
 <h4 class="sample-program-white" id="codenames">Generating clues for the Codenames board game</h4>
 <p class="sample-program">
 <a href=""target="_blank">Codenames</a> is an award-winning board game.
@@ -601,6 +636,11 @@ the sample project that answers questions about Snap! AI blocks</a>
 Using the <span class="block-name">answer this question ... using this passage ...</span> block
 together with the <span class="block-name">Ask Wikipedia</span> block to make a general question answering program.
 Consider adding speech input and output.
+</li>
+<li>
+There are many ways you can add GPT-3 to your projects by using the 
+<span class="block-name">complete <prompt> using GPT-3 ...</span> block.
+OpenAI lists <a href="https://beta.openai.com/examples" target="_blank">dozens of tasks</a> you can give it.
 </li>
 <li>
 Be creative! Word embeddings are new and there is much that remains to discover.
