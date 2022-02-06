@@ -621,8 +621,8 @@ window.ecraft2learn =
             return voice_number;
         }
         if (typeof default_voice_number === 'undefined') {
-            inform("Unable to find a matching voice",
-                   "This browser does not have a voice that matches " + name_parts.join("-"));
+            console.log("Unable to find a matching voice", // was inform() but that interupts programs 
+                        "This browser does not have a voice that matches " + name_parts.join("-"));
             default_voice_number = 0;          
         }
         return default_voice_number; // interpreted as the default voice for the default_language
