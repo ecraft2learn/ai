@@ -8,7 +8,9 @@ function install_listener (event, cache_name, files_to_cache) {
     event.waitUntil(
         caches.open(cache_name).then(function(cache) {
             console.log("Service worker " + cache_name + " installing");
-            const result = cache.addAll(files_to_cache.map(file => new Request(file, {cache: 'reload'})));
+            const result = cache.addAll(files_to_cache);
+            // was cache.addAll(files_to_cache.map(file => new Request(file, {cache: 'reload'})));
+            // but then every time I loaded a PWA it took a noticable long time
             console.log("Service worker " + cache_name + " cached all files");
             return result;
         })

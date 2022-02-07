@@ -1,6 +1,6 @@
 importScripts('/ai/js/service-worker-utilities.js');
 
-var snapVersion = '7.0.6'
+var snapVersion = '7.1.12'
 
 const cache_name = 'snap-ai-v12';
 
