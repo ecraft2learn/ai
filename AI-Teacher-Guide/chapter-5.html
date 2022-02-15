@@ -431,7 +431,19 @@ by describing the situation and giving it several conversational exchanges.
 It avoids the problem that as the conversation goes on the prompt gets too long for GPT-3
 by truncating it while keeping the context description.
 </p>
-
+<p class="sample-program">
+The project supports three "personas". Gopher is an attempt at a friendly general conversationalist.
+El is prompted to pretend to be an elephant so one can ask her questions like "What is your favourite food?" or 
+"Do you like jogging?".
+Ev pretends to be Mount Everest. Ask her questions like "What do you weigh?" or "How can I come visit you?".
+These different personas are running the same script.
+The only difference is the introductory text and initial sample conversation.
+</p>
+<p class="sample-program">
+Note that this project also illustrates how one can make a completely speech oriented interface.
+Other than the communication of your API key everything uses speech input and output.
+Look at the script to see how it works.
+</p>
 <h4 class="sample-program-white" id="codenames">Generating clues for the Codenames board game</h4>
 <p class="sample-program">
 <a href=""target="_blank">Codenames</a> is an award-winning board game.
@@ -650,6 +662,11 @@ Consider adding speech input and output.
 There are many ways you can add GPT-3 to your projects by using the 
 <span class="block-name">complete <prompt> using GPT-3 ...</span> block.
 OpenAI lists <a href="https://beta.openai.com/examples" target="_blank">dozens of tasks</a> you can give it.
+</li>
+<li>
+The <a href="../snap/snap.html?project=GPT-3 Gopher" target="_blank">GPT-3 and Jurassic 1 sample project</a>
+supports three personas.
+See if you can invent more.
 </li>
 <li>
 Be creative! Word embeddings are new and there is much that remains to discover.
