@@ -1,6 +1,6 @@
-snap.html - replace end with custom onload and additional files
+snap.html - replace end with custom onload and additional files (open snap.html in Wordpad or the like)
 
-Update libaries
+Update libaries (keep copy of LIBRARIES file)
 
 api.js - Adobe's Acrobat Chrome extension was triggering error in Snap! message handler so moved binding inside Move 
 var ide = world.children[0];
