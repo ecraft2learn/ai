@@ -87,7 +87,7 @@ BlockVisibilityDialogMorph, CostumeIconMorph, SoundIconMorph*/
 
 /*jshint esversion: 6*/
 
-modules.objects = '2022-January-28';
+modules.objects = '2022-February-22';
 
 var SpriteMorph;
 var StageMorph;
@@ -1428,6 +1428,11 @@ SpriteMorph.prototype.initBlocks = function () {
             category: 'lists',
             spec: 'append %lists'
         },
+        reportCrossproduct: { // as relabel option for "append"
+            type: 'reporter',
+            category: 'lists',
+            spec: 'combinations %lists'
+        },
         reportTranspose: { // deprecated
             type: 'reporter',
             category: 'lists',
@@ -1822,6 +1827,10 @@ SpriteMorph.prototype.blockAlternatives = {
     doShowVar: ['doHideVar'],
     doHideVar: ['doShowVar'],
 
+    // lists
+    reportConcatenatedLists: ['reportCrossproduct'],
+    reportCrossproduct: ['reportConcatenatedLists'],
+
     // HOFs
     reportMap: ['reportKeep', 'reportFindFirst'],
     reportKeep: ['reportFindFirst', 'reportMap'],
@@ -1987,12 +1996,14 @@ SpriteMorph.prototype.fullCopy = function (forClone) {
             }
         });
         c.costumes = new List(arr);
+        c.costumes.type = 'costume';
         arr = [];
         this.sounds.asArray().forEach(sound => {
             var snd = forClone ? sound : sound.copy();
             arr.push(snd);
         });
         c.sounds = new List(arr);
+        c.sounds.type = 'sound';
         arr = [];
     }
     c.nestingScale = 1;
@@ -4261,6 +4272,9 @@ SpriteMorph.prototype.remove = function () {
 SpriteMorph.prototype.createClone = function (immediately) {
     var stage = this.parentThatIsA(StageMorph),
         clone;
+    if (this.isCorpse) {
+        throw new Error('cannot operate on a deleted sprite');
+    }
     if (stage && stage.cloneCount <= 5000) {
         clone = this.fullCopy(true);
         clone.clonify(stage, immediately);
@@ -7934,8 +7948,10 @@ StageMorph.prototype.init = function (globals) {
     this.customBlocks = [];
     this.globalBlocks = [];
     this.costumes = new List();
+    this.costumes.type = 'costume';
     this.costume = null;
     this.sounds = new List();
+    this.sounds.type = 'sound';
     this.version = Date.now(); // for observers
     this.isFastTracked = false;
     this.enableCustomHatBlocks = true;
