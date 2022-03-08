@@ -4,6 +4,13 @@ window.create_paragraphs = () => {
     paragraphs = paragraphs.filter(paragraph => paragraph.length > 100);
 };
 
+window.create_sentences = () => {
+    window.sentences = paragraphs.map(paragraph => 
+                                        paragraph.split('. ')
+                                        .filter(sentence => sentence.length > 25)
+                                        .map(sentence => sentence.replaceAll('\n',' ')));
+};
+
 window.create_use_model = (continuation) => {
     use.load().then(model => {
         window.use_model = model;
@@ -13,10 +20,7 @@ window.create_use_model = (continuation) => {
 
 window.create_embeddings = () => {
     create_paragraphs();
-    let sentences = paragraphs.map(paragraph => 
-        paragraph.split('. ')
-        .filter(sentence => sentence.length > 25)
-        .map(sentence => sentence.replaceAll('\n',' ')));
+    create_sentences();
     window.embeddings = [];
     const embed_a_paragraph = (index) => {
         if (index < sentences.length) {
