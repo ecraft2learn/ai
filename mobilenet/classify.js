@@ -18,7 +18,7 @@ const listen_for_messages = (event) => {
     }
     if (typeof event.data.classify !== 'undefined') {
         const image_data = event.data.classify.image_data;
-        // timestamp used to resp0ond appropriately to multiple outstanding requests
+        // timestamp used to respond appropriately to multiple outstanding requests
         let time_stamp = event.data.classify.time_stamp;
         let top_k = event.data.classify.top_k; 
         model.classify(image_data, top_k).then(predictions => {
