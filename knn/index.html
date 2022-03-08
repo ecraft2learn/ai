@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>K Nearest Neighbors</title>
+<script src="../js/tfjs.js"></script> 
+<script src="../js/knn-classifier.js"></script>
+<script src="knn.js"></script>
+<script>
+window.addEventListener('load',
+    () => {
+      if ('serviceWorker' in navigator && window.location.hostname !== 'localhost') { 
+          // No Progressive Web App caching if running localhost
+          navigator.serviceWorker.register('sw-knn.js');
+      }   
+    });
+</script>
+</head>
+<body>
+You should never see this since is loaded into a "hidden" iframe
+</body>
+</html>
