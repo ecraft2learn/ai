@@ -1072,6 +1072,10 @@ window.ecraft2learn =
               URL = "/segmentation/index.html" + translate_query;
           } else if (source === 'detection') {
               URL = "/detection/index.html" + translate_query;
+          } else if (source === 'knn') {
+              URL = "/knn/index.html" + translate_query;
+          } else {
+              console.log('Unknown source for support window: ' + source);
           }
           if (window.location.hostname === "localhost" || window.location.protocol === 'file:') {
               URL = ".." + URL;
@@ -1133,6 +1137,11 @@ window.ecraft2learn =
   const open_posenet_window = function (no_display) {
       machine_learning_browser_warning();
       return open_support_window('posenet',no_display);
+  };
+  const open_knn_window = function (no_display) {
+      machine_learning_browser_warning();
+      const window = open_support_window('knn', no_display);
+      return window;
   };
   const machine_learning_window_request = function (machine_learning_window, 
                                                     message_maker, 
@@ -1982,7 +1991,7 @@ window.ecraft2learn =
             const ide = get_snap_ide();
             ide.showMessage(message, seconds || 5); // by defaults messages won't remain up more than 5 seconds
         } else {
-            alert(message);
+            console.log(message);
         }
     };
     const inform = (title, message, callback, ok_to_repeat) => {
@@ -3622,6 +3631,35 @@ xhr.send();
       };
       ask_for_poses();
   },
+  add_example_to_knn_classifier: (data, label, classifier_name, error_callback) => {
+      if (!ecraft2learn.support_window['knn'] || ecraft2learn.support_window['knn'].closed) {
+          open_knn_window(true);
+      }
+      const time_stamp = Date.now();
+      request_of_support_window(
+            'knn',
+            'Ready',
+            () => {
+                return {add_example_to_knn_classifier: {data: snap_to_javascript(data, true), 
+                                                        label, classifier_name, time_stamp}};
+            },
+            (message) => {
+                return (message.error_message && message.time_stamp === time_stamp);
+                        // reponse received and it is for the same request (time stamps match)
+            },
+            (message) => {
+                if (message.error_message) {   
+                    const title = "Error adding an example to a KNN classifier";
+                    const full_message = title + ": " + message.error_message;
+                    if (error_callback) {
+                        console.log(full_message);
+                        invoke_callback(error_callback, full_message);
+                    } else {
+                        inform(title, message.error_message);
+                    }
+                }
+        });
+  },
   weather: function (place, element_name, units, callback, error_callback, key, secret) {
       // element names documented at https://developer.yahoo.com/weather/documentation.html
       // units can be either 'metric' or 'imperial'
@@ -4276,111 +4314,22 @@ ecraft2learn.chrome_languages =
 ];
 ecraft2learn.language_defaults =
  // many arbitrary choices but some default is needed
- {english:    "en-GB",
-  en:         "en-GB",
-  español:    "es-ES",
-  spanish:    "es-ES",
-  français:   "fr-FR",
-  french:     "fr-FR",
-  português:  "pt-PT",
-  portuguese: "pt-PT",
-  swahili:    "sw-KE", 
-  தமிழ்:      "ta-IN",
-  tamil:      "ta-IN",
+ {"english":    "en-GB",
+  "en":         "en-GB",
+  "español":    "es-ES",
+  "spanish":    "es-ES",
+  "français":   "fr-FR",
+  "french":     "fr-FR",
+  "português":  "pt-PT",
+  "portuguese": "pt-PT",
+  "swahili":    "sw-KE", 
+  "தமிழ்":      "ta-IN",
+  "tamil":      "ta-IN",
   "اردو":     "ur-PK",
-  urdu:       "ur-PK",
+  "urdu":       "ur-PK",
   "العربية":  "ar-SA",
-  arabic:      "ar-SA",
-  chinese:     "cmn-Hans-CN" // "zh-CN"
+  "arabic":      "ar-SA",
+  "chinese":     "cmn-Hans-CN" // "zh-CN"
 };
+
 }
-
-// this.videoFlipped = true;
-// if (typeof CamSnapshotDialogMorph !== 'undefined') {
-// CamSnapshotDialogMorph.prototype.buildContents = function (myself, flipped) {
-//     let stage = myself.parentThatIsA(StageMorph);
-
-// 	function noCameraSupport() {
-// //         myself.disable();
-//         ecraft2learn.inform(
-//             'Camera not supported',
-//             CamSnapshotDialogMorph.prototype.notSupportedMessage
-//         );
-//         if (myself.videoElement) {
-//         	myself.videoElement.remove();
-//         }
-// //         myself.cancel();
-// 	}
-
-//     myself.videoElement = document.createElement('video');
-//     myself.videoElement.hidden = true;
-//     myself.videoElement.width = stage.dimensions.x;
-//     myself.videoElement.height = stage.dimensions.y;
-
-//     document.body.appendChild(myself.videoElement);
-
-//     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-//         navigator.mediaDevices.getUserMedia({ video: true })
-//             .then(function (stream) {
-//                 myself.videoElement.srcObject = stream;
-//                 myself.videoElement.play().catch(noCameraSupport);
-//                 myself.videoElement.stream = stream;
-//             })
-//             .catch(noCameraSupport);
-//     }
-
-//     if (!myself.videoView)  {
-//         myself.videoView = new Morph(); // a morph where we'll copy the video contents
-//     }
-
-//     myself.videoView.setExtent(stage.dimensions);
-//     myself.videoView.image = newCanvas(stage.dimensions);
-
-//     myself.videoView.drawOn = function (aCanvas) {
-//         var context = aCanvas.getContext('2d'),
-//             videoWidth = myself.videoElement.videoWidth,
-//             videoHeight = myself.videoElement.videoHeight,
-//             w = stage.dimensions.x,
-//             h = stage.dimensions.y,
-//             clippingWidth, clippingHeight;
-
-//         if (!videoWidth) { return; }
-
-//         context.save();
-// //         if (myself.sprite.videoFlipped) {
-//             // Flip the image so it looks like a mirror
-//             context.translate(w, 0);
-//             context.scale(-1, 1);
-// //         }
-//         if (videoWidth / w > videoHeight / h) {
-//             // preserve height, crop width
-//             clippingWidth = w * (videoHeight / h);
-//             clippingHeight = videoHeight;
-//         } else {
-//             // preserve width, crop height
-//             clippingWidth = videoWidth;
-//             clippingHeight = h * (videoWidth / w);
-//         }
-
-//         context.drawImage(
-//             myself.videoElement,
-//             0,
-//             0,
-//             clippingWidth,
-//             clippingHeight,
-//             0, // myself.left() * (flipped ? -1 : 1),
-//             0, // myself.top(),
-//             w,
-//             h
-//             );
-
-//         context.restore();
-//     };
-// }
-
-//     this.videoView.step = function () {
-//         myself.changed();
-//     };
-// };
-
-
