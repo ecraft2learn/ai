@@ -21,23 +21,25 @@ const listen_for_messages = (event) => {
             classifiers[classifier_name] = classifier;
         }
         classifier.addExample(tf.tensor(data), label);
-    } else if (typeof event.data.classify !== 'undefined') {
-        const data = tf.tensor(event.data.classify.data);
+    } else if (typeof event.data.classify_using_knn_classifier !== 'undefined') {
+        const payload = event.data.classify_using_knn_classifier;
+        const data = payload.data;
         // timestamp used to respond appropriately to multiple outstanding requests
-        const time_stamp = event.data.classify.time_stamp;
-        const top_k = event.data.classify.top_k;
-        const classifier_name = event.data.classify.name;
-        const classifer = classifiers[classifier_name];
-        if (classifer) {
-            classifier.classify(data, top_k).then(predictions => {
+        const time_stamp = payload.time_stamp;
+        const top_k = payload.top_k;
+        const classifier_name = payload.classifier_name;
+        const classifier = classifiers[classifier_name];
+        if (classifier) {
+            const data_tensor = tf.tensor(data);
+            classifier.predictClass(data_tensor, top_k).then(predictions => {
                 window.parent.postMessage({classify_response:
                                            {classifications: predictions,
                                             time_stamp}},
                                          '*');
-                data.dispose();
-            });         
+                data_tensor.dispose();
+            });
         } else {
-            window.parent.postMessage({error_message: 'No classifier named "' + name + 
+            window.parent.postMessage({error_message: 'No classifier named "' + classifier_name + 
                                                       '" created. Use "add example" to create one.'});
         }
     }

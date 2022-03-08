@@ -3644,12 +3644,44 @@ xhr.send();
                                                         label, classifier_name, time_stamp}};
             },
             (message) => {
-                return (message.error_message && message.time_stamp === time_stamp);
+                return (message.error_message);
                         // reponse received and it is for the same request (time stamps match)
             },
             (message) => {
                 if (message.error_message) {   
                     const title = "Error adding an example to a KNN classifier";
+                    const full_message = title + ": " + message.error_message;
+                    if (error_callback) {
+                        console.log(full_message);
+                        invoke_callback(error_callback, full_message);
+                    } else {
+                        inform(title, message.error_message);
+                    }
+                }
+        });
+  },
+  classify_using_knn_classifier: (data, top_k, classifier_name, success_callback, error_callback) => {
+      if (!ecraft2learn.support_window['knn'] || ecraft2learn.support_window['knn'].closed) {
+          open_knn_window(true);
+      }
+      const time_stamp = Date.now();
+      request_of_support_window(
+            'knn',
+            'Ready',
+            () => {
+                return {classify_using_knn_classifier: {data: snap_to_javascript(data, true), 
+                                                        top_k, classifier_name, time_stamp}};
+            },
+            (message) => {
+                return ((message.classify_response && message.classify_response.time_stamp === time_stamp) || 
+                        message.error_message);
+                        // reponse received and it is for the same request (time stamps match)
+            },
+            (message) => {
+                if (message.classify_response) {
+                    invoke_callback(success_callback, javascript_to_snap(message.classify_response.classifications));
+                } else if (message.error_message) {   
+                    const title = 'Error using KNN classifier named "' + classifier_name + '" to classify.';
                     const full_message = title + ": " + message.error_message;
                     if (error_callback) {
                         console.log(full_message);
