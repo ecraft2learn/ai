@@ -7,6 +7,15 @@
 
 let classifiers = {};
 
+const get_classifier = (name) => {
+    let classifier = classifiers[name];
+    if (!classifier) {
+        classifier = knnClassifier.create();
+        classifiers[name] = classifier;
+    }
+    return classifier;
+};
+
 const listen_for_messages = (event) => {
     if (typeof event.data.add_example_to_knn_classifier !== 'undefined') {
         const payload = event.data.add_example_to_knn_classifier;
@@ -15,12 +24,7 @@ const listen_for_messages = (event) => {
         const time_stamp = payload.time_stamp;
         const label = payload.label;
         const classifier_name = payload.classifier_name;
-        let classifier = classifiers[classifier_name];
-        if (!classifier) {
-            classifier = knnClassifier.create();
-            classifiers[classifier_name] = classifier;
-        }
-        classifier.addExample(tf.tensor(data), label);
+        get_classifier(classifier_name).addExample(tf.tensor(data), label);
     } else if (typeof event.data.classify_using_knn_classifier !== 'undefined') {
         const payload = event.data.classify_using_knn_classifier;
         const data = payload.data;
@@ -40,7 +44,53 @@ const listen_for_messages = (event) => {
             });
         } else {
             window.parent.postMessage({error_message: 'No classifier named "' + classifier_name + 
-                                                      '" created. Use "add example" to create one.'});
+                                                      '" exists. Use "add example" to create one.'});
+        }
+    } else if (typeof event.data.clear_or_dispose_knn_classifier !== 'undefined') {
+        const payload = event.data.clear_or_dispose_knn_classifier;
+        const {labels, dispose, classifier_name, time_stamp} = payload;
+        const classifier = classifiers[classifier_name];
+        if (classifier) {
+            if (dispose) {
+                classifier.dispose();
+                classifiers[classifier_name] = undefined;
+            } else if (labels instanceof Array) {
+                labels.forEach(label => {
+                    classifier.clearClass(label);
+                });
+            } else {
+                classifier.clearAllClasses();
+            }
+        } else {
+            window.parent.postMessage({error_message: 'No classifier named "' + classifier_name + 
+                                                      '" exists. Use "add example" to create one.'});
+        }
+    } else if (typeof event.data.get_knn_classifier_info != 'undefined') {
+        const payload = event.data.get_knn_classifier_info;
+        const {classifier_name, number_of_examples, number_of_classes, dataset, time_stamp} = payload;
+        const classifier = classifiers[classifier_name];
+        let classifier_info;
+        if (classifier) {
+            if (dataset) {
+                classifier_info = classifier.getClassifierDataset();
+                const entries = Object.entries(classifier_info);
+                entries.forEach(entry => {
+                    const dataset = entry[1].arraySync();
+                    entry[1].dispose();
+                    classifier_info[entry[0]] = dataset;
+                });
+            } else if (number_of_examples) {
+                classifier_info = classifier.getClassExampleCount();
+            } else if (number_of_classes) {
+                classifier_info = classifier.getNumClasses();
+            } else {
+                window.parent.postMessage({error_message: 'Bad KNN model info message: ' + JSON.stringify(payload)});
+                return;
+            }
+            window.parent.postMessage({classifier_info, time_stamp});
+        } else {
+            window.parent.postMessage({error_message: 'No classifier named "' + classifier_name + 
+                                                      '" exists. Use "add example" to create one.'});
         }
     }
 };
@@ -59,5 +109,3 @@ window.addEventListener('DOMContentLoaded',
                                                     });
                             window.parent.postMessage("Ready", "*");
                         });
-
-
