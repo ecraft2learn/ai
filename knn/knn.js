@@ -24,7 +24,14 @@ const listen_for_messages = (event) => {
         const time_stamp = payload.time_stamp;
         const label = payload.label;
         const classifier_name = payload.classifier_name;
-        get_classifier(classifier_name).addExample(tf.tensor(data), label);
+        const classifer = get_classifier(classifier_name);
+        if (Number.isFinite(data[0])) {
+            classifer.addExample(tf.tensor(data), label);
+        } else {
+            data.forEach(example => {
+                classifer.addExample(tf.tensor(example), label);
+            });
+        }
     } else if (typeof event.data.classify_using_knn_classifier !== 'undefined') {
         const payload = event.data.classify_using_knn_classifier;
         const data = payload.data;
@@ -74,14 +81,13 @@ const listen_for_messages = (event) => {
         const payload = event.data.get_knn_classifier_info;
         const {classifier_name, number_of_examples, number_of_classes, dataset, time_stamp} = payload;
         const classifier = classifiers[classifier_name];
-        let classifier_info;
+        let classifier_info = {};
         if (classifier) {
             if (dataset) {
-                classifier_info = classifier.getClassifierDataset();
-                const entries = Object.entries(classifier_info);
+                const dataset = classifier.getClassifierDataset();
+                const entries = Object.entries(dataset);
                 entries.forEach(entry => {
-                    const dataset = entry[1].arraySync();
-                    classifier_info[entry[0]] = dataset;
+                    classifier_info[entry[0]] = entry[1].arraySync();
                 });
             } else if (number_of_examples) {
                 classifier_info = classifier.getClassExampleCount();
