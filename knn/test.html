@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>K Nearest Neighbors</title>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier"></script>
+<script>
+const classifier = knnClassifier.create();
+classifier.addExample(tf.tensor([1, 2]), 'a');
+classifier.addExample(tf.tensor([2, 3]), 'a');
+classifier.addExample(tf.tensor([4, 5]), 'b');
+classifier.addExample(tf.tensor([6, 7]), 'b');
+classifier.predictClass(tf.tensor([2,4]), 3).then(x => console.log(x));
+const dataset = classifier.getClassifierDataset();
+const classifier2 = knnClassifier.create();
+classifier2.setClassifierDataset(dataset);
+classifier2.predictClass(tf.tensor([2,4]), 3).then(x => console.log(x));   
+</script>
+</head>
+</html>
