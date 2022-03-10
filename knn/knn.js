@@ -41,6 +41,11 @@ const listen_for_messages = (event) => {
                                             time_stamp}},
                                          '*');
                 data_tensor.dispose();
+            },
+            (error) => {
+                console.log(error);
+                event.source.postMessage({classification_failed: true,
+                                          error_message: error.message}, "*");
             });
         } else {
             window.parent.postMessage({error_message: 'No classifier named "' + classifier_name + 
@@ -76,7 +81,6 @@ const listen_for_messages = (event) => {
                 const entries = Object.entries(classifier_info);
                 entries.forEach(entry => {
                     const dataset = entry[1].arraySync();
-                    entry[1].dispose();
                     classifier_info[entry[0]] = dataset;
                 });
             } else if (number_of_examples) {
@@ -92,7 +96,17 @@ const listen_for_messages = (event) => {
             window.parent.postMessage({error_message: 'No classifier named "' + classifier_name + 
                                                       '" exists. Use "add example" to create one.'});
         }
-    }
+    } else if (typeof event.data.set_dataset_of_knn_classifier != 'undefined') {
+        const payload = event.data.set_dataset_of_knn_classifier;
+        const {classifier_name, dataset, time_stamp} = payload;
+        const classifier = get_classifier(classifier_name);
+        // const entries = Object.entries(dataset);
+        const dataset_with_tensors = {};
+        dataset.forEach(entry => {
+            dataset_with_tensors[entry[0]] = tf.tensor(entry[1]);
+        });
+        classifier.setClassifierDataset(dataset_with_tensors);
+    } 
 };
 
 window.addEventListener('DOMContentLoaded', 
