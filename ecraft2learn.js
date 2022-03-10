@@ -398,7 +398,7 @@ window.ecraft2learn =
     };
     const snap_to_javascript = (x, only_numbers) => {
         const numberify = function (x) {
-            if (typeof x === 'string') {
+            if (typeof x === 'string' && !isNaN(+x)) {
                 return +x;
             }
             return x;
@@ -1027,6 +1027,115 @@ window.ecraft2learn =
           }
       });
   };
+
+  const create_error_handler = (error_handler) => 
+      (message) => {
+          if (message.error_message) {
+              if (error_handler) {     
+                  invoke_callback(error_handler, message.error_message);
+              }
+                  console.log(message.error_message); 
+              } 
+      };
+
+  const error_message_filter = 
+      (message) => {
+           return (message.error_message);
+  };
+  
+  const add_example_to_knn_classifier = (data, label, classifier_name, error_callback) => {
+      open_support_window('knn', true);
+      const time_stamp = Date.now();
+      request_of_support_window(
+            'knn',
+            'Ready',
+            () => {
+                return {add_example_to_knn_classifier: {data: snap_to_javascript(data, true), 
+                                                        label, classifier_name, time_stamp}};
+            },
+            error_message_filter,
+            create_error_handler(error_callback));
+  };
+  const classify_using_knn_classifier = (data, top_k, classifier_name, success_callback, error_callback) => {
+      open_support_window('knn', true);
+      const time_stamp = Date.now();
+      request_of_support_window(
+            'knn',
+            'Ready',
+            () => {
+                return {classify_using_knn_classifier: {data: snap_to_javascript(data, true), 
+                                                        top_k, classifier_name, time_stamp}};
+            },
+            (message) => {
+                return ((message.classify_response && message.classify_response.time_stamp === time_stamp) || 
+                        message.error_message);
+                        // reponse received and it is for the same request (time stamps match)
+            },
+            (message) => {
+                if (message.classify_response) {
+                    invoke_callback(success_callback, javascript_to_snap(message.classify_response.classifications));
+                } else {
+                    create_error_handler(error_callback)(message);
+                }
+        });
+  };
+  const clear_or_dispose_knn_classifier = (classifier_name, labels, dispose, error_callback) => {
+      open_support_window('knn', true);
+      const time_stamp = Date.now();
+      request_of_support_window(
+            'knn',
+            'Ready',
+            () => {
+                return {clear_or_dispose_knn_classifier: {labels: snap_to_javascript(labels),
+                                                          dispose, classifier_name, time_stamp}};
+            },
+            (message) => {
+                return ((message.classify_response && message.classify_response.time_stamp === time_stamp) || 
+                        message.error_message);
+                        // reponse received and it is for the same request (time stamps match)
+            },
+            (message) => {
+                if (message.classify_response) {
+                    invoke_callback(success_callback, javascript_to_snap(message.classify_response.classifications));
+                } else {
+                    create_error_handler(error_callback)(message);
+                }});
+  };
+  const get_knn_classifier_info = (classifier_name, number_of_examples, number_of_classes, dataset, success_callback, error_callback) => {
+      open_support_window('knn', true);
+      const time_stamp = Date.now();
+      request_of_support_window(
+            'knn',
+            'Ready',
+            () => {
+                return {get_knn_classifier_info: {classifier_name, number_of_examples, number_of_classes, dataset, time_stamp}};
+            },
+            (message) => {
+                return ((message.classifier_info && message.time_stamp === time_stamp) || 
+                        message.error_message);
+                        // reponse received and it is for the same request (time stamps match)
+            },
+            (message) => {
+                if (message.classifier_info) {
+                    invoke_callback(success_callback, javascript_to_snap(message.classifier_info, true));
+                } else {
+                    create_error_handler(error_callback)(message);
+                }});
+  };
+  const set_dataset_of_knn_classifier = (classifier_name, dataset, error_callback) => {
+      open_support_window('knn', true);
+      const time_stamp = Date.now();
+      request_of_support_window(
+            'knn',
+            'Ready',
+            () => {
+                return {set_dataset_of_knn_classifier: {dataset: snap_to_javascript(dataset, true),
+                                                        classifier_name,
+                                                        time_stamp}};
+            },
+            error_message_filter,
+            create_error_handler(error_callback));
+  };
   const open_support_window = function (source, no_display) {
       if (!ecraft2learn.support_window[source] || ecraft2learn.support_window[source].closed) {
           create_machine_learning_window(source);
@@ -1137,11 +1246,6 @@ window.ecraft2learn =
   const open_posenet_window = function (no_display) {
       machine_learning_browser_warning();
       return open_support_window('posenet',no_display);
-  };
-  const open_knn_window = function (no_display) {
-      machine_learning_browser_warning();
-      const window = open_support_window('knn', no_display);
-      return window;
   };
   const machine_learning_window_request = function (machine_learning_window, 
                                                     message_maker, 
@@ -3631,67 +3735,11 @@ xhr.send();
       };
       ask_for_poses();
   },
-  add_example_to_knn_classifier: (data, label, classifier_name, error_callback) => {
-      if (!ecraft2learn.support_window['knn'] || ecraft2learn.support_window['knn'].closed) {
-          open_knn_window(true);
-      }
-      const time_stamp = Date.now();
-      request_of_support_window(
-            'knn',
-            'Ready',
-            () => {
-                return {add_example_to_knn_classifier: {data: snap_to_javascript(data, true), 
-                                                        label, classifier_name, time_stamp}};
-            },
-            (message) => {
-                return (message.error_message);
-                        // reponse received and it is for the same request (time stamps match)
-            },
-            (message) => {
-                if (message.error_message) {   
-                    const title = "Error adding an example to a KNN classifier";
-                    const full_message = title + ": " + message.error_message;
-                    if (error_callback) {
-                        console.log(full_message);
-                        invoke_callback(error_callback, full_message);
-                    } else {
-                        inform(title, message.error_message);
-                    }
-                }
-        });
-  },
-  classify_using_knn_classifier: (data, top_k, classifier_name, success_callback, error_callback) => {
-      if (!ecraft2learn.support_window['knn'] || ecraft2learn.support_window['knn'].closed) {
-          open_knn_window(true);
-      }
-      const time_stamp = Date.now();
-      request_of_support_window(
-            'knn',
-            'Ready',
-            () => {
-                return {classify_using_knn_classifier: {data: snap_to_javascript(data, true), 
-                                                        top_k, classifier_name, time_stamp}};
-            },
-            (message) => {
-                return ((message.classify_response && message.classify_response.time_stamp === time_stamp) || 
-                        message.error_message);
-                        // reponse received and it is for the same request (time stamps match)
-            },
-            (message) => {
-                if (message.classify_response) {
-                    invoke_callback(success_callback, javascript_to_snap(message.classify_response.classifications));
-                } else if (message.error_message) {   
-                    const title = 'Error using KNN classifier named "' + classifier_name + '" to classify.';
-                    const full_message = title + ": " + message.error_message;
-                    if (error_callback) {
-                        console.log(full_message);
-                        invoke_callback(error_callback, full_message);
-                    } else {
-                        inform(title, message.error_message);
-                    }
-                }
-        });
-  },
+  add_example_to_knn_classifier,
+  classify_using_knn_classifier,
+  clear_or_dispose_knn_classifier,
+  get_knn_classifier_info,
+  set_dataset_of_knn_classifier,
   weather: function (place, element_name, units, callback, error_callback, key, secret) {
       // element names documented at https://developer.yahoo.com/weather/documentation.html
       // units can be either 'metric' or 'imperial'
