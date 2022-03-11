@@ -66,6 +66,8 @@ const listen_for_messages = (event) => {
             if (dispose) {
                 classifier.dispose();
                 classifiers[classifier_name] = undefined;
+            } else if (labels.length === 0) {
+                classifier.clearAllClasses();
             } else if (labels instanceof Array) {
                 labels.forEach(label => {
                     classifier.clearClass(label);
