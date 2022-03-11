@@ -1,0 +1,62 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>KNN: Finding the nearest neighbours</title>
+<link href="../css/ai-teacher-guide.css" rel="stylesheet">
+<link rel="icon" type="image/png" href="../images/eCraft2Learn-Favicon.png" />
+<script src="../js/ai-guide.js"></script>
+<!-- Following is only when generating data for the Guide Assistant -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder"></script>
+<script src="../AI-Teacher-Guide/qa-embeddings/chapter-5.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier"></script>
+<script src="../js/qa-ai-guide.js"></script> -->
+</head>
+<body>
+<script src="../js/translate.js"></script>
+<h2>A guide to building AI apps and artefacts</h2>
+<h3>Chapter 7 - Finding the nearest neighbours</h3>
+<h4>Ken Kahn, University of Oxford</h4>
+<p class="resources">
+You can import the blocks presented here as a
+<a href="/ai/snap/snap.html?project=K nearest neighbors&editMode" target="_blank">project</a> or 
+download as a <a href="K nearest neighbors blocks.xml" download target="_blank">library</a> to import into your projects.
+</p>
+<div id="table-of-contents"></div>
+<h4 class="guide-to-guide-white" id="browser-compatibility">Browser compatibility</h3>
+<p class="guide-to-guide">
+This chapter of the guide includes many interactive elements are known to run well in the Chrome or Edge browser.
+See the <a href="troubleshooting.html" target="_blank">troubleshooting guide</a>
+for how to deal with problems encountered.
+</p>
+<h4 class="background-information-white" id="introduction">Introduction</h3>
+<p class="background-information">
+<a href="https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm" target="_blank">K Nearest Neighbours (KNN)</a>
+is a simple technique to find lists of numbers that are closest to a new list of numbers.
+Associated with each list is a label and the nearest neighbours each "votes" for their label.
+The voting is used to score how confident the system which label should be assigned to the new list.
+You can decide how many neighbours vote by specifying the "top k"; usually it is a small odd integer.
+</p>
+<p class="background-information">
+One could implement KNN in Snap! without any new blocks by iterating through a list of lists of numbers
+computing the distance the new list has to each of the existing lists.
+The distance could be measured using
+<a href="https://en.wikipedia.org/wiki/Euclidean_distance" target="_blank">Euclidean distance</a> (in higher-dimensions)
+or <a href="https://en.wikipedia.org/wiki/Cosine_similarity" target="_blank">cosine similarity</a>.
+The results can be sorted by distance and top k elements used to tally the associated labels.
+However, using
+<a href="https://github.com/tensorflow/tfjs-models/tree/master/knn-classifier" target="_blank">a TensorFlow.js library</a>
+can speed things up very many times by taking advantage of the
+<a href="http://www.nvidia.com/object/what-is-gpu-computing.html" target="_blank">GPU</a>.
+</p>
+<h4 class="guide-to-guide-white">Where to get these blocks to use in your projects</h4>
+<p class="resources">
+You can import the blocks presented here as a
+<a href="/ai/snap/snap.html?project=K nearest neighbors&editMode" target="_blank">project</a> or 
+download as a <a href="K nearest neighbors blocks.xml" download target="_blank">library</a> to import into your projects.
+</p>
+<p class="guide-to-guide">
+Return to 
+<a class="guide-link" href="chapter-6.html">the previous chapter on neural networks</a>.
+</p>
+<script src="../js/bottom-of-page.js"></script>
+</body>
+</html>
