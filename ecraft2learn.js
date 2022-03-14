@@ -1043,7 +1043,7 @@ window.ecraft2learn =
            return (message.error_message);
   };
   
-  const add_example_to_knn_classifier = (data, label, classifier_name, error_callback) => {
+  const add_example_to_knn_classifier = (data, label, classifier_name, success_callback, error_callback) => {
       open_support_window('knn', true);
       const time_stamp = Date.now();
       request_of_support_window(
@@ -1053,8 +1053,17 @@ window.ecraft2learn =
                 return {add_example_to_knn_classifier: {data: snap_to_javascript(data, true), 
                                                         label, classifier_name, time_stamp}};
             },
-            error_message_filter,
-            create_error_handler(error_callback));
+            (message) => {
+                return ((message.example_added && message.time_stamp === time_stamp) || 
+                        message.error_message);
+                        // reponse received and it is for the same request (time stamps match)
+            },
+            (message) => {
+                if (message.example_added) {
+                    invoke_callback(success_callback);
+                } else {
+                    create_error_handler(error_callback)(message);
+                });
   };
   const classify_using_knn_classifier = (data, top_k, classifier_name, success_callback, error_callback) => {
       open_support_window('knn', true);
@@ -4411,5 +4420,8 @@ ecraft2learn.language_defaults =
   "arabic":      "ar-SA",
   "chinese":     "cmn-Hans-CN" // "zh-CN"
 };
+
+// Tell Snap! that this has been loaded so don't load it again
+SnapExtensions.scripts.push('https://ecraft2learn.github.io/ai/ecraft2learn.js');
 
 }

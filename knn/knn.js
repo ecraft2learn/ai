@@ -32,6 +32,9 @@ const listen_for_messages = (event) => {
                 classifer.addExample(tf.tensor(example), label);
             });
         }
+        window.parent.postMessage({example_added: true,
+                                   time_stamp},
+                                  '*');   
     } else if (typeof event.data.classify_using_knn_classifier !== 'undefined') {
         const payload = event.data.classify_using_knn_classifier;
         const data = payload.data;
