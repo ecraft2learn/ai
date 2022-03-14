@@ -8,6 +8,8 @@ words blocks.xml	AI Language (NLP)	AI blocks for processing words and sentences
 words.xml	NLP demos	Tutorial project demonstrating blocks for processing words and sentences
 neural nets blocks.xml	Neural nets	AI blocks for creating, training, and using neural networks
 neural nets.xml	Neural net demos	Tutorial project demonstrating blocks for creating, training, and using neural networks
+K nearest neighbors blocks.xml	K nearest neighbors	blocks for creating and using KNN models
+K nearest neighbors.xml	K nearest neighbors	Tutorial project demonstrating blocks for creating and using KNN models
 misc AI blocks.xml	Misc AI	AI blocks for style transfer, Wikipedia, and image embedding
 misc AI.xml	Misc AI demos	Tutorial project demonstrating blocks for style transfer, Wikipedia, and image embedding
 ~	~
