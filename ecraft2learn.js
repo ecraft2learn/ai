@@ -1063,7 +1063,7 @@ window.ecraft2learn =
                     invoke_callback(success_callback);
                 } else {
                     create_error_handler(error_callback)(message);
-                });
+                }});
   };
   const classify_using_knn_classifier = (data, top_k, classifier_name, success_callback, error_callback) => {
       open_support_window('knn', true);
