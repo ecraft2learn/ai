@@ -4053,7 +4053,7 @@ xhr.send();
       // some old browsers don't support the ... syntax
       const cosines = Array.prototype.slice.call(cosines_float32); // new Array(...cosines_float32);
       // considered Math.acos(-cosine)*180/Math.PI but closest_words already uses cosine proximity
-      const indices_and_cosines = cosines.map((cosine, index) => [index, cosine]);
+      const indices_and_cosines = cosines.map((cosine, index) => [index+1, cosine]); // +1 for Snap!'s 1-indexing
       const sorted_indices_and_cosines = indices_and_cosines.sort((a, b) => a[1]-b[1]);
       return javascript_to_snap(sorted_indices_and_cosines);
   },

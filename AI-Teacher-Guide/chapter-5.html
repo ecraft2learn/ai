@@ -4,11 +4,11 @@
 <link rel="icon" type="image/png" href="../images/eCraft2Learn-Favicon.png" />
 <script src="../js/ai-guide.js"></script>
 <!-- Following is only when generating data for the Guide Assistant -->
-<!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder"></script>
 <script src="../AI-Teacher-Guide/qa-embeddings/chapter-5.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier"></script>
-<script src="../js/qa-ai-guide.js"></script> -->
+<script src="../js/qa-ai-guide.js"></script>
 </head>
 <body>
 <script src="../js/translate.js"></script>
@@ -200,7 +200,21 @@ While one rarely needs all 20,000 words it might be interesting to compare two w
 seeing how many of the nearest 100 or 500 words of each are in common.
 Think up other uses for this reporter.
 </p>
-
+<h4 class="instructions-white" id="closest-features">Finding how close some features are to a list of other features</h4>
+<p class="instructions">
+The <span class="block-name">features closest to list of features</span> block reports which features are closest to a given feature list.
+It reports a list of all the listed features sorted by their distance to the given features.
+The cosine similarity is also reported.
+This block works well with word, sentence, or image embeddings.
+Or a data table as illustrated below.
+Note that the values should be in similar ranges.
+(Weights are given as hundreds of kilograms for this reason.)
+</p>
+<figure class = "snap-iframe"
+        id = "sort closest features"
+        container_style = "width: 800px; height: 500px" 
+        caption = "Find all the features closest to a feature list. TRY IT!">
+</figure>
 <h4 class="instructions-white" id="sentence-embeddings">Sentence embeddings</h4>
 <p class="background-information">
 One can compute sentence embeddings by averaging all the words in a sentence.
