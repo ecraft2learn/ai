@@ -4041,6 +4041,22 @@ xhr.send();
           return invoke_callback(callback, javascript_to_snap(sorted_words_and_cosines.map(word_and_cosine => word_and_cosine[0])));
       }
   },
+  cosine_proximity: (features, list_of_features) => {
+      const features_tensor = tf.tensor(snap_to_javascript(features, true));
+      const list_of_features_tensor = tf.tensor(snap_to_javascript(list_of_features, true));
+      const cosines_tensor =
+          tf.metrics.cosineProximity(features_tensor, list_of_features_tensor);
+      const cosines_float32 = cosines_tensor.dataSync();
+      cosines_tensor.dispose();
+      features_tensor.dispose();
+      list_of_features_tensor.dispose();
+      // some old browsers don't support the ... syntax
+      const cosines = Array.prototype.slice.call(cosines_float32); // new Array(...cosines_float32);
+      // considered Math.acos(-cosine)*180/Math.PI but closest_words already uses cosine proximity
+      const indices_and_cosines = cosines.map((cosine, index) => [index, cosine]);
+      const sorted_indices_and_cosines = indices_and_cosines.sort((a, b) => a[1]-b[1]);
+      return javascript_to_snap(sorted_indices_and_cosines);
+  },
   load_universal_sentence_encoder: (callback) => {
       if (typeof ecraft2learn.universal_sentence_encoder_module === 'undefined') {
           load_script('js/universal-sentence-encoder.js',
