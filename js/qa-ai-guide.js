@@ -5,10 +5,26 @@ window.create_paragraphs = () => {
 };
 
 window.create_sentences = () => {
-    window.sentences = paragraphs.map(paragraph => 
-                                        paragraph.split('. ')
-                                        .filter(sentence => sentence.length > 25)
-                                        .map(sentence => sentence.replaceAll('\n',' ')));
+    const sentences_in_a_paragraph = paragraphs.map(paragraph => 
+                                        paragraph.split(/[.?] /) // including ! causes problems due to Snap!
+                                        .filter(sentence => (sentence.length > 25 && sentence.trim()[0] !== '(')) // remove short or parenthetical sentences
+                                        .map(sentence => sentence.replaceAll('\n',' ').trim()));
+    const join_fragments = (fragments) => {
+        let new_sentences = [];
+        for (let i = 0; i < fragments.length; i++) {
+           const fragment = fragments[i];
+            const suffix = i === fragments.length-1 ? '' : '. '; // don't add period to last sentence
+            if (fragment.lastIndexOf('e.g') === fragment.length-'e.g'.length ||
+                fragment.lastIndexOf('..') === fragment.length-'..'.length) {
+                new_sentences.push(fragment + suffix + fragments[i+1] + suffix.trim()); // shouldn't been broken
+                i++;
+            } else {
+                new_sentences.push(fragment + suffix.trim());
+            }
+        }
+        return new_sentences;
+    };
+    window.sentences = sentences_in_a_paragraph.map(join_fragments);
 };
 
 window.create_use_model = (continuation) => {
