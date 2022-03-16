@@ -87,7 +87,7 @@ BlockVisibilityDialogMorph, CostumeIconMorph, SoundIconMorph*/
 
 /*jshint esversion: 6*/
 
-modules.objects = '2022-March-04';
+modules.objects = '2022-March-16';
 
 var SpriteMorph;
 var StageMorph;
@@ -1431,7 +1431,7 @@ SpriteMorph.prototype.initBlocks = function () {
             category: 'lists',
             spec: 'append %lists'
         },
-        reportCrossproduct: { // as relabel option for "append"
+        reportCrossproduct: {
             type: 'reporter',
             category: 'lists',
             spec: 'combinations %lists'
@@ -2794,6 +2794,7 @@ SpriteMorph.prototype.blockTemplates = function (
         blocks.push('-');
         blocks.push(block('reportConcatenatedLists'));
         blocks.push(block('reportReshape'));
+        // +++ blocks.push(block('reportCrossproduct'));
         blocks.push('-');
         blocks.push(block('doAddToList'));
         blocks.push(block('doDeleteFromList'));
@@ -3824,10 +3825,6 @@ SpriteMorph.prototype.wearCostume = function (costume, noShadow) {
         y = this.yPosition ? this.yPosition() : null,
         idx = isNil(costume) ? null : this.costumes.asArray().indexOf(costume);
 
-    if (costume && (!costume.width() || !costume.height())) {
-        costume = null;
-        idx = null;
-    }
     this.changed();
     this.costume = costume;
     this.fixLayout();
@@ -6977,6 +6974,11 @@ SpriteMorph.prototype.replaceDoubleDefinitionsFor = function (definition) {
         this.customBlocks = this.customBlocks.filter(def =>
             !contains(doubles, def)
         );
+        this.allDependentInvocationsOf(
+            definition.blockSpec()
+        ).reverse().forEach(
+            block => block.refresh(definition)
+        );
     }
     ide = this.parentThatIsA(IDE_Morph);
     if (ide) {
@@ -9197,6 +9199,7 @@ StageMorph.prototype.blockTemplates = function (
         blocks.push('-');
         blocks.push(block('reportConcatenatedLists'));
         blocks.push(block('reportReshape'));
+        // +++ blocks.push(block('reportCrossproduct'));
         blocks.push('-');
         blocks.push(block('doAddToList'));
         blocks.push(block('doDeleteFromList'));
