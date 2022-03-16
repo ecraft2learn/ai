@@ -377,3 +377,39 @@ window.addEventListener(
          }
          Array.prototype.forEach.call(elements, snap_iframe);
      });
+
+const listen_for_messages = (event) => {
+    if (event.data && typeof event.data.display_paragraph !== 'undefined') {
+        const text = event.data.display_paragraph;
+        const paragraphs = Array.from(document.getElementsByTagName('p'));
+        let paragraph_element;
+        paragraphs.some(paragraph => {
+            if (paragraph.innerText.indexOf(text) >= 0) {
+                paragraph_element = paragraph;
+                return true;
+            }
+        });
+        if (paragraph_element) {
+            paragraph_element.scrollIntoView(true);
+            paragraph_element.classList.add('programmatically-displayed');
+            paragraph_element.title = "Click this paragraph to return to Snap!";
+            paragraph_element.addEventListener('click',
+                () => {
+                    //return to Snap!
+                    window.parent.postMessage('Hide support iframe', "*");
+                    // let children = document.body.children;
+                    // Array.from(children).forEach((child) => {
+                    //                                child.style.opacity = 0;
+                    // });     
+                });
+        }
+    }
+};
+
+window.addEventListener('DOMContentLoaded', 
+                        () => {
+                            if (window.parent) {
+                                window.parent.postMessage("Loaded", "*");
+                            }
+                            window.addEventListener("message", listen_for_messages);
+                        });

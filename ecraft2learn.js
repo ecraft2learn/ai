@@ -1192,6 +1192,8 @@ window.ecraft2learn =
               URL = "/detection/index.html" + translate_query;
           } else if (source === 'knn') {
               URL = "/knn/index.html" + translate_query;
+          } else if (source.indexOf('.html') > 0) {
+              URL = source + translate_query;
           } else {
               console.log('Unknown source for support window: ' + source);
           }
@@ -1407,6 +1409,14 @@ window.ecraft2learn =
             } // else may have loaded another project into Snap! and the old window is gone now
         };
         send_request_when_support_window_is(window_ready_state, support_window_type, send_request);
+    };
+    const display_paragraph_containing_text = (text, url) => {
+        open_support_window(url);
+        request_of_support_window(url,
+                                  'Loaded',
+                                  () => {
+                                      return {display_paragraph: text};
+                                  });
     };
     // following functions use the layers level of tensorflow.js to create models, train, and predict
     const create_tensorflow_model = (name, layers, optimizer, loss_function, input_shape, success_callback, error_callback,
@@ -3799,6 +3809,7 @@ xhr.send();
   },
   create_costume_with_style,
   get_image_features,
+  display_paragraph_containing_text,
   create_tensorflow_model,
   send_data,
   train_model,

@@ -327,6 +327,11 @@ background-color: buttonface;
   margin-top: -16px;
 }
 
+.programmatically-displayed {
+  border-radius: 8px;
+  border: 6px solid #b30909;
+}
+
 /* following based upon https://www.tipsandtricks-hq.com/simple-table-of-contents-toc-using-pure-html-and-css-code-9217 */
 
 #table-of-contents {
