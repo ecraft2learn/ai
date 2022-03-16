@@ -1,6 +1,6 @@
 snap.html - replace end with custom onload and additional files (open snap.html in Wordpad or the like)
 
-Update libaries (keep copy of LIBRARIES file) and their XML files. Remember to copy any projects that have been updated.
+Update libaries (keep copy of LIBRARIES file) and their XML files. Remember to copy any projects that have been updated including the block libraries in AI-Teachers-Guide
 
 speaking blocks.xml	Speaking	AI blocks for text to speech
 speaking.xml	Speaking demos	Tutorial project demonstrating blocks for for text to speech
