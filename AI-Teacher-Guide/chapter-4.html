@@ -3,6 +3,12 @@
 <link href="../css/ai-teacher-guide.css" rel="stylesheet">
 <link rel="icon" type="image/png" href="../images/eCraft2Learn-Favicon.png" />
 <script src="../js/ai-guide.js"></script>
+<!-- Following is only when generating data for the Guide Assistant -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder"></script>
+<script src="../AI-Teacher-Guide/qa-embeddings/chapter-5.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier"></script>
+<script src="../js/qa-ai-guide.js"></script> -->
 </head>
 <body>
 <script src="../js/translate.js"></script>
@@ -445,7 +451,7 @@ Google Creative Lab released browser-based software called <i>Posenet</i> for
 real-time human pose estimation</a>.
 This software can determine the locations of 17 different face and body parts:
 noses, eyes, ears, shoulders, elbows, wrists, hips, knees, and ankles.
-Posenet was created using deep machine learning and makes use of<a href="https://js.tensorflow.org/" target="_blank">Tensorflow.js</a>.
+Posenet was created using deep machine learning and makes use of <a href="https://js.tensorflow.org/" target="_blank">Tensorflow.js</a>.
 Many are familiar with how pose detection can be embedded in video games via
 <a href="https://en.wikipedia.org/wiki/Kinect">Microsoft's Xbox Kinect</a>.
 What is so impressive about Posenet is that it works in the browser without any special software or hardware (other than a webcam).
@@ -524,10 +530,10 @@ There are two blocks for segmentation:
 </p>
 <ol class="instructions">
 <li>
-<span class="block-name">segmentation and pose of <i>costume</i> ...</span> (best suited for analysing images of a single person)
+<span class="block-name">segmentation and pose of <i>costume</i>...</span> (best suited for analysing images of a single person)
 </li>
 <li>
-<span class="block-name">segmentations and poses of <i>costume</i> ...</span> (best suited for analysing images of multiple people)
+<span class="block-name">segmentations and poses of <i>costume</i>...</span> (best suited for analysing images of multiple people)
 </li>
 </ol>
 <p class="instructions">
@@ -576,7 +582,7 @@ The <span class="block-name">get value at <i>x</i> and <i>y</i> from bitmap</spa
 of either the <i>pixel codes</i> or the <i>person bitmap</i>.
 </p>
 <p class="instructions">
-Here you can explore the <span class="block-name">segmentation and pose of <i>costume</i> ...</span> block.
+Here you can explore the <span class="block-name">segmentation and pose of <i>costume</i>...</span> block.
 </p>
 <figure class = "snap-iframe"
         id = "segmentation single"
