@@ -81,9 +81,7 @@ figcaption {
  .save-validation-button, .together_button, .support-window-button, .generic-button {
 /* originally copied from jquery-ui many subsequent edits */
 margin-top: 10px;
-/*  padding: .8em 1em; */
-display: inline-block;
-position:absolute relative;
+position:absolute;
 line-height: normal;
 margin-right: .1em;
 cursor: pointer;
@@ -103,6 +101,7 @@ text-decoration: none;
 width: fit-content;
 background-color: buttonface;
 }
+
 .center-contents {
  text-align: center; 
 }
@@ -329,7 +328,19 @@ background-color: buttonface;
 
 .programmatically-displayed {
   border-radius: 8px;
-  border: 6px solid #b30909;
+  border: 6px dashed #b30909;
+}
+
+.return-to-snap-button-in-guide {
+  position: fixed;
+  bottom: 60px;
+  left: 10px;
+}
+
+.next-paragraph-in-guide {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
 }
 
 /* following based upon https://www.tipsandtricks-hq.com/simple-table-of-contents-toc-using-pure-html-and-css-code-9217 */

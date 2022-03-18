@@ -378,30 +378,77 @@ window.addEventListener(
          Array.prototype.forEach.call(elements, snap_iframe);
      });
 
+const ensure_not_hidden = (element) => {
+    if (element) {
+        element.style.display = null;
+        ensure_not_hidden(element.parentElement);
+    }
+};
+
 const listen_for_messages = (event) => {
-    if (event.data && typeof event.data.display_paragraph !== 'undefined') {
-        const text = event.data.display_paragraph;
-        const paragraphs = Array.from(document.getElementsByTagName('p'));
-        let paragraph_element;
-        paragraphs.some(paragraph => {
-            if (paragraph.innerText.indexOf(text) >= 0) {
-                paragraph_element = paragraph;
-                return true;
-            }
+    if (event.data && typeof event.data.display_paragraphs !== 'undefined') {
+        const texts = event.data.display_paragraphs;
+        const paragraphs = Array.from(document.getElementsByTagName('p'))
+                           .concat(Array.from(document.getElementsByTagName('h4')))
+                           .concat(Array.from(document.getElementsByTagName('ol')))
+                           .concat(Array.from(document.getElementsByTagName('ul')));
+        let paragraph_elements = [];
+        texts.forEach(text => {
+            paragraphs.some(paragraph => {
+               if (paragraph.innerText.indexOf(text) >= 0) {
+                   if (paragraph_elements.indexOf(paragraph) < 0 && // new element
+                       ((paragraph.tagName === 'H4' && 
+                         paragraph_elements.indexOf(paragraph.nextElementSibling) < 0) || // if H4 and next P is new
+                        (paragraph.tagName === 'P' && 
+                         (!paragraph.previousElementSibling ||
+                          paragraph.previousElementSibling.tagName === 'p' || // if P and previous element is P or new H4
+                          paragraph_elements.indexOf(paragraph.previousElementSibling) < 0)) ||
+                        paragraph.tagName === 'OL' ||
+                        paragraph.tagName === 'UL')) {
+                       paragraph_elements.push(paragraph);
+                   }
+                   return true;
+                }
+            });                
         });
-        if (paragraph_element) {
-            paragraph_element.scrollIntoView(true);
-            paragraph_element.classList.add('programmatically-displayed');
-            paragraph_element.title = "Click this paragraph to return to Snap!";
-            paragraph_element.addEventListener('click',
-                () => {
-                    //return to Snap!
-                    window.parent.postMessage('Hide support iframe', "*");
-                    // let children = document.body.children;
-                    // Array.from(children).forEach((child) => {
-                    //                                child.style.opacity = 0;
-                    // });     
+        let paragraph_index = 0;
+        if (paragraph_elements.length > 0) {
+            ensure_not_hidden(paragraph_elements[paragraph_index]);
+            paragraph_elements[paragraph_index].scrollIntoView(true);
+            paragraph_elements[paragraph_index].classList.add('programmatically-displayed');
+            console.log("added to programmatically-displayed " + paragraph_index);
+            if (!document.body.getElementsByClassName('return-to-snap-button-in-guide')[0]) {
+                const return_to_snap = document.createElement('button');
+                return_to_snap.innerHTML = "Return to Snap!";
+                return_to_snap.classList.add('generic-button', 'return-to-snap-button-in-guide');
+                return_to_snap.addEventListener('click',
+                    () => {
+                        paragraph_elements[paragraph_index].classList.remove('programmatically-displayed');
+                        console.log("removed to programmatically-displayed " + paragraph_index);
+                        window.parent.postMessage({returning_from_snap: true},
+                                                  "*");
                 });
+                document.body.appendChild(return_to_snap);
+                const next_paragraph_button = document.createElement('button');
+                next_paragraph_button.innerHTML = "Next paragraph"; 
+                next_paragraph_button.classList.add('generic-button', 'next-paragraph-in-guide');
+                next_paragraph_button.addEventListener('click',
+                    () => {
+                        paragraph_elements[paragraph_index].classList.remove('programmatically-displayed');
+                        console.log("removed to programmatically-displayed " + paragraph_index);
+                        paragraph_index++;
+                        ensure_not_hidden(paragraph_elements[paragraph_index]);
+                        paragraph_elements[paragraph_index].scrollIntoView(true);
+                        paragraph_elements[paragraph_index].classList.add('programmatically-displayed');
+                        console.log("added to programmatically-displayed " + paragraph_index);
+                        if (paragraph_index === paragraph_elements.length-1) {
+                            // last one
+                            next_paragraph_button.remove();
+                        }
+                         
+                });
+                document.body.appendChild(next_paragraph_button);
+            }
         }
     }
 };
