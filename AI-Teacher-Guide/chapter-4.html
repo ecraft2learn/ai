@@ -4,11 +4,11 @@
 <link rel="icon" type="image/png" href="../images/eCraft2Learn-Favicon.png" />
 <script src="../js/ai-guide.js"></script>
 <!-- Following is only when generating data for the Guide Assistant -->
-<!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder"></script>
 <script src="../AI-Teacher-Guide/qa-embeddings/chapter-5.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier"></script>
-<script src="../js/qa-ai-guide.js"></script> -->
+<script src="../js/qa-ai-guide.js"></script>
 </head>
 <body>
 <script src="../js/translate.js"></script>
@@ -561,7 +561,7 @@ If no list is provided a rainbow of colours is used.
 <b>create poses</b> if true reports <a href="#pose-detection">body poses</a>.
 </li>
 <li>
-<b>create person bitmasks</b> if true and using the multi-person <span class="block-name">segmentations and poses of <i>costume</i> ...</span> block
+<b>create person bitmasks</b> if true and using the multi-person <span class="block-name">segmentations and poses of <i>costume</i>...</span> block
 then a list of zeros and ones is reported. One indicating that the pixel is part of a person and zero otherwise.
 </li>
 <li>
@@ -573,10 +573,10 @@ and <a href="https://github.com/tensorflow/tfjs-models/tree/master/body-pix#user
 <p class="instructions">
 These blocks report a list of findings.
 The <span class="block-name">get the <i>key</i> in <i>table</i></span> block provides a convenient way of retrieving a finding.
-The keys for the <span class="block-name">segmentation and pose of <i>costume</i> ...</span> block are
+The keys for the <span class="block-name">segmentation and pose of <i>costume</i>...</span> block are
 <i>costume</i>, <i>pixel codes</i>, and <i>all poses</i>. 
 Often <i>all poses</i> contains more poses than there are people but the extra ones have very low confidence scores.
-The <span class="block-name">segmentations and poses of <i>costume</i> ...</span> block reports a list of findings, one for each person detected.
+The <span class="block-name">segmentations and poses of <i>costume</i>...</span> block reports a list of findings, one for each person detected.
 Each person finding can have the keys <i>costume</i>, <i>pixel codes</i>, <i>pose</i>, and <i>person bitmap</i>.
 The <span class="block-name">get value at <i>x</i> and <i>y</i> from bitmap</span> can be used the read the value
 of either the <i>pixel codes</i> or the <i>person bitmap</i>.
@@ -593,7 +593,7 @@ Here you can explore the <span class="block-name">segmentation and pose of <i>co
         caption = "See if the segmentation model can correctly find body parts.">
 </figure>
 <p class="instructions">
-Here you can explore the <span class="block-name">segmentations and poses of <i>costume</i> ...</span> block.
+Here you can explore the <span class="block-name">segmentations and poses of <i>costume</i>...</span> block.
 </p>
 <figure class = "snap-iframe"
         id = "segmentation multi"
