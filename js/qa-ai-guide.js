@@ -9,22 +9,22 @@ const create_paragraphs = () => {
 
 const create_sentences = (paragraphs) => {
     const sentences_in_a_paragraph = paragraphs.map(paragraph => 
-                                        paragraph.split(/[.?] /) // including ! causes problems due to Snap!
+                                        paragraph.split(/\n|[.?] /) // new line or end of sentence (including ! causes problems due to Snap!)
                                         .filter(sentence => (sentence.trim()[0] !== '(')) // remove short or parenthetical sentences
-                                        .map(sentence => sentence.replaceAll('\n',' ').trim()));
+                                        .map(sentence => sentence.trim()));
     const join_fragments = (fragments) => {
         let new_sentences = [];
         for (let i = 0; i < fragments.length; i++) {
-           const fragment = fragments[i];
+           const fragment = fragments[i].trim();
             const suffix = i === fragments.length-1 ? '' : '. '; // don't add period to last sentence
             if (i < fragments.length-1 && 
                 (fragment.lastIndexOf('e.g') === fragment.length-'e.g'.length ||
                  fragment.lastIndexOf('..') === fragment.length-'..'.length)) {
-                const full_sentence = fragment + suffix + fragments[i+1] + suffix.trim(); // shouldn't been broken
+                const full_sentence = fragment + suffix + fragments[i+1].trim() + suffix.trim(); // shouldn't been broken
                 if (full_sentence.length > 25) {
                     new_sentences.push(full_sentence); 
                 }
-                i++;
+                i++; // skip next one since combined with this one
             } else if (fragment.length > 24) {
                 new_sentences.push(fragment + suffix.trim());
             }
@@ -32,8 +32,8 @@ const create_sentences = (paragraphs) => {
         return new_sentences;
     };
     const headers = Array.from(document.getElementsByTagName('h4'))
-                   .filter(header => header.className !== 'guide-to-guide-white').map(x => [x.innerText])
-                   .filter(text => text.length > 25);
+                   .filter(header => header.className !== 'guide-to-guide-white').map(x => [x.innerText.trim()])
+                   .filter(text => text[0].split(' ').length > 1); // remove single word headers
     return sentences_in_a_paragraph.map(join_fragments).concat(headers);
 };
 

@@ -449,6 +449,8 @@ const listen_for_messages = (event) => {
                 });
                 document.body.appendChild(next_paragraph_button);
             }
+        } else {
+            console.log("No paragraphs found!");
         }
     }
 };

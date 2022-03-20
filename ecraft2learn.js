@@ -1424,7 +1424,7 @@ window.ecraft2learn =
                                   (message) => {
                                       ecraft2learn.support_iframe[url].style.width  = "1px";
                                       ecraft2learn.support_iframe[url].style.height = "1px";
-                                      console.log("display paragraphs callback invoked");
+                                      // console.log("display paragraphs callback invoked");
                                       invoke_callback(after_returning_callback);
                                   });
     };
