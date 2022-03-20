@@ -1,17 +1,10 @@
 speaking blocks.xml	Speaking	AI blocks for text to speech
-speaking.xml	Speaking demos	Tutorial project demonstrating blocks for for text to speech
 listening blocks.xml	Listening	AI blocks for recognizing speech
-listening.xml	Listening demos	Tutorial project demonstrating blocks for recognizing speech
 seeing blocks.xml	Seeing	AI blocks for object recognition and detection and pose recognition
-seeing.xml	Seeing demos	Tutorial project demonstrating blocks for object recognition and detection and pose recognition
-words blocks.xml	AI Language (NLP)	AI blocks for processing words and sentences
-words.xml	NLP demos	Tutorial project demonstrating blocks for processing words and sentences
+words blocks.xml	Natural language processing	AI blocks for processing words and sentences and question answering
 neural nets blocks.xml	Neural nets	AI blocks for creating, training, and using neural networks
-neural nets.xml	Neural net demos	Tutorial project demonstrating blocks for creating, training, and using neural networks
 K nearest neighbors blocks.xml	K nearest neighbors	blocks for creating and using KNN models
-K nearest neighbors.xml	K nearest neighbors demo	Tutorial project demonstrating blocks for creating and using KNN models
 misc AI blocks.xml	Misc AI	AI blocks for style transfer, Wikipedia, and image embedding
-misc AI.xml	Misc AI demos	Tutorial project demonstrating blocks for style transfer, Wikipedia, and image embedding
 ~	~
 ~	~
 ~	~
