@@ -8,10 +8,12 @@ const create_paragraphs = () => {
 };
 
 const create_sentences = (paragraphs) => {
+    const remove_final_punctuation = sentence =>
+        '.?'.indexOf(sentence[sentence.length-1]) >= 0 ? sentence.slice(0, sentence.length-1) : sentence;
     const sentences_in_a_paragraph = paragraphs.map(paragraph => 
                                         paragraph.split(/\n|[.?] /) // new line or end of sentence (including ! causes problems due to Snap!)
                                         .filter(sentence => (sentence.trim()[0] !== '(')) // remove short or parenthetical sentences
-                                        .map(sentence => sentence.trim()));
+                                        .map(sentence => remove_final_punctuation(sentence.trim())));
     const join_fragments = (fragments) => {
         let new_sentences = [];
         for (let i = 0; i < fragments.length; i++) {
@@ -20,13 +22,13 @@ const create_sentences = (paragraphs) => {
             if (i < fragments.length-1 && 
                 (fragment.lastIndexOf('e.g') === fragment.length-'e.g'.length ||
                  fragment.lastIndexOf('..') === fragment.length-'..'.length)) {
-                const full_sentence = fragment + suffix + fragments[i+1].trim() + suffix.trim(); // shouldn't been broken
+                const full_sentence = fragment + suffix + fragments[i+1].trim(); // shouldn't been broken by split
                 if (full_sentence.length > 25) {
                     new_sentences.push(full_sentence); 
                 }
                 i++; // skip next one since combined with this one
             } else if (fragment.length > 24) {
-                new_sentences.push(fragment + suffix.trim());
+                new_sentences.push(fragment);
             }
         }
         return new_sentences;
