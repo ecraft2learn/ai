@@ -385,6 +385,8 @@ const ensure_not_hidden = (element) => {
     }
 };
 
+let paragraph_index = 0;
+
 const listen_for_messages = (event) => {
     if (event.data && typeof event.data.display_paragraphs !== 'undefined') {
         const texts = event.data.display_paragraphs;
@@ -406,25 +408,24 @@ const listen_for_messages = (event) => {
                         paragraph.tagName === 'OL' ||
                         paragraph.tagName === 'UL')) {
                        paragraph_elements.push(paragraph);
+                       paragraph.classList.remove('programmatically-displayed');
                    }
                    return true;
                 }
             });                
         });
-        let paragraph_index = 0;
+        paragraph_index = 0;
         if (paragraph_elements.length > 0) {
             ensure_not_hidden(paragraph_elements[paragraph_index]);
             paragraph_elements[paragraph_index].scrollIntoView(true);
             paragraph_elements[paragraph_index].classList.add('programmatically-displayed');
-            console.log("added to programmatically-displayed " + paragraph_index);
-            if (!document.body.getElementsByClassName('return-to-snap-button-in-guide')[0]) {
+            // console.log("added to programmatically-displayed " + paragraph_index);
+            if (!document.body.getElementsByClassName('return-to-snap-button-in-guide')[0]) { // first time
                 const return_to_snap = document.createElement('button');
                 return_to_snap.innerHTML = "Return to Snap!";
                 return_to_snap.classList.add('generic-button', 'return-to-snap-button-in-guide');
                 return_to_snap.addEventListener('click',
                     () => {
-                        paragraph_elements[paragraph_index].classList.remove('programmatically-displayed');
-                        console.log("removed to programmatically-displayed " + paragraph_index);
                         window.parent.postMessage({returning_from_snap: true},
                                                   "*");
                 });
@@ -435,12 +436,13 @@ const listen_for_messages = (event) => {
                 next_paragraph_button.addEventListener('click',
                     () => {
                         paragraph_elements[paragraph_index].classList.remove('programmatically-displayed');
-                        console.log("removed to programmatically-displayed " + paragraph_index);
+                        // console.log("removed to programmatically-displayed " + paragraph_index);
                         paragraph_index++;
                         ensure_not_hidden(paragraph_elements[paragraph_index]);
                         paragraph_elements[paragraph_index].scrollIntoView(true);
+                            // console.log(paragraph_elements[paragraph_index], paragraph_elements[paragraph_index].innerText);
                         paragraph_elements[paragraph_index].classList.add('programmatically-displayed');
-                        console.log("added to programmatically-displayed " + paragraph_index);
+                        // console.log("added to programmatically-displayed " + paragraph_index);
                         if (paragraph_index === paragraph_elements.length-1) {
                             // last one
                             next_paragraph_button.remove();

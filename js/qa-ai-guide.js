@@ -10,8 +10,9 @@ const create_paragraphs = () => {
 const create_sentences = (paragraphs) => {
     const remove_final_punctuation = sentence =>
         '.?'.indexOf(sentence[sentence.length-1]) >= 0 ? sentence.slice(0, sentence.length-1) : sentence;
+    const remove_parenthetical_remarks = text => text.replace(/ \([^)]*\)/g, ''); // thank you Codex
     const sentences_in_a_paragraph = paragraphs.map(paragraph => 
-                                        paragraph.split(/\n|[.?] /) // new line or end of sentence (including ! causes problems due to Snap!)
+                                        remove_parenthetical_remarks(paragraph).split(/\n|[.?] /) // new line or end of sentence (including ! causes problems due to Snap!)
                                         .filter(sentence => (sentence.trim()[0] !== '(')) // remove short or parenthetical sentences
                                         .map(sentence => remove_final_punctuation(sentence.trim())));
     const join_fragments = (fragments) => {
