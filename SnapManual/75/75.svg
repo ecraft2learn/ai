@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg viewBox="0 0 935 1210" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<defs>
+<clipPath id="c0_75"><path d="M651.8,228.7V208.1H831.3v20.6Z"/></clipPath>
+<clipPath id="c1_75"><path d="M127.5,931.3V778.6h55V931.3Z"/></clipPath>
+<clipPath id="c2_75"><path d="M260.8,882.4v-55H664.5v55Z"/></clipPath>
+<clipPath id="c3_75"><path d="M742.8,931.4V778.6h55.8V931.4Z"/></clipPath>
+<clipPath id="c4_75"><path d="M230.9,857.7l2.7,-2.7l-2.7,-2.7v1.3H209.7v2.7h21.2v1.4ZM0,1210V0H935V1210Z"/></clipPath>
+<clipPath id="c5_75"><path d="M712.9,857.7l2.7,-2.7l-2.7,-2.7v1.3H691.7v2.7h21.2v1.4ZM0,1210V0H935V1210Z"/></clipPath>
+<style type="text/css"><![CDATA[
+.g0_75{
+fill: none;
+stroke: #F07C03;
+stroke-width: 1.145;
+stroke-linecap: butt;
+stroke-linejoin: miter;
+stroke-miterlimit: 8;
+}
+]]></style>
+</defs>
+<image clip-path="url(#c0_75)" preserveAspectRatio="none" x="652" y="208" width="179" height="21" xlink:href="img/1.png"/>
+<image clip-path="url(#c1_75)" preserveAspectRatio="none" x="127" y="779" width="55" height="152" xlink:href="img/2.png"/>
+<image clip-path="url(#c2_75)" preserveAspectRatio="none" x="261" y="827" width="404" height="55" xlink:href="img/3.png"/>
+<image clip-path="url(#c3_75)" preserveAspectRatio="none" x="743" y="779" width="56" height="152" xlink:href="img/4.png"/>
+<image clip-path="url(#c4_75)" preserveAspectRatio="none" x="203" y="848" width="37" height="19" xlink:href="img/5.png"/>
+<image x="209" y="852" width="25" height="6" xlink:href="shade/1.png"/>
+<path d="M209.7,853.6h21.2v-1.3l2.7,2.7l-2.7,2.7v-1.4H209.7Z" class="g0_75"/>
+<image clip-path="url(#c5_75)" preserveAspectRatio="none" x="686" y="848" width="36" height="19" xlink:href="img/6.png"/>
+<image x="691" y="852" width="25" height="6" xlink:href="shade/2.png"/>
+<path d="M691.7,853.6h21.2v-1.3l2.7,2.7l-2.7,2.7v-1.4H691.7Z" class="g0_75"/>
+</svg>
