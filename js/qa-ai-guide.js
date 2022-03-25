@@ -1,5 +1,44 @@
 
-const create_paragraphs = () => {
+const manual = location.href.indexOf('SnapManual') >= 0;
+
+const create_paragraphs = () => manual ? create_manual_paragraphs() : create_guide_paragraphs();
+
+let paragraph_to_page_number = [];
+
+let paragraphs = [];
+
+const paragraph_elements = (page) => {
+    const index_of_equals = location.search.indexOf('=');
+    if (+location.search.substring(index_of_equals+1) === page) {
+        paragraphs = paragraphs.concat(Array.from(document.getElementsByClassName('text-container')));
+        paragraph_to_page_number.push(paragraphs.length);
+        if (page < 6) {// 147) {
+            page++;
+            IDRViewer.goToPage(page);
+            paragraph_elements(page);
+        } else {
+            console.log(JSON.stringify(create_sentences(create_manual_paragraphs(paragraphs))));
+        }
+    } else {
+        setTimeout(paragraph_elements, 1000);
+    }   
+};
+
+if (manual) {
+    IDRViewer.goToPage(4);
+    paragraph_elements(4); // skip the table of contents
+}
+
+const create_manual_paragraphs = (paragraphs) => { 
+    console.log(paragraphs);
+    // ignore repeated periods (thanks Codex) - but maybe no longer needed since was triggered when table of contents was included
+    // .replaceAll(/\.{2,}/g, ' ')
+    // and middle initials --- Codex suggested a-z
+    return paragraphs.map(x => x.innerText.replaceAll('\n','').replaceAll(/[A-Z]\./g, ''))
+            .filter(paragraph => paragraph.length > 100); 
+};
+
+const create_guide_paragraphs = () => {
     let paragraphs = Array.from(document.getElementsByTagName('p'))
                     .filter(paragraph => paragraph.className !== 'guide-to-guide').map(x => x.innerText);
     const ordered_lists = Array.from(document.getElementsByTagName('ol')).map(list => list.innerText);
@@ -10,7 +49,7 @@ const create_paragraphs = () => {
 const create_sentences = (paragraphs) => {
     const remove_final_punctuation = sentence =>
         '.?'.indexOf(sentence[sentence.length-1]) >= 0 ? sentence.slice(0, sentence.length-1) : sentence;
-    const remove_parenthetical_remarks = text => text.replace(/ \([^)]*\)/g, ''); // thank you Codex
+    const remove_parenthetical_remarks = text => text.replaceAll(/ \([^)]*\)/g, ''); // thank you Codex
     const sentences_in_a_paragraph = paragraphs.map(paragraph => 
                                         remove_parenthetical_remarks(paragraph).split(/\n|[.?] /) // new line or end of sentence (including ! causes problems due to Snap!)
                                         .filter(sentence => (sentence.trim()[0] !== '(')) // remove short or parenthetical sentences
@@ -40,10 +79,10 @@ const create_sentences = (paragraphs) => {
     return sentences_in_a_paragraph.map(join_fragments).concat(headers);
 };
 
-window.addEventListener('DOMContentLoaded',
-                        () => {
-                            console.log(JSON.stringify(create_sentences(create_paragraphs())));
-                        });
+// window.addEventListener('DOMContentLoaded',
+//                         () => {
+//                             console.log(JSON.stringify(create_sentences(create_paragraphs())));
+//                         });
 
 // window.create_use_model = (continuation) => {
 //     use.load().then(model => {

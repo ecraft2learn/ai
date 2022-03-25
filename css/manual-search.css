@@ -1,0 +1,39 @@
+.generic-button {
+margin-top: 10px;
+position:absolute;
+line-height: normal;
+margin-right: .1em;
+cursor: pointer;
+vertical-align: middle;
+text-align: center;
+font-size: 1.1em;
+-webkit-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+border-radius: 8px;
+padding: 10px;
+box-shadow: 5px 3px 5px black;
+color: navy;
+cursor: pointer;
+text-decoration: none;
+width: fit-content;
+background-color: buttonface;
+}
+
+.programmatically-displayed {
+  border-radius: 8px;
+  border: 6px dashed #b30909;
+}
+
+.return-to-snap-button-in-guide {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+}
+
+.next-paragraph-in-guide {
+  position: fixed;
+  bottom: 130px;
+  right: 20px;
+}

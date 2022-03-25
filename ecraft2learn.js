@@ -1428,6 +1428,25 @@ window.ecraft2learn =
                                       invoke_callback(after_returning_callback);
                                   });
     };
+    const display_paragraphs_containing_text_in_manual = (texts, page_numbers, url, after_returning_callback) => {
+        open_support_window(url);
+        record_callbacks(after_returning_callback);
+        request_of_support_window(url,
+                                  'Loaded',
+                                  () => {
+                                      return {display_paragraphs: snap_to_javascript(texts),
+                                              page_numbers: snap_to_javascript(page_numbers, true)};
+                                  },
+                                  (message) => {
+                                      return message.returning_from_snap;
+                                  },
+                                  (message) => {
+                                      ecraft2learn.support_iframe[url].style.width  = "1px";
+                                      ecraft2learn.support_iframe[url].style.height = "1px";
+                                      // console.log("display paragraphs callback invoked");
+                                      invoke_callback(after_returning_callback);
+                                  });
+    };
     // following functions use the layers level of tensorflow.js to create models, train, and predict
     const create_tensorflow_model = (name, layers, optimizer, loss_function, input_shape, success_callback, error_callback,
                                      activation_function_name, dropout_rate) => { 
@@ -3820,6 +3839,7 @@ xhr.send();
   create_costume_with_style,
   get_image_features,
   display_paragraphs_containing_text,
+  display_paragraphs_containing_text_in_manual,
   create_tensorflow_model,
   send_data,
   train_model,
