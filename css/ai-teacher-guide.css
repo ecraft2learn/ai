@@ -333,14 +333,14 @@ background-color: buttonface;
 
 .return-to-snap-button-in-guide {
   position: fixed;
-  bottom: 60px;
-  left: 10px;
+  bottom: 20px;
+  right: 20px;
 }
 
 .next-paragraph-in-guide {
   position: fixed;
-  bottom: 10px;
-  left: 10px;
+  bottom: 70px;
+  right: 20px;
 }
 
 /* following based upon https://www.tipsandtricks-hq.com/simple-table-of-contents-toc-using-pure-html-and-css-code-9217 */

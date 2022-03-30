@@ -385,49 +385,15 @@ const ensure_not_hidden = (element) => {
     }
 };
 
-let paragraph_index = 0;
-
 const listen_for_messages = (event) => {
-    if (event.data && typeof event.data.display_paragraphs !== 'undefined') {
-        const texts = event.data.display_paragraphs;
-        const paragraphs = Array.from(document.getElementsByTagName('p'))
-                           .concat(Array.from(document.getElementsByTagName('h4')))
-                           .concat(Array.from(document.getElementsByTagName('ol')))
-                           .concat(Array.from(document.getElementsByTagName('ul')));
-        let paragraph_elements = [];
-        texts.forEach(text => {
-            paragraphs.some(paragraph => {
-               if (paragraph.innerText.indexOf(text) >= 0) {
-                   if (paragraph_elements.indexOf(paragraph) < 0 && // new element
-                       ((paragraph.tagName === 'H4' && 
-                         paragraph_elements.indexOf(paragraph.nextElementSibling) < 0) || // if H4 and next P is new
-                        (paragraph.tagName === 'P' && 
-                         (!paragraph.previousElementSibling ||
-                          paragraph.previousElementSibling.tagName === 'p' || // if P and previous element is P or new H4
-                          paragraph_elements.indexOf(paragraph.previousElementSibling) < 0)) ||
-                        paragraph.tagName === 'OL' ||
-                        paragraph.tagName === 'UL')) {
-                       paragraph_elements.push(paragraph);
-                       paragraph.classList.remove('programmatically-displayed');
-                   }
-                   return true;
-                }
-            });                
-        });
-        paragraph_index = 0;
-        if (paragraph_elements.length > 0) {
-            ensure_not_hidden(paragraph_elements[paragraph_index]);
-            paragraph_elements[paragraph_index].scrollIntoView(true);
-            paragraph_elements[paragraph_index].classList.add('programmatically-displayed');
-            // console.log("added to programmatically-displayed " + paragraph_index);
-            if (!document.body.getElementsByClassName('return-to-snap-button-in-guide')[0]) { // first time
+    if (event.data && typeof event.data.display_paragraph !== 'undefined') {
+        if (!document.body.getElementsByClassName('return-to-snap-button-in-guide')[0]) { // first time
                 const return_to_snap = document.createElement('button');
                 return_to_snap.innerHTML = "Return to Snap!";
                 return_to_snap.classList.add('generic-button', 'return-to-snap-button-in-guide');
                 return_to_snap.addEventListener('click',
                     () => {
-                        window.parent.postMessage({returning_from_snap: true},
-                                                  "*");
+                        window.parent.postMessage({returning_from_snap: true}, "*");
                 });
                 document.body.appendChild(return_to_snap);
                 const next_paragraph_button = document.createElement('button');
@@ -435,24 +401,28 @@ const listen_for_messages = (event) => {
                 next_paragraph_button.classList.add('generic-button', 'next-paragraph-in-guide');
                 next_paragraph_button.addEventListener('click',
                     () => {
-                        paragraph_elements[paragraph_index].classList.remove('programmatically-displayed');
-                        // console.log("removed to programmatically-displayed " + paragraph_index);
-                        paragraph_index++;
-                        ensure_not_hidden(paragraph_elements[paragraph_index]);
-                        paragraph_elements[paragraph_index].scrollIntoView(true);
-                            // console.log(paragraph_elements[paragraph_index], paragraph_elements[paragraph_index].innerText);
-                        paragraph_elements[paragraph_index].classList.add('programmatically-displayed');
-                        // console.log("added to programmatically-displayed " + paragraph_index);
-                        if (paragraph_index === paragraph_elements.length-1) {
-                            // last one
-                            next_paragraph_button.remove();
-                        }
-                         
+                        Array.from(document.getElementsByClassName('programmatically-displayed')).forEach(element => {
+                                element.classList.remove('programmatically-displayed');
+                        });            
+                        window.parent.postMessage({next_paragraph: true}, "*");
                 });
                 document.body.appendChild(next_paragraph_button);
-            }
-        } else {
-            console.log("No paragraphs found!");
+        }
+        const text = event.data.display_paragraph;
+        const paragraphs = Array.from(document.getElementsByTagName('p'))
+                           .filter(paragraph => paragraph.className !== 'guide-to-guide')
+                           .concat(Array.from(document.getElementsByTagName('h4')))
+                           .concat(Array.from(document.getElementsByTagName('ol')))
+                           .concat(Array.from(document.getElementsByTagName('ul')).filter(item => item.parentElement.id !== 'table-of-contents'));
+        if (!paragraphs.some(paragraph => {
+                if (paragraph.innerText.replaceAll('\n', ' ').replaceAll('  ', ' ').indexOf(text) >= 0) {
+                    ensure_not_hidden(paragraph);
+                    paragraph.scrollIntoView({block: "center"});
+                    paragraph.classList.add('programmatically-displayed');
+                    return true;
+                 }
+            })) {
+            console.log("No paragraphs found for " + text);
         }
     }
 };
