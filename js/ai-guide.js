@@ -388,25 +388,25 @@ const ensure_not_hidden = (element) => {
 const listen_for_messages = (event) => {
     if (event.data && typeof event.data.display_paragraph !== 'undefined') {
         if (!document.body.getElementsByClassName('return-to-snap-button-in-guide')[0]) { // first time
-                const return_to_snap = document.createElement('button');
-                return_to_snap.innerHTML = "Return to Snap!";
-                return_to_snap.classList.add('generic-button', 'return-to-snap-button-in-guide');
-                return_to_snap.addEventListener('click',
-                    () => {
-                        window.parent.postMessage({returning_from_snap: true}, "*");
-                });
-                document.body.appendChild(return_to_snap);
-                const next_paragraph_button = document.createElement('button');
-                next_paragraph_button.innerHTML = "Next paragraph"; 
-                next_paragraph_button.classList.add('generic-button', 'next-paragraph-in-guide');
-                next_paragraph_button.addEventListener('click',
-                    () => {
-                        Array.from(document.getElementsByClassName('programmatically-displayed')).forEach(element => {
+            const return_to_snap = document.createElement('button');
+            return_to_snap.innerHTML = "Return to Snap!";
+            return_to_snap.classList.add('generic-button', 'return-to-snap-button-in-guide');
+            return_to_snap.addEventListener('click',
+                () => {
+                    window.parent.postMessage({returning_from_snap: true}, "*");
+            });
+            document.body.appendChild(return_to_snap);
+            const next_paragraph_button = document.createElement('button');
+            next_paragraph_button.innerHTML = "Next paragraph"; 
+            next_paragraph_button.classList.add('generic-button', 'next-paragraph-in-guide');
+            next_paragraph_button.addEventListener('click',
+                () => {
+                    Array.from(document.getElementsByClassName('programmatically-displayed')).forEach(element => {
                                 element.classList.remove('programmatically-displayed');
-                        });            
-                        window.parent.postMessage({next_paragraph: true}, "*");
-                });
-                document.body.appendChild(next_paragraph_button);
+                    });            
+                    window.parent.postMessage({next_paragraph: true}, "*");
+             });
+             document.body.appendChild(next_paragraph_button);
         }
         const text = event.data.display_paragraph;
         const paragraphs = Array.from(document.getElementsByTagName('p'))
