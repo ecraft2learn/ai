@@ -264,6 +264,60 @@ A full screen version of this program can be
 The machine learning model used was trained in this
 <a href="chapter-6.html#confidences">project</a>.
 </p>
+
+<h4 class="instructions-white" id="manual-and-guide-ai-search">AI-aided search in the Snap! manual and the AI guide</h4>
+<p class="background-information">
+One use of sentence embeddings is information retrieval.
+Consider the task of searching the Snap! manual or this AI programming guide.
+String matching cannot take into account synonyms, different ways of saying the same thing,
+or different spelling conventions.
+In <a href="../snap/snap.html?project=QA guide&editMode&noRun" target="_blank">this sample search project</a>
+sentence embeddings are used to compare the user's query with sentence fragments from the manual and guide.
+By relying upon the
+<a href="#closest-features"><span class="block-name">features closest to list of features</span> block</a>
+the closest fragments are found very quickly.
+The embeddings of all the fragments have been pre-computed so only the embedding of the user's query is needed.
+Once the closest fragments have been computed we can fall back upon string search
+since the fragments were derived from the document being searched.
+</p>
+<p class="instructions">
+One can use this AI-augmented search while working with Snap! by downloading and then importing either
+<a href="/ai/projects/Guide search.xml" download>AI programming guide search</a> or
+<a href="/ai/projects/Manual search.xml" download>Snap! manual search</a>.
+They work similarly and have similar interfaces.
+The results tend to be better if the query is a grammatical phrase and not a question.
+</p>
+<p class="instructions">
+The programming guide supports these keyboard commands:
+</p>
+<ul>
+<li>
+<b>g</b> - to enter a search query to the <b>g</b>uide
+</li>
+<li><b>t</b> - to query by <b>t</b>alking
+</li>
+<li><b>x</b> - to stop listening for queries
+</li>
+</ul>
+<p class="instructions">
+The Snap! manual supports these keyboard commands:
+</p>
+<ul>
+<li>
+<b>m</b> - to enter a search query to the <b>m</b>anual
+</li>
+<li>
+<b>s</b> - to <b>s</b>peak a query
+</li>
+<li>
+<b>x</b> - to stop listening for queries
+</li>
+</ul> 
+<p class="instructions">
+Both the manual and guide search can be imported into the same project.
+But don't have both listening to your speech at the same time.
+When you no longer need this assistance just delete the imported sprite.
+</p>
 <h4 class="instructions-white" id="drawing-word-embeddings">Drawing word embeddings</h4>
 <p class="instructions">
 It would be nice to visualise the 300 numbers associated with a word.
