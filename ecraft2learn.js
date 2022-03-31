@@ -1015,6 +1015,7 @@ window.ecraft2learn =
   const noisy_polygon_help = () => {
       const iframe = document.createElement('iframe');
       iframe.id = 'noisy-polygon-help';
+      iframe.title = "Machine Learning for 'Noisy Polygons'";
       iframe.width = 720;
       iframe.height = 640;
       iframe.style = 'z-index: 99; position: absolute';
@@ -1220,6 +1221,7 @@ window.ecraft2learn =
               iframe.style.width = '100%';
               iframe.style.height = '100%';
           }
+          iframe.title = source;
           iframe.style.border = 0;
           iframe.style.position = 'absolute';
           iframe.style.backgroundColor = 'white';
