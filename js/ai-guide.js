@@ -432,5 +432,5 @@ window.addEventListener('DOMContentLoaded',
                             if (window.parent) {
                                 window.parent.postMessage("Loaded", "*");
                             }
-                            window.addEventListener("message", listen_for_messages);
+                            window.onmessage = listen_for_messages; // instead of adding an event listener make sure there is only one
                         });
