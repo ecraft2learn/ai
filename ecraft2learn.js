@@ -397,21 +397,32 @@ window.ecraft2learn =
         return x;
     };
     const snap_to_javascript = (x, only_numbers) => {
-        const numberify = function (x) {
-            if (typeof x === 'string' && !isNaN(+x)) {
-                return +x;
+        const snap_to_javascript_internal = (x, only_numbers) => {
+            const numberify = function (x) {
+                if (typeof x === 'string' && !isNaN(+x)) {
+                    return +x;
+                }
+                return x;
             }
-            return x;
+            if (x instanceof List) {
+                x = snap_to_javascript_internal(x.asArray(), only_numbers);
+            } else if (x instanceof Array) {
+                x = x.map((y) => snap_to_javascript_internal(y, only_numbers));
+            }
+            if (only_numbers) {
+                return numberify(x);
+            }
+            return x;       
+        };
+        if (only_numbers && !x.isLinked) {
+            if (!x.ecraft2learn_all_numbers) {
+                x.contents = snap_to_javascript_internal(x, only_numbers);
+                x.ecraft2learn_all_numbers = true;
+            }
+            return x.contents;
+        } else {
+            return snap_to_javascript_internal(x, only_numbers);
         }
-        if (x instanceof List) {
-            x = snap_to_javascript(x.asArray(), only_numbers);
-        } else if (x instanceof Array) {
-            x = x.map((y) => snap_to_javascript(y, only_numbers));
-        }
-        if (only_numbers) {
-            return numberify(x);
-        }
-        return x;       
     };
     const array_to_object = (array) => {
         // array alternates between keys and values
@@ -4075,12 +4086,10 @@ xhr.send();
       const words = Object.keys(words_to_features[language]);
       const target_tensor = tf.tensor(snap_to_javascript(target_features));
       const cosines_tensor = tf.metrics.cosineProximity(target_tensor, word_tensors);
-      const cosines_float32 = cosines_tensor.dataSync();
+      const cosines = cosines_tensor.arraySync();
       // using tf.tidy instead of explicitly disposing of tensors caused Snap! to repeated call this
       target_tensor.dispose();
       cosines_tensor.dispose();
-      // some old browsers don't support the ... syntax
-      const cosines = Array.prototype.slice.call(cosines_float32); // new Array(...cosines_float32);
       const words_and_cosines = cosines.map((cosine, index) => [words[index], cosine]);
       const sorted_words_and_cosines = words_and_cosines.sort((a, b) => a[1]-b[1]); 
       if (distances_too) {
@@ -4092,14 +4101,11 @@ xhr.send();
   cosine_proximity: (features, list_of_features) => {
       const features_tensor = tf.tensor(snap_to_javascript(features, true));
       const list_of_features_tensor = tf.tensor(snap_to_javascript(list_of_features, true));
-      const cosines_tensor =
-          tf.metrics.cosineProximity(features_tensor, list_of_features_tensor);
-      const cosines_float32 = cosines_tensor.dataSync();
+      const cosines_tensor = tf.metrics.cosineProximity(features_tensor, list_of_features_tensor);
+      const cosines = cosines_tensor.arraySync();
       cosines_tensor.dispose();
       features_tensor.dispose();
       list_of_features_tensor.dispose();
-      // some old browsers don't support the ... syntax
-      const cosines = Array.prototype.slice.call(cosines_float32); // new Array(...cosines_float32);
       // considered Math.acos(-cosine)*180/Math.PI but closest_words already uses cosine proximity
       const indices_and_cosines = cosines.map((cosine, index) => [index+1, cosine]); // +1 for Snap!'s 1-indexing
       const sorted_indices_and_cosines = indices_and_cosines.sort((a, b) => a[1]-b[1]);
