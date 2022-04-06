@@ -20,6 +20,7 @@ const listen_for_messages = (event) => {
                          setTimeout(get_highlighted_elements, 100);
                      } else {
                          selected_elements[0].scrollIntoView({block: "center"});
+                         selected_elements[0].focus(); // shouldn't be needed but scrollIntoView doesn't work 100% of the time
                          sentence_index++;
                      }
              };

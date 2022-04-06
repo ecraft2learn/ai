@@ -419,6 +419,7 @@ const listen_for_messages = (event) => {
                     ensure_not_hidden(paragraph);
                     paragraph.scrollIntoView({block: "center"});
                     paragraph.classList.add('programmatically-displayed');
+                    paragraph.focus(); // shouldn't be needed but scrollIntoView doesn't work 100% of the time
                     return true;
                  }
             })) {
