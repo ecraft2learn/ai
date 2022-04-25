@@ -1562,7 +1562,7 @@ window.ecraft2learn =
     const train_model = (model_name, epochs, learning_rate, shuffle, validation_split,
                          success_callback, error_callback,
                          // following added after release so easiest to add them at the end
-                         stop_if_no_progress_for_n_epochs) => {
+                         stop_if_no_progress_for_n_epochs, batch_size) => {
         record_callbacks(success_callback, error_callback);
         const time_stamp = Date.now();
         const tfvis_options = ecraft2learn.tensorflow_visualization_options ||
@@ -1578,7 +1578,8 @@ window.ecraft2learn =
                                                       validation_split,
                                                       tfvis_options,
                                                       time_stamp,
-                                                      stop_if_no_progress_for_n_epochs}};
+                                                      stop_if_no_progress_for_n_epochs,
+                                                      batch_size}};
                                   },
                                   (message) => {
                                       return message.training_completed === time_stamp ||

@@ -727,7 +727,7 @@ const optimize = async (xs, ys, validation_tensors, test_tensors, options) => {
     }
     const create_and_train_model = async (options, {xs, ys}) => {
         let {layers, optimization_method, loss_function, epochs, learning_rate, stop_if_no_progress_for_n_epochs,
-             dropout_rate, validation_split, activation, shuffle} = options;
+             dropout_rate, validation_split, activation, shuffle, batch_size} = options;
         if (create_and_train_model.stopped_prematurely) {
             return;
         }
@@ -867,6 +867,7 @@ const optimize = async (xs, ys, validation_tensors, test_tensors, options) => {
                          training_number,
                          dropout_rate,
                          optimization_method,
+                         batch_size,
                          tfvis_options},
                         (results) => {
                             samples_remaining--;
