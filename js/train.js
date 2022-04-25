@@ -184,7 +184,7 @@ const create_model = (options, failure_callback) => {
            return model;
         };
         const compile_model = (model) => {
-           // We use categoricalCrossentropy which is the loss function we use for
+           // We use categoricalCrossentropy (or binaryCrossentropy if two classes) which is the loss function we use for
            // categorical classification which measures the error between our predicted
            // probability distribution over classes (probability that an input is of each
            // class), versus the label (100% probability in the true class)
@@ -196,7 +196,7 @@ const create_model = (options, failure_callback) => {
            if (typeof loss_function === 'object') {
                loss = loss_function;
            } else if (class_names) {
-               loss = 'categoricalCrossentropy';
+               loss = class_names.length === 2 ? 'binaryCrossentropy' : 'categoricalCrossentropy';
                if (typeof loss_function === 'string' && loss_function !== loss && loss_function !== 'Softmax Cross Entropy') {
                    console.log("Ignoring loss function '" + loss_function + "' and using instead '" + loss + "'");
                }
