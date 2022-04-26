@@ -81,7 +81,7 @@ figcaption {
  .save-validation-button, .together_button, .support-window-button, .generic-button {
 /* originally copied from jquery-ui many subsequent edits */
 margin-top: 10px;
-position:absolute;
+position: relative; 
 line-height: normal;
 margin-right: .1em;
 cursor: pointer;
