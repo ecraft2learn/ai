@@ -1079,7 +1079,8 @@ const create_parameters_interface = function () {
 };
 
 const activation_functions =
-    ['elu', 'hardSigmoid', 'linear', 'relu', 'relu6', 'selu', 'sigmoid', 'softmax', 'softplus', 'softsign', 'tanh'];
+    ['elu', 'hardSigmoid', 'linear', 'relu', 'relu6', 'selu', 'sigmoid', 'softmax', 'softplus', 'softsign', 'tanh',
+     'swish', 'mish'];
 
 const create_model_parameters = (parameters_gui) => {
     const model = parameters_gui.addFolder("Model");
