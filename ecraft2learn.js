@@ -1045,7 +1045,7 @@ window.ecraft2learn =
           if (message.error_message) {
               if (error_handler) {     
                   invoke_callback(error_handler, message.error_message);
-              }
+              } else {
                   console.log(message.error_message); 
               } 
       };
