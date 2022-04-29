@@ -2472,7 +2472,7 @@ window.ecraft2learn =
         }
         return result;      
     };
-    const yahoo_weather = (place, element_name, units, callback, error_callback, key, secret) => {
+    // const yahoo_weather = (place, element_name, units, callback, error_callback, key, secret) => {
 // Weather API sample javascript code
 // Requires: jQuery and crypto-js (v3.1.9)
 // 
@@ -2481,72 +2481,72 @@ window.ecraft2learn =
 // Edited by Ken Kahn to remove jQuery dependance and provide interface
 // based upon https://developer.yahoo.com/weather/documentation.html#oauth-javascript
 
-if (typeof CryptoJS === 'undefined') {
-    load_script("js/crypto-js.js",
-                () => {
-                    yahoo_weather(place, element_name, units, callback, error_callback, key, secret);
-                });
-    return;
-}
+// if (typeof CryptoJS === 'undefined') {
+//     load_script("js/crypto-js.js",
+//                 () => {
+//                     yahoo_weather(place, element_name, units, callback, error_callback, key, secret);
+//                 });
+//     return;
+// }
 
-var url = 'https://weather-ydn-yql.media.yahoo.com/forecastrss';
-var method = 'GET';
-var app_id = '6HuByg4m';
-var consumer_key = key;
-var consumer_secret = secret;
-var concat = '&';
-var query = {'location': place,
-             'format': 'json',
-             'u': units};
-var oauth = {
-    'oauth_consumer_key': consumer_key,
-    'oauth_nonce': Math.random().toString(36).substring(2),
-    'oauth_signature_method': 'HMAC-SHA1',
-    'oauth_timestamp': parseInt(new Date().getTime() / 1000).toString(),
-    'oauth_version': '1.0'
-};
+// var url = 'https://weather-ydn-yql.media.yahoo.com/forecastrss';
+// var method = 'GET';
+// var app_id = '6HuByg4m';
+// var consumer_key = key;
+// var consumer_secret = secret;
+// var concat = '&';
+// var query = {'location': place,
+//              'format': 'json',
+//              'u': units};
+// var oauth = {
+//     'oauth_consumer_key': consumer_key,
+//     'oauth_nonce': Math.random().toString(36).substring(2),
+//     'oauth_signature_method': 'HMAC-SHA1',
+//     'oauth_timestamp': parseInt(new Date().getTime() / 1000).toString(),
+//     'oauth_version': '1.0'
+// };
 
-var merged = {}; 
-// $.extend(merged, query, oauth);
-Object.assign(merged, query);
-Object.assign(merged, oauth);
-// Note the sorting here is required
-var merged_arr = Object.keys(merged).sort().map(function(k) {
-  return [k + '=' + encodeURIComponent(merged[k])];
-});
-var signature_base_str = method
-  + concat + encodeURIComponent(url)
-  + concat + encodeURIComponent(merged_arr.join(concat));
+// var merged = {}; 
+// // $.extend(merged, query, oauth);
+// Object.assign(merged, query);
+// Object.assign(merged, oauth);
+// // Note the sorting here is required
+// var merged_arr = Object.keys(merged).sort().map(function(k) {
+//   return [k + '=' + encodeURIComponent(merged[k])];
+// });
+// var signature_base_str = method
+//   + concat + encodeURIComponent(url)
+//   + concat + encodeURIComponent(merged_arr.join(concat));
 
-var composite_key = encodeURIComponent(consumer_secret) + concat;
-var hash = CryptoJS.HmacSHA1(signature_base_str, composite_key);
-var signature = hash.toString(CryptoJS.enc.Base64);
+// var composite_key = encodeURIComponent(consumer_secret) + concat;
+// var hash = CryptoJS.HmacSHA1(signature_base_str, composite_key);
+// var signature = hash.toString(CryptoJS.enc.Base64);
 
-oauth['oauth_signature'] = signature;
-var auth_header = 'OAuth ' + Object.keys(oauth).map(function(k) {
-  return [k + '="' + oauth[k] + '"'];
-}).join(',');
+// oauth['oauth_signature'] = signature;
+// var auth_header = 'OAuth ' + Object.keys(oauth).map(function(k) {
+//   return [k + '="' + oauth[k] + '"'];
+// }).join(',');
 
-// following replaces $.ajax below
-let xhr = new XMLHttpRequest();
-let url_and_query = url + "?format=json&location=" + encodeURIComponent(place) + "&u=" + units;
-xhr.open('GET', url_and_query);
-xhr.setRequestHeader('Authorization', auth_header);
-xhr.setRequestHeader('X-Yahoo-App-Id', app_id);
-xhr.onload = function() {
-    callback(JSON.parse(xhr.responseText));
-};
-xhr.onerror = function(error) {
-    error_callback(url + " error is " + error.message);
-};
-xhr.onloadend = function() {
-    if (xhr.status >= 400) {
-        error_callback(url + " replied " + xhr.statusText);
-    } else if (xhr.status === 0) {
-        error_callback(url + " failed to load.");
-    }
-};
-xhr.send();
+// // following replaces $.ajax below
+// let xhr = new XMLHttpRequest();
+// let url_and_query = url + "?format=json&location=" + encodeURIComponent(place) + "&u=" + units;
+// xhr.open('GET', url_and_query);
+// xhr.setRequestHeader('Authorization', auth_header);
+// xhr.setRequestHeader('X-Yahoo-App-Id', app_id);
+// xhr.onload = function() {
+//     callback(JSON.parse(xhr.responseText));
+// };
+// xhr.onerror = function(error) {
+//     error_callback(url + " error is " + error.message);
+// };
+// xhr.onloadend = function() {
+//     if (xhr.status >= 400) {
+//         error_callback(url + " replied " + xhr.statusText);
+//     } else if (xhr.status === 0) {
+//         error_callback(url + " failed to load.");
+//     }
+// };
+// xhr.send();
 
 // $.ajax({
 //   url: url + '?' + $.param(query),
@@ -2560,7 +2560,7 @@ xhr.send();
 //   }
 // });
 
-}
+// }
     window.words_to_features  = {};
     window.words_to_locations = {};
     // see http://mary.dfki.de:59125/documentation.html for documentation of Mary TTS
