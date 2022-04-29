@@ -1049,7 +1049,7 @@ window.ecraft2learn =
                   console.log(message.error_message); 
               } 
       };
-
+  };
   const error_message_filter = 
       (message) => {
            return (message.error_message);
