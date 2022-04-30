@@ -1204,6 +1204,10 @@ window.ecraft2learn =
               URL = "/detection/index.html" + translate_query;
           } else if (source === 'knn') {
               URL = "/knn/index.html" + translate_query;
+          } else if (source === 'teachable machine image') {
+              URL = "/teachablemachine/image/index.html" + translate_query;
+          } else if (source === 'teachable machine pose') {
+              URL = "/teachablemachine/pose/index.html" + translate_query;
           } else if (source.indexOf('.html') > 0) {
               URL = source + translate_query;
           } else {
@@ -1665,18 +1669,6 @@ window.ecraft2learn =
 //                                       }
 //                                   });
 //     };
-    const get_prediction_from_teachable_machine_image_or_pose_model = (type, model_path, costume, success_callback, error_callback) => {
-        const script_url = 'https://cdn.jsdelivr.net/npm/@teachablemachine/' +
-                           type +
-                           '@0.8/dist/teachablemachine-' +
-                           type +
-                           '.min.js';
-        load_script(script_url,
-                    () => {
-                        get_prediction_from_teachable_machine_model({type, costume}, model_path, success_callback, error_callback);
-                    },
-                    error_callback);        
-    };
     const get_prediction_from_teachable_machine_audio_model = (model_path, options, success_callback, error_callback) => {
         if (typeof options !== 'object') {
             options = {};
@@ -1688,76 +1680,39 @@ window.ecraft2learn =
                     },
                     error_callback);        
     };
-    const get_prediction_from_teachable_machine_model = (options, model_path, success_callback, error_callback) => {
-        // based on https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
-        // based on https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/pose
-        // based on https://github.com/tensorflow/tfjs-models/tree/master/speech-commands
+    const get_prediction_from_teachable_machine_image_or_pose_model = (type, teachable_machine_model_url, costume, success_callback, error_callback) => {
         record_callbacks(success_callback, error_callback);
-        const full_model_path = relative_to_absolute_url(model_path);
-        const model_URL = full_model_path + "model.json";
-        const metadata_URL = full_model_path + "metadata.json";
-        const error_handler = (error) => {
-            if (error_callback) {
-                invoke_callback(error_callback, error.message);
-            } else {
-                console.error(error);
-            }
-        };
-        const report_predictions = (prediction) => {
-            let class_names;
-            let names_and_scores;
-            if (model.type === 'audio') {
-                class_names = model.wordLabels();
-                // turn it from float32array to array with 'map'
-                names_and_scores = Array.prototype.slice.call(prediction.scores).map((score, index) => [class_names[index], score]);
-            } else {
-                class_names = model.getClassLabels();
-                names_and_scores = prediction.map((score, index) => [class_names[index], score.probability]); 
-            }
-            invoke_callback(success_callback, javascript_to_snap(names_and_scores));
-        };
-        const predict = () => {
-            if (options.type === 'image') {
-                model.predict(options.costume.contents).then(report_predictions).catch(error_handler);
-            } else if (options.type === 'pose') {
-                model.estimatePose(options.costume.contents).then(({pose, posenet_output}) => {
-                    // run input through teachable machine classification model
-                    model.predict(posenet_output).then(report_predictions).catch(error_handler);
-                }).catch(error_handler);
-            } else if (options.type === 'audio' && typeof ecraft2learn.listening_model === 'undefined') {
-                ecraft2learn.listening_model = model;
-                model.listen(report_predictions, {invokeCallbackOnNoiseAndUnknown: true}); // could pass options in here
-            }
-        };
-        const when_loaded = (loaded_model) => {
-            ecraft2learn.teachable_machine_models[model_path] = loaded_model;
-            model = loaded_model;
-            model.type = options.type;
-            predict();
-        };
-        if (typeof ecraft2learn.teachable_machine_models === 'undefined') {
-            ecraft2learn.teachable_machine_models = {};
-        }
-        let model = ecraft2learn.teachable_machine_models[model_path];
-        const api = options.type === 'image' ? tmImage : options.type == 'pose' && tmPose;
-        if (model === undefined) {
-            if (options.type === 'audio') {
-                // test this with https://teachablemachine.withgoogle.com/models/HnIjdQ-A3/ - It listens for "OK"
-                const recognizer = speechCommands.create("BROWSER_FFT", // fourier transform type, not useful to change
-                                                         undefined, // speech commands vocabulary feature, not useful for your models
-                                                         model_URL,
-                                                         metadata_URL);
-                // check that model and metadata are loaded via HTTPS requests.
-                const when_ensured_loaded = () => {
-                    when_loaded(recognizer);
-                };
-                recognizer.ensureModelLoaded().then(when_ensured_loaded).catch(error_handler);
-            } else {
-                api.load(model_URL, metadata_URL).then(when_loaded).catch(error_handler);                
-            }
-        } else {
-            predict();
-        }
+        const support_window = 'teachable machine '  + type;
+        const time_stamp = Date.now();
+        request_of_support_window(support_window,
+                                  'Ready',
+                                  () => {
+                                      return {teachable_machine_predict: 
+                                                {image_data: get_costume_data(costume),
+                                                 teachable_machine_model_url,
+                                                 time_stamp}};
+                                  },
+                                  (message) => {
+                                      return (message.teachable_machine_prediction && 
+                                              message.teachable_machine_prediction.time_stamp === time_stamp) ||
+                                             (message.teachable_machine_prediction_failed &&
+                                              message.teachable_machine_prediction_failed.time_stamp === time_stamp);
+                                  },
+                                  (message) => {
+                                      if (message.teachable_machine_prediction.time_stamp === time_stamp) {
+                                          const full_prediction = message.teachable_machine_prediction.prediction;
+                                          const concise_prediction = full_prediction.map(
+                                              class_prediction => [class_prediction.className, class_prediction.probability]);
+                                          invoke_callback(success_callback,
+                                                          javascript_to_snap(concise_prediction),
+                                                          javascript_to_snap(message.additional_info));
+                                      } else if (error_callback) {
+                                          console.log(message.teachable_machine_prediction_failed.error_message);
+                                          invoke_callback(error_callback, javascript_to_snap(message.teachable_machine_prediction_failed.error_message));
+                                      } else {
+                                          inform("Error in teachable machine prediction", message.teachable_machine_prediction_failed.error_message);
+                                      }
+                                  });
     };
 //         const get_webcam = (callback) => {
 //             if (typeof ecraft2learn.posenet_webcam === 'undefined') {
