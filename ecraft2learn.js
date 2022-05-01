@@ -326,13 +326,13 @@ window.ecraft2learn =
                 return;
             }
             // callback.emptySlots+1 is in case callback is passed more arguments than callback has empty slots
-            let parameters = callback.emptySlots > 0 ?
-                             Array.prototype.slice.call(arguments, 1, callback.emptySlots+1) :
-                             Array.prototype.slice.call(arguments, 1, 2);
+            const number_of_inputs = callback.inputs.length || callback.emptySlots || 1;
+            // skip first input which is the callback
+            let parameters = Array.prototype.slice.call(arguments, 1, number_of_inputs+1); 
             // invoke the callback with the argments (other than the callback itself)
             // if BlockMorph then needs a receiver -- apparently callback is good enough
             if (callback.receiver.isWarped) {
-                // this fixes a problem with callbacks invoked within a wrap block
+                // this fixes a problem with callbacks invoked within a warp block
                 // where wait for never proceeds
                 callback.receiver.endWarp();
                 return invoke(callback, new List(parameters), (callback instanceof BlockMorph && callback));
@@ -1944,7 +1944,10 @@ window.ecraft2learn =
                                   },
                                   (message) => {
                                       if (message.normalized_data_time_stamp === time_stamp) {
-                                          invoke_callback(success_callback, javascript_to_snap(message.normalized_data));
+                                          invoke_callback(success_callback,
+                                                          javascript_to_snap(message.normalized_data),
+                                                          message.mean_scalar,
+                                                          message.variance_scalar);
                                       } else if (error_callback) {
                                           console.log(message.error_message);
                                           invoke_callback(error_callback, javascript_to_snap(message.error_message));
