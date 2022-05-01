@@ -2079,13 +2079,17 @@ const receive_message =
                 const {normalize_data, time_stamp} = message;
                 const data_tensor = tf.tensor(normalize_data);
                 const {mean, variance} = tf.moments(data_tensor);
+                const mean_scalar = mean.arraySync();
+                const variance_scalar = variance.arraySync();
                 const normalized_data_tensor = tf.batchNorm(data_tensor, mean, variance);
                 const normalized_data = normalized_data_tensor.arraySync();
                 normalized_data_tensor.dispose();
                 data_tensor.dispose();
                 mean.dispose();
                 variance.dispose();
-                event.source.postMessage({normalized_data, 
+                event.source.postMessage({normalized_data,
+                                          mean_scalar,
+                                          variance_scalar,
                                           normalized_data_time_stamp: time_stamp});
             } catch (error) {
                 event.source.postMessage({error_normalizing_data_time_stamp: time_stamp,
