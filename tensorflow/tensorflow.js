@@ -274,23 +274,24 @@ const ensure_last_layer_right_size = (model, data) => {
     }   
 };
 
-const normalize = (tensor) => {
-    // divides all by max-min value
-    let min = Math.min();
-    let max = Math.max();
-    const data = tensor.flatten().arraySync();
-    data.forEach((x) => {
-        if (x < min) {
-            min = x;
-        } else if (x > max) {
-            max = x;
-        }
-    });
-    const difference = max-min;
-    if (difference !== 0) {
-        return [difference, tensor.div(tf.scalar(difference))];
-    }
-};
+// following no longer used and besides better to normalize using mean and variance
+// const normalize = (tensor) => {
+//     // divides all by max-min value
+//     let min = Math.min();
+//     let max = Math.max();
+//     const data = tensor.flatten().arraySync();
+//     data.forEach((x) => {
+//         if (x < min) {
+//             min = x;
+//         } else if (x > max) {
+//             max = x;
+//         }
+//     });
+//     const difference = max-min;
+//     if (difference !== 0) {
+//         return [difference, tensor.div(tf.scalar(difference))];
+//     }
+// };
 
 const default_loss_function = (categories) => categories ? 'categoricalCrossentropy' : 'meanSquaredError';
 
@@ -2073,6 +2074,23 @@ const receive_message =
                                         event.source.postMessage({error_replacing_model: model_name,
                                                                   error_message});
                                     });
+        } else if (typeof message.normalize_data !== 'undefined') {
+            try {
+                const {normalize_data, time_stamp} = message;
+                const data_tensor = tf.tensor(normalize_data);
+                const {mean, variance} = tf.moments(data_tensor);
+                const normalized_data_tensor = tf.batchNorm(data_tensor, mean, variance);
+                const normalized_data = normalized_data_tensor.arraySync();
+                normalized_data_tensor.dispose();
+                data_tensor.dispose();
+                mean.dispose();
+                variance.dispose();
+                event.source.postMessage({normalized_data, 
+                                          normalized_data_time_stamp: time_stamp});
+            } catch (error) {
+                event.source.postMessage({error_normalizing_data_time_stamp: time_stamp,
+                                          error_message: error.message});
+            }
         }
 };
 

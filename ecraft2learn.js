@@ -1929,6 +1929,30 @@ window.ecraft2learn =
                                       }
                                   });
     };
+    const normalize = (data, success_callback, error_callback) => {
+        record_callbacks(success_callback, error_callback);  
+        const time_stamp = Date.now();
+        request_of_support_window('tensorflow.js', 
+                                  'Loaded',
+                                  () => {
+                                      return {normalize_data: snap_to_javascript(data, true),
+                                              time_stamp};
+                                  },
+                                  (message) => {
+                                      return message.normalized_data_time_stamp === time_stamp ||
+                                             message.error_normalizing_data_time_stamp === time_stamp;
+                                  },
+                                  (message) => {
+                                      if (message.normalized_data_time_stamp === time_stamp) {
+                                          invoke_callback(success_callback, javascript_to_snap(message.normalized_data));
+                                      } else if (error_callback) {
+                                          console.log(message.error_message);
+                                          invoke_callback(error_callback, javascript_to_snap(message.error_message));
+                                      } else {
+                                          inform("Error while replacing a model with best search results", message.error_message);
+                                      }
+                                  });
+    };
     var image_url_of_costume = function (costume) {
         var canvas = costume.contents;
         return canvas.toDataURL('image/png');        
@@ -3832,6 +3856,7 @@ window.ecraft2learn =
   load_data_from_URL,
   optimize_hyperparameters,
   replace_with_best_model,
+  normalize,
   noisy_polygon_help,
   display_support_window: open_support_window,
   image_class,
