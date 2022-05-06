@@ -416,10 +416,9 @@ window.ecraft2learn =
         };
         if (only_numbers && !x.isLinked) {
             if (!x.ecraft2learn_all_numbers) {
-                x.contents = snap_to_javascript_internal(x, only_numbers);
-                x.ecraft2learn_all_numbers = true;
+                x.ecraft2learn_all_numbers = snap_to_javascript_internal(x, only_numbers); 
             }
-            return x.contents;
+            return x.ecraft2learn_all_numbers;
         } else {
             return snap_to_javascript_internal(x, only_numbers);
         }
