@@ -372,6 +372,29 @@ and select <i>import</i>.
 <figcaption>A convenient way to bring data into Snap!</figcaption>
 </figure>
 <p class="instructions">
+Another way to bring data into Snap! is via the <span class="block-name">url</span> reporter.
+Many data sources provide URL-oriented interfaces that report
+<a href="https://en.wikipedia.org/wiki/JSON" target="_blank">JSON</a> or
+<a href="https://en.wikipedia.org/wiki/Comma-separated_values" target="_blank">CSV</a> data.
+The <span class="block-name">split</span> reporter can interpret JSON and CSV texts into
+data structures implemented as lists of lists of lists of ...
+</p>
+<p class="instructions">
+Bringing data into Snap! via a URL
+(or more generally using the GET and POST methods in Snap!'s Web Services Access library)
+has the advantage of providing the most up-to-date data to your apps.
+It also makes your projects much smaller since the project doesn't need to have variables holding the data.
+But it is only practical when users have fast and reliable Internet connections.
+</p>
+<figure class = "snap-iframe"
+        id = "json url exercise"
+        full_screen = "true"
+        edit_mode = "true"
+        stage_ratio = ".2"
+        container_style = "width: 900px; height: 550px" 
+        caption = "Fetching data from web pages. TRY IT!">
+</figure>
+<p class="instructions">
 Bringing data into Snap! as text is sometimes only the first step.
 If you import some text and need lists, you can use the Snap!
 <span class="block-name">split ... by</span> block to turn text into lists.
