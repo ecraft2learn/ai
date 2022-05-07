@@ -414,7 +414,7 @@ window.ecraft2learn =
             }
             return x;       
         };
-        if (only_numbers && !x.isLinked) {
+        if (only_numbers && x instanceof List && !x.isLinked) {
             if (!x.ecraft2learn_all_numbers) {
                 x.ecraft2learn_all_numbers = snap_to_javascript_internal(x, only_numbers); 
             }
@@ -1929,6 +1929,9 @@ window.ecraft2learn =
                                   });
     };
     const normalize = (data, success_callback, error_callback) => {
+        if (!(data instanceof List)) {
+            invoke_callback(error_callback, "Normalize reporter only works on lists. Not '" + data + "'");
+        }
         record_callbacks(success_callback, error_callback);  
         const time_stamp = Date.now();
         request_of_support_window('tensorflow.js', 
