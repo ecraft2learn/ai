@@ -410,16 +410,24 @@ with the flu data for the following week.
 one can try other offsets.)
 One problem is that the flu data from the World Health Organisation is weekly for entire countries
 while the weather data is daily for weather stations (often in cities).
-In the sample project data for Ireland and Switzerland were used because a big country could have very different weather in different parts.
+In the sample project data for Ireland and Switzerland were used because
+a big country could have very different weather in different parts.
 Also one needs to avoid datasets that are incomplete which occurs often.
 </p>
 <p class="instructions">
 Weather and flu are seasonal so to make interesting predictions we need to determined
 if the weather data was higher or lower than typical for that time of year
 predicts how the flu cases will vary from what is typical for that time of year. 
-To address this, the data has been regularised which in this case means that all measurements
-have been divided by the average value for that measurement.
-So a value such as 0.75 means that reading was 75% of the average value for that measurement for that week of the year.
+To address this, an earlier version of the sample project changed all the data by dividing by the average values.
+This worked fine for the flu data since the data is always non-negative.
+The flu data is capturing the multiplicative factor to which the case numbers were above or below average.
+This did not, however, work for the temperature data since the values can be negative.
+The mean temperature for can even be zero which cannot be used as a divisor.
+The new version of the project uses the <span class="block-name">normalize</span> block
+to instead map all the temperatures by subtracting by the mean and dividing by the standard deviation
+to normalize the data.
+The weather data were normalized for the averages for each month of the year.
+This improved the model's predictions (but they still were only a little better than predicting the average values).
 </p>
 <p class="instructions">
 Another challenge is to work out how to evaluate how well a model does.
