@@ -418,6 +418,7 @@ window.ecraft2learn =
             if (!x.ecraft2learn_all_numbers) {
                 x.ecraft2learn_all_numbers = snap_to_javascript_internal(x, only_numbers); 
             }
+            // this can fail if x has been encountered before and then destructively changed (e.g. 'delete' block)
             return x.ecraft2learn_all_numbers;
         } else {
             return snap_to_javascript_internal(x, only_numbers);
