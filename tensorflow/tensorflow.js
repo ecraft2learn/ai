@@ -637,7 +637,7 @@ const optimize_hyperparameters = (options) => {
        const [xs, ys] = get_tensors(model_name, 'training');
        const validation_tensors = get_tensors(model_name, 'validation'); // undefined if no validation data
        const test_tensors = get_tensors(model_name, 'test');
-           optimize(xs, ys, validation_tensors, test_tensors, options)
+       optimize(xs, ys, validation_tensors, test_tensors, options)
               .then((result) => {
                   xs.dispose();
                   ys.dispose();
@@ -653,7 +653,7 @@ const optimize_hyperparameters = (options) => {
                       previous_model.disposed = true;
                       previous_model = undefined;
                   }
-              });
+       });
    } catch (error) {
        if (error_callback) {
            let error_message;
@@ -2103,7 +2103,7 @@ const replace_with_best_model = (name_of_model_used_in_search, success_callback,
     let error_message;
     if (!model) {
         error_message = "No model named '" + name_of_model_used_in_search + "' found.";
-    } else if (!best_model) {
+    } else if (!best_model || !best_parameters) {
         error_message = "No model found by searching for better parameters for model '" + 
                         name_of_model_used_in_search +
                         "' to replace it."; 
