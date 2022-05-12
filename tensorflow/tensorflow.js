@@ -363,7 +363,8 @@ const search_descriptions =
      "Search for best number of training iterations",
      "Search for best validation split",
      "Search for best dropout rate",
-     "Search for best number of layers"];
+     "Search for best number of layers",
+     "Search for best learning rate"];
 
 const weight_descriptions =
     ["How much the loss detracts from the score",
