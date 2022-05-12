@@ -422,7 +422,9 @@ To address this, an earlier version of the sample project changed all the data b
 This worked fine for the flu data since the data is always non-negative.
 The flu data is capturing the multiplicative factor to which the case numbers were above or below average.
 This did not, however, work for the temperature data since the values can be negative.
-The mean temperature for can even be zero which cannot be used as a divisor.
+The mean temperature can even be zero which cannot be used as a divisor.
+Furthermore, some of the values were large enough that sometimes early in training the loss became NaN (not a number).
+This stops the training due to some internal model parameters becoming too big or small.
 The new version of the project uses the <span class="block-name">normalize</span> block
 to instead map all the temperatures by subtracting by the mean and dividing by the standard deviation
 to normalize the data.
