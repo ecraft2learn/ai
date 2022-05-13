@@ -6,13 +6,13 @@
 </head>
 <body>
 <script src="../js/translate.js"></script>
-<h2>A guide to building AI apps and artefacts</h2>
+<h2>A guide to building AI apps and artifacts</h2>
 <h3>Chapter 3 - Adding image recognition to programs</h3>
 <h4>Ken Kahn, University of Oxford</h4>
 <p class="resources">
 You can import the blocks presented here as a
 <a href="/ai/snap/snap.html?project=seeing&editMode" target="_blank">project</a> or 
-download as a <a href="seeing blocks.xml" download target="_blank">library</a> to import into your projects.
+download them as a <a href="seeing blocks.xml" download target="_blank">library</a> to import into your projects.
 </p>
 <div id="table-of-contents"></div>
 <h4 class="guide-to-guide-white">Browser compatibility</h4>
@@ -25,15 +25,15 @@ that should be consulted if problems are encountered.
 
 <h4 class="background-information-white" id="introduction">Introduction</h4>
 <p class="background-information">
-A camera connected to a computer can report the colour of each pixel in an image and not much else.
+A camera connected to a computer can report the color of each pixel in an image and not much else.
 A description of what is in front of the camera is returned when those pixels
 are sent to an image recognition service.
 There are many kinds of things an image description may contain.
 With speech recognition the description is what was spoken, how confident the system is, and possible alternatives.
-With image recognition there are many possible descriptions: descriptive tags, possible captions, dominant colours,
+With image recognition there are many possible descriptions: descriptive tags, possible captions, dominant colors,
 location of faces and parts of the face if there are any,
 and the presence of landmarks, celebrities, well-known entities, and logos.
-Hand-written and scanned text can also be recognised.
+Hand-written and scanned text can also be recognized.
 </p>
 
 <p class="advanced-information non-essential">
@@ -67,10 +67,10 @@ to gain some insight into how these services work.
 An alternative to using AI cloud services for image classification is
 to load deep learning vision models into the browser.
 Some of the blocks in the <a class="guide-link" href="chapter-4.html">next chapter</a>
-can be used to analyse images.
+can be used to analyze images.
 Some can be further trained by users which is
 especially useful when one wants to distinguish between images for idiosyncratic reasons (e.g. different facial expressions).
-One has been trained to recognise one thousand different kinds of things (but not people).
+One has been trained to recognize one thousand different kinds of things (but not people).
 While the models that run in the browser are not as capable or accurate as AI cloud services they have
 the advantage that no data leaves your device, maintaining privacy.
 Furthermore, they work even without a network connection.
@@ -148,11 +148,11 @@ Do you think this program <i>seems</i> intelligent? If so, why? Is it intelligen
 <span class="non-essential">
 <h4 class="advanced-information-white" id="advanced-image-recognition">Advanced image recognition blocks</h4>
 <p class="advanced-information">
-Image recognisers can do more than label images.
+Image recognizers can do more than label images.
 Some can detect and locate faces.
 Some of those will estimate the age of the person and their gender.
-Some recognise landmarks and logos.
-Many can recognise characters in hand-written or scanned text.
+Some recognize landmarks and logos.
+Many can recognize characters in hand-written or scanned text.
 A problem creating Snap! blocks that provide this functionality is that
 different services have different capabilities and different structures to capture their responses.
 </p>
@@ -219,7 +219,7 @@ They are
 </p>
 <p class="exercise">
 <b>Exercise.</b>
-Recognise a picture and then use
+Recognize a picture and then use
 the <span class="block-name">Current image property</span> block to see
 what kinds of descriptions the service provides.
 How might each one be useful?
@@ -276,7 +276,7 @@ Note these variables are declared as transient so they will not be set if you sa
 
 <p class="background-information">
 Because all the AI cloud services are commercial services heavy use can be costly.
-Consequently, it is best if each student has their own account and minimises the sharing of their keys.
+Consequently, it is best if each student has their own account and minimizes the sharing of their keys.
 This conflicts with one of the great things about tools like Scratch and Snap! --
 that it is so easy to share one's projects with a wider community.
 Adding the keys to the URL solves this problem if one is careful to keep the URL with keys private
@@ -335,15 +335,15 @@ detecting lung cancer from x-rays</a> machine learning has exceeded the ability 
 A neural net is a program that is inspired by what little is known
 about how neurons in animal and human brains work.
 It can be trained to identify images.
-In the most common case it is trained on thousands or millions of images that have already been labelled.
-When given a new image and it computes the most likely labels.
+In the most common case it is trained on thousands or millions of images that have already been labeled.
+When given a new image, it computes the most likely labels.
 Some easy visual discrimination tasks can be handled by training only a hundred or less images.
 You can train a neural net to do this kind of vision recognition in the
 <a class="guide-link" href="chapter-4.html">next chapter</a>.
 </p>
 
 <p class="background-information">
-Different levels or stages of the processing by the neural net recognise different elements of an image.
+Different levels or stages of the processing by the neural net recognize different elements of an image.
 Researchers have built
 <a href="https://distill.pub/2017/feature-visualization/" target="_blank">
 software that figures out what images produce the greatest response from the different layers</a>.
@@ -379,7 +379,7 @@ Some AI cloud providers such as
 <a href="https://cloud.google.com/video-intelligence/" target="_blank">Google</a>
 can accept a video stream and produce labels.
 It can also detect scene changes.
-This service can be expensive, though Google will analyse 1000 minutes of video per month at no cost.
+This service can be expensive, though Google will analyze 1000 minutes of video per month at no cost.
 There currently are no Snap! blocks for supporting video input.
 </p>
 </span>
@@ -405,10 +405,10 @@ E.g. says "How cute" when the description includes words such as "kitten" or "pu
 but says "How scary!" when the description is a toy lion or wolf.</li>
 <li>Enhance the <a class="guide-link" href="chapter-2.html#story-generator" target="_blank">story generator example</a>
 so that in addition to tokens that ask for phrases or names, a new kind of token
-is introduced that causes the current image to be recognised and
+is introduced that causes the current image to be recognized and
 then substitutes the resulting description into that location of the story.</li>
-<li>When a face is recognised its location and the location of parts of the face are included in the response. 
-The app can then add know where to place glasses, moustaches, etc. to the image.</li>
+<li>When a face is recognized its location and the location of parts of the face are included in the response. 
+The app can then add know where to place glasses, mustaches, etc. to the image.</li>
 <li>And thousands more possibilities.</li>
 </ol>
 
@@ -435,13 +435,13 @@ good interview with a data scientist about machine learning</a>.
 <p class="resources">
 You can import the blocks presented here as a
 <a href="/ai/snap/snap.html?project=seeing&editMode" target="_blank">project</a> or 
-download as a <a href="seeing blocks.xml" download target="_blank">library</a> to import into your projects.
+download them as a <a href="seeing blocks.xml" download target="_blank">library</a> to import into your projects.
 </p>
 
 <h4 class="guide-to-guide-white" id="machine-learning">Learn about machine learning</h4>
 <p class="guide-to-guide">
 The <a class="guide-link" href="chapter-4.html">next chapter</a>
-is about machine learning.
+is about using machine learning models.
 </p>
 <p class="guide-to-guide">
 Return to

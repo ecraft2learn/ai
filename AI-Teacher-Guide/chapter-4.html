@@ -6,13 +6,13 @@
 </head>
 <body>
 <script src="../js/translate.js"></script>
-<h2>A guide to building AI apps and artefacts</h2>
+<h2>A guide to building AI apps and artifacts</h2>
 <h3>Chapter 4 - Adding machine learning models to programs</h3>
 <h4>Ken Kahn, University of Oxford</h4>
 <p class="resources">
 You can import the blocks presented here as a
 <a href="/ai/snap/snap.html?project=misc AI&editMode" target="_blank">project</a> or 
-download as a <a href="misc AI blocks.xml" download target="_blank">library</a> to import into your projects.
+download them as a <a href="misc AI blocks.xml" download target="_blank">library</a> to import into your projects.
 </p>
 
 <div id="table-of-contents"></div>
@@ -26,7 +26,7 @@ Snap! and training window are both in the same browser tab but only one is visib
 <h4 class="background-information-white" id="introduction">Introduction</h4>
 <p class="background-information">
 In the previous chapters the new Snap! blocks used services that had been trained to
-recognise speech and images.
+recognize speech and images.
 In this chapter you do the training.
 This training is done by a <a href="https://en.wikipedia.org/wiki/Deep_learning">deep learning</a> system.
 Deep learning is a very successful set of machine learning techniques.
@@ -59,12 +59,12 @@ For example, a .8 score for label X can be thought of as saying the system is
 Unlike the previous chapters that rely upon pre-trained models here you can experiment with machine learning.
 You can learn what kinds of inputs the system can easily tell apart and which ones confuse it.
 You can experiment to answer questions such as
-how many examples of each label are needed to recognise them reliably and
+how many examples of each label are needed to recognize them reliably and
 how does recognition degrade as more labels are introduced.
 In <a href="chapter-6.html">a later chapter</a> you can not only train a neural network model but
 also design and create the model.
 </p>
-<h4 class="instructions-white" id="camera-training">A block to start training to recognise images from a camera</h4>
+<h4 class="instructions-white" id="camera-training">A block to start training to recognize images from a camera</h4>
 <p class="instructions">
 The <span class="block-name">Train with image buckets ...</span> block
 opens a tab where you can train the system to label what is in front of the camera.
@@ -84,11 +84,11 @@ There are no privacy issues that arise when relying upon third-party cloud servi
 It also means this and associated blocks will work even when there is no Internet.
 (See <a href="./localhost.html">instructions for how to download everything</a> and then run offline.)
 Blocks that use your trained model will typically run much faster than a request over the internet to a web service,
-enabling more reponsive apps.
+enabling more responsive apps.
 </p>
 <p class="instructions">
 In the following example there are only two labels: "leaning to the left" and "leaning to the right".
-You can edit the list to instead recognise different facial expressions, different people's faces,
+You can edit the list to instead recognize different facial expressions, different people's faces,
 objects held in front of the camera, and much more.
 When the training tab launches you'll see two buttons:
 </p>
@@ -102,7 +102,7 @@ When the training tab launches you'll see two buttons:
 <img src="/ai/AI-Teacher-Guide/images/camera%20train.png">
 </a>
 <figcaption>
-A block for training the system to recognise what the camera is showing. TRY IT
+A block for training the system to recognize what the camera is showing. TRY IT
 </figcaption>
 </figure>
 
@@ -131,10 +131,10 @@ If you are training "leaning left" then lean different amounts and at different 
 Then when training "leaning right" don't allow the system to learn some difference that shouldn't matter.
 For example, don't change the lighting or background between training different labels.
 When you aren't pressing any training buttons the training page keeps
-trying to recognise what is in front of the camera.
+trying to recognize what is in front of the camera.
 You can determine if your training is good by leaning one way and then the other
 and see if the confidence scores changes as they should.
-If not try adding more images.
+If not, try adding more images.
 </p>
 <p class="instructions">
 When you are ready to test the trained system return to the Snap! tab
@@ -144,7 +144,7 @@ followed by the probability of the second label.
 Change what is in front of the camera and try again.
 Note that you can return to the training tab to add more training samples by clicking on the
 <span class="block-name">Open support panel</span> block.
-When you are finished with this close the training tab.
+When you are finished with this, close the training tab.
 </p>
 <h4 class="sample-program-white" id="training-with-image-labels">A sample program training and using image labels</h4>
 <p class="sample-program">
@@ -244,14 +244,14 @@ host the file on the web and use its URL to access it.
 <h4 class="instructions-white" id="teachable-machine">Blocks that use models trained by Google's Teachable Machine</h4>
 <p class="instructions">
 Google has developed <a href="https://teachablemachine.withgoogle.com/" target="_blank">The Teachable Machine</a> to
-introduce the process of training a model to categorise images, sounds, and poses.
+introduce the process of training a model to categorize images, sounds, and poses.
 After training you can export your model to their server or download the files to your own web server.
 The <span class="block-name">Get prediction for costume ...</span> block reports the probabilities that the costume
 is in each of the categories for which it was trained.
 </p>
 <p class="instructions">
 The <span class="block-name">Get predictions using Teachable Machine audio model ...</span> block is different since
-it runs a command block input whenever a word is recognised.
+it runs a command block input whenever a word is recognized.
 You can try an example of its use in the following exercise.
 In addition to Snap!'s stop sign button, you can stop it from listening by using
 the <span class="block-name">Stop listening for audio label confidences</span> block.
@@ -316,7 +316,7 @@ target="_blank">teachable machine boilerplate</a>.
 The deep learning model used is called <a href="https://arxiv.org/abs/1704.04861" target="_blank">MobileNet</a>
 and it is designed to be smaller and faster than more accurate architectures.
 It works by using MobileNet to compute 1000 numbers for each trained image.
-These numbers capture high-level feature of the image.
+These numbers capture high-level features of the image.
 Then when asked to classify a new image it sees which of the images used in training are the closest and
 reports a high confidence for the labels of those images.
 </p>
@@ -365,7 +365,7 @@ The Snap! command uses what is called
 <a href="https://machinelearningmastery.com/transfer-learning-for-deep-learning/" target="_blank">transfer learning</a>
 to start the training using the features that a well-trained system has already learned.
 The system does not know anything about, for example, hands shaped as paper, rock, or scissors
-but it has already learned about textures, edges, colours, and more.
+but it has already learned about textures, edges, colors, and more.
 Each training image used in transfer learning is
 <a href="chapter-5.html#image_embeddings">converted by MobileNet into a list of 1280 numbers</a>.
 The confidence scores for the labels is then computed using an algorithm called
@@ -387,7 +387,7 @@ And AI vision services can do more than just
 Computers can be trained to distinguish different sounds including spoken speech.
 <a href="chapter-2.html">Chapter 3</a> describes how to use cloud services that do speech recognition.
 Here you can create programs that respond to any sound.
-Also you can train it to recognise a few different words or phrases that works locally on your computer without sending
+Also you can train it to recognize a few different words or phrases that works locally on your computer without sending
 any audio to a cloud server.
 This is useful in contexts without a reliable network connection or for increased privacy.
 Furthermore, the <span class="block-name">Audio label confidences</span> block has an option to use a 
@@ -403,7 +403,7 @@ speech command recognizer</a> created by Google.
 <img src="/ai/AI-Teacher-Guide/images/train%20audio.png">
 </a>
 <figcaption>
-A block for training the system to recognise what the microphone is hearing. TRY IT
+A block for training the system to recognize what the microphone is hearing. TRY IT
 </figcaption>
 </figure>
 
@@ -426,7 +426,7 @@ and the program should work just fine.
 <img src="/ai/AI-Teacher-Guide/images/train%20and%20speak%20commands.png">
 </a>
 <figcaption>
-Click the green flag to train it to recognise a few voice commands. TRY IT
+Click the green flag to train it to recognize a few voice commands. TRY IT
 </figcaption>
 </figure>
 
@@ -449,7 +449,7 @@ What is so impressive about Posenet is that it works in the browser without any 
 <p class="instructions">
 The <span class="block-name">poses</span> block reports a list of poses.
 One pose for each person in front of the camera.
-The system can be configured on the "poses" tab to be optimised for scenes with more than one person.
+The system can be configured on the "poses" tab to be optimized for scenes with more than one person.
 Trade-offs between speed and accuracy can also be made.
 The "poses" tab is also a good place to explore pose detection.
 There are two kinds of <span class="block-name">pose property</span> blocks that can fetch information for a <i>pose</i>.
@@ -457,8 +457,8 @@ They both can specify that one wants the confidence the system has that it has c
 (values between 0 and 100).
 Or that the location of the body part is desired which is reported as a list of the x and y coordinates.
 Depending upon the value of the flag the location is reported either as values between 0 and 100 or as coordinates of the stage.
-Note that because Posenet displays the video in a mirror-like fashion left and right are from the camera's viewpoint
-not the person whose pose is being analysed.
+Note that because Posenet displays the video in a mirror-like fashion where left and right are from the camera's viewpoint
+not the person whose pose is being analyzed.
 </p>
 <figure class = "snap-iframe"
         id = "pose"
@@ -492,28 +492,30 @@ Be creative.
 <span class="advanced-topic-body">
 <p class="how-it-works">
 Google trained a deep learning model on over 64,000 images of people.
-Associated with each image was a mask showing which pixels were of a person (indicated by one or white) or not (zero or black).
+Associated with each image was a mask showing which pixels were of a person (indicated by one or white)
+or not (zero or black).
 Also the locations of up to 17 face and body key points were provided.
 The trained model starts by first identifying the locations of body parts in a new image. 
-It then refines their positions by considering neighbouring key points (e.g. left elbow connects only with left wrist and left shoulder).
+It then refines their positions by considering neighboring key points
+(e.g. left elbow connects only with left wrist and left shoulder).
 If the image is of more than one person, the model needs to separate the key points to different people. 
-The algorithm starts with the key point it has the most confidence rather than a favoured starting point such as the nose.
+The algorithm starts with the key point it has the most confidence rather than a favored starting point such as the nose.
 It then considers body part locations connected to that key point, and then those connected to those parts, and so on.
 If, in addition, <a href="#segmentation">segmentation</a> is also required it assigns each pixel a code for each body part it belongs.
 Full details can be found in the paper <a href="https://arxiv.org/abs/1803.08225" target="_blank">
 PersonLab: Person Pose Estimation and Instance Segmentation with a Bottom-Up, Part-Based, Geometric Embedding Model</a>.
 </p>
 </span>
-<h4 class="background-information-white" id="segmentation">Labelling body parts in images of people</h4>
+<h4 class="background-information-white" id="segmentation">Labeling body parts in images of people</h4>
 <p class="background-information">
 <a href="https://github.com/tensorflow/tfjs-models/tree/master/body-pix" target="_blank">BodyPix</a>
 is a deep learning segmentation model that classifies each pixel in a photo
-of people as to whether it is a part of body and if so what part.
+of people as to whether it is a part of a body and if so what part.
 This is called segmentation since it segments the image into hands, arms, legs, etc.
 </p>
 <figure class="background-information-white">
 <img src="../images/segmentation demo.png" class="center">
-<figcaption>BodyPix has added different colours to different body parts</figcaption>
+<figcaption>BodyPix has added different colors to different body parts</figcaption>
 </figure>
 <p class="instructions">
 There are two blocks for segmentation: 
@@ -533,16 +535,16 @@ Both blocks can be used with images of any number of people but each one is fast
 Both blocks take as an argument a list of options indicating what information is desired:
 <ul class="instructions">
 <li>
-<b>create segmentation costume</b> if true reports a new costume where each pixel is one of 24 colours
+<b>create segmentation costume</b> if true reports a new costume where each pixel is one of 24 colors
 </li>
 <li>
-<b>color mappings</b> if provided is a list of 24 lists indicating which colour to use for each body part.
-Each colour is a list of four numbers between 0 and 255 which specify the amount of red, green, blue, and opaqueness of the colours.
+<b>color mappings</b> if provided is a list of 24 lists indicating which color to use for each body part.
+Each color is a list of four numbers between 0 and 255 which specify the amount of red, green, blue, and opaqueness of the colors.
 The order of the elements is left face, right face, left upper arm front, left upper arm back, right upper arm front,
 right upper arm back, left lower arm front, left lower arm back, right lower arm front, right lower arm back, left hand,
 right hand, torso front, torso back, left upper leg front, left upper leg back, right upper leg front, right upper leg back,
 left lower leg front, left lower leg back, right lower leg front, right lower leg back, left feet, and right feet.
-If no list is provided a rainbow of colours is used. 
+If no list is provided a rainbow of colors is used. 
 </li>
 <li>
 <b>create pixel codes</b> if true reports a list of numbers from 0 to 23 corresponding to different body parts listed above for each pixel in the image.
@@ -568,7 +570,7 @@ The keys for the <span class="block-name">segmentation and pose of <i>costume</i
 Often <i>all poses</i> contains more poses than there are people but the extra ones have very low confidence scores.
 The <span class="block-name">segmentations and poses of <i>costume</i>...</span> block reports a list of findings, one for each person detected.
 Each person finding can have the keys <i>costume</i>, <i>pixel codes</i>, <i>pose</i>, and <i>person bitmap</i>.
-The <span class="block-name">get value at <i>x</i> and <i>y</i> from bitmap</span> can be used the read the value
+The <span class="block-name">get value at <i>x</i> and <i>y</i> from bitmap</span> can be used to read the value
 of either the <i>pixel codes</i> or the <i>person bitmap</i>.
 </p>
 <p class="instructions">
@@ -596,7 +598,7 @@ Here you can explore the <span class="block-name">segmentations and poses of <i>
 <p class="instructions">
 The <a href="../index.html#balloon-game">Balloon Game</a> is an example of how a project might use segmentation.
 Balloons slowly fall down and a point is awarded when popped by a hand or foot.
-Balloons that pop on someone's head losses a point.
+Balloons that pop on someone's head lose a point.
 </p>
 
 <h4 class="background-information-white" id="detection">Detecting objects in an image</h4>
@@ -718,7 +720,7 @@ The <span class="block-name">Create costume in style ...</span> block relies upo
 <a href="https://ml5js.org/docs/StyleTransfer" target="_blank">students at the New York University Tisch School of the Arts</a>
 who created web-based versions of style transfer models.
 Adapting it to work with Snap! was done by a high school student named Luie.
-The core idea is to use a deep learning model that can recognise images to generate a new image that
+The core idea is to use a deep learning model that can recognize images to generate a new image that
 matches well the low-level style features of the style image and at the same time matches the
 high-level content features of a content image.
 A machine learning model has been trained to do this quickly.
@@ -741,7 +743,7 @@ A very good short video explaining how style transfer works is here:
 Most of the <a class="guide-link" href="chapter-3.html#project-ideas" target="_blank">project ideas listed for using image recognition services</a>
 can be based upon the blocks described in this chapter.
 There is much that training by users enables that cloud services can't do.
-You can train the system to recognise yourself, distinguish between your friends,
+You can train the system to recognize yourself, distinguish between your friends,
 gestures, and the things that
 your robots may encounter in their particular environments.
 </p>
@@ -773,7 +775,7 @@ Or identify who is speaking.
 Or whether the tone of the voice is happy, sad, or angry.
 </li>
 <li>
-A robot that recognises gestures such as "stop" when it sees an outstretched palm.
+A robot that recognizes gestures such as "stop" when it sees an outstretched palm.
 </li>
 <li>
 Control a game element with four hand positions for left, right, up, and down.
@@ -818,11 +820,11 @@ Many projects are possible by using the pose detection block, the segmentation b
 <ul class="project-ideas">
 <li id="simon-says-enhancements">
 There are many improvements one can make to the <a href="#simon-says-game"><i>Simon Says</i></a> game.
-The nose is the only recognised body part that doesn't have a left and right version, try to add it to the game.
+The nose is the only recognized body part that doesn't have a left and right version, try to add it to the game.
 Occasionally the game will say something like "touch your right wrist to your right wrist"; see if you can avoid that.
 Add score keeping.
 The game can be tuned to use better values for how close two body parts need to be to be touching.
-Or tune the minimal confidence used produce the list of body parts.
+Or tune the minimal confidence that is used to produce the list of body parts.
 The game gives players a limited amount of time to comply with instructions, try speeding up the game as it goes on.
 Maybe as it gets faster make the <a href="chapter-1.html" target="_blank">speech synthesis</a> go faster as well.
 Add to the display of what the camera sees markers on the body parts that are to touch.
@@ -863,7 +865,7 @@ interactive art, fitness, sport science, security, and more.
 </li>
 <li>
 The augmented reality <a href="../index.html#balloon-game" target="_blank">Balloon Game</a> can be improved in many ways.
-One idea is that additional body parts can have colours that are used in the game to determine what happens when a coloured balloon comes into contact.
+One idea is that additional body parts can have colors that are used in the game to determine what happens when a colored balloon comes into contact.
 </li>
 <li>
 Train the computer to know which part of a face is being pointed to.
@@ -878,7 +880,7 @@ Use posenet for sports. E.g. compare a series of poses for a good kick versus a 
 </li>
 <li>
 Create an exercise app that gives instructions and provides feedback.
-E.g. yoga posses.
+E.g. yoga poses.
 </li>
 </ul>
 
@@ -920,7 +922,7 @@ a painting created by a machine learning program was sold at a major art auction
 <p class="resources">
 You can import the blocks presented here as a
 <a href="/ai/snap/snap.html?project=misc AI&editMode" target="_blank">project</a> or 
-download as a <a href="misc AI blocks.xml" download target="_blank">library</a> to import into your projects.
+download them as a <a href="misc AI blocks.xml" download target="_blank">library</a> to import into your projects.
 </p>
 <h4 class="guide-to-guide-white" id="other-chapters">Learn about AI and language</h4>
 <p class="guide-to-guide">

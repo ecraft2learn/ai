@@ -6,13 +6,13 @@
 </head>
 <body>
 <script src="../js/translate.js"></script>
-<h2>A guide to building AI apps and artefacts</h2>
+<h2>A guide to building AI apps and artifacts</h2>
 <h3>Chapter 6 - Making deep machine learning neural nets</h4>
 <h4>Ken Kahn, University of Oxford</h4>
 <p class="resources">
 You can import the blocks presented here as a
 <a href="/ai/snap/snap.html?project=neural nets&editMode" target="_blank">project</a> or 
-download as a <a href="neural nets blocks.xml" download target="_blank">library</a> to import into your projects.
+download them as a <a href="neural nets blocks.xml" download target="_blank">library</a> to import into your projects.
 </p>
 <div id="table-of-contents"></div>
 <h4 class="guide-to-guide-white" id="browser-compatibility">Browser compatibility</h4>
@@ -68,7 +68,7 @@ Create a model with the desired number and size of layers.
 The model will connect the input to the first layer, the first layer to the second layer,
 and so on until the last layer which is the output of the model.
 More layers and wider layers typically makes the model more accurate but also slower to train and use.
-Though there is the risk that a large model "memorises" the training data and isn't able to generalise to new inputs.
+Though there is the risk that a large model "memorizes" the training data and isn't able to generalize to new inputs.
 </li>
 <li>
 Provide the data as two lists.
@@ -85,7 +85,7 @@ You can use advanced optimization methods to adjust the steps and improve the tr
 </li>
 <li>
 Use the model to make predictions.
-Predictions can either be probabilities that each label correctly categorises the input or else a number or list of numbers.
+Predictions can either be probabilities that each label correctly categorizes the input or else a number or list of numbers.
 A good way to evaluate the model is to use test data that wasn't used in training. 
 If it makes good predictions on the test data you can use it to predict things about the world,
 solve mathematics puzzles, or play games.
@@ -268,7 +268,7 @@ Here is <a href="chapter-5.html#confidence-guesser">simple project that uses thi
 <p class="how-it-works">
 A deep neural net consists of an input layer, some number of hidden layers, and an output layer.
 The nets that the <span class="block-name">Create a neural net model ...</span> block creates
-are always in a sequence and each neuron is connected to every neuron in the neighbouring layers.
+are always in a sequence and each neuron is connected to every neuron in the neighboring layers.
 While this is a common architecture, there are many models that connect the neurons in other patterns.
 Some contain branches and loops and some are connected more sparsely.
 </p>
@@ -302,7 +302,7 @@ If it is too large then the error may bounce up and down rather than making prog
 <h4 class="instructions-white" id="saving-and-loading-models">Blocks for saving and loading models and data</h4>
 <p class="instructions">
 Models and data can be saved and loaded using the 'Saving and loading' button
-which can found by clicking the
+which can be found by clicking the
 <span class="block-name">open support panel tensorflow.js</span> block
 to open an interface page and navigating to the Save/Load section.
 Your projects can load models using the <span class="block-name">Load neural net from URL ...</span> block
@@ -359,7 +359,7 @@ we used this <a href="https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/" target="_
 (documented in the readme.txt file).
 And for the number of cases of flu each week across many countries we used
 <a href="http://apps.who.int/flumart/Default?ReportNo=16" target="_blank">Epi Data Surveillance Information</a>
-from the World Health Organisation.
+from the World Health Organization.
 </p>
 <p class="instructions">
 An easy way to bring data into Snap! is by dragging a file onto the Snap! browser tab.
@@ -406,17 +406,17 @@ In this <a href="../snap/snap.html?project=weather data&editMode" target="_blank
 data wrangling is performed on both the weather and flu data.
 The idea is to have each element of the weather dataset to contain the weather for a week matched up
 with the flu data for the following week.
-(If one week is not a good estimate for the duration between exposure and confirmed diagonosis, then
+(If one week is not a good estimate for the duration between exposure and confirmed diagnosis, then
 one can try other offsets.)
 One problem is that the flu data from the World Health Organisation is weekly for entire countries
 while the weather data is daily for weather stations (often in cities).
 In the sample project data for Ireland and Switzerland were used because
 a big country could have very different weather in different parts.
-Also one needs to avoid datasets that are incomplete which occurs often.
+Also one needs to avoid datasets that are incomplete which occur often.
 </p>
 <p class="instructions">
-Weather and flu are seasonal so to make interesting predictions we need to determined
-if the weather data was higher or lower than typical for that time of year
+Weather and flu are seasonal so to make interesting predictions we need to determine
+whether the weather data having been higher or lower than typical for that time of year
 predicts how the flu cases will vary from what is typical for that time of year. 
 To address this, an earlier version of the sample project changed all the data by dividing by the average values.
 This worked fine for the flu data since the data is always non-negative.
@@ -441,8 +441,8 @@ If you want to work on the question of whether the weather partially helps predi
 then there are many things to try to enhance 
 this <a href="../snap/snap.html?project=weather data&editMode" target="_blank">first draft of such a project</a>.
 Perhaps you can improve it with more or different data.
-Or designing a different machine learning model and training scheme.
-Or if start to get good predictions then see if a simpler model works almost as well.
+Or by designing a different machine learning model and training scheme.
+Or if you start to get good predictions then see if a simpler model works almost as well.
 Maybe the precipitation measurements don't matter.
 Or maybe it doesn't need the full daily measurements of the previous week.
 Alternatively, try doing something similar with other available datasets.
@@ -569,7 +569,7 @@ And then we use that number to ensure that the odds of any move being chosen is 
 The best advice is to experiment!
 No one knows what is the best model architecture, the best way to generate good training data, how much training is required, etc.
 One way to search for a good architecture is to create two models with a different number of layers or differences in the sizes of their layers.
-After training them both with the same data have them play a large number of games and see if one wins more than another.
+After training them both with the same data, have them play a large number of games and see if one wins more than another.
 Keep the good one.
 (You can save models after running the <span class="block-name">open support panel tensorflow.js</span> block.)
 Repeat with a different model architecture for the weaker player.
@@ -637,7 +637,7 @@ Simple games such as <a href="https://en.wikipedia.org/wiki/Dots_and_Boxes" targ
 could be approached in a manner similar to the Tic Tac Toe machine learning program.
 </li>
 <li>
-Enhance the Tic Tac Toe program include a perfect computer player that can generate good training data.
+Enhance the Tic Tac Toe program to include a perfect computer player that can generate good training data.
 </li>
 <li>
 Explore how simple models can solve simple mathematical challenges (e.g. doubling a number)
@@ -666,14 +666,15 @@ The output could be a few numbers capturing the emotional content of the input s
 Several enhancements to this chapter are being considered.
 There are many model architectures that cannot be expressed.
 Convolutional networks are very successful at handling image and sound input.
-Recursive neural nets handle well time-based data.
-Reinforcement learning enables unsupervised learning (using only input datasets and in-world or in-simulation rewards).
+Recursive neural nets handle time-based data well.
+Transformers are increasingly used for language models and multi-modal data.
+Reinforcement learning enables unsupervized learning (using only input datasets and in-world or in-simulation rewards).
 </p>
 
 <h4 class="resources-white" id="additional-resources">Additional resources</h4>
 <p class="resources">
 This chapter provides a simplified interface to
-<a href="https://js.tensorflow.org/api/latest/" target="_blank">TensorFlow.js</a>
+<a href="https://js.tensorflow.org/api/latest/" target="_blank">TensorFlow.js</a>,
 a JavaScript implementation of Google's TensorFlow machine learning library.
 There is a <a href="https://js.tensorflow.org/tutorials/" target="_blank">set of tutorials</a> for
 learning how to use TensorFlow.js (some familiarity with JavaScript required).
@@ -697,9 +698,9 @@ different uses of training, validation, and test data</a>.
 <p class="resources">
 You can import the blocks presented here as a
 <a href="/ai/snap/snap.html?project=neural nets&editMode" target="_blank">project</a> or 
-download as a <a href="neural nets blocks.xml" download target="_blank">library</a> to import into your projects.
+download them as a <a href="neural nets blocks.xml" download target="_blank">library</a> to import into your projects.
 </p>
-<h4 class="guide-to-guide-white" id="knn"">Learn about finding he nearest neighbours</h4>
+<h4 class="guide-to-guide-white" id="knn"">Learn about finding the nearest neighbors</h4>
 <p class="guide-to-guide">
 Go to 
 <a class="guide-link" href="chapter-7.html">the next chapter on K Nearest Neighbors</a>.

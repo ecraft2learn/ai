@@ -6,7 +6,7 @@
 </head>
 <body>
 <script src="../js/translate.js"></script>
-<h2>A guide to building AI apps and artefacts</h2>
+<h2>A guide to building AI apps and artifacts</h2>
 <h3>Chapter 2 - Adding listening to programs</h3>
 <h4>Ken Kahn, University of Oxford</h4>
 <p class="resources">
@@ -28,7 +28,7 @@ that should be consulted if problems are encountered.
 <p class="background-information">
 It is much easier to get a computer to start with text and end up with speech
 than to start with speech and end up with the corresponding text.
-Typically, it is easier to get a computer to generate something than to recognise it.
+Typically, it is easier to get a computer to generate something than to recognize it.
 </p>
 
 <p class="background-information">
@@ -73,7 +73,7 @@ E.g., fr will be treated as fr-FR.
 Speech recognition can encounter errors such as the inability to access the microphone.
 The most common "error" is when after several seconds nothing is heard.
 The <span class="block-name">listen then ...</span> block keeps listening until there is an error.
-When the speech recogniser notices a problem the error block is given a text error message.
+When the speech recognizer notices a problem the error block is given a text error message.
 The error messages are
 "Unable to access the microphone. Perhaps another program is using it or permission has not been granted.",
 "No speech heard for a while.", and
@@ -121,7 +121,7 @@ A similar program could be written to control a physical device such as a robot 
 <b>Exercise.</b> 
 See if you can add a <span class="notranslate english">"turn left"</span> command to the program.
 What else might be fun to try?
-Hint: how about changing size, looks, colour, or more?
+Hint: how about changing size, looks, color, or more?
 How about doing animations in response to spoken commands?
 </p>
 
@@ -140,7 +140,7 @@ and select 'edit' you'll see the following program.
 <p class="advanced-topic">Click to read an explanation of how the speech command program works</p>
 <span class="advanced-topic-body">
 <p class="advanced-information">
-The <span class="block-name">spoken</span> variable contains what was just recognised.
+The <span class="block-name">spoken</span> variable contains what was just recognized.
 The nested <span class="block-name">if-then-else</span> commands test first for speech for exiting the program,
 then for forward movement, and then turning commands.
 If none match, then a 'not understood' response is created.
@@ -155,7 +155,7 @@ When a number is spoken the turtle then turns or moves appropriately.
 <p class="advanced-information">
 The command program relies upon what computer scientists call
 <span class="notranslate english" translate=no>'continuations'</span>.
-These are blocks of code that are executed when something happens, in this case when the speech is recognised.
+These are blocks of code that are executed when something happens, in this case when the speech is recognized.
 An alternative that is popular among Scratch programmers is to rely instead upon broadcasting messages.
 The following implements voice commands by using a helper command called 
 <span class="block-name">Broadcast speech recognition results and ...</span>.
@@ -216,7 +216,7 @@ The following code responds when something has been heard and interpreted:
 </p>
 <figure>
 <img src="images/part-of-speech-when-something-heard.png">
-<figcaption>Screenshot of the part of the program that responds to recognised words or phrases</figcaption></figure>
+<figcaption>Screenshot of the part of the program that responds to recognized words or phrases</figcaption></figure>
 
 <p class="how-it-works non-essential">
 It repeats what was heard and substitutes it into the list of words replacing the word starting with "?".
@@ -303,7 +303,7 @@ Typically, there are many matches so it picks one at random and says it.
 <h4 class="sample-program-white" id="weather-service-demo">A weather service demo</h4>
 <p class="sample-program">
 The following is a demo of a very simple speech interface to a weather service.
-It asks for the name of a city and says the current and forcasted temperature.
+It asks for the name of a city and says the current and forecasted temperature.
 The weather program can be enhanced in many ways.
 It can ask what weather information is desired, for example.
 </p>
@@ -319,7 +319,7 @@ It can ask what weather information is desired, for example.
 <p class="societal-impact">
 Speech recognition can be used to transcribe spoken speech.
 Those unable to type or write can use it to communicate textually and to generate notes and reports.
-There are many specialised contexts where it can be very useful.
+There are many specialized contexts where it can be very useful.
 For example, <a href="https://research.googleblog.com/2017/11/understanding-medical-conversations.html" target="_blank">
 doctors can produce transcripts of their conversations with patients</a>, thereby improving the patient's records.
 Automatic transcription can enable textual searches within videos.
@@ -329,7 +329,7 @@ and its output can be converted to speech in another language.
 </p>
 
 <p class="societal-impact">
-Another use of speech recognition is as an interface to computers or digital artefacts.
+Another use of speech recognition is as an interface to computers or digital artifacts.
 An application or a robot can be constructed that takes verbal commands.
 This is particularly empowering for people with disabilities who can't themselves perform those tasks.
 Assistants like Siri or Alexa can provide helpful responses to spoken queries.
@@ -340,7 +340,7 @@ Verbal input and output can be the safest way to communicate in some circumstanc
 <p class="societal-impact">
 Like many technologies speech recognition can be misused.
 It could be used for widespread spying on a population.
-It could be part of the basis for replacing human interactions with call-centre help services with computers
+It could be part of the basis for replacing human interactions with call-center help services with computers
 that lack the kind of understanding and empathy that people can provide.
 By reducing drastically the cost of telemarketing calls by automating them they can become a more frequent annoyance.
 The use of <a href="https://www.wired.com/story/companion-robots-are-here/" target="_blank">companion robots</a> to
@@ -362,7 +362,7 @@ Is there a way the dangers can be avoided?
 <p class="how-it-works">
 It begins with the microphone that converts vibrations in the air (i.e. sounds) to numbers
 (using something called an analog-to-digital converter).
-The digitised sound is broken into short segments (hundredths or thousandths of a second long)
+The digitized sound is broken into short segments (hundredths or thousandths of a second long)
 and fed into a recognition engine.
 Today the best ones rely upon
 <a href="https://en.wikipedia.org/wiki/Artificial_neural_network" target="_blank">neural nets</a>.
@@ -399,7 +399,7 @@ Find a list of things that people mishear or use the examples in
 this article about lyrics that people misunderstand</a>.
 See how well the <span class="block-name">listen</span> block does when saying these examples.
 Does the system make the same kinds of mistakes people do?
-What can one say about a speech recogniser if it makes the same mistakes as people?
+What can one say about a speech recognizer if it makes the same mistakes as people?
 What if its mistakes are different?
 </p>
 
@@ -409,7 +409,7 @@ The speech recognition engines typically can do more than
 the basic <span class="block-name">listen then ...</span> block described above.
 One can specify which language is expected.
 The engine can report interim results and alternative results.
-It can provide 'confidence' values indicating how certain it is that it recognised the speech correctly.
+It can provide 'confidence' values indicating how certain it is that it recognized the speech correctly.
 All of these functionalities are provided by this block:
 </p>
 
@@ -455,8 +455,8 @@ There is much one can explore with the 'language' option.
 For example, if one selects 'fr-FR' (French as spoken in France) and then says
 <span class="notranslate english" translate=no>"une deux trois quatre five six"</span>
 the result is "1 2 3 4 5 6".
-Notice that it recognises both French and English.
-(English is probably used because it the operating system language setting on my computer --
+Notice that it recognizes both French and English.
+(English is probably used because it is the operating system language setting on my computer --
 if your computer is configured with another language it probably will be the default.)
 Strangely if with English you say <span class="notranslate english" translate=no>"one two three four five six"</span>
 you get those words,
@@ -465,7 +465,7 @@ not the digits one sees with the French setting.
 
 <p class="exercise">
 <b>Exercise.</b>
-Explore how well the system recognises numbers in different languages.
+Explore how well the system recognizes numbers in different languages.
 You can use <a href="translate.google.com" target="_blank">Google Translate</a> to learn how to say 
 numbers in languages you don't know.
 Try fractions and negative numbers.
@@ -534,7 +534,7 @@ that discusses these Snap! speech synthesis and recognition blocks.</p>
 <p class="resources">
 You can import the blocks presented here as a
 <a href="/ai/snap/snap.html?project=listening&editMode" target="_blank">project</a> or 
-download as a <a href="listening blocks.xml" download target="_blank">library</a> to import into your projects.
+download them as a <a href="listening blocks.xml" download target="_blank">library</a> to import into your projects.
 </p>
 
 <h4 class="guide-to-guide-white" id="image-recognition">Learn about image input</h4>

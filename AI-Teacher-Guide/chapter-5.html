@@ -6,13 +6,13 @@
 </head>
 <body>
 <script src="../js/translate.js"></script>
-<h2>A guide to building AI apps and artefacts</h2>
+<h2>A guide to building AI apps and artifacts</h2>
 <h3>Chapter 5 - Using AI with words and sentences</h3>
 <h4>Ken Kahn, University of Oxford</h4>
 <p class="resources">
 You can import the blocks presented here as a
 <a href="/ai/snap/snap.html?project=words&editMode" target="_blank">project</a> or 
-download as a <a href="words blocks.xml" download target="_blank">library</a> to import into your projects.
+download them as a <a href="words blocks.xml" download target="_blank">library</a> to import into your projects.
 </p>
 <div id="table-of-contents"></div>
 <h4 class="guide-to-guide-white" id="browser-compatibility">Browser compatibility</h3>
@@ -31,7 +31,7 @@ These include
 Answering questions (including more intelligent handling of web searches).
 </li>
 <li>
-Summarising text.
+summarizing text.
 </li>
 <li>
 Detecting the sentiment of the text (positive or negative? happy or sad? angry?).
@@ -143,7 +143,7 @@ And see what word is the closest to somewhere between two words other than the h
 
 <h4 class="instructions-white" id="word-analogy-problems">Using word embeddings to solve word analogy problems</h4>
 <p class="instructions">
-One of the most surprising thing about word embeddings is that with the right formula
+One of the most surprising things about word embeddings is that with the right formula
 one can solve word analogy problems.
 For example, "man is to woman as king is to what?" can be expressed as "king+(woman-man)=x".
 </p>
@@ -320,7 +320,7 @@ When you no longer need this assistance just delete the imported sprite.
 </p>
 <h4 class="instructions-white" id="drawing-word-embeddings">Drawing word embeddings</h4>
 <p class="instructions">
-It would be nice to visualise the 300 numbers associated with a word.
+It would be nice to visualize the 300 numbers associated with a word.
 One way is to draw a succession of vertical lines, one for each feature.
 </p>
 <figure class = "snap-iframe"
@@ -332,12 +332,12 @@ One way is to draw a succession of vertical lines, one for each feature.
 <p class="instructions">
 A full screen version of this program can be
 <a href="../snap/snap.html?project=draw%20word%20embedding&editMode&noRun" target="_blank">found here</a>.
-See if you can create other ways of visualising embeddings.
-For example, to compare two embeddings perhaps the visualisations should be interleaved.
+See if you can create other ways of visualizing embeddings.
+For example, to compare two embeddings perhaps the visualizations should be interleaved.
 </p>
 <h4 class="background-information-white" id="to-2d-points">Mapping 300 dimensional points to two-dimensional points</h4>
 <p class="background-information">
-No one can visualise 300-dimensional space.
+No one can visualize 300-dimensional space.
 There are techniques for giving an impression of the relationships between very high-dimensional points
 by mapping the points to two or three dimensions.
 We use a technique called
@@ -366,7 +366,7 @@ You can also use the projector to see the word embeddings of these languages:
 </p>
 <p class="background-information">
 Note that it takes several hundred iterations of t-SNE before it settles down on a good mapping from 300 dimensions.
-You can also search for words and their neighbours and create bookmarks.
+You can also search for words and their neighbors and create bookmarks.
 The above links launch the projector with a bookmark showing t-SNE and highlighting the hundred words closes to 'dog'.
 </p>
 
@@ -456,12 +456,12 @@ An easy way to import a passage into Snap! is to drag a file that contains the p
         caption = "Ask questions of a passage of text describing Snap!. TRY IT!">
 </figure>
 
-<h4 class="instructions-white" id="gpt-3">Conversing with GPT-3 or Jurassic 1</h4>
+<h4 class="instructions-white" id="gpt-3 and j1">Getting responses from GPT-3 or Jurassic 1</h4>
 <p class="background-information">
 <a href="https://en.wikipedia.org/wiki/GPT-3" target="_blank">GPT-3</a> is a neural network model that
 is capable of generating text in response to a prompt.
 The impressive thing is how often the generated text is very appropriate whether it is
-answering questions, fixing the grammar of a sentence, summarising text, or following instructions.
+answering questions, fixing the grammar of a sentence, summarizing text, or following instructions.
 GPT-3 was trained on hundreds of billions of words from web pages and books.
 Surprisingly, the "only" thing it learns is to predict the next word (or token that is sometimes a part of a word).
 People call models like this "language models".
@@ -491,8 +491,8 @@ that they are implemented by a parallel set of reporters that end with "(J1)".
 
 <h4 class="sample-program-white" id="GPT-3 Gopher">Having a conversation with GPT-3 or Jurassic 1</h4>
 <p class="sample-program">
-<a href="../snap/snap.html?project=GPT-3 Gopher" target="_blank">GPT-3 Gopher</a> is a sample program
-that tries to hold a conversation using GPT-3.
+<a href="../snap/snap.html?project=GPT-3 Gopher" target="_blank">GPT-3 and Jurassic 1 Gopher</a> is a sample program
+that tries to hold a conversation using GPT-3 or Jurassic 1.
 It uses <a href="chapter-2.html">speech recognition</a> to listen to what you say.
 What you say is added to a prompt that tries to get GPT-3 to be a good conversationalist
 by describing the situation and giving it several conversational exchanges.
@@ -501,7 +501,7 @@ by truncating it while keeping the context description.
 </p>
 <p class="sample-program">
 The project supports three "personas". Gopher is an attempt at a friendly general conversationalist.
-El is prompted to pretend to be an elephant so one can ask her questions like "What is your favourite food?" or 
+El is prompted to pretend to be an elephant so one can ask her questions like "What is your favorite food?" or 
 "Do you like jogging?".
 Eve pretends to be Mount Everest. Ask her questions like "What do you weigh?" or "How can I come visit you?".
 Charles is a simple simulation of Charles Darwin.
@@ -512,7 +512,7 @@ The only difference is the introductory text and initial sample conversation.
 <p class="sample-program">
 Note that this project also illustrates how one can make a completely speech oriented interface.
 Other than the communication of your API key everything uses speech input and output.
-This particularly useful when the project is run on a smartphone.
+This is particularly useful when the project is run on a smartphone.
 Look at the script to see how it works.
 </p>
 
@@ -540,7 +540,7 @@ Produce a summary of text. Optionally can control the length, repetition, and mo
 </li>
 <li>
 Hold a conversation. Note this model is much smaller and less capable than
-<a href="#gpt-3">the GPT-3 and Jurassic 1 models</a>.
+<a href="#gpt-3 and j1">the GPT-3 and Jurassic 1 models</a>.
 </li>
 <li>
 Query a spreadsheet. Ask questions of a table of data.
@@ -550,7 +550,7 @@ Answer a question given a context. Note that
 <a href="#question-answering">similar models can be run in the browser</a> without accessing Hugging Face.
 </li>
 <li>
-Detect how positive or negative some is.
+Detect how positive or negative some text is.
 </li>
 <li>
 Find the named entities in some text.
@@ -582,7 +582,7 @@ or the assassin's codename.
 <h4 class="societal-impact-white" id="benefits-and-risks">Benefits and risks using word embeddings</h4>
 <p class="societal-impact">
 Word and sentence embeddings can be used as a component in AI programs that do
-sentiment analysis, entity detection, recommendations, summarising text, translation, and question answering.
+sentiment analysis, entity detection, recommendations, summarizing text, translation, and question answering.
 This is typically done by replacing the words or phrases in a text with their embeddings
 and then training a machine learning system on these 
 approximate meaning of the words.
@@ -662,7 +662,7 @@ close to where their translations are.
 While it is impressive that translation works at all given a word list that covers only 2.5% of the vocabulary,
 <a href="https://engineering.fb.com/ai-research/unsupervised-machine-translation-a-novel-approach-to-provide-fast-accurate-translations-for-more-languages/" target="_blank">
 Researchers at Facebook describe a technique</a> that uses no word lists or translated texts.
-A rotation is all that is needed because all the word embeddings are centred around zero
+A rotation is all that is needed because all the word embeddings are centered around zero
 so they don't need to be translated (in the mathematical sense, i.e. moved) as well.
 But note that the translation happens in 299 dimensions!
 </p>
@@ -688,14 +688,14 @@ This uses MobileNet to compute the numbers from the "top" of the neural net.
 </figure>
 <p class="instructions">
 One can use image embeddings to determine which images are close to other images.
-Closeness takes into account many factors including texture, colour, parts, and semantics.
+Closeness takes into account many factors including texture, color, parts, and semantics.
 Image embeddings can be used to work out image analogy problems similar to how word analogy problems are solved.
 </p>
 <p class="how-it-works">
 In the machine learning chapter there is a
 <a href="chapter-4.html#image-recognition-without-cloud-services" target="_blank">description</a>
 of the <span class="block-name">train with image buckets ...</span> block which is used for training.
-It works by collecting the feature vectors of all the training images and then finds the nearest neighbours to 
+It works by collecting the feature vectors of all the training images and then finds the nearest neighbors to 
 a test image to determine what label to give the image.
 </p>
 <h4 class="project-ideas-white" id="project-ideas">Possible project ideas for Natural Language Processing</h4>
@@ -736,9 +736,9 @@ See if you can find other biases that arise from the way people write about thin
 If you know another language (and it is one of the 15 supported languages) see if it applies across languages.
 </li>
 <li>
-Explore the relationships between words in groups such a colour words or emotion words. 
-Are 'red', 'green', and 'blue' close to each other or are colour words close when the colours appear similar.
-If you know another language see if different languages organise colour words differently.
+Explore the relationships between words in groups such a color words or emotion words. 
+Are 'red', 'green', and 'blue' close to each other or are color words close when the colors appear similar.
+If you know another language, see if different languages organize color words differently.
 Try this with other categories such emotions, directions, numbers, etc.
 </li>
 <li>
@@ -746,14 +746,14 @@ Explore the relationships between different grammatical versions of the same wor
 E.g. the relationships of 'tall', 'taller', 'tallest', 'short', 'shorter', 'shortest'.
 Or 'run', 'ran', 'running' (and 'runny' and 'runnier').
 Can you find some general patterns?
-Do they generalise to other languages?
+Do they generalize to other languages?
 </li>
 <li>
 Explore word embeddings for number words.
 For example, "two" is to "four" as "ten" is to "twenty". Can you find other examples?
 </li>
 <li>
-The <a href="#guess-my-word">Guess My Word</a> is very difficult because the answer can be one of 20,000 words
+The <a href="#guess-my-word">Guess My Word</a> is very difficult because the answer can be one of 20,000 words.
 Make an easier version of the game.
 </li>
 <li>
@@ -809,7 +809,7 @@ E.g. one sense of "duck" is close to "chicken" while another sense is close to "
 There is plenty more that AI programs can do with language including
 determining the grammatical structure of sentences (this is called "parsing"),
 figuring out the sentiment in some text,
-and summarising text.
+and summarizing text.
 We plan to add more.
 </p>
 
@@ -835,7 +835,7 @@ pioneered the idea adjusting the word embeddings to support translation.
 <a href="https://arxiv.org/abs/1710.04087" target="_blank">Word Translation Without Parallel Data</a>
 explores how word embeddings can be used for translation without using word lists or translated texts.
 <a href="https://projector.tensorflow.org/" target="_blank">projector.tensorflow.org</a>
-is a great website for interactively exploring different ways of visualising high-dimensional spaces.
+is a great website for interactively exploring different ways of visualizing high-dimensional spaces.
 Here is a video of <a href="https://www.youtube.com/watch?v=RJVL80Gg3lA" target="_blank">
 a nice talk by Laurens van der Maaten</a> who invented the idea of t-SNE.
 </p>
@@ -843,7 +843,7 @@ a nice talk by Laurens van der Maaten</a> who invented the idea of t-SNE.
 <p class="resources">
 You can import the blocks presented here as a
 <a href="/ai/snap/snap.html?project=words&editMode" target="_blank">project</a> or 
-download as a <a href="words blocks.xml" download target="_blank">library</a> to import into your projects.
+download them as a <a href="words blocks.xml" download target="_blank">library</a> to import into your projects.
 </p>
 <h4 class="guide-to-guide-white" id="making-neural-nets">Learn about making and training neural nets</h4>
 <p class="guide-to-guide">
