@@ -2042,6 +2042,9 @@ const receive_message =
                 result_labels.forEach((label) => {
                     results[label] = trial.result.results[label];
                 });
+                Object.entries(parameters).forEach((entry) => {
+                    results[entry[0]] = entry[1];
+                });
                 event.source.postMessage({optimize_hyperparameters_time_stamp: time_stamp,
                                           trial_number: n,
                                           trial_optimize_hyperparameters: parameters,
