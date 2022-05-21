@@ -435,8 +435,15 @@ const display_trial_results = (trial) => {
     if (best_accuracy) {
         highest_accuracy = accuracy;
     }
+    message += "Duration in seconds = " + results['Duration in seconds'];
+    const string_to_html_row = (string, type, style) => {
+        const items = string.split(',');
+        return items.map((item) => "<" + type + " " + (style || '') + ">" + item.trim() + "</" + type + ">")
+    };
+    message += "<br><table><tr>" + string_to_html_row(results['Column labels for saving results in a spreadsheet'], 'th') +
+               "</tr><tr>" + string_to_html_row(results['Spreadsheet values'], 'td', 'style="border: 1px solid #333"') + "</tr></table>"
     if (best_score) {
-        message = "<b>Best so far.<br>";
+        message += "<b>Best so far.<br>";
     }
     message += "Score = " + shorter_number(score);
     const add_samples = (kind) => {
