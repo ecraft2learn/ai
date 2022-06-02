@@ -425,11 +425,16 @@ window.ecraft2learn =
         }
     };
     const array_to_object = (array) => {
-        // array alternates between keys and values
         const object = {};
-        for (let i = 0; i < array.length; i += 2) {
-            object[array[i]] = array[i+1];
-        };
+        if (array.length > 0 && typeof array[0] === 'string') { // array alternates between keys and values
+            for (let i = 0; i < array.length; i += 2) {
+                object[array[i]] = array[i+1];
+            };
+        } else { // key-values are sublists
+            for (let i = 0; i < array.length; i += 1) {
+                object[array[i][0]] = array[i][1];
+            };
+        }
         return object;
     };
     let add_photo_to_canvas = function (image_or_video, new_width, new_height, mirrored) {
@@ -1204,6 +1209,8 @@ window.ecraft2learn =
               URL = "/detection/index.html" + translate_query;
           } else if (source === 'knn') {
               URL = "/knn/index.html" + translate_query;
+          } else if (source === 'poses-and-landmarks') {
+              URL = "/poses-and-landmarks/index.html" + translate_query;
           } else if (source === 'teachable machine image') {
               URL = "/teachablemachine/image/index.html" + translate_query;
           } else if (source === 'teachable machine pose') {
@@ -3756,7 +3763,52 @@ window.ecraft2learn =
                               refineSteps: 10};
        segmentation_handler(true, costume, options, callback, error_callback, config, default_config);
   },
+  poses_and_landmarks: (costume, options, callback, error_callback, default_config) => {
+      if (options) {
+          options = array_to_object(snap_to_javascript(options));
+      } else {
+          options = {};
+      }
+      if (options.config) {
+          options.config = array_to_object(options.config);
+      } else if (default_config) {
+          options.config = default_config;
+      }
+      const time_stamp = Date.now();
+      request_of_support_window('poses-and-landmarks',
+                                'Ready',
+                                () => {
+                                    const image_data = get_costume_data(costume);
+                                    return {poses_and_landmarks: {image_data, options, time_stamp}};
+                                },
+                                (message) => {
+                                    return (message.poses_and_landmarks_response && message.time_stamp === time_stamp) ||
+                                           message.poses_and_landmarks_show_message ||
+                                            // reponse received and it is for the same request (time stamps match)
+                                           message.error_message;
+                                },
+                                (message) => {
+                                    if (message.error_message) {   
+                                        const title = "Error computing poses or landmarks of a costume";
+                                        const full_message = title + ": " + message.error_message;
+                                        if (error_callback) {
+                                            console.log(full_message);
+                                            invoke_callback(error_callback, full_message);
+                                        } else {
+                                            inform(title, message.error_message);
+                                        }
+                                    } else if (message.poses_and_landmarks_show_message) {
+                                        show_message(message.poses_and_landmarks_show_message,
+                                                     message.poses_and_landmarks_show_message_duration);
+                                    } else { // responded with the data structure 
+                                        invoke_callback(callback, 
+                                                        javascript_to_snap(message.poses_and_landmarks_response));
+                                    }
+                                    return true;
+                                });
+  },
   poses: function (callback, no_display) {
+      // deprecated version of pose detection
       var ask_for_poses = function (window_just_created) {
           if (!ecraft2learn.support_window['posenet'] || ecraft2learn.support_window['posenet'].closed) {
               open_posenet_window(no_display);
