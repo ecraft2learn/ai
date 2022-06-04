@@ -30,12 +30,13 @@ const load_scripts = (urls, onload, onerror) => {
     document.head.appendChild(script);
 };
 
-const urls = {MediaPipeFaceDetector: ['face-detection.js'],
-              MediaPipeFaceMesh: ['face-detection.js', 'face-landmarks-detection.js'],
-              MediaPipeHands: ['hand-pose-detection.js'],
-              MoveNet: ['pose-detection.js'],
-              PoseNet: ['pose-detection.js'],
-              BlazePose: ['pose-detection.js']};
+const urls = {MediaPipeFaceDetector: ['https://cdn.jsdelivr.net/npm/@tensorflow-models/face-detection'],
+              MediaPipeFaceMesh: ['https://cdn.jsdelivr.net/npm/@tensorflow-models/face-detection',
+                                  'https://cdn.jsdelivr.net/npm/@tensorflow-models/face-landmarks-detection'],
+              MediaPipeHands: ['https://cdn.jsdelivr.net/npm/@tensorflow-models/hand-pose-detection'],
+              MoveNet: ['https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection'],
+              PoseNet: ['https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection'],
+              BlazePose: ['https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection']};
 
 const estimator = {MediaPipeFaceDetector:  'estimateFaces',
                    MediaPipeFaceMesh:      'estimateFaces',
@@ -129,8 +130,26 @@ const respond_to_messages = (event, error_handler) => {
     }          
 };
 
+// caused strange errors and isn't that important to use video element directly
+// const get_video = async (event) => {
+//     const video_elements = event.source.parent.document.getElementsByTagName('video');
+//     if (video_elements.length > 0) {
+//         return video_elements[0];
+//     } else {
+//         const video_element = document.createElement('video');
+//         document.body.appendChild(video_element);
+//         const stream = await navigator.mediaDevices.getUserMedia({video: true, audio: false});
+//         video_element.srcObject = stream;
+//         video_element.play();
+//         return video_element;
+//     }
+// };
+
 const respond_to_message = async (event, error_handler) => {
     const {image_data, options, time_stamp} = event.data.poses_and_landmarks;
+    // if (!(image_data instanceof ImageData)) {
+    //     image_data = await get_video(event);
+    // }
     const model_name = options['model name'];
     const detector_id = model_name + '.' + get_model_type(options);
     detectors[detector_id][estimator[model_name]](image_data)

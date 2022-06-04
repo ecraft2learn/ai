@@ -825,7 +825,8 @@ window.ecraft2learn =
         sprite.wearCostume(costume);
         ide.hasChangedMedia = true;
     };
-    const get_costume_data = (costume) => get_image_data(costume.contents);
+    // if not a costume may be interpreted as any video element from the document
+    const get_costume_data = (costume) => costume instanceof Costume ? get_image_data(costume.contents) : costume;
     const get_image_data = (canvas) => canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
     const post_image = function post_image(image, cloud_provider, callback, error_callback) {
         // based upon https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/Sending_forms_through_JavaScript
@@ -3173,7 +3174,11 @@ window.ecraft2learn =
                                        2*stage.width(),
                                        2*stage.height(),
                                        mirrored);
-      ecraft2learn.video = undefined; // this is so one can change the browser settings to use a different camera
+      // following commented out since either get losts of video elements in the document
+      // or else need to create them repeatedly
+      // changing browser settings causing a refresh seems fine
+      // ecraft2learn.video.remove();
+      // ecraft2learn.video = undefined; // this is so one can change the browser settings to use a different camera
       invoke_callback(callback, create_costume(canvas));
   },
 
@@ -3744,14 +3749,14 @@ window.ecraft2learn =
       return ecraft2learn.support_iframe[source].style.width === "100%";
   },
   detect_objects: detection_handler,
-  segmentation_and_pose: (costume, options, callback, error_callback, config) => {
+  body_segmentation: (costume, options, callback, error_callback, config) => {
       // single person
       const default_config = {flipHorizontal: true,
                               internalResolution: 'medium',
                               segmentationThreshold: 0.7};
       segmentation_handler(false, costume, options, callback, error_callback, config, default_config);
   },
-  segmentations_and_poses: (costume, options, callback, error_callback, config) => {
+  body_segmentations: (costume, options, callback, error_callback, config) => {
       // multiple people
       const default_config = {flipHorizontal: true,
                               internalResolution: 'medium',
