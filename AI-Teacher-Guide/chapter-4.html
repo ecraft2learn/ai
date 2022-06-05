@@ -436,38 +436,55 @@ Click the green flag to train it to recognize a few voice commands. TRY IT
 <figcaption>A demonstration of pose detection</figcaption>
 </figure>
 <p class="background-information">
-Google Creative Lab released browser-based software called <i>Posenet</i> for
-<a href="https://medium.com/tensorflow/real-time-human-pose-estimation-in-the-browser-with-tensorflow-js-7dd0bc881cd5" target="_blank">
+Google has released browser-based machine learning models for
+<a href="https://github.com/tensorflow/tfjs-models/tree/master/pose-detection" target="_blank">
 real-time human pose estimation</a>.
-This software can determine the locations of 17 different face and body parts:
+This software can determine the locations of 17 (or 33 depending upon which version is chosen) different face and body parts:
 noses, eyes, ears, shoulders, elbows, wrists, hips, knees, and ankles.
-Posenet was created using deep machine learning and makes use of <a href="https://js.tensorflow.org/" target="_blank">Tensorflow.js</a>.
-Many are familiar with how pose detection can be embedded in video games via
-<a href="https://en.wikipedia.org/wiki/Kinect">Microsoft's Xbox Kinect</a>.
-What is so impressive about Posenet is that it works in the browser without any special software or hardware (other than a webcam).
+These models were created using deep machine learning and makes use of <a href="https://js.tensorflow.org/" target="_blank">Tensorflow.js</a>.
+Google posted <a href="https://google.github.io/mediapipe/solutions/pose.html" target="_blank">a blog describing how the pose models were made and 
+some uses</a>.
+This works in the browser without any special software or hardware.
 </p>
 <p class="instructions">
-The <span class="block-name">poses</span> block reports a list of poses.
-One pose for each person in front of the camera.
-The system can be configured on the "poses" tab to be optimized for scenes with more than one person.
-Trade-offs between speed and accuracy can also be made.
-The "poses" tab is also a good place to explore pose detection.
-There are two kinds of <span class="block-name">pose property</span> blocks that can fetch information for a <i>pose</i>.
-They both can specify that one wants the confidence the system has that it has correctly identified a particular body part
-(values between 0 and 100).
-Or that the location of the body part is desired which is reported as a list of the x and y coordinates.
-Depending upon the value of the flag the location is reported either as values between 0 and 100 or as coordinates of the stage.
-Note that because Posenet displays the video in a mirror-like fashion where left and right are from the camera's viewpoint
-not the person whose pose is being analyzed.
+The <span class="block-name">body poses of costume</span> block reports a list of poses.
+One pose for each person in the costume (either obtained from the camera accessed by the browser or from photographic Snap! costumes.
+Each pose is a list of lists of keys and values.
+The <i>PoseNet</i> version works for multiple people, while the other two are best for a single pose.
+The <span class="block-name">get the &lt;property&gt; of &lt;list of keys and values&gt;</span> block can fetch information from a pose.
+The models also report their confidence that it has correctly identified a particular body part
+(with scores between 0 and 1).
+Depending upon the value of the third input the location is reported as values between 0 and 100, as coordinates of the stage,
+or costume image coordinates.
+The <i>BlazePose</i> version also reports 3D coordinates between 0 and 1.
+Advanced options can be supplied to <span class="block-name">body poses of costume</span>.
+One option <i>modelType</i> can be used to trade-off between speed and accuracy.
+See <a href="https://github.com/tensorflow/tfjs-models/tree/master/pose-detection" target="_blank">this documenation</a>.
 </p>
 <figure class = "snap-iframe"
         id = "pose"
         full_screen = "true"
-        stage_ratio = ".4"
+        stage_ratio = ".6"
         container_style = "width: 1000px; height: 700px;" 
-        caption = "A block for detecting the location of 17 different body parts. TRY IT">
+        caption = "A block for detecting the location of 17 or 33 different body parts. TRY IT">
 </figure>
-
+<p class="instructions">
+Google has also developed a model that reports 21 locations on a hand.
+The <span class="block-name">hand poses of costume</span> reports these locations and their confidence scores.
+Like the <span class="block-name">body poses of costume</span> block (see above) it can report locations in
+costume coordinates, stage coordinates, or percentages.
+Note that the location labels use anatomical abbreviations:
+<i>CMC</i> for carpometacarpal, <i>MCP</i> for metacarpophalangeal, and <i>IP</i> for interphalangeal,
+<i>IP</i> for proximal interphalangeal, and <i>DIP</i> for distal phalanges.
+</p>
+<figure class = "snap-iframe"
+        id = "hand pose"
+        full_screen = "true"
+        stage_ratio = ".6"
+        container_style = "width: 1000px; height: 700px;" 
+        caption = "A block for detecting the location of 21 different parts of hands. TRY IT">
+</figure>
+        
 <h4 class="sample-program-white" id="simon-says-game">Using pose detection to implement a <i>Simon Says</i> game</h4>
 <p class="sample-program">
 Using the <span class="block-name">poses</span> block a <i>Simon Says</i> game can be built.
