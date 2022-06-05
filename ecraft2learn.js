@@ -2465,6 +2465,27 @@ window.ecraft2learn =
         }
         return result;      
     };
+    const body_segmentation = (costume, options, callback, error_callback, config) => {
+      // single person
+      const default_config = {flipHorizontal: true,
+                              internalResolution: 'medium',
+                              segmentationThreshold: 0.7};
+      segmentation_handler(false, costume, options, callback, error_callback, config, default_config);
+    };
+    const body_segmentations = (costume, options, callback, error_callback, config) => {
+      // multiple people
+      const default_config = {flipHorizontal: true,
+                              internalResolution: 'medium',
+                              segmentationThreshold: 0.7,
+                              maxDetections: 10,
+                              scoreThreshold: 0.2,
+                              nmsRadius: 20,
+                              minKeypointScore: 0.3,
+                              refineSteps: 10};
+       segmentation_handler(true, costume, options, callback, error_callback, config, default_config);
+    };
+    const segmentation_and_pose = body_segmentation; // for backwards compatibility
+    const segmentations_and_poses = body_segmentations;
     // const yahoo_weather = (place, element_name, units, callback, error_callback, key, secret) => {
 // Weather API sample javascript code
 // Requires: jQuery and crypto-js (v3.1.9)
@@ -3749,25 +3770,10 @@ window.ecraft2learn =
       return ecraft2learn.support_iframe[source].style.width === "100%";
   },
   detect_objects: detection_handler,
-  body_segmentation: (costume, options, callback, error_callback, config) => {
-      // single person
-      const default_config = {flipHorizontal: true,
-                              internalResolution: 'medium',
-                              segmentationThreshold: 0.7};
-      segmentation_handler(false, costume, options, callback, error_callback, config, default_config);
-  },
-  body_segmentations: (costume, options, callback, error_callback, config) => {
-      // multiple people
-      const default_config = {flipHorizontal: true,
-                              internalResolution: 'medium',
-                              segmentationThreshold: 0.7,
-                              maxDetections: 10,
-                              scoreThreshold: 0.2,
-                              nmsRadius: 20,
-                              minKeypointScore: 0.3,
-                              refineSteps: 10};
-       segmentation_handler(true, costume, options, callback, error_callback, config, default_config);
-  },
+  body_segmentation,
+  body_segmentations,
+  segmentation_and_pose, // for backwards compatibility
+  segmentations_and_poses,
   poses_and_landmarks: (costume, options, callback, error_callback, default_config) => {
       if (options) {
           options = array_to_object(snap_to_javascript(options));
