@@ -36,14 +36,17 @@ const urls = {MediaPipeFaceDetector: ['https://cdn.jsdelivr.net/npm/@tensorflow-
               MediaPipeHands: ['https://cdn.jsdelivr.net/npm/@tensorflow-models/hand-pose-detection'],
               MoveNet: ['https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection'],
               PoseNet: ['https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection'],
-              BlazePose: ['https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection']};
+              BlazePose: ['https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection'],
+              ARPortraitDepth: ['https://cdn.jsdelivr.net/npm/@tensorflow-models/body-segmentation',
+                                'https://cdn.jsdelivr.net/npm/@tensorflow-models/depth-estimation']};
 
 const estimator = {MediaPipeFaceDetector:  'estimateFaces',
                    MediaPipeFaceMesh:      'estimateFaces',
                    MediaPipeHands:         'estimateHands',
                    MoveNet:                'estimatePoses',
                    PoseNet:                'estimatePoses',
-                   BlazePose:              'estimatePoses'};
+                   BlazePose:              'estimatePoses',
+                   ARPortraitDepth:        'estimateDepth'};
 
 const get_detector = (options, callback, error_handler) => {
     let model;
@@ -60,6 +63,8 @@ const get_detector = (options, callback, error_handler) => {
         detector_creator = handPoseDetection;
     } else if (['MoveNet', 'PoseNet', 'BlazePose'].includes(model_name)) {
         detector_creator = poseDetection;
+    } else if (model_name === 'ARPortraitDepth') {
+        detector_creator = depthEstimation;
     } else {
         error_handler(new Error('"model name" option given to "poses and landmarks" ' + model_name + ' is not supported.'));
         return;
@@ -69,11 +74,15 @@ const get_detector = (options, callback, error_handler) => {
         error_handler(new Error(options['model name'] + ' model not found'));
         return;
     }
-    detector_creator.createDetector(model, options)
-        .then(detector => {
-            callback(detector);
-        })
-        .catch(error_handler);
+    if (model_name === 'ARPortraitDepth') {
+        detector_creator.createEstimator(model, options)
+                .then(callback)
+                .catch(error_handler); 
+    } else {
+        detector_creator.createDetector(model, options)
+                .then(callback)
+                .catch(error_handler);        
+    }
 };
 
 const get_model_type = (options) => {
@@ -152,10 +161,19 @@ const respond_to_message = async (event, error_handler) => {
     // }
     const model_name = options['model name'];
     const detector_id = model_name + '.' + get_model_type(options);
-    detectors[detector_id][estimator[model_name]](image_data)
+    const config = model_name === 'ARPortraitDepth' ? {minDepth: 0, maxDepth: 1} : undefined;
+    detectors[detector_id][estimator[model_name]](image_data, config)
         .then(response => {
-            event.source.postMessage({poses_and_landmarks_response: response,
-                                      time_stamp}, "*");
+            if (model_name === 'ARPortraitDepth') {
+                response.toArray() // response is a depth object
+                    .then((array) => {
+                              event.source.postMessage({poses_and_landmarks_response: array,
+                                                        time_stamp}, "*");
+                        });
+            } else {
+                event.source.postMessage({poses_and_landmarks_response: response,
+                                         time_stamp}, "*");
+            }
         })
         .catch(error_handler);
 };
