@@ -51,7 +51,19 @@ const cache_name = 'snap-poses-and-landmarks-v1',
 "https://tfhub.dev/mediapipe/tfjs-model/blazepose_3d/landmark/full/2/group1-shard2of2.bin?tfjs-format=file",
 "https://storage.googleapis.com/tfhub-tfjs-modules/mediapipe/tfjs-model/blazepose_3d/landmark/full/2/group1-shard1of2.bin",
 "https://storage.googleapis.com/tfhub-tfjs-modules/mediapipe/tfjs-model/blazepose_3d/landmark/full/2/group1-shard2of2.bin",
-
+"https://cdn.jsdelivr.net/npm/@tensorflow-models/depth-estimation",
+"https://tfhub.dev/tensorflow/tfjs-model/ar_portrait_depth/1/model.json?tfjs-format=file",
+"https://storage.googleapis.com/tfhub-tfjs-modules/tensorflow/tfjs-model/ar_portrait_depth/1/model.json",
+"https://tfhub.dev/tensorflow/tfjs-model/ar_portrait_depth/1/group1-shard1of3.bin?tfjs-format=file",
+"https://tfhub.dev/tensorflow/tfjs-model/ar_portrait_depth/1/group1-shard2of3.bin?tfjs-format=file",
+"https://tfhub.dev/tensorflow/tfjs-model/ar_portrait_depth/1/group1-shard3of3.bin?tfjs-format=file",
+"https://storage.googleapis.com/tfhub-tfjs-modules/tensorflow/tfjs-model/ar_portrait_depth/1/group1-shard1of3.bin",
+"https://storage.googleapis.com/tfhub-tfjs-modules/tensorflow/tfjs-model/ar_portrait_depth/1/group1-shard2of3.bin",
+"https://storage.googleapis.com/tfhub-tfjs-modules/tensorflow/tfjs-model/ar_portrait_depth/1/group1-shard3of3.bin",
+"https://tfhub.dev/mediapipe/tfjs-model/selfie_segmentation/general/1/model.json?tfjs-format=file",
+"https://storage.googleapis.com/tfhub-tfjs-modules/mediapipe/tfjs-model/selfie_segmentation/general/1/model.json",
+"https://tfhub.dev/mediapipe/tfjs-model/selfie_segmentation/general/1/group1-shard1of1.bin?tfjs-format=file",
+"https://storage.googleapis.com/tfhub-tfjs-modules/mediapipe/tfjs-model/selfie_segmentation/general/1/group1-shard1of1.bin",
 ];
 
 self.addEventListener('install', (event) => {
