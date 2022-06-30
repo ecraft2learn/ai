@@ -205,7 +205,7 @@ const optimization_methods =
      "Adaptive Learning Rate Gradiant Descent": "adadelta",
      "Adaptive Moment Estimation": "adam",
      "Adaptive Moment Estimation Max": "adamax",
-     "Root Mean Squared Prop": "rmsprop"};
+     "Root Mean Squared Prop": "rmsprop"};   
 
 const optimizer_named = (name, learning_rate) => {
     name = name.trim();
@@ -213,6 +213,34 @@ const optimizer_named = (name, learning_rate) => {
         return tf.train.momentum((learning_rate || .001), .9);
     }
     return optimization_methods[name] || name;
+};
+
+const regularizer_named = (name, weight1, weight2) => {
+    if (name instanceof Array) {
+        return regularizer_named(name[0], name[1], name[2]);
+    }
+    if (!isNaN(+name)) {
+        name = +name;
+        if (name === 0) {
+            return null;
+        }
+        return regularizer_named('l2', name); // l2 is a good default
+    }
+    name = name.trim();
+    if (name === 'none') {
+        return null;
+    }
+    if (tf.regularizers[name] !== 'undefined') {
+        const options = {};
+        if (name === 'l1l2') {
+            options.l1 = +weight1;
+            options.l2 = +weight2;
+        } else {
+            options[name] = +weight1;
+        }
+        return tf.regularizers[name](options);
+    }
+    return null;
 };
 
 const non_categorical_loss_functions = 
@@ -1734,6 +1762,7 @@ const receive_message =
                 }
                 options.loss_function = loss_function_named(options.loss_function);
                 options.optimizer = optimizer_named(options.optimizer);
+                options.layer_regularizer = regularizer_named(options.layer_regularizer);
                 options.datasets = get_data(model_name, 'datasets');   
                 const model = create_model(options);
                 install_settings(options);

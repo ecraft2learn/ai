@@ -1479,7 +1479,7 @@ window.ecraft2learn =
     };
     // following functions use the layers level of tensorflow.js to create models, train, and predict
     const create_tensorflow_model = (name, layers, optimizer, loss_function, input_shape, success_callback, error_callback,
-                                     activation_function_name, dropout_rate) => { 
+                                     activation_function_name, dropout_rate, layer_regularizer, layer_initializer) => { 
         if (typeof input_shape === 'string' && !isNaN(+input_shape)) {
             input_shape = +input_shape; // convert string to number
         }
@@ -1496,9 +1496,8 @@ window.ecraft2learn =
                                                            dropout_rate,
                                                            tfvis_options: {display_layers_after_creation: true},
                                                            time_stamp,
-                                                           // regularizers seem like a good default but should enable overriding this
-                                                           regularizer : 'l2',
-                                                           layer_initializer: 'varianceScaling'
+                                                           layer_regularizer: snap_to_javascript(layer_regularizer),
+                                                           layer_initializer
                                                            };
                                       // if no size is provided then it will be computed from the training data
                                       if (typeof input_shape === 'number') {
