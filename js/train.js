@@ -237,7 +237,10 @@ const tfjs_function = (fun, function_table, layer_index) => {
     if (typeof fun === 'string') {
         return function_table[fun]({});
     }
-    return fun(layer_index);
+    if (typeof fun === 'function') {
+        return fun(layer_index); // used by callers that want to use different functions depending upon the layer
+    }
+    return fun;
 };
 
 const show_layers = (model, tab_name, training_number) => {
