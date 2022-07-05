@@ -1,0 +1,13 @@
+{
+  "embeddings": [
+    {
+      "tensorName": "Snap! Manual",
+      "tensorShape": [
+        3164,
+        512
+      ],
+      "tensorPath": "https://ecraft2learn.github.io/ai/resources/snap-manual-sentences.tsv",
+      "metadataPath": "https://ecraft2learn.github.io/ai/resources/snap-manual-sentences-metadata.tsv"
+    }
+  ]
+}
