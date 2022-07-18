@@ -4120,7 +4120,8 @@ window.ecraft2learn =
           invoke_callback(callback);
       }
   },
-  closest_words: (target_features, language, distances_too, callback) => {
+  closest_words: (target_features, language, distances_too, callback, distance_measure) => {
+      const euclidean_distance = (distance_measure === 'Euclidean distance');
       verify_features(target_features);
       record_callbacks(callback);
       language = extract_language_code(language);
@@ -4134,17 +4135,33 @@ window.ecraft2learn =
       const word_tensors = ecraft2learn.words_to_features_tensors[language];
       const words = Object.keys(words_to_features[language]);
       const target_tensor = tf.tensor(snap_to_javascript(target_features));
-      const cosines_tensor = tf.metrics.cosineProximity(target_tensor, word_tensors);
-      const cosines = cosines_tensor.arraySync();
+      const compute_euclidean_distances = (target_tensor, word_tensors) => {
+          const distances_squared = tf.metrics.meanSquaredError(target_tensor, word_tensors);
+          if (distances_too) {
+              const distances = tf.sqrt(distances_squared);
+              distances_squared.dispose();
+              return distances;
+          } else {
+              return distances_squared;
+          }
+      };
+      const distances_tensor = 
+          euclidean_distance ? compute_euclidean_distances(target_tensor, word_tensors) :
+                               tf.metrics.cosineProximity(target_tensor, word_tensors);
+      const distances = distances_tensor.arraySync();
       // using tf.tidy instead of explicitly disposing of tensors caused Snap! to repeated call this
       target_tensor.dispose();
-      cosines_tensor.dispose();
-      const words_and_cosines = cosines.map((cosine, index) => [words[index], cosine]);
-      const sorted_words_and_cosines = words_and_cosines.sort((a, b) => a[1]-b[1]); 
+      distances_tensor.dispose();
+      // not disposing of word_tensors since those are shared for each language
+      const words_and_distances = distances.map((distance, index) => [words[index], distance]);
+      const sorted_words_and_distances = words_and_distances.sort((a, b) => a[1]-b[1]); 
       if (distances_too) {
-          invoke_callback(callback, javascript_to_snap(sorted_words_and_cosines));
+          invoke_callback(callback, javascript_to_snap(sorted_words_and_distances));
       } else {
-          return invoke_callback(callback, javascript_to_snap(sorted_words_and_cosines.map(word_and_cosine => word_and_cosine[0])));
+          return invoke_callback(callback, 
+                                 javascript_to_snap(
+                                     sorted_words_and_distances.map(
+                                         word_and_distance => word_and_distance[0])));
       }
   },
   cosine_proximity: (features, list_of_features) => {
