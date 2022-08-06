@@ -1762,7 +1762,7 @@ const receive_message =
                 }
                 options.loss_function = loss_function_named(options.loss_function);
                 options.optimizer = optimizer_named(options.optimizer);
-                options.layer_regularizer = regularizer_named(options.layer_regularizer);
+                options.layer_regularizer = options.layer_regularizer && regularizer_named(options.layer_regularizer);
                 options.datasets = get_data(model_name, 'datasets');   
                 const model = create_model(options);
                 install_settings(options);
