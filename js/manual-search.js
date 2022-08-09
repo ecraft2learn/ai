@@ -4,11 +4,13 @@ let sentences;
 const listen_for_messages = (event) => {
     if (event.data && typeof event.data.display_paragraphs !== 'undefined') {
         const next_paragraph = () => {
-             const sentence = sentences[sentence_index];
+             const sentence = sentences[sentence_index].trim();
              const search = IDRViewer.search(sentence, false, true, true);
              if (search.length === 0) {
                  window.parent.postMessage({no_results_for_search: sentence}, "*");
                  console.log("no results for search: ", sentence);
+                 sentence_index++;
+                 next_paragraph();
                  return;
              }
              const page = search[0].page;
