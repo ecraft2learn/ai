@@ -198,6 +198,7 @@ window.ecraft2learn =
           };
       };
       const stop_all_scripts = (and_reset_iframes) => {
+          ecraft2learn.time_last_stopped = Date.now();
           if (window.speechSynthesis) {
               window.speechSynthesis.cancel(); // should stop all utterances
           }
@@ -4202,6 +4203,7 @@ window.ecraft2learn =
       }
   },
   sentence_features: (sentences, success_callback, error_callback) => {
+      const time_last_stopped = ecraft2learn.time_last_stopped || 0;
       record_callbacks(success_callback, error_callback);
       if (!(sentences instanceof List)) {
           throw new Error("Sentence features expected a list of sentences. Not " + sentences.constructor.name);;
@@ -4222,7 +4224,8 @@ window.ecraft2learn =
               const embeddings = embeddings_tensor.arraySync();
               all_embeddings = all_embeddings.concat(embeddings);
               embeddings_tensor.dispose();
-              if (remaining_sentences.length === 0) {
+              if (remaining_sentences.length === 0 || (ecraft2learn.time_last_stopped || 0) !== time_last_stopped) {
+                  // finished or user clicked the stop sign
                   invoke_callback(success_callback, javascript_to_snap(all_embeddings));
               } else {
                   setTimeout(() => { // give other processes a chance to run
