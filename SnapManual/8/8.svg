@@ -5,8 +5,8 @@
 <defs>
 <clipPath id="c0_8"><path d="M220,552.5V456.3H410.2v96.2Z"/></clipPath>
 <clipPath id="c1_8"><path d="M408.9,117.3V90.6h37.4v26.7Z"/></clipPath>
-<clipPath id="c2_8"><path d="M789.3,734.4V710.7h35.2v23.7Z"/></clipPath>
-<clipPath id="c3_8"><path d="M369.7,1097.7V891.5H564.1v206.2Z"/></clipPath>
+<clipPath id="c2_8"><path d="M521,757V733.3h35.2V757Z"/></clipPath>
+<clipPath id="c3_8"><path d="M369.7,1094.3V888.1H564.1v206.2Z"/></clipPath>
 <clipPath id="c4_8"><path d="M482.8,362.8V234.5H652.4V362.8Z"/></clipPath>
 <clipPath id="c5_8"><path d="M220,343.8V234.5H390.6V343.8Z"/></clipPath>
 <clipPath id="c6_8"><path d="M487.8,554.8V456.3H678v98.5Z"/></clipPath>
@@ -14,9 +14,9 @@
 </defs>
 <image clip-path="url(#c0_8)" preserveAspectRatio="none" x="220" y="456" width="190" height="97" xlink:href="img/1.png"/>
 <image clip-path="url(#c1_8)" preserveAspectRatio="none" x="409" y="91" width="37" height="26" xlink:href="img/2.jpg"/>
-<image clip-path="url(#c2_8)" preserveAspectRatio="none" x="789" y="711" width="35" height="23" xlink:href="img/3.jpg"/>
-<image clip-path="url(#c3_8)" preserveAspectRatio="none" x="370" y="891" width="194" height="207" xlink:href="img/4.jpg"/>
-<image clip-path="url(#c4_8)" preserveAspectRatio="none" x="483" y="235" width="169" height="128" xlink:href="img/5.png"/>
+<image clip-path="url(#c2_8)" preserveAspectRatio="none" x="521" y="733" width="35" height="24" xlink:href="img/3.jpg"/>
+<image clip-path="url(#c3_8)" preserveAspectRatio="none" x="370" y="888" width="194" height="206" xlink:href="img/4.jpg"/>
+<image clip-path="url(#c4_8)" preserveAspectRatio="none" x="483" y="234" width="169" height="129" xlink:href="img/5.png"/>
 <image clip-path="url(#c5_8)" preserveAspectRatio="none" x="220" y="235" width="171" height="109" xlink:href="img/6.png"/>
 <image clip-path="url(#c6_8)" preserveAspectRatio="none" x="488" y="456" width="190" height="99" xlink:href="img/7.png"/>
 <image clip-path="url(#c7_8)" preserveAspectRatio="none" x="541" y="688" width="32" height="19" xlink:href="img/8.png"/>

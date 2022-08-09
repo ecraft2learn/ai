@@ -3,23 +3,39 @@
 "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg viewBox="0 0 935 1210" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <defs>
-<clipPath id="c0_63"><path d="M332.8,296.8v-149H594.1v149Z"/></clipPath>
-<clipPath id="c1_63"><path d="M266.8,1130.5v-303H668.6v303Z"/></clipPath>
-<clipPath id="c2_63"><path d="M352.2,595.4V418.9H636.4V595.4Z"/></clipPath>
-<clipPath id="c3_63"><path d="M617.5,1073.2v-21.8h21.7v21.8Z"/></clipPath>
+<clipPath id="c0_63"><path d="M390.6,265.6V237.3H575.4v28.3Z"/></clipPath>
+<clipPath id="c1_63"><path d="M519.1,539.8V291H845V539.8Z"/></clipPath>
+<clipPath id="c2_63"><path d="M749.4,580V479.8H880.2V580Z"/></clipPath>
+<clipPath id="c3_63"><path d="M55.2,430.9V291H464V430.9Z"/></clipPath>
+<clipPath id="c4_63"><path d="M413.1,708.1V650.8H593.4v57.3Z"/></clipPath>
+<clipPath id="c5_63"><path d="M106.1,983.4V881.1h194V983.4Z"/></clipPath>
+<clipPath id="c6_63"><path d="M433.5,996.7V854.3H826.1V996.7Z"/></clipPath>
+<clipPath id="c7_63"><path d="M379.7,939.9l11.7,-11.7H356.2v11.7ZM0,1210V0H935V1210Z"/></clipPath>
+<clipPath id="c8_63"><path d="M526.8,219.4V204.2h14.3v15.2Z"/></clipPath>
+<clipPath id="c9_63"><path d="M803.6,229.5V194.4h66.5v35.1Z"/></clipPath>
 <style type="text/css"><![CDATA[
 .g0_63{
+}
+.g1_63{
 fill: none;
-stroke: #FF0000;
-stroke-width: 4.583;
+stroke: #000000;
+stroke-width: 1.145;
 stroke-linecap: butt;
-stroke-linejoin: round;
+stroke-linejoin: miter;
+stroke-miterlimit: 8;
 }
 ]]></style>
 </defs>
-<image clip-path="url(#c0_63)" preserveAspectRatio="none" x="333" y="148" width="261" height="149" xlink:href="img/1.png"/>
-<path d="M539.7,509.3c0,-8.5,5.6,-15.4,12.6,-15.4c7,0,12.6,6.9,12.6,15.4c0,8.6,-5.6,15.5,-12.6,15.5c-7,0,-12.6,-6.9,-12.6,-15.5Z" class="g0_63"/>
-<image clip-path="url(#c1_63)" preserveAspectRatio="none" x="267" y="828" width="402" height="302" xlink:href="img/2.png"/>
-<image clip-path="url(#c2_63)" preserveAspectRatio="none" x="352" y="419" width="284" height="176" xlink:href="img/3.jpg"/>
-<image clip-path="url(#c3_63)" preserveAspectRatio="none" x="617" y="1051" width="22" height="22" xlink:href="img/4.png"/>
+<image clip-path="url(#c0_63)" preserveAspectRatio="none" x="391" y="237" width="184" height="29" xlink:href="img/1.png"/>
+<image clip-path="url(#c1_63)" preserveAspectRatio="none" x="519" y="291" width="326" height="249" xlink:href="img/2.png"/>
+<image clip-path="url(#c2_63)" preserveAspectRatio="none" x="749" y="480" width="131" height="100" xlink:href="img/3.png"/>
+<image clip-path="url(#c3_63)" preserveAspectRatio="none" x="55" y="291" width="409" height="140" xlink:href="img/4.png"/>
+<image clip-path="url(#c4_63)" preserveAspectRatio="none" x="413" y="651" width="180" height="57" xlink:href="img/5.png"/>
+<image clip-path="url(#c5_63)" preserveAspectRatio="none" x="106" y="881" width="194" height="102" xlink:href="img/6.png"/>
+<image clip-path="url(#c6_63)" preserveAspectRatio="none" x="433" y="854" width="393" height="143" xlink:href="img/7.png"/>
+<image clip-path="url(#c7_63)" preserveAspectRatio="none" x="347" y="918" width="51" height="34" xlink:href="img/8.png"/>
+<path fill-rule="evenodd" d="M358.8,929.7h22.7v-2.6l5.2,5.2l-5.2,5.1v-2.5H358.8Z" class="g0_63"/>
+<path d="M358.8,929.7h22.7v-2.6l5.2,5.2l-5.2,5.1v-2.5H358.8Z" class="g1_63"/>
+<image clip-path="url(#c8_63)" preserveAspectRatio="none" x="527" y="204" width="14" height="15" xlink:href="img/9.png"/>
+<image clip-path="url(#c9_63)" preserveAspectRatio="none" x="804" y="194" width="66" height="36" xlink:href="img/10.png"/>
 </svg>

@@ -6,10 +6,10 @@
 <clipPath id="c0_14"><path d="M354.4,369.4V119.6H580.2V369.4Z"/></clipPath>
 <clipPath id="c1_14"><path d="M294.8,600.4V397.6H645.4V600.4Z"/></clipPath>
 <clipPath id="c2_14"><path d="M375.8,1008V755.9H558.2V1008Z"/></clipPath>
-<clipPath id="c3_14"><path d="M409.4,1132.3v-44.7H524v44.7Z"/></clipPath>
+<clipPath id="c3_14"><path d="M409.4,1136.3v-44.7H524v44.7Z"/></clipPath>
 </defs>
 <image clip-path="url(#c0_14)" preserveAspectRatio="none" x="354" y="120" width="226" height="249" xlink:href="img/1.jpg"/>
 <image clip-path="url(#c1_14)" preserveAspectRatio="none" x="295" y="398" width="350" height="202" xlink:href="img/2.jpg"/>
 <image clip-path="url(#c2_14)" preserveAspectRatio="none" x="376" y="756" width="182" height="252" xlink:href="img/3.jpg"/>
-<image clip-path="url(#c3_14)" preserveAspectRatio="none" x="409" y="1088" width="115" height="44" xlink:href="img/4.jpg"/>
+<image clip-path="url(#c3_14)" preserveAspectRatio="none" x="409" y="1092" width="115" height="44" xlink:href="img/4.jpg"/>
 </svg>
