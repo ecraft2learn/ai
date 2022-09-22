@@ -1,0 +1,63 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Troubleshooting - AI Teacher's Guide</title>
+<link href="/ai/css/ai-teacher-guide.css" rel="stylesheet">
+<script src="../js/ai-guide.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/ncase/nutshell@1.0.1/nutshell.js"></script>
+<link rel="icon" type="image/png" href="images/eCraft2Learn-Favicon.png" />
+</head>
+<body>
+<p>As with any technology things can go wrong.
+Here we discuss problems we are aware of.
+Please send email to <a href="mailto:toontalk@gmail.com">Ken Kahn &lt;toontalk@gmail.com&gt;</a> if you encounter any problems or have questions.</p>
+
+<h3>General advice</h3>
+<p>The guide has been well-tested on Chrome.
+Some problems have been observed with FireFox and Safari so switch to Chrome (or Edge)
+if you encounter problems or very slow responses.
+</p>
+
+<h3>Granting permission for the guide to use the microphone and camera</h3>
+<p>The first time the guide is loaded into the browser it should ask for permission to use the microphone or camera.
+If you need to change the permission then
+<a href="https://support.google.com/chrome/answer/114662?hl=en&visit_id=1-636489202927020473-1104243073&rd=1" target="_blank">read this help page by Google</a>.
+</p>
+<h3>Speech synthesis works and then stops working</h3>
+<p>
+We have occasionally seen where a program that generates speech successfully suddenly stops generating sound.
+Saving your work, closing the tab, and then reopening the tab seems to fix this.
+</p>
+<h3 id="train-camera">Nothing happens when using the <span class="block-name">Train using camera</span>
+or <span class="block-name">Poses</span> blocks</h3>
+<p>
+Training a computer to recognise images runs quickly on modern PCs because it is able to use the
+<a href="http://www.nvidia.com/object/what-is-gpu-computing.html" target="_blank">GPU</a> that is part of nearly all computers.
+There is a GPU on a Raspberry Pi but you may find it runs very slowly.
+On a laptop training takes 100 to 200 milliseconds per image and prediction takes 40 to 60 milliseconds.
+On an Android phone training ranges from 60 to 1500 milliseconds and prediction takes 1.1 to 1.3 seconds.
+On a Raspberry Pi training takes 80 to 250 seconds and prediction 100 to 2500 seconds (2 or 3 minutes is typical).
+At the time of writing this developers are actively working on the Android version of deep learning and not all examples work yet.
+</p>
+<h3 id="tensorflow">Problems with user-created machine learning models</h3>
+<p>
+Sometimes after many remaking of models or repeated training sessions it begins to predict zero for everything.
+Saving your work and reloading the web page seems to fix the problem.
+This chapter has been well-tested on Chrome on PCs and may or may not work on tablets and smart phones.
+</p>
+<h3>Raspberry Pi problems</h3>
+<h4>No audio</h4>
+<p>The Raspberry Pi may think there are multiple audio devices.
+Right clicking on the speaker volume icon should display alternative devices.</p>
+<h4>No microphone</h4>
+<p>Depending upon the kind of microphone connected (internal or USB) the browser may not know how to access the microphone.
+You may need to launch Chromium with an argument describing the <a href="https://raspberrypi.stackexchange.com/questions/39928/unable-to-set-default-input-and-output-audio-device-on-raspberry-jessie" target="_blank">alsa-input-device</a>:
+<code>
+chromium-browser --alsa-input-device=...
+</code>
+</p>
+<h4>Text-to-speech voices missing</h4>
+<p>The Raspberry Pi cannot run Chrome but can run Chromium instead.
+One of the few ways in which Chromium differs from Chrome is that it has no builtin voices.
+The easiest workaround is to rely upon the MARY TTS speech blocks instead.</p>
+<script src="/ai/js/bottom-of-page.js"></script>
+</body>
+</html>
