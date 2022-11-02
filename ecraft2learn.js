@@ -4310,6 +4310,19 @@ window.ecraft2learn =
           });
       };     
   },
+  color_name_to_rgb: (color_name) => {
+      color_name = color_name.toLowerCase();
+      const div = document.createElement('div');
+      div.style.color = color_name;
+      document.body.appendChild(div);
+      const color_as_string = window.getComputedStyle(div).color;
+      div.remove();
+      if (color_as_string === 'rgb(0, 0, 0)' && color_name !== 'black') {
+          return false; // is an unknown color
+      }
+      const colors = color_as_string.split('(')[1].split(')')[0].split(', ');
+      return javascript_to_snap(colors);
+  },
   label_of_size: (text, size) => { // , ide, stage
       // this was once in a library with the help:
       // LABEL will stamp text on the stage at the given font size.
