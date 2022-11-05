@@ -815,6 +815,23 @@ window.ecraft2learn =
         }
         return new Costume(canvas, name);
     };
+    const create_costume_from_url = (url, width, height, name, callback) => {
+        // since loading the image is asynchronous need to use callback here
+        const canvas = newCanvas(new Point(width, height), true);
+        const image = document.createElement('img');
+        document.body.appendChild(image);
+        image.onload = () => {
+            canvas.getContext("2d").drawImage(image, 0, 0);
+            image.remove();
+            const costume = create_costume(canvas, name);
+            invoke_callback(callback, costume);
+        };
+        image.setAttribute("src", url);
+    };
+    const create_costume_from_b64_json = (b64_json, image_format, width, height, callback) => {
+        // image_format can be png, jpg, etc.
+        create_costume_from_url("data:image/" + image_format + ";base64," + b64_json, width, height, "", callback);
+    };
     const add_costume = function (costume, sprite) {
         var ide = get_snap_ide();
         if (!sprite) {
@@ -3904,6 +3921,9 @@ window.ecraft2learn =
       };
   },
   create_costume_with_style,
+  create_costume_from_url,
+  create_costume_from_b64_json,
+  add_costume,
   get_image_features,
   display_paragraph_containing_text_in_guide,
   display_paragraphs_containing_text_in_manual,
