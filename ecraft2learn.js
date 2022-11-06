@@ -828,9 +828,9 @@ window.ecraft2learn =
         };
         image.setAttribute("src", url);
     };
-    const create_costume_from_b64_json = (b64_json, image_format, width, height, callback) => {
+    const create_costume_from_b64_json = (b64_json, image_format, width, height, name, callback) => {
         // image_format can be png, jpg, etc.
-        create_costume_from_url("data:image/" + image_format + ";base64," + b64_json, width, height, "", callback);
+        create_costume_from_url("data:image/" + image_format + ";base64," + b64_json, width, height, name, callback);
     };
     const add_costume = function (costume, sprite) {
         var ide = get_snap_ide();
