@@ -4594,6 +4594,9 @@ ecraft2learn.language_defaults =
 };
 
 // Tell Snap! that this has been loaded so don't load it again
-SnapExtensions.scripts.push('https://ecraft2learn.github.io/ai/ecraft2learn.js');
+if (SnapExtensions) {
+    SnapExtensions.scripts.push('https://ecraft2learn.github.io/ai/ecraft2learn.js');    
+}
+
 
 }
