@@ -570,6 +570,50 @@ or <a href="https://os.cohere.ai/" target="_blank">Cohere</a>
 to generate transcripts of a virtual debate on any topic.
 Read this <a href="https://docs.google.com/document/d/1je5Aqlx5vzF-Sob_R91JB5xX82dx18ePMhysNhRUVIM/edit?usp=sharing">post</a> to learn more.
 </p>
+<h4 class="sample-program-white" id="generating-turtle-commands">Generating turtle commands</h4>
+<p class="sample-program">
+<a href="../snap/snap.html?project=language models to turtle commands" target="_blank">Turtle command generator</a>
+is a sample program that uses GPT-3 to control the motion of a sprite. It works by getting GPT-3 to produce
+Logo turtle commands in response to spoken or typed instructions. Those commands are then converted to
+Snap! blocks.
+Read this <a href="https://docs.google.com/document/d/1RbFQlIQGxYCDAxjtMDJ5LUmoxmqlCQregS1W6aVvGgU/edit?usp=sharing">post</a> to learn more.
+</p>
+<figure class = "snap-iframe"
+        id = "language model to turtle commands"
+        full_screen = "true"
+        container_style = "width: 800px; height: 800px" 
+        caption = "See how one get a language model to generate movement commands">
+</figure>
+<p class="instructions">
+You can stop the project and run the <span class="block-name">log to blocks</span> command to convert the
+history of your interaction into Snap! blocks. For example,
+</p>
+<figure>
+<img src="images/lm turtle commands.png" class="center">
+<figcaption>The Snap! blocks generated from instructions</figcaption>
+</figure>
+<figure>
+<img src="images/lm turtle output.png" class="center">
+<figcaption>How the Stage looks after issuing instructions</figcaption>
+</figure>
+<h4 class="instructions-white" id="dalle-2">Using words to generate costumes</h4>
+<p class="instructions">
+The <span class = "block-name">Ask DALLE-2 to create ... costumes ...</span> block can be used to generate costumes.
+With an API key from <a href="https://openai.com" target="_blank">OpenAI</a> one can use this block
+to generate costumes (at a cost of 2 US cents each or less).
+Your costume description can include medium (watercolor, photo, stainglass, oil painting, etc.),
+style (like Simpsons, Studio Ghibli, Rembrandt, Picasso, Cezanne, etc.), lighting, viewpoint, etc.
+</p>
+<figure class = "snap-iframe"
+        id = "dalle-2 exercise"
+        container_style = "width: 850px; height: 200px" 
+        caption = "A block for generating costumes in response to text">
+</figure>
+<p class="sample-program">
+This <a href="../snap/snap.html?project=dalle-2" target="_blank">DALLE-2 demo project</a>
+asks for a description and creates two costumes, adds them to the sprite, and then fades in and out between them.
+It also demonstrates how to replace a color (white in this case) with transparency.
+</p>
 <h4 class="instructions-white" id="hugging-face">Using language models on Hugging Face</h4>
 <p class="background-information">
 <a href="https://huggingface.co" target="_blank">Hugging Face</a> provides access to over 15,000 neural network models.
