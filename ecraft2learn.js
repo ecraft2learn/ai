@@ -843,6 +843,66 @@ window.ecraft2learn =
         sprite.wearCostume(costume);
         ide.hasChangedMedia = true;
     };
+    const post_to_dalle = (type, n, size, name, image_costume, mask_costume, prompt, key, error_callback, callback, b64_json_callback) => {
+        // type is either variations or edits
+        const XHR = new XMLHttpRequest();
+        let costumes = [];
+        let costume_encodings = [];
+        const data_to_costumes = (index, data) => {
+            if (index >= data.length) {
+                invoke_callback(callback, javascript_to_snap(costumes));
+                invoke_callback(b64_json_callback, javascript_to_snap(costume_encodings));
+            } else {
+                if (b64_json_callback instanceof Context) {
+                    costume_encodings.push(data[index].b64_json);
+                }
+                create_costume_from_b64_json(data[index].b64_json, "png", size, size, name + "-" + (index+1), 
+                                             (costume) => {
+                                                 costumes.push(costume);
+                                                 data_to_costumes(index+1, data);
+                                             });
+            }
+        };
+        XHR.addEventListener('load', function(event) {
+            const response = JSON.parse(event.currentTarget.response);
+            if (response.error) {
+                invoke_callback(error_callback, response.error.message);
+            } else {
+                const data = response.data; 
+                data_to_costumes(0, data);
+            }            
+        });
+        if (!error_callback) {
+            error_callback = function (event) {
+                console.error(event);
+            }
+        }
+        XHR.addEventListener('error', function (event) {
+            invoke_callback(error_callback, event);
+        });
+        XHR.open('POST', 
+                 "https://api.openai.com/v1/images/" + type,
+                 true);
+        XHR.setRequestHeader('Authorization', "Bearer " + key);
+        const formData = new FormData();
+        formData.append("n", n);
+        formData.append("size", size + "x" + size);
+        formData.append("response_format", "b64_json");
+        if (type === 'edits') {
+            formData.append("prompt", prompt);
+        }
+        image_costume.contents.toBlob(blob => {
+            formData.append("image", blob, "image.png");
+            if (type === 'edits') {
+                mask_costume.contents.toBlob(blob => {
+                    formData.append("mask", blob, "mask.png");
+                    XHR.send(formData);
+                });
+            } else {
+                XHR.send(formData);   
+            }
+        });              
+    };
     // if not a costume may be interpreted as any video element from the document
     const get_costume_data = (costume) => costume instanceof Costume ? get_image_data(costume.contents) : costume;
     const get_image_data = (canvas) => canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height);
@@ -1987,6 +2047,14 @@ window.ecraft2learn =
     var image_url_of_costume = function (costume) {
         var canvas = costume.contents;
         return canvas.toDataURL('image/png');        
+    };
+    const costume_to_png_text = (costume, callback) => {
+        const canvas = costume.contents;
+        canvas.toBlob(blob => {
+            blob.text().then(text => {
+                invoke_callback(callback, text);
+            });
+        });
     };
     var costume_to_image = function (costume, when_loaded) {
         let image_url = image_url_of_costume(costume);
@@ -3923,6 +3991,8 @@ window.ecraft2learn =
   create_costume_with_style,
   create_costume_from_url,
   create_costume_from_b64_json,
+  image_url_of_costume,
+  post_to_dalle,
   add_costume,
   get_image_features,
   display_paragraph_containing_text_in_guide,
