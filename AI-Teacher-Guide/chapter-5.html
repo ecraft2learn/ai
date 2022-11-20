@@ -603,7 +603,7 @@ With an API key from <a href="https://openai.com" target="_blank">OpenAI</a> one
 to generate costumes (at a cost of 2 US cents each or less).
 Your costume description can include medium (watercolor, photo, stainglass, oil painting, etc.),
 style (like Simpsons, Studio Ghibli, Rembrandt, Picasso, Cezanne, etc.), lighting, viewpoint, etc.
-Learn more about DALLE-2 <a href="https://openai.com/dall-e-2/" target="_blank"">here</a>.
+Learn more about DALL-E-2 <a href="https://openai.com/dall-e-2/" target="_blank"">here</a>.
 </p>
 <figure class = "snap-iframe"
         id = "dalle-2 exercise"
@@ -611,11 +611,11 @@ Learn more about DALLE-2 <a href="https://openai.com/dall-e-2/" target="_blank""
         caption = "A block for generating costumes in response to text">
 </figure>
 <p class="sample-program">
-This <a href="../snap/snap.html?project=dalle-2" target="_blank">DALLE-2 demo project</a>
+This <a href="../snap/snap.html?project=dalle-2" target="_blank">DALL-E-2 demo project</a>
 asks for a description and creates two costumes, adds them to the sprite, and then fades in and out between them.
 It also demonstrates how to replace a color (white in this case) with transparency.
 </p>
-<h4 class="instructions-white" id="dalle-2-variants">Using DALLE-2 to create variants of a costume</h4>
+<h4 class="instructions-white" id="dalle-2-variants">Using DALL-E-2 to create variants of a costume</h4>
 <p class="instructions">
 The <span class = "block-name">Ask DALLE-2 to create ... costumes as variants of costume ...</span> block
 can be used to make a variant of a costume. The width and height of the costume must be the same.
@@ -627,7 +627,7 @@ can be used to make a variant of a costume. The width and height of the costume 
         container_style = "width: 1050px; height: 500px" 
         caption = "A block for generating variant costumes">
 </figure>
-        <h4 class="instructions-white" id="dalle-2-edits">Using DALLE-2 to edit a costume</h4>
+<h4 class="instructions-white" id="dalle-2-edits">Using DALL-E-2 to edit a costume</h4>
 <p class="instructions">
 The <span class = "block-name">Ask DALLE-2 to create ... costumes as edits of costume ...</span> block
 can be used to edit a costume. The width and height of the costume and the "mask" costume must be the same.
@@ -639,7 +639,14 @@ The "mask costume" should have transparent pixels that will be replaced dependin
         edit_mode = "true"
         container_style = "width: 1050px; height: 500px" 
         caption = "A block for editing costumes">
-</figure> 
+</figure>
+<p class="sample-program">
+This <a href="../snap/snap.html?project=edit costume with DALLE" target="_blank">sample project</a>
+combines DALL-E variants and editing blocks
+with <a href="chapter-4.#segmentation">the computer vision segmentation block</a>.
+The project takes a photo of a person, creates a variant, uses segmentation to create a background mask,
+and DALL-E editing to change the background in accord with the inputed prompt.
+</p>
 <h4 class="instructions-white" id="hugging-face">Using language models on Hugging Face</h4>
 <p class="background-information">
 <a href="https://huggingface.co" target="_blank">Hugging Face</a> provides access to over 15,000 neural network models.
