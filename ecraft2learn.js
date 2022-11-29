@@ -347,7 +347,7 @@ window.ecraft2learn =
                 // however they are displayed at the top of the "world"
                 process.topBlock.world = () => world;
             };
-            if (stage.threads.isPaused()) {
+            if (stage.threads.isPaused() && ecraft2learn.paused_callbacks) {
                 ecraft2learn.paused_callbacks =
                     ecraft2learn.paused_callbacks.concat(() => {
                         stage.threads.processes.push(process);
@@ -2397,6 +2397,8 @@ window.ecraft2learn =
                                         const canvas = document.createElement('canvas');
                                         canvas.setAttribute('width',  segmentation.width);
                                         canvas.setAttribute('height', segmentation.height);
+                                        // canvas.width = segmentation.width;
+                                        // canvas.height = segmentation.height;
                                         canvas.getContext('2d').putImageData(segmentation.mask, 0, 0)
                                         segmentation.costume = create_costume(canvas);
                                         // the following takes up lots of resources and isn't needed if one is creating costumes
