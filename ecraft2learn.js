@@ -2397,8 +2397,8 @@ window.ecraft2learn =
                                         const canvas = document.createElement('canvas');
                                         canvas.setAttribute('width',  segmentation.width);
                                         canvas.setAttribute('height', segmentation.height);
-                                        // canvas.width = segmentation.width;
-                                        // canvas.height = segmentation.height;
+                                        canvas.width = segmentation.width;
+                                        canvas.height = segmentation.height;
                                         canvas.getContext('2d').putImageData(segmentation.mask, 0, 0)
                                         segmentation.costume = create_costume(canvas);
                                         // the following takes up lots of resources and isn't needed if one is creating costumes
