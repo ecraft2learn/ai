@@ -830,6 +830,9 @@ window.ecraft2learn =
     };
     const create_costume_from_b64_json = (b64_json, image_format, width, height, name, callback) => {
         // image_format can be png, jpg, etc.
+        if (b64_json.substring(0, 21) === 'data:image/png;base64') {
+            b64_json = b64_json.substring(22);
+        }
         create_costume_from_url("data:image/" + image_format + ";base64," + b64_json, width, height, name, callback);
     };
     const add_costume = function (costume, sprite) {
@@ -1456,6 +1459,7 @@ window.ecraft2learn =
                                       // support window has responded with image_data
                                       // need to create a canvas and draw the image_data on it
                                       let new_canvas = document.createElement('canvas');
+                                      new_canvas.isRetinaEnabled = false;
                                       new_canvas.height = costume_canvas.height;
                                       new_canvas.width  = costume_canvas.width;
                                       new_canvas.getContext('2d').putImageData(message.style_transfer_response.image_data, 0, 0);
