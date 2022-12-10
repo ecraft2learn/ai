@@ -596,7 +596,7 @@ history of your interaction into Snap! blocks. For example,
 <img src="images/lm turtle output.png" class="center">
 <figcaption>How the Stage looks after issuing instructions</figcaption>
 </figure>
-<h4 class="instructions-white" id="dalle-2">Using words to generate costumes</h4>
+<h4 class="instructions-white" id="dalle-2">Using words to generate costumes using DALLE-2</h4>
 <p class="instructions">
 The <span class = "block-name">Ask DALLE-2 to create ... costumes ...</span> block can be used to generate costumes.
 With an API key from <a href="https://openai.com" target="_blank">OpenAI</a> one can use this block
@@ -608,16 +608,44 @@ Learn more about DALL-E-2 <a href="https://openai.com/dall-e-2/" target="_blank"
 <figure class = "snap-iframe"
         id = "dalle-2 exercise"
         container_style = "width: 850px; height: 200px" 
-        caption = "A block for generating costumes in response to text">
+        caption = "A block for generating costumes in response to text using DALLE-2">
 </figure>
 <p class="sample-program">
 This <a href="../snap/snap.html?project=dalle-2" target="_blank">DALL-E-2 demo project</a>
 asks for a description and creates two costumes, adds them to the sprite, and then fades in and out between them.
 It also demonstrates how to replace a color (white in this case) with transparency.
 </p>
+<h4 class="instructions-white" id="stable-diffusion">Using Stable Diffusion to generate a costume</h4>
+<p class="instructions">
+The <span class="block-name">Create a costume described as ...</span> block relies upon the open-source
+<a href="https://stability.ai/" target="_blank">Stable Diffusion text-to-image model</a>.
+Anyone with a Google account can use <a href="" target="_blank">Colab</a> to run a server needed to run the block.
+See <a href="https://docs.google.com/document/d/1pGfLeO5OjbJeXx-NkpQUWBJR-9mTJufcPNRokdM2Gg0/edit?usp=sharing" target="_blank">
+this Stable Diffusion Colab guide</a> for details.
+</p>
+<figure class = "snap-iframe"
+        id = "Stable Diffusion exercise"
+        full_screen = "true"
+        edit_mode = "true"
+        container_style = "width: 1200px; height: 600px" 
+        caption = "A block for generating costumes in response to text using Stable Diffusion">
+</figure> 
+<h4 class="instructions-white" id="stable-diffusion">A generic text-to-image block</h4>
+<p class="instructions">
+The <span class="block-name">Ask ... to create a costume described as ...</span> block
+can use either the <a href="https://stability.ai/" target="_blank">Stable Diffusion text-to-image model</a>
+or <a href="https://openai.com/dall-e-2/" target="_blank"">DALLE-2</a> to generate images.
+</p>
+<figure class = "snap-iframe"
+        id = "Generic text-to-image exercise"
+        full_screen = "true"
+        edit_mode = "true"
+        container_style = "width: 1200px; height: 600px" 
+        caption = "A block for generating costumes in response to text using Stable Diffusion or DALLE-2">
+</figure> 
 <h4 class="instructions-white" id="dalle-2-variants">Using DALL-E-2 to create variants of a costume</h4>
 <p class="instructions">
-The <span class = "block-name">Ask DALLE-2 to create ... costumes as variants of costume ...</span> block
+The <span class="block-name">Ask DALLE-2 to create ... costumes as variants of costume ...</span> block
 can be used to make a variant of a costume. The width and height of the costume must be the same.
 </p>
 <figure class = "snap-iframe"
@@ -643,7 +671,7 @@ The "mask costume" should have transparent pixels that will be replaced dependin
 <p class="sample-program">
 This <a href="../snap/snap.html?project=edit costume with DALLE" target="_blank">sample project</a>
 combines DALL-E variants and editing blocks
-with <a href="chapter-4.#segmentation">the computer vision segmentation block</a>.
+with <a href="chapter-4.html#segmentation">the computer vision segmentation block</a>.
 The project takes a photo of a person, creates a variant, uses segmentation to create a background mask,
 and DALL-E editing to change the background in accord with the inputed prompt.
 </p>
