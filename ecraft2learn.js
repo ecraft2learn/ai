@@ -1571,7 +1571,7 @@ window.ecraft2learn =
                                   'Loaded',
                                   () => {
                                       let configuration = {model_name: name,
-                                                           hidden_layer_sizes: snap_to_javascript(layers),
+                                                           hidden_layer_sizes: snap_to_javascript(layers, true),
                                                            optimizer,
                                                            activation: activation_function_name,
                                                            loss_function,
