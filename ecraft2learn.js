@@ -1706,6 +1706,21 @@ window.ecraft2learn =
                                       invoke_callback(callback, javascript_to_snap(message.model_exists));
                                   });
     };
+    const get_model_layer = (model_name, index, callback) => {
+        record_callbacks(callback);
+        request_of_support_window('tensorflow.js',
+                                  'Loaded',
+                                  () => {
+                                      return {get_layer_data: {model_name, index}};
+                                  },
+                                  (message) => {
+                                      return typeof message.layer_data === 'object' &&
+                                             message.model_name === model_name;
+                                  },
+                                  (message) => {
+                                      invoke_callback(callback, javascript_to_snap(message.layer_data));
+                                  });
+    };
     const is_model_ready_for_prediction = (model_name, callback) => {
         // now if a model exists then it is ready for prediction
         // if not yet trained the weights will be random but still capable of "predicting"
@@ -4012,6 +4027,7 @@ window.ecraft2learn =
   is_model_ready_for_prediction, // kept for backwards compatibility
   does_model_exist,
   predictions_from_model,
+  get_model_layer,
   save_project_to_localstorage,
   load_project_from_localstorage,
   load_tensorflow_model_from_URL,

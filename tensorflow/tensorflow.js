@@ -68,11 +68,11 @@ const set_data = (model_name, kind, value, callback, permitted_labels, minimum_n
                                                                            false); 
 //                                                                            // consider making this optional 
 //                                                                            kind === 'training');
-                if (values_are_non_numeric_strings) {
+                // if (values_are_non_numeric_strings) {
                     data[model_name].categories = labels;
-                } else {
-                    data[model_name].categories = labels; // was categories_for_multiple_output but not used
-                }
+                // } else {
+                //     data[model_name].categories = labels; // was categories_for_multiple_output but not used
+                // }
                 if (kind ==='training') {
                     data[model_name].class_weights = class_weights;
                 }
@@ -302,6 +302,9 @@ const ensure_last_layer_right_size = (model, data) => {
     }   
 };
 
+const get_model_layer = (model_name, index) =>
+    tensorflow.get_model(model_name).getLayer(null,index).getWeights()[0].arraySync();
+    
 // following no longer used and besides better to normalize using mean and variance
 // const normalize = (tensor) => {
 //     // divides all by max-min value
@@ -1932,6 +1935,11 @@ const receive_message =
                     });
                 });
             };
+        } else if (typeof message.get_layer_data !== 'undefined') {
+            let {model_name, index} = message.get_layer_data;
+            let model = models[name];
+            event.source.postMessage({layer_data: get_model_layer(model_name, index),
+                                      model_name: model_name}, "*");
         } else if (typeof message.does_model_exist !== 'undefined') {
             let name = message.does_model_exist.model_name;
             let model = models[name];
