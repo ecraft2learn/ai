@@ -1,1 +1,0 @@
-Files from http://www.danderm-pdv.is.kkh.dk/atlas/index.html
