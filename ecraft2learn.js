@@ -3957,6 +3957,13 @@ window.ecraft2learn =
       };
       ask_for_poses();
   },
+  full_screen: (flag) => {
+      if (flag) {
+          document.body.requestFullscreen();
+      } else {
+          document.exitFullscreen();
+      }
+  },
   add_example_to_knn_classifier,
   classify_using_knn_classifier,
   clear_or_dispose_knn_classifier,
