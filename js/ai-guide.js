@@ -308,11 +308,10 @@ window.addEventListener(
 //                       window.location.protocol == 'file:' || 
 //                       window.location.hostname  === 'localhost' ||
 //                       window.location.hostname  === '127.0.0.1';
-                 let iframe_src = //local_web_server ? 
-                                  window.location.origin + "/ai/snap/snap.html?project=" + name + search + window.location.hash; 
-                                  //snap_url + "#present:Username=toontalk&ProjectName=" + name + search;                
+                 let iframe_src_without_hash = window.location.origin + "/ai/snap/snap.html?project=" + name + search;
+                 let iframe_src = iframe_src_without_hash + window.location.hash;                
                  if (full_screen !== 'true' || edit_mode === 'true') {
-                     iframe_src += "&editMode";
+                     iframe_src = iframe_src_without_hash + "&editMode";
                  }
                  iframe.src = iframe_src;
                  iframe.setAttribute('scrolling', 'no');
