@@ -1760,7 +1760,7 @@ const receive_message =
                     throw new Error("Model name must be text. " + model_name + " is a " + typeof model_name);
                 }
                 options.class_names = get_data(model_name, 'categories');
-                if (options.loss_function === true) {
+                if (options.loss_function === true || options.loss_function === '') {
                     options.loss_function = default_loss_function(options.class_names);
                 }
                 options.loss_function = loss_function_named(options.loss_function);
