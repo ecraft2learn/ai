@@ -1,0 +1,17 @@
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder"></script>
+<script>
+    // Load the model.
+use.load().then(model => {
+  // Embed an array of sentences.
+  const sentences = [
+    'This is a sentence',
+    'THIS IS A SENTENCE'
+  ];
+  model.embed(sentences).then(embeddings => {
+    // `embeddings` is a 2D tensor consisting of the 512-dimensional embeddings for each sentence.
+    // So in this example `embeddings` has the shape [2, 512].
+    console.log(embeddings.arraySync());
+  });
+});
+</script>
