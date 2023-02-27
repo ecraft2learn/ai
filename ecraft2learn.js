@@ -4328,7 +4328,8 @@ window.ecraft2learn =
       if (!(sentences instanceof List)) {
           throw new Error("Sentence features expected a list of sentences. Not " + sentences.constructor.name);;
       }
-      const sentences_as_javascript = sentences.asArray();
+      let sentences_as_javascript = sentences.asArray();
+      sentences_as_javascript = sentences_as_javascript.map(sentence => sentence.toLowerCase()); // see https://github.com/tensorflow/tfjs/issues/7418
       if (sentences_as_javascript.length === 0) {
           throw new Error("Sentence features does not accept empty lists.");
       } 
