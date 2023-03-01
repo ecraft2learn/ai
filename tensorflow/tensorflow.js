@@ -676,6 +676,7 @@ const optimize_hyperparameters = (options) => {
        const [xs, ys] = get_tensors(model_name, 'training');
        const validation_tensors = get_tensors(model_name, 'validation'); // undefined if no validation data
        const test_tensors = get_tensors(model_name, 'test');
+       options.model_name = model_name;
        optimize(xs, ys, validation_tensors, test_tensors, options)
               .then((result) => {
                   xs.dispose();
@@ -767,7 +768,7 @@ const optimize = async (xs, ys, validation_tensors, test_tensors, options) => {
     }
     const create_and_train_model = async (options, {xs, ys}) => {
         let {layers, optimization_method, loss_function, epochs, learning_rate, stop_if_no_progress_for_n_epochs,
-             dropout_rate, validation_split, activation, shuffle, batch_size} = options;
+             dropout_rate, validation_split, activation, shuffle, batch_size, model_name} = options;
         if (create_and_train_model.stopped_prematurely) {
             return;
         }
@@ -1030,6 +1031,7 @@ const optimize = async (xs, ys, validation_tensors, test_tensors, options) => {
         space.layers = hpjs.choice(choices);
     }
     space.stop_if_no_progress_for_n_epochs = stop_if_no_progress_for_n_epochs;
+    space.model_name = model_name;
     try {
         const result = await hpjs.fmin(create_and_train_model,
                                        space,
