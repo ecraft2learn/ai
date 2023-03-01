@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+<head>
+	<title>Machine Learning for 'Rating Predictor'</title>
+	<meta charset='utf-8'>
+	<link href="/ai/css/ai-teacher-guide.css" rel="stylesheet">
+	<link rel="icon" type="image/png" href="/ai/images/eCraft2Learn-Favicon.png" />
+	</head>
+<body style="background-color: white;font-size: 1.0em;">
+<script src="/ai/js/translate.js"></script>
+<h4>Rating Predictor</h4>
+<p>
+Given a prompt this generates generates iamges that the user rates by clicking on a star.
+The generator can be <a href="https://docs.google.com/document/d/1pGfLeO5OjbJeXx-NkpQUWBJR-9mTJufcPNRokdM2Gg0/edit?usp=sharing" target="_blank">a Stable Diffusion server</a> or DALL-E
+(requires an API key from OpenAi.com).
+</p>
+<h4>Machine learning</h4>
+<p>
+After you have rated several images (100 works well, maybe less)
+you can train the computer to predict how you would rate a new images you've never seen.
+</p>
+<h4>Keyboard shortcuts</h4>
+<ul>
+<li>
+<b style="color:red;">L</b>earning (when you think you have rated enough and want to start training (or re-start training from scratch))
+</li>
+<li>
+<b style="color:red;">A</b>dditional learning (when you have already done 'Learning' but want to do more training)
+</li>
+<li>
+<b style="color:red;">R</b>ating (after training has finished you can rate either the best or worst of a number of generated images)
+</li>
+<li>
+<b style="color:red;">S</b>earch (repeats training with different size models and techniques)
+</li>
+<li>
+<b style="color:red;">I</b>nspect (opens interface where you see training progress, do experiments, and save your model)
+</ul>
+<div style='display: flex; align-items: center; justify-content: center;'>
+<button class='generic-button'
+        onclick='window.remove_me()'>
+  <b style='font-size: 24px'>CLOSE</b>
+</button>
+</div>
+<script>
+window.remove_me = () => {
+	window.parent.postMessage('Remove noisy-polygon-help', '*');
+};
+</script>
+</body>
+</html>
