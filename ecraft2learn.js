@@ -1110,14 +1110,14 @@ window.ecraft2learn =
           train(options);
       }
   };
-  const noisy_polygon_help = () => {
+  const image_rating_help = (URL, topic) => {
       const iframe = document.createElement('iframe');
       iframe.id = 'noisy-polygon-help';
-      iframe.title = "Machine Learning for 'Noisy Polygons'";
+      iframe.title = "Machine Learning for " + topic;
       iframe.width = 720;
       iframe.height = 640;
       iframe.style = 'z-index: 99; position: absolute';
-      iframe.src = 'https://ecraft2learn.github.io/ai/noisy-polygons/index.html';
+      iframe.src = relative_to_absolute_url(URL);
       document.body.insertBefore(iframe, document.body.firstChild);
       window.addEventListener('message', event => {
           if (event.data === 'Remove noisy-polygon-help') {
@@ -1126,7 +1126,12 @@ window.ecraft2learn =
           }
       });
   };
-
+  const noisy_polygon_help = () => {
+      image_rating_help('noisy-polygons/index.html', 'noisy polygons');
+  };
+  const rating_predictor_help = () => {
+      image_rating_help('noisy-polygons/rating-predictor.html', 'image rating predictor');
+  };
   const create_error_handler = (error_handler) => 
       (message) => {
           if (message.error_message) {
@@ -4047,6 +4052,7 @@ window.ecraft2learn =
   replace_with_best_model,
   normalize,
   noisy_polygon_help,
+  rating_predictor_help,
   display_support_window: open_support_window,
   image_class,
   inform,
