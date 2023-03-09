@@ -602,10 +602,10 @@ SnapTranslator.dict.pt_BR = {
         '%fun de %n',
     'pick random %n to %n':
         'escolha um valor aleatório entre %n e %n',
-    '%b and %b':
-        '%b e %b',
-    '%b or %b':
-        '%b ou %b',
+    'and':
+        'e',
+    'or':
+        'ou',
     'not %b':
         'não %b',
     'true':
@@ -632,6 +632,24 @@ SnapTranslator.dict.pt_BR = {
         '%s é um/uma %typ',
     'is %s identical to %s ?':
         '%s é idêntico a %s',
+    'is %all== ?':
+        '%all== ?',
+    'identical to':
+        'é idêntico a',
+    'all identical':
+        'all identical',
+    'all <':
+        'all <',
+    'all >':
+        'all >',
+    'all \u2264':
+        'all \u2264',
+    'all \u2265':
+        'all \u2265',
+    'all =':
+        'all =',
+    'neighbors \u2260':
+        'neighbors \u2260',
 
     'type of %s':
         'o tipo de %s',
@@ -1418,7 +1436,7 @@ SnapTranslator.dict.pt_BR = {
     'last':
         'último item',
     'any':
-        'qualquer (aleatório)',
+        'qualquer',
 
     // em falta no ficheiro lang-de.js
     'costume name':

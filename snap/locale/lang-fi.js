@@ -540,10 +540,10 @@ SnapTranslator.dict.fi = {
         '%fun %n',
     'pick random %n to %n':
         'arvo satunnaisluku %n .. %n',
-    '%b and %b':
-        '%b ja %b',
-    '%b or %b':
-        '%b tai %b',
+    'and':
+        'ja',
+    'or':
+        'tai',
     'not %b':
         'ei %b',
     'true':
@@ -568,8 +568,24 @@ SnapTranslator.dict.fi = {
         'Unicode-arvoa %n vastaava merkki',
     'is %s a %typ ?':
         'onko %s %typ ?',
-    'is %s identical to %s ?':
-        'onko %s sama kuin %s ?',
+    'is %all== ?':
+        'onko %all== ?',
+    'identical to':
+        'sama kuin',
+    'all identical':
+        'all identical',
+    'all <':
+        'all <',
+    'all >':
+        'all >',
+    'all \u2264':
+        'all \u2264',
+    'all \u2265':
+        'all \u2265',
+    'all =':
+        'all =',
+    'neighbors \u2260':
+        'neighbors \u2260',
 
     'type of %s':
         '%s:n tyyppi',
@@ -1277,6 +1293,6 @@ SnapTranslator.dict.fi = {
     // list indices
     'last':
         'viimeinen',
-    'any':
+    'random':
         'mik\u00e4 tahansa'
 };

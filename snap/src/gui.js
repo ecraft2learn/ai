@@ -86,11 +86,11 @@ BlockVisibilityDialogMorph, ThreadManager, isString, SnapExtensions*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.gui = '2022-February-01';
+modules.gui = '2023-March-05';
 
 // Declarations
 
-var SnapVersion = '8.1.0';
+var SnapVersion = '8.2.1';
 
 var IDE_Morph;
 var ProjectDialogMorph;
@@ -224,7 +224,7 @@ IDE_Morph.prototype.setDefaultDesign();
 
 // IDE_Morph instance creation:
 
-function IDE_Morph(config = { autofill: true }) {
+function IDE_Morph(config = {}) {
     this.init(config);
 }
 
@@ -234,8 +234,10 @@ function IDE_Morph(config = { autofill: true }) {
     creating an instance. This is still very much under construction. Currently
     the following options are available:
 
+        noAutoFill      bool, do not let the IDE fill the whole World canvas
         path            str, path to additional resources (translations)
         load:           str, microworld file name (xml)
+        onload:         callback, called when the microworld is loaded
         design:         str, currently "flat" (bright) or "classic" (dark)
         border:         num, pixels surrounding the IDE, default is none (zero)
         lang:           str, translation to be used, e.g. "de" for German
@@ -307,7 +309,7 @@ IDE_Morph.prototype.init = function (config) {
     this.embedOverlay = null;
     this.isEmbedMode = false;
 
-    this.isAutoFill = !!config.autofill;
+    this.isAutoFill = !config.noAutoFill;
     this.isAppMode = false;
     this.isSmallStage = false;
     this.filePicker = null;
@@ -755,6 +757,9 @@ IDE_Morph.prototype.applyConfigurations = function () {
                         }
                         this.hasChangedMedia = true;
                         this.applyPaneHidingConfigurations();
+                        if (cnf.onload) {
+                            cnf.onload();
+                        }
                     }
                 );
             } else {
@@ -764,6 +769,10 @@ IDE_Morph.prototype.applyConfigurations = function () {
                 this.applyPaneHidingConfigurations();
             }
         };
+
+    if (!Object.keys(cnf).length) {
+        return;
+    }
 
     // design
     if (cnf.design) {
@@ -1364,6 +1373,7 @@ IDE_Morph.prototype.createControlBar = function () {
                     (myself.isSmallStage ? myself.stageRatio : 1) -
                     (myself.config.border || 0)
             );
+            x = Math.max(x, this.left());
         }
         [stageSizeButton, appModeButton].forEach(button => {
                 x += padding;
@@ -2649,12 +2659,9 @@ IDE_Morph.prototype.setExtent = function (point) {
 
     // determine the minimum dimensions making sense for the current mode
     if (this.isAppMode) {
-        if (this.isEmbedMode) {
-            minExt = new Point(100, 100);
-        } else {
-            minExt = this.stage.dimensions.add(
-                this.controlBar.height() + 10
-            );
+        minExt = new Point(100, 100);
+        if (!this.isEmbedMode) {
+            minExt = minExt.add(this.controlBar.height() + 10);
         }
     } else if (cnf.noSprites) {
         minExt = new Point(100, 100);
@@ -2669,18 +2676,24 @@ IDE_Morph.prototype.setExtent = function (point) {
     }
     ext = point.max(minExt);
 
-    // adjust stage ratio if necessary
-    if (!cnf.noSprites) {
-        maxWidth = ext.x -
-            (200 + this.spriteBar.tabBar.width() + (this.padding * 2));
-        minWidth = SpriteIconMorph.prototype.thumbSize.x * 3;
-        maxHeight = (ext.y - SpriteIconMorph.prototype.thumbSize.y * 3.5);
-        minRatio = minWidth / this.stage.dimensions.x;
-        maxRatio = Math.min(
-            (maxWidth / this.stage.dimensions.x),
-            (maxHeight / this.stage.dimensions.y)
-        );
-        this.stageRatio = Math.min(maxRatio, Math.max(minRatio, this.stageRatio));
+    if (!this.isAppMode) {
+        // in edit mode adjust stage ratio if necessary
+        // (in presentation mode this is already handled separately)
+        if (!cnf.noSprites) {
+            maxWidth = ext.x -
+                (200 + this.spriteBar.tabBar.width() + (this.padding * 2));
+            minWidth = SpriteIconMorph.prototype.thumbSize.x * 3;
+            maxHeight = (ext.y - SpriteIconMorph.prototype.thumbSize.y * 3.5);
+            minRatio = minWidth / this.stage.dimensions.x;
+            maxRatio = Math.min(
+                (maxWidth / this.stage.dimensions.x),
+                (maxHeight / this.stage.dimensions.y)
+            );
+            this.stageRatio = Math.min(
+                maxRatio,
+                Math.max(minRatio,this.stageRatio)
+            );
+        }
     }
 
     // apply
@@ -6447,7 +6460,9 @@ IDE_Morph.prototype.switchToScene = function (
     if (!scene || !scene.stage) {
         return;
     }
-    this.siblings().forEach(
+    this.siblings().filter(
+        morph => !morph.nag
+    ).forEach(
         morph => morph.destroy()
     );
     this.scene.captureGlobalSettings();
@@ -7948,10 +7963,10 @@ IDE_Morph.prototype.blocksLibraryXML = function (
         locals = definitions.filter(def => !def.isGlobal),
         glbStr = globals.length ? this.serializer.serialize(globals, true) : '',
         locStr = locals.length ? this.serializer.serialize(locals, true) : '',
-        dtaStr = dataFrame && dataFrame.names().length ?
+        dtaStr = dataFrame && dataFrame.names(true).length ?
             this.serializer.serialize(dataFrame, true)
             : '',
-        ldtStr = localData && localData.names().length ?
+        ldtStr = localData && localData.names(true).length ?
             this.serializer.serialize(localData, true)
             : '',
         cats = moreCategories || [],
@@ -8006,7 +8021,7 @@ IDE_Morph.prototype.showMessage = function (message, secs) {
 };
 
 IDE_Morph.prototype.inform = function (title, message) {
-    new DialogBoxMorph().inform(
+    return new DialogBoxMorph().inform(
         title,
         localize(message),
         this.world()
@@ -8058,6 +8073,7 @@ IDE_Morph.prototype.warnAboutIE = function () {
         dlg.addBody(txt);
         dlg.fixLayout();
         dlg.popUp(this.world());
+        dlg.nag = true;
     }
 };
 
@@ -8081,7 +8097,7 @@ IDE_Morph.prototype.warnAboutDev = function () {
             'even future official versions!\n\n' +
             'visit https://snap.berkeley.edu/run\n' +
             'for the official Snap! installation.'
-    );
+    ).nag = true;
 };
 
 // ProjectDialogMorph ////////////////////////////////////////////////////

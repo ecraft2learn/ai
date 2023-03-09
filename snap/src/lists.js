@@ -65,7 +65,7 @@ Context, ZERO, WHITE*/
 
 // Global settings /////////////////////////////////////////////////////
 
-modules.lists = '2023-January-31';
+modules.lists = '2023-February-27';
 
 var List;
 var ListWatcherMorph;
@@ -129,6 +129,11 @@ var ListWatcherMorph;
     crossproduct()          - answer a new list of all possible sublist tuples
     query()                 - answer a part of a list or multidimensionel struct
     slice()                 - same as query() turning negative indices into slices
+
+    analysis:
+    ---------
+    distribution()          - answer the occurrence count for each element
+
 */
 
 // List instance creation:
@@ -875,6 +880,30 @@ List.prototype.strideTranspose = function () {
 List.prototype.reversed = function () {
     // only for arrayed lists
     return new List(this.itemsArray().slice().reverse());
+};
+
+// List analysis
+
+List.prototype.distribution = function () {
+    // return a table representing a dictionary indicating the occurrence count
+    // of each unique elements
+    // note: for compound data this method uses identity rather than equqlity
+    var dict = new Map(),
+        data = this.itemsArray(),
+        len = data.length,
+        isNum = thing => parseFloat(thing) === +thing,
+        item, i;
+    for (i = 0; i < len; i += 1) {
+        item = isNum(data[i]) ? data[i].toString() : data[i];
+        if (dict.has(item)) {
+            dict.set(item, dict.get(item) + 1);
+        } else {
+            dict.set(item, 1);
+        }
+    }
+    return new List([...dict].sort((a, b) => b[1] - a[1])
+        .map(pair => new List(pair))
+    );
 };
 
 // List conversion:

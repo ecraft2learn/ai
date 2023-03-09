@@ -65,7 +65,7 @@ StagePickerMorph, CustomBlockDefinition*/
 
 /*jshint esversion: 11, bitwise: false, evil: true*/
 
-modules.threads = '2023-January-30';
+modules.threads = '2023-February-27';
 
 var ThreadManager;
 var Process;
@@ -788,7 +788,7 @@ Process.prototype.evaluateContext = function () {
     if (exp instanceof ArgLabelMorph) {
         return this.evaluateArgLabel(exp);
     }
-    if (exp instanceof ArgMorph || exp.bindingID) {
+    if (exp instanceof ArgMorph || (exp && exp.bindingID)) {
         return this.evaluateInput(exp);
     }
     if (exp instanceof BlockMorph) {
@@ -808,8 +808,8 @@ Process.prototype.evaluateBlock = function (block, argCount) {
     	selector = block.selector;
 
     // check for special forms
-    if (selector === 'reportOr' ||
-            selector ===  'reportAnd' ||
+    if (selector === 'reportVariadicOr' ||
+            selector ===  'reportVariadicAnd' ||
             selector === 'reportIfElse' ||
             selector === 'doReport') {
         if (this.isCatchingErrors) {
@@ -862,7 +862,9 @@ Process.prototype.doApplyExtension = function (prim, args) {
 Process.prototype.reportApplyExtension = function (prim, args) {
     var ext = SnapExtensions.primitives.get(prim);
     if (isNil(ext)) {
-        throw new Error(localize('missing / unspecified extension') + ': ' + prim);
+        throw new Error(
+            localize('missing / unspecified extension') + ': ' + prim
+        );
     }
     return ext.apply(
         this.blockReceiver(),
@@ -872,58 +874,92 @@ Process.prototype.reportApplyExtension = function (prim, args) {
 
 // Process: Special Forms Blocks Primitives
 
-Process.prototype.reportOr = function (block) {
-    var inputs = this.context.inputs;
+Process.prototype.reportVariadicOr = function (block) {
+    this.reportAssociativeBool(
+        block,
+        this.reportBasicOr, // base op
+        true // short-circuit return value
+    );
+};
 
+Process.prototype.reportVariadicAnd = function (block) {
+    this.reportAssociativeBool(
+        block,
+        this.reportBasicAnd, // base op
+        false // short-circuit return value
+    );
+};
+
+Process.prototype.reportAssociativeBool = function (block, baseOp, short) {
+    // private - evaluate special form variadic associative Boolean operations
+    // such as AND, OR
+    // baseOp - dyadic base operation (AND, OR)
+    // short - value at which to immediately return (short circuit)
+    var inputs = this.context.inputs,
+        tests = block.inputs()[0],
+        inline = tests instanceof MultiArgMorph,
+        outer = this.context.outerContext,
+        acc = this.context.accumulator,
+        check = slot => {
+            if (slot instanceof List || typeof slot === 'boolean') {
+                inputs.push(slot);
+            } else {
+                this.pushContext();
+                this.evaluate(slot);
+            }
+        };
     if (inputs.length < 1) {
-        this.evaluateNextInput(block);
+        if (inline) {
+            acc = this.context.accumulator = {
+                slots: tests.inputs(),
+                len: tests.inputs().length,
+                pc: 1
+            };
+            this.pushContext(acc.slots[0], outer);
+        } else { // tests is an ArgLabelMorph
+            this.pushContext(tests.argMorph(), outer);
+        }
     } else if (inputs.length === 1) {
-        // this.assertType(inputs[0], 'Boolean');
-        if (inputs[0] === true) {
-            if (this.flashContext()) {return; }
-            this.returnValueToParentContext(true);
-            this.popContext();
-        } else {
-            this.evaluateNextInput(block);
+        if (acc) { // inline - acc has been initialized
+            if (inputs[0] === short) {
+                if (this.flashContext()) {return; }
+                this.returnValueToParentContext(short);
+                this.popContext();
+            } else if (acc.pc >= acc.len) {
+                if (this.flashContext()) {return; }
+                this.returnValueToParentContext(
+                    inputs[0] === null ? !short : inputs[0]
+                );
+                this.popContext();
+            } else {
+                if (inline) {
+                    this.pushContext(acc.slots[acc.pc], outer);
+                } else {
+                    check(acc.slots[acc.pc]);
+                }
+            }
+        } else { // "with input list" variant
+            this.context.accumulator = {
+                slots: inputs[0].itemsArray(),
+                len: inputs[0].length(),
+                pc: 1
+            };
+            inputs.pop();
+            check(this.context.accumulator.slots[0]);
         }
     } else {
-        // this.assertType(inputs[1], 'Boolean');
         if (this.flashContext()) {return; }
-        // this.returnValueToParentContext(inputs[1] === true);
-        this.returnValueToParentContext(
-            this.hyper(this.reportBasicOr, inputs[0], inputs[1])
-        );
-        this.popContext();
+        inputs.push(this.hyper(
+            baseOp,
+            inputs.pop(),
+            inputs.pop()
+        ));
+        acc.pc += 1;
     }
 };
 
 Process.prototype.reportBasicOr = function (a, b) {
     return a || b;
-};
-
-Process.prototype.reportAnd = function (block) {
-    var inputs = this.context.inputs;
-
-    if (inputs.length < 1) {
-        this.evaluateNextInput(block);
-    } else if (inputs.length === 1) {
-        // this.assertType(inputs[0], 'Boolean');
-        if (!inputs[0]) {
-            if (this.flashContext()) {return; }
-            this.returnValueToParentContext(false);
-            this.popContext();
-        } else {
-            this.evaluateNextInput(block);
-        }
-    } else {
-        // this.assertType(inputs[1], 'Boolean');
-        if (this.flashContext()) {return; }
-        // this.returnValueToParentContext(inputs[1] === true);
-        this.returnValueToParentContext(
-            this.hyper(this.reportBasicAnd, inputs[0], inputs[1])
-        );
-        this.popContext();
-    }
 };
 
 Process.prototype.reportBasicAnd = function (a, b) {
@@ -1114,7 +1150,7 @@ Process.prototype.evaluateNextInputSet = function (element) {
     // the idea behind this optimization is to keep evaluating the inputs
     // while we know for sure that we aren't going to yield anyway
     var args = element.inputs(),
-        sel = this.context.expression.selector,
+        sel = this.context.expression?.selector,
         outer = this.context.outerContext, // for tail call elimination
         exp, ans;
 
@@ -1328,8 +1364,8 @@ Process.prototype.doRun = function (context, args) {
 
 Process.prototype.evaluate = function (
     context,
-    args,
-    isCommand
+    args = new List(),
+    isCommand = false
 ) {
     if (!context) {
         return this.returnValueToParentContext(null);
@@ -2003,11 +2039,14 @@ Process.prototype.doInsertInList = function (element, index, list) {
     if (index === '') {
         return null;
     }
-    if (this.inputOption(index) === 'any') {
-        idx = this.reportBasicRandom(1, list.length() + 1);
-    }
-    if (this.inputOption(index) === 'last') {
-        idx = list.length() + 1;
+    if (index instanceof Array) {
+        if (index[0] === 'any') {
+            idx = this.reportBasicRandom(1, list.length() + 1);
+        } else if (index[0] === 'last') {
+            idx = list.length() + 1;
+        } else {
+            idx = list.length() + 1;
+        }
     }
     if (parseFloat(idx) !== +idx) { // treat as alphanumerical index
         return list.bind(idx, element);
@@ -2025,11 +2064,14 @@ Process.prototype.doReplaceInList = function (index, list, element) {
     if (index === '') {
         return null;
     }
-    if (this.inputOption(index) === 'any') {
-        idx = this.reportBasicRandom(1, list.length());
-    }
-    if (this.inputOption(index) === 'last') {
-        idx = list.length();
+    if (index instanceof Array) {
+        if (index[0] === 'any') {
+            idx = this.reportBasicRandom(1, list.length() + 1);
+        } else if (index[0] === 'last') {
+            idx = list.length();
+        } else {
+            idx = 0;
+        }
     }
     list.bind(idx, element);
 };
@@ -2058,11 +2100,14 @@ Process.prototype.reportListItem = function (index, list) {
     if (index === '') {
         return '';
     }
-    if (this.inputOption(index) === 'any') {
-        return list.at(this.reportBasicRandom(1, list.length()));
-    }
-    if (this.inputOption(index) === 'last') {
-        return list.at(list.length());
+    if (index instanceof Array) {
+        if (index[0] === 'random') {
+            return list.at(this.reportBasicRandom(1, list.length()));
+        }
+        if (index[0] === 'last') {
+            return list.at(list.length());
+        }
+        return '';
     }
     if (index instanceof List && this.enableHyperOps) {
         return list.query(index);
@@ -2122,6 +2167,9 @@ Process.prototype.reportListAttribute = function (choice, list) {
     case 'transpose':
         this.assertType(list, 'list');
         return list.transpose();
+    case 'distribution':
+        this.assertType(list, 'list');
+        return list.distribution();
     case 'reverse':
         this.assertType(list, 'list');
         return list.reversed();
@@ -3307,7 +3355,7 @@ Process.prototype.doPlaySoundUntilDone = function (name) {
     }
     if (name === null || this.context.activeAudio.ended
             || this.context.activeAudio.terminated) {
-        if (this.context.activeAudio) {
+        if (this.context.activeAudio && this.context.activeAudio.remove) {
             this.context.activeAudio.remove();
         }
         return null;
@@ -4279,6 +4327,82 @@ Process.prototype.reportBasicMax = function (a, b) {
     return x > y ? x : y;
 };
 
+// Process logic primitives - hyper-variadic applicative order
+
+Process.prototype.reportVariadicLessThan = function (items) {
+    return this.reportSequentialComparison(
+        (a, b) => this.reportLessThan(a, b),
+        items
+    );
+};
+
+Process.prototype.reportVariadicGreaterThan = function (items) {
+    return this.reportSequentialComparison(
+        (a, b) => this.reportGreaterThan(a, b),
+        items
+    );
+};
+
+Process.prototype.reportVariadicLessThanOrEquals = function (items) {
+    return this.reportSequentialComparison(
+        (a, b) => this.reportLessThanOrEquals(a, b),
+        items
+    );
+};
+
+Process.prototype.reportVariadicGreaterThanOrEquals = function (items) {
+    return this.reportSequentialComparison(
+        (a, b) => this.reportGreaterThanOrEquals(a, b),
+        items
+    );
+};
+
+Process.prototype.reportVariadicEquals = function (items) {
+    return this.reportSequentialComparison(
+        (a, b) => this.reportEquals(a, b),
+        items,
+        true // not hyper
+    );
+};
+
+Process.prototype.reportVariadicNotEquals = function (items) {
+    return this.reportSequentialComparison(
+        (a, b) => this.reportNotEquals(a, b),
+        items,
+        true // not hyper
+    );
+};
+
+Process.prototype.reportVariadicIsIdentical = function (items) {
+    return this.reportSequentialComparison(
+        (a, b) => this.reportIsIdentical(a, b),
+        items,
+        true // not hyper
+    );
+};
+
+Process.prototype.reportSequentialComparison = function (op, items, notHyper) {
+    // private - apply a comparison op to a sequence of values
+    var len = items.length(),
+        step, result, i;
+    if (len < 2) {return true; }
+    for (i = 1; i < len; i += 1) {
+        step = op(items.at(i), items.at(i + 1));
+        if (isNil(result)) {
+            result = step;
+        } else if (notHyper) {
+            result = result && step;
+        } else {
+            result = this.hyper(
+                (a, b) => a && b,
+                result,
+                step
+            );
+        }
+    }
+    return result;
+};
+
 // Process logic primitives - hyper where applicable
 
 Process.prototype.reportLessThan = function (a, b) {
@@ -4556,7 +4680,11 @@ Process.prototype.reportBasicLetter = function (idx, string) {
 
 Process.prototype.reportStringSize = function (data) {
     return this.hyper(
-        str => isNil(data) ? 0 : Array.from(str.toString()).length,
+        str => isString(str) ? str.length
+                : (parseFloat(str) === +str ? str.toString().length : 0),
+        // proposed scheme by Michael to address text with emojis, has
+        // memory issue when the stringd get very large:
+        // str => isNil(data) ? 0 : Array.from(str.toString()).length,
         data
     );
 };
@@ -4571,7 +4699,8 @@ Process.prototype.reportUnicode = function (string) {
             return string.map(each => this.reportUnicode(each));
         }
         str = isNil(string) ? '\u0000' : string.toString();
-        unicodeList = Array.from(str);
+        // unicodeList = Array.from(str); // emoji-friendly version
+        unicodeList = str.split('');
         if (unicodeList.length > 1) {
             return this.reportUnicode(new List(unicodeList));
         }
@@ -4651,7 +4780,8 @@ Process.prototype.reportBasicTextSplit = function (string, delimiter) {
         break;
     case '':
     case 'letter':
-        return new List(Array.from(str));
+        // return new List(Array.from(str)); // proposed by Michael for emojis
+        return new List(str.split(''));
     case 'csv':
         return this.parseCSV(string);
     case 'json':
@@ -8602,9 +8732,9 @@ JSCompiler.prototype.compileExpression = function (block) {
 
     // first check for special forms and infix operators
     switch (selector) {
-    case 'reportOr':
+    case 'reportVariadicOr':
         return this.compileInfix('||', inputs);
-    case 'reportAnd':
+    case 'reportVariadicAnd':
         return this.compileInfix('&&', inputs);
     case 'reportIfElse':
         return '(' +
@@ -8773,7 +8903,7 @@ JSCompiler.prototype.compileInput = function (inp) {
             return 'new List([' + this.compileInputs(value) + '])';
         default:
             if (value instanceof Array) {
-                return '"' + this.escape(value[0]) + '"';
+                return '["' + this.escape(value[0]) + '"]';
             }
             throw new Error(
                 'compiling does not yet support\n' +

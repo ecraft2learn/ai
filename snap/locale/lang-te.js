@@ -536,10 +536,10 @@ SnapTranslator.dict.te = {
         '%fun లో %n',
     'pick random %n to %n':
         '%n నుండి %n ను యాదృచ్ఛికంగా ఎంచుకోండి',
-    '%b and %b':
-        '%b మరియ %b',
-    '%b or %b':
-        '%b లేదా %b',
+    'and':
+        'మరియ',
+    'or':
+        'లేదా',
     'not %b':
         'లేద %b',
     'true':
@@ -566,6 +566,24 @@ SnapTranslator.dict.te = {
         'ist %s ein(e) %typ ?',
     'is %s identical to %s ?':
         'ist %s identisch mit %s ?',
+    'is %all== ?':
+        'is %all== ?',
+    'identical to':
+        'identical to',
+    'all identical':
+        'all identical',
+    'all <':
+        'all <',
+    'all >':
+        'all >',
+    'all \u2264':
+        'all \u2264',
+    'all \u2265':
+        'all \u2265',
+    'all =':
+        'all =',
+    'neighbors \u2260':
+        'neighbors \u2260',
 
     'type of %s':
         'Typ von %s',
@@ -1278,6 +1296,6 @@ SnapTranslator.dict.te = {
     // list indices
     'last':
         'letztes',
-    'any':
-        'beliebiges'
+    'random':
+        'random'
 };
