@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Student Assignments</title>
+    <script>
+      function assignStudents() {
+        // Get the list of student names
+        const studentsInput = document.getElementById("students");
+        const students = studentsInput.value.split("\n").filter(s => s.trim() !== "");
+        
+        // Shuffle the list of student names
+        const shuffledStudents = shuffle(students);
+        
+        // Assign each student to 3 other students
+        const assignments = {};
+        for (let i = 0; i < students.length; i++) {
+          const student = students[i];
+          assignments[student] = [
+            shuffledStudents[(i + 1) % students.length],
+            shuffledStudents[(i + 2) % students.length],
+            shuffledStudents[(i + 3) % students.length]
+          ];
+        }
+        
+        // Display the assignments
+        const assignmentsOutput = document.getElementById("assignments");
+        assignmentsOutput.value = "";
+        for (const student in assignments) {
+          const assignedStudents = assignments[student];
+          assignmentsOutput.value += `${student} is assigned to ${assignedStudents[0]}, ${assignedStudents[1]}, and ${assignedStudents[2]}\n`;
+        }
+      }
+      
+      function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+      }
+    </script>
+  </head>
+  <body>
+    <h1>Student Assignments</h1>
+    <p>Enter the list of student names:</p>
+    <textarea id="students" rows="10" cols="50"></textarea>
+    <br>
+    <button onclick="assignStudents()">Assign Students</button>
+    <br>
+    <p>Assignments:</p>
+    <textarea id="assignments" rows="10" cols="50" readonly></textarea>
+  </body>
+</html>
