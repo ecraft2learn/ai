@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Square Root Approximation</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0/dist/tf.min.js"></script>
+
+</head>
+
+<body>
+    <h1>Square Root Approximation</h1>
+    <p>This was created with this prompt to GPT-4
+        <a href="https://sharegpt.com/c/Tn5ZBs0" target="_blank">
+            Create a neural network and train it to approximate square roots. Do this on a single web page.
+        </a>
+    </p>
+    <p>Input number:</p>
+    <input type="number" id="inputNumber" min="0" step="0.01">
+    <p>Estimated square root:</p>
+    <p id="outputSqrt"></p>
+    <button id="estimateButton">Estimate Square Root</button>
+    <p>Training loss:</p>
+    <p id="trainingLoss">0</p>
+    <script src="square-root-app.js"></script>
+</body>
+
+</html>
