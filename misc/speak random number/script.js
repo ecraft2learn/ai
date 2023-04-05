@@ -64,7 +64,7 @@ function speakRandomInteger() {
     }
 }
 
-function repeatUserSpeech() {
+async function repeatUserSpeech() {
     if (!voicesLoaded) {
         displayOutput('Voices not loaded yet. Please try again.');
         return;
@@ -78,7 +78,7 @@ function repeatUserSpeech() {
         recognition.interimResults = false;
         recognition.lang = 'en-US';
 
-        recognition.onresult = (event) => {
+        recognition.onresult = async (event) => {
             const last = event.results.length - 1;
             const text = event.results[last][0].transcript;
 
@@ -90,7 +90,10 @@ function repeatUserSpeech() {
                 const pitch = 1 + getRandomNumber(10) / 10; // Range 1 to 2
                 const rate = 0.5 + getRandomNumber(10) / 10; // Range 0.5 to 1.5
 
-                const utterance = new SpeechSynthesisUtterance(text);
+                const translatedText = await translateText(text, randomLanguage.lang);
+
+                const utterance = new SpeechSynthesisUtterance(translatedText);
+
                 utterance.lang = randomVoice.lang;
                 utterance.voice = randomVoice;
                 utterance.pitch = pitch;
@@ -100,6 +103,7 @@ function repeatUserSpeech() {
 
                 displayOutput(`
                     Text Heard: ${text}<br>
+                    Translated Text: ${translatedText}<br>
                     Language: ${randomVoice.lang}<br>
                     Voice: ${randomVoice.name}<br>
                     Pitch: ${pitch.toFixed(1)}<br>
@@ -113,6 +117,91 @@ function repeatUserSpeech() {
         recognition.start();
     } else {
         displayOutput('Speech Recognition API not supported in this browser');
+    }
+}
+
+async function translateText(text, targetLanguage) {
+    if (!userApiKey) {
+        displayOutput('Please enter your Google Translate API Key');
+        return text;
+    }
+
+    const url = `https://translation.googleapis.com/language/translate/v2?key=${userApiKey}`;
+
+    const requestBody = {
+        q: text,
+        target: targetLanguage,
+        format: 'text',
+    };
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+    });
+
+    const result = await response.json();
+
+    if (result.error) {
+        console.error('Error translating text:', result.error.message);
+        return text;
+    } else {
+        return result.data.translations[0].translatedText;
+    }
+}
+
+// commented out the Huggingface version since most of the time it responded that the model was being loaded...
+// could have tried to wait...
+// async function translateText(text, targetLanguage) {
+//     if (!userApiKey) {
+//         displayOutput('Please enter your Google Translate API Key');
+//         return text;
+//     }
+
+//     const url = 'https://api-inference.huggingface.co/models/Helsinki-NLP/opus-mt-en-' + targetLanguage;
+//     const headers = new Headers({
+//         'Content-Type': 'application/json',
+//         'Authorization': 'Bearer ' + userApiKey,
+//     });
+
+//     const body = {
+//         inputs: text,
+//     };
+
+//     const requestOptions = {
+//         method: 'POST',
+//         headers: headers,
+//         body: JSON.stringify(body),
+//     };
+
+//     const response = await fetch(url, requestOptions);
+//     // if (response.status !== 200) {
+//     //     console.error(`Error translating text: HTTP status code ${response.status}`);
+//     //     displayOutput('Translation service is temporarily unavailable. Please try again later.');
+//     //     return text;
+//     // }
+
+//     const result = await response.json();
+
+//     if (result.error) {
+//         console.error('Error translating text:', result.error.message);
+//         return text;
+//     } else {
+//         return result[0].generated_text;
+//     }
+// }
+
+let userApiKey = '';
+
+function storeApiKey() {
+    const apiKeyInput = document.getElementById('api-key');
+    userApiKey = apiKeyInput.value;
+    if (userApiKey) {
+        apiKeyInput.style.borderColor = '';
+    } else {
+        apiKeyInput.style.borderColor = 'red';
     }
 }
 
