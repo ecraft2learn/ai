@@ -1,0 +1,242 @@
+[
+ {
+   "text": "I'm not sure I can.",
+   "label": -1
+ },
+ {
+   "text": "I'm not sure if I'll be able to.",
+   "label": -1
+ },
+ {
+   "text": "I'm uncertain what to do next.",
+   "label": -1
+ },
+ {
+   "text": "I worry that I'll make a mistake",
+   "label": -1
+ },
+ {
+   "text": "I can't do that.",
+   "label": -1
+ },
+ {
+   "text": "Why do you think I can do that?",
+   "label": -1
+ },
+ {
+   "text": "What if I fail?",
+   "label": -1
+ },
+ {
+   "text": "I'm not going to try.",
+   "label": -1
+ },
+ {
+   "text": "I don't want to fail.",
+   "label": -1
+ },
+ {
+   "text": "I can't stop worrying.",
+   "label": -1
+ },
+ {
+   "text": "That is something I can't do.",
+   "label": -1
+ },
+ {
+   "text": "I don't think I can.",
+   "label": -1
+ },
+ {
+   "text": "I'm not making much progress.",
+   "label": -1
+ },
+ {
+   "text": "I find this pretty hard.",
+   "label": -1
+ },
+ {
+   "text": "I'm not sure I can.",
+   "label": -1
+ },
+ {
+   "text": "This is much too hard for me.",
+   "label": -1
+ },
+ {
+   "text": "This isn't something I've very good at.",
+   "label": -1
+ },
+ {
+   "text": "I don't know what to do next.",
+   "label": -1
+ },
+ {
+   "text": "Should I give up?",
+   "label": -1
+ },
+ {
+   "text": "I'm worried that I can't finish this.",
+   "label": -1
+ },
+ {
+   "text": "OK, I'll try.",
+   "label": 1
+ },
+ {
+   "text": "I think I can.",
+   "label": 1
+ },
+ {
+   "text": "I'm good at doing that.",
+   "label": 1
+ },
+ {
+   "text": "I probably can do better than them.",
+   "label": 1
+ },
+ {
+   "text": "Let's see if I can do that.",
+   "label": 1
+ },
+ {
+   "text": "That is something I'm good at.",
+   "label": 1
+ },
+ {
+   "text": "I usually succeed at whatever I try.",
+   "label": 1
+ },
+ {
+   "text": "I know that I can do that.",
+   "label": 1
+ },
+ {
+   "text": "I have a can do attitude.",
+   "label": 1
+ },
+ {
+   "text": "I usually can do whatever I put my mind to.",
+   "label": 1
+ },
+ {
+   "text": "I can do it!",
+   "label": 1
+ },
+ {
+   "text": "This should be easy.",
+   "label": 1
+ },
+ {
+   "text": "I keep making good progress.",
+   "label": 1
+ },
+ {
+   "text": "This I can do.",
+   "label": 1
+ },
+ {
+   "text": "I'm sure I can succeed.",
+   "label": 1
+ },
+ {
+   "text": "This looks pretty easy.",
+   "label": 1
+ },
+ {
+   "text": "I find this to be a piece of cake.",
+   "label": 1
+ },
+ {
+   "text": "I'm sure I'll finish this in time.",
+   "label": 1
+ },
+ {
+   "text": "All is going well.",
+   "label": 1
+ },
+ {
+   "text": "No problem doing this.",
+   "label": 1
+ },
+ {
+   "text": "I often eat granola for breakfast.",
+   "label": 0
+ },
+ {
+   "text": "I prefer public transit.",
+   "label": 0
+ },
+ {
+   "text": "I like modern art.",
+   "label": 0
+ },
+ {
+   "text": "I'm not so sleepy just now.",
+   "label": 0
+ },
+ {
+   "text": "I like board games too.",
+   "label": 0
+ },
+ {
+   "text": "I enjoying bicycling around a new place.",
+   "label": 0
+ },
+ {
+   "text": "My doctor told me to wear a hat.",
+   "label": 0
+ },
+ {
+   "text": "I'm proud of my grandson.",
+   "label": 0
+ },
+ {
+   "text": "I am eating lunch now.",
+   "label": 0
+ },
+ {
+   "text": "This is my favorite music.",
+   "label": 0
+ },
+ {
+   "text": "Oranges cost a quarter.",
+   "label": 0
+ },
+ {
+   "text": "I'm going to eat dinner now.",
+   "label": 0
+ },
+ {
+   "text": "This sure is tasty.",
+   "label": 0
+ },
+ {
+   "text": "My flight leaves tomorrow.",
+   "label": 0
+ },
+ {
+   "text": "I'll watch TV tonight.",
+   "label": 0
+ },
+ {
+   "text": "My aunt just got married.",
+   "label": 0
+ },
+ {
+   "text": "What did he just say?",
+   "label": 0
+ },
+ {
+   "text": "When does the bank open?",
+   "label": 0
+ },
+ {
+   "text": "We can glue this back together.",
+   "label": 0
+ },
+ {
+   "text": "Please print this out.",
+   "label": 0
+ }
+]
