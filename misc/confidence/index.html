@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Confidence Predictor</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+        #prediction-form {
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>Confidence Predictor</h1>
+    <label for="epochs-input">Number of epochs:</label>
+    <input type="number" id="epochs-input" min="1" value="20" />
+    <button id="train-btn">Train Model</button>
+    <form id="prediction-form">
+        <label for="text-input">Enter text:</label>
+        <textarea id="text-input" rows="4" cols="50"></textarea>
+        <button type="submit">Predict</button>
+    </form>
+    <div id="result"></div>
+    <p>This app is the result of this <a href="https://shareg.pt/2r6aaPQ" target="_blank">GPT-4 dialogue</a></p>
+    <canvas id="loss-chart" width="800" height="400"></canvas>
+    <script src="app.js"></script>
+</body>
+</html>

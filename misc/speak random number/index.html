@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Integer Speaker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f3f3f3;
+        }
+
+        button {
+            font-size: 1.5rem;
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:active {
+            background-color: #004085;
+        }
+
+        button:focus {
+            outline: none;
+        }
+        
+        img {
+            width: 150px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        
+         .clickable-image {
+            width: 200px;
+            cursor: pointer;
+            margin: 0 20px;
+        }
+
+        #image-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        #output {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #ffffff;
+            border: 1px solid #dddddd;
+            border-radius: 5px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="image-container">
+        <img src="DALL·E 2023-04-05 12.03.42 - colorful collection of random integers.png" alt="Random Integer" onclick="speakRandomInteger()" class="clickable-image">
+        <img src="DALL·E 2023-04-05 11.50.29 - a colorful cartoon parrot.png" alt="Parrot" onclick="repeatUserSpeech()" class="clickable-image">
+    </div>
+    <div id="output"></div>
+    <div>
+        <label for="api-key">Google Translate API Key:</label>
+        <input type="text" id="api-key" placeholder="Enter your API Key">
+        <button onclick="storeApiKey()">Submit API Key</button>
+    </div>
+    <p>Created by <a href="https://shareg.pt/EsVTtIP" target="_blank">this GPT-4 dialog</a></p>
+    <script src="script.js"></script>
+</body>
+</html>

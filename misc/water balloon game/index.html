@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Water Balloon Game</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: skyblue;
+    }
+    canvas {
+      border: 1px solid black;
+    }
+  </style>
+</head>
+<body>
+  <div id="errorMessage" style="position: fixed; top: 20px; left: 20px; color: red;"></div>
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+  <script src="game.js"></script>
+  <div id="settingsContainer" style="position: fixed; top: 20px; right: 20px;">
+    <img id="settingsIcon" src="https://iconarchive.com/download/i113236/google/noto-emoji-animals-nature/22215-gear.ico" alt="settings" width="32" height="32">
+    <div id="settingsPanel" style="display: none; background-color: white; border: 1px solid black; padding: 10px;">
+      <label for="intensitySlider">Intensity Rate:</label>
+      <input type="range" id="intensitySlider" min="1" max="50" step="0.5" value="10">
+      <br>
+      <label for="sizeSlider">Size Rate:</label>
+      <input type="range" id="sizeSlider" min="1" max="50" step="0.5" value="10">
+    </div>
+  </div>
+</body>
+</html>

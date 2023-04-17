@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Balloon Game</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #eee;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        canvas {
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        let flowers = [];
+        let balloons = [];
+        let lastTimestamp = 0;
+
+        class Flower {
+            constructor(x, y, hue) {
+                this.x = x;
+                this.y = y;
+                this.size = 2;
+                this.hue = hue;
+                this.color = `hsl(${this.hue}, 100%, 50%)`;
+            }
+
+            drawPetals(n, radius) {
+                const angle = Math.PI * 2 / n;
+                for (let i = 0; i < n; i++) {
+                    const petalX = this.x + radius * Math.cos(angle * i);
+                    const petalY = this.y - this.size * 20 + radius * Math.sin(angle * i);
+                    ctx.beginPath();
+                    ctx.arc(petalX, petalY, this.size * 7, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                // Draw stem
+                const stemHeight = this.size * 15 * 3;
+                ctx.fillRect(this.x - this.size * 2, this.y, this.size * 4, stemHeight); // Adjusted stem y-coordinate
+                // Draw petals
+                this.drawPetals(5, this.size * 15);
+            }
+
+            update(deltaTime) {
+                const decreaseFactor = deltaTime * 0.0001; // Change this value to make the flowers shrink slower (initially 0.0005)
+                this.size = Math.max(0, this.size - decreaseFactor);
+                const lightness = 50 + (1 - this.size / 2) * 50;
+                this.color = `hsl(${this.hue}, 100%, ${lightness}%)`;
+            }
+        }
+
+        class Balloon {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.radius = 10;
+                this.speed = 300;
+            }
+
+            draw() {
+                ctx.fillStyle = "blue";
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            update(deltaTime) {
+                this.y += this.speed * deltaTime * 0.001;
+            }
+        }
+
+        function createFlowers() {
+            for (let i = 0; i < 5; i++) {
+                const hue = Math.floor(Math.random() * 360); // Random hue for each flower
+                flowers.push(new Flower(100 + i * 150, canvas.height - 100, hue));
+            }
+        }
+
+        function drawInstructions() {
+            ctx.font = '20px Arial';
+            ctx.fillStyle = 'black';
+            ctx.fillText('Click in the upper third of the canvas', 200, 50);
+            ctx.fillText('to drop water balloons on the flowers', 210, 80);
+        }
+
+        function gameLoop(timestamp) {
+            const deltaTime = timestamp - lastTimestamp;
+            lastTimestamp = timestamp;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (const flower of flowers) {
+                flower.update(deltaTime);
+                flower.draw();
+            }
+
+            for (const balloon of balloons) {
+                balloon.update(deltaTime);
+                balloon.draw();
+            }
+
+            checkCollisions();
+            
+            drawInstructions();
+            
+            requestAnimationFrame(gameLoop);
+        }
+
+        function checkCollisions() {
+            for (let i = balloons.length - 1; i >= 0; i--) {
+                const balloon = balloons[i];
+                for (const flower of flowers) {
+                    const dx = balloon.x - flower.x;
+                    const dy = balloon.y - (flower.y + flower.size * 20);
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < balloon.radius + flower.size * 10) {
+                        flower.size += 0.5;
+                        flower.size = Math.min(2, flower.size);
+                        balloons.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+        }
+
+        function onClick(event) {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            if (y < canvas.height / 3) { // Only create balloons when the click is in the upper third of the canvas
+                balloons.push(new Balloon(x, y));
+            }
+        }
+
+        canvas.addEventListener("click", onClick);
+
+        createFlowers();
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>

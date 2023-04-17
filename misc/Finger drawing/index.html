@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finger Drawing</title>
+    <style>
+        canvas, video {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        #instructions {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 400px;
+            margin: 20px auto;
+        }
+        
+        h2 {
+            margin-top: 0;
+        }
+        #app-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        #canvas,
+        #webcam {
+            position: absolute;
+            top: 0;
+            left: 0;
+        } 
+        #overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-family: Arial, sans-serif;
+            z-index: 1;
+            white-space: nowrap;
+        }
+        #last-spoken,
+        #current-color {
+            display: inline;
+            margin-right: 10px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/handpose"></script>
+</head>
+<body>
+    <div id="app-container">
+        <video id="webcam" playsinline autoplay muted width="640" height="480"></video>
+        <canvas id="canvas" width="640" height="480"></canvas>
+        <div id="overlay">
+            <span id="last-spoken">Last spoken: </span>
+            <span id="current-color">Current color: </span>
+        </div>
+    </div>
+    <div id="instructions">
+        <h2>Instructions</h2>
+        <ol>
+            <li>Allow access to your webcam.</li>
+            <li>Point your index finger upwards to start drawing on the canvas.</li>
+            <li>Speak a color (e.g., red, green, blue, etc.) to change the drawing color.</li>
+        </ol>
+        <p>Created by <a href="https://sharegpt.com/c/FvP26mF" target="_blank">this dialog with GPT-4</a></p>
+    </div>
+    <script src="app.js" defer></script>
+</body>
+</html>
