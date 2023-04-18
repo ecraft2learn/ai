@@ -1,0 +1,46 @@
+h1 {
+  text-align: center;  
+}
+.game-area {
+  width: 600px;
+  height: 300px;
+  background-color: lightgreen;
+  margin: auto;
+  position: relative;
+}
+.flower-1, .flower-2, .flower-3 {
+  position: absolute;
+  bottom: 0;        /* Flowers at bottom */
+  width: 100px;
+  height: 100px;
+  background-color: red;
+  border-radius: 50%;
+  left: 100px;  
+}
+.petal-1 {
+  width: 50%;
+  height: 50%;
+  background-color: darkred;  
+  border-radius: 50% 0 0 50% / 50% 0 0 50%;  
+  position: absolute;
+  top: 0;
+  left: 0; 
+}  
+.petal-2 {...}
+.petal-3 {...} 
+.petal-4 {...}
+.stem {
+  width: 20px;
+  height: 100px;
+  background-color: green;
+  position: absolute;
+  bottom: 0;
+  left: 40px;
+}
+.balloon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  position: absolute;
+}
+// Additional CSS...
