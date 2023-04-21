@@ -34,11 +34,6 @@ body {
   background-color: #ff3333;
 }
 
-.hidden {
-  display: none;
-}
-
-
 .close-popup {
   color: #aaa;
   float: right;
@@ -126,4 +121,17 @@ img {
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); /* Subtle box shadow for depth */
   z-index: 1000; /* Ensures the loading indicator appears above other elements */
 }
+
+#prompts-completions {
+  margin-top: 2rem;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.hidden {
+  display: none;
+}
+
 

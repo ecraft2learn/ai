@@ -57,8 +57,7 @@ async function generateStoryAndDescriptions(apiKey, prompt, numberOfParagraphs) 
   const responseData = await response.json();
   const storyAndDescriptions = responseData.choices[0].message.content.trim().split(/(\[PARAGRAPH\]|\[ILLUSTRATION_DESCRIPTION\])/).filter(item => item.trim() !== '' && item !== '[PARAGRAPH]' && item !== '[ILLUSTRATION_DESCRIPTION]');
 
-  console.log("Prompt: ", promptWithSeparators); // added manually
-  console.log("Response: ", responseData.choices[0].message.content.trim());
+  recordPromptAndCompletion(promptWithSeparators, responseData.choices[0].message.content.trim()); // added manually
   
   const paragraphs = [];
   const illustrationDescriptions = [];
@@ -139,8 +138,7 @@ async function generateImage(description, apiKey) {
   
   hideLoadingIndicator();
 
-  console.log("Prompt: ", description); // manually added
-  console.log("Response: ", responseData.data[0].url);
+  recordPromptAndCompletion(description, responseData.data[0].url);
   
   return responseData.data[0].url;
 }
@@ -260,8 +258,7 @@ async function getConstructiveCriticisms(apiKey, paragraphElement, paragraphInde
   const responseData = await response.json();
   const criticisms = responseData.choices[0].message.content.trim().split('\n');
 
-  console.log("Prompt: ", prompt); // added manually
-  console.log("Response: ", criticisms);
+  recordPromptAndCompletion(prompt, responseData.choices[0].message.content);
 
   hideLoadingIndicator();
 
@@ -348,6 +345,7 @@ async function rewriteParagraph(apiKey, buttonElement, paragraphElement, critici
 
   const responseData = await response.json();
   const rewrittenParagraph = responseData.choices[0].message.content.trim();
+  recordPromptAndCompletion(prompt, responseData.choices[0].message.content);
 
   // Replace the current paragraph with the rewritten one
   paragraphElement.textContent = rewrittenParagraph;
@@ -357,9 +355,6 @@ async function rewriteParagraph(apiKey, buttonElement, paragraphElement, critici
   if (buttonElement) {
     buttonElement.remove();
   }
-  
-  console.log("Prompt: ", prompt); // added manually
-  console.log("Response: ", rewrittenParagraph);
 
   // Hide the loading indicator
   hideLoadingIndicator();
@@ -390,7 +385,27 @@ document.getElementById("api-form").addEventListener("submit", async (event) => 
   }
 });
 
-if (document.getElementById('content').textContent === '') {
+document.getElementById('toggle-prompts-completions').addEventListener('click', () => {
+  const promptsCompletionsContainer = document.getElementById('prompts-completions');
+  promptsCompletionsContainer.classList.toggle('hidden');
+});
+
+function recordPromptAndCompletion(prompt, completion) {
+  const promptsCompletionsContainer = document.getElementById('prompts-completions');
+  const promptCompletionPair = document.createElement('div');
+
+  promptCompletionPair.innerHTML = `
+    <h3>Prompt</h3>
+    <p>${prompt}</p>
+    <h3>Completion</h3>
+    <p>${completion}</p>
+    <hr>
+  `;
+
+  promptsCompletionsContainer.appendChild(promptCompletionPair);
+}
+
+if (document.getElementById('content').textContent.trim() === '') {
   // conditional added so the instructions don't popup on a saved story
   document.addEventListener('DOMContentLoaded', showInstructionsPopup);
 }
