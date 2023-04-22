@@ -1,0 +1,137 @@
+body {
+  font-family: Arial, sans-serif;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.popup {
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: white;
+  padding: 2rem;
+  border-radius: 5px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 80%;
+  z-index: 1;
+}
+
+.popup button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: #ff5555;
+  color: white;
+  border: none;
+  font-size: 1rem;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.popup button:hover {
+  background-color: #ff3333;
+}
+
+.close-popup {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close-popup:hover {
+  color: black;
+}
+
+form {
+  margin-bottom: 20px;
+}
+
+label, input, button {
+  display: block;
+  margin-bottom: 10px;
+}
+
+body {
+  font-family: 'Palatino', serif;
+  font-size: 24px;
+  line-height: 1.6;
+  color: #333;
+}
+
+.img-container {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 20px;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.alternative-img {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  margin-left: 10px;
+  z-index: 1; /* Add z-index to bring the alternative image to the front */
+}
+
+.tooltip {
+  visibility: hidden;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  text-align: center;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  white-space: pre-wrap;
+  max-width: 300px;
+  position: absolute;
+  z-index: 100;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.img-container:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.loading-indicator {
+  display: inline-block;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #333;
+  background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
+  border-radius: 10px; /* Rounded edges */
+  padding: 15px 25px; /* Padding around the text */
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); /* Subtle box shadow for depth */
+  z-index: 1000; /* Ensures the loading indicator appears above other elements */
+}
+
+#prompts-completions {
+  margin-top: 2rem;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.hidden {
+  display: none;
+}
+
+
