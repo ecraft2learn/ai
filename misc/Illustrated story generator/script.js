@@ -138,7 +138,7 @@ async function generateImage(description, apiKey) {
   
   hideLoadingIndicator();
 
-  recordPromptAndCompletion(description, responseData.data[0].url);
+  recordPromptAndCompletion(description, responseData.data[0].url); // added manually
   
   return responseData.data[0].url;
 }
