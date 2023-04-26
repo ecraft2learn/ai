@@ -11,11 +11,14 @@ popup.classList.add("popup");
 function showInstructionsPopup() {
   popup.innerHTML = `
     <h2>Instructions</h2>
-    <p>To generate a story, enter a brief description of the story you want in the text area below, and set the desired number of paragraphs (default is 3). Then click "Generate Story." The AI will create a story with corresponding illustration descriptions for each paragraph.</p>
-    <p>Once the story is generated, you can click on any paragraph to receive a list of constructive criticisms from the AI. Each criticism will appear as a button above the paragraph. Click on a criticism button to rewrite the paragraph following the chosen criticism. The criticism button will be removed after rewriting.</p>
-    <p>If you prefer to provide your own criticism, click on the "Add your own criticism" button. A text input field will appear, where you can type your criticism. After entering your criticism, click "Submit," and the AI will rewrite the paragraph following your input.</p>
-    <p>To close the list of criticism buttons, click on the "Close" button that appears alongside them.</p>
-    <p>You can click on an image to replace it with another one. The AI will generate a new illustration based on the corresponding illustration description.</p>
+    <ol>
+      <li>Enter a short description of the story you want to generate, and then click the "Generate Story and Images" button.</li>
+      <li>Click on a paragraph to view a list of criticism buttons. Click on a criticism button to rewrite the paragraph based on the criticism, or click "Add your own criticism" to enter a custom criticism.</li>
+      <li>Click on an image to open the "Edit Illustration" dialog. You can view the current description of the illustration and suggest changes to it.</li>
+      <li>After suggesting changes to the illustration description, click the "Apply Changes" button to update the description. The updated description will be displayed in the "Current Description" field.</li>
+      <li>Click the "Replace Image" button to generate and display a new image based on the updated description.</li>
+      <li>Click the "Close" button to close the "Edit Illustration" dialog at any time.</li>
+    </ol>
     <button>x</button>
   `;
   document.body.appendChild(popup);
@@ -102,14 +105,7 @@ async function generateStoryAndDescriptions(apiKey, prompt, numberOfParagraphs) 
   return [paragraphs, illustrationDescriptions]; //, fontSuggestion];
 }
 
-async function handleImageClick(img, apiKey, descriptions) {
-  const index = img.dataset.index;
-  const alternativeImageURL = await generateImage(`${descriptions[index]} - Unique ID: ${Date.now()}${index}`, apiKey);
-
-  img.src = alternativeImageURL;
-}
-
-async function generateImage(description, apiKey) {
+async function generateImage(apiKey, description) { // arguments reordered manually
   showLoadingIndicator('Generating image...'); // didn't bother GPT-4 to insert this
   const url = 'https://api.openai.com/v1/images/generations';
   const requestBody = {
@@ -197,12 +193,14 @@ async function displayStoryAndImages(apiKey, storyPrompt) {
       content.appendChild(paragraph);
 
       if (descriptions[i]) {
-        const imageUrl = await generateImage(descriptions[i], apiKey);
+        const imageUrl = await generateImage(apiKey, descriptions[i]); // arguments reordered manually
         const img = document.createElement('img');
         img.src = imageUrl;
         img.dataset.index = i;
         img.title = descriptions[i]; // Set the illustration description as the title attribute
-        img.addEventListener('click', () => handleImageClick(img, apiKey, descriptions));
+        img.addEventListener('click', () => {
+          openEditIllustrationDialog(apiKey, img);
+        });
         content.appendChild(img);
       }
     }
@@ -220,6 +218,120 @@ async function displayStoryAndImages(apiKey, storyPrompt) {
     
     displayPopup('Error', 'Error generating story and images.');
   }
+}
+
+function openEditIllustrationDialog(apiKey, illustrationElement) {
+  const dialog = document.getElementById('edit-illustration-dialog');
+  const currentDescription = illustrationElement.title;
+  const currentDescriptionElement = dialog.querySelector('#current-description');
+
+  // Set the current description in the textarea
+  currentDescriptionElement.value = illustrationElement.title;
+  
+  // currentDescription.value = illustrationElement.getAttribute('data-description');
+  dialog.classList.remove('hidden');
+  // editIllustrationForm.onsubmit = async (event) => {
+  //   event.preventDefault();
+    
+  //   const suggestedChanges = event.target.elements['suggested-changes'].value;
+  //   await applyChangesToIllustration(apiKey, illustration, currentDescription, suggestedChanges);
+    
+    // hideEditIllustrationDialog();
+  // };
+  dialog.querySelector('#edit-illustration-form').onsubmit = async (event) => {
+    event.preventDefault();
+    const suggestedChanges = event.target.elements['suggested-changes'].value;
+    await applyChangesToIllustration(apiKey, illustrationElement, currentDescription, suggestedChanges);
+    event.target.elements['suggested-changes'].value = ''; // added manually
+  };
+  dialog.querySelector("#replace-image").addEventListener("click", async () => {
+    showLoadingIndicator("Generating new illustration...");
+    // replaced newDescription with illustrationElement.title
+    const newImageUrl = await generateImage(apiKey, illustrationElement.title); 
+    illustrationElement.src = newImageUrl;
+    hideLoadingIndicator();
+  });
+
+  dialog.querySelector('#close-dialog').onclick = () => {
+    dialog.classList.add('hidden');
+  };
+}
+
+function closeEditIllustrationDialog() {
+  const dialog = document.getElementById('edit-illustration-dialog');
+  dialog.classList.add('hidden');
+}
+
+async function applyChangesToIllustration(apiKey, illustrationElement, currentDescription, suggestedChanges) {
+  // const currentDescription = document.getElementById('current-description').value; // manually commented out
+  // const suggestedChanges = document.getElementById('suggested-changes').value;
+  const newDescription = await getUpdatedDescription(apiKey, currentDescription, suggestedChanges);
+
+  // Replace old description with new description
+  // illustrationElement.setAttribute('data-description', newDescription); // manually commented out
+
+  illustrationElement.title = newDescription;
+
+  document.querySelector("#suggested-changes").value = '';
+
+  // Generate a new image using the updated description
+  const newImageURL = await generateImage(apiKey, newDescription);
+
+  // Replace the old image with the new image
+  illustrationElement.setAttribute('src', newImageURL);
+
+  // Close the dialog
+  // closeEditIllustrationDialog();
+}
+
+async function getUpdatedDescription(apiKey, currentDescription, suggestedChanges) {
+  showLoadingIndicator('Rewriting illustration description ...'); // added manually
+  
+  const prompt = `The current illustration description is: "${currentDescription}". The suggested changes are: "${suggestedChanges}". Please provide an updated description based on the suggested changes.`;
+
+  // Call GPT-4 and get the updated description
+  const newDescription = await callGPT4(apiKey, prompt);
+
+  document.querySelector("#current-description").value = newDescription;;
+  
+  return newDescription;
+}
+
+async function callGPT4(apiKey, prompt) {
+  const url = 'https://api.openai.com/v1/chat/completions';
+
+  const requestBody = {
+    model: "gpt-4",
+    messages: [
+      {
+        role: "user",
+        content: prompt,
+      },
+    ],
+  };
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(requestBody),
+  });
+
+  hideLoadingIndicator(); // added manually
+  
+  if (!response.ok) {
+    const errorMessage = `Error: ${response.status} ${response.statusText}`;
+    console.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+
+  const responseData = await response.json();
+  const textOutput = responseData.choices[0].message.content.trim();
+  recordPromptAndCompletion(prompt, responseData.choices[0].message.content);
+
+  return textOutput;
 }
 
 async function getConstructiveCriticisms(apiKey, paragraphElement, paragraphIndex, paragraphs) {
@@ -380,6 +492,7 @@ document.getElementById("api-form").addEventListener("submit", async (event) => 
   const storyPrompt = document.getElementById("story-prompt").value;
 
   if (apiKey && storyPrompt) {
+    document.getElementById("api-key").value = 'enter your OpenAI key'; // added manually for security
     document.getElementById("api-form").style.display = "none";
     await displayStoryAndImages(apiKey, storyPrompt);
   }
