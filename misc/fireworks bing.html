@@ -1,0 +1,114 @@
+<div class="fireworks"></div>
+<style>
+  .fireworks {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+  }
+
+  .fireworks::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #fff;
+    animation: launch 1s ease-out infinite;
+  }
+
+  .fireworks::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #fff;
+    animation: explode 1s ease-in infinite;
+  }
+
+  @keyframes launch {
+    0% {
+      transform: translate(-50%, -50%);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(-50%, -200%);
+      opacity: 0;
+    }
+  }
+
+  @keyframes explode {
+    0% {
+      transform: translate(-50%, -200%);
+      opacity: 0;
+      box-shadow:
+        inset rgba(255,255,255,0.5) 0px -2px,
+        inset rgba(255,255,255,0.5) -2px -2px,
+        inset rgba(255,255,255,0.5) -2px 0px,
+        inset rgba(255,255,255,0.5) -2px 2px,
+        inset rgba(255,255,255,0.5) 0px 2px,
+        inset rgba(255,255,255,0.5) 2px 2px,
+        inset rgba(255,255,255,0.5) 2px 0px,
+        inset rgba(255,255,255,0.5) 2px -2px;
+      filter: blur(1px);
+      background-color: transparent;
+    }
+    25% {
+      transform: translate(-50%, -200%);
+      opacity: 1;
+      box-shadow:
+        rgba(255,0,0,1) -20px -20px,
+        rgba(0,255,0,1) -20px -10px,
+        rgba(0,0,255,1) -20px   0px,
+        rgba(255,0,255,1) -20px   10px,
+        rgba(255,255,0,1) -20px   20px,
+        rgba(0,255,255,1)   -10px   -20px,
+        rgba(128,128,128,.5)   -10px   -10px,
+        rgba(128,128,.5,.5)   -10px   0px,
+        rgba(128,.5,.5,.5)   -10px   +10px,
+        rgba(.5,.5,.5,.5)   -10px   +20px,
+        rgba(.5,.5,.5,.5)   +10px   +20px,
+        rgba(.5,.5,.5,.5)   +10px   +10px,
+        rgba(.5,.5,.5,.5)   +10px   +0x,
+        rgba(.5,.5,.5,.5)   +10x   +-10x,
+        rgba(.5,.5,.5,.5)   +20x   +-20x,
+        rgba(.5,.5,.5,.5)   +20x   +-10x,
+        rgba(.5,.5,.128,.25)   +20x   +-00x,
+        rgba(.128,.128,.128,.25)   +20x   +-+10x
+Oh, I'm sorry. I ran out of space to show the full code. Here is the rest of the CSS:
+
+```css
+        rgba(128,.5,.5,.25)   +20x   +-+20x;
+      filter: blur(2px);
+      background-color: transparent;
+    }
+    50% {
+      transform: translate(-50%, -200%);
+      opacity: 0;
+      box-shadow:
+        rgba(255,0,0,.5) -40px -40px,
+        rgba(0,255,0,.5) -40px -20px,
+        rgba(0,0,255,.5) -40px   0px,
+        rgba(255,0,255,.5) -40px   20px,
+        rgba(255,255,0,.5) -40px   40px,
+        rgba(0,255,255,.5)   -20px   -40px,
+        rgba(128,128,128,.25)   -20px   -20px,
+        rgba(128,128,.25,.25)   -20px   0px,
+        rgba(128,.25,.25,.25)   -20px   +20px,
+        rgba(.25,.25,.25,.25)   -20px   +40px,
+        rgba(.25,.25,.25,.25)   +20px   +40px,
+        rgba(.25,.25,.25,.25)   +20px   +20px,
+        rgba(.25,.25,.25,.25)   +20px   +0x,
+        rgba(.25,.25,.25,.25)   +20x   +-20x,
+        rgba(.25,.25,.25,.25)   +40x   +-40x,
+        rgba(.25,.25,.25,.25)   +40x   +-20x,
+        rgba(.5,.5,.128,.125)   +40x   +-00x,
+        rgba(.128,.128,.128,.125)   +40x   +-+20x

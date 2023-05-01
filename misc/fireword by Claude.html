@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Fireworks!</title>
+<style>
+body {
+  background: black;
+}
+</style>
+</head>
+<body>
+
+<button onclick="showFireworks()">Click for fireworks!</button>
+
+<script>
+function showFireworks() {
+  var fireworks = document.createElement("div");
+  fireworks.style.position = "fixed";
+  fireworks.style.left = "0";
+  fireworks.style.top = "0";
+  
+  document.body.appendChild(fireworks);
+  
+  var colors = ["#ff0000", "#ffff00", "#00ff00", "#0000ff"];
+  
+  for (var i=0; i<100; i++) {
+    var firework = document.createElement("div");
+    firework.style.width = Math.random() * 10 + "px";
+    firework.style.height = firework.style.width;
+    firework.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    firework.style.position = "absolute";
+    firework.style.left = Math.random() * window.innerWidth + "px";
+    firework.style.top = Math.random() * window.innerHeight + "px";
+    fireworks.appendChild(firework);
+    var el = firework;  // Store reference to element
+    animateFirework(firework);
+  }  
+}
+
+function animateFirework(el) {
+  var maxX = window.innerWidth - el.offsetWidth;
+  var maxY = window.innerHeight - el.offsetHeight;
+  var t = setInterval(function() {
+    var x = parseInt(el.style.left);
+    var y = parseInt(el.style.top);
+    el.style.left = Math.min(maxX, Math.max(0, x + Math.random() * 10 - 5)) + "px"; 
+    el.style.top =  Math.min(maxY, Math.max(0, y + Math.random() * 10 - 5)) + "px";
+  }, 50);
+  
+  setTimeout(function() {
+    clearInterval(t);
+    document.body.removeChild(el);  
+  }, 1000);
+}
+</script>
+
+</body>
+</html>

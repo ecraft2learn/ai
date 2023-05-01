@@ -245,7 +245,7 @@ function openEditIllustrationDialog(apiKey, illustrationElement) {
     event.target.elements['suggested-changes'].value = ''; // added manually
   };
   dialog.querySelector("#replace-image").addEventListener("click", async () => {
-    showLoadingIndicator("Generating new illustration...");
+    // showLoadingIndicator("Generating new illustration..."); // commented out since generateImage also shows status
     // replaced newDescription with illustrationElement.title
     const newImageUrl = await generateImage(apiKey, illustrationElement.title); 
     illustrationElement.src = newImageUrl;
@@ -274,8 +274,10 @@ async function applyChangesToIllustration(apiKey, illustrationElement, currentDe
 
   document.querySelector("#suggested-changes").value = '';
 
+  // commented out the following since there is now a button that gives the user control
+  // over whether to generate a new image
   // Generate a new image using the updated description
-  const newImageURL = await generateImage(apiKey, newDescription);
+  // const newImageURL = await generateImage(apiKey, newDescription); 
 
   // Replace the old image with the new image
   illustrationElement.setAttribute('src', newImageURL);

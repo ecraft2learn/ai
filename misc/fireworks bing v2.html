@@ -1,0 +1,202 @@
+<html>
+<head>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <script>
+    // Get the canvas element and its context
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+
+    // Set the canvas size to fill the window
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Create an array to store the fireworks
+    var fireworks = [];
+
+    // Define some constants for the fireworks
+    var gravity = 0.1; // The acceleration of gravity
+    var friction = 0.98; // The friction coefficient
+    var maxFireworks = 10; // The maximum number of fireworks at a time
+    var maxParticles = 100; // The maximum number of particles per firework
+    var colors = ["#f00", "#0f0", "#00f", "#ff0", "#f0f", "#0ff"]; // The colors of the fireworks
+
+    // Create a function to generate a random number between min and max
+    function random(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    // Create a function to calculate the distance between two points
+    function distance(x1, y1, x2, y2) {
+      return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    }
+
+    // Create a class to represent a firework
+    function Firework(x, y) {
+      this.x = x; // The x coordinate of the firework
+      this.y = y; // The y coordinate of the firework
+      this.vx = random(-5, 5); // The x velocity of the firework
+      this.vy = random(-15, -10); // The y velocity of the firework
+      this.color = colors[Math.floor(random(0, colors.length))]; // The color of the firework
+      this.particles = []; // The array of particles for the firework
+
+      // Create a function to update the firework
+      this.update = function() {
+        // Apply gravity and friction to the firework velocity
+        this.vy += gravity;
+        this.vx *= friction;
+
+        // Update the firework position based on the velocity
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // Check if the firework has reached its peak height
+        if (this.vy >= 0) {
+          // Explode the firework into particles
+          for (var i = 0; i < maxParticles; i++) {
+            // Create a new particle with the same position and color as the firework
+            var particle = new Particle(this.x, this.y, this.color);
+
+            // Add the particle to the array of particles
+            this.particles.push(particle);
+          }
+
+          // Remove the firework from the array of fireworks
+          fireworks.splice(fireworks.indexOf(this), 1);
+        }
+      };
+
+      // Create a function to draw the firework on the canvas
+      this.draw = function() {
+        // Save the current context state
+        ctx.save();
+
+        // Set the fill style to the firework color
+        ctx.fillStyle = this.color;
+
+        // Draw a circle at the firework position with a radius of 2 pixels
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Restore the context state
+        ctx.restore();
+      };
+    }
+	function Particle(x, y, color) {
+      this.x = x; // The x coordinate of the particle
+      this.y = y; // The y coordinate of the particle
+      this.vx = random(-5, 5); // The x velocity of the particle
+      this.vy = random(-5, 5); // The y velocity of the particle
+      this.color = color; // The color of the particle
+      this.alpha = 1; // The alpha value of the particle
+
+      // Create a function to update the particle
+      this.update = function() {
+        // Apply gravity and friction to the particle velocity
+        this.vy += gravity;
+        this.vx *= friction;
+        this.vy *= friction;
+
+        // Update the particle position based on the velocity
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // Decrease the alpha value of the particle
+        this.alpha -= 0.02;
+
+        // Check if the particle is faded out
+        if (this.alpha <= 0) {
+          // Remove the particle from the array of particles
+          var firework = fireworks.find(f => f.particles.includes(this));
+          if (firework) {
+            firework.particles.splice(firework.particles.indexOf(this), 1);
+          }
+        }
+      };
+
+      // Create a function to draw the particle on the canvas
+      this.draw = function() {
+        // Save the current context state
+        ctx.save();
+
+        // Set the fill style to the particle color with the alpha value
+        ctx.fillStyle = "rgba(" + this.color + "," + this.alpha + ")";
+
+        // Draw a circle at the particle position with a radius of 1 pixel
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 1, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Restore the context state
+        ctx.restore();
+      };
+    }
+
+    // Create a function to animate the fireworks
+    function animate() {
+      // Request the next animation frame
+      requestAnimationFrame(animate);
+
+      // Clear the canvas with a black background
+      ctx.fillStyle = "#000";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Loop through each firework and update and draw it
+      for (var i = 0; i < fireworks.length; i++) {
+        var firework = fireworks[i];
+        firework.update();
+        firework.draw();
+
+        // Loop through each particle of the firework and update and draw it
+        for (var j = 0; j < firework.particles.length; j++) {
+          var particle = firework.particles[j];
+          particle.update();
+          particle.draw();
+        }
+      }
+    }
+
+    // Create a function to create a new firework at a random position
+    function createFirework() {
+      // Generate a random x position between 0 and canvas width
+      var x = random(0, canvas.width);
+
+      // Create a new firework at the x position and canvas height
+      var firework = new Firework(x, canvas.height);
+
+      // Add the firework to the array of fireworks
+      fireworks.push(firework);
+    }
+
+    // Add an event listener for mouse click on the canvas
+    canvas.addEventListener("click", function(e) {
+      // Get the mouse position relative to the canvas
+      var x = e.clientX - canvas.offsetLeft;
+      var y = e.clientY - canvas.offsetTop;
+
+      // Create a new firework at the mouse position
+      var firework = new Firework(x, y);
+
+      // Add the firework to the array of fireworks
+      fireworks.push(firework);
+    });
+
+    // Start the animation loop
+    animate();
+
+    // Set an interval to create a new firework every second
+    setInterval(createFirework, 1000);
+  </script>
+</body>
+</html>

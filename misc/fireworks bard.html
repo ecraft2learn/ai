@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Fireworks</title>
+<style>
+.firework {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100px;
+  height: 100px;
+  background-color: red;
+  animation: firework 1s linear infinite;
+}
+
+@keyframes firework {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+</style>
+</head>
+<body>
+<div class="firework"></div>
+<script>
+document.querySelector(".firework").addEventListener("click", function() {
+  this.classList.add("exploded");
+});
+</script>
+</body>
+</html>

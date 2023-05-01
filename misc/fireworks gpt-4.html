@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            background-color: black;
+            overflow: hidden;
+        }
+
+        .firework {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background-color: white;
+            border-radius: 50%;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body onclick="clickHandler(event)">
+
+<script>
+    function clickHandler(event) {
+        createFirework(event.clientX, event.clientY);
+    }
+
+    function createFirework(x, y) {
+        const numParticles = 50;
+        const colors = ['red', 'yellow', 'blue', 'white', 'orange', 'purple', 'green'];
+        for(let i = 0; i < numParticles; i++) {
+            let particle = document.createElement('div');
+            particle.className = 'firework';
+            particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            document.body.appendChild(particle);
+
+            particle.style.left = `${x}px`;
+            particle.style.top = `${y}px`;
+
+            let angle = Math.random() * 2 * Math.PI;
+            let speed = Math.random() * 2 + 2;
+            let vx = speed * Math.cos(angle);
+            let vy = speed * Math.sin(angle);
+
+            setTimeout(() => {
+                particle.style.transform = `translate(${vx * 50}px, ${vy * 50}px)`;
+                particle.style.opacity = 0;
+            }, 0);
+
+            setTimeout(() => {
+                document.body.removeChild(particle);
+            }, 1000);
+        }
+    }
+</script>
+
+</body>
+</html>
