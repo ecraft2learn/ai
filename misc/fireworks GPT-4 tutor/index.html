@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Fireworks Display</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+    #startButton {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+    }
+    #note {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+       color: #fff;
+      text-align: right;
+    }
+
+    #note a {
+      color: #fff;
+      text-decoration: none;
+    }
+
+    #note a:hover {
+      text-decoration: underline;
+    }
+  </style>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <button id="startButton">Start Fireworks</button>
+    <div id="note">
+      This project was created with the help of GPT-4. <br />
+      View the conversation log
+      <a href="https://shareg.pt/UZPt0Oi" target="_blank" rel="noopener noreferrer">here</a>.
+    </div>
+    <script src="fireworks.js"></script>
+  </body>
+</html>
