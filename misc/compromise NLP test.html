@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <script src="https://unpkg.com/compromise"></script>
+    <script>
+        var doc = nlp('The cat chased the dog.').normalize();
+        console.log(doc.nouns().out('array'));  // Output: ['cat', 'dog']
+    </script>
+</body>
+</html>
