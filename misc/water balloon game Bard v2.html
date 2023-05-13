@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Water Balloon Game</title>
+  <style>
+    body {
+      background-color: lightgreen;
+    }
+    
+    .container {
+      width: 400px;
+      height: 400px;
+      margin: auto;
+    }
+    
+    .flower {
+      width: 100px;
+      height: 100px;
+      position: relative;
+    }
+    
+    .flower .petals {
+      width: 100px;
+      height: 100px;
+      background-color: red;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    
+    .flower .stem {
+      width: 10px;
+      height: 100px;
+      background-color: green;
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    .water-balloon {
+      width: 20px;
+      height: 20px;
+      background-color: blue;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="flower">
+      <div class="petals"></div>
+      <div class="stem"></div>
+    </div>
+    <div class="water-balloon"></div>
+  </div>
+  <script>
+    let flowers = document.querySelectorAll(".flower");
+    let waterBalloons = document.querySelectorAll(".water-balloon");
+    
+    function onWaterBalloonClick(event) {
+      let waterBalloon = event.target;
+      let flower = flowers[Math.floor(Math.random() * flowers.length)];
+      waterBalloon.style.position = "absolute";
+      waterBalloon.style.top = flower.offsetTop + "px";
+      waterBalloon.style.left = flower.offsetLeft + "px";
+    
+      window.setTimeout(() => {
+        waterBalloon.remove();
+        flower.classList.add("grown");
+      }, 500);
+    }
+    
+    for (let waterBalloon of waterBalloons) {
+      waterBalloon.addEventListener("click", onWaterBalloonClick);
+    }
+  </script>
+</body>
+</html>
