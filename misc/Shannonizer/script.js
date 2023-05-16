@@ -52,7 +52,7 @@ function getNextWord() {
     document.getElementById('text').textContent += ' ' + currentWord;
     return true;
   } else {
-    document.getElementById('text').textContent += ` ---------- Could not find a match after 1000 attempts for the word "${currentWord}". Please try again with a different word.`;
+    document.getElementById('text').textContent += ` ---------- Could not find a match after 1000 attempts for the word "${currentWord}".`;
     return false;
   }
 }
