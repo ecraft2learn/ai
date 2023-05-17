@@ -15,6 +15,17 @@ body {
     margin-bottom: 20px;
 }
 
+.container {
+    max-width: 800px; /* limit the width to make the text more readable */
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.explanation, #text {
+    text-align: justify;
+}
+
 #startWord {
     padding: 10px;
     font-size: 16px;

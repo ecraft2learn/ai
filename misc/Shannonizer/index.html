@@ -4,10 +4,21 @@
     <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 <body>
-    <p>This app was created with <a href="https://shareg.pt/jrKrZg5" target="_blank">the help of ChatGPT 4</a></p>
-    <input type="text" id="startWord" placeholder="Enter the first word">
-    <button onclick="startGenerating()">Start generating text</button>
-    <p id="text"></p>
+    <div class="container">
+        <div class="explanation">
+            <p>This application generates text based on the method proposed by Claude Shannon. 
+            It starts with a word provided by the user. Then, using the text of Mary Shelley's Frankenstein, 
+            it selects a random "page" from the book, finds the first occurrence of the current word in that 
+            page, and selects the word immediately following it as the next word. This process repeats to 
+            generate a sequence of 1000 words.</p>
+        </div>
+        <p>This app was created with <a href="https://shareg.pt/FuXHm5D" target="_blank">the help of ChatGPT 4</a></p>
+        <div class="input-container">
+            <input type="text" id="startWord" placeholder="Enter the first word">
+            <button onclick="startGenerating()">Start generating text</button>
+        </div>
+        <p id="text"></p>
+    </div>
 
     <script src="script.js"></script>
 </body>
