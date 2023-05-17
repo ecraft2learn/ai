@@ -57,6 +57,8 @@ function getNextWord() {
   }
 }
 
+// Fetching a random Wikipedia page or pages from random books
+// ran into CORS (Cross-Origin Resource Sharing) security problems so I just copied the text here
 let bookText = `Letter 1
 
 _To Mrs. Saville, England._
