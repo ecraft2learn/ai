@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Encoding Distance</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      width: 80%;
+      margin: auto;
+      padding: 20px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      box-sizing: border-box;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    p#result {
+      font-weight: bold;
+    }
+    a {
+      color: #333;
+      text-decoration: none;
+    }
+    a:hover {
+      color: #4CAF50;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Universal Sentence Encoder Cosine Distance Calculator</h2>
+    <p>This web application calculates the cosine distance between the encodings of two pieces of text using Google's Universal Sentence Encoder (USE). 
+      The USE is a model trained to encode sentences into a 512-dimensional vector space. The cosine distance is a measure of the similarity 
+      between these two encodings, with a smaller distance indicating more similar sentences.</p>
+    <input id="input1" type="text" placeholder="Enter text here">
+    <input id="input2" type="text" placeholder="Enter text here">
+    <button onclick="calculateDistance()">Calculate Distance</button>
+    <p id="result"></p>
+    <p><a href="https://shareg.pt/tu3W6Oj">See the GPT-4 conversation that created this app</a></p>
+  </div>
+
+  <script>
+    let useModel;
+
+    // Load the model
+    async function loadModel() {
+      useModel = await use.load();
+    }
+    loadModel();
+
+    // Calculate and display the cosine distance
+    async function calculateDistance() {
+      const input1 = document.getElementById('input1').value;
+      const input2 = document.getElementById('input2').value;
+
+      const sentences = [input1, input2];
+
+      const embeddings = await useModel.embed(sentences);
+
+      const distance = await tf.losses.cosineDistance(
+        embeddings.slice([0, 0], [1]),
+        embeddings.slice([1, 0], [1]),
+        1
+      );
+
+      document.getElementById('result').innerText = `The cosine distance is ${distance.dataSync()[0]}`;
+    }
+  </script>
+</body>
+</html>
