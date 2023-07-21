@@ -50,7 +50,7 @@
 
 // Global stuff
 
-modules.locale = '2023-February-28';
+modules.locale = '2023-July-12';
 
 var Localizer;
 var SnapTranslator = new Localizer();
@@ -71,7 +71,7 @@ Localizer.prototype.translate = function (string) {
     return Object.prototype.hasOwnProperty.call(
         this.dict[this.language],
         phrase
-    ) ? this.dict[this.language][phrase] : phrase;
+    ) ? this.dict[this.language][phrase] || phrase : phrase;
 };
 
 Localizer.prototype.languages = function () {
@@ -151,8 +151,7 @@ SnapTranslator.dict.en = {
         'green flag clicked',
 
     // rewordings in English avoiding having to adjust all other translations
-    'length of %s':
-        'length of text %s',
+    // -- currently none --
 
     // long strings look-up only
     'file menu import hint':
@@ -185,7 +184,7 @@ SnapTranslator.dict.de = {
     'translator_e-mail':
         'jens@moenig.org, jadga.huegle@sap.com',
     'last_changed':
-        '2023-02-27'
+        '2023-07-12'
 };
 
 SnapTranslator.dict.it = {
@@ -383,7 +382,7 @@ SnapTranslator.dict.el = {
     'translator_e-mail':
         'ino.samaras@berkeley.edu, aprekates@sch.gr',
     'last_changed':
-        '2022-07-30'
+        '2023-04-15'
 };
 
 SnapTranslator.dict.ca = {
@@ -649,6 +648,7 @@ SnapTranslator.dict.he = {
     'last_changed':
         '2020-04-21'
 };
+
 SnapTranslator.dict.hi = {
 	'language_name':
         'हिंदी',
@@ -658,4 +658,15 @@ SnapTranslator.dict.hi = {
         'barathkumarbasker2007@gmail.com',
     'last_changed':
         '2021-05-08'
+};
+
+SnapTranslator.dict.hy = {
+    'language_name':
+        'Հայերեն',
+    'language_translator':
+        'Symotec LLC and Armath team',
+    'translator_e-mail':
+        'info@symotec.am and info@armath.am',
+    'last_changed':
+        '2023-04-12',
 };

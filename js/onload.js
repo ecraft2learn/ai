@@ -13,10 +13,19 @@ window.addEventListener('load', function () {
 //    SnapExtensions.scripts.push('https://ecraft2learn.github.io/ai/ecraft2learn.js'); // is loaded in modified snap.html
 	var world_canvas = document.getElementById('world');
 	var ide_morph = new IDE_Morph();
-	var loop = function loop() {
-		requestAnimationFrame(loop);
-		world.doOneCycle();
-	};
+	var FPS = 67,
+            lastTime = 0,
+            loop = (timestamp) => {
+                    requestAnimationFrame(loop);
+                    if (timestamp - lastTime < 1000 / FPS) {
+                        return;
+                    }
+                    world.doOneCycle();
+                    lastTime = Math.max(
+                        lastTime + 1000 / FPS,
+                        timestamp - 1000 / FPS
+                    );
+                };
 	let full_screen = true;
 	let edit_mode = window.location.href.indexOf('editMode') >= 0;
 	let run_full_screen = window.location.href.indexOf('noRun') < 0;

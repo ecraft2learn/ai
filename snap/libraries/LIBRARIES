@@ -1,19 +1,8 @@
-speaking blocks.xml	Speaking	AI blocks for text to speech
-listening blocks.xml	Listening	AI blocks for recognizing speech
-seeing blocks.xml	Seeing	AI blocks for object recognition and detection and pose recognition
-words blocks.xml	Natural language processing	AI blocks for processing words and sentences and question answering
-neural nets blocks.xml	Neural nets	AI blocks for creating, training, and using neural networks
-K nearest neighbors blocks.xml	K nearest neighbors	blocks for creating and using KNN models
-misc AI blocks.xml	Misc AI	AI blocks for style transfer, Wikipedia, and image embedding
-~	~
-~	~
-~	~
 iteration-composition.xml	Iteration, composition	Traditional loop constructs (while, until, etc.) plus the Lisp "named let" (a generalization of FOR) plus functional iteration (repeated invocation of a function) and function composition.
 list-utilities.xml	List utilities	Some standard functions on lists (reverse, sort, etc.)
 colors.xml	Colors and Crayons	Incorporates the former crayon and set RGB libraries.  Implements fair hues (more orange, less green, adds brown) and a linear color scale including grayscale and fair-hue-based shades.
 crayons.xml	Crayons	Just the crayons, without the rest of the colors library.  Fast and simple.
 bignumbers.xml	Bignums, rationals, complex #s	The full Scheme numeric tower.  "USE BIGNUMS <True>" to enable.
-cases.xml	Multi-branched conditional	Like "switch" in C-like languages or "cond" in Lisp.  Thanks to Nathan Dinsmore for inventing the idea of a separate block for each branch!
 try-catch.xml	Catch errors	Run a script; if an error happens, instead of stopping the script with a red halo, run another script to handle the error. Also includes a block to cause an error with a message given as input. Also includes a block to create a script variable and give it a value.
 parallel_module.xml	Parallelization	Run several scripts in parallel and wait until all are done.
 Eisenbergification.xml	Getters and setters	Eisenberg's Law: Anything that can be done from the GUI should be doable from the programming language, and vice versa.
@@ -30,6 +19,8 @@ pixel_module.xml	Pixels	Manipulate costumes pixel-wise.
 audioComp_module.xml	Audio Comp	Analyze, manipulate and generate sound samples.
 frequency_distribution_module.xml	Frequency Distribution Analysis	Analyze data for frequency distribution
 localstorage_module.xml	Database	Persistent key-value storage across Snap! sessions in the same browser
+tiles_module.xml	Tiles	Divide the stage into sub-regions in each of which to perform an action
+arcs_module.xml	Arcs	Turn sprites by a delta of degrees moving them at a given radius
 ~	~
 ~	~
 ~	~
