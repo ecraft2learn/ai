@@ -4701,7 +4701,7 @@ ecraft2learn.language_defaults =
 };
 
 // Tell Snap! that this has been loaded so don't load it again
-if (SnapExtensions) {
+if (typeof SnapExtensions !== 'undefined' && SnapExtensions ) {
     SnapExtensions.scripts.push('https://ecraft2learn.github.io/ai/ecraft2learn.js');    
 }
 
