@@ -1434,7 +1434,7 @@ const create_prediction_interface = () => {
     const make_prediction = (model_name) => {
         const success_callback = (results) => {
             const categories = get_data(model_name, 'categories');
-            if (categories) {
+            if (categories && categories.length !== 0) {
                 results = JSON.stringify(results);
             } else if (input_element.value.indexOf('[') < 0) {
                 results = results[0]; // only one number in inputs so only one result
@@ -1811,7 +1811,7 @@ const receive_message =
             install_settings(message.train);
             const options = message.train;
             const categories = get_data(model_name, 'categories');
-            if (categories) {
+            if (categories && categories.length !== 0) {
                 options.tfvis_options.measure_accuracy = true;
 //                 options.tfvis_options.display_confusion_matrix = true;
                 options.class_names = categories;
@@ -1831,7 +1831,7 @@ const receive_message =
                     });
                     return average;
                 }
-                if (categories) {
+                if (categories && categories.length !== 0) {
                     return average_categorical_results();
                 }
                 const averages = results[0].map((x) => typeof x === 'number' ? 0 : x.map(() => 0));
