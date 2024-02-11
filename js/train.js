@@ -837,7 +837,7 @@ const predict = (model, inputs, success_callback, error_callback, categories) =>
         let prediction = model.predict(input_tensor);
         const results = prediction.arraySync().map((element) => Array.isArray(element) && element.length === 1 ?
                                                                 element[0] : element);
-        if (categories) {
+        if (categories && categories.length !== 0) {
             invoke_callback(success_callback, categorical_results(results, categories));
         } else {
             invoke_callback(success_callback, results);
